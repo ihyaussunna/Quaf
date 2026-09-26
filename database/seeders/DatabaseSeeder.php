@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
         FestivalSetting::set('registration_open', '1');
 
         // 2. Point Settings
-        $pointSetting = PointSetting::create([
+        $pointSetting = PointSetting::firstOrCreate([], [
             'first_place_points' => 10,
             'second_place_points' => 7,
             'third_place_points' => 5,
@@ -42,99 +42,88 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 3. Create Users
-        $superAdmin = User::create([
+        $superAdmin = User::updateOrCreate(['email' => 'admin@quaf.fest'], [
             'name' => 'QUAF Central Admin',
-            'email' => 'admin@quaf.fest',
             'password' => Hash::make('password'),
             'role' => 'super_admin',
             'phone' => '+91 98470 00001',
             'is_active' => true,
         ]);
 
-        $greenRoomUser = User::create([
+        $greenRoomUser = User::updateOrCreate(['email' => 'greenroom@quaf.fest'], [
             'name' => 'Green Room Officer',
-            'email' => 'greenroom@quaf.fest',
             'password' => Hash::make('password'),
             'role' => 'green_room_coordinator',
             'phone' => '+91 98470 00002',
             'is_active' => true,
         ]);
 
-        $judgeUser1 = User::create([
+        $judgeUser1 = User::updateOrCreate(['email' => 'judge1@quaf.fest'], [
             'name' => 'Dr. Anas Al-Azhari',
-            'email' => 'judge1@quaf.fest',
             'password' => Hash::make('password'),
             'role' => 'judge',
             'phone' => '+91 98470 00003',
             'is_active' => true,
         ]);
 
-        $judgeUser2 = User::create([
+        $judgeUser2 = User::updateOrCreate(['email' => 'judge2@quaf.fest'], [
             'name' => 'Prof. Zaid Rahman',
-            'email' => 'judge2@quaf.fest',
             'password' => Hash::make('password'),
             'role' => 'judge',
             'phone' => '+91 98470 00004',
             'is_active' => true,
         ]);
 
-        $programCommitteeUser = User::create([
+        $programCommitteeUser = User::updateOrCreate(['email' => 'samithi@quaf.fest'], [
             'name' => 'Program Samithi (പ്രോഗ്രാം സമിതി)',
-            'email' => 'samithi@quaf.fest',
             'password' => Hash::make('Samithi#2026@QuafFest!'),
             'role' => 'program_committee',
             'phone' => '+91 98470 00011',
             'is_active' => true,
         ]);
 
-        $leaderUser1 = User::create([
+        $leaderUser1 = User::updateOrCreate(['email' => 'leader.lumo@quaf.fest'], [
             'name' => 'WARIS ADANY (Leader - LUMO FIKRIC)',
-            'email' => 'leader.lumo@quaf.fest',
             'password' => Hash::make('Lumo#9482@FikricFest!26'),
             'role' => 'group_leader',
             'phone' => '+91 98470 00005',
             'is_active' => true,
         ]);
 
-        $leaderUser2 = User::create([
+        $leaderUser2 = User::updateOrCreate(['email' => 'leader.pacto@quaf.fest'], [
             'name' => 'BASIL ADANY (Leader - PACTO HIKMIC)',
-            'email' => 'leader.pacto@quaf.fest',
             'password' => Hash::make('Pacto$Hikmic*8319#Q9'),
             'role' => 'group_leader',
             'phone' => '+91 98470 00006',
             'is_active' => true,
         ]);
 
-        $leaderUser3 = User::create([
+        $leaderUser3 = User::updateOrCreate(['email' => 'leader.conco@quaf.fest'], [
             'name' => 'SINAN SAQAFI VELLIMUTTAM (Leader - CONCO MAJDIC)',
-            'email' => 'leader.conco@quaf.fest',
             'password' => Hash::make('Majdic&Conco%6724!Apex'),
             'role' => 'group_leader',
             'phone' => '+91 98470 00008',
             'is_active' => true,
         ]);
 
-        $leaderUser4 = User::create([
+        $leaderUser4 = User::updateOrCreate(['email' => 'leader.unio@quaf.fest'], [
             'name' => 'ANAS ADANY (Leader - UNIO HILMIC)',
-            'email' => 'leader.unio@quaf.fest',
             'password' => Hash::make('Unio_5193-Hilmic@9Fest'),
             'role' => 'group_leader',
             'phone' => '+91 98470 00009',
             'is_active' => true,
         ]);
 
-        $leaderUser5 = User::create([
+        $leaderUser5 = User::updateOrCreate(['email' => 'leader.yugo@quaf.fest'], [
             'name' => 'JABIR SAQAFI (Leader - YUGO RUSHDIC)',
-            'email' => 'leader.yugo@quaf.fest',
             'password' => Hash::make('Yugo!Rushdic?3825#Shield'),
             'role' => 'group_leader',
             'phone' => '+91 98470 00010',
             'is_active' => true,
         ]);
 
-        $studentUser1 = User::create([
+        $studentUser1 = User::updateOrCreate(['email' => 'student@quaf.fest'], [
             'name' => 'JAMALUDHEEN ABDUL HAMEED',
-            'email' => 'student@quaf.fest',
             'password' => Hash::make('password'),
             'role' => 'student',
             'phone' => '+91 98470 00007',
@@ -212,7 +201,7 @@ class DatabaseSeeder extends Seeder
 
         $groups = [];
         foreach ($groupData as $gd) {
-            $groups[$gd['code']] = Group::create($gd);
+            $groups[$gd['code']] = Group::updateOrCreate(['code' => $gd['code']], $gd);
         }
         $groups['GROUP A'] = $groups['LUMO'];
 
@@ -227,7 +216,7 @@ class DatabaseSeeder extends Seeder
 
         $categories = [];
         foreach ($categoriesData as $cd) {
-            $categories[$cd['slug']] = ProgramCategory::create($cd);
+            $categories[$cd['slug']] = ProgramCategory::updateOrCreate(['slug' => $cd['slug']], $cd);
         }
 
         // 6. Stages
@@ -240,7 +229,7 @@ class DatabaseSeeder extends Seeder
 
         $stages = [];
         foreach ($stageData as $sd) {
-            $stages[$sd['code']] = Stage::create($sd);
+            $stages[$sd['code']] = Stage::updateOrCreate(['code' => $sd['code']], $sd);
         }
 
         // 7. Programs (144 Official Programs synced via command)
@@ -249,8 +238,7 @@ class DatabaseSeeder extends Seeder
         $programs = Program::all()->keyBy('code');
 
         // 9. Judges
-        $judge1 = Judge::create([
-            'user_id' => $judgeUser1->id,
+        $judge1 = Judge::updateOrCreate(['user_id' => $judgeUser1->id], [
             'name' => 'Dr. Anas Al-Azhari',
             'designation' => 'Professor of Arabic Rhetoric',
             'specialization' => 'Arabic Literature & Eloquence',
@@ -258,8 +246,7 @@ class DatabaseSeeder extends Seeder
             'bio' => 'Renowned scholar of Arabic eloquence and linguistics with 18 years of national festival judging experience.',
         ]);
 
-        $judge2 = Judge::create([
-            'user_id' => $judgeUser2->id,
+        $judge2 = Judge::updateOrCreate(['user_id' => $judgeUser2->id], [
             'name' => 'Prof. Zaid Rahman',
             'designation' => 'Vocal Musicologist & Critic',
             'specialization' => 'Sufi Maqam & Vocal Art',
@@ -267,8 +254,12 @@ class DatabaseSeeder extends Seeder
             'bio' => 'Classical vocal trainer and specialist in Ottoman and Andalusian spiritual melodies.',
         ]);
 
-        $judge1->programs()->sync([$programs['Q9-101']->id, $programs['Q9-103']->id, $programs['Q9-106']->id]);
-        $judge2->programs()->sync([$programs['Q9-102']->id, $programs['Q9-104']->id, $programs['Q9-105']->id]);
+        if (isset($programs['Q9-101'], $programs['Q9-103'], $programs['Q9-106'])) {
+            $judge1->programs()->sync([$programs['Q9-101']->id, $programs['Q9-103']->id, $programs['Q9-106']->id]);
+        }
+        if (isset($programs['Q9-102'], $programs['Q9-104'], $programs['Q9-105'])) {
+            $judge2->programs()->sync([$programs['Q9-102']->id, $programs['Q9-104']->id, $programs['Q9-105']->id]);
+        }
 
         // 11. Students (30 Official Students of GROUP A)
         $students = [];
@@ -306,18 +297,20 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($officialGroupAStudents as $index => $item) {
-            $students[] = Student::create([
-                'student_id' => $item['chest_no'],
-                'user_id' => ($index === 0) ? $studentUser1->id : null,
-                'group_id' => $groups['GROUP A']->id,
-                'name' => $item['name'],
-                'category' => 'A Zone',
-                'class_level' => $item['class'],
-                'gender' => 'Male',
-                'contact' => '+91 98470 '.str_pad((string) (10000 + $index), 5, '0', STR_PAD_LEFT),
-                'photo_url' => null,
-                'qr_token' => Str::random(40),
-            ]);
+            $students[] = Student::updateOrCreate(
+                ['student_id' => $item['chest_no']],
+                [
+                    'user_id' => ($index === 0) ? $studentUser1->id : null,
+                    'group_id' => $groups['GROUP A']->id,
+                    'name' => $item['name'],
+                    'category' => 'A Zone',
+                    'class_level' => $item['class'],
+                    'gender' => 'Male',
+                    'contact' => '+91 98470 '.str_pad((string) (10000 + $index), 5, '0', STR_PAD_LEFT),
+                    'photo_url' => null,
+                    'qr_token' => Str::random(40),
+                ]
+            );
         }
 
         // 12. Seed Official Conco Majdic Students

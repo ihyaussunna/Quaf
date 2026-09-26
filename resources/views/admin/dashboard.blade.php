@@ -21,8 +21,36 @@
                 <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span>Export Data</span>
             </a>
+            <form method="POST" action="{{ route('admin.system.sync-festival-data') }}" class="inline">
+                @csrf
+                <button type="submit" onclick="return confirm('Do you want to sync all 144 official programs, groups, stages, and Conco Majdic students into the database?')" class="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1.5" title="Sync 144 Programs, Groups, Stages, and Conco Majdic Students">
+                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Sync Official Data</span>
+                </button>
+            </form>
         </div>
     </div>
+
+    @if($stats['competitions'] == 0 || $stats['teams'] == 0)
+        <div class="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <h3 class="text-sm font-bold text-amber-950 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>ഡാറ്റാബേസിൽ പ്രോഗ്രാമുകളും ഗ്രൂപ്പുകളും ചേർത്തിട്ടില്ല (Database Needs Initial Sync)</span>
+                </h3>
+                <p class="text-xs text-amber-800 leading-relaxed font-mono">
+                    ഔദ്യോഗിക 144 പ്രോഗ്രാമുകളും, 5 ഗ്രൂപ്പുകളും, സ്റ്റേജുകളും, കോൺകോ മജ്ദിക് വിദ്യാർത്ഥികളും ഒറ്റ ക്ലിക്കിൽ ആഡ് ചെയ്യാൻ താഴെയുള്ള ബട്ടൺ ക്ലിക്ക് ചെയ്യുക.
+                </p>
+            </div>
+            <form method="POST" action="{{ route('admin.system.sync-festival-data') }}" class="flex-shrink-0">
+                @csrf
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-mono font-bold uppercase tracking-wider shadow-md transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Sync 144 Programs & Data Now</span>
+                </button>
+            </form>
+        </div>
+    @endif
 
     <!-- 4 Primary Stat Cards (Matching Last Year's Screenshot) -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">

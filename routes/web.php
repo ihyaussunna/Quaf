@@ -86,16 +86,20 @@ Route::get('/init-database/{token}', function (string $token) {
         Artisan::call('db:seed', ['--force' => true]);
         $seedOutput = Artisan::output();
 
-        Artisan::call('app:sync-official-students');
-        $studentsOutput = Artisan::output();
+        Artisan::call('app:sync-official-programs');
+        $programsOutput = Artisan::output();
+
+        Artisan::call('db:seed', ['--class' => 'ConcoMajdicStudentsSeeder', '--force' => true]);
+        $concoOutput = Artisan::output();
 
         Artisan::call('db:seed', ['--class' => 'PanelPasswordsSeeder', '--force' => true]);
 
+        Artisan::call('optimize:clear');
         Cache::flush();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Database initialized successfully!',
+            'message' => 'Database initialized and synced successfully!',
             'users' => User::count(),
             'groups' => Group::count(),
             'zones' => Zone::count(),
@@ -104,13 +108,15 @@ Route::get('/init-database/{token}', function (string $token) {
             'details' => [
                 'migrate' => $migrateOutput,
                 'seed' => $seedOutput,
-                'students' => $studentsOutput,
+                'programs' => $programsOutput,
+                'conco' => $concoOutput,
             ],
         ]);
     } catch (Throwable $e) {
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
         ], 500);
     }
 });
@@ -153,6 +159,7 @@ Route::post('/student/login', [StudentController::class, 'login'])->name('studen
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_admin'])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::match(['get', 'post'], '/system/sync-festival-data', [AdminDashboardController::class, 'syncFestivalData'])->name('system.sync-festival-data');
 
     // Admin Profile
     Route::get('profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
