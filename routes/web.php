@@ -41,8 +41,14 @@ use App\Http\Controllers\Public\GalleryController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\ResultController;
+use App\Http\Controllers\Public\VerificationController;
 use App\Http\Controllers\Public\VideoController;
 use App\Http\Controllers\Student\StudentController;
+use App\Models\Group;
+use App\Models\Program;
+use App\Models\Student;
+use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -60,18 +66,49 @@ Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 
-// One-click database installation & migration runner for Hostinger setup
-Route::get('/init-setup-db', function () {
+// Public Verifications & Live Displays
+Route::get('/verify/certificate/{certificateNumber}', [VerificationController::class, 'verifyCertificate'])->name('verify.certificate');
+Route::get('/verify/student/{qrToken}', [VerificationController::class, 'verifyStudent'])->name('verify.student');
+Route::get('/stages/{stage}/projector', [AdminStageController::class, 'projector'])->name('stages.projector');
+
+// One-time Secure Database Initializer for Hostinger Deployment
+Route::get('/init-database/{token}', function (string $token) {
+    if ($token !== 'quaf2026setup') {
+        abort(403, 'Unauthorized setup token.');
+    }
+
     try {
+        @set_time_limit(300);
         Artisan::call('migrate', ['--force' => true]);
         $migrateOutput = Artisan::output();
 
         Artisan::call('db:seed', ['--force' => true]);
         $seedOutput = Artisan::output();
 
-        return response("<h2>Database Migrated & Seeded Successfully!</h2><pre>{$migrateOutput}\n{$seedOutput}</pre><br><a href='/admin'>Go to Admin Panel</a>");
+        Artisan::call('app:sync-official-students');
+        $studentsOutput = Artisan::output();
+
+        Artisan::call('db:seed', ['--class' => 'PanelPasswordsSeeder', '--force' => true]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database initialized successfully!',
+            'users' => User::count(),
+            'groups' => Group::count(),
+            'zones' => Zone::count(),
+            'programs' => Program::count(),
+            'students' => Student::count(),
+            'details' => [
+                'migrate' => $migrateOutput,
+                'seed' => $seedOutput,
+                'students' => $studentsOutput,
+            ],
+        ]);
     } catch (Throwable $e) {
-        return response("<h2>Database Error:</h2><pre>{$e->getMessage()}</pre>", 500);
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
     }
 });
 
