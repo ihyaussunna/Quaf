@@ -34,6 +34,7 @@
          url('/fonts/Malayalam Sangam MN.ttc');
     font-weight: 400;
     font-style: normal;
+    unicode-range: U+0D00-0D7F;
     font-display: swap;
 }
 
@@ -43,6 +44,7 @@
          url('/fonts/Malayalam Sangam MN.ttc');
     font-weight: 700;
     font-style: normal;
+    unicode-range: U+0D00-0D7F;
     font-display: swap;
 }
 
@@ -52,6 +54,7 @@
          url('/fonts/Malayalam MN.ttc');
     font-weight: 400;
     font-style: normal;
+    unicode-range: U+0D00-0D7F;
     font-display: swap;
 }
 
@@ -61,6 +64,7 @@
          url('/fonts/Malayalam MN.ttc');
     font-weight: 700;
     font-style: normal;
+    unicode-range: U+0D00-0D7F;
     font-display: swap;
 }
 
@@ -142,18 +146,18 @@
 }
 
 .font-ml-mn {
-    font-family: 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
+    font-family: 'Sora', 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
 }
 
 .font-ml-sangam {
-    font-family: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
 }
 
 .font-ml,
 :lang(ml),
 .malayalam-text,
 .font-malayalam {
-    font-family: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
 }
 
 .font-ar {
