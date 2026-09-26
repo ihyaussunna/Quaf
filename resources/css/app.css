@@ -179,6 +179,9 @@
     --color-brand-gold: #f3bd2e;
     --color-brand-blue: #005c94;
     --color-brand-green: #009444;
+    --color-brand-burgundy: #be1e2d;
+    --color-brand-burgundy-dark: #850d18;
+    --color-brand-burgundy-hover: #a01624;
 
     --color-obsidian: #0f172a;
     --color-midnight: #000000;
@@ -224,6 +227,22 @@
 @layer utilities {
     .bg-grid-pattern {
         background-image: none;
+    }
+
+    .bg-brand-burgundy {
+        background-color: #be1e2d;
+    }
+
+    .hover\:bg-brand-burgundy:hover {
+        background-color: #a01624;
+    }
+
+    .text-brand-burgundy {
+        color: #be1e2d;
+    }
+
+    .border-brand-burgundy {
+        border-color: #be1e2d;
     }
     
     .fest-glow-red {

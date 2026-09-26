@@ -13,7 +13,7 @@
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('program-committee.programs.create') }}" 
-               class="px-4 py-2.5 rounded-xl bg-brand-burgundy hover:bg-[#850d18] text-white text-xs font-mono font-bold flex items-center gap-2 shadow-sm transition">
+               class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-mono font-bold flex items-center gap-2 shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span>Add New Program</span>
             </a>

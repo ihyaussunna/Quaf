@@ -266,4 +266,26 @@ class ProgramCommitteePortalTest extends TestCase
         $this->assertNotNull($program->category_id);
         $response->assertRedirect(route('program-committee.programs.show', $program));
     }
+
+    public function test_program_creation_with_non_existent_category_id_succeeds_with_fallback(): void
+    {
+        $response = $this->actingAs($this->committeeUser)->post(route('program-committee.programs.store'), [
+            'code' => 'Q9-999',
+            'name' => 'Auto Fallback Category Competition',
+            'category_id' => 999999, // non-existent category id
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'duration_minutes' => 5,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $program = Program::where('code', 'Q9-999')->first();
+        $this->assertNotNull($program);
+        $this->assertDatabaseHas('programs', [
+            'code' => 'Q9-999',
+            'name' => 'Auto Fallback Category Competition',
+        ]);
+    }
 }

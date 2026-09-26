@@ -216,6 +216,17 @@ class MarkEntryController extends Controller
             });
         }
 
+        if ($status) {
+            if ($status === 'passed') {
+                $query->where(function ($q) {
+                    $q->doesntHave('result')
+                        ->orWhereHas('result', fn ($rq) => $rq->where('status', 'passed'));
+                });
+            } else {
+                $query->whereHas('result', fn ($rq) => $rq->where('status', $status));
+            }
+        }
+
         $programs = $query->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.mark-entry.handler', compact('programs', 'search', 'status'));
@@ -226,6 +237,21 @@ class MarkEntryController extends Controller
         $action = $request->input('action'); // verify, send, announced, reset
 
         $result = $program->result ?? Result::firstOrNew(['program_id' => $program->id]);
+
+        // Auto-assign top 3 winner entries from recorded scores if not already set
+        if (! $result->first_entry_id) {
+            $topEntries = ProgramEntry::where('program_id', $program->id)
+                ->with('scores')
+                ->get()
+                ->sortByDesc(fn ($e) => $e->scores->sum('total_score'))
+                ->values();
+
+            if ($topEntries->isNotEmpty() && $topEntries[0]->scores->sum('total_score') > 0) {
+                $result->first_entry_id = $topEntries[0]->id;
+                $result->second_entry_id = $topEntries->get(1)?->id;
+                $result->third_entry_id = $topEntries->get(2)?->id;
+            }
+        }
 
         if ($action === 'verify') {
             $result->status = 'verified';

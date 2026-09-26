@@ -143,6 +143,10 @@ class ProgramCommitteeController extends Controller
     public function create(): View
     {
         $categories = ProgramCategory::all();
+        if ($categories->isEmpty()) {
+            ProgramCategory::firstOrCreate(['slug' => 'general'], ['name' => 'General']);
+            $categories = ProgramCategory::all();
+        }
         $stages = Stage::all();
         $zones = Zone::orderBy('display_order')->get();
 
@@ -164,7 +168,7 @@ class ProgramCommitteeController extends Controller
             'malayalam_name' => ['nullable', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20', 'unique:programs,code'],
             'zone_id' => ['nullable', 'exists:zones,id'],
-            'category_id' => ['nullable', 'exists:program_categories,id'],
+            'category_id' => ['nullable'],
             'type' => ['required', 'in:individual,group'],
             'participant_count' => ['nullable', 'integer', 'min:1', 'max:50'],
             'max_participants' => ['nullable', 'integer', 'min:1'],
@@ -194,7 +198,16 @@ class ProgramCommitteeController extends Controller
             $validated['eligibility'] = $zone?->name;
         }
 
-        $validated['category_id'] = $validated['category_id'] ?? ProgramCategory::first()?->id ?? 1;
+        $categoryId = $validated['category_id'] ?? null;
+        if ($categoryId && ProgramCategory::where('id', $categoryId)->exists()) {
+            $validated['category_id'] = (int) $categoryId;
+        } else {
+            $defaultCategory = ProgramCategory::first() ?? ProgramCategory::firstOrCreate(
+                ['slug' => 'general'],
+                ['name' => 'General']
+            );
+            $validated['category_id'] = $defaultCategory?->id;
+        }
 
         $program = Program::create($validated);
 
@@ -271,7 +284,7 @@ class ProgramCommitteeController extends Controller
             'malayalam_name' => ['nullable', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20', "unique:programs,code,{$program->id}"],
             'zone_id' => ['nullable', 'exists:zones,id'],
-            'category_id' => ['nullable', 'exists:program_categories,id'],
+            'category_id' => ['nullable'],
             'type' => ['required', 'in:individual,group'],
             'participant_count' => ['nullable', 'integer', 'min:1', 'max:50'],
             'max_participants' => ['nullable', 'integer', 'min:1'],
@@ -301,7 +314,16 @@ class ProgramCommitteeController extends Controller
             $validated['eligibility'] = $zone?->name;
         }
 
-        $validated['category_id'] = $validated['category_id'] ?? $program->category_id ?? ProgramCategory::first()?->id ?? 1;
+        $categoryId = $validated['category_id'] ?? $program->category_id;
+        if ($categoryId && ProgramCategory::where('id', $categoryId)->exists()) {
+            $validated['category_id'] = (int) $categoryId;
+        } else {
+            $defaultCategory = ProgramCategory::first() ?? ProgramCategory::firstOrCreate(
+                ['slug' => 'general'],
+                ['name' => 'General']
+            );
+            $validated['category_id'] = $defaultCategory?->id;
+        }
 
         $old = $program->toArray();
         $program->update($validated);

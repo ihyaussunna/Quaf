@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Announcer;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
@@ -57,7 +58,25 @@ class AnnouncerController extends Controller
     public function markAnnounced(Result $result): RedirectResponse
     {
         $old = $result->status;
-        $result->update(['status' => 'announced']);
+
+        // Auto-assign top 3 winner entries from recorded scores if not already set
+        if (! $result->first_entry_id && $result->program_id) {
+            $topEntries = ProgramEntry::where('program_id', $result->program_id)
+                ->with('scores')
+                ->get()
+                ->sortByDesc(fn ($e) => $e->scores->sum('total_score'))
+                ->values();
+
+            if ($topEntries->isNotEmpty() && $topEntries[0]->scores->sum('total_score') > 0) {
+                $result->first_entry_id = $topEntries[0]->id;
+                $result->second_entry_id = $topEntries->get(1)?->id;
+                $result->third_entry_id = $topEntries->get(2)?->id;
+            }
+        }
+
+        $result->status = 'announced';
+        $result->is_media_published = false;
+        $result->save();
 
         AuditLogger::log('announcer_announced_result', $result, ['status' => $old], ['status' => 'announced']);
 

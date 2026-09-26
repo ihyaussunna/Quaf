@@ -31,7 +31,7 @@
                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
         </div>
 
-        <input type="hidden" name="category_id" value="{{ old('category_id', $categories->first()?->id ?? 1) }}">
+        <input type="hidden" name="category_id" value="{{ old('category_id', $categories->first()?->id ?? '') }}">
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>

@@ -113,7 +113,7 @@
                 </div>
 
                 <!-- Hidden Category ID (Zone is used instead of category) -->
-                <input type="hidden" name="category_id" value="{{ old('category_id', $program->category_id ?? $categories->first()?->id ?? 1) }}">
+                <input type="hidden" name="category_id" value="{{ old('category_id', $program->category_id ?? $categories->first()?->id ?? '') }}">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Duration (Minutes) -->
@@ -282,7 +282,7 @@
                     Cancel
                 </a>
                 <button type="submit" 
-                        class="px-8 py-3 rounded-xl bg-brand-burgundy hover:bg-[#850d18] text-white text-xs font-mono font-bold uppercase tracking-wider shadow-md shadow-brand-burgundy/20 transition-all">
+                        class="px-8 py-3 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-mono font-bold uppercase tracking-wider shadow-md shadow-[#be1e2d]/20 transition-all">
                     Update Program Details
                 </button>
             </div>
