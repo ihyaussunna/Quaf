@@ -1,10 +1,10 @@
-@extends('layouts.leader', ['title' => 'House Roster: ' . $group->name])
+@extends('layouts.leader', ['title' => 'Group Roster: ' . $group->name])
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">House Students Roster</h1>
+            <h1 class="text-3xl font-serif font-black text-slate-900">Group Students Roster</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">All registered participants belonging to {{ $group->name }}.</p>
         </div>
         <div class="flex items-center gap-3">
@@ -58,7 +58,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">No students registered in this house.</td>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">No students registered in this group.</td>
                         </tr>
                     @endforelse
                 </tbody>

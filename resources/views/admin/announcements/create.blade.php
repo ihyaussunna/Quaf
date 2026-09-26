@@ -30,7 +30,7 @@
                 <select name="target_role" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                     <option value="all">Everyone / Public</option>
                     <option value="student">Students</option>
-                    <option value="leader">House Leaders</option>
+                    <option value="leader">Group Leaders</option>
                     <option value="judge">Judges / Jury</option>
                     <option value="green_room">Green Room Backstage</option>
                 </select>
@@ -48,9 +48,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Specific House (Optional)</label>
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Specific Group (Optional)</label>
                 <select name="target_group_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-                    <option value="">-- All Houses --</option>
+                    <option value="">-- All Groups --</option>
                     @foreach($groups as $grp)
                         <option value="{{ $grp->id }}" {{ old('target_group_id') == $grp->id ? 'selected' : '' }}>{{ $grp->name }}</option>
                     @endforeach

@@ -6,7 +6,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Central festival operations, real-time analytics & house progress.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Central festival operations, real-time analytics & group progress.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2.5">
             <a href="{{ route('admin.mark-entry.view-marks') }}" class="px-3.5 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5">

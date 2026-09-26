@@ -82,7 +82,7 @@ class ExportController extends Controller
             fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
 
             if ($type === 'participants') {
-                fputcsv($handle, ['Student ID', 'Name', 'Team / House', 'Zone', 'Class Level', 'Gender', 'Contact', 'Total Points']);
+                fputcsv($handle, ['Student ID', 'Name', 'Team / Group', 'Zone', 'Class Level', 'Gender', 'Contact', 'Total Points']);
 
                 Student::with('group')->chunk(200, function ($students) use ($handle) {
                     foreach ($students as $s) {

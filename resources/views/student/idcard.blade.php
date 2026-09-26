@@ -54,7 +54,7 @@
                     <p class="text-xs font-mono text-slate-500 mt-0.5">ID: {{ $student->student_id }}</p>
                 </div>
 
-                <!-- House Badge -->
+                <!-- Group Badge -->
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-200" style="background-color: {{ $student->group->color_hex }}15;">
                     <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ $student->group->color_hex }};"></span>
                     <span class="text-xs font-mono font-bold uppercase tracking-wider" style="color: {{ $student->group->color_hex }};">

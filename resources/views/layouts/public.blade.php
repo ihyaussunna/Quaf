@@ -134,7 +134,7 @@
                         Green Room
                     </a>
                     <a href="{{ route('login') }}" class="p-2 rounded-lg bg-slate-50 hover:bg-amber-50 text-slate-700 border border-slate-200 text-center font-semibold">
-                        House Leader
+                        Group Leader
                     </a>
                 </div>
             </div>

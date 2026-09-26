@@ -27,7 +27,7 @@
         </div>
         <div>
             <select name="group" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-                <option value="">All Houses</option>
+                <option value="">All Groups</option>
                 @foreach($groups as $g)
                     <option value="{{ $g->id }}" {{ $groupId == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
                 @endforeach

@@ -30,7 +30,7 @@
                         <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#be1e2d] text-white">SELECTIVE EXPORT</span>
                         <h2 class="text-lg font-bold">Customizable Print & PDF Reports Hub</h2>
                     </div>
-                    <p class="text-xs text-slate-300 mt-0.5">Filter by house, zone, or competition and choose exact columns/sections to print or save as PDF.</p>
+                    <p class="text-xs text-slate-300 mt-0.5">Filter by group, zone, or competition and choose exact columns/sections to print or save as PDF.</p>
                 </div>
             </div>
 
@@ -43,7 +43,7 @@
                             <svg class="w-4 h-4 text-white/50 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         </div>
                         <h3 class="text-sm font-bold text-white mb-1">Official Results & Leaderboard</h3>
-                        <p class="text-[11px] text-slate-300 leading-relaxed">Toggle house championship points, 1st/2nd/3rd rank verdicts, grade tables, and jury signatures.</p>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">Toggle group championship points, 1st/2nd/3rd rank verdicts, grade tables, and jury signatures.</p>
                     </div>
                     <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono font-bold text-[#f3bd2e]">
                         <span>Print / Save PDF →</span>
@@ -58,7 +58,7 @@
                             <svg class="w-4 h-4 text-white/50 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         </div>
                         <h3 class="text-sm font-bold text-white mb-1">Participant Delegate Roster</h3>
-                        <p class="text-[11px] text-slate-300 leading-relaxed">Filter by 5 houses or 4 zones, toggle chest numbers, enrolled events, points, and sign-off columns.</p>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">Filter by 5 groups or 4 zones, toggle chest numbers, enrolled events, points, and sign-off columns.</p>
                     </div>
                     <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono font-bold text-[#f3bd2e]">
                         <span>Print / Save PDF →</span>

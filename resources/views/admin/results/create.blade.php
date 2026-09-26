@@ -23,7 +23,7 @@
                     <tr>
                         <th class="px-6 py-3 font-semibold">Chest #</th>
                         <th class="px-6 py-3 font-semibold">Participant</th>
-                        <th class="px-6 py-3 font-semibold">House</th>
+                        <th class="px-6 py-3 font-semibold">Group</th>
                         <th class="px-6 py-3 font-semibold">Judge Score</th>
                         <th class="px-6 py-3 font-semibold">Remarks</th>
                     </tr>
@@ -33,7 +33,7 @@
                         @php $score = $entry->scoreSheets->first(); @endphp
                         <tr class="hover:bg-slate-50/70 transition-colors">
                             <td class="px-6 py-3 font-bold text-[#f3bd2e]">{{ $entry->chest_number }}</td>
-                            <td class="px-6 py-3 font-medium text-slate-900">{{ $entry->student?->name ?? 'House Ensemble' }}</td>
+                            <td class="px-6 py-3 font-medium text-slate-900">{{ $entry->student?->name ?? 'Group Ensemble' }}</td>
                             <td class="px-6 py-3">{{ $entry->group->name }}</td>
                             <td class="px-6 py-3 font-bold text-emerald-700">
                                 {{ $score ? $score->total_score . ' pts' : 'Pending' }}
@@ -59,7 +59,7 @@
                 <option value="">-- Choose 1st Place Entry --</option>
                 @foreach($program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('first_entry_id') == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'House Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
                     </option>
                 @endforeach
             </select>
@@ -71,7 +71,7 @@
                 <option value="">-- Choose 2nd Place Entry --</option>
                 @foreach($program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('second_entry_id') == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'House Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
                     </option>
                 @endforeach
             </select>
@@ -83,7 +83,7 @@
                 <option value="">-- Choose 3rd Place Entry --</option>
                 @foreach($program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('third_entry_id') == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'House Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
                     </option>
                 @endforeach
             </select>

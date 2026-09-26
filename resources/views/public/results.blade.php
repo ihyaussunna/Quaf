@@ -7,7 +7,7 @@
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">OFFICIAL CONCLAVE VERDICTS</span>
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Results</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
-            Explore verified verdicts across all programs. Filter by category, house, or stage to discover champions and point tallies.
+            Explore verified verdicts across all programs. Filter by zone, group, or stage to discover champions and point tallies.
         </p>
     </div>
 
@@ -38,9 +38,9 @@
 
             <!-- Group Filter -->
             <div>
-                <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">House / Group</label>
+                <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Group</label>
                 <select name="group" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white">
-                    <option value="">All Houses</option>
+                    <option value="">All Groups</option>
                     @foreach($groups as $grp)
                         <option value="{{ $grp->id }}" {{ $groupId == $grp->id ? 'selected' : '' }}>{{ $grp->name }} ({{ $grp->code }})</option>
                     @endforeach

@@ -45,7 +45,7 @@
 <body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen py-6 px-3 sm:px-6"
       x-data="{
           colChestNo: true,
-          colHouse: true,
+          colGroup: true,
           colCategory: true,
           colClass: true,
           colContact: true,
@@ -66,7 +66,7 @@
                     <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#be1e2d] text-white">PRINT & PDF EXPORT</span>
                     <h1 class="text-lg font-bold text-slate-900">Participants Roster Customizer</h1>
                 </div>
-                <p class="text-xs text-slate-500 mt-0.5">Filter by house or zone, select required columns, and export to PDF</p>
+                <p class="text-xs text-slate-500 mt-0.5">Filter by group or zone, select required columns, and export to PDF</p>
             </div>
             
             <div class="flex items-center gap-2.5">
@@ -86,9 +86,9 @@
         <!-- Filter Selectors -->
         <form method="GET" action="{{ route('admin.print.students') }}" class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <div>
-                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by House</label>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by Group</label>
                 <select name="group" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
-                    <option value="">All Houses</option>
+                    <option value="">All Groups</option>
                     @foreach($groups as $grp)
                         <option value="{{ $grp->id }}" {{ $selectedGroupId == $grp->id ? 'selected' : '' }}>
                             {{ $grp->name }} ({{ $grp->code }})
@@ -135,8 +135,8 @@
             </label>
 
             <label class="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" x-model="colHouse" class="rounded border-slate-300 text-[#be1e2d] focus:ring-0">
-                <span>House / Team</span>
+                <input type="checkbox" x-model="colGroup" class="rounded border-slate-300 text-[#be1e2d] focus:ring-0">
+                <span>Group / Team</span>
             </label>
 
             <label class="flex items-center gap-1.5 cursor-pointer">
@@ -192,7 +192,7 @@
                 @if($selectedGroupId)
                     @php $currentGroup = $groups->firstWhere('id', $selectedGroupId); @endphp
                     <div class="font-bold" style="color: {{ $currentGroup?->color_hex ?? '#be1e2d' }}">
-                        House: {{ $currentGroup?->name }}
+                        Group: {{ $currentGroup?->name }}
                     </div>
                 @endif
             </div>
@@ -211,7 +211,7 @@
                             <th class="py-2 px-2.5 w-10 text-center">#</th>
                             <th x-show="colChestNo" class="py-2 px-2.5">ID / Chest #</th>
                             <th class="py-2 px-3">Participant Name</th>
-                            <th x-show="colHouse" class="py-2 px-2.5">House</th>
+                            <th x-show="colGroup" class="py-2 px-2.5">Group</th>
                             <th x-show="colCategory" class="py-2 px-2.5">Zone</th>
                             <th x-show="colClass" class="py-2 px-2.5">Class</th>
                             <th x-show="colContact" class="py-2 px-2.5">Contact</th>
@@ -235,7 +235,7 @@
                                     {{ $st->name }}
                                 </td>
 
-                                <td x-show="colHouse" class="py-2 px-2.5">
+                                <td x-show="colGroup" class="py-2 px-2.5">
                                     <span class="inline-flex items-center gap-1.5 font-medium">
                                         <span class="w-2 h-2 rounded-full" style="background-color: {{ $st->group?->color_hex ?? '#be1e2d' }}"></span>
                                         <span class="text-[11px]">{{ $st->group?->name ?? '—' }}</span>
@@ -292,7 +292,7 @@
                 </div>
                 <div>
                     <div class="border-b border-slate-400 mb-2 h-8"></div>
-                    <div class="font-bold text-slate-900">House Leader / Captain</div>
+                    <div class="font-bold text-slate-900">Group Leader / Captain</div>
                     <div class="text-[10px] text-slate-500">Official Verification</div>
                 </div>
                 <div>

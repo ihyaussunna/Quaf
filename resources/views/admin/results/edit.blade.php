@@ -20,7 +20,7 @@
             <select name="first_entry_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                 @foreach($result->program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('first_entry_id', $result->first_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'House Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
                     </option>
                 @endforeach
             </select>
@@ -32,7 +32,7 @@
                 <option value="">-- None --</option>
                 @foreach($result->program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('second_entry_id', $result->second_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'House Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
                     </option>
                 @endforeach
             </select>
@@ -44,7 +44,7 @@
                 <option value="">-- None --</option>
                 @foreach($result->program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('third_entry_id', $result->third_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'House Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
                     </option>
                 @endforeach
             </select>

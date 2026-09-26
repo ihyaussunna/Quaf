@@ -75,7 +75,7 @@
             <div class="text-2xl font-black text-rose-600 mt-1">{{ $stats['locked'] }}</div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">House Leaders</div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Group Leaders</div>
             <div class="text-2xl font-black text-slate-900 mt-1">{{ $stats['leaders'] }}</div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
@@ -180,7 +180,7 @@
                                 'program_committee', 'program_coordinator' => 'Program Samithi',
                                 'announcer' => 'Announcer Desk',
                                 'media_team', 'media_manager' => 'Media Wing',
-                                'group_leader' => 'Team Leader (' . ($user->ledGroup->name ?? 'House') . ')',
+                                'group_leader' => 'Team Leader (' . ($user->ledGroup->name ?? 'Group') . ')',
                                 'judge' => 'Judges Panel',
                                 'green_room_coordinator' => 'Green Room Coordinator',
                                 'student' => 'Student Portal',

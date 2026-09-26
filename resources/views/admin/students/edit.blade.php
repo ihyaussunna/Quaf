@@ -10,7 +10,7 @@
         <div class="flex items-center gap-2">
             <span class="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">{{ $student->student_id }}</span>
             <span class="px-2.5 py-1 rounded-md text-xs font-bold text-white shadow-2xs" style="background-color: {{ $student->group?->color_hex ?? '#be1e2d' }}">
-                {{ $student->group?->name ?? 'No House' }}
+                {{ $student->group?->name ?? 'No Group' }}
             </span>
         </div>
     </div>
@@ -77,10 +77,10 @@
             </div>
         </div>
 
-        <!-- House & Zone -->
+        <!-- Group & Zone -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">House / Group <span class="text-red-500">*</span></label>
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Group <span class="text-red-500">*</span></label>
                 <select name="group_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
                     @foreach($groups as $grp)
                         <option value="{{ $grp->id }}" {{ old('group_id', $student->group_id) == $grp->id ? 'selected' : '' }}>

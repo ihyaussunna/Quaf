@@ -58,7 +58,7 @@
         <div class="evaluation-paper bg-white p-6 sm:p-10 rounded-2xl border border-slate-200 shadow-sm mx-auto print:p-0 print:border-none print:shadow-none print:m-0 print:w-full">
             <!-- Official Centered Logo with Tagline -->
             <div class="text-center mb-2.5">
-                <img src="{{ asset('images/forms-header-logo.png') }}" alt="QUAF" class="h-16 sm:h-20 mx-auto object-contain">
+                <img src="{{ asset('images/forms-header-logo.svg') }}" alt="QUAF" class="h-16 sm:h-20 mx-auto object-contain">
             </div>
 
             <!-- Title -->

@@ -63,7 +63,7 @@
 
                 <!-- Description (Placed to the side of the logo) -->
                 <p class="text-sm sm:text-base md:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
-                    The grand confluence of eloquence, arts, and intellectual heritage. Uniting premier academic houses across 120+ cultural and literary disciplines.
+                    The grand confluence of eloquence, arts, and intellectual heritage. Uniting premier academic groups across 120+ cultural and literary disciplines.
                 </p>
 
                 <!-- Date & Location Badge -->
@@ -94,20 +94,20 @@
     </div>
 </section>
 
-<!-- Interactive Groups & House Standings Section (Light Theme) -->
+<!-- Interactive Groups Standings Section (Light Theme) -->
 <section id="groups" class="py-12 sm:py-16 lg:py-24 border-t border-slate-200 bg-white relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
-                <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">ACADEMIC HOUSES</span>
+                <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">ACADEMIC GROUPS</span>
                 <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Standings</h2>
             </div>
             <p class="text-xs sm:text-sm text-slate-600 max-w-md">
-                Points are calculated dynamically upon official result verification. Hover or tap each house to inspect leadership and points.
+                Points are calculated dynamically upon official result verification. Hover or tap each group to inspect leadership and points.
             </p>
         </div>
 
-        <!-- Visual Interactive House Blocks (No Profile Pictures) -->
+        <!-- Visual Interactive Group Blocks (No Profile Pictures) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
             @foreach($groups as $group)
                 <div class="group relative rounded-2xl bg-white border-2 border-slate-200/80 hover:border-slate-300 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden flex flex-col justify-between"
@@ -134,7 +134,7 @@
                         </h3>
                         <p class="text-xs text-slate-600 mb-4 flex items-center gap-1.5 truncate">
                             <svg class="w-3.5 h-3.5 opacity-60 shrink-0 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                            <span class="truncate">Leader: {{ $group->manager_name ?: ($group->leader?->name ?? 'House Captain') }}</span>
+                            <span class="truncate">Leader: {{ $group->manager_name ?: ($group->leader?->name ?? 'Group Captain') }}</span>
                         </p>
                     </div>
 

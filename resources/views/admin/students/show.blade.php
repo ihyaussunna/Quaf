@@ -50,7 +50,7 @@
                             {{ $student->student_id }}
                         </span>
                         <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold" style="background-color: {{ $student->group->color_hex }}15; color: {{ $student->group->color_hex }}">
-                            House {{ $student->group->name }}
+                            Group {{ $student->group->name }}
                         </span>
                         <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-slate-100 text-slate-700 border border-slate-200">
                             {{ $student->category }}

@@ -38,7 +38,7 @@
                 {{ $certificate->student->name }}
             </h2>
             <div class="text-sm font-mono text-[#f3bd2e] font-semibold">
-                Student ID: {{ $certificate->student->student_id }} • House: {{ $certificate->student->group->name }}
+                Student ID: {{ $certificate->student->student_id }} • Group: {{ $certificate->student->group->name }}
             </div>
 
             <p class="text-sm sm:text-base text-slate-700 font-normal max-w-lg mx-auto leading-relaxed">

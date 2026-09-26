@@ -137,7 +137,7 @@
     <div class="container">
         <!-- Logo -->
         <div class="header">
-            <img src="{{ asset('images/forms-header-logo.png') }}" class="logo" alt="QUAF Logo">
+            <img src="{{ asset('images/forms-header-logo.svg') }}" class="logo" alt="QUAF Logo">
         </div>
 
         <!-- Title -->

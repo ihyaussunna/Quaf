@@ -17,7 +17,7 @@
                     </span>
                 @endif
             </div>
-            <p class="text-xs font-mono text-slate-500 mt-1">Review, approve, or reject participant entries submitted by House Leaders.</p>
+            <p class="text-xs font-mono text-slate-500 mt-1">Review, approve, or reject participant entries submitted by Group Leaders.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             @if($pendingCount > 0)
@@ -97,9 +97,9 @@
                     @endforeach
                 </select>
 
-                <!-- Group / House Dropdown -->
+                <!-- Group Dropdown -->
                 <select name="group" onchange="this.form.submit()" class="px-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-700 focus:outline-none focus:border-[#be1e2d]">
-                    <option value="">All Houses (5 Groups)</option>
+                    <option value="">All Groups</option>
                     @foreach($groups as $grp)
                         <option value="{{ $grp->id }}" {{ (string)$selectedGroupId === (string)$grp->id ? 'selected' : '' }}>{{ $grp->name }}</option>
                     @endforeach
@@ -130,7 +130,7 @@
                         <th class="px-5 py-3.5 w-12 text-center">#</th>
                         <th class="px-5 py-3.5">Chest #</th>
                         <th class="px-5 py-3.5">Program</th>
-                        <th class="px-5 py-3.5">House / Team</th>
+                        <th class="px-5 py-3.5">Group / Team</th>
                         <th class="px-5 py-3.5">Participant / Team Leader</th>
                         <th class="px-5 py-3.5">Status</th>
                         <th class="px-5 py-3.5 text-right">Verification Action</th>

@@ -166,6 +166,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Students & 360° Profile
     Route::get('students/export', [AdminStudentController::class, 'export'])->name('students.export');
+    Route::get('students/bulk', [AdminStudentController::class, 'bulkCreate'])->name('students.bulk');
+    Route::post('students/bulk', [AdminStudentController::class, 'bulkStore'])->name('students.bulk-store');
+    Route::get('students/bulk-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.bulk-template');
     Route::get('students/next-chest-number', [AdminStudentController::class, 'nextChestNumber'])->name('students.next-chest-number');
     Route::get('students-wise', [AdminStudentController::class, 'studentWise'])->name('students.student-wise');
     Route::resource('students', AdminStudentController::class);

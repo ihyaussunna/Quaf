@@ -13,6 +13,10 @@
                 <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 <span>Print / PDF Report</span>
             </a>
+            <a href="{{ route('admin.students.bulk') }}" class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors">
+                <svg class="w-3.5 h-3.5 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Bulk Add (ബൾക്ക് ആഡ്)</span>
+            </a>
             <button @click="newParticipantOpen = true" class="px-4 py-2 rounded-lg bg-[#be1e2d] hover:bg-[#a01624] text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors">
                 <span>+</span> <span>New Participant</span>
             </button>
@@ -153,7 +157,10 @@
                 
                 <!-- Drawer Header -->
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-slate-900 font-sans">New Participant</h2>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 font-sans">New Participant</h2>
+                        <a href="{{ route('admin.students.bulk') }}" class="text-[11px] font-mono text-[#be1e2d] hover:underline font-semibold block mt-0.5">Need to add many students? Use Bulk Add →</a>
+                    </div>
                     <button @click="newParticipantOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>

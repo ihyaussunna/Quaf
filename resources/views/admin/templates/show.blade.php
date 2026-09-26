@@ -42,7 +42,7 @@
                         {{ $sampleStudent?->name ?? 'Muhammed Nihal' }}
                     </h3>
                     <p class="text-xs font-mono text-slate-600">
-                        representing <strong class="text-slate-900 font-serif">{{ $sampleStudent?->group?->name ?? 'House of Cordoba' }}</strong>
+                        representing <strong class="text-slate-900 font-serif">{{ $sampleStudent?->group?->name ?? 'Group of Cordoba' }}</strong>
                         has secured <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">FIRST PLACE (A GRADE)</span> in
                     </p>
                     <h4 class="text-lg font-serif font-bold text-[#f3bd2e]">

@@ -117,7 +117,7 @@
                     <tr>
                         <th class="px-6 py-3 font-semibold">Chest #</th>
                         <th class="px-6 py-3 font-semibold">Participant</th>
-                        <th class="px-6 py-3 font-semibold">House</th>
+                        <th class="px-6 py-3 font-semibold">Group</th>
                         <th class="px-6 py-3 font-semibold">Verification</th>
                     </tr>
                 </thead>
@@ -125,7 +125,7 @@
                     @forelse($program->entries as $entry)
                         <tr class="hover:bg-slate-50/70 transition-colors">
                             <td class="px-6 py-3 font-bold text-[#f3bd2e]">{{ $entry->chest_number }}</td>
-                            <td class="px-6 py-3 font-medium text-slate-900">{{ $entry->student?->name ?? 'House Group Ensemble' }}</td>
+                            <td class="px-6 py-3 font-medium text-slate-900">{{ $entry->student?->name ?? 'Group Ensemble' }}</td>
                             <td class="px-6 py-3">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold" style="background-color: {{ $entry->group->color_hex }}15; color: {{ $entry->group->color_hex }}">
                                     {{ $entry->group->name }}

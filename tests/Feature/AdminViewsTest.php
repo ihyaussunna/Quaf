@@ -176,7 +176,7 @@ class AdminViewsTest extends TestCase
 
         $editView = $this->actingAs($this->admin)->get(route('admin.groups.edit', $group));
         $editView->assertStatus(200);
-        $editView->assertSee('Edit House: '.$group->name);
+        $editView->assertSee('Edit Group: '.$group->name);
 
         $updateResponse = $this->actingAs($this->admin)->put(route('admin.groups.update', $group), [
             'name' => 'PACTO HIKMIC UPDATED',

@@ -529,7 +529,7 @@
                     <div x-show="activeDrawerTab === 'registration'" class="space-y-6" style="display: none;">
                         <div>
                             <h2 class="text-2xl font-bold text-white tracking-tight">Registration Portal</h2>
-                            <p class="text-xs text-slate-400 mt-1">Open or Close student entry submissions for house leaders</p>
+                            <p class="text-xs text-slate-400 mt-1">Open or Close student entry submissions for group leaders</p>
                         </div>
                         @php
                             $drawerRegOpen = (\App\Models\FestivalSetting::get('registration_open', '1') == '1');
@@ -542,7 +542,7 @@
                                 </span>
                             </div>
                             <p class="text-slate-300 text-[11px] leading-relaxed">
-                                {{ $drawerRegOpen ? 'House leaders can currently submit participant registrations. Click the button below to close registration.' : 'Registration is currently closed. Leaders cannot submit new entries until reopened.' }}
+                                {{ $drawerRegOpen ? 'Group leaders can currently submit participant registrations. Click the button below to close registration.' : 'Registration is currently closed. Leaders cannot submit new entries until reopened.' }}
                             </p>
                             <form method="POST" action="{{ route('admin.settings.toggle-registration') }}">
                                 @csrf

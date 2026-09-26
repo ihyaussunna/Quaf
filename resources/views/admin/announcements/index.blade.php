@@ -5,7 +5,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-serif font-black text-slate-900">Announcements</h1>
-            <p class="text-xs font-mono text-slate-500 mt-1">Broadcast urgent stage calls, jury notices, and house alerts.</p>
+            <p class="text-xs font-mono text-slate-500 mt-1">Broadcast urgent stage calls, jury notices, and group alerts.</p>
         </div>
         <a href="{{ route('admin.announcements.create') }}" class="px-4 py-2.5 rounded-xl bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg shadow-[#f3bd2e]/20">
             + Broadcast Notice
@@ -30,7 +30,7 @@
                             <span class="text-xs font-mono text-[#f3bd2e] font-semibold">[{{ $ann->targetStage->code }}]</span>
                         @endif
                         @if($ann->targetGroup)
-                            <span class="text-xs font-mono text-slate-700 font-semibold">[House {{ $ann->targetGroup->code }}]</span>
+                            <span class="text-xs font-mono text-slate-700 font-semibold">[Group {{ $ann->targetGroup->code }}]</span>
                         @endif
                     </div>
 

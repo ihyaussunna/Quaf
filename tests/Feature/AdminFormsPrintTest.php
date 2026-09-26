@@ -44,7 +44,7 @@ class AdminFormsPrintTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.forms.call-list', ['program' => $program->id]));
 
         $response->assertStatus(200);
-        $response->assertSee('images/forms-header-logo.png');
+        $response->assertSee('images/forms-header-logo.svg');
         $response->assertSee('CALL LIST');
         $response->assertSee('Malayalam Speech');
         $response->assertSee('Q9 - 103');
@@ -73,7 +73,7 @@ class AdminFormsPrintTest extends TestCase
         ]));
 
         $response->assertStatus(200);
-        $response->assertSee('images/forms-header-logo.png');
+        $response->assertSee('images/forms-header-logo.svg');
         $response->assertSee('CALL LIST');
         $response->assertSee('Qira\'th');
         $response->assertSee('Student Id');
@@ -99,7 +99,7 @@ class AdminFormsPrintTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.forms.evaluation', ['program' => $program->id]));
 
         $response->assertStatus(200);
-        $response->assertSee('images/forms-header-logo.png');
+        $response->assertSee('images/forms-header-logo.svg');
         $response->assertSee('Evaluation Sheet');
         $response->assertSee('Urdu Speech');
         $response->assertSee('Out of 100');
@@ -126,7 +126,7 @@ class AdminFormsPrintTest extends TestCase
         ]));
 
         $response->assertStatus(200);
-        $response->assertSee('images/forms-header-logo.png');
+        $response->assertSee('images/forms-header-logo.svg');
         $response->assertSee('Evaluation Sheet');
         $response->assertSee('English Poem Writing');
         $response->assertSee('Out of 100');

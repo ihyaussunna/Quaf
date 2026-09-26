@@ -179,13 +179,13 @@
                                 </div>
                             </div>
 
-                            <!-- Team / House Banner at Bottom -->
+                            <!-- Team / Group Banner at Bottom -->
                             @if($group)
                                 <div class="relative z-10 pt-6 mt-6 border-t border-slate-200 flex items-center justify-between bg-white/80 backdrop-blur rounded-2xl p-4 border border-slate-200">
                                     <div class="flex items-center gap-3">
                                         <span class="w-5 h-5 rounded-full border border-slate-300 shadow-sm" style="background-color: {{ $group->color_code ?? '#f3bd2e' }}"></span>
                                         <div>
-                                            <div class="text-[11px] font-mono uppercase font-bold text-slate-500 tracking-wider">House / Team</div>
+                                            <div class="text-[11px] font-mono uppercase font-bold text-slate-500 tracking-wider">Group / Team</div>
                                             <div class="text-base font-bold text-slate-900 font-serif">{{ $group->name }}</div>
                                         </div>
                                     </div>

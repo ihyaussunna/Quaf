@@ -37,7 +37,7 @@
                     <tr>
                         <th class="px-6 py-4 font-semibold">Certificate Serial</th>
                         <th class="px-6 py-4 font-semibold">Participant</th>
-                        <th class="px-6 py-4 font-semibold">House</th>
+                        <th class="px-6 py-4 font-semibold">Group</th>
                         <th class="px-6 py-4 font-semibold">Program</th>
                         <th class="px-6 py-4 font-semibold">Placement</th>
                         <th class="px-6 py-4 font-semibold">Issued On</th>

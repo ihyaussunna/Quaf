@@ -90,7 +90,7 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Team / House (Optional)</label>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Team / Group (Optional)</label>
                 <select name="group_id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#be1e2d]">
                     <option value="">None (General)</option>
                     @foreach($groups as $grp)

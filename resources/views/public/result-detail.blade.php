@@ -92,7 +92,7 @@
                     <tr>
                         <th class="px-5 sm:px-6 py-3">Chest #</th>
                         <th class="px-5 sm:px-6 py-3">Participant / Team</th>
-                        <th class="px-5 sm:px-6 py-3">House</th>
+                        <th class="px-5 sm:px-6 py-3">Group</th>
                         <th class="px-5 sm:px-6 py-3">Evaluation Status</th>
                     </tr>
                 </thead>

@@ -118,7 +118,7 @@
             
             <label class="flex items-center gap-1.5 cursor-pointer">
                 <input type="checkbox" x-model="showLeaderboard" class="rounded border-slate-300 text-[#be1e2d] focus:ring-0">
-                <span>House Championship Leaderboard</span>
+                <span>Group Championship Leaderboard</span>
             </label>
 
             <label class="flex items-center gap-1.5 cursor-pointer">
@@ -169,23 +169,23 @@
             <p class="text-xs font-mono text-slate-500 mt-1">Authorized Scorecard and Merit Verdicts</p>
         </div>
 
-        <!-- Section 1: House Championship Leaderboard -->
+        <!-- Section 1: Group Championship Leaderboard -->
         <div x-show="showLeaderboard" class="mb-8 avoid-break">
             <div class="flex items-center justify-between mb-3 border-b border-slate-200 pb-1.5">
                 <h3 class="text-sm font-mono uppercase font-bold text-slate-800 flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-[#be1e2d]"></span>
-                    <span>1. House Championship Tally</span>
+                    <span>1. Group Championship Tally</span>
                 </h3>
-                <span class="text-xs font-mono text-slate-500">5 Official Houses</span>
+                <span class="text-xs font-mono text-slate-500">5 Official Groups</span>
             </div>
 
             <table class="w-full text-left text-xs border border-slate-200">
                 <thead class="bg-slate-100 font-mono font-bold text-slate-700 uppercase border-b border-slate-200">
                     <tr>
                         <th class="py-2.5 px-3 w-16 text-center">Rank</th>
-                        <th class="py-2.5 px-3">House / Team</th>
+                        <th class="py-2.5 px-3">Group / Team</th>
                         <th class="py-2.5 px-3">Code</th>
-                        <th class="py-2.5 px-3">House Captain / Leader</th>
+                        <th class="py-2.5 px-3">Group Captain / Leader</th>
                         <th class="py-2.5 px-3 text-right">Total Points</th>
                     </tr>
                 </thead>

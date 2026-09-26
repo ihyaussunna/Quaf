@@ -57,7 +57,7 @@
         <form method="GET" action="{{ route('admin.idcards.chest-slips') }}" class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 text-xs font-mono">
             <span class="text-slate-500 font-semibold">Filter:</span>
             <select name="group" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800">
-                <option value="">All Houses</option>
+                <option value="">All Groups</option>
                 @foreach($groups as $g)
                     <option value="{{ $g->id }}" {{ $groupId == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
                 @endforeach

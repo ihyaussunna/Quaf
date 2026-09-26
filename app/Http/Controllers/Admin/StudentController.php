@@ -11,6 +11,7 @@ use App\Services\QrCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -113,6 +114,273 @@ class StudentController extends Controller
             'selectedStudent',
             'search'
         ));
+    }
+
+    public function bulkCreate(): View
+    {
+        $groups = Group::orderBy('name')->get();
+        $zones = Zone::orderBy('display_order')->get();
+        $categories = Student::ZONES;
+
+        return view('admin.students.bulk', compact('groups', 'zones', 'categories'));
+    }
+
+    public function downloadTemplate(): StreamedResponse
+    {
+        $callback = function () {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
+            fputcsv($handle, ['Name', 'Group', 'Class / Zone', 'Contact', 'Chest Number (Optional)']);
+            fputcsv($handle, ['Muhammed Faris', 'PACTO', 'Class 4', '9847000001', '']);
+            fputcsv($handle, ['Ahmad Bilal', 'LUMO', 'Class 3', '9847000002', '']);
+            fputcsv($handle, ['Zaid Ameen', 'CONCO', 'C Zone', '9847000003', '']);
+            fputcsv($handle, ['Umar Farooq', 'UNIO', 'Class 1', '9847000004', '']);
+            fputcsv($handle, ['Hassan Ali', 'YUGO', 'Mix Zone', '9847000005', '']);
+            fclose($handle);
+        };
+
+        return response()->streamDownload($callback, 'students_bulk_template.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    public function bulkStore(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'default_group_id' => ['nullable', 'exists:groups,id'],
+            'default_category' => ['nullable', 'string'],
+            'paste_text' => ['nullable', 'string'],
+            'csv_file' => ['nullable', 'file', 'mimes:csv,txt'],
+        ]);
+
+        $defaultGroup = $request->input('default_group_id') ? Group::find($request->input('default_group_id')) : null;
+        $defaultCategory = $request->input('default_category');
+        $defaultZone = $defaultCategory ? Zone::where('name', $defaultCategory)->first() : null;
+
+        $rows = [];
+
+        // 1. Process CSV File if uploaded
+        if ($request->hasFile('csv_file') && $request->file('csv_file')->isValid()) {
+            $file = $request->file('csv_file');
+            $handle = fopen($file->getRealPath(), 'r');
+            if ($handle !== false) {
+                $bom = fread($handle, 3);
+                if ($bom !== "\xEF\xBB\xBF") {
+                    rewind($handle);
+                }
+
+                $headerChecked = false;
+                while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+                    $nonEmpty = array_filter($data, fn ($v) => trim((string) $v) !== '');
+                    if (empty($nonEmpty)) {
+                        continue;
+                    }
+
+                    if (! $headerChecked) {
+                        $headerChecked = true;
+                        $firstCol = strtolower(trim((string) ($data[0] ?? '')));
+                        if (in_array($firstCol, ['name', 'student name', 'participant name', 'full name', 'പേര്'])) {
+                            continue;
+                        }
+                    }
+
+                    $rows[] = array_map('trim', $data);
+                }
+                fclose($handle);
+            }
+        }
+
+        // 2. Process Paste Text
+        $pasteText = trim((string) $request->input('paste_text', ''));
+        if (! empty($pasteText)) {
+            $lines = preg_split('/\r\n|\r|\n/', $pasteText);
+            $headerChecked = false;
+
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
+
+                $delimiter = ',';
+                if (str_contains($line, '|')) {
+                    $delimiter = '|';
+                } elseif (str_contains($line, "\t")) {
+                    $delimiter = "\t";
+                }
+
+                $cols = array_map('trim', explode($delimiter, $line));
+
+                if (! $headerChecked) {
+                    $headerChecked = true;
+                    $firstCol = strtolower($cols[0] ?? '');
+                    if (in_array($firstCol, ['name', 'student name', 'participant name', 'full name', 'പേര്'])) {
+                        continue;
+                    }
+                }
+
+                $rows[] = $cols;
+            }
+        }
+
+        if (empty($rows)) {
+            return back()->withInput()->with('error', 'No student entries found to import. Please paste student details or upload a CSV file.');
+        }
+
+        $allGroups = Group::all();
+        $allZones = Zone::all();
+
+        $groupCounters = [];
+        $existingStudentIds = Student::pluck('student_id')->toArray();
+        $usedStudentIds = array_flip($existingStudentIds);
+
+        $createdStudents = [];
+        $failedRows = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($rows as $rowIndex => $cols) {
+                $name = $cols[0] ?? '';
+                if (empty($name)) {
+                    $failedRows[] = 'Row #'.($rowIndex + 1).': Participant Name is empty.';
+
+                    continue;
+                }
+
+                // Group
+                $groupInput = $cols[1] ?? '';
+                $group = null;
+                if (! empty($groupInput)) {
+                    $group = $allGroups->first(function ($g) use ($groupInput) {
+                        return (string) $g->id === (string) $groupInput
+                            || strcasecmp($g->code, $groupInput) === 0
+                            || strcasecmp($g->name, $groupInput) === 0
+                            || stripos($g->name, $groupInput) !== false;
+                    });
+                }
+                if (! $group) {
+                    $group = $defaultGroup;
+                }
+
+                if (! $group) {
+                    $failedRows[] = 'Row #'.($rowIndex + 1)." ({$name}): Group not found or not specified.";
+
+                    continue;
+                }
+
+                // Class / Zone
+                $classOrZone = $cols[2] ?? '';
+                $zoneId = null;
+                $category = null;
+                $classLevel = null;
+
+                if (! empty($classOrZone)) {
+                    $matchedZone = $allZones->first(function ($z) use ($classOrZone) {
+                        return strcasecmp($z->name, $classOrZone) === 0
+                            || strcasecmp($z->code, $classOrZone) === 0;
+                    });
+
+                    if ($matchedZone) {
+                        $zoneId = $matchedZone->id;
+                        $category = $matchedZone->name;
+                    } else {
+                        $detectedZoneName = Zone::determineZoneNameFromClass($classOrZone);
+                        $classLevel = $classOrZone;
+                        if ($detectedZoneName) {
+                            $category = $detectedZoneName;
+                            $zoneId = $allZones->firstWhere('name', $detectedZoneName)?->id;
+                        }
+                    }
+                }
+
+                if (! $category) {
+                    if ($defaultZone) {
+                        $zoneId = $defaultZone->id;
+                        $category = $defaultZone->name;
+                    } elseif ($defaultCategory) {
+                        $category = $defaultCategory;
+                        $zoneId = $allZones->firstWhere('name', $defaultCategory)?->id;
+                    } else {
+                        $category = 'A Zone';
+                        $zoneId = $allZones->firstWhere('name', 'A Zone')?->id;
+                    }
+                }
+
+                // Contact
+                $contact = $cols[3] ?? null;
+
+                // Chest number / Student ID
+                $customChest = $cols[4] ?? null;
+                if (! empty($customChest)) {
+                    if (isset($usedStudentIds[$customChest])) {
+                        $failedRows[] = 'Row #'.($rowIndex + 1)." ({$name}): Chest number '{$customChest}' is already assigned.";
+
+                        continue;
+                    }
+                    $studentId = $customChest;
+                    $usedStudentIds[$studentId] = true;
+                } else {
+                    if (! isset($groupCounters[$group->id])) {
+                        $initialNext = Student::generateNextChestNumber($group);
+                        if (preg_match('/(?:QF)?(\d+)/i', $initialNext, $m)) {
+                            $groupCounters[$group->id] = (int) $m[1];
+                        } else {
+                            $groupCounters[$group->id] = 1001;
+                        }
+                    } else {
+                        $groupCounters[$group->id]++;
+                    }
+
+                    $candidateId = 'QF'.$groupCounters[$group->id];
+                    while (isset($usedStudentIds[$candidateId])) {
+                        $groupCounters[$group->id]++;
+                        $candidateId = 'QF'.$groupCounters[$group->id];
+                    }
+                    $studentId = $candidateId;
+                    $usedStudentIds[$studentId] = true;
+                }
+
+                $student = Student::create([
+                    'name' => $name,
+                    'student_id' => $studentId,
+                    'group_id' => $group->id,
+                    'zone_id' => $zoneId,
+                    'category' => $category,
+                    'class_level' => $classLevel,
+                    'gender' => 'Male',
+                    'contact' => $contact,
+                    'qr_token' => Str::random(40),
+                ]);
+
+                $createdStudents[] = $student;
+            }
+
+            if (empty($createdStudents) && ! empty($failedRows)) {
+                DB::rollBack();
+
+                return back()->withInput()->with('error', 'Bulk registration failed: '.implode(' | ', array_slice($failedRows, 0, 5)));
+            }
+
+            DB::commit();
+
+            AuditLogger::log('bulk_create_students', null, null, [
+                'count' => count($createdStudents),
+                'first_id' => $createdStudents[0]->student_id ?? null,
+                'last_id' => end($createdStudents)->student_id ?? null,
+            ]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->withInput()->with('error', 'Error occurred during bulk registration: '.$e->getMessage());
+        }
+
+        $successMsg = count($createdStudents).' students registered successfully in bulk ('.($createdStudents[0]->student_id ?? '').' - '.(end($createdStudents)->student_id ?? '').').';
+        if (! empty($failedRows)) {
+            $successMsg .= ' [Note: '.count($failedRows).' rows skipped due to missing details.]';
+        }
+
+        return redirect()->route('admin.students.index')->with('success', $successMsg);
     }
 
     public function create(): View

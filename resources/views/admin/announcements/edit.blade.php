@@ -31,7 +31,7 @@
                 <select name="target_role" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                     <option value="all" {{ old('target_role', $announcement->target_role) == 'all' ? 'selected' : '' }}>Everyone / Public</option>
                     <option value="student" {{ old('target_role', $announcement->target_role) == 'student' ? 'selected' : '' }}>Students</option>
-                    <option value="leader" {{ old('target_role', $announcement->target_role) == 'leader' ? 'selected' : '' }}>House Leaders</option>
+                    <option value="leader" {{ old('target_role', $announcement->target_role) == 'leader' ? 'selected' : '' }}>Group Leaders</option>
                     <option value="judge" {{ old('target_role', $announcement->target_role) == 'judge' ? 'selected' : '' }}>Judges / Jury</option>
                     <option value="green_room" {{ old('target_role', $announcement->target_role) == 'green_room' ? 'selected' : '' }}>Green Room Backstage</option>
                 </select>

@@ -79,7 +79,7 @@ class Result extends Model
 
         if ($this->firstEntry) {
             $name = $this->firstEntry->student->name ?? ($this->firstEntry->group->name ?? '1st Place Winner');
-            $unit = $this->firstEntry->student->group->name ?? ($this->firstEntry->group->name ?? 'House');
+            $unit = $this->firstEntry->student->group->name ?? ($this->firstEntry->group->name ?? 'Group');
             $chest = $this->firstEntry->chest_number ?? ($this->firstEntry->student->student_id ?? '');
 
             $winners['first'][] = [
@@ -92,7 +92,7 @@ class Result extends Model
 
         if ($this->secondEntry) {
             $name = $this->secondEntry->student->name ?? ($this->secondEntry->group->name ?? '2nd Place Winner');
-            $unit = $this->secondEntry->student->group->name ?? ($this->secondEntry->group->name ?? 'House');
+            $unit = $this->secondEntry->student->group->name ?? ($this->secondEntry->group->name ?? 'Group');
             $chest = $this->secondEntry->chest_number ?? ($this->secondEntry->student->student_id ?? '');
 
             $winners['second'][] = [
@@ -105,7 +105,7 @@ class Result extends Model
 
         if ($this->thirdEntry) {
             $name = $this->thirdEntry->student->name ?? ($this->thirdEntry->group->name ?? '3rd Place Winner');
-            $unit = $this->thirdEntry->student->group->name ?? ($this->thirdEntry->group->name ?? 'House');
+            $unit = $this->thirdEntry->student->group->name ?? ($this->thirdEntry->group->name ?? 'Group');
             $chest = $this->thirdEntry->chest_number ?? ($this->thirdEntry->student->student_id ?? '');
 
             $winners['third'][] = [

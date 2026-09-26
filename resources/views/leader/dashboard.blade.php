@@ -216,7 +216,7 @@
 
             <div class="pt-6 border-t border-gray-100 mt-6">
                 <a href="{{ route('leader.programs') }}" class="w-full py-3 bg-brand-orange text-white rounded-2xl text-xs font-bold text-center block hover:bg-orange-600 transition shadow-xs">
-                    View House Programs &rarr;
+                    View Group Programs &rarr;
                 </a>
             </div>
         </div>

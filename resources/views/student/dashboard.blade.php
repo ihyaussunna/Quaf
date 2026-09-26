@@ -351,7 +351,7 @@
                 </div>
             @empty
                 <div class="col-span-full py-12 text-center text-slate-500 font-mono text-xs bg-white rounded-3xl border border-slate-200 shadow-sm">
-                    You have not been enrolled in any programs yet. Contact your House Leader.
+                    You have not been enrolled in any programs yet. Contact your Group Leader.
                 </div>
             @endforelse
         </div>
