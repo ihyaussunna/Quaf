@@ -52,7 +52,7 @@
                     @endforeach
                 </select>
 
-                @if($search || $status || $zone || $categoryId)
+                @if($search || $status || $zone)
                     <a href="{{ route('admin.programs.index') }}" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800 bg-slate-100 rounded-lg">Reset</a>
                 @endif
             </div>

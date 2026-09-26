@@ -46,7 +46,7 @@
                         has secured <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">FIRST PLACE (A GRADE)</span> in
                     </p>
                     <h4 class="text-lg font-serif font-bold text-[#f3bd2e]">
-                        Elocution (English) — Senior Category
+                        Elocution (English) — A Zone
                     </h4>
                 </div>
 
@@ -121,7 +121,7 @@
                     </div>
                     <div class="border-t border-b border-slate-100 py-2 text-xs font-mono space-y-1 text-slate-600">
                         <div>Team: <strong class="text-slate-900">{{ $sampleStudent?->group?->name ?? 'Cordoba' }}</strong></div>
-                        <div>Category: <strong class="text-slate-900">{{ $sampleStudent?->category ?? 'Senior' }}</strong></div>
+                        <div>Zone: <strong class="text-slate-900">{{ $sampleStudent?->category ?? 'A Zone' }}</strong></div>
                     </div>
                     <div class="w-24 h-24 mx-auto bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center text-[10px] font-mono text-slate-400">
                         [QR CODE]

@@ -6,7 +6,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sans tracking-tight">Top Scorers & Champions</h1>
-            <p class="text-xs text-slate-500 mt-1 font-sans">Individual star performers, Kalaprathibha, Kalathilakam, and special category badge winners.</p>
+            <p class="text-xs text-slate-500 mt-1 font-sans">Individual star performers, Kalaprathibha, Kalathilakam, and special zone badge winners.</p>
         </div>
         <div class="flex items-center gap-2.5">
             <a href="{{ route('admin.points.index') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-2xs">
@@ -123,7 +123,7 @@
         </form>
     </div>
 
-    <!-- Top Scorers Table (Columns: Participant Name, Special Badges, Gender, Team, Category, Offstage Points, Stage Points, Total Points) -->
+    <!-- Top Scorers Table (Columns: Participant Name, Special Badges, Gender, Team, Zone, Offstage Points, Stage Points, Total Points) -->
     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs font-sans">
@@ -202,7 +202,7 @@
                                 <span class="text-[10px] text-slate-400 font-mono">{{ $student->group?->code ?? '' }}</span>
                             </td>
 
-                            <!-- Category -->
+                            <!-- Zone -->
                             <td class="px-5 py-3.5">
                                 <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                                     {{ $student->category }}

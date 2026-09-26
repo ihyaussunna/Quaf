@@ -6,7 +6,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-slate-900 font-sans">Zones Overview</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Official festival zones, categories, registered competitions, and student distributions</p>
+            <p class="text-xs text-slate-500 mt-0.5">Official festival zones, registered competitions, and student distributions</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('admin.achievements.zone-score') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 hover:border-[#be1e2d] transition-all flex items-center gap-1.5 shadow-2xs">
@@ -64,7 +64,7 @@
                     <span class="font-bold text-emerald-900 font-sans text-sm">Mix Zone</span>
                     <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">Open</span>
                 </div>
-                <div class="text-xs font-bold text-emerald-800 mb-1">All Classes (General Category)</div>
+                <div class="text-xs font-bold text-emerald-800 mb-1">All Classes (General / Open Zone)</div>
                 <div class="text-[11px] font-mono text-emerald-700 font-medium">All Classes Included</div>
             </div>
         </div>

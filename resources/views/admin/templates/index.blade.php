@@ -5,7 +5,7 @@
     activeTab: 'badges',
     participantName: 'Muhammed Nihal',
     chestNo: '101',
-    category: 'Junior',
+    category: 'A Zone',
     unit: 'Al Falah Unit',
     competition: 'Arabana (10 Mem)',
     grade: 'A Grade',
@@ -85,7 +85,7 @@
                     </div>
                     <h3 class="font-bold text-slate-900 text-sm font-sans">Customize Template Canvas</h3>
                 </div>
-                <button @click="participantName = 'Muhammed Nihal'; chestNo = '101'; category = 'Junior'; unit = 'Al Falah Unit'; competition = 'Arabana (10 Mem)'; grade = 'A Grade'; position = '1st Place'"
+                <button @click="participantName = 'Muhammed Nihal'; chestNo = '101'; category = 'A Zone'; unit = 'Al Falah Unit'; competition = 'Arabana (10 Mem)'; grade = 'A Grade'; position = '1st Place'"
                         class="text-[11px] text-[#be1e2d] hover:underline font-medium">
                     Reset Defaults
                 </button>
@@ -106,7 +106,7 @@
                                class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-mono focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all">
                     </div>
                     <div>
-                        <label class="block text-slate-600 font-medium mb-1">Category</label>
+                        <label class="block text-slate-600 font-medium mb-1">Zone</label>
                         <input type="text" x-model="category"
                                class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all">
                     </div>
@@ -180,7 +180,7 @@
                         <div class="text-xs font-mono font-bold text-[#be1e2d]" x-text="'CHEST NO: #' + chestNo"></div>
                     </div>
                     <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100 text-[11px] space-y-1">
-                        <div class="text-slate-600"><span class="text-slate-400">Category:</span> <span class="font-semibold text-slate-800" x-text="category"></span></div>
+                        <div class="text-slate-600"><span class="text-slate-400">Zone:</span> <span class="font-semibold text-slate-800" x-text="category"></span></div>
                         <div class="text-slate-600"><span class="text-slate-400">Unit:</span> <span class="font-semibold text-slate-800" x-text="unit"></span></div>
                     </div>
                     <!-- QR placeholder -->
@@ -200,7 +200,7 @@
                 <p class="text-xs text-slate-500 italic max-w-sm mx-auto">This is proudly presented to</p>
                 <div class="text-xl font-bold text-[#be1e2d] border-b-2 border-slate-200 pb-1 inline-block px-4" x-text="participantName"></div>
                 <p class="text-xs text-slate-600 max-w-sm mx-auto">
-                    representing <strong x-text="unit"></strong> for active participation in the event <strong x-text="competition"></strong> under category <strong x-text="category"></strong>.
+                    representing <strong x-text="unit"></strong> for active participation in the event <strong x-text="competition"></strong> under zone <strong x-text="category"></strong>.
                 </p>
                 <div class="flex items-center justify-between pt-6 text-[10px] text-slate-400 font-mono">
                     <div>Chairman</div>

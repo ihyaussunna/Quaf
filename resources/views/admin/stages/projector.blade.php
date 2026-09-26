@@ -92,7 +92,7 @@
                                 {{ $stage->currentProgram->program_code }}
                             </span>
                             <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-blue-50 text-[#005c94] border border-blue-200">
-                                {{ strtoupper($stage->currentProgram->category) }}
+                                {{ strtoupper($stage->currentProgram->eligibility ?? ($stage->currentProgram->zone?->name ?? 'Zone')) }}
                             </span>
                             <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
                                 {{ strtoupper(str_replace('_', ' ', $stage->currentProgram->type)) }}
@@ -274,7 +274,7 @@
                                     {{ $stage->nextProgram->program_code }}
                                 </span>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
-                                    {{ $stage->nextProgram->category }}
+                                    {{ $stage->nextProgram->eligibility ?? ($stage->nextProgram->zone?->name ?? 'Zone') }}
                                 </span>
                             </div>
                         </div>

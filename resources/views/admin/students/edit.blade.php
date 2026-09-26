@@ -77,7 +77,7 @@
             </div>
         </div>
 
-        <!-- House & Category / Zone -->
+        <!-- House & Zone -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">House / Group <span class="text-red-500">*</span></label>
