@@ -9,13 +9,11 @@ use App\Models\PointSetting;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\Stage;
-use App\Models\Student;
 use App\Models\User;
 use App\Services\PointCalculationService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -261,60 +259,8 @@ class DatabaseSeeder extends Seeder
             $judge2->programs()->sync([$programs['Q9-102']->id, $programs['Q9-104']->id, $programs['Q9-105']->id]);
         }
 
-        // 11. Students (30 Official Students of GROUP A)
-        $students = [];
-        $officialGroupAStudents = [
-            ['chest_no' => 'QF1001', 'name' => 'JAMALUDHEEN ABDUL HAMEED', 'class' => 'TQS', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1002', 'name' => 'RAZI MANJANADI', 'class' => 'TQS', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1003', 'name' => 'TWAYYIB JARAMKANDI', 'class' => 'TQS', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1004', 'name' => 'SALMANUL FARIS MAMBURAM', 'class' => 'TQS', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1005', 'name' => 'JABIR PAKARA', 'class' => 'TQS', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1006', 'name' => 'LIYAKATH TV', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1007', 'name' => 'SHEHIN KT', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1008', 'name' => 'SHUAIB', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1009', 'name' => 'FAKHRUDDIN THASHFEEQ', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1010', 'name' => 'ALI', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1011', 'name' => 'MUHAMMED UNAIS.P.M', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1012', 'name' => 'MUHAMMED SALMAN KP', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1013', 'name' => 'MUHAMMED UVAIS P', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1014', 'name' => 'SHAQEEB IHSAN C M', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1015', 'name' => 'MOHAMED BUJAIR NP', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1016', 'name' => 'SHAKEEL MUBARAK CP', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1017', 'name' => 'ADHIL MS', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1018', 'name' => 'MUHAMMED SUHAIL', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1019', 'name' => 'MAHAMMAD SADIK K', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1020', 'name' => 'MUHAMMED RAFI', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1021', 'name' => 'MOHAMMED RASIQ K', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1022', 'name' => 'MUHAMMED MUDHASIR KT', 'class' => 'S4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1023', 'name' => 'ZIYAD ZAINUDHEEN', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1024', 'name' => 'SINAN KT', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1025', 'name' => 'SINAN KARUVANKALLU', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1026', 'name' => 'SHIBILI', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1027', 'name' => 'JAZIL RAHMAN', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1028', 'name' => 'SINAN MK', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1029', 'name' => 'MUHAMMIL', 'class' => 'UT4', 'zone' => 'A ZONE'],
-            ['chest_no' => 'QF1030', 'name' => 'AKHIL', 'class' => 'UT4', 'zone' => 'A ZONE'],
-        ];
-
-        foreach ($officialGroupAStudents as $index => $item) {
-            $students[] = Student::updateOrCreate(
-                ['student_id' => $item['chest_no']],
-                [
-                    'user_id' => ($index === 0) ? $studentUser1->id : null,
-                    'group_id' => $groups['GROUP A']->id,
-                    'name' => $item['name'],
-                    'category' => 'A Zone',
-                    'class_level' => $item['class'],
-                    'gender' => 'Male',
-                    'contact' => '+91 98470 '.str_pad((string) (10000 + $index), 5, '0', STR_PAD_LEFT),
-                    'photo_url' => null,
-                    'qr_token' => Str::random(40),
-                ]
-            );
-        }
-
-        // 12. Seed Official Conco Majdic Students
-        $this->call(ConcoMajdicStudentsSeeder::class);
+        // 11. Seed Official Students for all 5 Groups (Lumo, Pacto, Conco, Unio, Yugo)
+        $this->call(OfficialGroupStudentsSeeder::class);
 
         // 13. Calculate Initial Points & Rankings
         app(PointCalculationService::class)->recalculateAllPoints();

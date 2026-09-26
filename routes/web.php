@@ -89,8 +89,8 @@ Route::get('/init-database/{token}', function (string $token) {
         Artisan::call('app:sync-official-programs');
         $programsOutput = Artisan::output();
 
-        Artisan::call('db:seed', ['--class' => 'ConcoMajdicStudentsSeeder', '--force' => true]);
-        $concoOutput = Artisan::output();
+        Artisan::call('db:seed', ['--class' => 'OfficialGroupStudentsSeeder', '--force' => true]);
+        $studentsOutput = Artisan::output();
 
         Artisan::call('db:seed', ['--class' => 'PanelPasswordsSeeder', '--force' => true]);
 
@@ -109,7 +109,7 @@ Route::get('/init-database/{token}', function (string $token) {
                 'migrate' => $migrateOutput,
                 'seed' => $seedOutput,
                 'programs' => $programsOutput,
-                'conco' => $concoOutput,
+                'students' => $studentsOutput,
             ],
         ]);
     } catch (Throwable $e) {

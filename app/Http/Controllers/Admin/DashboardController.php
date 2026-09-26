@@ -86,8 +86,8 @@ class DashboardController extends Controller
             // 3. Sync 144 official programs
             Artisan::call('app:sync-official-programs');
 
-            // 4. Seed Conco Majdic 236 students
-            Artisan::call('db:seed', ['--class' => 'ConcoMajdicStudentsSeeder', '--force' => true]);
+            // 4. Seed all official students across all 5 groups (1,168 participants)
+            Artisan::call('db:seed', ['--class' => 'OfficialGroupStudentsSeeder', '--force' => true]);
 
             // 5. Seed Passwords
             Artisan::call('db:seed', ['--class' => 'PanelPasswordsSeeder', '--force' => true]);
