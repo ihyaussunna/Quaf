@@ -117,8 +117,8 @@
             <!-- Details Strip -->
             <div class="grid grid-cols-3 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono">
                 <div>
-                    <span class="text-[10px] text-slate-400 uppercase block">Category & Type</span>
-                    <strong>{{ $program->category?->name ?? 'General' }} • {{ ucfirst($program->type) }}</strong>
+                    <span class="text-[10px] text-slate-400 uppercase block">Zone & Type</span>
+                    <strong>{{ $program->zone?->name ?? $program->eligibility ?? 'General' }} • {{ ucfirst($program->type) }}</strong>
                 </div>
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase block">Duration</span>

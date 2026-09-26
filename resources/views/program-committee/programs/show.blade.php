@@ -40,9 +40,6 @@
                     <span class="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-mono font-bold text-xs">
                         {{ $program->zone?->name ?? $program->eligibility }}
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-mono text-xs">
-                        {{ $program->category?->name ?? 'General' }}
-                    </span>
                     <span class="px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold uppercase {{ $program->type === 'group' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
                         {{ $program->type }}
                     </span>

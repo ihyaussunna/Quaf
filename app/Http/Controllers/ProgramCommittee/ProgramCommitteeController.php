@@ -164,7 +164,7 @@ class ProgramCommitteeController extends Controller
             'malayalam_name' => ['nullable', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20', 'unique:programs,code'],
             'zone_id' => ['nullable', 'exists:zones,id'],
-            'category_id' => ['required', 'exists:program_categories,id'],
+            'category_id' => ['nullable', 'exists:program_categories,id'],
             'type' => ['required', 'in:individual,group'],
             'participant_count' => ['nullable', 'integer', 'min:1', 'max:50'],
             'max_participants' => ['nullable', 'integer', 'min:1'],
@@ -193,6 +193,8 @@ class ProgramCommitteeController extends Controller
             $zone = Zone::find($validated['zone_id']);
             $validated['eligibility'] = $zone?->name;
         }
+
+        $validated['category_id'] = $validated['category_id'] ?? ProgramCategory::first()?->id ?? 1;
 
         $program = Program::create($validated);
 
@@ -269,7 +271,7 @@ class ProgramCommitteeController extends Controller
             'malayalam_name' => ['nullable', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:20', "unique:programs,code,{$program->id}"],
             'zone_id' => ['nullable', 'exists:zones,id'],
-            'category_id' => ['required', 'exists:program_categories,id'],
+            'category_id' => ['nullable', 'exists:program_categories,id'],
             'type' => ['required', 'in:individual,group'],
             'participant_count' => ['nullable', 'integer', 'min:1', 'max:50'],
             'max_participants' => ['nullable', 'integer', 'min:1'],
@@ -298,6 +300,8 @@ class ProgramCommitteeController extends Controller
             $zone = Zone::find($validated['zone_id']);
             $validated['eligibility'] = $zone?->name;
         }
+
+        $validated['category_id'] = $validated['category_id'] ?? $program->category_id ?? ProgramCategory::first()?->id ?? 1;
 
         $old = $program->toArray();
         $program->update($validated);

@@ -242,4 +242,28 @@ class ProgramCommitteePortalTest extends TestCase
         $studentRes = $this->actingAs($this->studentUser)->get(route('program-committee.dashboard'));
         $studentRes->assertStatus(403);
     }
+
+    public function test_program_can_be_created_without_category_selection_using_zone(): void
+    {
+        $createPage = $this->actingAs($this->committeeUser)->get(route('program-committee.programs.create'));
+        $createPage->assertStatus(200);
+        $createPage->assertDontSee('Category *');
+
+        $response = $this->actingAs($this->committeeUser)->post(route('program-committee.programs.store'), [
+            'code' => 'Q9-888',
+            'name' => 'Zone Based Elocution',
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'duration_minutes' => 7,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $program = Program::where('code', 'Q9-888')->first();
+        $this->assertNotNull($program);
+        $this->assertEquals($this->zone->id, $program->zone_id);
+        $this->assertEquals('A Zone', $program->eligibility);
+        $this->assertNotNull($program->category_id);
+        $response->assertRedirect(route('program-committee.programs.show', $program));
+    }
 }

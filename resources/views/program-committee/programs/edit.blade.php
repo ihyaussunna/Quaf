@@ -112,22 +112,10 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-xs font-mono uppercase text-slate-700 font-bold mb-1">
-                            Category <span class="text-red-500">*</span>
-                        </label>
-                        <select name="category_id" required 
-                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-brand-burgundy">
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('category_id', $program->category_id) == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                <!-- Hidden Category ID (Zone is used instead of category) -->
+                <input type="hidden" name="category_id" value="{{ old('category_id', $program->category_id ?? $categories->first()?->id ?? 1) }}">
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Duration (Minutes) -->
                     <div>
                         <label class="block text-xs font-mono uppercase text-slate-700 font-bold mb-1">

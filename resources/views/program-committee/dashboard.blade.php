@@ -67,7 +67,7 @@
 
         <!-- Card 4: Type Breakdown -->
         <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
-            <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block mb-2">Category & Format</span>
+            <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block mb-2">Zone & Format</span>
             <div class="space-y-1.5 text-xs font-mono">
                 <div class="flex justify-between items-center text-slate-700">
                     <span>Stage Programs:</span>
