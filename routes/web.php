@@ -41,9 +41,9 @@ use App\Http\Controllers\Public\GalleryController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\ResultController;
-use App\Http\Controllers\Public\VerificationController;
 use App\Http\Controllers\Public\VideoController;
 use App\Http\Controllers\Student\StudentController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,10 +60,20 @@ Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 
-// Public Verifications & Live Displays
-Route::get('/verify/certificate/{certificateNumber}', [VerificationController::class, 'verifyCertificate'])->name('verify.certificate');
-Route::get('/verify/student/{qrToken}', [VerificationController::class, 'verifyStudent'])->name('verify.student');
-Route::get('/stages/{stage}/projector', [AdminStageController::class, 'projector'])->name('stages.projector');
+// One-click database installation & migration runner for Hostinger setup
+Route::get('/init-setup-db', function () {
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = Artisan::output();
+
+        Artisan::call('db:seed', ['--force' => true]);
+        $seedOutput = Artisan::output();
+
+        return response("<h2>Database Migrated & Seeded Successfully!</h2><pre>{$migrateOutput}\n{$seedOutput}</pre><br><a href='/admin'>Go to Admin Panel</a>");
+    } catch (Throwable $e) {
+        return response("<h2>Database Error:</h2><pre>{$e->getMessage()}</pre>", 500);
+    }
+});
 
 /*
 |--------------------------------------------------------------------------
