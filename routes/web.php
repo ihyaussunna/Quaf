@@ -50,6 +50,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -90,6 +91,8 @@ Route::get('/init-database/{token}', function (string $token) {
 
         Artisan::call('db:seed', ['--class' => 'PanelPasswordsSeeder', '--force' => true]);
 
+        Cache::flush();
+
         return response()->json([
             'status' => 'success',
             'message' => 'Database initialized successfully!',
@@ -110,6 +113,20 @@ Route::get('/init-database/{token}', function (string $token) {
             'message' => $e->getMessage(),
         ], 500);
     }
+});
+
+Route::get('/clear-cache/{token}', function (string $token) {
+    if ($token !== 'quaf2026setup') {
+        abort(403, 'Unauthorized setup token.');
+    }
+
+    Cache::flush();
+    Artisan::call('view:clear');
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Cache and compiled views cleared successfully!',
+    ]);
 });
 
 /*

@@ -13,38 +13,33 @@ use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Stage;
 use App\Models\Student;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
-        // 6 Primary Operational Statistics cached with short TTL for peak traffic scalability
-        $stats = Cache::remember('admin_dashboard_stats', 20, function () {
-            return [
-                'participants' => Student::count(),
-                'competitions' => Program::count(),
-                'teams' => Group::count(),
-                'categories' => ProgramCategory::count(),
-                'stages' => Stage::count(),
-                'judges' => Judge::count(),
-                // Additional operational metrics
-                'active_stages' => Stage::where('status', 'active')->count(),
-                'pending_registrations' => ProgramEntry::where('status', 'pending')->count(),
-                'pending_results' => Result::whereIn('status', ['submitted', 'under_review'])->count(),
-                'published_results' => Result::where('status', 'published')->count(),
-                'programs_in_progress' => Program::where('status', 'in_progress')->count(),
-            ];
-        });
+        // 6 Primary Operational Statistics
+        $stats = [
+            'participants' => Student::count(),
+            'competitions' => Program::count(),
+            'teams' => Group::count(),
+            'categories' => ProgramCategory::count(),
+            'stages' => Stage::count(),
+            'judges' => Judge::count(),
+            // Additional operational metrics
+            'active_stages' => Stage::where('status', 'active')->count(),
+            'pending_registrations' => ProgramEntry::where('status', 'pending')->count(),
+            'pending_results' => Result::whereIn('status', ['submitted', 'under_review'])->count(),
+            'published_results' => Result::where('status', 'published')->count(),
+            'programs_in_progress' => Program::where('status', 'in_progress')->count(),
+        ];
 
-        // Real-time Leaderboard of all groups with fast short-lived cache
-        $leaderboard = Cache::remember('admin_leaderboard', 20, function () {
-            return Group::withCount(['students', 'entries'])
-                ->orderBy('rank_cache')
-                ->orderByDesc('points_cache')
-                ->get();
-        });
+        // Real-time Leaderboard of all groups
+        $leaderboard = Group::withCount(['students', 'entries'])
+            ->orderBy('rank_cache')
+            ->orderByDesc('points_cache')
+            ->get();
 
         $activePrograms = Program::where('status', 'in_progress')
             ->with(['category', 'stage', 'schedule'])

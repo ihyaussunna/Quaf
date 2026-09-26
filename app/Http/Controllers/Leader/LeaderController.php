@@ -120,7 +120,7 @@ class LeaderController extends Controller
             ? round(($stats['declared_results'] / $stats['total_results']) * 100, 2)
             : 0;
 
-        $leaderboard = Cache::remember('leaderboard_cached', 20, fn () => Group::orderByDesc('points_cache')->get());
+        $leaderboard = Group::orderByDesc('points_cache')->get();
 
         return view('leader.dashboard', compact(
             'group',
