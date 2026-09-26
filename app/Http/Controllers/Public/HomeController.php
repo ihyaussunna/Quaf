@@ -21,6 +21,12 @@ class HomeController extends Controller
 {
     public function index(): View
     {
+        $defaultLaunchStatus = app()->environment('testing') ? 'launched' : 'coming_soon';
+        $launchStatus = FestivalSetting::get('launch_status', $defaultLaunchStatus);
+        if ($launchStatus === 'coming_soon' && ! request()->has('portal')) {
+            return view('public.coming-soon');
+        }
+
         $liveFestMode = FestivalSetting::get('live_fest_mode', '1') === '1';
 
         $groups = Group::orderBy('rank_cache', 'asc')
