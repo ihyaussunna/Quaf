@@ -1,0 +1,247 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: url('/fonts/Rockwell-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: url('/fonts/Rockwell-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: url('/fonts/Rockwell-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Malayalam Sangam MN';
+    src: url('/fonts/Malayalam-Sangam-MN-Regular.ttf') format('truetype'),
+         url('/fonts/Malayalam Sangam MN.ttc');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Malayalam Sangam MN';
+    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
+         url('/fonts/Malayalam Sangam MN.ttc');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Malayalam MN';
+    src: url('/fonts/Malayalam-MN-Regular.ttf') format('truetype'),
+         url('/fonts/Malayalam MN.ttc');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Malayalam MN';
+    src: url('/fonts/Malayalam-MN-Bold.ttf') format('truetype'),
+         url('/fonts/Malayalam MN.ttc');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Automatic Malayalam Unicode fallback for Sora font-sans */
+@font-face {
+    font-family: 'Sora';
+    src: url('/fonts/Malayalam-Sangam-MN-Regular.ttf') format('truetype'),
+         url('/fonts/Malayalam Sangam MN.ttc');
+    font-weight: 300 500;
+    unicode-range: U+0D00-0D7F;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Sora';
+    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
+         url('/fonts/Malayalam Sangam MN.ttc');
+    font-weight: 600 900;
+    unicode-range: U+0D00-0D7F;
+    font-display: swap;
+}
+
+/* Automatic Malayalam Unicode fallback for Rockwell Std */
+@font-face {
+    font-family: 'Rockwell Std';
+    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
+         url('/fonts/Malayalam Sangam MN.ttc');
+    font-weight: 400 900;
+    unicode-range: U+0D00-0D7F;
+    font-display: swap;
+}
+
+/* Automatic Malayalam Unicode fallback for JetBrains Mono */
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/fonts/Malayalam-Sangam-MN-Regular.ttf') format('truetype'),
+         url('/fonts/Malayalam Sangam MN.ttc');
+    font-weight: 400 900;
+    unicode-range: U+0D00-0D7F;
+    font-display: swap;
+}
+
+@theme {
+    --font-sans: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif;
+    --font-serif: 'Rockwell Std', 'Malayalam Sangam MN', 'Malayalam MN', 'Sora', serif;
+    --font-mono: 'JetBrains Mono', 'Malayalam Sangam MN', monospace;
+    --font-rockwell: 'Rockwell Std', 'Malayalam Sangam MN', 'Rockwell', serif;
+    --font-ml-mn: 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
+    --font-ml-sangam: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    --font-sora: 'Sora', 'Malayalam Sangam MN', sans-serif;
+    --font-ml: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    --font-ar: 'Amiri', 'Noto Naskh Arabic', serif;
+    --font-ur: 'Noto Nastaliq Urdu', serif;
+
+    /* Official QUAF 2026 Festival Theme Colors */
+    --color-fest-red: #be1e2d;
+    --color-fest-gold: #f3bd2e;
+    --color-fest-blue: #005c94;
+    --color-fest-green: #009444;
+
+    --color-brand-orange: #be1e2d;
+    --color-brand-red: #be1e2d;
+    --color-brand-gold: #f3bd2e;
+    --color-brand-blue: #005c94;
+    --color-brand-green: #009444;
+
+    --color-obsidian: #0f172a;
+    --color-midnight: #000000;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f8fafc;
+    --color-surface-card: #ffffff;
+    --color-gold: #f3bd2e;
+    --color-gold-light: #f3bd2e;
+    --color-gold-dark: #f3bd2e;
+}
+
+.font-rockwell {
+    font-family: 'Rockwell Std', 'Rockwell', serif;
+}
+
+.font-ml-mn {
+    font-family: 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
+}
+
+.font-ml-sangam {
+    font-family: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+}
+
+.font-ml,
+:lang(ml),
+.malayalam-text,
+.font-malayalam {
+    font-family: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+}
+
+.font-ar {
+    font-family: 'Amiri', serif;
+    direction: rtl;
+}
+
+.font-ur {
+    font-family: 'Noto Nastaliq Urdu', 'Amiri', serif;
+    direction: rtl;
+}
+
+/* Custom Utilities for Light Theme */
+@layer utilities {
+    .bg-grid-pattern {
+        background-image: none;
+    }
+    
+    .fest-glow-red {
+        box-shadow: 0 4px 20px -2px rgba(190, 30, 45, 0.25);
+    }
+
+    .fest-glow-gold {
+        box-shadow: 0 4px 20px -2px rgba(243, 189, 46, 0.25);
+    }
+
+    .fest-glow-blue {
+        box-shadow: 0 4px 20px -2px rgba(0, 92, 148, 0.25);
+    }
+
+    .fest-glow-green {
+        box-shadow: 0 4px 20px -2px rgba(0, 148, 68, 0.25);
+    }
+
+    .animate-marquee {
+        display: flex;
+        width: max-content;
+        animation: marquee 35s linear infinite;
+    }
+
+    .animate-marquee:hover {
+        animation-play-state: paused;
+    }
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Mobile UX & Font Enhancements */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: rgba(190, 30, 45, 0.15);
+}
+
+input, textarea, select, button {
+    font-family: inherit;
+}
+
+@media (max-width: 640px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #be1e2d;
+}
