@@ -97,27 +97,29 @@ Route::get('/init-database/{token}', function (string $token) {
         Artisan::call('optimize:clear');
         Cache::flush();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Database initialized and synced successfully!',
-            'users' => User::count(),
-            'groups' => Group::count(),
-            'zones' => Zone::count(),
-            'programs' => Program::count(),
-            'students' => Student::count(),
-            'details' => [
-                'migrate' => $migrateOutput,
-                'seed' => $seedOutput,
-                'programs' => $programsOutput,
-                'students' => $studentsOutput,
-            ],
-        ]);
+        $usersCount = User::count();
+        $groupsCount = Group::count();
+        $zonesCount = Zone::count();
+        $programsCount = Program::count();
+        $studentsCount = Student::count();
+
+        return response('<html><head><title>QUAF 9.0 Sync</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#c9d1d9;">'
+            .'<h1 style="color:#3fb950;margin-bottom:20px;">Festival Database Initialized & Synced Successfully!</h1>'
+            .'<div style="background:#161b22;padding:24px;border-radius:8px;border:1px solid #30363d;max-width:600px;">'
+            .'<p style="margin:8px 0;font-size:16px;"><strong>Programs:</strong> '.$programsCount.'</p>'
+            .'<p style="margin:8px 0;font-size:16px;"><strong>Groups:</strong> '.$groupsCount.'</p>'
+            .'<p style="margin:8px 0;font-size:16px;"><strong>Students:</strong> '.$studentsCount.'</p>'
+            .'<p style="margin:8px 0;font-size:16px;"><strong>Zones:</strong> '.$zonesCount.'</p>'
+            .'<p style="margin:8px 0;font-size:16px;"><strong>Users:</strong> '.$usersCount.'</p>'
+            .'<div style="margin-top:24px;">'
+            .'<a href="/admin" style="display:inline-block;padding:10px 20px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Go to Admin Dashboard &rarr;</a>'
+            .'</div></div>'
+            .'</body></html>', 200, ['Content-Type' => 'text/html']);
     } catch (Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
+        return response('<html><head><title>QUAF 9.0 Sync Error</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#f85149;">'
+            .'<h1>Sync Error</h1>'
+            .'<pre style="background:#161b22;padding:20px;border-radius:6px;border:1px solid #da3633;color:#ff7b72;">'.htmlspecialchars($e->getMessage()).'</pre>'
+            .'</body></html>', 500, ['Content-Type' => 'text/html']);
     }
 });
 
