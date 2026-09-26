@@ -173,4 +173,93 @@ class AdminBulkStudentTest extends TestCase
             'category' => 'B Zone',
         ]);
     }
+
+    public function test_admin_can_bulk_register_four_column_chest_name_class_zone_format_with_group_header(): void
+    {
+        $concoGroup = Group::firstOrCreate(
+            ['code' => 'CONCO'],
+            [
+                'name' => 'Conco Majdic',
+                'slug' => 'conco-majdic',
+                'color_hex' => '#f8e709',
+            ]
+        );
+
+        $pasteText = "CONCO MAJDIC\n".
+                     "\"LEADER : SINAN SAQAFI VELLIMUTTAM\nASSI.LEADERS : MUSHARAF PONNANI\"\n".
+                     "Chest No\tName\tClass\tZone\n".
+                     "QF3001\tIMRAN MAVINAKATT\tTQS\tA ZONE\n".
+                     "QF3002\tSYD SWABAH\tTQS\tA ZONE\n".
+                     "QF3099\tYASIR RILWAN\tS3\tB ZONE\n".
+                     "QF3208\tABDULLAH REZA\tL2\tC ZONE\n";
+
+        $response = $this->actingAs($this->admin)->post(route('admin.students.bulk-store'), [
+            'paste_text' => $pasteText,
+        ]);
+
+        $response->assertRedirect(route('admin.students.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('students', [
+            'student_id' => 'QF3001',
+            'name' => 'IMRAN MAVINAKATT',
+            'class_level' => 'TQS',
+            'category' => 'A Zone',
+            'group_id' => $concoGroup->id,
+        ]);
+
+        $this->assertDatabaseHas('students', [
+            'student_id' => 'QF3002',
+            'name' => 'SYD SWABAH',
+            'class_level' => 'TQS',
+            'category' => 'A Zone',
+            'group_id' => $concoGroup->id,
+        ]);
+
+        $this->assertDatabaseHas('students', [
+            'student_id' => 'QF3099',
+            'name' => 'YASIR RILWAN',
+            'class_level' => 'S3',
+            'category' => 'B Zone',
+            'group_id' => $concoGroup->id,
+        ]);
+
+        $this->assertDatabaseHas('students', [
+            'student_id' => 'QF3208',
+            'name' => 'ABDULLAH REZA',
+            'class_level' => 'L2',
+            'category' => 'C Zone',
+            'group_id' => $concoGroup->id,
+        ]);
+    }
+
+    public function test_admin_can_bulk_register_four_column_comma_separated_with_default_group(): void
+    {
+        $pasteText = "QF2001, Ahmad Rayan, S4, A ZONE\n".
+                     "QF2002, Zahir Ali, S3, B ZONE\n";
+
+        $response = $this->actingAs($this->admin)->post(route('admin.students.bulk-store'), [
+            'default_group_id' => $this->groupPacto->id,
+            'paste_text' => $pasteText,
+        ]);
+
+        $response->assertRedirect(route('admin.students.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('students', [
+            'student_id' => 'QF2001',
+            'name' => 'Ahmad Rayan',
+            'class_level' => 'S4',
+            'category' => 'A Zone',
+            'group_id' => $this->groupPacto->id,
+        ]);
+
+        $this->assertDatabaseHas('students', [
+            'student_id' => 'QF2002',
+            'name' => 'Zahir Ali',
+            'class_level' => 'S3',
+            'category' => 'B Zone',
+            'group_id' => $this->groupPacto->id,
+        ]);
+    }
 }

@@ -130,12 +130,12 @@ class StudentController extends Controller
         $callback = function () {
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
-            fputcsv($handle, ['Name', 'Group', 'Class / Zone', 'Contact', 'Chest Number (Optional)']);
-            fputcsv($handle, ['Muhammed Faris', 'PACTO', 'Class 4', '9847000001', '']);
-            fputcsv($handle, ['Ahmad Bilal', 'LUMO', 'Class 3', '9847000002', '']);
-            fputcsv($handle, ['Zaid Ameen', 'CONCO', 'C Zone', '9847000003', '']);
-            fputcsv($handle, ['Umar Farooq', 'UNIO', 'Class 1', '9847000004', '']);
-            fputcsv($handle, ['Hassan Ali', 'YUGO', 'Mix Zone', '9847000005', '']);
+            fputcsv($handle, ['Chest No', 'Name', 'Class', 'Zone', 'Group']);
+            fputcsv($handle, ['QF3001', 'IMRAN MAVINAKATT', 'TQS', 'A ZONE', 'CONCO']);
+            fputcsv($handle, ['QF3002', 'SYD SWABAH', 'TQS', 'A ZONE', 'CONCO']);
+            fputcsv($handle, ['QF1001', 'Muhammed Faris', 'S4', 'A ZONE', 'LUMO']);
+            fputcsv($handle, ['QF2001', 'Ahmad Bilal', 'S3', 'B ZONE', 'PACTO']);
+            fputcsv($handle, ['QF4001', 'Umar Farooq', 'U1', 'C ZONE', 'UNIO']);
             fclose($handle);
         };
 
@@ -179,7 +179,7 @@ class StudentController extends Controller
                     if (! $headerChecked) {
                         $headerChecked = true;
                         $firstCol = strtolower(trim((string) ($data[0] ?? '')));
-                        if (in_array($firstCol, ['name', 'student name', 'participant name', 'full name', 'പേര്'])) {
+                        if (in_array($firstCol, ['chest no', 'chest no.', 'chest', 'sl no', 'si no', 'name', 'student name', 'participant name', 'full name', 'പേര്'])) {
                             continue;
                         }
                     }
@@ -194,7 +194,6 @@ class StudentController extends Controller
         $pasteText = trim((string) $request->input('paste_text', ''));
         if (! empty($pasteText)) {
             $lines = preg_split('/\r\n|\r|\n/', $pasteText);
-            $headerChecked = false;
 
             foreach ($lines as $line) {
                 $line = trim($line);
@@ -203,22 +202,15 @@ class StudentController extends Controller
                 }
 
                 $delimiter = ',';
-                if (str_contains($line, '|')) {
-                    $delimiter = '|';
-                } elseif (str_contains($line, "\t")) {
+                if (str_contains($line, "\t")) {
                     $delimiter = "\t";
+                } elseif (str_contains($line, '|')) {
+                    $delimiter = '|';
+                } elseif (str_contains($line, ';')) {
+                    $delimiter = ';';
                 }
 
                 $cols = array_map('trim', explode($delimiter, $line));
-
-                if (! $headerChecked) {
-                    $headerChecked = true;
-                    $firstCol = strtolower($cols[0] ?? '');
-                    if (in_array($firstCol, ['name', 'student name', 'participant name', 'full name', 'പേര്'])) {
-                        continue;
-                    }
-                }
-
                 $rows[] = $cols;
             }
         }
@@ -234,21 +226,128 @@ class StudentController extends Controller
         $existingStudentIds = Student::pluck('student_id')->toArray();
         $usedStudentIds = array_flip($existingStudentIds);
 
+        $activeGroup = $defaultGroup;
         $createdStudents = [];
         $failedRows = [];
 
         DB::beginTransaction();
         try {
-            foreach ($rows as $rowIndex => $cols) {
-                $name = $cols[0] ?? '';
+            foreach ($rows as $rowIndex => $rawCols) {
+                $cols = array_values(array_map('trim', $rawCols));
+                while (! empty($cols) && end($cols) === '') {
+                    array_pop($cols);
+                }
+
+                if (empty($cols)) {
+                    continue;
+                }
+
+                $firstCol = $cols[0];
+                $fullLine = implode(' ', $cols);
+
+                // Ignore leadership metadata / banner lines
+                if (preg_match('/^(?:LEADER|ASSI\.LEADERS|ASSISTANT LEADERS|MANAGER|ASSI)\s*:/i', $firstCol) || preg_match('/^(?:LEADER|ASSI\.LEADERS|ASSISTANT LEADERS)\s*:/i', $fullLine)) {
+                    continue;
+                }
+
+                // Check if this row is a Group Header line (e.g. "CONCO MAJDIC", "LUMO FIKRIC", "CONCO")
+                if (count($cols) <= 2) {
+                    $matchedGrp = $allGroups->first(function ($g) use ($firstCol, $fullLine) {
+                        return strcasecmp($g->code, $firstCol) === 0
+                            || strcasecmp($g->name, $firstCol) === 0
+                            || strcasecmp($g->name, $fullLine) === 0
+                            || stripos($g->name, $firstCol) !== false;
+                    });
+                    if ($matchedGrp) {
+                        $activeGroup = $matchedGrp;
+
+                        continue;
+                    }
+                }
+
+                // Check if this row is a table header row (e.g. "Chest No", "Name", "Class", "Zone")
+                $lowerFirst = strtolower($firstCol);
+                $isHeader = in_array($lowerFirst, [
+                    'chest no', 'chest no.', 'chest', 'chest_no', 'chess number', 'chess no',
+                    'sl no', 'sl no.', 'si no', 'si no.', 'sl.no', 'name', 'student name', 'participant name',
+                    'full name', 'പേര്', 'ചെസ്റ്റ് നമ്പർ', 'നമ്പർ',
+                ]);
+                if ($isHeader) {
+                    continue;
+                }
+
+                // Determine whether first column is a Chest Number or a Name
+                // A chest number must contain digits (e.g. QF3001, 3001, QF-101, Q9_201)
+                $isFirstColChest = preg_match('/\d/', $firstCol)
+                    && (preg_match('/^(?:QF|Q9)?[0-9]{2,6}$/i', $firstCol) || preg_match('/^[A-Z0-9_-]{2,12}$/i', $firstCol));
+
+                $customChest = null;
+                $name = '';
+                $groupInput = '';
+                $classInput = '';
+                $zoneInput = '';
+                $contact = null;
+
+                if ($isFirstColChest) {
+                    // Format A: Chest No, Name, Class, Zone [, Group / Contact]
+                    $customChest = $firstCol;
+                    $name = $cols[1] ?? '';
+
+                    if (count($cols) >= 4) {
+                        $classInput = $cols[2] ?? '';
+                        $zoneInput = $cols[3] ?? '';
+
+                        if (isset($cols[4])) {
+                            // Check if 5th column is a Group or a Contact
+                            $candidateGroup = $cols[4];
+                            $foundGrp = $allGroups->first(function ($g) use ($candidateGroup) {
+                                return strcasecmp($g->code, $candidateGroup) === 0 || strcasecmp($g->name, $candidateGroup) === 0 || stripos($g->name, $candidateGroup) !== false;
+                            });
+                            if ($foundGrp) {
+                                $groupInput = $candidateGroup;
+                            } else {
+                                $contact = $candidateGroup;
+                            }
+                        }
+                    } elseif (count($cols) === 3) {
+                        // Chest No, Name, Class/Zone
+                        $classOrZone = $cols[2];
+                        $matchedZone = $allZones->first(function ($z) use ($classOrZone) {
+                            return strcasecmp($z->name, $classOrZone) === 0 || strcasecmp($z->code, $classOrZone) === 0;
+                        });
+                        if ($matchedZone) {
+                            $zoneInput = $classOrZone;
+                        } else {
+                            $classInput = $classOrZone;
+                        }
+                    }
+                } else {
+                    // Format B: Name, Group, Class/Zone, Contact, Chest
+                    $name = $firstCol;
+                    $groupInput = $cols[1] ?? '';
+                    $classOrZone = $cols[2] ?? '';
+                    $contact = $cols[3] ?? null;
+                    $customChest = $cols[4] ?? null;
+
+                    if (! empty($classOrZone)) {
+                        $matchedZone = $allZones->first(function ($z) use ($classOrZone) {
+                            return strcasecmp($z->name, $classOrZone) === 0 || strcasecmp($z->code, $classOrZone) === 0;
+                        });
+                        if ($matchedZone) {
+                            $zoneInput = $classOrZone;
+                        } else {
+                            $classInput = $classOrZone;
+                        }
+                    }
+                }
+
                 if (empty($name)) {
                     $failedRows[] = 'Row #'.($rowIndex + 1).': Participant Name is empty.';
 
                     continue;
                 }
 
-                // Group
-                $groupInput = $cols[1] ?? '';
+                // Resolve Group
                 $group = null;
                 if (! empty($groupInput)) {
                     $group = $allGroups->first(function ($g) use ($groupInput) {
@@ -259,37 +358,38 @@ class StudentController extends Controller
                     });
                 }
                 if (! $group) {
-                    $group = $defaultGroup;
+                    $group = $activeGroup ?? $defaultGroup;
                 }
-
                 if (! $group) {
                     $failedRows[] = 'Row #'.($rowIndex + 1)." ({$name}): Group not found or not specified.";
 
                     continue;
                 }
 
-                // Class / Zone
-                $classOrZone = $cols[2] ?? '';
+                // Resolve Zone & Class
                 $zoneId = null;
                 $category = null;
-                $classLevel = null;
+                $classLevel = ! empty($classInput) ? $classInput : null;
 
-                if (! empty($classOrZone)) {
-                    $matchedZone = $allZones->first(function ($z) use ($classOrZone) {
-                        return strcasecmp($z->name, $classOrZone) === 0
-                            || strcasecmp($z->code, $classOrZone) === 0;
+                if (! empty($zoneInput)) {
+                    $matchedZone = $allZones->first(function ($z) use ($zoneInput) {
+                        return strcasecmp($z->name, $zoneInput) === 0
+                            || strcasecmp(str_replace(' ', '', $z->name), str_replace(' ', '', $zoneInput)) === 0
+                            || strcasecmp($z->code, str_replace(' ', '_', $zoneInput)) === 0
+                            || stripos($zoneInput, $z->name) !== false
+                            || stripos($z->name, $zoneInput) !== false;
                     });
-
                     if ($matchedZone) {
                         $zoneId = $matchedZone->id;
                         $category = $matchedZone->name;
-                    } else {
-                        $detectedZoneName = Zone::determineZoneNameFromClass($classOrZone);
-                        $classLevel = $classOrZone;
-                        if ($detectedZoneName) {
-                            $category = $detectedZoneName;
-                            $zoneId = $allZones->firstWhere('name', $detectedZoneName)?->id;
-                        }
+                    }
+                }
+
+                if (! $category && ! empty($classLevel)) {
+                    $detectedZoneName = Zone::determineZoneNameFromClass($classLevel);
+                    if ($detectedZoneName) {
+                        $category = $detectedZoneName;
+                        $zoneId = $allZones->firstWhere('name', $detectedZoneName)?->id;
                     }
                 }
 
@@ -302,23 +402,13 @@ class StudentController extends Controller
                         $zoneId = $allZones->firstWhere('name', $defaultCategory)?->id;
                     } else {
                         $category = 'A Zone';
-                        $zoneId = $allZones->firstWhere('name', 'A Zone')?->id;
+                        $zoneId = $allZones->firstWhere('name', 'A Zone')?->id ?? 1;
                     }
                 }
 
-                // Contact
-                $contact = $cols[3] ?? null;
-
-                // Chest number / Student ID
-                $customChest = $cols[4] ?? null;
+                // Resolve Chest Number
                 if (! empty($customChest)) {
-                    if (isset($usedStudentIds[$customChest])) {
-                        $failedRows[] = 'Row #'.($rowIndex + 1)." ({$name}): Chest number '{$customChest}' is already assigned.";
-
-                        continue;
-                    }
                     $studentId = $customChest;
-                    $usedStudentIds[$studentId] = true;
                 } else {
                     if (! isset($groupCounters[$group->id])) {
                         $initialNext = Student::generateNextChestNumber($group);
@@ -337,22 +427,34 @@ class StudentController extends Controller
                         $candidateId = 'QF'.$groupCounters[$group->id];
                     }
                     $studentId = $candidateId;
-                    $usedStudentIds[$studentId] = true;
                 }
+                $usedStudentIds[$studentId] = true;
 
-                $student = Student::create([
-                    'name' => $name,
-                    'student_id' => $studentId,
-                    'group_id' => $group->id,
-                    'zone_id' => $zoneId,
-                    'category' => $category,
-                    'class_level' => $classLevel,
-                    'gender' => 'Male',
-                    'contact' => $contact,
-                    'qr_token' => Str::random(40),
-                ]);
-
-                $createdStudents[] = $student;
+                $existing = Student::where('student_id', $studentId)->first();
+                if ($existing) {
+                    $existing->update([
+                        'name' => $name,
+                        'group_id' => $group->id,
+                        'zone_id' => $zoneId,
+                        'category' => $category,
+                        'class_level' => $classLevel ?: $existing->class_level,
+                        'contact' => $contact ?: $existing->contact,
+                    ]);
+                    $createdStudents[] = $existing;
+                } else {
+                    $student = Student::create([
+                        'name' => $name,
+                        'student_id' => $studentId,
+                        'group_id' => $group->id,
+                        'zone_id' => $zoneId,
+                        'category' => $category,
+                        'class_level' => $classLevel,
+                        'gender' => 'Male',
+                        'contact' => $contact,
+                        'qr_token' => Str::random(40),
+                    ]);
+                    $createdStudents[] = $student;
+                }
             }
 
             if (empty($createdStudents) && ! empty($failedRows)) {

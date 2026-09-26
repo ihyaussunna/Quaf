@@ -200,6 +200,42 @@ class SyncOfficialProgramsCommand extends Command
                 ['code' => 'Q9-244', 'name' => 'Capture the Flag', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'stage-arts'],
             ];
 
+            $csvPath = base_path('database/data/Programme_List_quaf26.csv');
+            if (file_exists($csvPath) && ($handle = fopen($csvPath, 'r')) !== false) {
+                fgetcsv($handle); // skip header
+                $csvData = [];
+                while (($row = fgetcsv($handle)) !== false) {
+                    if (empty($row[0]) || ! is_numeric($row[0])) {
+                        continue;
+                    }
+                    $rawCode = trim(preg_replace('/\s+/', '', (string) ($row[1] ?? '')));
+                    if (str_starts_with($rawCode, 'Q9') && ! str_contains($rawCode, '-')) {
+                        $rawCode = preg_replace('/^Q9(\d+)/', 'Q9-$1', $rawCode);
+                    }
+                    $csvData[$rawCode] = [
+                        'name' => trim((string) ($row[2] ?? '')),
+                        'type' => strtolower(trim((string) ($row[3] ?? ''))) === 'group' ? 'group' : 'individual',
+                        'is_stage' => strtolower(trim((string) ($row[4] ?? ''))) === 'stage',
+                        'zone' => trim((string) ($row[5] ?? 'A Zone')),
+                        'limit' => max(1, (int) trim((string) ($row[6] ?? '1'))),
+                    ];
+                }
+                fclose($handle);
+
+                // Overlay CSV details onto programsList
+                foreach ($programsList as &$item) {
+                    if (isset($csvData[$item['code']])) {
+                        $c = $csvData[$item['code']];
+                        $item['name'] = $c['name'];
+                        $item['type'] = $c['type'];
+                        $item['is_stage'] = $c['is_stage'];
+                        $item['zone'] = $c['zone'];
+                        $item['limit'] = $c['limit'];
+                    }
+                }
+                unset($item);
+            }
+
             $count = 0;
             foreach ($programsList as $p) {
                 $isGroup = ($p['type'] === 'group');

@@ -47,6 +47,10 @@
                   return this.pasteContent.trim().split(/\r\n|\r|\n/).filter(l => l.trim() !== '').length;
               },
               insertSample() {
+                  const sample = `QF3001\tIMRAN MAVINAKATT\tTQS\tA ZONE\nQF3002\tSYD SWABAH\tTQS\tA ZONE\nQF3003\tMIDLAJ MANGAD\tTQS\tA ZONE\nQF3004\tKABEER KUTTOTH\tTQS\tA ZONE\nQF3005\tMUBASHIR POONOOR\tTQS\tA ZONE`;
+                  this.pasteContent = sample;
+              },
+              insertAltSample() {
                   const sample = `Muhammed Bilal, LUMO, Class 4, 9847111111\nAhmed Shafeeq, PACTO, Class 3, 9847222222\nZaid Rayan, CONCO, Class 2, 9847333333\nUmar Swalih, UNIO, Class 1, 9847444444\nHassan Ali, YUGO, TQS, 9847555555`;
                   this.pasteContent = sample;
               }
@@ -129,12 +133,15 @@
                             Paste Student List (വിദ്യാർത്ഥികളുടെ പട്ടിക പേസ്റ്റ് ചെയ്യുക)
                         </label>
                         <p class="text-[11px] text-slate-400 mt-0.5 font-mono">
-                            Format: <span class="text-slate-700 font-bold">Name, Group, Class/Zone, Contact</span> (One student per line)
+                            Recommended Format: <span class="text-slate-900 font-bold">Chest No, Name, Class, Zone</span> (One student per line)
                         </p>
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" @click="insertSample()" class="text-[11px] font-mono text-[#be1e2d] hover:underline font-semibold">
-                            + Insert Sample Rows
+                            + Insert 4-Col Sample (Chest, Name, Class, Zone)
+                        </button>
+                        <button type="button" @click="insertAltSample()" class="text-[11px] font-mono text-slate-500 hover:text-slate-800 underline">
+                            5-Col Format
                         </button>
                         <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-mono font-bold">
                             Lines: <span x-text="lineCount" class="text-[#be1e2d]">0</span>
@@ -143,13 +150,13 @@
                 </div>
 
                 <textarea name="paste_text" x-model="pasteContent" rows="12"
-                          placeholder="Muhammed Faris, LUMO, Class 4, 9847000001
-Ahmed Bilal, PACTO, Class 3, 9847000002
-Zaid Ameen, CONCO, C Zone, 9847000003
-Umar Swalih, UNIO, Class 1, 9847000004
-Hassan Ali, YUGO, Mix Zone, 9847000005
+                          placeholder="QF3001	IMRAN MAVINAKATT	TQS	A ZONE
+QF3002	SYD SWABAH	TQS	A ZONE
+QF3003	MIDLAJ MANGAD	TQS	A ZONE
+QF3004	KABEER KUTTOTH	TQS	A ZONE
+QF3005	MUBASHIR POONOOR	TQS	A ZONE
 
-(Note: If Default Group is selected above, you only need to paste student names on each line!)"
+(Note: Direct copy-paste from Excel or Google Sheets supported! You can also paste: Name, Group, Class/Zone, Contact)"
                           class="w-full bg-slate-50 border border-slate-300 rounded-xl p-4 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors leading-relaxed"></textarea>
 
                 <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-900 text-xs space-y-1">
@@ -158,9 +165,10 @@ Hassan Ali, YUGO, Mix Zone, 9847000005
                         <span>ഉപയോഗ ക്രമം (Instructions):</span>
                     </p>
                     <ul class="list-disc list-inside text-[11px] text-amber-800 space-y-0.5 font-mono">
-                        <li>കോമ (,), പൈപ്പ് (|), അല്ലെങ്കിൽ ടാബ് (Tab) ഉപയോഗിച്ച് വിവരങ്ങൾ വേർതിരിക്കാം.</li>
-                        <li>മുകളിൽ ഡിഫോൾട്ട് ഗ്രൂപ്പ് സെലക്ട് ചെയ്താൽ ഓരോ വരിയിലും കുട്ടിയുടെ പേര് മാത്രം നൽകിയാലും മതിയാകും.</li>
-                        <li>ചെസ്റ്റ് നമ്പറുകൾ ഗ്രൂപ്പ് ക്രമത്തിൽ സിസ്റ്റം സ്വയം അലോക്കേറ്റ് ചെയ്യും (LUMO: 1001+, PACTO: 2001+, CONCO: 3001+, UNIO: 4001+, YUGO: 5001+).</li>
+                        <li>പ്രധാന ഫോർമാറ്റ്: <strong class="text-amber-950 font-bold">Chest No, Name, Class, Zone</strong> (Excel/Spreadsheet-ൽ നിന്ന് കോപ്പി ചെയ്ത് നേരിട്ട് ഇവിടെ പേസ്റ്റ് ചെയ്യാം).</li>
+                        <li>ടാബ് (Tab), കോമ (,), അല്ലെങ്കിൽ പൈപ്പ് (|) വഴി വേർതിരിക്കാം.</li>
+                        <li>മുകളിൽ ഡിഫോൾട്ട് ഗ്രൂപ്പ് സെലക്ട് ചെയ്യുകയോ, പട്ടികക്ക് മുകളിൽ ഗ്രൂപ്പ് പേര് നൽകുകയോ (ഉദാ: CONCO MAJDIC) ചെയ്യാം.</li>
+                        <li>ചെസ്റ്റ് നമ്പർ നൽകിയാൽ ആ ചെസ്റ്റ് നമ്പർ നേരിട്ട് അസൈൻ ചെയ്യപ്പെടും; നൽകിയില്ലെങ്കിൽ സിസ്റ്റം സ്വയം നമ്പർ അലോക്കേറ്റ് ചെയ്യും.</li>
                     </ul>
                 </div>
             </div>

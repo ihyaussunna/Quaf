@@ -320,7 +320,10 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 12. Calculate Initial Points & Rankings
+        // 12. Seed Official Conco Majdic Students
+        $this->call(ConcoMajdicStudentsSeeder::class);
+
+        // 13. Calculate Initial Points & Rankings
         app(PointCalculationService::class)->recalculateAllPoints();
     }
 }
