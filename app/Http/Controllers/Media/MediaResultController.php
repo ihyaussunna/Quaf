@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Media;
 
 use App\Http\Controllers\Controller;
+use App\Models\Certificate;
 use App\Models\FestivalSetting;
 use App\Models\PosterSetting;
 use App\Models\Result;
 use App\Models\ResultTemplate;
 use App\Services\AuditLogger;
+use App\Services\PointCalculationService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class MediaResultController extends Controller
@@ -173,6 +176,60 @@ class MediaResultController extends Controller
 
         return redirect()->route('media.results.index', ['tab' => 'published'])
             ->with('success', "പ്രോഗ്രാം '{$result->program->name}' പോസ്റ്റർ വിജയകരമായി പബ്ലിഷ് ചെയ്തു.");
+    }
+
+    /**
+     * Publish result publicly from Media Desk.
+     */
+    public function publishPublic(Result $result): RedirectResponse
+    {
+        $old = $result->toArray();
+        $result->update([
+            'status' => 'published',
+            'is_media_published' => true,
+            'media_published_at' => Carbon::now(),
+            'published_at' => $result->published_at ?? Carbon::now(),
+        ]);
+
+        $result->program->update(['status' => 'completed']);
+
+        // Issue certificates
+        $this->issueCertificates($result);
+
+        // Recalculate points
+        app(PointCalculationService::class)->recalculateAllPoints();
+
+        AuditLogger::log('media_publish_result', $result, $old, $result->toArray());
+
+        return back()->with('success', "പ്രോഗ്രാം '{$result->program->name}' ഫലം പബ്ലിക് ആയി പ്രസിദ്ധീകരിച്ചു.");
+    }
+
+    protected function issueCertificates(Result $result): void
+    {
+        $program = $result->program;
+
+        $placements = [
+            '1st Place' => $result->firstEntry,
+            '2nd Place' => $result->secondEntry,
+            '3rd Place' => $result->thirdEntry,
+        ];
+
+        foreach ($placements as $pos => $entry) {
+            if ($entry && $entry->student_id) {
+                $certNum = 'QUAF09-'.strtoupper(Str::slug($program->code)).'-'.$entry->chest_number;
+                Certificate::firstOrCreate(
+                    ['certificate_number' => $certNum],
+                    [
+                        'entry_id' => $entry->id,
+                        'student_id' => $entry->student_id,
+                        'program_id' => $program->id,
+                        'position' => $pos,
+                        'issued_at' => Carbon::now(),
+                        'qr_verification_url' => route('verify.certificate', $certNum),
+                    ]
+                );
+            }
+        }
     }
 
     /**

@@ -14,12 +14,25 @@ class PanelPasswordsSeeder extends Seeder
         $passwords = [
             'admin@quaf.fest' => 'CentralAdmin#2026@Quaf!',
             'samithi@quaf.fest' => 'Samithi#2026@QuafFest!',
+            'announcer@quaf.fest' => 'Announcer#2026@QuafLive!',
             'media@quaf.fest' => 'Media#2026@QuafLive!',
             'greenroom@quaf.fest' => 'GreenRoom#2026@Quaf!',
             'judge1@quaf.fest' => 'Judge1#2026@Quaf!',
             'judge2@quaf.fest' => 'Judge2#2026@Quaf!',
             'student@quaf.fest' => 'Student#2026@Quaf!',
         ];
+
+        User::firstOrCreate(
+            ['email' => 'announcer@quaf.fest'],
+            [
+                'name' => 'QUAF Announcer Desk (അനൗൺസർ ഡെസ്ക്)',
+                'role' => 'announcer',
+                'phone' => '+91 98470 00015',
+                'is_active' => true,
+                'plain_password' => 'Announcer#2026@QuafLive!',
+                'password' => Hash::make('Announcer#2026@QuafLive!'),
+            ]
+        );
 
         foreach ($passwords as $email => $pass) {
             $user = User::where('email', $email)->first();

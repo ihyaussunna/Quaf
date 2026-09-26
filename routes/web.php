@@ -208,6 +208,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('results/specified', [AdminResultController::class, 'specified'])->name('results.specified');
     Route::get('results/all', [AdminResultController::class, 'allResults'])->name('results.all');
     Route::post('results/{result}/publish', [AdminResultController::class, 'publish'])->name('results.publish');
+    Route::post('results/{result}/send-to-announcer', [AdminResultController::class, 'sendToAnnouncer'])->name('results.send-to-announcer');
     Route::resource('results', AdminResultController::class);
 
     // Points & Rankings
@@ -406,6 +407,7 @@ Route::prefix('media')->name('media.')->middleware(['auth', 'role:media_team,med
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');
     Route::get('/results/{result}/studio', [MediaResultController::class, 'studio'])->name('results.studio');
     Route::post('/results/{result}/save-poster', [MediaResultController::class, 'savePoster'])->name('results.save-poster');
+    Route::post('/results/{result}/publish', [MediaResultController::class, 'publishPublic'])->name('results.publish');
     Route::post('/results/save-default-settings', [MediaResultController::class, 'saveDefaultSettings'])->name('results.save-default-settings');
     Route::get('/results/templates', [MediaResultController::class, 'templatesIndex'])->name('results.templates');
     Route::post('/results/templates', [MediaResultController::class, 'templateStore'])->name('results.templates.store');

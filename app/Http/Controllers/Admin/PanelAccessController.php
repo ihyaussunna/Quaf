@@ -43,6 +43,8 @@ class PanelAccessController extends Controller
                 $query->where('role', 'judge');
             } elseif ($panel === 'media') {
                 $query->whereIn('role', ['media_team', 'media_manager']);
+            } elseif ($panel === 'announcer') {
+                $query->where('role', 'announcer');
             } elseif ($panel === 'greenroom') {
                 $query->where('role', 'green_room_coordinator');
             } elseif ($panel === 'student') {
@@ -64,11 +66,12 @@ class PanelAccessController extends Controller
                 WHEN role = 'super_admin' THEN 1
                 WHEN role = 'admin' THEN 2
                 WHEN role IN ('program_committee', 'program_coordinator') THEN 3
-                WHEN role IN ('media_team', 'media_manager') THEN 4
-                WHEN role = 'group_leader' THEN 5
-                WHEN role = 'judge' THEN 6
-                WHEN role = 'green_room_coordinator' THEN 7
-                ELSE 8
+                WHEN role = 'announcer' THEN 4
+                WHEN role IN ('media_team', 'media_manager') THEN 5
+                WHEN role = 'group_leader' THEN 6
+                WHEN role = 'judge' THEN 7
+                WHEN role = 'green_room_coordinator' THEN 8
+                ELSE 9
             END ASC
         ")->orderBy('id')->get();
 
@@ -79,6 +82,7 @@ class PanelAccessController extends Controller
             'leaders' => User::where('role', 'group_leader')->count(),
             'judges' => User::where('role', 'judge')->count(),
             'media' => User::whereIn('role', ['media_team', 'media_manager'])->count(),
+            'announcer' => User::where('role', 'announcer')->count(),
         ];
 
         return view('admin.panel-access.index', compact('users', 'stats'));

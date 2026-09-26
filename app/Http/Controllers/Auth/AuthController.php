@@ -77,6 +77,10 @@ class AuthController extends Controller
                 $user = User::whereIn('role', ['media_team', 'media_manager'])->first();
             }
 
+            if (! $user && in_array(strtolower(trim($login)), ['announcer', 'announcement', 'desk', 'mike'])) {
+                $user = User::where('role', 'announcer')->first();
+            }
+
             if (! $user) {
                 $user = User::where('name', 'like', "%{$login}%")->first();
             }
@@ -118,6 +122,10 @@ class AuthController extends Controller
 
     protected function redirectBasedOnRole($user): RedirectResponse
     {
+        if ($user->role === 'announcer') {
+            return redirect()->intended(route('announcer.index'));
+        }
+
         if ($user->role === 'program_committee' || $user->role === 'program_coordinator') {
             return redirect()->intended(route('program-committee.dashboard'));
         }

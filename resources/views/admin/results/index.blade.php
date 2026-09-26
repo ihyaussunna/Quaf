@@ -149,6 +149,18 @@
                                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Published
                                             </span>
+                                        @elseif($res->status === 'announced')
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Announced (Stage)
+                                            </span>
+                                        @elseif($res->status === 'send' || $res->status === 'delivered')
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-pulse">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Sent to Announcer
+                                            </span>
+                                        @elseif($res->status === 'verified')
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Verified
+                                            </span>
                                         @elseif($res->status === 'submitted')
                                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Submitted
@@ -158,12 +170,25 @@
                                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Under Review
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 uppercase">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> {{ $res->status }}
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ $res->status }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-5 py-3.5 text-right space-x-1.5">
+                                    <td class="px-5 py-3.5 text-right space-x-1.5 whitespace-nowrap">
+                                        @if(!in_array($res->status, ['send', 'delivered', 'announced', 'published']))
+                                            <form method="POST" action="{{ route('admin.results.send-to-announcer', $res) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-900 font-bold text-[11px] hover:bg-amber-400 transition-colors shadow-2xs" title="Send to Stage Announcer Desk">
+                                                    Send to Announcer
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($res->status === 'announced' || $res->status === 'published')
+                                            <a href="{{ route('media.results.studio', $res) }}" class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-semibold text-[11px] hover:bg-purple-700 transition-colors shadow-2xs">
+                                                Media Poster
+                                            </a>
+                                        @endif
                                         @if($res->status !== 'published')
                                             <form method="POST" action="{{ route('admin.results.publish', $res) }}" class="inline">
                                                 @csrf

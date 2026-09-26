@@ -163,6 +163,16 @@ class ResultController extends Controller
         return back()->with('success', "Result for '{$result->program->name}' is now PUBLISHED and points have been calculated.");
     }
 
+    public function sendToAnnouncer(Result $result): RedirectResponse
+    {
+        $old = $result->status;
+        $result->update(['status' => 'send']);
+
+        AuditLogger::log('send_result_to_announcer', $result, ['status' => $old], ['status' => 'send']);
+
+        return back()->with('success', "Result for '{$result->program->name}' has been sent to the Announcer Desk.");
+    }
+
     protected function issueCertificates(Result $result): void
     {
         $program = $result->program;

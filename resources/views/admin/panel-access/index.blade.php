@@ -108,6 +108,10 @@
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'leader' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                 Team Leaders (5 Groups)
             </a>
+            <a href="{{ route('admin.panel-access.index', ['panel' => 'announcer']) }}" 
+               class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'announcer' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                Announcer Desk
+            </a>
             <a href="{{ route('admin.panel-access.index', ['panel' => 'media']) }}" 
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'media' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                 Media Wing
@@ -162,6 +166,7 @@
                             $roleBadgeColor = match($user->role) {
                                 'super_admin', 'admin' => 'bg-red-50 text-red-700 border-red-200',
                                 'program_committee', 'program_coordinator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                'announcer' => 'bg-amber-50 text-amber-900 border-amber-300',
                                 'media_team', 'media_manager' => 'bg-purple-50 text-purple-700 border-purple-200',
                                 'group_leader' => 'bg-amber-50 text-amber-800 border-amber-200',
                                 'judge' => 'bg-blue-50 text-blue-700 border-blue-200',
@@ -173,6 +178,7 @@
                                 'super_admin' => 'Central Admin',
                                 'admin' => 'Admin Panel',
                                 'program_committee', 'program_coordinator' => 'Program Samithi',
+                                'announcer' => 'Announcer Desk',
                                 'media_team', 'media_manager' => 'Media Wing',
                                 'group_leader' => 'Team Leader (' . ($user->ledGroup->name ?? 'House') . ')',
                                 'judge' => 'Judges Panel',
@@ -183,6 +189,7 @@
 
                             $quickLoginAlias = match($user->role) {
                                 'program_committee', 'program_coordinator' => 'samithi',
+                                'announcer' => 'announcer',
                                 'media_team', 'media_manager' => 'media',
                                 'group_leader' => strtolower($user->ledGroup->code ?? 'leader'),
                                 default => null
