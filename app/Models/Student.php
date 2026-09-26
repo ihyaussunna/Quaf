@@ -37,6 +37,11 @@ class Student extends Model
         'points_cache',
     ];
 
+    protected $appends = [
+        'zone_name',
+        'chest_number',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -85,6 +90,11 @@ class Student extends Model
     public function getZoneNameAttribute(): string
     {
         return $this->zone?->name ?? $this->category ?? 'A Zone';
+    }
+
+    public function getChestNumberAttribute(): string
+    {
+        return (string) ($this->attributes['chest_number'] ?? $this->student_id ?? '');
     }
 
     /**

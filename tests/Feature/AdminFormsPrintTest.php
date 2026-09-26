@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AdminFormsPrintTest extends TestCase
@@ -127,5 +130,36 @@ class AdminFormsPrintTest extends TestCase
         $response->assertSee('Evaluation Sheet');
         $response->assertSee('English Poem Writing');
         $response->assertSee('Out of 100');
+    }
+
+    public function test_chest_slips_renders_successfully(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $group = Group::create([
+            'name' => 'Lumo Fikric',
+            'code' => 'LUMO',
+            'slug' => 'lumo-fikric',
+            'color_hex' => '#56286b',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'QF1001',
+            'name' => 'Faris Test',
+            'group_id' => $group->id,
+            'admission_number' => 'ADM001',
+            'class_level' => 'D4',
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.idcards.chest-slips'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Contestant Chest Number Slips');
+        $response->assertSee('QF1001');
+        $response->assertSee('Faris Test');
     }
 }

@@ -59,7 +59,7 @@ class IdCardController extends Controller
         $students = Student::with(['group', 'entries.program'])
             ->when($groupId, fn ($q) => $q->where('group_id', $groupId))
             ->when($category, fn ($q) => $q->where('category', $category))
-            ->orderBy('chest_number')
+            ->orderBy('student_id')
             ->get();
 
         $groups = Group::all();
