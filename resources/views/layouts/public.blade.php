@@ -8,10 +8,10 @@
     <title>{{ $title ?? 'QUAF' }} | Ihyaussunna Students Union</title>
     <meta name="description" content="Official Festival Platform organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.">
 
-    <!-- Google Fonts (Multilingual: Anek Malayalam, Sora, Manjari, Gayathri, Amiri, Noto Nastaliq Urdu) -->
+    <!-- Google Fonts (Multilingual: Anek Malayalam, JetBrains Mono, Sora, Manjari, Gayathri, Amiri, Noto Nastaliq Urdu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Anek+Malayalam:wght@300;400;500;600;700;800&family=Gayathri:wght@400;700&family=Manjari:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Anek+Malayalam:wght@300;400;500;600;700;800&family=Gayathri:wght@400;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Manjari:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
@@ -71,11 +71,21 @@
             font-display: swap;
         }
 
-        /* Public Portal Typography: Sora for all Headings, Body & UI; Rockwell for Numbers/IDs; Anek Malayalam for Malayalam */
+        /* Public Portal Typography: Titles & UI -> Sora, Headings/Display -> Rockwell, Numbers & Chest Numbers -> JetBrains Mono, Malayalam -> Anek Malayalam */
         body,
         h1, h2, h3, h4, h5, h6,
         .font-sora {
-            font-family: 'Sora', 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
+            font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
+        }
+
+        .font-rockwell {
+            font-family: 'Rockwell', 'Rockwell Std', serif !important;
+        }
+
+        .font-mono,
+        [data-mono],
+        .font-jetbrains {
+            font-family: 'JetBrains Mono', monospace !important;
         }
 
         .font-anek,
@@ -83,13 +93,7 @@
         .malayalam-text,
         :lang(ml),
         [data-script="malayalam"] {
-            font-family: 'Anek Malayalam', 'Sora', 'Malayalam Sangam MN', sans-serif !important;
-        }
-
-        .font-rockwell,
-        .font-mono,
-        [data-mono] {
-            font-family: 'Rockwell', 'Rockwell Std', 'Anek Malayalam', 'Sora', sans-serif !important;
+            font-family: 'Anek Malayalam', 'Malayalam Sangam MN', 'Manjari', sans-serif !important;
         }
     </style>
 </head>

@@ -195,13 +195,14 @@
 }
 
 @theme {
-    --font-sora: 'Sora', 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-rockwell: 'Rockwell', 'Rockwell Std', 'Anek Malayalam', 'Sora', serif;
-    --font-mono: 'Rockwell', 'Rockwell Std', 'Anek Malayalam', 'Sora', sans-serif;
-    --font-anek: 'Anek Malayalam', 'Sora', sans-serif;
+    --font-sora: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    --font-rockwell: 'Rockwell', 'Rockwell Std', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-jetbrains: 'JetBrains Mono', monospace;
+    --font-anek: 'Anek Malayalam', 'Malayalam Sangam MN', 'Manjari', sans-serif;
     --font-ml-mn: 'Anek Malayalam', 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
     --font-ml-sangam: 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-ml: 'Anek Malayalam', 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    --font-ml: 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
     --font-ar: 'Amiri', 'Noto Naskh Arabic', serif;
     --font-ur: 'Noto Nastaliq Urdu', serif;
 
@@ -237,28 +238,30 @@
     --color-gold-dark: #f3bd2e;
 }
 
-/* Base typography: Titles and UI globally enforce Sora with Anek Malayalam fallback */
+/* Base typography: Titles and UI globally enforce Sora */
 body,
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Sora', 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
 }
 
 .font-sora,
 .font-sans,
 .font-serif {
-    font-family: 'Sora', 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
 }
 
 .font-rockwell {
-    font-family: 'Rockwell', 'Rockwell Std', 'Anek Malayalam', 'Sora', serif !important;
+    font-family: 'Rockwell', 'Rockwell Std', serif !important;
 }
 
+/* Monospace font for numbers, chest numbers, codes, stats */
 .font-mono,
-[data-mono] {
-    font-family: 'Rockwell', 'Rockwell Std', 'Anek Malayalam', 'Sora', sans-serif !important;
+[data-mono],
+.font-jetbrains {
+    font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* Dedicated Malayalam Typography (Anek Malayalam) */
+/* Dedicated Malayalam Typography (Anek Malayalam) - ONLY for Malayalam elements */
 .font-anek,
 .font-ml,
 .font-ml-mn,
@@ -267,7 +270,7 @@ h1, h2, h3, h4, h5, h6 {
 .malayalam-text,
 .font-malayalam,
 [data-script="malayalam"] {
-    font-family: 'Anek Malayalam', 'Sora', 'Malayalam Sangam MN', 'Manjari', sans-serif !important;
+    font-family: 'Anek Malayalam', 'Malayalam Sangam MN', 'Manjari', sans-serif !important;
     letter-spacing: 0 !important;
 }
 

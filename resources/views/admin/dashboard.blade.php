@@ -60,7 +60,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
             </div>
             <div>
-                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-rockwell">{{ number_format($stats['participants']) }}+</div>
+                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['participants']) }}+</div>
                 <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Students</div>
             </div>
         </a>
@@ -71,7 +71,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <div>
-                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-rockwell">{{ number_format($stats['competitions']) }}+</div>
+                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['competitions']) }}+</div>
                 <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Programs</div>
             </div>
         </a>
@@ -82,7 +82,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
             <div>
-                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-rockwell">{{ number_format($stats['teams']) }}+</div>
+                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['teams']) }}+</div>
                 <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Teams</div>
             </div>
         </a>
@@ -93,7 +93,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
             </div>
             <div>
-                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-rockwell">{{ number_format($stats['stages']) }}+</div>
+                <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['stages']) }}+</div>
                 <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Venues</div>
             </div>
         </a>
@@ -190,9 +190,9 @@
 
                 <div class="text-center">
                     <div class="text-xs font-semibold text-slate-700 font-sora">
-                        Declared <span class="font-rockwell font-bold">{{ $declaredCount }}</span> of <span class="font-rockwell font-bold">{{ $totalCompetitions }}</span> Results
+                        Declared <span class="font-mono font-bold">{{ $declaredCount }}</span> of <span class="font-mono font-bold">{{ $totalCompetitions }}</span> Results
                     </div>
-                    <div class="text-[11px] font-bold text-[#be1e2d] mt-0.5 font-rockwell">
+                    <div class="text-[11px] font-bold text-[#be1e2d] mt-0.5 font-mono">
                         Progress {{ $progressPct }}%
                     </div>
                 </div>
@@ -212,14 +212,14 @@
                     @forelse($leaderboard->take(5) as $rank => $group)
                         <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-6 h-6 rounded-lg font-bold text-xs flex items-center justify-center font-rockwell
+                                <span class="w-6 h-6 rounded-lg font-bold text-xs flex items-center justify-center font-mono
                                     {{ $rank === 0 ? 'bg-[#f3bd2e]/20 text-[#be1e2d]' : ($rank === 1 ? 'bg-slate-200 text-slate-700' : ($rank === 2 ? 'bg-[#005c94]/10 text-[#005c94]' : 'bg-slate-100 text-slate-500')) }}">
                                     {{ $rank + 1 }}
                                 </span>
                                 <span class="w-3 h-3 rounded-full shrink-0 border border-black/10 shadow-2xs" style="background-color: {{ $group->color_hex }};"></span>
                                 <span class="font-bold text-xs text-slate-800 font-sora">{{ $group->name }}</span>
                             </div>
-                            <span class="font-bold text-sm font-rockwell px-2.5 py-0.5 rounded-lg border shadow-2xs" style="background-color: {{ $group->color_hex }}15; color: {{ $group->color_hex }}; border-color: {{ $group->color_hex }}35;">
+                            <span class="font-bold text-sm font-mono px-2.5 py-0.5 rounded-lg border shadow-2xs" style="background-color: {{ $group->color_hex }}15; color: {{ $group->color_hex }}; border-color: {{ $group->color_hex }}35;">
                                 {{ number_format($group->points_cache) }}
                             </span>
                         </div>
@@ -244,7 +244,7 @@
                 @forelse($stages as $stage)
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="font-rockwell text-xs font-bold text-slate-700">{{ $stage->code }}</span>
+                            <span class="font-mono text-xs font-bold text-slate-700">{{ $stage->code }}</span>
                             <span class="px-2 py-0.5 rounded text-[10px] font-sora font-bold {{ $stage->status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-200 text-slate-600' }}">
                                 {{ strtoupper($stage->status) }}
                             </span>
