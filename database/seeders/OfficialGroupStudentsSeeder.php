@@ -85,7 +85,19 @@ class OfficialGroupStudentsSeeder extends Seeder
 
         $totalSeeded = 0;
 
-        DB::transaction(function () use ($groupsConfig, $zoneMap, $defaultZone, &$totalSeeded) {
+        $cleanString = function (?string $val): string {
+            if ($val === null || $val === '') {
+                return '';
+            }
+            $str = str_replace(["\xC2\xA0", "\xA0"], ' ', $val);
+            $str = mb_convert_encoding($str, 'UTF-8', 'UTF-8');
+            $str = preg_replace('/[^\x20-\x7E]/', '', $str);
+            $str = preg_replace('/\s+/', ' ', $str);
+
+            return trim($str);
+        };
+
+        DB::transaction(function () use ($groupsConfig, $zoneMap, $defaultZone, &$totalSeeded, $cleanString) {
             foreach ($groupsConfig as $code => $config) {
                 $group = Group::where('code', $code)
                     ->orWhere('slug', $config['slug'])
@@ -132,9 +144,9 @@ class OfficialGroupStudentsSeeder extends Seeder
                         continue;
                     }
 
-                    $name = trim((string) ($row[1] ?? ''));
-                    $class = trim((string) ($row[2] ?? ''));
-                    $zoneRaw = strtoupper(trim((string) ($row[3] ?? '')));
+                    $name = $cleanString($row[1] ?? '');
+                    $class = $cleanString($row[2] ?? '');
+                    $zoneRaw = strtoupper($cleanString($row[3] ?? ''));
 
                     $zone = $zoneMap[$zoneRaw] ?? $defaultZone;
                     $category = $zone ? $zone->name : 'A Zone';
