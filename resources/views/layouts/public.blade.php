@@ -71,24 +71,22 @@
             font-display: swap;
         }
 
-        /* Typography Hierarchy: Headings -> Rockwell, Body/UI -> Sora, IDs/Numbers -> JetBrains Mono */
-        h1:not(.font-mono),
-        h2:not(.font-mono),
-        h3:not(.font-mono),
-        .font-rockwell,
-        .font-serif {
-            font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
-        }
-
+        /* Public Portal Typography: Sora for all Headings, Body & UI; JetBrains Mono for Numbers/IDs */
         body,
+        h1, h2, h3, h4, h5, h6,
         .font-sans,
-        .font-sora {
-            font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif !important;
+        .font-sora,
+        .font-serif {
+            font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
         }
 
         .font-mono,
         [data-mono] {
             font-family: 'JetBrains Mono', 'Malayalam Sangam MN', monospace !important;
+        }
+
+        .font-rockwell {
+            font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
         }
     </style>
 </head>

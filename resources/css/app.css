@@ -205,7 +205,7 @@
 }
 
 @theme {
-    --font-sans: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
     --font-serif: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif;
     --font-mono: 'JetBrains Mono', 'Malayalam Sangam MN', monospace;
     --font-rockwell: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif;
@@ -248,7 +248,7 @@
 
 .font-sora,
 .font-sans {
-    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif !important;
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
 }
 
 .font-mono {

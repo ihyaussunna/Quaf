@@ -5,26 +5,26 @@
     <!-- Header -->
     <div class="mb-6 sm:mb-10 text-center sm:text-left">
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">OFFICIAL CONCLAVE VERDICTS</span>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Results</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Results</h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl font-sora">
             Explore verified verdicts across all programs. Filter by zone, group, or stage to discover champions and point tallies.
         </p>
     </div>
 
     <!-- Filters Bar (Light Theme) -->
-    <form method="GET" action="{{ route('results.index') }}" class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 mb-8 sm:mb-12 shadow-xs">
+    <form method="GET" action="{{ route('results.index') }}" class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 mb-8 sm:mb-12 shadow-xs font-sora">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             <!-- Search -->
             <div>
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Search Program</label>
                 <input type="text" name="search" value="{{ $search }}" placeholder="e.g. Arabic Speech..."
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white">
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sora">
             </div>
 
             <!-- Zone Filter -->
             <div>
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Zone</label>
-                <select name="zone" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white">
+                <select name="zone" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sora">
                     <option value="">All Zones</option>
                     @foreach($zones as $zKey => $zVal)
                         @php
@@ -39,7 +39,7 @@
             <!-- Group Filter -->
             <div>
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Group</label>
-                <select name="group" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white">
+                <select name="group" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sora">
                     <option value="">All Groups</option>
                     @foreach($groups as $grp)
                         <option value="{{ $grp->id }}" {{ $groupId == $grp->id ? 'selected' : '' }}>{{ $grp->name }} ({{ $grp->code }})</option>
@@ -50,7 +50,7 @@
             <!-- Stage Filter -->
             <div>
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Stage</label>
-                <select name="stage" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white">
+                <select name="stage" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sora">
                     <option value="">All Stages</option>
                     @foreach($stages as $stg)
                         <option value="{{ $stg->id }}" {{ $stageId == $stg->id ? 'selected' : '' }}>{{ $stg->name }}</option>
@@ -60,7 +60,7 @@
 
             <!-- Actions -->
             <div class="flex items-end gap-2">
-                <button type="submit" class="flex-1 bg-[#f3bd2e] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl hover:brightness-105 transition-all shadow-xs">
+                <button type="submit" class="flex-1 bg-[#f3bd2e] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl hover:brightness-105 transition-all shadow-xs font-sora">
                     Filter
                 </button>
                 <a href="{{ route('results.index') }}" class="px-4 py-3 bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl text-xs font-mono">
@@ -80,22 +80,22 @@
                         <span class="truncate max-w-[160px]">Stage: {{ $result->program->stage?->name ?? 'Main Arena' }}</span>
                     </div>
 
-                    <h3 class="text-xl sm:text-2xl font-serif font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors mb-1 leading-snug">
+                    <h3 class="text-xl sm:text-2xl font-sora font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors mb-1 leading-snug">
                         {{ $result->program->name }}
                     </h3>
-                    <span class="text-xs text-slate-500 block mb-4 sm:mb-6 font-medium">{{ $result->program->eligibility ?? 'A Zone' }} • {{ ucfirst($result->program->type) }}</span>
+                    <span class="text-xs text-slate-500 block mb-4 sm:mb-6 font-medium font-sora">{{ $result->program->eligibility ?? 'A Zone' }} • {{ ucfirst($result->program->type) }}</span>
 
                     <!-- Placements Cards -->
                     <div class="space-y-2.5 sm:space-y-3">
                         <!-- 1st -->
                         <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-amber-50/80 border border-amber-300/80 gap-2">
                             <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-serif shadow-xs shrink-0">1</span>
+                                <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-sora shadow-xs shrink-0">1</span>
                                 <div class="min-w-0 flex-1">
-                                    <div class="font-bold text-xs sm:text-sm text-slate-900 truncate">
+                                    <div class="font-bold text-xs sm:text-sm text-slate-900 truncate font-sora">
                                         {{ $result->firstEntry?->student?->name ?? 'Team ' . $result->firstEntry?->group?->name }}
                                     </div>
-                                    <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest #{{ $result->firstEntry?->chest_number }}</span>
+                                    <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest {{ $result->firstEntry?->chest_number }}</span>
                                 </div>
                             </div>
                             <span class="text-[11px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white text-[#f3bd2e] border border-amber-200 shrink-0">
@@ -107,12 +107,12 @@
                         @if($result->secondEntry)
                             <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 gap-2">
                                 <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-400 text-white font-black text-xs flex items-center justify-center font-serif shrink-0">2</span>
+                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-400 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">2</span>
                                     <div class="min-w-0 flex-1">
-                                        <div class="font-medium text-xs sm:text-sm text-slate-800 truncate">
+                                        <div class="font-medium text-xs sm:text-sm text-slate-800 truncate font-sora">
                                             {{ $result->secondEntry?->student?->name ?? 'Team ' . $result->secondEntry?->group?->name }}
                                         </div>
-                                        <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest #{{ $result->secondEntry?->chest_number }}</span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest {{ $result->secondEntry?->chest_number }}</span>
                                     </div>
                                 </div>
                                 <span class="text-[11px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white text-slate-700 border border-slate-200 shrink-0">
@@ -125,12 +125,12 @@
                         @if($result->thirdEntry)
                             <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-amber-50/40 border border-amber-200/60 gap-2">
                                 <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center font-serif shrink-0">3</span>
+                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">3</span>
                                     <div class="min-w-0 flex-1">
-                                        <div class="font-medium text-xs sm:text-sm text-slate-800 truncate">
+                                        <div class="font-medium text-xs sm:text-sm text-slate-800 truncate font-sora">
                                             {{ $result->thirdEntry?->student?->name ?? 'Team ' . $result->thirdEntry?->group?->name }}
                                         </div>
-                                        <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest #{{ $result->thirdEntry?->chest_number }}</span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest {{ $result->thirdEntry?->chest_number }}</span>
                                     </div>
                                 </div>
                                 <span class="text-[11px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white text-slate-700 border border-slate-200 shrink-0">
