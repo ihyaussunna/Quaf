@@ -3,140 +3,121 @@
 
 ---
 
-## 1. Public Festival Portal (`/`)
-
-### 1.1 Brand Identity & Hero Section
-- **Dynamic Title Lockup**: Displays the official QUAF Season 09 logo with side-by-side festival metadata, institution tag, and quick-navigation CTA buttons.
-- **Urgent Announcement Ticker**: Top sticky alert bar showing live emergency broadcasts from the festival control room.
-
-### 1.2 Academic Houses Standings (`#groups`)
-- Real-time leaderboard cards for all competing academic houses.
-- Displays House Code, Rank badge, House Name, Captain/Leader details, and live points tally.
-- Clean presentation without avatar boxes or placeholder graphics.
-
-### 1.3 Festival Zones Showcase (`#zones`)
-- Visual display of the 4 official academic zones:
-  - **A Zone** (റാബിഅ, തഖസ്സുസ് — TQS, S4)
-  - **B Zone** (സാലിസ — S3)
-  - **C Zone** (ഊല, സാനി — S1, S2)
-  - **Mix Zone** (Open Category)
-- Quick links to filter official results by zone.
-
-### 1.4 Active Stages & Live Venue Tracker (`#stages`)
-- Real-time indicator for each stage venue with color-coded status pills:
-  - `LIVE NOW` (Emerald green pulse)
-  - `BREAK` (Amber intermission)
-  - `CLOSED` (Slate grey)
-- Displays currently performing program and the next scheduled event.
-
-### 1.5 Verified Verdicts & Podium Placements (`#results`)
-- Instant card rendering of published competition verdicts.
-- Gold (1st), Silver (2nd), and Bronze (3rd) medal placements with contestant names, chest numbers, and house codes.
-- Direct links to view complete signed score sheets.
-
-### 1.6 Festival Journal & Media Dispatches (`#news`, `#gallery`, `#videos`)
-- Editorial articles and announcements with category filtering.
-- High-resolution photo gallery with zoom modals.
-- Video stream integration for live stage broadcasts.
-
-### 1.7 Cryptographic Certificate Verification (`/verify-certificate/{code}`)
-- Public verification portal where any scanned QR code confirms student authenticity, program details, placement, and date of issue.
+## 1. Feature Status Summary
+- **Implemented**: Fully operational in current codebase and production database.
+- **In Progress**: Active work in progress or partial automation.
+- **Planned**: Scheduled for subsequent festival conclave iterations.
+- **Deprecated**: Removed or superseded by updated architecture.
 
 ---
 
-## 2. Central Administration Panel (`/admin`)
+## 2. Implemented Features
 
-### 2.1 Operational Command Dashboard
-- 4 Primary stat cards: Total Students, Competitions, Teams, and Active Venues.
-- Multi-line performance chart tracking house points progression over time.
-- Real-time feed of recent announcements and audit logs.
+### 2.1 Public Festival Portal (`/`)
+- **Brand Identity & Navigation**: Official QUAF Season 09 logo lockup, institution branding, and responsive header navigation.
+- **Emergency Broadcast Ticker**: Sticky top alert bar broadcasting live announcements dispatched from the festival control room.
+- **Real-time Group Standings (`#groups`)**: Live scoreboard cards displaying rank, official group colors, manager details, and aggregate points tally.
+- **Festival Zones Showcase (`#zones`)**: Visual cards for the 4 official academic zones (A Zone, B Zone, C Zone, Mix Zone) with direct result filter links.
+- **Live Stage Monitoring (`#stages`)**: Real-time venue status indicators (`LIVE NOW`, `BREAK`, `CLOSED`) displaying current performing program and next scheduled event.
+- **Verified Results Archive (`/results`)**: Filterable competition verdicts with gold, silver, and bronze placement cards, student chest numbers, and signed judge marks.
+- **Cryptographic Verification**:
+  - Certificate verification (`/verify/certificate/{certificateNumber}`): Verifies student credentials, position, grade, and date of issue.
+  - Student identity verification (`/verify/student/{qrToken}`): QR scanner verification for competitor badges.
+- **Festival News & Media Hub**: Editorial articles with category filters (`/news`), photo gallery (`/gallery`), and video live streams (`/videos`).
 
-### 2.2 Academic Houses (Teams) Module
-- Full CRUD for competing houses.
-- Configuration of house name, unique code, official brand color hex, and manager contact.
-- Automated points cache monitoring.
+### 2.2 Central Administration Console (`/admin`)
+- **Executive Operations Dashboard**:
+  - 4 Primary stat cards: Students (1,168+), Programs (144+), Teams (5), and Venues (4).
+  - Dynamic multi-line performance chart tracking real-time group points progression as results are declared.
+  - 1-Click "Sync Official Data" button to automatically seed and sync all 144 official programs and 1,168 students from CSV sources.
+  - Live stage status monitor and quick navigation shortcuts.
+- **Dedicated Zone Management Dashboard (`/admin/zones`)**: Dedicated zone oversight with statistics, stage vs. off-stage breakdown, program matrix, and student rosters.
+- **Academic Groups Module (`/admin/groups`)**: Full management of the 5 official groups (Pacto, Yugo, Conco, Lumo, Unio) with leader assignments, official color hex codes, and standings caches.
+- **Student Competitor Master (`/admin/students`)**:
+  - Directory search by Chest Number, Name, Class, or Group.
+  - Add Student form with automatic sequential chest number generator.
+  - **Bulk Student Registration (`/admin/students/bulk`)**: Upload 4-column CSV / Excel rosters with downloadable template.
+  - Student-wise enrolled events inspector (`/admin/students-wise`).
+- **Program & Competition Management (`/admin/programs`)**:
+  - Full catalog of 144 official programs categorized by Zone and discipline.
+  - Configuration of eligibility rules, participant limits, duration, and scoring criteria.
+  - Filtered stage dropdowns: Only stage programs (`is_stage = true`) appear in Current / Next Program selectors.
+  - Program-wise competitor roster inspector (`/admin/programs-wise`).
+- **Code-Letter Anonymization Matrix (`/admin/code-letters`)**: One-click random code letter generator (`A`, `B`, `C`...) for checked-in competitors with manual override.
+- **Printable Stage Operations Forms (`/admin/forms`)**:
+  - Stage Call Lists (`/admin/forms/call-list`) with arrival check-boxes.
+  - Judge Evaluation Sheets (`/admin/forms/evaluation`) with criteria breakdown.
+  - Competitor Chest Slips (`/admin/idcards/chest-slips`).
+- **Marks & Tabulation Suite (`/admin/mark-entry`)**:
+  - Tabulated marks viewer (`/admin/mark-entry/view-marks`).
+  - Administrative marks entry override (`/admin/mark-entry/handler`).
+  - Multi-judge variance checker (`/admin/mark-entry/check`).
+- **Results Declaration & Publishing Engine (`/admin/results`)**:
+  - Staged publication workflow: `Declare Result` -> `Review Podium` -> `Publish Result`.
+  - **Dense Ranking with Ties**: Equal point distribution for tied scores without skipping subsequent ranks.
+  - **Workflow Dispatching**: One-click dispatch of declared results to the Announcer Desk (`send-to-announcer`) and Media Studio.
+  - Undeclare capability (`DELETE /admin/results/{result}/undeclare`) with transactional points rollback.
+- **Achievements & Leaderboards (`/admin/achievements`)**: Overall Team Score, Zone Scores, Stage Scores, and Championship Top Scorers (Kalaprathibha, Kalathilakam, Zone Toppers).
+- **Settings Drawer (`/admin/settings`)**: Sliding drawer for point weights, registration cutoff countdowns, and broadcast messages.
 
-### 2.3 Dedicated Zone Management Dashboard (`/admin/zones`)
-- Dedicated administrative overview of the 4 official zones.
-- Real-time statistics: Total Programs, Stage vs. Off-stage breakdown, Enrolled Students, Total Points.
-- Interactive tabbed interface:
-  - **Programs Tab**: Filterable list of competitions with participant limits and entry tallies.
-  - **Students Tab**: Filterable roster of competitors with chest numbers, class levels, and house affiliations.
+### 2.3 Program Committee / Program Samithi Portal (`/program-committee`)
+- **Rules & Guidelines Editor**: Manage official instructions, duration, and scoring criteria across all 144 programs.
+- **Malayalam Rules Typography**: Dedicated `Anek Malayalam` font rendering for Malayalam guidelines.
+- **Printable Niyamavali Rules Book (`/program-committee/niyamavali/print-book`)**: Generates a unified, formatted printable rules book with cover page, index, and individual program guidelines.
+- **Single Program Rules Print (`/program-committee/programs/{program}/rules/print`)**: One-click individual rule sheet printing.
 
-### 2.4 Student Management Suite
-- Comprehensive student directory with search by Chest Number, Name, Class, or House.
-- Add Student form with automatic validation of required fields and unique chest numbers.
-- Student-wise program inspector displaying all events a competitor is registered for.
-- Data export in multiple formats.
+### 2.4 Group Leader Portal (`/leader`)
+- **Quota Tracking & Slot Counter**: Displays slot capacity per program (e.g. `2 / 2 Slots Filled` or `1 / 2 Slots Filled - Partial`).
+- **Continuous Multi-Student Registration**: Group leaders can rapidly enroll multiple students without leaving the registration modal.
+- **Auto-Verification**: Registrations are instantly approved upon submission by group leaders without waiting for admin sign-off.
+- **Inline Entry Editing**: Group leaders can directly edit or replace registered competitors (`/leader/registrations/{entry}/edit`) or remove entries before deadlines.
+- **Roster & Program Inspectors**: Student-wise (`/leader/students-wise`) and Program-wise (`/leader/programs-wise`) views.
 
-### 2.5 Program & Competition Engine
-- Configuration of individual and group programs with eligibility constraints.
-- Stage vs. Off-stage classification.
-- Participant cap settings (e.g. 2 participants per team for individual events).
-- Program-wise student roster inspector.
+### 2.5 Jury Evaluation Suite (`/judge`)
+- **PIN-Based Quick Login**: Fast 4-digit PIN authentication for judges on mobile/tablet devices.
+- **Digital Marksheets**: Touch-friendly criteria evaluation cards with automated score sum and percentage calculation.
+- **Grade B+ Option**: Full support for Grade A+ (6 pts), Grade A (5 pts), Grade B+ (4 pts), Grade B (3 pts), and Grade C (1 pt).
+- **Locked Submissions**: Submissions are cryptographically locked to prevent tampering once finalized.
 
-### 2.6 Code-Letter Anonymization Engine
-- Automated one-click assignment of random code letters (`A`, `B`, `C`...) for checked-in competitors.
-- Manual code letter override for stage emergencies.
-- Complete separation between jury sheets and competitor identities.
+### 2.6 Green Room Operations (`/greenroom`)
+- **Contestant Check-In**: Stage arrival and attendance verification.
+- **Automated Code Letters**: Generates random code letters per program to preserve anonymity on stage.
+- **Call-Next Queue**: Advances contestants from called to on-stage status.
 
-### 2.7 Printable Stage Operations (Forms)
-- **Call Lists (`/admin/forms/call-list`)**: Official stage-call sheet with student verification check-boxes, chest numbers, and arrival timestamps.
-- **Evaluation Forms (`/admin/forms/evaluation`)**: Printable jury judging sheets with criteria score tables.
-- **Chest Slips (`/admin/idcards/chest-slips`)**: Printable competitor badges and stage slips.
+### 2.7 Auditorium Projector View (`/stages/{stage}/projector`)
+- **Big Screen Live Display**: High-contrast, dark-mode auditorium display showing the stage name, currently performing contestant/code letter, and upcoming contestants.
 
-### 2.8 Mark Entry & Verification Suite
-- **View Marks (`/admin/mark-entry/view-marks`)**: Tabulated matrix of judge marks per competition.
-- **Marks Handler (`/admin/mark-entry/handler`)**: Administrative override and bulk mark input.
-- **Mark Check (`/admin/mark-entry/check`)**: Discrepancy detector flagging variance between multiple jury sheets.
+### 2.8 Announcer Desk Console (`/announcer`)
+- **Live Broadcast Queue**: Queue of declared results dispatched from the admin desk ready for live stage announcement.
+- **Stage Call Sheets**: Real-time access to stage call lists for live auditorium microphone callouts.
 
-### 2.9 Official Results Management
-- Multi-stage publication lifecycle:
-  - Declare results based on judge marks.
-  - Review preliminary podium winners.
-  - Official sign-off and publication triggering point cache recalculation.
+### 2.9 Media Desk & Result Poster Graphics Studio (`/media`)
+- **Editorial Hub**: News authoring (`/media/news`), photo gallery (`/media/gallery`), and video archives (`/media/videos`).
+- **Result Poster Studio (`/media/results/{result}/studio`)**: Built-in canvas graphics generator that renders branded social media posters with winner names, chest numbers, scores, and group colors.
+- **Instant Poster Publishing**: Exports PNG graphics and publishes them directly to the public result page.
 
-### 2.10 Achievements & Championship Leaderboards
-- **Team Score**: Overall house championship ranking with point breakdown.
-- **Zone Score**: Filterable ranking of students within each of the 4 zones.
-- **Stage Score**: Separate leaderboard for Stage vs. Off-stage excellence.
-- **All Student Score**: Global individual student leaderboard.
-- **Kalaprathibha & Kalathilakam Tracker**: Automatic identification of top male and female performers.
-
-### 2.11 Stage & Venue Management
-- Add, edit, and configure physical stage venues, seat capacities, and current live status.
-
-### 2.12 Jury Management
-- Directory of empanelled judges, contact info, and program assignments.
-
-### 2.13 PDF & Export Customizer (`/admin/exports`)
-- Dynamic print report builder with toggles for exact columns, house filters, and zone filters.
-
-### 2.14 Settings Drawer (Sliding Control Panel)
-- **Mark Settings**: Adjust point weights per program.
-- **Limit Settings**: Configure group event team limits.
-- **Broadcast Messages**: Send instantaneous notices to teams and students.
-- **Deadline Settings**: Configure countdown timers for registration cutoffs.
-- **Score Display Settings**: Toggle public score visibility (Off, Limited count, or All).
+### 2.10 Student Competitor Portal (`/student`)
+- **Personalized Competitor Dashboard**: Shows student chest number, group, enrolled programs, and schedule timings.
+- **Quota Meter**: Visual indicator showing `X / 5 Used (Remaining: Y)`.
+- **Digital ID Card (`/student/id-card`)**: Printable competitor identity card with QR verification token.
+- **Certificates Viewer (`/student/certificates`)**: Downloadable digital certificates for winners and participants.
 
 ---
 
-## 3. House Leader Portal (`/leader`)
-- Dedicated portal restricted to house captains.
-- Register competitors under official chest number formats.
-- Enroll house representatives into eligible individual and group programs while enforcing limits.
-- View real-time house points tally and program schedule.
+## 3. In Progress Features
+- **Auditorium Live Status WebSockets**: Replacing client polling on `/stages/{stage}/projector` with native WebSockets / Server-Sent Events (SSE).
+- **Automated Stage Call SMS / WhatsApp Alerts**: Direct notifications to group leaders 15 minutes before their student's scheduled stage appearance.
 
 ---
 
-## 4. Digital Jury Portal (`/judge`)
-- Touch-friendly interface optimized for mobile and tablet evaluation.
-- Displays assigned programs, contestant code letters, and evaluation criteria sliders/inputs.
-- One-click final submission locking to prevent unauthorized score tampering.
+## 4. Planned Features
+- **Server-Side Batch PDF Certificate Export**: Bulk certificate generation using Headless Chrome or DomPDF.
+- **Bar-code Scanner Integration for Stage Slips**: Physical barcode scanner support at the green room check-in desk.
 
 ---
 
-## 5. Green Room Coordinator Portal (`/greenroom`)
-- Real-time contestant check-in and stage preparation.
-- Code letter generation and verification.
-- Stage-call communication.
+## 5. Deprecated Features
+- **Manual Admin Registration Verification**: Replaced by automatic verification on group leader submissions to eliminate enrollment bottlenecks.
+- **Standalone Category Models**: Replaced by the 4 official Zones (`A Zone`, `B Zone`, `C Zone`, `Mix Zone`).
+- **"House" Terminology**: Fully replaced by "Group" across all models, views, and documentation.
+- **JetBrains Mono Removal**: Re-instated as the dedicated tabular font for all numbers, chest numbers, codes, and scores.

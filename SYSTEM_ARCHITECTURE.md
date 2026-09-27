@@ -7,51 +7,61 @@
 
 ```mermaid
 flowchart TD
-    Client["Client Browser / Mobile Devices"]
+    Client["Client Browser / Mobile / Projector"]
     
     subgraph "Presentation Layer"
         Blade["Laravel Blade Templates"]
-        Alpine["Alpine.js (Reactive Components)"]
-        Tailwind["Tailwind CSS v4 (Design Tokens)"]
+        Alpine["Alpine.js (Reactive Modals & Live Selects)"]
+        Tailwind["Tailwind CSS v4 (Theme & Official Tokens)"]
         Vite["Vite Asset Bundler"]
+        Typography["Typography: Sora, Rockwell, JetBrains Mono, Anek Malayalam"]
     end
 
     subgraph "Security & Middleware Layer"
-        AuthMW["Session Authenticate"]
+        AuthMW["Session Authenticate & Multi-Guard"]
         CSRF["CSRF Protection"]
-        RoleMW["RoleMiddleware ('admin', 'judge', 'leader', 'green_room_coordinator', 'student')"]
+        RoleMW["RoleMiddleware ('admin', 'judge', 'group_leader', 'green_room_coordinator', 'program_committee', 'announcer', 'media', 'student')"]
         AuditMW["AuditLogger Service"]
     end
 
     subgraph "Application Controllers Layer"
-        AdminCtrl["Admin Controllers (14 Core Modules)"]
+        AdminCtrl["Admin Controllers (15+ Modules)"]
         JudgeCtrl["Judge & MarkEntry Controllers"]
-        LeaderCtrl["Leader Controllers"]
+        LeaderCtrl["Leader Controllers (Registrations & Rosters)"]
+        CommitteeCtrl["Program Committee Controller"]
+        MediaCtrl["Media & Poster Studio Controllers"]
+        AnnounceCtrl["Announcer Console Controller"]
+        StudentCtrl["Student Portal Controller"]
         PublicCtrl["Public & Verification Controllers"]
     end
 
-    subgraph "Domain & Business Logic"
-        ScoreEngine["Result & Points Tabulation Engine"]
-        CacheSync["Points Cache Synchronization (Group & Student)"]
-        Anonymizer["Code Letter Generator & Anonymizer"]
-        CertEngine["QR Certificate Generator"]
+    subgraph "Domain & Business Logic Services"
+        EligibilityEngine["EligibilityService (10-Check Transactional Validator)"]
+        ScoreEngine["PointCalculationService (Dense Ranking & Tied Points)"]
+        CacheSync["Points Cache Synchronizer (Groups & Students)"]
+        Anonymizer["Code Letter Generator & Stage Sequencer"]
+        PosterEngine["Media Result Poster Generator"]
+        CertEngine["QR Verification Service"]
     end
 
     subgraph "Data Storage Layer"
-        Eloquent["Eloquent ORM Models"]
+        Eloquent["Eloquent ORM Models & Scopes"]
         DB["SQLite 3 (Default Local) / MySQL 8.0 (Production)"]
         AuditTable["Audit Logs Table"]
+        TransTable["Points Transactions Ledger"]
     end
 
     Client --> Blade
     Blade --> Alpine
-    Alpine --> Tailwind
+    Alpine --> Tailwind & Typography
     Client --> AuthMW
     AuthMW --> CSRF
     CSRF --> RoleMW
-    RoleMW --> AdminCtrl & JudgeCtrl & LeaderCtrl & PublicCtrl
-    AdminCtrl & JudgeCtrl & LeaderCtrl & PublicCtrl --> ScoreEngine & Anonymizer & CertEngine
-    ScoreEngine --> CacheSync
+    RoleMW --> AdminCtrl & JudgeCtrl & LeaderCtrl & CommitteeCtrl & MediaCtrl & AnnounceCtrl & StudentCtrl & PublicCtrl
+    LeaderCtrl --> EligibilityEngine
+    AdminCtrl & JudgeCtrl --> ScoreEngine
+    AdminCtrl & MediaCtrl --> PosterEngine
+    ScoreEngine --> TransTable & CacheSync
     ScoreEngine & CacheSync & Anonymizer & CertEngine --> Eloquent
     Eloquent --> DB
     AdminCtrl --> AuditMW --> AuditTable
@@ -61,70 +71,71 @@ flowchart TD
 
 ## 2. Layer Descriptions
 
-### 1. Presentation Layer (Lightweight Server-Rendered UI)
-- **Blade Templating**: Fast, highly maintainable, server-rendered views with layout inheritance (`layouts.admin`, `layouts.public`, `layouts.leader`, `layouts.judge`, `layouts.student`).
-- **Alpine.js**: Declarative client-side micro-reactivity for modal dialogs, drawer menus, live filters, and collapsible sidebars without the complexity of heavy SPA frameworks.
-- **Tailwind CSS v4**: Utility-first CSS integrated with Vite for lightning-fast sub-second HMR and production minification.
+### 1. Presentation Layer (Server-Rendered Reactive UI)
+- **Blade Templating**: High-speed, maintainable server-rendered views with strict layout inheritance:
+  - `layouts.admin`: Central administration shell with sliding settings drawer and audit widgets.
+  - `layouts.public`: Mobile-first responsive public festival portal.
+  - `layouts.leader`: Academic group leader console with quota tracking.
+  - `layouts.judge`: Touch-friendly digital judging scorecard.
+  - `layouts.program-committee`: Rules and Niyamavali management workspace.
+  - `layouts.media`: Press releases, media galleries, and poster studio.
+  - `layouts.student`: Student competitor profile, schedule, and certificates.
+- **Multilingual Typography Architecture**:
+  - **Sora**: Primary UI font for labels, buttons, navigation, body copy, and subtitles.
+  - **Rockwell**: Display serif font for brand headers and section banners.
+  - **JetBrains Mono**: Tabular monospace font for numbers, chest numbers, scores, rankings, codes, and timers.
+  - **Anek Malayalam**: Dedicated typography strictly for Malayalam script (rules, criteria, names, and news dispatches), preventing Latin alphabet font corruption.
+- **Alpine.js**: Declarative micro-reactivity for live filters, modals, multi-student slot selectors, and canvas graphics rendering.
+- **Tailwind CSS v4**: Theme engine utilizing custom CSS variables matching official 2026 group and festival brand specifications.
 
 ### 2. Security & Routing Layer
-- **Stateful Web Authentication**: Cookie-based session authentication with standard Laravel session guards.
-- **RoleMiddleware (`app/Http/Middleware/RoleMiddleware.php`)**: Gatekeeper intercepting requests and enforcing role checks (`super_admin`, `admin`, `judge`, `green_room_coordinator`, `group_leader`, `student`).
-- **CSRF Token Validation**: Enforced across all state-mutating requests (`POST`, `PUT`, `DELETE`).
+- **Multi-Role Middleware (`app/Http/Middleware/RoleMiddleware.php`)**: Gatekeeper enforcing access control across 8 user roles: `super_admin`, `admin`, `judge`, `green_room_coordinator`, `group_leader`, `program_committee`, `announcer`, `media`, and `student`.
+- **Graceful Redirection**: Unauthorized attempts to access role-specific panels redirect users directly to their appropriate dashboard instead of throwing generic 403 errors.
+- **CSRF Token Validation**: Enforced across all state-mutating requests (`POST`, `PUT`, `PATCH`, `DELETE`).
 
-### 3. Business Logic & Tabulation Engine
+### 3. Business Logic & Calculation Engines
 
-#### Points Calculation Pipeline
-When a competition result is officially published via `AdminResultController@publish`:
-1. First, second, and third place podium placements are extracted from the verified marksheet.
-2. Official handbook weights are applied:
+#### Points Calculation Pipeline (`App\Services\PointCalculationService`)
+When a competition result is declared or published via `ResultController`:
+1. First, second, and third place podium placements are extracted from verified marksheets.
+2. **Dense Ranking with Ties**:
+   - Tied contestants receive the full points corresponding to their tied rank.
+   - Example: A tie for 1st place awards 5 points to both contestants; the next distinct score receives 3 points (2nd place).
+3. **Handbook Scoring Weights**:
    - **1st Position**: **5 points**
    - **2nd Position**: **3 points**
    - **3rd Position**: **1 point**
-3. Grade points are awarded based on performance marks:
+4. **Grade Points Engine**:
    - **Grade A+** (90–100%): **6 points**
    - **Grade A** (70–89%): **5 points**
+   - **Grade B+** (Explicitly designated): **4 points**
    - **Grade B** (60–69%): **3 points**
    - **Grade C** (50–59%): **1 point**
-4. **Group Programme Single-Award Rule**:
-   - Points are credited once to the Group; they are not multiplied per student on stage.
-5. **Auditable Ledger (`points_transactions`)**:
-   - Every point transaction is persisted in `points_transactions` with `group_id`, `program_id`, `result_id`, `source_type` (`POSITION`, `GRADE`), points, and calculation description.
-6. **Cache Invalidation & Denormalized Updates**:
-   - `students.points_cache` is updated for individual participants.
-   - `groups.points_cache` is refreshed as the sum of all transactions for that Group.
-   - `groups.rank_cache` is updated and persisted for instant 0-millisecond queries on public leaderboards.
+5. **Group Programme Single-Award Rule**:
+   - Points are credited once to the Group; individual student members do not receive duplicate individual points.
+6. **Auditable Transaction Ledger (`points_transactions`)**:
+   - Every point awarded is logged with `group_id`, `program_id`, `result_id`, `student_id`, `source_type` (`POSITION`, `GRADE`), and calculation description.
+7. **Cache Invalidation & Denormalized Updates**:
+   - `students.points_cache` increments immediately.
+   - `groups.points_cache` recalculates aggregate group points.
+   - `groups.rank_cache` persists current group standings for instant sub-millisecond public queries.
 
 #### The 10-Check Eligibility Engine (`App\Services\EligibilityService`)
+Executes transactional checks before any student is enrolled in a program:
 1. Student active status check.
 2. Group assignment check.
-3. Programme open state check.
-4. Zone matching check (A Zone, B Zone, C Zone) & Mix Zone permission check (`mix_zone_open_to_all`).
-5. Max 5 individual programmes limit per student (atomic lock check).
-6. Total programme participant limit (`max_participants`).
-7. Group-wise participant cap (`max_participants_per_group`).
-8. Duplicate registration prevention.
-9. Required participant count for group programmes.
-10. Gender & class restrictions.
-
-#### Anonymization Pipeline (Fair Play)
-1. In the Green Room, enrolled contestants are checked in.
-2. An alphanumeric code letter (e.g., `A`, `B`, `C`, `D`) is pseudo-randomly assigned to each contestant for the program.
-3. The jury receives digital scorecards displaying **only the Code Letter and Program ID**. Student names, chest numbers, and group affiliations are completely masked until verdict approval.
+3. Program open state check.
+4. Zone matching check (student zone matches program zone, or program is Mix Zone).
+5. Individual 5-programme quota cap check (rejects 6th individual event).
+6. Group event exclusion check (group events do not decrement individual quota).
+7. Gender restriction check (Male / Female / All).
+8. Group team participant limit check (e.g. maximum 2 participants per group).
+9. Duplicate registration prevention check.
+10. Deadline cutoff verification check.
 
 ---
 
-## 3. Database Concurrency & Integrity
-- **SQLite Concurrency**: Configured with WAL mode (`journal_mode=WAL`) and `busy_timeout=5000` to prevent database locks during peak concurrent scoring.
-- **Unique Constraint Safety**: Compound unique index on `program_entries(program_id, chest_number)` guarantees a student cannot be doubly enrolled in the same program under the same chest number.
-- **Atomic Transactions**: Complex state transitions (declaring results, assigning marks, awarding group points) execute within `DB::transaction()` closures to maintain absolute consistency.
-
----
-
-## 4. Audit Logging Architecture
-- The system includes a dedicated `AuditLogger` service (`app/Services/AuditLogger.php`).
-- Every administrative action (modifying marks, declaring results, editing student profiles, altering festival settings) records:
-  - User ID and role
-  - Action identifier
-  - Target model and record ID
-  - IP Address and User Agent
-  - Pre-change and post-change JSON payload
+## 3. Data Storage & Schema Design
+- **SQLite 3 (Default Local)**: Zero-configuration local database persisted at `database/database.sqlite`.
+- **MySQL 8.0 / MariaDB (Production Compatible)**: Configurable via `.env` for production deployments.
+- **Optimized Composite Indexes**: Added for high-frequency queries on `program_entries(program_id, group_id)`, `students(group_id, category)`, `programs(zone_id, is_stage)`, and `points_transactions(group_id, source_type)`.

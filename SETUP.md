@@ -17,7 +17,7 @@ Before running the application, verify that your development machine meets the f
 
 ### Step 1: Clone & Navigate
 ```powershell
-git clone <repository-url> "Quaf 9.0"
+git clone https://github.com/ihyaussunna/Quaf.git "Quaf 9.0"
 cd "Quaf 9.0"
 ```
 
@@ -38,19 +38,29 @@ QUAF 09 uses SQLite by default for seamless local development:
 # Create SQLite file if missing
 if (-not (Test-Path database/database.sqlite)) { New-Item database/database.sqlite -ItemType File }
 
-# Run migrations and seed official festival data
+# Run migrations and seed foundational roles, groups, and settings
 php artisan migrate:fresh --seed
 ```
 
-### Step 5: Install & Build Frontend Assets
+### Step 5: Sync Official Festival Data (144 Programs & 1,168 Students)
+Run the automated commands to populate the official conclave dataset from CSV:
+```powershell
+# Ingest 144 official programs with criteria
+php artisan app:sync-official-programs
+
+# Ingest 1,168 official students across all 5 groups
+php artisan app:sync-official-students
+```
+
+### Step 6: Install & Build Frontend Assets
 > [!NOTE]
-> On Windows PowerShell, running `npm.ps1` directly can trigger script execution policy errors. Run via `cmd.exe /c` or use standard npm commands if execution policy is unrestricted:
+> On Windows PowerShell, running `npm.ps1` directly can trigger script execution policy restrictions. Execute via `cmd.exe /c` or use standard npm commands if your execution policy is unrestricted:
 ```powershell
 cmd.exe /c npm install
 cmd.exe /c npm run build
 ```
 
-### Step 6: Launch Development Server
+### Step 7: Launch Development Server
 ```powershell
 php artisan serve --port=8000
 ```
@@ -58,17 +68,23 @@ Access the application at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ---
 
-## 3. Seeded Default Accounts
+## 3. Seeded Default Accounts & Portals
 
-| Role | Email | Password | Access Portal |
+| Role | Email / Identifier | Password | Access Portal |
 |---|---|---|---|
-| **Super Admin** | `admin@quaf.fest` | `password` | `http://127.0.0.1:8000/admin` |
+| **Super Admin / Central Directorate** | `admin@quaf.fest` | `password` | `http://127.0.0.1:8000/admin` |
+| **Program Committee (സമിതി)** | `samithi@quaf.fest` | `Samithi#2026@QuafFest!` | `http://127.0.0.1:8000/program-committee` |
 | **Green Room Officer** | `greenroom@quaf.fest` | `password` | `http://127.0.0.1:8000/greenroom` |
-| **Judge (Jury 1)** | `judge1@quaf.fest` | `password` | `http://127.0.0.1:8000/judge` |
-| **Judge (Jury 2)** | `judge2@quaf.fest` | `password` | `http://127.0.0.1:8000/judge` |
-| **Group A Leader** | `leader.groupa@quaf.fest` | `password` | `http://127.0.0.1:8000/leader` |
-| **Group B Leader** | `leader.conco@quaf.fest` | `password` | `http://127.0.0.1:8000/leader` |
-| **Student** | `student@quaf.fest` | `password` | `http://127.0.0.1:8000/student` |
+| **Judge (Jury 1)** | `judge1@quaf.fest` | `password` (PIN: `1234`) | `http://127.0.0.1:8000/judge` |
+| **Judge (Jury 2)** | `judge2@quaf.fest` | `password` (PIN: `5678`) | `http://127.0.0.1:8000/judge` |
+| **Media / Press Desk** | `media@quaf.fest` | `Media#2026@QuafFest!` | `http://127.0.0.1:8000/media` |
+| **Announcer Desk** | `announcer@quaf.fest` | `password` | `http://127.0.0.1:8000/announcer` |
+| **Leader (Lumo Fikric)** | `leader.lumo@quaf.fest` | `Lumo#9482@FikricFest!26` | `http://127.0.0.1:8000/leader` |
+| **Leader (Pacto Hikmic)** | `leader.pacto@quaf.fest` | `Pacto$Hikmic*8319#Q9` | `http://127.0.0.1:8000/leader` |
+| **Leader (Conco Majdic)** | `leader.conco@quaf.fest` | `Majdic&Conco%6724!Apex` | `http://127.0.0.1:8000/leader` |
+| **Leader (Unio Hilmic)** | `leader.unio@quaf.fest` | `Unio_5193-Hilmic@9Fest` | `http://127.0.0.1:8000/leader` |
+| **Leader (Yugo Rushdic)** | `leader.yugo@quaf.fest` | `Yugo!Rushdic?3825#Shield` | `http://127.0.0.1:8000/leader` |
+| **Student Competitor** | `student@quaf.fest` | `password` | `http://127.0.0.1:8000/student` |
 
 ---
 
@@ -80,7 +96,6 @@ vendor/bin/phpunit
 # or with compact output
 php artisan test --compact
 ```
-Expected result: **21 tests passing (118 assertions, 0 failures)**.
 
 ### Run Code Formatter (Laravel Pint)
 ```powershell
@@ -89,7 +104,21 @@ vendor/bin/pint --format agent
 
 ---
 
-## 5. Troubleshooting & FAQ
+## 5. Production & Deployment Notes
+
+### Server Requirements
+- PHP 8.3+ with OPcache, FPM, and required extensions.
+- Nginx or Apache with URL rewriting enabled.
+- SQLite or MySQL 8.0 / MariaDB 10.6+.
+
+### Live Synchronization Helpers
+- **Remote Git Deployment**: `GET /git-pull/{token}` (executes `git pull origin main` and clears route/config caches).
+- **Remote Database Re-seed**: `GET /init-database/{token}` (executes fresh migration and seeding remotely).
+- **Admin Dashboard 1-Click Sync**: `POST /admin/system/sync-festival-data` (idempotently re-syncs all 144 programs and 1,168 students without data loss).
+
+---
+
+## 6. Troubleshooting & FAQ
 
 ### Issue: `npm : File npm.ps1 cannot be loaded because running scripts is disabled`
 **Fix**: Execute npm commands prefixed with `cmd.exe /c`:
@@ -98,13 +127,7 @@ cmd.exe /c npm run build
 ```
 
 ### Issue: `SQLSTATE[HY000]: General error: 5 database is locked`
-**Fix**: SQLite WAL mode and busy timeout are configured in `config/database.php`. If file locks persist in development, execute:
-```powershell
-php artisan optimize:clear
-```
+**Fix**: Increase SQLite timeout in `config/database.php` or ensure proper file write permissions on `database/database.sqlite` and the `database/` directory.
 
-### Issue: Vite Manifest Not Found
-**Fix**: Rebuild production assets:
-```powershell
-cmd.exe /c npm run build
-```
+### Issue: `There is no active transaction` during recalculation
+**Fix**: Ensure `PointsTransaction::query()->delete()` is used rather than `truncate()`, which triggers an implicit transaction commit in MySQL/SQLite.

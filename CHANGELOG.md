@@ -3,6 +3,41 @@
 
 ---
 
+## [v9.0.5] — 2026-09-28
+
+### Added
+- **Complete Dataset Ingestion (144 Programs & 1,168 Students)**:
+  - Ingested all 144 official festival programs (`Q9-001` through `Q9-144`) spanning A Zone, B Zone, C Zone, and Mix Zone via `php artisan app:sync-official-programs`.
+  - Enrolled all 1,168 official students across all 5 groups (`Pacto Hikmic`, `Yugo Rushdic`, `Conco Majdic`, `Lumo Fikric`, `Unio Hilmic`) with standardized chest numbers (`QF1001`–`QF1250+`) via `php artisan app:sync-official-students`.
+- **Program Committee Portal (`/program-committee`)**:
+  - Dedicated administrative module for managing guidelines, rules, categories, and stages.
+  - Interactive Niyamavali Rulebook browser with category filtering and one-click printable compilation view (`/program-committee/guidelines/print`).
+- **Announcer Desk (`/announcer`)**:
+  - Stage management workspace for live stage call sheets, competitor verification, and stage sequence dispatch.
+  - Added stage-only program dropdown filtering preventing off-stage programs from appearing in stage schedules.
+- **Media Desk & Result Poster Graphics Studio (`/media`, `/media/posters`)**:
+  - In-browser visual graphics editor for generating branded result posters in multiple aspect ratios (1:1 square, 4:5 social, 9:16 story).
+  - Rich text formatting toolbar (bold, italics, headings, font styling), group color palettes, student details, and direct image export.
+- **Auditorium Stage Projector View (`/stages/{stage}/projector`)**:
+  - High-visibility full-screen auditorium display with dark mode UI, showing current active performer spotlight, next up queue, and live program metadata.
+- **Multi-Script Typography Hierarchy**:
+  - Standardized font pairing across all views: **Sora** (primary UI, body, titles), **Rockwell** (display headlines and awards), **JetBrains Mono** (tabular numbers, chest numbers, codes, scores), and **Anek Malayalam** (strictly reserved for Malayalam script).
+- **Auto-Verification & Inline Editing for Group Leaders**:
+  - Streamlined group leader registration workflow: candidate submissions are automatically marked as verified upon registration (`is_verified = true`), bypassing manual admin bottlenecks.
+  - Group leaders can perform inline edits on registered participant lists prior to schedule freeze.
+- **Dense Ranking & Grade B+ Scoring**:
+  - Scoring engine upgraded to support dense ranking with tied positions without skipping point ranks.
+  - Added Grade B+ (4 points) to evaluation matrices and scorecard inputs.
+- **Comprehensive Documentation Suite Synchronization**:
+  - Fully updated and synchronized all 13 project documentation files (`README.md`, `PROJECT_OVERVIEW.md`, `SYSTEM_ARCHITECTURE.md`, `FEATURES.md`, `USER_ROLES.md`, `DATABASE.md`, `FOLDER_STRUCTURE.md`, `WORKFLOW.md`, `SETUP.md`, `API_DOCUMENTATION.md`, `.env.example`, `CHANGELOG.md`, `TODO.md`) with the active codebase as single source of truth.
+
+### Changed
+- Replaced manual registration approval queue with real-time auto-verification on leader submit.
+- Enhanced program selectors in stage management to strictly filter out off-stage items.
+- Modernized public leaderboard, zone cards, and result modals with high-contrast badge styles and JetBrains Mono digit displays.
+
+---
+
 ## [v9.0.4] — 2026-09-24
 
 ### Added
