@@ -87,6 +87,16 @@ class Student extends Model
         return $this->hasMany(PointsTransaction::class);
     }
 
+    public function getNameAttribute(?string $value): string
+    {
+        return ltrim((string) $value, "? \t\n\r\0\x0B");
+    }
+
+    public function setNameAttribute(?string $value): void
+    {
+        $this->attributes['name'] = ltrim((string) $value, "? \t\n\r\0\x0B");
+    }
+
     public function getZoneNameAttribute(): string
     {
         return $this->zone?->name ?? $this->category ?? 'A Zone';

@@ -341,6 +341,8 @@ class StudentController extends Controller
                     }
                 }
 
+                $name = ltrim(trim((string) $name), "? \t\n\r\0\x0B");
+
                 if (empty($name)) {
                     $failedRows[] = 'Row #'.($rowIndex + 1).': Participant Name is empty.';
 

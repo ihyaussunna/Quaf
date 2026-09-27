@@ -74,7 +74,8 @@
                     @forelse($students as $s)
                         @php
                             // Extract initials
-                            $words = explode(' ', trim($s->name));
+                            $cleanName = trim((string)preg_replace('/[^a-zA-Z\s]/', '', $s->name));
+                            $words = array_filter(explode(' ', $cleanName ?: $s->name));
                             $initials = '';
                             foreach (array_slice($words, 0, 2) as $w) {
                                 $initials .= strtoupper(substr($w, 0, 1));
