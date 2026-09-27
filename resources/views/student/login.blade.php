@@ -58,7 +58,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('student.login.submit') }}" class="space-y-6">
+            <form method="POST" action="{{ route('student.login.submit') }}" autocomplete="off" class="space-y-6">
                 @csrf
 
                 <div class="space-y-2">
@@ -71,6 +71,9 @@
                                value="{{ old('identifier') }}"
                                required
                                autofocus
+                               autocomplete="off"
+                               readonly
+                               onfocus="this.removeAttribute('readonly');"
                                placeholder="e.g. QUAF-ST-1001 or 101"
                                class="w-full text-base font-mono font-bold py-3.5 px-4 bg-slate-50 border-2 border-slate-300 focus:border-[#f3bd2e] focus:bg-white rounded-2xl outline-none transition-all text-slate-900 placeholder:text-slate-400">
                     </div>

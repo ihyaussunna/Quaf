@@ -70,7 +70,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('judge.login.submit') }}" class="space-y-6">
+            <form method="POST" action="{{ route('judge.login.submit') }}" autocomplete="off" class="space-y-6">
                 @csrf
 
                 <!-- Display Box -->
@@ -81,6 +81,9 @@
                            maxlength="6"
                            required
                            autofocus
+                           autocomplete="new-password"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
                            placeholder="••••"
                            class="w-full text-center text-3xl font-mono tracking-[0.6em] font-black py-4 px-3 bg-slate-50 border-2 border-slate-300 focus:border-[#f3bd2e] focus:bg-white rounded-2xl outline-none transition-all text-slate-900 placeholder:text-slate-300">
                 </div>

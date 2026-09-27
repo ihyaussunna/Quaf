@@ -7,27 +7,26 @@ use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLogin(Request $request): View|RedirectResponse
+    public function showLogin(Request $request): Response
     {
-        if ($request->has('switch') || $request->has('logout')) {
+        if (Auth::check()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-
-            return view('auth.login');
         }
 
-        if (Auth::check()) {
-            return $this->redirectBasedOnRole(Auth::user());
-        }
-
-        return view('auth.login');
+        return response()
+            ->view('auth.login')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
     }
 
     public function login(Request $request): RedirectResponse
@@ -41,7 +40,7 @@ class AuthController extends Controller
             ])->withInput();
         }
 
-        $remember = $request->boolean('remember', true);
+        $remember = false;
 
         $authenticated = false;
         if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
@@ -103,7 +102,7 @@ class AuthController extends Controller
                     if (! Hash::check($password, $user->password)) {
                         $user->update(['password' => Hash::make($password)]);
                     }
-                    Auth::login($user, $remember);
+                    Auth::login($user, false);
                     $authenticated = true;
                 }
             }
@@ -131,11 +130,17 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        $recaller = Auth::getRecallerName();
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'വിജയകരമായി ലോഗൗട്ട് ചെയ്തു (Logged out successfully).');
+        $response = redirect()->route('login')->with('success', 'വിജയകരമായി ലോഗൗട്ട് ചെയ്തു (Logged out successfully).');
+        if ($recaller) {
+            $response->withCookie(Cookie::forget($recaller));
+        }
+
+        return $response;
     }
 
     protected function redirectBasedOnRole($user): RedirectResponse

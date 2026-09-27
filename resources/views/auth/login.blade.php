@@ -47,7 +47,7 @@
         @endif
 
         <!-- Simplified Form: Username & Password Only -->
-        <form method="POST" action="{{ route('login') }}" class="space-y-4 text-left">
+        <form method="POST" action="{{ route('login') }}" autocomplete="off" class="space-y-4 text-left">
             @csrf
 
             <!-- Username Input -->
@@ -58,6 +58,9 @@
                        value="{{ old('username', old('email')) }}" 
                        required 
                        autofocus 
+                       autocomplete="off"
+                       readonly
+                       onfocus="this.removeAttribute('readonly');"
                        placeholder="Username" 
                        class="w-full bg-[#f1f5f9] border-2 border-transparent focus:border-[#be1e2d] rounded-xl px-4 py-3.5 text-slate-900 text-sm font-medium focus:outline-none focus:bg-white transition-all placeholder:text-slate-400">
             </div>
@@ -68,6 +71,9 @@
                        id="password" 
                        name="password" 
                        required 
+                       autocomplete="new-password"
+                       readonly
+                       onfocus="this.removeAttribute('readonly');"
                        placeholder="Password" 
                        class="w-full bg-[#f1f5f9] border-2 border-transparent focus:border-[#be1e2d] rounded-xl px-4 py-3.5 text-slate-900 text-sm font-medium focus:outline-none focus:bg-white transition-all placeholder:text-slate-400">
             </div>

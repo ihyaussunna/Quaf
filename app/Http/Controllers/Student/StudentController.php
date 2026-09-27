@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -16,13 +17,19 @@ use Illuminate\View\View;
 
 class StudentController extends Controller
 {
-    public function showLogin(): View|RedirectResponse
+    public function showLogin(Request $request): Response
     {
-        if (Auth::check() && Auth::user()->isStudent()) {
-            return redirect()->route('student.dashboard');
+        if (Auth::check()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
         }
 
-        return view('student.login');
+        return response()
+            ->view('student.login')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
     }
 
     public function login(Request $request): RedirectResponse

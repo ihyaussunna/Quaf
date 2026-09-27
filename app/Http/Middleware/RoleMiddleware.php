@@ -32,23 +32,32 @@ class RoleMiddleware
 
         // Super Admin has universal access
         if ($user->role === 'super_admin') {
-            return $next($request);
+            return $this->addNoCacheHeaders($next($request));
         }
 
         // Check if user's role matches any allowed role
         if (! in_array($user->role, $roles)) {
             // If user is admin and route allows 'admin', let's allow sub-admin roles if appropriate
             if (in_array('admin', $roles) && in_array($user->role, ['admin', 'program_coordinator', 'stage_coordinator', 'program_committee'])) {
-                return $next($request);
+                return $this->addNoCacheHeaders($next($request));
             }
 
             if (in_array('media_team', $roles) && in_array($user->role, ['media_team', 'media_manager', 'admin'])) {
-                return $next($request);
+                return $this->addNoCacheHeaders($next($request));
             }
 
             abort(403, 'Unauthorized. You do not have permission to access this management area.');
         }
 
-        return $next($request);
+        return $this->addNoCacheHeaders($next($request));
+    }
+
+    protected function addNoCacheHeaders(Response $response): Response
+    {
+        $response->headers->set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
+
+        return $response;
     }
 }
