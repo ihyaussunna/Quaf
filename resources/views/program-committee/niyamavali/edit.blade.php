@@ -139,13 +139,14 @@
 
             <!-- SECTION 2: NIYAMAVALI RULES TEXTAREA -->
             <div class="space-y-2">
-                <label class="block text-xs font-mono uppercase text-slate-700 font-bold">
+                <label class="block text-xs font-sora uppercase text-slate-700 font-bold">
                     Official Competition Rules (Niyamavali) <span class="text-red-500">*</span>
                 </label>
                 <textarea name="rules" x-model="rulesText" rows="9" required
                           placeholder="Enter official competition rules, timing instructions, guidelines, etc..."
-                          class="w-full bg-slate-50 border border-slate-300 rounded-2xl p-4 text-xs font-mono text-slate-900 focus:outline-none focus:border-brand-burgundy leading-relaxed"></textarea>
-                <p class="text-[11px] font-mono text-slate-400">
+                          class="w-full bg-slate-50 border border-slate-300 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-brand-burgundy leading-relaxed"
+                          :class="/[\u0D00-\u0D7F]/.test(rulesText) ? 'font-anek text-sm' : 'font-sora text-xs'"></textarea>
+                <p class="text-[11px] font-sora text-slate-400">
                     * Use numbered points (1., 2., 3.) for better readability.
                 </p>
             </div>
@@ -154,29 +155,30 @@
             <div class="space-y-4 pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                     <div>
-                        <h3 class="text-xs font-mono uppercase tracking-wider text-brand-burgundy font-bold">
+                        <h3 class="text-xs font-sora uppercase tracking-wider text-brand-burgundy font-bold">
                             Evaluation Criteria & Marks Breakdown
                         </h3>
-                        <p class="text-[11px] font-mono text-slate-500">Criteria and score distribution for the judging panel.</p>
+                        <p class="text-[11px] font-sora text-slate-500">Criteria and score distribution for the judging panel.</p>
                     </div>
-                    <div class="text-xs font-mono font-bold px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
-                        Total Marks: <span x-text="totalMarks"></span>
+                    <div class="text-xs font-sora font-bold px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                        Total Marks: <span class="font-rockwell font-bold" x-text="totalMarks"></span>
                     </div>
                 </div>
 
                 <div class="space-y-2.5">
                     <template x-for="(crit, index) in criteria" :key="index">
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                            <span class="w-6 h-6 rounded-lg bg-slate-200 text-slate-700 text-xs font-mono font-bold flex items-center justify-center flex-shrink-0" x-text="index + 1"></span>
+                            <span class="w-6 h-6 rounded-lg bg-slate-200 text-slate-700 text-xs font-rockwell font-bold flex items-center justify-center flex-shrink-0" x-text="index + 1"></span>
                             
                             <input type="text" :name="'criteria[' + index + '][name]'" x-model="crit.name" required
                                    placeholder="Criterion name (e.g. Presentation & Delivery)"
-                                   class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-burgundy">
+                                   class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-brand-burgundy transition-all"
+                                   :class="/[\u0D00-\u0D7F]/.test(crit.name) ? 'font-anek text-sm font-semibold' : 'font-sora text-xs'">
                             
                             <div class="flex items-center gap-1">
                                 <input type="number" :name="'criteria[' + index + '][max_marks]'" x-model.number="crit.max_marks" min="1" max="100" required
-                                       class="w-20 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-right text-slate-900 focus:outline-none focus:border-brand-burgundy">
-                                <span class="text-xs font-mono text-slate-400">Marks</span>
+                                       class="w-20 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-rockwell font-bold text-right text-slate-900 focus:outline-none focus:border-brand-burgundy">
+                                <span class="text-xs font-sora text-slate-400">Marks</span>
                             </div>
 
                             <button type="button" @click="removeCriterion(index)" 

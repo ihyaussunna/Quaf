@@ -105,16 +105,16 @@
         </div>
 
         @if(!empty($program->rules))
-            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm leading-relaxed text-slate-800 font-sora whitespace-pre-line">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm leading-relaxed text-slate-800 whitespace-pre-line {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $program->rules) ? 'font-anek' : 'font-sora' }}">
 {{ $program->rules }}
             </div>
         @else
             <div class="p-8 rounded-2xl bg-amber-50/60 border border-amber-200 text-center space-y-3">
-                <p class="text-xs font-mono text-amber-800 font-semibold">
+                <p class="text-xs font-sora text-amber-800 font-semibold">
                     No rules provided for this competition yet.
                 </p>
                 <a href="{{ route('program-committee.programs.rules', $program) }}" 
-                   class="inline-block px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-mono font-bold shadow-sm transition">
+                   class="inline-block px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-sora font-bold shadow-sm transition">
                     + Click here to add Rules
                 </a>
             </div>
@@ -126,19 +126,19 @@
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
                 <h3 class="text-lg font-sora font-bold text-slate-900">Scoring & Evaluation Criteria</h3>
-                <p class="text-[11px] font-mono text-slate-500 mt-0.5">Evaluation criteria and maximum marks for judges.</p>
+                <p class="text-[11px] font-sora text-slate-500 mt-0.5">Evaluation criteria and maximum marks for judges.</p>
             </div>
-            <span class="text-xs font-mono font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-800">
+            <span class="text-xs font-rockwell font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-800">
                 Total: {{ $program->scoringCriteria->sum('max_marks') }} Marks
             </span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-mono">
+            <table class="w-full text-left text-xs">
                 <thead>
-                    <tr class="border-b border-slate-100 text-slate-400 uppercase">
+                    <tr class="border-b border-slate-100 text-slate-400 uppercase font-sora">
                         <th class="py-2.5 px-3 w-16">Sl No</th>
-                        <th class="py-2.5 px-3 font-sora">Criterion</th>
+                        <th class="py-2.5 px-3">Criterion</th>
                         <th class="py-2.5 px-3 text-right">Max Marks</th>
                         <th class="py-2.5 px-3 text-right">Weightage</th>
                     </tr>
@@ -147,14 +147,14 @@
                     @php $totalM = max(1, $program->scoringCriteria->sum('max_marks')); @endphp
                     @forelse($program->scoringCriteria as $idx => $crit)
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="py-3 px-3 font-bold text-slate-400">{{ $idx + 1 }}</td>
-                            <td class="py-3 px-3 font-sora font-bold text-slate-900 text-sm">
+                            <td class="py-3 px-3 font-bold text-slate-400 font-rockwell">{{ $idx + 1 }}</td>
+                            <td class="py-3 px-3 font-bold text-slate-900 text-sm {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $crit->criterion_name) ? 'font-anek' : 'font-sora' }}">
                                 {{ $crit->criterion_name }}
                             </td>
-                            <td class="py-3 px-3 text-right font-bold text-brand-burgundy text-sm">
+                            <td class="py-3 px-3 text-right font-bold text-brand-burgundy text-sm font-rockwell">
                                 {{ $crit->max_marks }}
                             </td>
-                            <td class="py-3 px-3 text-right text-slate-500">
+                            <td class="py-3 px-3 text-right text-slate-500 font-rockwell">
                                 {{ round(($crit->max_marks / $totalM) * 100) }}%
                             </td>
                         </tr>

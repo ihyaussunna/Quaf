@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Blade::directive('malayalamFont', function ($expression) {
+            return "<?php echo preg_match('/[\\x{0D00}-\\x{0D7F}]/u', (string)({$expression})) ? 'font-anek' : 'font-sora'; ?>";
+        });
+
+        Blade::if('malayalam', function ($text) {
+            return preg_match('/[\x{0D00}-\x{0D7F}]/u', (string) $text);
+        });
     }
 }

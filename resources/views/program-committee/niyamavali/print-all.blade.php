@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gayathri:wght@400;700&family=JetBrains+Mono:wght@400;600;700&family=Manjari:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=Gayathri:wght@400;700&family=Manjari:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css'])
 
@@ -18,12 +18,12 @@
             margin: 15mm;
         }
         body {
-            font-family: 'Sora', 'Manjari', sans-serif;
+            font-family: 'Sora', 'Anek Malayalam', 'Manjari', sans-serif;
             background: #ffffff;
             color: #0f172a;
         }
-        .font-malayalam {
-            font-family: 'Manjari', 'Gayathri', sans-serif;
+        .font-malayalam, .font-anek {
+            font-family: 'Anek Malayalam', 'Manjari', 'Gayathri', sans-serif !important;
         }
         .page-break {
             page-break-after: always;
@@ -132,10 +132,10 @@
 
             <!-- Rules -->
             <div class="space-y-2">
-                <h4 class="text-xs font-mono uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1">
+                <h4 class="text-xs font-sora uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1">
                     Official Competition Rules
                 </h4>
-                <div class="text-xs leading-relaxed text-slate-800 font-sora whitespace-pre-line p-4 rounded-xl bg-slate-50/70 border border-slate-200">
+                <div class="text-xs leading-relaxed text-slate-800 whitespace-pre-line p-4 rounded-xl bg-slate-50/70 border border-slate-200 {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $program->rules ?? '') ? 'font-anek' : 'font-sora' }}">
 {{ $program->rules ?: 'Adhere to general competition rules and schedule.' }}
                 </div>
             </div>
@@ -143,24 +143,24 @@
             <!-- Scoring Criteria -->
             @if($program->scoringCriteria->count() > 0)
                 <div class="space-y-2">
-                    <h4 class="text-xs font-mono uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1 flex justify-between">
+                    <h4 class="text-xs font-sora uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1 flex justify-between">
                         <span>Scoring Rubric & Evaluation Criteria</span>
-                        <span>Total: {{ $program->scoringCriteria->sum('max_marks') }} Marks</span>
+                        <span class="font-rockwell font-bold">Total: {{ $program->scoringCriteria->sum('max_marks') }} Marks</span>
                     </h4>
-                    <table class="w-full text-left text-xs font-mono border border-slate-300">
+                    <table class="w-full text-left text-xs border border-slate-300">
                         <thead>
-                            <tr class="bg-slate-100 border-b border-slate-300 text-slate-600">
+                            <tr class="bg-slate-100 border-b border-slate-300 text-slate-600 uppercase font-sora">
                                 <th class="p-2 border-r border-slate-300 w-12 text-center">No</th>
-                                <th class="p-2 border-r border-slate-300 font-sora">Criterion</th>
+                                <th class="p-2 border-r border-slate-300">Criterion</th>
                                 <th class="p-2 text-right w-24">Max Marks</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200">
                             @foreach($program->scoringCriteria as $i => $crit)
                                 <tr>
-                                    <td class="p-2 border-r border-slate-200 text-center font-bold text-slate-500">{{ $i + 1 }}</td>
-                                    <td class="p-2 border-r border-slate-200 font-sora font-bold text-slate-900">{{ $crit->criterion_name }}</td>
-                                    <td class="p-2 text-right font-bold text-slate-900">{{ $crit->max_marks }}</td>
+                                    <td class="p-2 border-r border-slate-200 text-center font-bold text-slate-500 font-rockwell">{{ $i + 1 }}</td>
+                                    <td class="p-2 border-r border-slate-200 font-bold text-slate-900 {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $crit->criterion_name) ? 'font-anek' : 'font-sora' }}">{{ $crit->criterion_name }}</td>
+                                    <td class="p-2 text-right font-bold text-slate-900 font-rockwell">{{ $crit->max_marks }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

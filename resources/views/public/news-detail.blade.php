@@ -11,11 +11,11 @@
             <span>•</span>
             <span>{{ $article->published_at?->format('F d, Y — h:i A') }}</span>
         </div>
-        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 leading-tight mb-6">
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 leading-tight mb-6 {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $article->title) ? 'font-anek' : 'font-sora' }}">
             {{ $article->title }}
         </h1>
         @if($article->excerpt)
-            <p class="text-lg text-slate-600 font-normal leading-relaxed border-l-4 border-[#f3bd2e] pl-4 italic bg-amber-50/50 py-2 rounded-r-xl">
+            <p class="text-lg text-slate-600 font-normal leading-relaxed border-l-4 border-[#f3bd2e] pl-4 italic bg-amber-50/50 py-2 rounded-r-xl {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $article->excerpt) ? 'font-anek' : 'font-sora' }}">
                 {{ $article->excerpt }}
             </p>
         @endif
@@ -28,7 +28,7 @@
     @endif
 
     <!-- Content Body (Light Theme) -->
-    <div class="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed space-y-6 font-normal">
+    <div class="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed space-y-6 font-normal {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $article->content) ? 'font-anek' : 'font-sora' }}">
         {!! nl2br(e($article->content)) !!}
     </div>
 
@@ -40,7 +40,7 @@
                 @foreach($related as $rel)
                     <a href="{{ route('news.show', $rel->slug) }}" class="group block rounded-2xl bg-white border border-slate-200 p-5 hover:border-[#f3bd2e]/40 transition-all shadow-sm hover:shadow-md">
                         <span class="text-[10px] font-mono text-[#f3bd2e] uppercase font-bold block mb-1">{{ $rel->category }}</span>
-                        <h4 class="font-sora font-bold text-slate-900 text-base group-hover:text-[#f3bd2e] transition-colors leading-snug">
+                        <h4 class="font-bold text-slate-900 text-base group-hover:text-[#f3bd2e] transition-colors leading-snug {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $rel->title) ? 'font-anek' : 'font-sora' }}">
                             {{ $rel->title }}
                         </h4>
                     </a>

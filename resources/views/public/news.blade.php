@@ -43,10 +43,10 @@
                             <span>•</span>
                             <span>{{ $featured->published_at?->format('F d, Y') }}</span>
                         </div>
-                        <h2 class="text-xl sm:text-3xl md:text-4xl font-sora font-black text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-tight mb-2 sm:mb-4">
+                        <h2 class="text-xl sm:text-3xl md:text-4xl @malayalamFont($featured->title) font-black text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-tight mb-2 sm:mb-4">
                             {{ $featured->title }}
                         </h2>
-                        <p class="text-xs sm:text-sm md:text-base text-slate-600 font-normal leading-relaxed">
+                        <p class="text-xs sm:text-sm md:text-base @malayalamFont($featured->excerpt) text-slate-600 font-normal leading-relaxed">
                             {{ $featured->excerpt }}
                         </p>
                     </div>
@@ -76,10 +76,10 @@
                 <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                     <div>
                         <span class="text-xs font-mono text-slate-400 block mb-1.5 sm:mb-2">{{ $article->published_at?->format('M d, Y') }}</span>
-                        <h3 class="text-lg sm:text-xl font-sora font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-snug mb-2 sm:mb-3">
+                        <h3 class="text-lg sm:text-xl @malayalamFont($article->title) font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-snug mb-2 sm:mb-3">
                             {{ $article->title }}
                         </h3>
-                        <p class="text-xs sm:text-sm text-slate-600 font-normal line-clamp-2 leading-relaxed">
+                        <p class="text-xs sm:text-sm @malayalamFont($article->excerpt) text-slate-600 font-normal line-clamp-2 leading-relaxed">
                             {{ $article->excerpt }}
                         </p>
                     </div>
