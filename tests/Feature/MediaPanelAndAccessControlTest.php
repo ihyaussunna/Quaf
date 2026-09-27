@@ -570,4 +570,53 @@ class MediaPanelAndAccessControlTest extends TestCase
         $response->assertSee('Log Out / Switch Account');
         $response->assertSee('Go to Media Dashboard');
     }
+
+    public function test_media_user_can_publish_result_via_publish_public_route(): void
+    {
+        $group = Group::create(['name' => 'Alfa Group', 'code' => 'ALF', 'slug' => 'alfa', 'color_hex' => '#047857']);
+        $cat = ProgramCategory::create(['name' => 'General Wing', 'slug' => 'general-wing']);
+        $prog = Program::create([
+            'category_id' => $cat->id,
+            'name' => 'Essay Writing',
+            'code' => 'Q9-555',
+            'type' => 'individual',
+            'status' => 'completed',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'STU555',
+            'chest_number' => '555',
+            'name' => 'Rashid Ali',
+            'group_id' => $group->id,
+            'admission_number' => 'ADM555',
+            'class' => 'D4',
+            'category' => 'General',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+            'chest_number' => '555',
+            'status' => 'verified',
+        ]);
+
+        $result = Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry->id,
+            'status' => 'announced',
+            'is_media_published' => false,
+        ]);
+
+        $response = $this->actingAs($this->mediaUser)->post(route('media.results.publish', $result));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $result->refresh();
+        $this->assertEquals('published', $result->status);
+        $this->assertTrue($result->is_media_published);
+        $this->assertEquals('completed', $prog->fresh()->status);
+    }
 }

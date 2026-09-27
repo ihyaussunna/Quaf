@@ -81,8 +81,8 @@ class PointCalculationService
     public function recalculateAllPoints(): void
     {
         DB::transaction(function () {
-            // 1. Wipe existing transaction log for full idempotency
-            PointsTransaction::truncate();
+            // 1. Wipe existing transaction log for full idempotency (use delete() to prevent MySQL implicit commit)
+            PointsTransaction::query()->delete();
 
             // 2. Reset points cache
             Student::query()->update(['points_cache' => 0]);
