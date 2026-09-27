@@ -282,6 +282,18 @@ class LeaderController extends Controller
 
         $students = $group->students()->with('zone')->orderBy('name')->get();
         $zones = Zone::orderBy('display_order')->get();
+        if ($zones->isEmpty()) {
+            $defaultZones = [
+                ['code' => 'A_ZONE', 'name' => 'A Zone', 'slug' => 'a-zone', 'color_hex' => '#be1e2d', 'display_order' => 1],
+                ['code' => 'B_ZONE', 'name' => 'B Zone', 'slug' => 'b-zone', 'color_hex' => '#f3bd2e', 'display_order' => 2],
+                ['code' => 'C_ZONE', 'name' => 'C Zone', 'slug' => 'c-zone', 'color_hex' => '#005c94', 'display_order' => 3],
+                ['code' => 'MIX_ZONE', 'name' => 'Mix Zone', 'slug' => 'mix-zone', 'color_hex' => '#009444', 'display_order' => 4],
+            ];
+            foreach ($defaultZones as $dz) {
+                Zone::firstOrCreate(['code' => $dz['code']], $dz);
+            }
+            $zones = Zone::orderBy('display_order')->get();
+        }
         $isRegistrationOpen = $this->isRegistrationOpen();
 
         return view('leader.registrations', compact(

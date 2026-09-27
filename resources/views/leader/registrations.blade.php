@@ -38,6 +38,231 @@
     });
 @endphp
 
+<script>
+window.quafRegistrationData = {
+    programs: @json($programsData),
+    students: @json($studentsData),
+    zones: @json($zonesData)
+};
+
+function registrationManager() {
+    return {
+        selectedZone: '{{ old('zone', '') }}',
+        selectedProgramId: '{{ old('program_id', '') }}',
+        selectedStudents: [],
+        leaderStudentId: null,
+        studentSearch: '',
+        showStudentDropdown: false,
+        isSubmitting: false,
+        feedbackSuccess: '',
+        feedbackError: '',
+        
+        allPrograms: window.quafRegistrationData ? (window.quafRegistrationData.programs || []) : [],
+        allStudents: window.quafRegistrationData ? (window.quafRegistrationData.students || []) : [],
+        allZones: window.quafRegistrationData ? (window.quafRegistrationData.zones || []) : [],
+        
+        init() {
+            if (this.selectedZone) {
+                this.updateProgramDropdown();
+                if (this.selectedProgramId) {
+                    const sel = this.$refs.programSelect || document.getElementById('program_select');
+                    if (sel) sel.value = this.selectedProgramId;
+                }
+            }
+        },
+        
+        get currentProgram() {
+            return this.allPrograms.find(p => p.id == this.selectedProgramId) || null;
+        },
+        
+        get isGroup() {
+            return this.currentProgram ? this.currentProgram.type === 'group' : false;
+        },
+        
+        get participantLimit() {
+            return this.currentProgram ? (this.currentProgram.limit || 1) : 1;
+        },
+        
+        get filteredPrograms() {
+            if (!this.selectedZone) return [];
+            const z = this.selectedZone.toLowerCase().trim();
+            return this.allPrograms.filter(p => {
+                const pZone = (p.zone_name || '').toLowerCase().trim();
+                return pZone === z || (z === 'mix zone' && pZone.includes('mix'));
+            });
+        },
+        
+        get eligibleStudents() {
+            if (!this.selectedZone) return this.allStudents;
+            const z = this.selectedZone.toLowerCase().trim();
+            return this.allStudents.filter(s => {
+                const isMix = z === 'mix zone';
+                const sZone = (s.zone_name || '').toLowerCase().trim();
+                return isMix || sZone === z;
+            });
+        },
+        
+        get availableStudents() {
+            const addedIds = this.selectedStudents.map(s => s.id);
+            const q = (this.studentSearch || '').toLowerCase().trim();
+            const base = this.eligibleStudents.filter(s => !addedIds.includes(s.id));
+            if (!q) return base.slice(0, 30);
+            return base.filter(s => (s.name || '').toLowerCase().includes(q) || (s.chest || '').toLowerCase().includes(q)).slice(0, 30);
+        },
+        
+        updateProgramDropdown() {
+            const select = this.$refs.programSelect || document.getElementById('program_select');
+            if (!select) return;
+            
+            const zone = (this.selectedZone || '').toLowerCase().trim();
+            const currentProgId = this.selectedProgramId;
+            select.innerHTML = '';
+            
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            
+            if (!zone) {
+                defaultOpt.textContent = '-- Please select a Zone first --';
+                select.appendChild(defaultOpt);
+                return;
+            }
+            
+            const progs = this.filteredPrograms;
+            defaultOpt.textContent = `-- Choose Competition Program (${progs.length} available) --`;
+            select.appendChild(defaultOpt);
+            
+            progs.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                const regStatus = p.is_registered ? ' [REGISTERED ✓]' : ' [UNREGISTERED]';
+                const typeInfo = p.type === 'group' ? `Group - Limit: ${p.limit}` : `Individual - Limit: ${p.limit}`;
+                opt.textContent = `[${p.code}] ${p.name}${regStatus} (${typeInfo})`;
+                if (p.id == currentProgId) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+        },
+        
+        onZoneChange() {
+            this.selectedProgramId = '';
+            this.selectedStudents = [];
+            this.leaderStudentId = null;
+            this.studentSearch = '';
+            this.feedbackSuccess = '';
+            this.feedbackError = '';
+            
+            this.updateProgramDropdown();
+            
+            // Auto-select first unregistered program in this zone
+            const firstUnreg = this.filteredPrograms.find(p => !p.is_registered);
+            if (firstUnreg) {
+                this.selectedProgramId = firstUnreg.id;
+                const select = this.$refs.programSelect || document.getElementById('program_select');
+                if (select) select.value = firstUnreg.id;
+            }
+            this.onProgramChange();
+        },
+        
+        onProgramChange() {
+            this.selectedStudents = [];
+            this.leaderStudentId = null;
+            this.studentSearch = '';
+            this.feedbackSuccess = '';
+            this.feedbackError = '';
+        },
+        
+        addStudent(st) {
+            if (this.selectedStudents.length >= this.participantLimit) return;
+            this.selectedStudents.push(st);
+            if (!this.leaderStudentId) {
+                this.leaderStudentId = st.id;
+            }
+            this.studentSearch = '';
+            this.showStudentDropdown = false;
+        },
+        
+        removeStudent(stId) {
+            this.selectedStudents = this.selectedStudents.filter(s => s.id !== stId);
+            if (this.leaderStudentId == stId) {
+                this.leaderStudentId = this.selectedStudents.length > 0 ? this.selectedStudents[0].id : null;
+            }
+        },
+        
+        async submitRegistration(e) {
+            if (this.isSubmitting) return;
+            if (!this.currentProgram) {
+                this.feedbackError = 'Please select a competition program first.';
+                return;
+            }
+            if (this.selectedStudents.length === 0) {
+                this.feedbackError = 'Please select at least one student participant.';
+                return;
+            }
+            
+            this.isSubmitting = true;
+            this.feedbackSuccess = '';
+            this.feedbackError = '';
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            try {
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await res.json().catch(() => ({}));
+                
+                if (!res.ok || !data.success) {
+                    this.feedbackError = data.message || (data.errors ? Object.values(data.errors).flat().join(' ') : 'Registration failed. Please check candidate eligibility.');
+                    return;
+                }
+                
+                // Registration Success!
+                const enrolledProg = this.currentProgram;
+                const enrolledProgName = enrolledProg ? enrolledProg.name : 'Program';
+                const enrolledCount = this.selectedStudents.length;
+                
+                // 1. Mark current program registered in state
+                if (enrolledProg) {
+                    enrolledProg.is_registered = true;
+                }
+                
+                // 2. Clear current enrolled students
+                this.selectedStudents = [];
+                this.leaderStudentId = null;
+                this.studentSearch = '';
+                
+                // 3. Update program dropdown to show updated [REGISTERED ✓] tag
+                this.updateProgramDropdown();
+                
+                // 4. Find next unregistered program in the same zone
+                const nextUnreg = this.filteredPrograms.find(p => !p.is_registered);
+                if (nextUnreg) {
+                    this.selectedProgramId = nextUnreg.id;
+                    const select = this.$refs.programSelect || document.getElementById('program_select');
+                    if (select) select.value = nextUnreg.id;
+                    this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! Switched to next program: "${nextUnreg.name}".`;
+                } else {
+                    this.selectedProgramId = '';
+                    this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! All programs in ${this.selectedZone} have been completed.`;
+                }
+            } catch (err) {
+                this.feedbackError = 'Connection error: Could not complete registration. Please check your network.';
+            } finally {
+                this.isSubmitting = false;
+            }
+        }
+    };
+}
+</script>
+
 <div class="space-y-8">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -125,164 +350,7 @@
 
         <form method="POST" action="{{ route('leader.registrations.store') }}" 
               @submit.prevent="submitRegistration($event)"
-              x-data="{
-                  selectedZone: '{{ old('zone', '') }}',
-                  selectedProgramId: '{{ old('program_id', '') }}',
-                  
-                  // Participants enrolled for this program (up to limit)
-                  selectedStudents: [],
-                  leaderStudentId: null,
-                  studentSearch: '',
-                  showStudentDropdown: false,
-                  
-                  // Submission state & feedback
-                  isSubmitting: false,
-                  feedbackSuccess: '',
-                  feedbackError: '',
-                  
-                  allPrograms: {{ json_encode($programsData) }},
-                  allStudents: {{ json_encode($studentsData) }},
-                  allZones: {{ json_encode($zonesData) }},
-                  
-                  get currentProgram() {
-                      return this.allPrograms.find(p => p.id == this.selectedProgramId) || null;
-                  },
-                  
-                  get isGroup() {
-                      return this.currentProgram ? this.currentProgram.type === 'group' : false;
-                  },
-                  
-                  get participantLimit() {
-                      return this.currentProgram ? (this.currentProgram.limit || 1) : 1;
-                  },
-                  
-                  get filteredPrograms() {
-                      if (!this.selectedZone) return [];
-                      return this.allPrograms.filter(p => p.zone_name.toLowerCase().trim() === this.selectedZone.toLowerCase().trim());
-                  },
-                  
-                  get eligibleStudents() {
-                      if (!this.selectedZone) return [];
-                      return this.allStudents.filter(s => {
-                          const isMix = this.selectedZone.toLowerCase().trim() === 'mix zone';
-                          return isMix || (s.zone_name.toLowerCase().trim() === this.selectedZone.toLowerCase().trim());
-                      });
-                  },
-                  
-                  get availableStudents() {
-                      const addedIds = this.selectedStudents.map(s => s.id);
-                      const q = this.studentSearch.toLowerCase().trim();
-                      const base = this.eligibleStudents.filter(s => !addedIds.includes(s.id));
-                      if (!q) return base.slice(0, 30);
-                      return base.filter(s => s.name.toLowerCase().includes(q) || s.chest.toLowerCase().includes(q)).slice(0, 30);
-                  },
-                  
-                  onZoneChange() {
-                      this.selectedProgramId = '';
-                      this.selectedStudents = [];
-                      this.leaderStudentId = null;
-                      this.studentSearch = '';
-                      this.feedbackSuccess = '';
-                      this.feedbackError = '';
-                      
-                      // Auto-select first unregistered program in this zone
-                      const firstUnreg = this.filteredPrograms.find(p => !p.is_registered);
-                      if (firstUnreg) {
-                          this.selectedProgramId = firstUnreg.id;
-                      }
-                  },
-                  
-                  onProgramChange() {
-                      this.selectedStudents = [];
-                      this.leaderStudentId = null;
-                      this.studentSearch = '';
-                      this.feedbackSuccess = '';
-                      this.feedbackError = '';
-                  },
-                  
-                  addStudent(st) {
-                      if (this.selectedStudents.length >= this.participantLimit) return;
-                      this.selectedStudents.push(st);
-                      if (!this.leaderStudentId) {
-                          this.leaderStudentId = st.id;
-                      }
-                      this.studentSearch = '';
-                      this.showStudentDropdown = false;
-                  },
-                  
-                  removeStudent(stId) {
-                      this.selectedStudents = this.selectedStudents.filter(s => s.id !== stId);
-                      if (this.leaderStudentId == stId) {
-                          this.leaderStudentId = this.selectedStudents.length > 0 ? this.selectedStudents[0].id : null;
-                      }
-                  },
-                  
-                  async submitRegistration(e) {
-                      if (this.isSubmitting) return;
-                      if (!this.currentProgram) {
-                          this.feedbackError = 'Please select a competition program first.';
-                          return;
-                      }
-                      if (this.selectedStudents.length === 0) {
-                          this.feedbackError = 'Please select at least one student participant.';
-                          return;
-                      }
-                      
-                      this.isSubmitting = true;
-                      this.feedbackSuccess = '';
-                      this.feedbackError = '';
-                      
-                      const form = e.target;
-                      const formData = new FormData(form);
-                      
-                      try {
-                          const res = await fetch(form.action, {
-                              method: 'POST',
-                              body: formData,
-                              headers: {
-                                  'X-Requested-With': 'XMLHttpRequest',
-                                  'Accept': 'application/json'
-                              }
-                          });
-                          
-                          const data = await res.json().catch(() => ({}));
-                          
-                          if (!res.ok || !data.success) {
-                              this.feedbackError = data.message || (data.errors ? Object.values(data.errors).flat().join(' ') : 'Registration failed. Please check candidate eligibility.');
-                              return;
-                          }
-                          
-                          // Registration Success!
-                          const enrolledProg = this.currentProgram;
-                          const enrolledProgName = enrolledProg ? enrolledProg.name : 'Program';
-                          const enrolledCount = this.selectedStudents.length;
-                          
-                          // 1. Mark current program registered in state
-                          if (enrolledProg) {
-                              enrolledProg.is_registered = true;
-                          }
-                          
-                          // 2. Clear current enrolled students
-                          this.selectedStudents = [];
-                          this.leaderStudentId = null;
-                          this.studentSearch = '';
-                          
-                          // 3. Find next unregistered program in the same zone
-                          const nextUnreg = this.filteredPrograms.find(p => !p.is_registered);
-                          if (nextUnreg) {
-                              this.selectedProgramId = nextUnreg.id;
-                              this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! Switched to next program: "${nextUnreg.name}".`;
-                          } else {
-                              this.selectedProgramId = '';
-                              this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! All programs in ${this.selectedZone} have been completed.`;
-                          }
-                      } catch (err) {
-                          this.feedbackError = 'Connection error: Could not complete registration. Please check your network.';
-                      } finally {
-                          this.isSubmitting = false;
-                      }
-                  }
-              }"
+              x-data="registrationManager()"
               class="space-y-6">
             @csrf
 
@@ -313,14 +381,20 @@
                     1. Select Zone <span class="text-red-500">*</span>
                 </label>
                 <select name="zone" 
+                        id="zone_select"
                         x-model="selectedZone" 
                         @change="onZoneChange()" 
                         required 
                         class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                     <option value="">-- Choose Zone --</option>
-                    <template x-for="z in allZones" :key="z.id">
-                        <option :value="z.name" x-text="z.name"></option>
-                    </template>
+                    @php
+                        $zoneList = ($zones && $zones->isNotEmpty()) 
+                            ? $zones->pluck('name')->toArray() 
+                            : ['A Zone', 'B Zone', 'C Zone', 'Mix Zone'];
+                    @endphp
+                    @foreach($zoneList as $zName)
+                        <option value="{{ $zName }}" {{ old('zone') == $zName ? 'selected' : '' }}>{{ $zName }}</option>
+                    @endforeach
                 </select>
                 <p class="text-[11px] font-mono text-slate-500 mt-1">Select the festival zone to filter competitions and eligible students from {{ $group->name }}.</p>
             </div>
@@ -331,15 +405,26 @@
                     2. Select Program <span class="text-red-500">*</span>
                 </label>
                 <select name="program_id" 
+                        id="program_select"
+                        x-ref="programSelect"
                         x-model="selectedProgramId" 
-                        @change="onProgramChange()" 
+                        @change="onProgramChange(); selectedProgramId = $event.target.value;" 
                         :disabled="!selectedZone"
                         required 
                         class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     <option value="" x-text="selectedZone ? '-- Choose Competition Program (' + filteredPrograms.length + ' available) --' : '-- Please select a Zone first --'"></option>
-                    <template x-for="p in filteredPrograms" :key="p.id">
-                        <option :value="p.id" x-text="'[' + p.code + '] ' + p.name + (p.is_registered ? ' [REGISTERED ✓]' : ' [UNREGISTERED]') + ' (' + (p.type === 'group' ? 'Group - Limit: ' + p.limit : 'Individual - Limit: ' + p.limit) + ')'"></option>
-                    </template>
+                    @foreach($eligiblePrograms as $p)
+                        @php
+                            $pZone = $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone');
+                            $isReg = in_array($p->id, $registeredProgramIds ?? []);
+                            $limit = $p->type === 'group' 
+                                ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
+                                : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+                        @endphp
+                        <option value="{{ $p->id }}" data-zone="{{ strtolower(trim($pZone)) }}">
+                            [{{ $p->code }}] {{ $p->name }} {{ $isReg ? ' [REGISTERED ✓]' : ' [UNREGISTERED]' }} ({{ $p->type === 'group' ? 'Group - Limit: '.$limit : 'Individual - Limit: '.$limit }})
+                        </option>
+                    @endforeach
                 </select>
                 <template x-if="currentProgram">
                     <div class="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono flex flex-wrap items-center justify-between gap-2">
