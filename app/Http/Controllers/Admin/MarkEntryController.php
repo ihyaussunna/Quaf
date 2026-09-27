@@ -293,31 +293,31 @@ class MarkEntryController extends Controller
                     ->map(function ($entry) {
                         $score = (float) $entry->scores->avg('total_score');
                         $entry->computed_score = $score;
-                        if ($score >= 80) {
-                            $entry->computed_grade = 'A';
-                        } elseif ($score >= 60) {
-                            $entry->computed_grade = 'B';
-                        } elseif ($score >= 40) {
-                            $entry->computed_grade = 'C';
-                        } else {
-                            $entry->computed_grade = '-';
-                        }
+                        $gradeInfo = PointCalculationService::getGradeFromScore($score);
+                        $entry->computed_grade = $gradeInfo['grade'] ?? '-';
 
                         return $entry;
                     })
                     ->sortByDesc('computed_score')
                     ->values();
 
-                foreach ($entries as $index => $item) {
-                    if ($index === 0 && $item->computed_score > 0) {
-                        $item->computed_rank = 'first';
-                    } elseif ($index === 1 && $item->computed_score > 0) {
-                        $item->computed_rank = 'second';
-                    } elseif ($index === 2 && $item->computed_score > 0) {
-                        $item->computed_rank = 'third';
-                    } else {
+                $currentRank = 0;
+                $prevScore = null;
+                $rankMap = [1 => 'first', 2 => 'second', 3 => 'third'];
+
+                foreach ($entries as $item) {
+                    if ($item->computed_score <= 0) {
                         $item->computed_rank = '';
+
+                        continue;
                     }
+
+                    if ($prevScore === null || abs($item->computed_score - $prevScore) > 0.001) {
+                        $currentRank++;
+                        $prevScore = $item->computed_score;
+                    }
+
+                    $item->computed_rank = $rankMap[$currentRank] ?? '';
                 }
                 $rankedEntries = $entries;
             }

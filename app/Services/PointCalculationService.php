@@ -28,12 +28,14 @@ class PointCalculationService
      * Handbook official grade points:
      * A+ = 6 points
      * A  = 5 points
+     * B+ = 4 points
      * B  = 3 points
      * C  = 1 point
      */
     public const GRADE_POINTS = [
         'A+' => 6,
         'A' => 5,
+        'B+' => 4,
         'B' => 3,
         'C' => 1,
     ];
@@ -45,6 +47,7 @@ class PointCalculationService
      * A  = 70–89  -> 5 points
      * B  = 60–69  -> 3 points
      * C  = 50–59  -> 1 point
+     * (B+ is awarded at 4 points when explicitly designated)
      *
      * @return array{grade: ?string, points: int}
      */
@@ -235,11 +238,17 @@ class PointCalculationService
                 $gradeName = strtoupper(trim($declaredGrade));
                 $gradePointsRaw = self::GRADE_POINTS[$gradeName];
             } else {
-                $avgScore = $entry->scoreSheets->where('is_submitted', true)->avg('total_score');
-                if ($avgScore !== null && $avgScore > 0) {
-                    $gradeInfo = self::getGradeFromScore((float) $avgScore);
-                    $gradeName = $gradeInfo['grade'];
-                    $gradePointsRaw = $gradeInfo['points'];
+                $judgeGrade = $entry->scoreSheets->where('is_submitted', true)->pluck('criteria_scores.grade')->filter()->first();
+                if ($judgeGrade && isset(self::GRADE_POINTS[strtoupper(trim($judgeGrade))])) {
+                    $gradeName = strtoupper(trim($judgeGrade));
+                    $gradePointsRaw = self::GRADE_POINTS[$gradeName];
+                } else {
+                    $avgScore = $entry->scoreSheets->where('is_submitted', true)->avg('total_score');
+                    if ($avgScore !== null && $avgScore > 0) {
+                        $gradeInfo = self::getGradeFromScore((float) $avgScore);
+                        $gradeName = $gradeInfo['grade'];
+                        $gradePointsRaw = $gradeInfo['points'];
+                    }
                 }
             }
 

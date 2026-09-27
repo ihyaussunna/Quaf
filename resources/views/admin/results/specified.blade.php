@@ -13,7 +13,7 @@
     <div class="max-w-xl mx-auto">
         <form method="GET" action="{{ route('admin.results.specified') }}">
             <div class="relative">
-                <input type="text" name="program_id" value="{{ $programQuery }}" placeholder="Enter Program ID (e.g. 1315)" autofocus class="w-full text-center bg-white border-2 border-blue-400 rounded-2xl px-6 py-3.5 text-base font-bold text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-100 shadow-sm transition">
+                <input type="text" name="program_id" value="{{ $programQuery }}" placeholder="Enter Program Code or Number (e.g. 204, Q9-204)" autofocus class="w-full text-center bg-white border-2 border-blue-400 rounded-2xl px-6 py-3.5 text-base font-bold text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-100 shadow-sm transition">
             </div>
         </form>
     </div>
@@ -71,7 +71,7 @@
                                 <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $item->student?->class_level ?? '-' }}</td>
                                 <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $item->group?->name ?? $item->student?->group?->name ?? '-' }}</td>
                                 <td class="px-4 py-3.5 text-center">
-                                    <span class="inline-block px-2 py-0.5 rounded text-xs font-bold {{ $item->computed_grade === 'A+' || $item->computed_grade === 'A' ? 'bg-emerald-100 text-emerald-700' : ($item->computed_grade === 'B' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700') }}">
+                                    <span class="inline-block px-2 py-0.5 rounded text-xs font-bold {{ $item->computed_grade === 'A+' || $item->computed_grade === 'A' ? 'bg-emerald-100 text-emerald-700' : ($item->computed_grade === 'B+' || $item->computed_grade === 'B' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700') }}">
                                         {{ $item->computed_grade }}
                                     </span>
                                 </td>

@@ -9,7 +9,9 @@ use App\Models\ProgramEntry;
 use App\Models\ScoreSheet;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\PointCalculationService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -152,7 +154,7 @@ class JudgeController extends Controller
         return view('judge.evaluate', compact('judge', 'program', 'entries', 'scoreSheets'));
     }
 
-    public function saveScore(Request $request, Program $program, ProgramEntry $entry): RedirectResponse
+    public function saveScore(Request $request, Program $program, ProgramEntry $entry): JsonResponse|RedirectResponse
     {
         $judge = $this->getJudge();
 
@@ -164,13 +166,29 @@ class JudgeController extends Controller
         $criteriaScores = [];
         $total = 0;
 
-        foreach ($criteria as $criterion) {
-            $score = (float) $request->input("scores.{$criterion->id}", 0);
-            if ($score > $criterion->max_marks) {
-                $score = $criterion->max_marks;
+        if ($criteria->isNotEmpty()) {
+            foreach ($criteria as $criterion) {
+                $score = (float) $request->input("scores.{$criterion->id}", 0);
+                if ($score > $criterion->max_marks) {
+                    $score = $criterion->max_marks;
+                }
+                $criteriaScores[$criterion->criterion_name] = $score;
+                $total += $score;
             }
-            $criteriaScores[$criterion->criterion_name] = $score;
-            $total += $score;
+        } else {
+            $total = (float) $request->input('total_score', $request->input('score', 0));
+            if ($total > 100) {
+                $total = 100;
+            }
+        }
+
+        // Judge Grade option (A+, A, B+, B, C)
+        $grade = $request->input('grade');
+        if (empty($grade) && $total > 0) {
+            $grade = PointCalculationService::getGradeFromScore($total)['grade'] ?? null;
+        }
+        if ($grade) {
+            $criteriaScores['grade'] = strtoupper(trim($grade));
         }
 
         $remarks = $request->input('remarks');
@@ -197,16 +215,19 @@ class JudgeController extends Controller
             'program_id' => $program->id,
             'entry_id' => $entry->id,
             'total_score' => $total,
+            'grade' => $grade,
         ]);
 
         $codeName = $entry->code_letter ? "Code {$entry->code_letter}" : "Participant #{$entry->id}";
-        $message = "Evaluation saved for {$codeName} (Score: {$total}).";
+        $gradeDisplay = $grade ? " • Grade {$grade}" : '';
+        $message = "Evaluation saved for {$codeName} (Score: {$total}{$gradeDisplay}).";
 
         if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'entry_id' => $entry->id,
                 'total_score' => $total,
+                'grade' => $grade,
                 'message' => $message,
             ]);
         }
