@@ -11,7 +11,7 @@
     <!-- Google Fonts (Multilingual: Sora, Manjari, Gayathri, Amiri, Noto Nastaliq Urdu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Gayathri:wght@400;700&family=JetBrains+Mono:wght@400;500;600;700&family=Manjari:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Gayathri:wght@400;700&family=Manjari:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
@@ -71,21 +71,16 @@
             font-display: swap;
         }
 
-        /* Public Portal Typography: Sora for all Headings, Body & UI; JetBrains Mono for Numbers/IDs */
+        /* Public Portal Typography: Sora for all Headings, Body & UI; Rockwell for Numbers/IDs */
         body,
         h1, h2, h3, h4, h5, h6,
-        .font-sora,
-        .font-sora,
         .font-sora {
             font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
         }
 
+        .font-rockwell,
         .font-mono,
         [data-mono] {
-            font-family: 'JetBrains Mono', 'Malayalam Sangam MN', monospace !important;
-        }
-
-        .font-rockwell {
             font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
         }
     </style>

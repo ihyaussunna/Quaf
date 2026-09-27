@@ -194,20 +194,10 @@
     font-display: swap;
 }
 
-/* Automatic Malayalam Unicode fallback for JetBrains Mono */
-@font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/fonts/Malayalam-Sangam-MN-Regular.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 400 900;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
 @theme {
     --font-sora: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-rockwell: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif;
-    --font-mono: 'JetBrains Mono', 'Malayalam Sangam MN', monospace;
+    --font-rockwell: 'Rockwell', 'Rockwell Std', 'Sora', serif;
+    --font-mono: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif;
     --font-ml-mn: 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
     --font-ml-sangam: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
     --font-ml: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
@@ -252,12 +242,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .font-rockwell {
-    font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
+    font-family: 'Rockwell', 'Rockwell Std', 'Sora', serif !important;
 }
 
 .font-mono,
 [data-mono] {
-    font-family: 'JetBrains Mono', 'Malayalam Sangam MN', monospace !important;
+    font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
 }
 
 .font-ml-mn {
