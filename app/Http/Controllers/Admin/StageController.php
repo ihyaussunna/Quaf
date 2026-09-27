@@ -18,7 +18,7 @@ class StageController extends Controller
             ->withCount('programs')
             ->get();
 
-        $programs = Program::orderBy('name')->get();
+        $programs = Program::where('is_stage', true)->orderBy('name')->get();
 
         return view('admin.stages.index', compact('stages', 'programs'));
     }
@@ -47,7 +47,7 @@ class StageController extends Controller
 
     public function edit(Stage $stage): View
     {
-        $programs = Program::orderBy('name')->get();
+        $programs = Program::where('is_stage', true)->orderBy('name')->get();
 
         return view('admin.stages.edit', compact('stage', 'programs'));
     }
