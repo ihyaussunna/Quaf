@@ -46,7 +46,38 @@ class RoleMiddleware
                 return $this->addNoCacheHeaders($next($request));
             }
 
-            abort(403, 'Unauthorized. You do not have permission to access this management area.');
+            // For JSON or API calls, return 403 response
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Unauthorized access.'], 403);
+            }
+
+            // Web requests: Never show a jarring 403 error page!
+            // If a non-admin is trying to access the Admin Panel (/admin*):
+            if ($request->is('admin*') || in_array('admin', $roles) || in_array('super_admin', $roles)) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->with('info', 'Admin പാനലിൽ പ്രവേശിക്കാൻ Admin വിവരങ്ങൾ നൽകി ലോഗിൻ ചെയ്യുക (Please login with Admin credentials).');
+            }
+
+            // For other sections, smoothly redirect to user's authorized dashboard
+            $dashUrl = match ($user->role) {
+                'super_admin', 'admin' => route('admin.dashboard'),
+                'group_leader' => route('leader.dashboard'),
+                'judge' => route('judge.dashboard'),
+                'media_team', 'media_manager' => route('media.dashboard'),
+                'green_room_coordinator' => route('greenroom.index'),
+                'program_committee', 'program_coordinator' => route('program-committee.dashboard'),
+                'student' => route('student.dashboard'),
+                default => route('home'),
+            };
+
+            if ($request->url() === $dashUrl) {
+                return redirect()->route('home');
+            }
+
+            return redirect($dashUrl)->with('error', 'നിങ്ങൾക്ക് ആ സെക്ഷൻ ആക്സസ് ചെയ്യാനുള്ള അനുമതിയില്ല.');
         }
 
         return $this->addNoCacheHeaders($next($request));

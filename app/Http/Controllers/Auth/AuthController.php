@@ -161,6 +161,12 @@ class AuthController extends Controller
             return redirect()->intended(route('admin.dashboard'));
         }
 
+        // Never redirect a non-admin to an admin intended URL
+        $intended = session()->get('url.intended');
+        if ($intended && str_contains($intended, '/admin')) {
+            session()->forget('url.intended');
+        }
+
         if ($user->isJudge()) {
             return redirect()->intended(route('judge.dashboard'));
         }

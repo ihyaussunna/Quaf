@@ -240,7 +240,7 @@ class ProgramCommitteePortalTest extends TestCase
     public function test_unauthorized_users_cannot_access_program_committee_portal(): void
     {
         $studentRes = $this->actingAs($this->studentUser)->get(route('program-committee.dashboard'));
-        $studentRes->assertStatus(403);
+        $studentRes->assertRedirect(route('login'));
     }
 
     public function test_program_can_be_created_without_category_selection_using_zone(): void

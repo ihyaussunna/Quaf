@@ -135,4 +135,13 @@ class LeaderLoginTest extends TestCase
         $response->assertRedirect(route('announcer.index'));
         $this->assertAuthenticatedAs($user);
     }
+
+    public function test_leader_accessing_admin_path_is_redirected_to_login_without_403_error(): void
+    {
+        $leader = User::where('role', 'group_leader')->first();
+        $response = $this->actingAs($leader)->get(route('admin.dashboard'));
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
 }

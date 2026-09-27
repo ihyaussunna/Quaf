@@ -560,15 +560,12 @@ class MediaPanelAndAccessControlTest extends TestCase
         $response->assertSee('WhatsApp Share');
     }
 
-    public function test_non_admin_accessing_admin_panel_receives_403_with_helpful_options(): void
+    public function test_non_admin_accessing_admin_panel_is_redirected_to_login_without_403_error(): void
     {
         $response = $this->actingAs($this->mediaUser)->get(route('admin.dashboard'));
 
-        $response->assertStatus(403);
-        $response->assertSee('Access Restricted');
-        $response->assertSee('Media team', false);
-        $response->assertSee('Log Out / Switch Account');
-        $response->assertSee('Go to Media Dashboard');
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
     }
 
     public function test_media_user_can_publish_result_via_publish_public_route(): void
