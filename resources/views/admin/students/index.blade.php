@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 font-sans">Participants</h1>
+            <h1 class="text-2xl font-bold text-slate-900 font-serif">Participants</h1>
             <p class="text-xs text-slate-500 mt-0.5">Manage registrations and chest numbers</p>
         </div>
         <div class="flex items-center gap-2">

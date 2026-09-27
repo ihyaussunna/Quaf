@@ -6,7 +6,7 @@
 
 @font-face {
     font-family: 'Rockwell';
-    src: url('/fonts/Rockwell-Light.woff2') format('woff2');
+    src: local('Rockwell Light'), local('Rockwell-Light'), url('/fonts/Rockwell-Light.woff2') format('woff2');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
@@ -14,7 +14,7 @@
 
 @font-face {
     font-family: 'Rockwell Std';
-    src: url('/fonts/Rockwell-Light.woff2') format('woff2');
+    src: local('Rockwell Light'), local('Rockwell-Light'), url('/fonts/Rockwell-Light.woff2') format('woff2');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
@@ -22,15 +22,7 @@
 
 @font-face {
     font-family: 'Rockwell';
-    src: url('/fonts/Rockwell-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Rockwell Std';
-    src: url('/fonts/Rockwell-Regular.woff2') format('woff2');
+    src: local('Rockwell'), local('Rockwell Regular'), local('Rockwell-Regular'), url('/fonts/Rockwell-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -38,32 +30,88 @@
 
 @font-face {
     font-family: 'Rockwell';
-    src: url('/fonts/Rockwell-Bold.woff2') format('woff2');
-    font-weight: 600 700;
+    src: local('Rockwell'), local('Rockwell Regular'), local('Rockwell-Regular'), url('/fonts/Rockwell-Regular.woff2') format('woff2');
+    font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
     font-family: 'Rockwell Std';
-    src: url('/fonts/Rockwell-Bold.woff2') format('woff2');
-    font-weight: 600 700;
+    src: local('Rockwell Std'), local('Rockwell'), local('Rockwell-Regular'), url('/fonts/Rockwell-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: local('Rockwell Std'), local('Rockwell'), local('Rockwell-Regular'), url('/fonts/Rockwell-Regular.woff2') format('woff2');
+    font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
     font-family: 'Rockwell';
-    src: url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
-    font-weight: 800 900;
+    src: local('Rockwell Bold'), local('Rockwell-Bold'), local('Rockwell'), url('/fonts/Rockwell-Bold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell';
+    src: local('Rockwell Bold'), local('Rockwell-Bold'), local('Rockwell'), url('/fonts/Rockwell-Bold.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
     font-family: 'Rockwell Std';
-    src: url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
-    font-weight: 800 900;
+    src: local('Rockwell Std Bold'), local('Rockwell Bold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Bold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: local('Rockwell Std Bold'), local('Rockwell Bold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell';
+    src: local('Rockwell Extra Bold'), local('Rockwell-ExtraBold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell';
+    src: local('Rockwell Extra Bold'), local('Rockwell-ExtraBold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Rockwell Std';
+    src: local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
+    font-weight: 900;
     font-style: normal;
     font-display: swap;
 }
@@ -196,6 +244,15 @@
 .font-rockwell,
 .font-serif {
     font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
+}
+
+.font-sora,
+.font-sans {
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif !important;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono', 'Malayalam Sangam MN', monospace !important;
 }
 
 .font-ml-mn {

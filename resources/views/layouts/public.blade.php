@@ -18,6 +18,79 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Rockwell Web Font Declarations */
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Light'), local('Rockwell-Light'), url('/fonts/Rockwell-Light.woff2') format('woff2');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell'), local('Rockwell Regular'), local('Rockwell-Regular'), url('/fonts/Rockwell-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell'), local('Rockwell Regular'), local('Rockwell-Regular'), url('/fonts/Rockwell-Regular.woff2') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Bold'), local('Rockwell-Bold'), local('Rockwell'), url('/fonts/Rockwell-Bold.woff2') format('woff2');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Bold'), local('Rockwell-Bold'), local('Rockwell'), url('/fonts/Rockwell-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Extra Bold'), local('Rockwell-ExtraBold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Extra Bold'), local('Rockwell-ExtraBold'), local('Rockwell-Bold'), url('/fonts/Rockwell-Extra-Bold.woff2') format('woff2');
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* Typography Hierarchy: Headings -> Rockwell, Body/UI -> Sora, IDs/Numbers -> JetBrains Mono */
+        h1:not(.font-mono),
+        h2:not(.font-mono),
+        h3:not(.font-mono),
+        .font-rockwell,
+        .font-serif {
+            font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
+        }
+
+        body,
+        .font-sans,
+        .font-sora {
+            font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif !important;
+        }
+
+        .font-mono,
+        [data-mono] {
+            font-family: 'JetBrains Mono', 'Malayalam Sangam MN', monospace !important;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-[#be1e2d] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden">
 
