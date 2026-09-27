@@ -21,7 +21,7 @@
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-900 text-white">
                     Access Control & Security
                 </span>
-                <span class="text-xs text-slate-500 font-mono">QUAF Season 09</span>
+                <span class="text-xs text-slate-500 font-mono">Security & Access Hub</span>
             </div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-2 font-sans">
                 Panel Access & Credentials Hub
@@ -87,6 +87,113 @@
             <div class="text-2xl font-black text-slate-900 mt-1">{{ $stats['media'] }}</div>
         </div>
     </div>
+
+    <!-- Dedicated Group Leaders (5 Groups) Access Hub -->
+    @if(isset($groups) && $groups->isNotEmpty())
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                    <h2 class="text-base font-bold text-slate-900 tracking-tight">Group Leaders Access Credentials (5 Groups)</h2>
+                    <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-mono font-bold">Official Portals</span>
+                </div>
+                <div class="text-xs font-mono text-slate-500">
+                    Dedicated credentials to access respective Group Leader portals.
+                </div>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                @foreach($groups as $grp)
+                    @php
+                        $leaderUser = $grp->leader;
+                        $username = $grp->admin_username ?: ($leaderUser?->email ?? 'leader.' . strtolower($grp->code ?? 'group') . '@quaf.fest');
+                        $password = $grp->admin_password ?: ($leaderUser?->plain_password ?? 'Not Configured');
+                        $colorHex = $grp->color_hex ?: '#be1e2d';
+                    @endphp
+                    <div class="rounded-xl border border-slate-200/90 bg-slate-50/40 p-4 flex flex-col justify-between hover:border-slate-300 transition-all shadow-2xs hover:shadow-xs"
+                         x-data="{ showCardPass: false }">
+                        <div>
+                            <!-- Group Header -->
+                            <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/80">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $colorHex }};"></span>
+                                    <span class="font-black text-xs text-slate-900 uppercase tracking-tight">{{ $grp->name }}</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase text-white shadow-2xs" style="background-color: {{ $colorHex }};">
+                                    {{ $grp->code }}
+                                </span>
+                            </div>
+
+                            <!-- Leader Name -->
+                            <div class="mt-3">
+                                <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Team Leader</div>
+                                <div class="text-xs font-bold text-slate-800 line-clamp-1 mt-0.5" title="{{ $leaderUser?->name ?? 'Team Leader' }}">
+                                    {{ $leaderUser?->name ?? 'Team Leader' }}
+                                </div>
+                            </div>
+
+                            <!-- Username -->
+                            <div class="mt-3">
+                                <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Username</div>
+                                <div class="flex items-center justify-between gap-1.5 mt-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
+                                    <span class="font-mono text-[11px] text-slate-700 truncate select-all">{{ $username }}</span>
+                                    <button type="button" 
+                                            @click="copyText('{{ $username }}', 'g_u_{{ $grp->id }}')" 
+                                            class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800 shrink-0" 
+                                            title="Copy Username">
+                                        <template x-if="copiedId === 'g_u_{{ $grp->id }}'">
+                                            <span class="text-[10px] font-bold text-emerald-600">✓</span>
+                                        </template>
+                                        <template x-if="copiedId !== 'g_u_{{ $grp->id }}'">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        </template>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mt-2.5">
+                                <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Password</div>
+                                <div class="flex items-center justify-between gap-1 mt-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
+                                    <span class="font-mono text-[11px] text-slate-900 font-semibold truncate select-all">
+                                        <span x-show="showCardPass">{{ $password }}</span>
+                                        <span x-show="!showCardPass" class="tracking-widest">••••••••</span>
+                                    </span>
+                                    <div class="flex items-center shrink-0">
+                                        <button type="button" @click="showCardPass = !showCardPass" class="p-1 text-slate-400 hover:text-slate-700" title="Show/Hide">
+                                            <svg x-show="!showCardPass" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            <svg x-show="showCardPass" class="w-3.5 h-3.5 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                                        </button>
+                                        <button type="button" 
+                                                @click="copyText('{{ $password }}', 'g_p_{{ $grp->id }}')" 
+                                                class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800" 
+                                                title="Copy Password">
+                                            <template x-if="copiedId === 'g_p_{{ $grp->id }}'">
+                                                <span class="text-[10px] font-bold text-emerald-600">✓</span>
+                                            </template>
+                                            <template x-if="copiedId !== 'g_p_{{ $grp->id }}'">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            </template>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Action Link -->
+                        <div class="mt-4 pt-3 border-t border-slate-200/70 flex items-center justify-between text-[11px]">
+                            <a href="{{ route('admin.groups.show', $grp) }}" class="font-bold text-slate-600 hover:text-[#be1e2d] transition-colors">
+                                View Group →
+                            </a>
+                            <a href="{{ route('login') }}" target="_blank" class="font-mono text-slate-400 hover:text-slate-700">
+                                Portal Login ↗
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
     <!-- Filter & Search Toolbar -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
@@ -236,7 +343,7 @@
 
                             <!-- Password with Eye Toggle & 1-Click Copy -->
                             <td class="py-4 px-4 align-middle">
-                                @php $pass = $user->plain_password ?? 'Not Available'; @endphp
+                                @php $pass = $user->plain_password ?? $user->ledGroup?->admin_password ?? 'Not Available'; @endphp
                                 <div class="flex items-center gap-2">
                                     <div class="font-mono text-xs px-2.5 py-1 rounded bg-slate-100 border border-slate-200 select-all">
                                         <span x-show="showPass">{{ $pass }}</span>

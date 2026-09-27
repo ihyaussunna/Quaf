@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Participant Delegate Roster — QUAF Season 09</title>
+    <title>Participant Delegate Registry — QUAF</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -179,9 +179,8 @@
             <div class="flex items-center gap-4">
                 <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-14 w-auto object-contain">
                 <div>
-                    <h1 class="text-xl font-black font-serif text-slate-900 uppercase tracking-tight">QUAF — Season 09</h1>
-                    <p class="text-xs font-semibold text-slate-600">Official Participant Delegate Registry & Roll Sheet</p>
-                    <p class="text-[11px] text-slate-500">Ihyaussunna Students Union, Jamia Markaz</p>
+                    <h1 class="text-xl font-black font-serif text-slate-900 uppercase tracking-tight">Participant Delegate Registry & Roll Sheet</h1>
+                    <p class="text-xs font-semibold text-slate-600">Ihyaussunna Students Union, Jamia Markaz</p>
                 </div>
             </div>
 
@@ -302,7 +301,7 @@
                 </div>
             </div>
             <div class="text-center text-[10px] text-slate-400 font-mono mt-6">
-                QUAF 2026 Season 09 • Markazu Saquafathi Sunniyya • Official Participant Enrollment List
+                Markazu Saquafathi Sunniyya • Ihyaussunna Students Union • Official Participant Enrollment List
             </div>
         </div>
 

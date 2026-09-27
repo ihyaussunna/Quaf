@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => $student->name . ' — Participant Verification | QUAF Season 09'])
+@extends('layouts.public', ['title' => $student->name . ' — Participant Verification | QUAF'])
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'QUAF — Season 09 | Ihyaussunna Students Union'])
+@extends('layouts.public', ['title' => 'QUAF | Ihyaussunna Students Union'])
 
 @section('content')
 
@@ -25,7 +25,7 @@
                             <span class="text-slate-700">2nd {{ $res->secondEntry?->student?->name ?? 'Team ' . $res->secondEntry?->group?->name }}</span>
                         </div>
                     @empty
-                        <span class="text-slate-600">Welcome to QUAF Season 09 — Live program scores and stage calls are active.</span>
+                        <span class="text-slate-600">Welcome to QUAF — Live program scores and stage calls are active.</span>
                     @endforelse
                 </div>
             </div>
@@ -48,7 +48,7 @@
             <div class="w-full lg:w-1/2 flex items-center justify-center lg:justify-start">
                 <div class="relative group">
                     <img src="{{ asset('images/quaf-title-logo.png') }}" 
-                         alt="QUAF Season 09" 
+                         alt="QUAF" 
                          class="w-full max-w-[280px] xs:max-w-[340px] sm:max-w-md md:max-w-lg lg:max-w-xl h-auto object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-[1.02]">
                 </div>
             </div>

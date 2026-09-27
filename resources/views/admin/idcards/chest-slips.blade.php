@@ -84,11 +84,8 @@
                 <!-- Top Header -->
                 <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                     <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-[#f3bd2e] text-white flex items-center justify-center font-serif font-black text-xs">
-                            Q9
-                        </div>
+                        <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF" class="h-6 w-auto object-contain">
                         <div>
-                            <h3 class="font-serif font-black text-xs uppercase tracking-wider text-slate-900">QUAF SEASON 09</h3>
                             <p class="text-[8px] font-mono text-slate-500 uppercase">Ihyaussunna • Markaz</p>
                         </div>
                     </div>

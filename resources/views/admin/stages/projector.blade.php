@@ -298,7 +298,7 @@
                         {{ $stage->name }} • {{ $stage->code }}
                     </span>
                     <span class="px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
-                        QUAF Season 09
+                        LIVE STAGE DISPLAY
                     </span>
                 </div>
             </div>
@@ -309,11 +309,11 @@
     <!-- Bottom Marquee Ticker -->
     <footer class="bg-white border-t border-slate-200 px-6 py-3 shadow-inner flex items-center gap-4 text-xs font-mono">
         <span class="px-2.5 py-1 rounded bg-amber-500 text-white font-extrabold tracking-wider uppercase whitespace-nowrap shadow-sm">
-            QUAF 9.0 BULLETIN
+            QUAF BULLETIN
         </span>
         <div class="flex-1 overflow-hidden whitespace-nowrap">
             <div class="inline-block animate-marquee font-medium text-slate-700">
-                QUAF Season 09 • Organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya • Official Stage Display • Auto-refreshes every 15 seconds • Results and schedules available at the public portal.
+                Organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya • Official Stage Display • Auto-refreshes every 15 seconds • Results and schedules available at the public portal.
             </div>
         </div>
         <div class="text-slate-400 hidden sm:block whitespace-nowrap">

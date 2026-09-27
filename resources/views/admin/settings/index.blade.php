@@ -91,7 +91,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs font-mono text-slate-600 mb-2 uppercase tracking-wider font-semibold">Festival Name</label>
-                    <input type="text" name="festival_name" value="{{ $settings['festival_name'] ?? 'QUAF — Season 09' }}" required
+                    <input type="text" name="festival_name" value="{{ $settings['festival_name'] ?? 'QUAF' }}" required
                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                 </div>
                 <div>

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Certificate Verification | QUAF Season 09'])
+@extends('layouts.public', ['title' => 'Certificate Verification | QUAF'])
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -50,7 +50,7 @@
             </p>
 
             <p class="text-xs text-slate-500 italic">
-                conducted during QUAF Season 09 under the auspices of Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.
+                conducted under the auspices of Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.
             </p>
         </div>
 

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Festival Theater & Highlights | QUAF Season 09'])
+@extends('layouts.public', ['title' => 'Festival Theater & Highlights | QUAF'])
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16" x-data="{
@@ -9,7 +9,7 @@
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">CINEMATIC ARCHIVES</span>
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Theater</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
-            Watch live broadcasts, event highlights, and grand choral performances from QUAF Season 09.
+            Watch live broadcasts, event highlights, and grand choral performances.
         </p>
     </div>
 

@@ -85,7 +85,9 @@ class PanelAccessController extends Controller
             'announcer' => User::where('role', 'announcer')->count(),
         ];
 
-        return view('admin.panel-access.index', compact('users', 'stats'));
+        $groups = Group::with('leader')->orderBy('name')->get();
+
+        return view('admin.panel-access.index', compact('users', 'stats', 'groups'));
     }
 
     /**

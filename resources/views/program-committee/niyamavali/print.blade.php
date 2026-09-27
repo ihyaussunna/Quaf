@@ -65,10 +65,10 @@
         <div class="border-b-2 border-slate-900 pb-6 flex items-center justify-between gap-6">
             <div class="space-y-1">
                 <div class="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">
-                    Markaz Cultural Festival • Season 09
+                    Markazu Saquafathi Sunniyya • Ihyaussunna
                 </div>
                 <h1 class="text-2xl font-serif font-black tracking-tight text-slate-900 uppercase">
-                    QUAF FESTIVAL 2026
+                    OFFICIAL NIYAMAVALI & RULES
                 </h1>
                 <p class="text-xs font-malayalam font-bold text-slate-700">
                     Program Committee • Official Competition Rules

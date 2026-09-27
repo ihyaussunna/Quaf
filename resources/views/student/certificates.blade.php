@@ -5,7 +5,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-serif font-black text-slate-900">My Digital Certificates</h1>
-            <p class="text-xs font-mono text-slate-500 mt-1">Official merit and participation credentials awarded during QUAF Season 09.</p>
+            <p class="text-xs font-mono text-slate-500 mt-1">Official festival merit and participation credentials.</p>
         </div>
         <div>
             <span class="px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm text-xs font-mono text-[#f3bd2e] font-bold">

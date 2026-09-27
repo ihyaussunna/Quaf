@@ -90,7 +90,7 @@
                     </div>
 
                     <p class="text-xs font-mono text-slate-500 pt-2">
-                        held as part of QUAF Season 09 Grand Conclave on {{ $certificate->issued_at?->format('F d, Y') ?? date('F d, Y') }}.
+                        held as part of the Grand Conclave on {{ $certificate->issued_at?->format('F d, Y') ?? date('F d, Y') }}.
                     </p>
                 </div>
 
@@ -103,7 +103,7 @@
                         </div>
                         <div class="w-32 mx-auto border-t border-slate-300 pt-1">
                             <p class="text-[10px] font-mono text-slate-900 font-semibold uppercase">General Convener</p>
-                            <p class="text-[9px] font-mono text-slate-500">QUAF '09 Directorate</p>
+                            <p class="text-[9px] font-mono text-slate-500">QUAF Directorate</p>
                         </div>
                     </div>
 

@@ -6,7 +6,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-slate-900 font-sans">Groups</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Manage official competition groups for QUAF Season 09</p>
+            <p class="text-xs text-slate-500 mt-0.5">Manage official festival competition groups and leaders</p>
         </div>
         <div>
             <button @click="newTeamOpen = true" class="px-4 py-2 rounded-lg bg-[#be1e2d] hover:bg-[#a01624] text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors">

@@ -67,7 +67,7 @@
         <div class="pt-8">
             <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-24 w-auto object-contain mx-auto mb-6">
             <div class="text-xs font-mono uppercase tracking-widest text-slate-500 font-bold mb-2">
-                Markaz Cultural Festival • Season 09
+                Ihyaussunna Students Union • Jamia Markaz
             </div>
             <h1 class="text-4xl font-serif font-black tracking-tight text-slate-900 uppercase">
                 COMPETITION RULES & REGULATIONS

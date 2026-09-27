@@ -207,7 +207,8 @@ class AdminViewsTest extends TestCase
 
         foreach ($printRoutes as $pRoute) {
             $response = $this->actingAs($this->admin)->get($pRoute);
-            $response->assertSee('QUAF — Season 09');
+            $response->assertOk();
+            $response->assertSee('dashboard-logo.png');
             $response->assertSee('PRINT & PDF EXPORT', false);
         }
     }

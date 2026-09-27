@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'QUAF — Season 09' }} | Ihyaussunna Students Union</title>
-    <meta name="description" content="Official Festival Platform of QUAF Season 09 organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.">
+    <title>{{ $title ?? 'QUAF' }} | Ihyaussunna Students Union</title>
+    <meta name="description" content="Official Festival Platform organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.">
 
     <!-- Google Fonts (Multilingual: Sora, Manjari, Gayathri, Amiri, Noto Nastaliq Urdu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

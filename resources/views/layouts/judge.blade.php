@@ -30,7 +30,7 @@
                         <span class="font-bold tracking-wider text-sm sm:text-base text-slate-900 group-hover:text-[#be1e2d] transition-colors">JUDGES JURY</span>
                         <span class="px-2 py-0.5 rounded-full bg-red-50 text-[#be1e2d] border border-red-200 text-[10px] font-mono font-bold">CONFIDENTIAL</span>
                     </div>
-                    <span class="text-[10px] font-mono tracking-widest text-slate-500 block uppercase">QUAF SEASON 09</span>
+                    <span class="text-[10px] font-mono tracking-widest text-slate-500 block uppercase">EVALUATION CONSOLE</span>
                 </div>
             </a>
         </div>

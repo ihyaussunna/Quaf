@@ -27,7 +27,7 @@
                 <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 sm:h-12 w-auto object-contain">
                 <div>
                     <span class="font-bold tracking-wider text-base text-slate-900">STUDENT PORTAL</span>
-                    <span class="text-[10px] font-mono tracking-widest text-[#be1e2d] block uppercase font-bold">QUAF SEASON 09</span>
+                    <span class="text-[10px] font-mono tracking-widest text-[#be1e2d] block uppercase font-bold">DELEGATE CONSOLE</span>
                 </div>
             </a>
         </div>

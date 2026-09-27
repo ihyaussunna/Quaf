@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => $program->name . ' — Results | QUAF Season 09'])
+@extends('layouts.public', ['title' => $program->name . ' — Results | QUAF'])
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">

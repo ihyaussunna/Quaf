@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<title>QUAF Season 09</title>
+<title>QUAF</title>
 
 <style>
     * {
@@ -175,7 +175,6 @@
 
 <div class="content">
     <div class="line quaf">#QUAF</div>
-    <div class="line season">Season 09</div>
     <div class="line stay">Stay Tuned</div>
 </div>
 

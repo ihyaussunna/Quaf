@@ -61,7 +61,7 @@
                 <a href="{{ route('program-committee.dashboard') }}" class="flex items-center gap-3">
                     <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 w-auto object-contain">
                     <div>
-                        <div class="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">QUAF 09</div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">SAMITHI DESK</div>
                         <div class="text-[11px] font-bold text-slate-200">Program Samithi</div>
                     </div>
                 </a>

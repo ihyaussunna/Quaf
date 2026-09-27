@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Official Results & Merit Report — QUAF Season 09</title>
+    <title>Official Results & Merit Report — QUAF</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -146,7 +146,7 @@
             <div class="flex items-center gap-4">
                 <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-16 w-auto object-contain">
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-black font-serif text-slate-900 uppercase tracking-tight">QUAF — Season 09</h1>
+                    <h1 class="text-xl sm:text-2xl font-black font-serif text-slate-900 uppercase tracking-tight">Official Festival Results & Standings</h1>
                     <p class="text-xs font-semibold text-slate-600">Adabic Inheritance • Samastha Centenary Edition</p>
                     <p class="text-[11px] text-slate-500">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
                 </div>

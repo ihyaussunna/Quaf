@@ -30,8 +30,7 @@
 
                 <!-- Header -->
                 <div class="text-center space-y-1">
-                    <span class="text-xs font-mono tracking-widest text-[#f3bd2e] uppercase font-bold">Ihyaussunna Students Union • Markazu Saquafathi Sunniyya</span>
-                    <h2 class="text-3xl font-serif font-black text-slate-900 tracking-wider">QUAF — SEASON 09</h2>
+                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-14 mx-auto object-contain">
                     <p class="text-xs font-mono text-slate-500 italic">The Grand Cultural Conclave of Talents</p>
                 </div>
 
@@ -74,8 +73,7 @@
                 <div class="absolute top-4 right-4 text-[10px] font-mono text-blue-700 font-bold">CERTIFICATE OF PARTICIPATION</div>
 
                 <div class="text-center space-y-1">
-                    <span class="text-xs font-mono tracking-widest text-[#f3bd2e] uppercase font-bold">Ihyaussunna Students Union • Markaz</span>
-                    <h2 class="text-3xl font-serif font-black text-slate-900 tracking-wider">QUAF — SEASON 09</h2>
+                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-14 mx-auto object-contain">
                     <p class="text-xs font-mono text-slate-500 italic">Celebrating Art, Literature & Culture</p>
                 </div>
 
@@ -106,8 +104,8 @@
             <!-- Student ID Card Preview -->
             <div class="w-[320px] bg-white border-2 border-slate-300 rounded-2xl overflow-hidden shadow-xl text-center">
                 <div class="bg-gradient-to-r from-[#f3bd2e] to-[#be1e2d] p-4 text-white">
-                    <h3 class="font-serif font-black tracking-wider text-base">QUAF SEASON 09</h3>
-                    <p class="text-[9px] font-mono opacity-80 uppercase tracking-widest">Official Participant Badge</p>
+                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 mx-auto object-contain brightness-0 invert">
+                    <p class="text-[9px] font-mono opacity-80 uppercase tracking-widest mt-1">Official Participant Badge</p>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="w-24 h-24 mx-auto rounded-full bg-slate-100 border-4 border-[#f3bd2e]/30 flex items-center justify-center text-4xl shadow-inner">
@@ -133,8 +131,8 @@
             <!-- General Pass Preview -->
             <div class="w-[320px] bg-white border-2 border-slate-300 rounded-2xl overflow-hidden shadow-xl text-center">
                 <div class="bg-slate-900 p-4 text-white">
-                    <h3 class="font-serif font-black tracking-wider text-base text-[#f3bd2e]">QUAF SEASON 09</h3>
-                    <p class="text-[9px] font-mono opacity-80 uppercase tracking-widest">Official Accreditation Pass</p>
+                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 mx-auto object-contain brightness-0 invert">
+                    <p class="text-[9px] font-mono opacity-80 uppercase tracking-widest mt-1">Official Accreditation Pass</p>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="w-20 h-20 mx-auto rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center justify-center text-3xl">

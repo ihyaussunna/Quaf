@@ -54,7 +54,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-gray-200/60 py-4 text-center text-gray-400 text-xs bg-white">
-        QUAF Season 09 • Ihyaussunna Students Union
+        Ihyaussunna Students Union • Jamia Markaz
     </footer>
 
 </body>
