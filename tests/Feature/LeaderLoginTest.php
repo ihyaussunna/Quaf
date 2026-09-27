@@ -82,4 +82,57 @@ class LeaderLoginTest extends TestCase
         $response->assertRedirect(route('leader.dashboard'));
         $this->assertAuthenticated();
     }
+
+    public function test_admin_can_login_with_password_or_central_admin_key(): void
+    {
+        $admin = User::create([
+            'name' => 'QUAF Central Admin',
+            'email' => 'admin@quaf.fest',
+            'password' => Hash::make('CentralAdmin#2026@Quaf!'),
+            'plain_password' => 'CentralAdmin#2026@Quaf!',
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        // Attempt login with default 'password'
+        $response = $this->post(route('login'), [
+            'username' => 'admin@quaf.fest',
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($admin);
+
+        $this->post(route('logout'));
+        $this->assertGuest();
+
+        // Attempt login with 'CentralAdmin#2026@Quaf!'
+        $response = $this->post(route('login'), [
+            'username' => 'admin',
+            'password' => 'CentralAdmin#2026@Quaf!',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($admin);
+    }
+
+    public function test_user_can_login_with_plain_password_fallback(): void
+    {
+        $user = User::create([
+            'name' => 'Desk Announcer',
+            'email' => 'announcer@quaf.fest',
+            'password' => Hash::make('OldHashNotMatching123'),
+            'plain_password' => 'Announcer#2026@QuafLive!',
+            'role' => 'announcer',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post(route('login'), [
+            'username' => 'announcer',
+            'password' => 'Announcer#2026@QuafLive!',
+        ]);
+
+        $response->assertRedirect(route('announcer.index'));
+        $this->assertAuthenticatedAs($user);
+    }
 }
