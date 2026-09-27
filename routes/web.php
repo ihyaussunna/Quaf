@@ -137,6 +137,25 @@ Route::get('/clear-cache/{token}', function (string $token) {
     ]);
 });
 
+Route::get('/git-pull/{token}', function (string $token) {
+    if ($token !== 'quaf2026setup') {
+        abort(403, 'Unauthorized setup token.');
+    }
+
+    $output = '';
+    if (function_exists('shell_exec')) {
+        $output = (string) shell_exec('git pull origin main 2>&1');
+    } else {
+        $output = 'shell_exec is disabled on this server.';
+    }
+
+    return response('<html><body style="font-family:sans-serif;padding:30px;background:#0d1117;color:#c9d1d9;">'
+        .'<h2>Git Pull Output</h2><pre style="background:#161b22;padding:16px;border-radius:6px;border:1px solid #30363d;">'
+        .htmlspecialchars($output).'</pre>'
+        .'<p><a href="/init-database/quaf2026setup" style="color:#58a6ff;">Run Database Sync Now &rarr;</a></p>'
+        .'</body></html>');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes
