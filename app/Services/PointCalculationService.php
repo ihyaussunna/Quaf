@@ -555,11 +555,11 @@ class PointCalculationService
 
         // 5. Build SVG Series for each group
         $brandColors = [
-            'PACTO' => '#be1e2d',
-            'YUGO' => '#f3bd2e',
-            'CONCO' => '#005c94',
-            'LUMO' => '#009444',
-            'UNIO' => '#0f172a',
+            'PACTO' => '#2E3192',
+            'YUGO' => '#AD1E56',
+            'CONCO' => '#F8E709',
+            'LUMO' => '#56286B',
+            'UNIO' => '#7F1518',
         ];
 
         $series = [];
@@ -568,7 +568,7 @@ class PointCalculationService
 
         foreach ($groups as $g) {
             $codeUpper = strtoupper(trim((string) $g->code));
-            $color = $brandColors[$codeUpper] ?? $g->color_hex ?? '#0284c7';
+            $color = $brandColors[$codeUpper] ?? $g->color_hex ?? '#2E3192';
             $finalCache = (int) $g->points_cache;
 
             $coords = [];

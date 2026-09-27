@@ -25,29 +25,42 @@ class Group extends Model
         'PACTO_HIKMIC' => [
             'name' => 'Pacto Hikmic',
             'code' => 'PACTO',
-            'color_hex' => '#2e3192',
+            'color_hex' => '#2E3192',
         ],
         'YUGO_RUSHDIC' => [
             'name' => 'Yugo Rushdic',
             'code' => 'YUGO',
-            'color_hex' => '#ad1e56',
+            'color_hex' => '#AD1E56',
         ],
         'CONCO_MAJDIC' => [
             'name' => 'Conco Majdic',
             'code' => 'CONCO',
-            'color_hex' => '#f8e709',
+            'color_hex' => '#F8E709',
         ],
         'LUMO_FIKRIC' => [
             'name' => 'Lumo Fikric',
             'code' => 'LUMO',
-            'color_hex' => '#56286b',
+            'color_hex' => '#56286B',
         ],
         'UNIO_HILMIC' => [
             'name' => 'Unio Hilmic',
             'code' => 'UNIO',
-            'color_hex' => '#7f1518',
+            'color_hex' => '#7F1518',
         ],
     ];
+
+    public static function getColorForCode(?string $code): string
+    {
+        $colors = [
+            'PACTO' => '#2E3192',
+            'YUGO' => '#AD1E56',
+            'CONCO' => '#F8E709',
+            'LUMO' => '#56286B',
+            'UNIO' => '#7F1518',
+        ];
+
+        return $colors[strtoupper(trim((string) $code))] ?? '#2E3192';
+    }
 
     protected $fillable = [
         'name',

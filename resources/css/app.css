@@ -210,6 +210,13 @@
     --color-fest-blue: #005c94;
     --color-fest-green: #009444;
 
+    /* Official Academic Group Colors (spec: 2026 Teams) */
+    --color-team-pacto: #2E3192;
+    --color-team-yugo: #AD1E56;
+    --color-team-conco: #F8E709;
+    --color-team-lumo: #56286B;
+    --color-team-unio: #7F1518;
+
     --color-brand-orange: #be1e2d;
     --color-brand-red: #be1e2d;
     --color-brand-gold: #f3bd2e;

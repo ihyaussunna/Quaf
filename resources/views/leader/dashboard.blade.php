@@ -83,7 +83,7 @@
             <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-6 text-xs font-semibold">
                 @foreach(($chartData['series'] ?? []) as $ser)
                     <div class="flex items-center gap-1.5">
-                        <span class="w-4 h-3.5 rounded-xs" style="background-color: {{ $ser['color'] }};"></span>
+                        <span class="w-4 h-3.5 rounded-xs border border-black/10 shadow-2xs shrink-0" style="background-color: {{ $ser['color'] }};"></span>
                         <span class="text-gray-700 uppercase font-sora">{{ $ser['name'] }}</span>
                     </div>
                 @endforeach
@@ -148,16 +148,17 @@
                     @endphp
                     @forelse($teamsList as $index => $team)
                         <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/75 hover:bg-gray-100/80 transition">
-                            <div class="flex items-center gap-4">
-                                <span class="text-base font-extrabold text-brand-orange w-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-base font-extrabold text-brand-orange w-4 font-rockwell">
                                     {{ $index + 1 }}
                                 </span>
-                                <span class="text-sm font-bold text-gray-900">
+                                <span class="w-3 h-3 rounded-full shrink-0 border border-black/10 shadow-2xs" style="background-color: {{ $team->color_hex }};"></span>
+                                <span class="text-sm font-bold text-gray-900 font-sora">
                                     {{ $team->name }}
                                 </span>
                             </div>
                             <div>
-                                <span class="px-3.5 py-1 rounded-xl text-sm font-extrabold {{ $index === 0 ? 'bg-amber-100/70 text-amber-900' : ($index === 1 ? 'bg-gray-200/80 text-gray-800' : ($index === 2 ? 'bg-orange-100/80 text-orange-900' : 'bg-blue-50 text-blue-900')) }}">
+                                <span class="px-3.5 py-1 rounded-xl text-sm font-bold font-rockwell border shadow-2xs" style="background-color: {{ $team->color_hex }}15; color: {{ $team->color_hex }}; border-color: {{ $team->color_hex }}35;">
                                     {{ number_format($team->points_cache ?? $team->total_points ?? 0) }}
                                 </span>
                             </div>
