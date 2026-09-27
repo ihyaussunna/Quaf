@@ -17,7 +17,7 @@
                     $enrolledStudents = $firstEntry->participants->map(function ($st) use ($firstEntry, $leaderStudent) {
                         return [
                             'id' => $st->id,
-                            'chest' => (string)($st->student_id ?: $st->id),
+                            'chest' => ltrim((string)($st->chest_number ?: ($st->student_id ?: $st->id)), '#'),
                             'name' => $st->name,
                             'class' => $st->class_level ?? '',
                             'zone_id' => $st->zone_id,
@@ -30,7 +30,7 @@
                     $st = $firstEntry->student;
                     $enrolledStudents = [[
                         'id' => $st->id,
-                        'chest' => (string)($st->student_id ?: $st->id),
+                        'chest' => ltrim((string)($st->chest_number ?: ($st->student_id ?: $st->id)), '#'),
                         'name' => $st->name,
                         'class' => $st->class_level ?? '',
                         'zone_id' => $st->zone_id,
@@ -46,7 +46,7 @@
                 if (!$st) return null;
                 return [
                     'id' => $st->id,
-                    'chest' => (string)($st->student_id ?: $st->id),
+                    'chest' => ltrim((string)($st->chest_number ?: ($st->student_id ?: $st->id)), '#'),
                     'name' => $st->name,
                     'class' => $st->class_level ?? '',
                     'zone_id' => $st->zone_id,
@@ -99,7 +99,7 @@
     $studentsData = $students->map(function ($s) {
         return [
             'id' => $s->id,
-            'chest' => (string)($s->student_id ?: $s->id),
+            'chest' => ltrim((string)($s->chest_number ?: ($s->student_id ?: $s->id)), '#'),
             'name' => $s->name,
             'class' => $s->class_level ?? '',
             'zone_name' => $s->zone?->name ?? ($s->category ?? 'A Zone'),
@@ -427,40 +427,40 @@ function registrationManager() {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block">Total Programs</span>
+                <span class="text-[11px] font-sans uppercase text-slate-400 font-bold block">Total Programs</span>
                 <span class="text-2xl font-serif font-black text-slate-900">{{ $totalProgramsCount ?? $eligiblePrograms->count() }}</span>
             </div>
-            <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 font-mono font-bold text-xs">
-                #
+            <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             </div>
         </div>
 
         <a href="#entries-table-section" class="p-5 rounded-3xl bg-white border-2 border-emerald-500/40 shadow-sm flex items-center justify-between hover:border-emerald-500 transition-colors">
             <div>
-                <span class="text-[11px] font-mono uppercase text-emerald-600 font-bold block">Fully Registered</span>
+                <span class="text-[11px] font-sans uppercase text-emerald-600 font-bold block">Fully Registered</span>
                 <span class="text-2xl font-serif font-black text-emerald-700">{{ $fullyRegisteredCount ?? 0 }}</span>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
+            <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-sans font-bold">
                 Full Quota ✓
             </span>
         </a>
 
         <a href="#unregistered-section" class="p-5 rounded-3xl bg-white border-2 border-amber-500/40 shadow-sm flex items-center justify-between hover:border-amber-500 transition-colors">
             <div>
-                <span class="text-[11px] font-mono uppercase text-amber-600 font-bold block">Partially Registered</span>
+                <span class="text-[11px] font-sans uppercase text-amber-600 font-bold block">Partially Registered</span>
                 <span class="text-2xl font-serif font-black text-amber-700">{{ $partiallyRegisteredCount ?? 0 }}</span>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-mono font-bold">
+            <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-sans font-bold">
                 Slots Left !
             </span>
         </a>
 
         <a href="#unregistered-section" class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 transition-colors">
             <div>
-                <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block">Unregistered Programs</span>
+                <span class="text-[11px] font-sans uppercase text-slate-400 font-bold block">Unregistered Programs</span>
                 <span class="text-2xl font-serif font-black text-slate-700">{{ $unregisteredProgramsCount ?? 0 }}</span>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-mono font-bold">
+            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-sans font-bold">
                 0 Enrolled
             </span>
         </a>
@@ -468,14 +468,14 @@ function registrationManager() {
 
     <!-- Registration Window Notice -->
     @if($isRegistrationOpen)
-        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono flex items-center justify-between shadow-2xs">
+        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sans flex items-center justify-between shadow-2xs">
             <span class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 <strong>Registration Window Open:</strong> You can submit individual and group program registrations for your group.
             </span>
         </div>
     @else
-        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono flex items-center justify-between shadow-2xs">
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-sans flex items-center justify-between shadow-2xs">
             <span class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 <strong>Registration Window Closed:</strong> Program registration is currently closed by the festival administration.
@@ -498,7 +498,7 @@ function registrationManager() {
     @endif
 
     @if(session('success'))
-        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-mono font-medium shadow-2xs">
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-sans font-medium shadow-2xs">
             {{ session('success') }}
         </div>
     @endif
@@ -519,7 +519,7 @@ function registrationManager() {
             <!-- Reactive Feedback Banners -->
             <div x-show="feedbackSuccess" 
                  x-transition 
-                 class="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-900 text-xs font-mono font-bold flex items-center justify-between shadow-xs">
+                 class="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-900 text-xs font-sans font-bold flex items-center justify-between shadow-xs">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span x-text="feedbackSuccess"></span>
@@ -529,7 +529,7 @@ function registrationManager() {
 
             <div x-show="feedbackError" 
                  x-transition 
-                 class="p-4 rounded-2xl bg-red-50 border-2 border-red-300 text-red-900 text-xs font-mono font-bold flex items-center justify-between shadow-xs">
+                 class="p-4 rounded-2xl bg-red-50 border-2 border-red-300 text-red-900 text-xs font-sans font-bold flex items-center justify-between shadow-xs">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#be1e2d] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     <span x-text="feedbackError"></span>
@@ -539,7 +539,7 @@ function registrationManager() {
 
             <!-- STEP 1: ZONE SELECTION -->
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-700 mb-1.5 font-bold">
+                <label class="block text-xs font-sans uppercase text-slate-700 mb-1.5 font-bold">
                     1. Select Zone <span class="text-red-500">*</span>
                 </label>
                 <select name="zone" 
@@ -558,12 +558,12 @@ function registrationManager() {
                         <option value="{{ $zName }}" {{ old('zone') == $zName ? 'selected' : '' }}>{{ $zName }}</option>
                     @endforeach
                 </select>
-                <p class="text-[11px] font-mono text-slate-500 mt-1">Select the festival zone to filter competitions and eligible students from {{ $group->name }}.</p>
+                <p class="text-[11px] font-sans text-slate-500 mt-1">Select the festival zone to filter competitions and eligible students from {{ $group->name }}.</p>
             </div>
 
             <!-- STEP 2: PROGRAM SELECTION (FILTERED BY ZONE) -->
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-700 mb-1.5 font-bold">
+                <label class="block text-xs font-sans uppercase text-slate-700 mb-1.5 font-bold">
                     2. Select Program <span class="text-red-500">*</span>
                 </label>
                 <select name="program_id" 
@@ -604,28 +604,28 @@ function registrationManager() {
                     @endforeach
                 </select>
                 <template x-if="currentProgram">
-                    <div class="mt-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono flex flex-wrap items-center justify-between gap-2.5 shadow-2xs">
+                    <div class="mt-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-sans flex flex-wrap items-center justify-between gap-2.5 shadow-2xs">
                         <div class="flex items-center gap-2">
                             <span>Type: <strong class="text-slate-800" x-text="currentProgram.type === 'group' ? 'Group Competition' : 'Individual Competition'"></strong></span>
                             <span class="text-slate-300">•</span>
-                            <span>Limit: <strong class="text-slate-800" x-text="currentProgram.limit"></strong></span>
+                            <span>Limit: <strong class="text-slate-800 font-mono" x-text="currentProgram.limit"></strong></span>
                         </div>
                         
                         <div class="flex items-center gap-2">
                             <template x-if="currentProgram.enrolled === 0">
                                 <span class="px-2.5 py-1 rounded-xl bg-slate-200 text-slate-700 font-bold">
-                                    Not Registered (0 / <span x-text="currentProgram.limit"></span> slots)
+                                    Not Registered (0 / <span class="font-mono" x-text="currentProgram.limit"></span> slots)
                                 </span>
                             </template>
                             <template x-if="currentProgram.enrolled > 0 && !currentProgram.is_full">
                                 <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 font-bold flex items-center gap-1.5">
-                                    <span>Partially Registered (<span x-text="currentProgram.enrolled"></span>/<span x-text="currentProgram.limit"></span>)</span>
-                                    <span class="text-amber-700 font-black">— <span x-text="currentProgram.remaining"></span> Slot(s) Available</span>
+                                    <span>Partially Registered (<span class="font-mono" x-text="currentProgram.enrolled"></span>/<span class="font-mono" x-text="currentProgram.limit"></span>)</span>
+                                    <span class="text-amber-700 font-black">— <span class="font-mono" x-text="currentProgram.remaining"></span> Slot(s) Available</span>
                                 </span>
                             </template>
                             <template x-if="currentProgram.is_full">
                                 <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
-                                    Quota Full (<span x-text="currentProgram.enrolled"></span>/<span x-text="currentProgram.limit"></span> slots filled ✓)
+                                    Quota Full (<span class="font-mono" x-text="currentProgram.enrolled"></span>/<span class="font-mono" x-text="currentProgram.limit"></span> slots filled ✓)
                                 </span>
                             </template>
                         </div>
@@ -638,10 +638,10 @@ function registrationManager() {
                 <div class="space-y-4 pt-2 border-t border-slate-100">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                            <label class="block text-xs font-mono uppercase text-slate-700 font-bold">
+                            <label class="block text-xs font-sans uppercase text-slate-700 font-bold">
                                 3. Selected Participants & Quota Roster <span class="text-red-500">*</span>
                             </label>
-                            <p class="text-[11px] font-mono text-slate-500">
+                            <p class="text-[11px] font-sans text-slate-500">
                                 <template x-if="currentProgram.is_registered">
                                     <span>
                                         Showing registered students for this competition. You can <strong>Remove</strong> any student to open a slot and search to add a replacement.
@@ -649,15 +649,15 @@ function registrationManager() {
                                 </template>
                                 <template x-if="!currentProgram.is_registered">
                                     <span>
-                                        Add up to <strong class="text-slate-800" x-text="participantLimit"></strong> participant(s) from {{ $group->name }} for this competition.
+                                        Add up to <strong class="text-slate-800 font-mono" x-text="participantLimit"></strong> participant(s) from {{ $group->name }} for this competition.
                                     </span>
                                 </template>
                                 <span x-show="isGroup" class="text-amber-700 font-semibold ml-1">(Designate one student as Team Leader)</span>
                             </p>
                         </div>
-                        <div class="text-xs font-mono px-3 py-1.5 rounded-xl border font-bold"
+                        <div class="text-xs font-sans px-3 py-1.5 rounded-xl border font-bold"
                              :class="selectedStudents.length >= participantLimit ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-orange-50 border-orange-200 text-orange-800'">
-                            Enrolled: <span x-text="selectedStudents.length"></span> / <span x-text="participantLimit"></span> Slot(s)
+                            Enrolled: <span class="font-mono" x-text="selectedStudents.length"></span> / <span class="font-mono" x-text="participantLimit"></span> Slot(s)
                         </div>
                     </div>
 
@@ -670,8 +670,8 @@ function registrationManager() {
 
                     <!-- Selected Students List -->
                     <div class="rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden bg-slate-50/50">
-                        <div class="p-3 bg-slate-100/80 font-mono text-xs font-bold text-slate-700 flex items-center justify-between">
-                            <span>Selected Students (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>)</span>
+                        <div class="p-3 bg-slate-100/80 font-sans text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span>Selected Students (<span class="font-mono" x-text="selectedStudents.length"></span> of <span class="font-mono" x-text="participantLimit"></span>)</span>
                             <span x-show="isGroup" class="text-[11px] text-slate-500">Select Leader (Name appears on result poster)</span>
                         </div>
 
@@ -686,21 +686,21 @@ function registrationManager() {
                                                    :checked="leaderStudentId == st.id" 
                                                    @change="leaderStudentId = st.id" 
                                                    class="text-brand-orange focus:ring-brand-orange">
-                                            <span class="text-[11px] font-mono font-bold" 
+                                            <span class="text-[11px] font-sans font-bold" 
                                                    :class="leaderStudentId == st.id ? 'text-brand-orange' : 'text-slate-400'" 
                                                    x-text="leaderStudentId == st.id ? 'LEADER' : 'Member'"></span>
                                         </label>
                                     </template>
-                                    <div class="h-10 w-10 rounded-xl bg-brand-orange text-white flex flex-col items-center justify-center font-mono font-black text-xs shadow-xs flex-shrink-0">
-                                        <span class="text-[8px] uppercase font-bold text-orange-100 leading-tight">CHEST</span>
-                                        <span x-text="st.chest"></span>
+                                    <div class="h-10 w-10 rounded-xl bg-brand-orange text-white flex flex-col items-center justify-center text-xs shadow-xs flex-shrink-0">
+                                        <span class="text-[8px] uppercase font-bold text-orange-100 leading-tight font-sans">CHEST</span>
+                                        <span class="font-mono font-bold" x-text="st.chest"></span>
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <span class="font-bold text-sm text-slate-900" x-text="st.name"></span>
-                                            <span class="font-mono text-xs text-brand-orange font-semibold" x-text="'#' + st.chest"></span>
+                                            <span class="font-mono text-xs text-brand-orange font-semibold" x-text="st.chest"></span>
                                         </div>
-                                        <div class="text-[11px] text-slate-500 font-mono">
+                                        <div class="text-[11px] text-slate-500 font-sans">
                                             <span x-text="'Zone: ' + st.zone_name"></span>
                                             <span class="ml-2" x-text="'Class: ' + (st.class || '-')"></span>
                                         </div>
@@ -709,22 +709,22 @@ function registrationManager() {
 
                                 <button type="button" 
                                         @click="removeStudent(st.id)" 
-                                        class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 text-xs font-mono font-bold flex items-center gap-1 transition-colors">
+                                        class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 text-xs font-sans font-bold flex items-center gap-1 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     Remove
                                 </button>
                             </div>
                         </template>
 
-                        <div x-show="selectedStudents.length === 0" class="p-6 text-center text-xs font-mono text-slate-400">
+                        <div x-show="selectedStudents.length === 0" class="p-6 text-center text-xs font-sans text-slate-400">
                             No students currently selected. Search and add candidates below.
                         </div>
                     </div>
 
                     <!-- Search Input to Add Student -->
                     <div x-show="selectedStudents.length < participantLimit" class="relative" @click.outside="showStudentDropdown = false">
-                        <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">
-                            Search & Add Student (Name or Chest #)
+                        <label class="block text-xs font-sans uppercase text-slate-600 mb-1.5 font-bold">
+                            Search & Add Student (Name or Chest Number)
                         </label>
                         <div class="relative">
                             <input type="text" 
@@ -742,7 +742,7 @@ function registrationManager() {
                         <div x-show="showStudentDropdown" 
                              class="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100"
                              style="display: none;">
-                            <div class="p-2 text-slate-400 text-[10px] uppercase font-mono tracking-wider bg-slate-50">
+                            <div class="p-2 text-slate-400 text-[10px] uppercase font-sans tracking-wider bg-slate-50 font-bold">
                                 Eligible Candidates in <span x-text="selectedZone"></span> ({{ $group->name }})
                             </div>
                             <template x-for="st in availableStudents" :key="st.id">
@@ -751,22 +751,22 @@ function registrationManager() {
                                         class="w-full text-left px-4 py-2.5 hover:bg-orange-50 flex items-center justify-between gap-3 transition-colors">
                                     <div>
                                         <span class="font-bold text-sm text-slate-800 block" x-text="st.name"></span>
-                                        <span class="text-[11px] text-slate-500 font-mono" x-text="'Chest #' + st.chest + ' • Zone: ' + st.zone_name + ' • Class: ' + (st.class || '-')"></span>
+                                        <span class="text-[11px] text-slate-500 font-sans"><span class="font-mono font-bold text-slate-800" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '-'"></span></span>
                                     </div>
-                                    <span class="px-2.5 py-1 rounded-lg bg-brand-orange text-white text-[11px] font-mono font-bold">
+                                    <span class="px-2.5 py-1 rounded-lg bg-brand-orange text-white text-[11px] font-sans font-bold">
                                         + Add
                                     </span>
                                 </button>
                             </template>
-                            <div x-show="availableStudents.length === 0" class="p-3 text-center text-xs font-mono text-slate-400">
+                            <div x-show="availableStudents.length === 0" class="p-3 text-center text-xs font-sans text-slate-400">
                                 No matching eligible students found in {{ $group->name }} for <span x-text="selectedZone"></span>.
                             </div>
                         </div>
                     </div>
 
-                    <div x-show="selectedStudents.length >= participantLimit" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-semibold flex items-center gap-2">
+                    <div x-show="selectedStudents.length >= participantLimit" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sans font-semibold flex items-center gap-2">
                         <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Available quota limit reached (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>). To replace a student, click Remove above. Click Save & Update Participants below to confirm.</span>
+                        <span>Available quota limit reached (<span class="font-mono" x-text="selectedStudents.length"></span> of <span class="font-mono" x-text="participantLimit"></span>). To replace a student, click Remove above. Click Save & Update Participants below to confirm.</span>
                     </div>
                 </div>
             </template>
@@ -777,7 +777,7 @@ function registrationManager() {
                         <button type="button" 
                                 @click="deleteCurrentProgramRegistration()" 
                                 :disabled="isSubmitting"
-                                class="px-4 py-2.5 rounded-xl text-xs font-mono font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center gap-1.5">
+                                class="px-4 py-2.5 rounded-xl text-xs font-sans font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             <span>Remove All Registrations for this Program</span>
                         </button>
@@ -788,7 +788,7 @@ function registrationManager() {
                     <button type="submit" 
                             :disabled="isSubmitting || !selectedProgramId || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit"
                             :class="isSubmitting || !selectedProgramId || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
-                            class="px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-brand-orange text-white transition-all flex items-center gap-2">
+                            class="px-6 py-3 rounded-xl text-xs font-sans font-bold uppercase tracking-wider bg-brand-orange text-white transition-all flex items-center gap-2">
                         <template x-if="isSubmitting">
                             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                         </template>
@@ -804,18 +804,18 @@ function registrationManager() {
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
             <div>
                 <h3 class="text-base font-serif font-bold text-slate-900">Registered Program Entries ({{ $entries->total() }})</h3>
-                <p class="text-[11px] font-mono text-slate-500">All programs enrolled by {{ $group->name }}. You can edit participants or remove an entry while registration is open.</p>
+                <p class="text-[11px] font-sans text-slate-500">All programs enrolled by {{ $group->name }}. You can edit participants or remove an entry while registration is open.</p>
             </div>
-            <span class="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-bold">
+            <span class="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sans font-bold">
                 {{ $registeredProgramsCount ?? 0 }} Unique Programs Registered ({{ $fullyRegisteredCount ?? 0 }} Full • {{ $partiallyRegisteredCount ?? 0 }} Partial)
             </span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-mono">
+            <table class="w-full text-left text-xs font-sans">
                 <thead>
                     <tr class="border-b border-slate-100 text-slate-400 uppercase">
-                        <th class="py-3 px-3">Chest / ID</th>
+                        <th class="py-3 px-3">Chest No</th>
                         <th class="py-3 px-3">Program</th>
                         <th class="py-3 px-3">Zone</th>
                         <th class="py-3 px-3">Participant / Competition Leader</th>
@@ -829,10 +829,10 @@ function registrationManager() {
                         @php
                             $isGroupComp = $e->isGroupEntry();
                             $displayLeader = $isGroupComp ? ($e->leaderStudent() ?? $e->student) : $e->student;
-                            $displayChest = $displayLeader?->student_id ?: ($e->chest_number ?: '—');
+                            $displayChest = ltrim((string)($displayLeader?->student_id ?: ($e->chest_number ?: '—')), '#');
                         @endphp
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="py-3 px-3 font-bold text-brand-orange font-mono">#{{ $displayChest }}</td>
+                            <td class="py-3 px-3 font-bold text-brand-orange font-mono">{{ $displayChest }}</td>
                             <td class="py-3 px-3 font-sans font-semibold text-slate-900">
                                 <span class="text-[10px] font-mono text-slate-400 mr-1">[{{ $e->program->code }}]</span>
                                 {{ $e->program->name }}
@@ -842,7 +842,7 @@ function registrationManager() {
                                 @if($displayLeader)
                                     <span class="font-bold text-slate-900">{{ $displayLeader->name }}</span>
                                     @if($isGroupComp)
-                                        <span class="text-[10px] text-amber-700 font-mono font-bold block">
+                                        <span class="text-[10px] text-amber-700 font-sans font-bold block">
                                             (Group Leader • {{ max(1, $e->participants->count()) }} members)
                                         </span>
                                     @endif
@@ -860,13 +860,13 @@ function registrationManager() {
                                 @if($isRegistrationOpen)
                                     <div class="inline-flex items-center gap-1.5">
                                         <a href="{{ route('leader.registrations.edit', $e) }}" 
-                                           class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white text-slate-700 font-mono text-[11px] font-bold transition-colors">
+                                           class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white text-slate-700 font-sans text-[11px] font-bold transition-colors">
                                             Edit
                                         </a>
                                         <form method="POST" action="{{ route('leader.registrations.destroy', $e) }}" onsubmit="return confirm('Are you sure you want to remove this registration entry?');" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-700 font-mono text-[11px] font-bold transition-colors">
+                                            <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-600 hover:text-white text-red-700 font-sans text-[11px] font-bold transition-colors">
                                                 Delete
                                             </button>
                                         </form>
@@ -894,10 +894,10 @@ function registrationManager() {
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
                 <h3 class="text-base font-serif font-bold text-slate-900">Unregistered Programs & Open Quota Slots ({{ ($unregisteredPrograms ?? collect())->count() }})</h3>
-                <p class="text-[11px] font-mono text-slate-500">Competitions with available or partially enrolled participant slots for {{ $group->name }}.</p>
+                <p class="text-[11px] font-sans text-slate-500">Competitions with available or partially enrolled participant slots for {{ $group->name }}.</p>
             </div>
             <div class="flex items-center gap-2">
-                <select x-model="filterZone" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-700 focus:outline-none">
+                <select x-model="filterZone" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-sans text-slate-700 focus:outline-none">
                     <option value="">All Zones</option>
                     @foreach($zones as $z)
                         <option value="{{ $z->name }}">{{ $z->name }}</option>
@@ -907,7 +907,7 @@ function registrationManager() {
         </div>
 
         <div class="overflow-x-auto max-h-96 overflow-y-auto">
-            <table class="w-full text-left text-xs font-mono">
+            <table class="w-full text-left text-xs font-sans">
                 <thead class="sticky top-0 bg-white border-b border-slate-100 text-slate-400 uppercase">
                     <tr>
                         <th class="py-2.5 px-3">Code</th>
@@ -937,15 +937,15 @@ function registrationManager() {
                             $isPartial = ($enrolled > 0 && $enrolled < $limit);
                         @endphp
                         <tr x-show="!filterZone || filterZone === '{{ addslashes($upZone) }}'" class="hover:bg-amber-50/40 transition">
-                            <td class="py-2.5 px-3 font-bold text-slate-600">{{ $up->code }}</td>
+                            <td class="py-2.5 px-3 font-bold text-slate-600 font-mono">{{ $up->code }}</td>
                             <td class="py-2.5 px-3 font-sans font-semibold text-slate-900">{{ $up->name }}</td>
                             <td class="py-2.5 px-3">{{ $upZone }}</td>
                             <td class="py-2.5 px-3 capitalize">{{ $up->type }}</td>
                             <td class="py-2.5 px-3">
-                                <span class="font-bold {{ $isPartial ? 'text-amber-800' : 'text-slate-700' }}">
+                                <span class="font-bold {{ $isPartial ? 'text-amber-800' : 'text-slate-700' }} font-mono">
                                     {{ $enrolled }} / {{ $limit }} Filled
                                 </span>
-                                <span class="text-[10px] text-slate-400 block font-normal">({{ $remaining }} slot{{ $remaining > 1 ? 's' : '' }} remaining)</span>
+                                <span class="text-[10px] text-slate-400 block font-normal font-mono">({{ $remaining }} slot{{ $remaining > 1 ? 's' : '' }} remaining)</span>
                             </td>
                             <td class="py-2.5 px-3">
                                 @if($isPartial)
@@ -962,7 +962,7 @@ function registrationManager() {
                                 @if($isRegistrationOpen)
                                     <a href="#zone_select" 
                                        @click="selectedZone = '{{ addslashes($upZone) }}'; onZoneChange(); selectedProgramId = {{ $up->id }}; onProgramChange();"
-                                       class="inline-block px-2.5 py-1 rounded-lg bg-brand-orange text-white hover:bg-orange-600 text-[11px] font-mono font-bold transition-colors shadow-2xs">
+                                       class="inline-block px-2.5 py-1 rounded-lg bg-brand-orange text-white hover:bg-orange-600 text-[11px] font-sans font-bold transition-colors shadow-2xs">
                                         + Enroll
                                     </a>
                                 @endif
