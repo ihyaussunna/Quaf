@@ -4,7 +4,7 @@
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
         <a href="{{ route('admin.judges.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to Judges</a>
-        <h1 class="text-3xl font-serif font-black text-slate-900">Register Judge</h1>
+        <h1 class="text-3xl font-sora font-black text-slate-900">Register Judge</h1>
         <p class="text-xs font-mono text-slate-500 mt-1">Creates a judge profile and login credentials for evaluating assigned programs.</p>
     </div>
 

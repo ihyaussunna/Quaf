@@ -6,7 +6,7 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-serif font-black text-slate-900 tracking-tight">Rules Hub (Niyamavali)</h1>
+            <h1 class="text-2xl font-sora font-black text-slate-900 tracking-tight">Rules Hub (Niyamavali)</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">
                 Manage official competition rules, timing instructions, and scoring criteria.
             </p>
@@ -26,7 +26,7 @@
            class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 transition">
             <div>
                 <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">Total Programs</span>
-                <span class="text-2xl font-serif font-black text-slate-900">{{ $totalCount }}</span>
+                <span class="text-2xl font-sora font-black text-slate-900">{{ $totalCount }}</span>
             </div>
             <span class="px-2 py-1 rounded bg-slate-100 text-slate-600 font-mono font-bold text-xs">All</span>
         </a>
@@ -35,7 +35,7 @@
            class="p-4 rounded-2xl bg-white border-2 border-emerald-500/40 shadow-sm flex items-center justify-between hover:border-emerald-500 transition">
             <div>
                 <span class="text-[10px] font-mono uppercase text-emerald-600 font-bold block">Rules Configured</span>
-                <span class="text-2xl font-serif font-black text-emerald-700">{{ $withRulesCount }}</span>
+                <span class="text-2xl font-sora font-black text-emerald-700">{{ $withRulesCount }}</span>
             </div>
             <span class="px-2 py-1 rounded bg-emerald-100 text-emerald-800 font-mono font-bold text-xs">Added ✓</span>
         </a>
@@ -44,7 +44,7 @@
            class="p-4 rounded-2xl bg-white border-2 border-amber-500/40 shadow-sm flex items-center justify-between hover:border-amber-500 transition">
             <div>
                 <span class="text-[10px] font-mono uppercase text-amber-600 font-bold block">Pending Rules</span>
-                <span class="text-2xl font-serif font-black text-amber-700">{{ $missingRulesCount }}</span>
+                <span class="text-2xl font-sora font-black text-amber-700">{{ $missingRulesCount }}</span>
             </div>
             <span class="px-2 py-1 rounded bg-amber-100 text-amber-800 font-mono font-bold text-xs">Action !</span>
         </a>
@@ -91,9 +91,9 @@
                 <thead>
                     <tr class="bg-slate-50/75 border-b border-slate-200 text-slate-500 uppercase tracking-wider">
                         <th class="py-3.5 px-4 w-28">Code</th>
-                        <th class="py-3.5 px-4 font-sans">Program</th>
+                        <th class="py-3.5 px-4 font-sora">Program</th>
                         <th class="py-3.5 px-4">Zone</th>
-                        <th class="py-3.5 px-4 font-sans">Niyamavali Preview</th>
+                        <th class="py-3.5 px-4 font-sora">Niyamavali Preview</th>
                         <th class="py-3.5 px-4 text-center">Status</th>
                         <th class="py-3.5 px-4 text-right">Action</th>
                     </tr>
@@ -107,7 +107,7 @@
                                     {{ $p->code }}
                                 </span>
                             </td>
-                            <td class="py-3.5 px-4 font-sans">
+                            <td class="py-3.5 px-4 font-sora">
                                 <a href="{{ route('program-committee.programs.show', $p) }}" class="font-bold text-slate-900 hover:text-brand-burgundy transition block">
                                     {{ $p->name }}
                                 </a>
@@ -118,7 +118,7 @@
                             <td class="py-3.5 px-4">
                                 {{ $p->zone?->name ?? $p->eligibility }}
                             </td>
-                            <td class="py-3.5 px-4 font-sans max-w-md">
+                            <td class="py-3.5 px-4 font-sora max-w-md">
                                 @if($hasRules)
                                     <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                                         {{ $p->rules }}

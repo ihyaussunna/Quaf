@@ -6,7 +6,7 @@
         <a href="{{ route('admin.students.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to Students</a>
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-serif font-black text-slate-900">Student 360° Profile</h1>
+                <h1 class="text-3xl font-sora font-black text-slate-900">Student 360° Profile</h1>
                 <p class="text-xs font-mono text-slate-500 mt-1">Comprehensive festival dossier for {{ $student->name }} ({{ $student->student_id }}).</p>
             </div>
             <div class="flex items-center gap-3">
@@ -31,7 +31,7 @@
                     @elseif($student->photo_url)
                         <img src="{{ $student->photo_url }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-full flex items-center justify-center font-serif text-5xl font-bold text-[#f3bd2e]">
+                        <div class="w-full h-full flex items-center justify-center font-sora text-5xl font-bold text-[#f3bd2e]">
                             {{ substr($student->name, 0, 1) }}
                         </div>
                     @endif
@@ -56,7 +56,7 @@
                             {{ $student->category }}
                         </span>
                     </div>
-                    <h2 class="text-3xl font-serif font-black text-slate-900">{{ $student->name }}</h2>
+                    <h2 class="text-3xl font-sora font-black text-slate-900">{{ $student->name }}</h2>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs font-mono">
@@ -78,7 +78,7 @@
                     </div>
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <span class="text-[10px] text-slate-500 uppercase block">Total Points Won</span>
-                        <span class="text-[#f3bd2e] font-serif font-black text-base">{{ $student->points_cache }} pts</span>
+                        <span class="text-[#f3bd2e] font-sora font-black text-base">{{ $student->points_cache }} pts</span>
                     </div>
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <span class="text-[10px] text-slate-500 uppercase block">Certificates</span>
@@ -92,7 +92,7 @@
     <!-- Registered Programs List -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-            <h3 class="font-serif font-bold text-lg text-slate-900">Registered Program Entries</h3>
+            <h3 class="font-sora font-bold text-lg text-slate-900">Registered Program Entries</h3>
             <span class="text-xs font-mono text-slate-500">{{ $student->entries->count() }} Entries</span>
         </div>
         <div class="overflow-x-auto">

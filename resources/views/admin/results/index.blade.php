@@ -5,8 +5,8 @@
     <!-- Top Header -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sans tracking-tight">Results & Leaderboard</h1>
-            <p class="text-xs text-slate-500 mt-1 font-sans">Manage program verdicts, review jury scorecards, and monitor real-time team championship standings.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sora tracking-tight">Results & Leaderboard</h1>
+            <p class="text-xs text-slate-500 mt-1 font-sora">Manage program verdicts, review jury scorecards, and monitor real-time team championship standings.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
@@ -235,7 +235,7 @@
                         <div class="w-7 h-7 rounded-lg bg-red-50 text-[#be1e2d] flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                         </div>
-                        <h2 class="font-bold text-slate-900 text-sm font-sans">Team Leaderboard</h2>
+                        <h2 class="font-bold text-slate-900 text-sm font-sora">Team Leaderboard</h2>
                     </div>
                     <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-100 flex items-center gap-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> LIVE
@@ -284,7 +284,7 @@
                     @endforelse
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-sans">
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-sora">
                     <span>Updates instantly on results</span>
                     <a href="{{ route('admin.points.index') }}" class="text-[#be1e2d] hover:underline font-medium">Points Rules →</a>
                 </div>

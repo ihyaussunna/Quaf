@@ -18,7 +18,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#f8fafc] text-gray-800 font-sans antialiased flex overflow-hidden">
+<body class="h-full bg-[#f8fafc] text-gray-800 font-sora antialiased flex overflow-hidden">
 
     <!-- Sidebar (Dark Slate / Charcoal matching original QUAF Fest) -->
     <aside id="sidebar" class="w-64 bg-[#141414] text-white flex-shrink-0 flex flex-col justify-between transition-all duration-300 z-30 select-none">

@@ -49,7 +49,7 @@
                     <p class="text-[11px] font-mono tracking-[0.3em] text-[#f3bd2e] uppercase font-bold">
                         IHYAUSSUNNA STUDENTS UNION • MARKAZU SAQUAFATHI SUNNIYYA
                     </p>
-                    <h2 class="text-4xl sm:text-5xl font-serif font-black tracking-widest text-[#f3bd2e] uppercase">
+                    <h2 class="text-4xl sm:text-5xl font-sora font-black tracking-widest text-[#f3bd2e] uppercase">
                         QUAF '09
                     </h2>
                     <p class="text-xs font-mono tracking-widest text-slate-500 uppercase">
@@ -57,7 +57,7 @@
                     </p>
                     
                     <div class="pt-6">
-                        <span class="inline-block px-6 py-1.5 border-y border-[#f3bd2e]/50 font-serif text-lg tracking-widest uppercase text-slate-900 font-bold">
+                        <span class="inline-block px-6 py-1.5 border-y border-[#f3bd2e]/50 font-sora text-lg tracking-widest uppercase text-slate-900 font-bold">
                             Certificate of Excellence
                         </span>
                     </div>
@@ -65,23 +65,23 @@
 
                 <!-- Certificate Body Text -->
                 <div class="mt-8 text-center space-y-4 max-w-2xl mx-auto">
-                    <p class="text-xs sm:text-sm font-serif italic text-slate-600">
+                    <p class="text-xs sm:text-sm font-sora italic text-slate-600">
                         This is proudly presented to
                     </p>
                     
                     <div class="py-2 border-b border-[#f3bd2e]/40 inline-block min-w-[280px]">
-                        <h3 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 tracking-wide">
+                        <h3 class="text-2xl sm:text-3xl font-sora font-bold text-slate-900 tracking-wide">
                             {{ $certificate->student->name }}
                         </h3>
                     </div>
 
-                    <p class="text-xs sm:text-sm font-sans text-slate-700 leading-relaxed">
-                        representing <span class="font-bold text-[#f3bd2e] font-serif">{{ $certificate->student->group->name }}</span>
-                        for securing <span class="font-bold text-slate-900 font-serif uppercase tracking-wider px-2 py-0.5 bg-amber-50 border border-[#f3bd2e]/40 rounded">{{ $certificate->position }}</span> in the event
+                    <p class="text-xs sm:text-sm font-sora text-slate-700 leading-relaxed">
+                        representing <span class="font-bold text-[#f3bd2e] font-sora">{{ $certificate->student->group->name }}</span>
+                        for securing <span class="font-bold text-slate-900 font-sora uppercase tracking-wider px-2 py-0.5 bg-amber-50 border border-[#f3bd2e]/40 rounded">{{ $certificate->position }}</span> in the event
                     </p>
 
                     <div class="py-1">
-                        <span class="text-xl sm:text-2xl font-serif font-bold text-[#f3bd2e] tracking-wider block">
+                        <span class="text-xl sm:text-2xl font-sora font-bold text-[#f3bd2e] tracking-wider block">
                             {{ $certificate->program->name }}
                         </span>
                         <span class="text-[11px] font-mono text-slate-500">
@@ -99,7 +99,7 @@
                     <!-- General Convener -->
                     <div class="space-y-2">
                         <div class="h-10 flex items-end justify-center">
-                            <span class="font-serif italic text-base text-[#f3bd2e]">Anas Al-Azhari</span>
+                            <span class="font-sora italic text-base text-[#f3bd2e]">Anas Al-Azhari</span>
                         </div>
                         <div class="w-32 mx-auto border-t border-slate-300 pt-1">
                             <p class="text-[10px] font-mono text-slate-900 font-semibold uppercase">General Convener</p>
@@ -121,7 +121,7 @@
                     <!-- General Secretary -->
                     <div class="space-y-2">
                         <div class="h-10 flex items-end justify-center">
-                            <span class="font-serif italic text-base text-[#f3bd2e]">Sayyid Munawwar</span>
+                            <span class="font-sora italic text-base text-[#f3bd2e]">Sayyid Munawwar</span>
                         </div>
                         <div class="w-32 mx-auto border-t border-slate-300 pt-1">
                             <p class="text-[10px] font-mono text-slate-900 font-semibold uppercase">General Secretary</p>

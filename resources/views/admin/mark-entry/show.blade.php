@@ -10,7 +10,7 @@
                 <span>/</span>
                 <span>{{ $program->code }}</span>
             </div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">{{ $program->name }}</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">{{ $program->name }}</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">
                 Zone: <span class="text-slate-800 font-bold">{{ $program->eligibility ?? 'A Zone' }}</span> • 
                 Venue: <span class="text-slate-800 font-bold">{{ $program->stage?->name ?? 'Off-Stage' }}</span> • 
@@ -38,7 +38,7 @@
     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
         <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h2 class="font-serif font-bold text-lg text-slate-900">1. Judge Score Entry</h2>
+                <h2 class="font-sora font-bold text-lg text-slate-900">1. Judge Score Entry</h2>
                 <p class="text-xs font-mono text-slate-500">Input evaluated marks for each participant or unit entry.</p>
             </div>
         </div>
@@ -79,7 +79,7 @@
                                     {{ $entry->student?->student_id ?? 'GROUP-'.$entry->id }}
                                 </td>
                                 <td class="px-4 py-3">
-                                    <span class="font-serif font-bold text-sm text-slate-900 block">
+                                    <span class="font-sora font-bold text-sm text-slate-900 block">
                                         {{ $entry->student?->name ?? $entry->group?->name }}
                                     </span>
                                 </td>
@@ -128,7 +128,7 @@
     <div class="bg-white border-2 border-[#f3bd2e]/30 rounded-2xl overflow-hidden shadow-xs">
         <div class="px-6 py-4 border-b border-slate-200 bg-amber-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h2 class="font-serif font-bold text-lg text-slate-900 flex items-center gap-2">
+                <h2 class="font-sora font-bold text-lg text-slate-900 flex items-center gap-2">
                     <span>2. Publish Official Verdict & Results</span>
                 </h2>
                 <p class="text-xs font-mono text-slate-600">

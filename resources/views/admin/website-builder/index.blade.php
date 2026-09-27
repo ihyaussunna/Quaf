@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Website Builder & Content</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Website Builder & Content</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Customize public landing page content, live stream feeds, announcements, and contact information.</p>
         </div>
         <div class="flex items-center gap-3">
@@ -22,7 +22,7 @@
         <!-- 1. Hero Section Content -->
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
             <div class="border-b border-slate-200 pb-3">
-                <h2 class="font-serif font-bold text-lg text-slate-900 flex items-center gap-2">
+                <h2 class="font-sora font-bold text-lg text-slate-900 flex items-center gap-2">
                     <span>🌟</span> Hero Section & Branding
                 </h2>
                 <p class="text-xs font-mono text-slate-500">Main headline, subtitle, and organizing bodies featured at the top of the homepage.</p>
@@ -52,7 +52,7 @@
         <!-- 2. Live Broadcast & Announcements -->
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
             <div class="border-b border-slate-200 pb-3">
-                <h2 class="font-serif font-bold text-lg text-slate-900 flex items-center gap-2">
+                <h2 class="font-sora font-bold text-lg text-slate-900 flex items-center gap-2">
                     <span>🔴</span> Live Broadcast & Flash News
                 </h2>
                 <p class="text-xs font-mono text-slate-500">YouTube live stream link and real-time announcement marquee ticker.</p>
@@ -78,7 +78,7 @@
         <!-- 3. About Section -->
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
             <div class="border-b border-slate-200 pb-3">
-                <h2 class="font-serif font-bold text-lg text-slate-900 flex items-center gap-2">
+                <h2 class="font-sora font-bold text-lg text-slate-900 flex items-center gap-2">
                     <span>📖</span> About Section
                 </h2>
                 <p class="text-xs font-mono text-slate-500">Tell visitors about the festival background, heritage, and vision.</p>
@@ -102,7 +102,7 @@
         <!-- 4. Contact & Social Channels -->
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
             <div class="border-b border-slate-200 pb-3">
-                <h2 class="font-serif font-bold text-lg text-slate-900 flex items-center gap-2">
+                <h2 class="font-sora font-bold text-lg text-slate-900 flex items-center gap-2">
                     <span>📱</span> Contact & Social Media Channels
                 </h2>
                 <p class="text-xs font-mono text-slate-500">Helpline phone number, official email, and links for social media handles.</p>

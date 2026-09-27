@@ -26,7 +26,7 @@
                 @endif
             </div>
 
-            <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight mt-1.5 font-sans">
+            <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight mt-1.5 font-sora">
                 {{ $result->program->name }}
             </h1>
             <p class="text-xs text-slate-500">

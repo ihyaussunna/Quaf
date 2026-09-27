@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
     <div class="mb-6 sm:mb-10">
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">THE OFFICIAL CONCLAVE CHRONICLE</span>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Journal</h1>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Journal</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
             In-depth reporting, official communiques, and artistic reviews from the halls and stages of QUAF 09.
         </p>
@@ -43,7 +43,7 @@
                             <span>•</span>
                             <span>{{ $featured->published_at?->format('F d, Y') }}</span>
                         </div>
-                        <h2 class="text-xl sm:text-3xl md:text-4xl font-serif font-black text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-tight mb-2 sm:mb-4">
+                        <h2 class="text-xl sm:text-3xl md:text-4xl font-sora font-black text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-tight mb-2 sm:mb-4">
                             {{ $featured->title }}
                         </h2>
                         <p class="text-xs sm:text-sm md:text-base text-slate-600 font-normal leading-relaxed">
@@ -76,7 +76,7 @@
                 <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                     <div>
                         <span class="text-xs font-mono text-slate-400 block mb-1.5 sm:mb-2">{{ $article->published_at?->format('M d, Y') }}</span>
-                        <h3 class="text-lg sm:text-xl font-serif font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-snug mb-2 sm:mb-3">
+                        <h3 class="text-lg sm:text-xl font-sora font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-snug mb-2 sm:mb-3">
                             {{ $article->title }}
                         </h3>
                         <p class="text-xs sm:text-sm text-slate-600 font-normal line-clamp-2 leading-relaxed">

@@ -10,7 +10,7 @@
                 <span>/</span>
                 <span class="capitalize">{{ str_replace('-', ' ', $type) }}</span>
             </div>
-            <h1 class="text-3xl font-serif font-black text-slate-900 capitalize">{{ str_replace('-', ' ', $type) }}</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900 capitalize">{{ str_replace('-', ' ', $type) }}</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Live design preview with sample data.</p>
         </div>
         <div class="flex items-center gap-3">
@@ -36,15 +36,15 @@
 
                 <!-- Body -->
                 <div class="text-center my-6 space-y-4">
-                    <p class="text-xs font-serif italic text-slate-600">This is to certify that</p>
-                    <h3 class="text-2xl font-serif font-black text-slate-900 border-b-2 border-slate-300 pb-1 inline-block min-w-[320px]">
+                    <p class="text-xs font-sora italic text-slate-600">This is to certify that</p>
+                    <h3 class="text-2xl font-sora font-black text-slate-900 border-b-2 border-slate-300 pb-1 inline-block min-w-[320px]">
                         {{ $sampleStudent?->name ?? 'Muhammed Nihal' }}
                     </h3>
                     <p class="text-xs font-mono text-slate-600">
-                        representing <strong class="text-slate-900 font-serif">{{ $sampleStudent?->group?->name ?? 'Group of Cordoba' }}</strong>
+                        representing <strong class="text-slate-900 font-sora">{{ $sampleStudent?->group?->name ?? 'Group of Cordoba' }}</strong>
                         has secured <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">FIRST PLACE (A GRADE)</span> in
                     </p>
-                    <h4 class="text-lg font-serif font-bold text-[#f3bd2e]">
+                    <h4 class="text-lg font-sora font-bold text-[#f3bd2e]">
                         Elocution (English) — A Zone
                     </h4>
                 </div>
@@ -78,14 +78,14 @@
                 </div>
 
                 <div class="text-center my-6 space-y-4">
-                    <p class="text-xs font-serif italic text-slate-600">Proudly presented to</p>
-                    <h3 class="text-2xl font-serif font-black text-slate-900 border-b-2 border-slate-300 pb-1 inline-block min-w-[320px]">
+                    <p class="text-xs font-sora italic text-slate-600">Proudly presented to</p>
+                    <h3 class="text-2xl font-sora font-black text-slate-900 border-b-2 border-slate-300 pb-1 inline-block min-w-[320px]">
                         {{ $sampleStudent?->name ?? 'Ahmad Shafi' }}
                     </h3>
                     <p class="text-xs font-mono text-slate-600">
                         for active participation and creative performance in
                     </p>
-                    <h4 class="text-lg font-serif font-bold text-slate-800">
+                    <h4 class="text-lg font-sora font-bold text-slate-800">
                         Calligraphy & Design Exhibition
                     </h4>
                 </div>
@@ -112,7 +112,7 @@
                         👤
                     </div>
                     <div>
-                        <h4 class="font-serif font-black text-lg text-slate-900">{{ $sampleStudent?->name ?? 'Muhammed Nihal' }}</h4>
+                        <h4 class="font-sora font-black text-lg text-slate-900">{{ $sampleStudent?->name ?? 'Muhammed Nihal' }}</h4>
                         <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-900">
                             {{ $sampleStudent?->student_id ?? 'QUAF-ST-1001' }}
                         </span>
@@ -142,7 +142,7 @@
                         <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-50 text-purple-900 uppercase">
                             {{ str_replace('-', ' ', $type) }}
                         </span>
-                        <h4 class="font-serif font-black text-lg text-slate-900 mt-2">Dr. Abdul Kareem</h4>
+                        <h4 class="font-sora font-black text-lg text-slate-900 mt-2">Dr. Abdul Kareem</h4>
                         <span class="text-xs font-mono text-slate-500">All Stages & Green Rooms</span>
                     </div>
                     <div class="p-3 bg-slate-50 rounded-xl text-xs font-mono text-slate-600 border border-slate-200">

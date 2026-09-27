@@ -16,7 +16,7 @@
     <!-- Header -->
     <div class="mb-6 sm:mb-10">
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">MOMENTS OF SPLENDOR</span>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Visual Gallery</h1>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Visual Gallery</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
             A photographic tapestry capturing the spirit, devotion, and artistic triumph across all stages.
         </p>
@@ -45,7 +45,7 @@
                         {{ $item->category }}
                     </span>
                     <div>
-                        <h4 class="text-xs sm:text-sm font-serif font-bold text-white leading-tight truncate">{{ $item->title }}</h4>
+                        <h4 class="text-xs sm:text-sm font-sora font-bold text-white leading-tight truncate">{{ $item->title }}</h4>
                         @if($item->group)
                             <span class="text-[10px] sm:text-[11px] text-slate-300 block mt-0.5 truncate">Group: {{ $item->group->name }}</span>
                         @endif
@@ -83,7 +83,7 @@
             <img :src="activeImg" :alt="activeTitle" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10 mb-4">
             <div class="text-center">
                 <span class="text-xs font-mono uppercase text-[#f3bd2e] block mb-1 font-bold" x-text="activeCategory"></span>
-                <h3 class="text-xl font-serif font-bold text-white" x-text="activeTitle"></h3>
+                <h3 class="text-xl font-sora font-bold text-white" x-text="activeTitle"></h3>
             </div>
         </div>
     </div>

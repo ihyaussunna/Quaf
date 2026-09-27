@@ -36,7 +36,7 @@
         }
     </style>
 </head>
-<body class="h-full bg-[#f8fafc] text-slate-800 font-sans antialiased flex overflow-hidden" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-[#f8fafc] text-slate-800 font-sora antialiased flex overflow-hidden" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="sidebarOpen" 

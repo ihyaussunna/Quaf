@@ -45,7 +45,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen py-6 px-3 sm:px-6"
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen py-6 px-3 sm:px-6"
       x-data="{
           showLeaderboard: true,
           showResults: true,
@@ -146,7 +146,7 @@
             <div class="flex items-center gap-4">
                 <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-16 w-auto object-contain">
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-black font-serif text-slate-900 uppercase tracking-tight">Official Festival Results & Standings</h1>
+                    <h1 class="text-xl sm:text-2xl font-black font-sora text-slate-900 uppercase tracking-tight">Official Festival Results & Standings</h1>
                     <p class="text-xs font-semibold text-slate-600">Adabic Inheritance • Samastha Centenary Edition</p>
                     <p class="text-[11px] text-slate-500">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
                 </div>
@@ -163,7 +163,7 @@
         </div>
 
         <div class="text-center my-6">
-            <h2 class="text-lg sm:text-xl font-bold uppercase tracking-wider font-serif text-slate-900">
+            <h2 class="text-lg sm:text-xl font-bold uppercase tracking-wider font-sora text-slate-900">
                 Official Festival Results & Standings
             </h2>
             <p class="text-xs font-mono text-slate-500 mt-1">Authorized Scorecard and Merit Verdicts</p>
@@ -189,7 +189,7 @@
                         <th class="py-2.5 px-3 text-right">Total Points</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 font-sans">
+                <tbody class="divide-y divide-slate-200 font-sora">
                     @foreach($groups as $idx => $grp)
                         <tr class="{{ $idx === 0 ? 'bg-amber-50/50 font-bold' : ($idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white') }}">
                             <td class="py-2 px-3 text-center font-mono font-bold">

@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 font-sans">Zones Overview</h1>
+            <h1 class="text-2xl font-bold text-slate-900 font-sora">Zones Overview</h1>
             <p class="text-xs text-slate-500 mt-0.5">Official festival zones, registered competitions, and student distributions</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -27,14 +27,14 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
-                <h2 class="text-sm font-bold text-slate-900 font-sans uppercase tracking-wider">Official Zone & Class Mapping</h2>
+                <h2 class="text-sm font-bold text-slate-900 font-sora uppercase tracking-wider">Official Zone & Class Mapping</h2>
             </div>
             <span class="text-[11px] font-mono text-slate-500 font-medium">All students & competitions are categorized by academic class</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             <div class="p-3.5 rounded-xl bg-red-50/70 border border-red-200/80">
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="font-bold text-red-900 font-sans text-sm">A Zone</span>
+                    <span class="font-bold text-red-900 font-sora text-sm">A Zone</span>
                     <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-red-100 text-red-800 border border-red-200">Class 4</span>
                 </div>
                 <div class="text-xs font-bold text-red-800 mb-1">All Class 4 Levels</div>
@@ -43,7 +43,7 @@
 
             <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="font-bold text-amber-900 font-sans text-sm">B Zone</span>
+                    <span class="font-bold text-amber-900 font-sora text-sm">B Zone</span>
                     <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">Class 3</span>
                 </div>
                 <div class="text-xs font-bold text-amber-800 mb-1">All Class 3 Levels</div>
@@ -52,7 +52,7 @@
 
             <div class="p-3.5 rounded-xl bg-sky-50/70 border border-sky-200/80">
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="font-bold text-sky-900 font-sans text-sm">C Zone</span>
+                    <span class="font-bold text-sky-900 font-sora text-sm">C Zone</span>
                     <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 border border-sky-200">Class 1 & 2</span>
                 </div>
                 <div class="text-xs font-bold text-sky-800 mb-1">All Class 1 & 2 Levels</div>
@@ -61,7 +61,7 @@
 
             <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="font-bold text-emerald-900 font-sans text-sm">Mix Zone</span>
+                    <span class="font-bold text-emerald-900 font-sora text-sm">Mix Zone</span>
                     <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">Open</span>
                 </div>
                 <div class="text-xs font-bold text-emerald-800 mb-1">All Classes (General / Open Zone)</div>
@@ -98,22 +98,22 @@
                     </div>
 
                     <h3 class="text-lg font-bold text-slate-900 mb-0.5">{{ $card['title'] }}</h3>
-                    <p class="text-xs font-semibold text-slate-600 mb-1 font-serif">{{ $card['sub'] }}</p>
+                    <p class="text-xs font-semibold text-slate-600 mb-1 font-sora">{{ $card['sub'] }}</p>
                     <p class="text-[11px] text-slate-500 font-medium leading-relaxed mb-4">{{ $card['classes'] }}</p>
                 </div>
 
                 <!-- Metrics Strip -->
                 <div class="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
                     <div>
-                        <div class="text-base font-black text-slate-900 font-sans">{{ $card['programs_count'] }}</div>
+                        <div class="text-base font-black text-slate-900 font-sora">{{ $card['programs_count'] }}</div>
                         <div class="text-[10px] font-mono uppercase text-slate-400 font-semibold">Programs</div>
                     </div>
                     <div>
-                        <div class="text-base font-black text-slate-900 font-sans">{{ $card['students_count'] }}</div>
+                        <div class="text-base font-black text-slate-900 font-sora">{{ $card['students_count'] }}</div>
                         <div class="text-[10px] font-mono uppercase text-slate-400 font-semibold">Students</div>
                     </div>
                     <div>
-                        <div class="text-base font-black text-slate-900 font-sans" style="color: {{ $card['color'] }};">{{ number_format($card['points_total']) }}</div>
+                        <div class="text-base font-black text-slate-900 font-sora" style="color: {{ $card['color'] }};">{{ number_format($card['points_total']) }}</div>
                         <div class="text-[10px] font-mono uppercase text-slate-400 font-semibold">Points</div>
                     </div>
                 </div>
@@ -171,7 +171,7 @@
         <!-- Tab 1: Programs Listing -->
         @if($activeTab === 'programs')
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs font-sans">
+                <table class="w-full text-left text-xs font-sora">
                     <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 uppercase text-[11px] font-mono">
                         <tr>
                             <th class="px-5 py-3.5">Prog ID</th>
@@ -195,7 +195,7 @@
                                 <td class="px-5 py-3.5">
                                     <div class="font-bold text-slate-900 text-sm">{{ $prog->name }}</div>
                                     @if($prog->malayalam_name)
-                                        <div class="text-[11px] text-slate-500 font-serif">{{ $prog->malayalam_name }}</div>
+                                        <div class="text-[11px] text-slate-500 font-sora">{{ $prog->malayalam_name }}</div>
                                     @endif
                                 </td>
                                 <td class="px-5 py-3.5 whitespace-nowrap">
@@ -258,7 +258,7 @@
         <!-- Tab 2: Students Listing -->
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs font-sans">
+                <table class="w-full text-left text-xs font-sora">
                     <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 uppercase text-[11px] font-mono">
                         <tr>
                             <th class="px-5 py-3.5">Chest No</th>
@@ -293,7 +293,7 @@
                                 <td class="px-5 py-3.5 whitespace-nowrap font-medium text-slate-700">
                                     {{ $student->category ?? $selectedZoneKey }}
                                 </td>
-                                <td class="px-5 py-3.5 text-center whitespace-nowrap font-black font-sans text-sm" style="color: {{ $selectedZone['color'] }};">
+                                <td class="px-5 py-3.5 text-center whitespace-nowrap font-black font-sora text-sm" style="color: {{ $selectedZone['color'] }};">
                                     {{ number_format($student->points_cache ?? 0) }}
                                 </td>
                                 <td class="px-5 py-3.5 text-right whitespace-nowrap">

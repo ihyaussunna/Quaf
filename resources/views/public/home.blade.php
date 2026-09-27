@@ -100,7 +100,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">ACADEMIC GROUPS</span>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Standings</h2>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Standings</h2>
             </div>
             <p class="text-xs sm:text-sm text-slate-600 max-w-md">
                 Points are calculated dynamically upon official result verification. Hover or tap each group to inspect leadership and points.
@@ -129,7 +129,7 @@
                         </div>
 
                         <!-- Name & Leadership (No Profile Picture) -->
-                        <h3 class="text-xl font-serif font-black text-slate-900 mb-1.5 group-hover:text-[#be1e2d] transition-colors">
+                        <h3 class="text-xl font-sora font-black text-slate-900 mb-1.5 group-hover:text-[#be1e2d] transition-colors">
                             {{ $group->name }}
                         </h3>
                         <p class="text-xs text-slate-600 mb-4 flex items-center gap-1.5 truncate">
@@ -141,7 +141,7 @@
                     <!-- Points Metric -->
                     <div class="pt-4 border-t border-slate-100 flex items-baseline justify-between mt-auto">
                         <span class="text-xs font-mono text-slate-500 uppercase font-semibold">Points</span>
-                        <div class="text-3xl font-serif font-black tracking-tight" style="color: {{ $group->color_hex }}">
+                        <div class="text-3xl font-sora font-black tracking-tight" style="color: {{ $group->color_hex }}">
                             {{ number_format($group->points_cache) }}
                         </div>
                     </div>
@@ -157,7 +157,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">ACADEMIC DIVISIONS</span>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Zones</h2>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Zones</h2>
             </div>
             <p class="text-xs sm:text-sm text-slate-600 max-w-md">
                 Competitions and student enrolments categorized under 4 designated zones according to academic year and class levels.
@@ -175,8 +175,8 @@
                             </span>
                             <span class="w-3 h-3 rounded-full" style="background-color: {{ $zoneItem['color'] }}"></span>
                         </div>
-                        <h3 class="text-xl font-serif font-bold text-slate-900 mb-1">{{ $zoneItem['name'] }}</h3>
-                        <p class="text-sm font-semibold text-slate-700 font-serif mb-1">{{ $zoneItem['sub'] }}</p>
+                        <h3 class="text-xl font-sora font-bold text-slate-900 mb-1">{{ $zoneItem['name'] }}</h3>
+                        <p class="text-sm font-semibold text-slate-700 font-sora mb-1">{{ $zoneItem['sub'] }}</p>
                         <p class="text-xs text-slate-500 mb-4 sm:mb-6 font-mono">Classes: {{ $zoneItem['classes'] }}</p>
                     </div>
 
@@ -203,7 +203,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">FESTIVAL VENUES</span>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Active Stages</h2>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Active Stages</h2>
             </div>
             <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-mono text-slate-600">
                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Active</span>
@@ -228,7 +228,7 @@
                             @endif
                         </div>
 
-                        <h3 class="text-base sm:text-lg font-serif font-bold text-slate-900 mb-1">{{ $stage->name }}</h3>
+                        <h3 class="text-base sm:text-lg font-sora font-bold text-slate-900 mb-1">{{ $stage->name }}</h3>
                         <p class="text-xs text-slate-500 mb-4 sm:mb-6 flex items-center gap-1">
                             <svg class="w-3.5 h-3.5 opacity-60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
                             <span class="truncate">{{ $stage->location ?? 'Festival Grounds' }}</span>
@@ -270,7 +270,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">VERIFIED VERDICTS</span>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Latest Results</h2>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Latest Results</h2>
             </div>
             <a href="{{ route('results.index') }}" class="text-xs sm:text-sm font-semibold text-[#f3bd2e] hover:underline flex items-center gap-1">
                 <span>View Complete Results Archive</span>
@@ -287,7 +287,7 @@
                             <span class="text-[#f3bd2e] font-bold">{{ $result->program->code }}</span>
                             <span>{{ $result->published_at?->diffForHumans() ?? 'Just now' }}</span>
                         </div>
-                        <h3 class="text-lg sm:text-xl font-serif font-bold text-slate-900 mb-1 leading-snug">
+                        <h3 class="text-lg sm:text-xl font-sora font-bold text-slate-900 mb-1 leading-snug">
                             {{ $result->program->name }}
                         </h3>
                         <span class="text-xs text-slate-500 block mb-4 sm:mb-6 font-medium">{{ $result->program->eligibility ?? 'A Zone' }}</span>
@@ -297,7 +297,7 @@
                             <!-- 1st Place -->
                             <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-amber-50/70 border border-amber-300/80 gap-2">
                                 <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                    <span class="w-6 h-6 rounded-full bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-serif shadow-xs shrink-0">1</span>
+                                    <span class="w-6 h-6 rounded-full bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-sora shadow-xs shrink-0">1</span>
                                     <div class="min-w-0 flex-1">
                                         <div class="font-bold text-xs sm:text-sm text-slate-900 truncate">
                                             {{ $result->firstEntry?->student?->name ?? 'Team ' . $result->firstEntry?->group?->name }}
@@ -314,7 +314,7 @@
                             @if($result->secondEntry)
                                 <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-50 border border-slate-200 gap-2">
                                     <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                        <span class="w-6 h-6 rounded-full bg-slate-400 text-white font-black text-xs flex items-center justify-center font-serif shrink-0">2</span>
+                                        <span class="w-6 h-6 rounded-full bg-slate-400 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">2</span>
                                         <div class="min-w-0 flex-1">
                                             <div class="font-medium text-xs sm:text-sm text-slate-800 truncate">
                                                 {{ $result->secondEntry?->student?->name ?? 'Team ' . $result->secondEntry?->group?->name }}
@@ -332,7 +332,7 @@
                             @if($result->thirdEntry)
                                 <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-amber-50/40 border border-amber-200/60 gap-2">
                                     <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                        <span class="w-6 h-6 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center font-serif shrink-0">3</span>
+                                        <span class="w-6 h-6 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">3</span>
                                         <div class="min-w-0 flex-1">
                                             <div class="font-medium text-xs sm:text-sm text-slate-800 truncate">
                                                 {{ $result->thirdEntry?->student?->name ?? 'Team ' . $result->thirdEntry?->group?->name }}
@@ -370,7 +370,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">FESTIVAL JOURNAL</span>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Latest News & Dispatches</h2>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Latest News & Dispatches</h2>
             </div>
             <a href="{{ route('news.index') }}" class="text-xs sm:text-sm font-semibold text-[#f3bd2e] hover:underline flex items-center gap-1">
                 <span>View All Articles</span>
@@ -395,7 +395,7 @@
                     <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                         <div>
                             <span class="text-xs font-mono text-slate-400 block mb-2">{{ $article->published_at?->format('M d, Y') }}</span>
-                            <h3 class="text-lg sm:text-xl font-serif font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-snug mb-2 sm:mb-3">
+                            <h3 class="text-lg sm:text-xl font-sora font-bold text-slate-900 group-hover:text-[#f3bd2e] transition-colors leading-snug mb-2 sm:mb-3">
                                 {{ $article->title }}
                             </h3>
                             <p class="text-xs sm:text-sm text-slate-600 font-normal line-clamp-2 leading-relaxed">
@@ -420,7 +420,7 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-4 sm:gap-6">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">MOMENTS OF SPLENDOR</span>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Gallery</h2>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Gallery</h2>
             </div>
             <a href="{{ route('gallery.index') }}" class="text-xs sm:text-sm font-semibold text-[#f3bd2e] hover:underline flex items-center gap-1">
                 <span>View Full Photo Archive</span>

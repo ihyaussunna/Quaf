@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 font-serif">Participants</h1>
+            <h1 class="text-2xl font-bold text-slate-900 font-sora">Participants</h1>
             <p class="text-xs text-slate-500 mt-0.5">Manage registrations and chest numbers</p>
         </div>
         <div class="flex items-center gap-2">
@@ -59,7 +59,7 @@
     <!-- Participants Table -->
     <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-white text-slate-600 font-semibold border-b border-slate-200">
                     <tr>
                         <th class="px-5 py-3.5">Name</th>
@@ -159,7 +159,7 @@
                 <!-- Drawer Header -->
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-900 font-sans">New Participant</h2>
+                        <h2 class="text-lg font-bold text-slate-900 font-sora">New Participant</h2>
                         <a href="{{ route('admin.students.bulk') }}" class="text-[11px] font-mono text-[#be1e2d] hover:underline font-semibold block mt-0.5">Need to add many students? Use Bulk Add →</a>
                     </div>
                     <button @click="newParticipantOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
@@ -168,7 +168,7 @@
                 </div>
 
                 <!-- Drawer Body / Form -->
-                <form method="POST" action="{{ route('admin.students.store') }}" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs font-sans">
+                <form method="POST" action="{{ route('admin.students.store') }}" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs font-sora">
                     @csrf
 
                     <!-- Zone -->

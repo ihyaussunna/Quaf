@@ -5,25 +5,25 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-serif">Dashboard</h1>
-            <p class="text-xs text-slate-500 mt-0.5 font-sans">Central festival operations, real-time analytics & group progress.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-sora">Dashboard</h1>
+            <p class="text-xs text-slate-500 mt-0.5 font-sora">Central festival operations, real-time analytics & group progress.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2.5">
-            <a href="{{ route('admin.mark-entry.view-marks') }}" class="px-3.5 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5 font-sans">
+            <a href="{{ route('admin.mark-entry.view-marks') }}" class="px-3.5 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5 font-sora">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 <span>View Marks</span>
             </a>
-            <a href="{{ route('admin.results.all') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase hover:bg-slate-50 transition-colors shadow-2xs flex items-center gap-1.5 font-sans">
+            <a href="{{ route('admin.results.all') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase hover:bg-slate-50 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <svg class="w-3.5 h-3.5 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 <span>All Results</span>
             </a>
-            <a href="{{ route('admin.exports.index') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase hover:bg-slate-50 transition-colors shadow-2xs flex items-center gap-1.5 font-sans">
+            <a href="{{ route('admin.exports.index') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase hover:bg-slate-50 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span>Export Data</span>
             </a>
             <form method="POST" action="{{ route('admin.system.sync-festival-data') }}" class="inline">
                 @csrf
-                <button type="submit" onclick="return confirm('Do you want to sync all 144 official programs, groups, stages, and Conco Majdic students into the database?')" class="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1.5 font-sans" title="Sync 144 Programs, Groups, Stages, and Conco Majdic Students">
+                <button type="submit" onclick="return confirm('Do you want to sync all 144 official programs, groups, stages, and Conco Majdic students into the database?')" class="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1.5 font-sora" title="Sync 144 Programs, Groups, Stages, and Conco Majdic Students">
                     <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     <span>Sync Official Data</span>
                 </button>
@@ -34,7 +34,7 @@
     @if($stats['competitions'] == 0 || $stats['teams'] == 0)
         <div class="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="space-y-1">
-                <h3 class="text-sm font-bold text-amber-950 flex items-center gap-2 font-serif">
+                <h3 class="text-sm font-bold text-amber-950 flex items-center gap-2 font-sora">
                     <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>ഡാറ്റാബേസിൽ പ്രോഗ്രാമുകളും ഗ്രൂപ്പുകളും ചേർത്തിട്ടില്ല (Database Needs Initial Sync)</span>
                 </h3>
@@ -61,7 +61,7 @@
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['participants']) }}+</div>
-                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sans">Students</div>
+                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Students</div>
             </div>
         </a>
 
@@ -72,7 +72,7 @@
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['competitions']) }}+</div>
-                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sans">Programs</div>
+                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Programs</div>
             </div>
         </a>
 
@@ -83,7 +83,7 @@
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['teams']) }}+</div>
-                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sans">Teams</div>
+                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Teams</div>
             </div>
         </a>
 
@@ -94,7 +94,7 @@
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors font-mono">{{ number_format($stats['stages']) }}+</div>
-                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sans">Venues</div>
+                <div class="text-xs text-slate-500 font-bold uppercase tracking-wider font-sora">Venues</div>
             </div>
         </a>
     </div>
@@ -104,7 +104,7 @@
         <!-- Left: Performance Over Time Multi-line Chart (2 cols) -->
         <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6 shadow-2xs">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-                <h2 class="text-lg font-bold text-slate-900 tracking-tight font-serif">Performance Over Time</h2>
+                <h2 class="text-lg font-bold text-slate-900 tracking-tight font-sora">Performance Over Time</h2>
                 <!-- Legend -->
                 <div class="flex flex-wrap items-center gap-3 text-xs">
                     @php
@@ -113,7 +113,7 @@
                     @foreach($leaderboard->take(5) as $idx => $grp)
                         <div class="flex items-center gap-1.5">
                             <span class="w-3 h-3 rounded-xs" style="background-color: {{ $chartColors[$idx] ?? $grp->color_hex }}"></span>
-                            <span class="text-slate-600 font-medium font-sans">{{ $grp->name }}</span>
+                            <span class="text-slate-600 font-medium font-sora">{{ $grp->name }}</span>
                         </div>
                     @endforeach
                 </div>
@@ -196,7 +196,7 @@
         <div class="space-y-6">
             <!-- Progress Result Card -->
             <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-2xs">
-                <h3 class="text-sm font-bold text-slate-900 tracking-tight mb-4 font-serif">Progress Result</h3>
+                <h3 class="text-sm font-bold text-slate-900 tracking-tight mb-4 font-sora">Progress Result</h3>
                 
                 @php
                     $declaredCount = $stats['published_results'] ?? 0;
@@ -210,7 +210,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="text-xs font-semibold text-slate-700 font-sans">
+                    <div class="text-xs font-semibold text-slate-700 font-sora">
                         Declared <span class="font-mono font-bold">{{ $declaredCount }}</span> of <span class="font-mono font-bold">{{ $totalCompetitions }}</span> Results
                     </div>
                     <div class="text-[11px] font-bold text-[#be1e2d] mt-0.5 font-mono">
@@ -223,10 +223,10 @@
             <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-2xs">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900 tracking-tight font-serif">Score Board</h3>
+                        <h3 class="text-sm font-bold text-slate-900 tracking-tight font-sora">Score Board</h3>
                         <span class="text-[10px] font-mono text-slate-400">Live Status</span>
                     </div>
-                    <a href="{{ route('admin.achievements.team-score') }}" class="text-xs font-bold text-[#be1e2d] hover:underline font-sans">View All →</a>
+                    <a href="{{ route('admin.achievements.team-score') }}" class="text-xs font-bold text-[#be1e2d] hover:underline font-sora">View All →</a>
                 </div>
 
                 <div class="space-y-2.5">
@@ -237,14 +237,14 @@
                                     {{ $rank === 0 ? 'bg-[#f3bd2e]/20 text-[#be1e2d]' : ($rank === 1 ? 'bg-slate-200 text-slate-700' : ($rank === 2 ? 'bg-[#005c94]/10 text-[#005c94]' : 'bg-slate-100 text-slate-500')) }}">
                                     {{ $rank + 1 }}
                                 </span>
-                                <span class="font-bold text-xs text-slate-800 font-sans">{{ $group->name }}</span>
+                                <span class="font-bold text-xs text-slate-800 font-sora">{{ $group->name }}</span>
                             </div>
                             <span class="font-black text-sm text-[#be1e2d] font-mono">
                                 {{ number_format($group->points_cache) }}
                             </span>
                         </div>
                     @empty
-                        <p class="text-xs text-slate-400 text-center py-4 font-sans">No team scores recorded yet.</p>
+                        <p class="text-xs text-slate-400 text-center py-4 font-sora">No team scores recorded yet.</p>
                     @endforelse
                 </div>
             </div>
@@ -256,8 +256,8 @@
         <!-- Stages Overview -->
         <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6 shadow-2xs">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-slate-900 tracking-tight font-serif">Live Stage Monitoring</h3>
-                <a href="{{ route('admin.stages.index') }}" class="text-xs font-bold text-[#be1e2d] hover:underline font-sans">Manage Stages →</a>
+                <h3 class="text-sm font-bold text-slate-900 tracking-tight font-sora">Live Stage Monitoring</h3>
+                <a href="{{ route('admin.stages.index') }}" class="text-xs font-bold text-[#be1e2d] hover:underline font-sora">Manage Stages →</a>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -269,14 +269,14 @@
                                 {{ strtoupper($stage->status) }}
                             </span>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-900 truncate font-serif">{{ $stage->name }}</h4>
+                        <h4 class="font-bold text-sm text-slate-900 truncate font-sora">{{ $stage->name }}</h4>
                         <div class="mt-2 text-xs text-slate-500">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block font-sans">Now Playing:</span>
-                            <span class="font-medium text-slate-800 truncate block font-sans">{{ $stage->currentProgram?->name ?? 'Intermission / Sound Check' }}</span>
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block font-sora">Now Playing:</span>
+                            <span class="font-medium text-slate-800 truncate block font-sora">{{ $stage->currentProgram?->name ?? 'Intermission / Sound Check' }}</span>
                         </div>
                     </div>
                 @empty
-                    <p class="text-xs text-slate-400 font-sans">No stages active.</p>
+                    <p class="text-xs text-slate-400 font-sora">No stages active.</p>
                 @endforelse
             </div>
         </div>
@@ -284,7 +284,7 @@
         <!-- Central Jury / Quick Links -->
         <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-2xs flex flex-col justify-between">
             <div>
-                <h3 class="text-sm font-bold text-slate-900 tracking-tight mb-3 font-serif">Quick Navigation</h3>
+                <h3 class="text-sm font-bold text-slate-900 tracking-tight mb-3 font-sora">Quick Navigation</h3>
                 <div class="space-y-2 text-xs">
                     <a href="{{ route('admin.mark-entry.handler') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
                         <span class="font-semibold text-slate-700">Programs to Verify</span>

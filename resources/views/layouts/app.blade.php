@@ -18,7 +18,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#f4f7fc] text-gray-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-orange selection:text-white">
+<body class="bg-[#f4f7fc] text-gray-800 font-sora antialiased min-h-screen flex flex-col selection:bg-brand-orange selection:text-white">
 
     <!-- Top Navigation Bar -->
     <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs">

@@ -6,7 +6,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">Program Entries & Registrations</h1>
+                <h1 class="text-2xl sm:text-3xl font-sora font-black text-slate-900 tracking-tight">Program Entries & Registrations</h1>
                 <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-xs font-mono">
                     {{ $totalEntriesCount }} Total Entries
                 </span>
@@ -111,7 +111,7 @@
     <!-- Verification Table -->
     <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200 uppercase text-[11px]">
                     <tr>
                         <th class="px-5 py-3.5 w-12 text-center">#</th>

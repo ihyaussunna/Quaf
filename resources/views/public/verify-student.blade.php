@@ -4,7 +4,7 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="text-center mb-8">
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">PARTICIPANT IDENTIFICATION</span>
-        <h1 class="text-3xl sm:text-5xl font-serif font-black text-slate-900 mt-2">Official Delegate Profile</h1>
+        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2">Official Delegate Profile</h1>
     </div>
 
     <!-- Student 360 Card (Light Theme) -->
@@ -32,7 +32,7 @@
                         {{ $student->category }}
                     </span>
                 </div>
-                <h2 class="text-3xl font-serif font-black text-slate-900 mb-2">{{ $student->name }}</h2>
+                <h2 class="text-3xl font-sora font-black text-slate-900 mb-2">{{ $student->name }}</h2>
                 <div class="text-xs font-mono text-slate-500 space-y-1">
                     <p>Class: {{ $student->class_level ?? 'Registered Student' }}</p>
                     <p>Conclave Standing: <span class="text-[#f3bd2e] font-bold">{{ $student->points_cache }} Points Contributed</span></p>
@@ -42,7 +42,7 @@
 
         <!-- Registered Programs & Stage Status -->
         <div class="mt-8">
-            <h3 class="font-serif font-bold text-lg text-slate-900 mb-4">Program Entries</h3>
+            <h3 class="font-sora font-bold text-lg text-slate-900 mb-4">Program Entries</h3>
             <div class="space-y-3">
                 @forelse($student->entries as $entry)
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -52,7 +52,7 @@
                                 <span>•</span>
                                 <span>Chest #{{ $entry->chest_number }}</span>
                             </div>
-                            <h4 class="font-serif font-bold text-slate-900 text-base">{{ $entry->program->name }}</h4>
+                            <h4 class="font-sora font-bold text-slate-900 text-base">{{ $entry->program->name }}</h4>
                             <span class="text-xs text-slate-500">{{ $entry->program->stage?->name ?? 'Stage TBD' }}</span>
                         </div>
                         <div class="text-right">

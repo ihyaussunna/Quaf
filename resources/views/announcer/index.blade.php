@@ -15,7 +15,7 @@
                     </span>
                     <span class="text-xs text-slate-500 font-mono">Stage Microphone Sync</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-serif">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-sora">
                     Stage Announcement Console
                 </h1>
                 <p class="text-xs text-slate-600 mt-1 max-w-2xl font-ml">
@@ -25,7 +25,7 @@
 
             <!-- Live Status & Controls -->
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('media.results.index') }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sans">
+                <a href="{{ route('media.results.index') }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sora">
                     <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
                     <span>മീഡിയ ഡെസ്ക് (Media Desk)</span>
                 </a>
@@ -54,12 +54,12 @@
             <a href="{{ route('announcer.index', ['tab' => 'ready']) }}" 
                class="p-5 rounded-2xl border transition-all {{ $tab === 'ready' ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-400' : 'bg-white border-slate-200 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between text-amber-700 mb-1">
-                    <span class="text-xs font-bold uppercase tracking-wider font-sans">Awaiting Announcement</span>
+                    <span class="text-xs font-bold uppercase tracking-wider font-sora">Awaiting Announcement</span>
                     @if($stats['ready_count'] > 0)
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
                     @endif
                 </div>
-                <div class="text-3xl font-black text-slate-900 font-serif">{{ $stats['ready_count'] }}</div>
+                <div class="text-3xl font-black text-slate-900 font-sora">{{ $stats['ready_count'] }}</div>
                 <div class="text-[11px] text-amber-800 font-medium mt-1 font-ml">അനൗൺസ് ചെയ്യാൻ കാത്തിരിക്കുന്നവ</div>
             </a>
 
@@ -67,10 +67,10 @@
             <a href="{{ route('announcer.index', ['tab' => 'announced']) }}" 
                class="p-5 rounded-2xl border transition-all {{ $tab === 'announced' ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-400' : 'bg-white border-slate-200 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between text-emerald-700 mb-1">
-                    <span class="text-xs font-bold uppercase tracking-wider font-sans">Already Announced</span>
+                    <span class="text-xs font-bold uppercase tracking-wider font-sora">Already Announced</span>
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
-                <div class="text-3xl font-black text-slate-900 font-serif">{{ $stats['announced_count'] }}</div>
+                <div class="text-3xl font-black text-slate-900 font-sora">{{ $stats['announced_count'] }}</div>
                 <div class="text-[11px] text-emerald-800 font-medium mt-1 font-ml">സ്റ്റേജിൽ അനൗൺസ് ചെയ്തവ</div>
             </a>
 
@@ -78,10 +78,10 @@
             <a href="{{ route('announcer.index', ['tab' => 'all']) }}" 
                class="p-5 rounded-2xl border transition-all {{ $tab === 'all' ? 'bg-slate-100 border-slate-300 ring-2 ring-slate-400' : 'bg-white border-slate-200 hover:border-slate-300' }}">
                 <div class="flex items-center justify-between text-slate-500 mb-1">
-                    <span class="text-xs font-bold uppercase tracking-wider font-sans">Total Transferred</span>
+                    <span class="text-xs font-bold uppercase tracking-wider font-sora">Total Transferred</span>
                     <span class="text-xs font-mono font-bold">{{ $stats['total_count'] }}</span>
                 </div>
-                <div class="text-3xl font-black text-slate-900 font-serif">{{ $stats['total_count'] }}</div>
+                <div class="text-3xl font-black text-slate-900 font-sora">{{ $stats['total_count'] }}</div>
                 <div class="text-[11px] text-slate-500 font-medium mt-1 font-ml">ആകെ ലഭ്യമായ ഫലങ്ങൾ</div>
             </a>
         </div>
@@ -127,7 +127,7 @@
                 <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
                 </div>
-                <h3 class="text-base font-bold text-slate-800 font-serif">
+                <h3 class="text-base font-bold text-slate-800 font-sora">
                     @if($tab === 'ready')
                         No programs currently waiting for announcement
                     @else
@@ -177,7 +177,7 @@
                                         {{ $prog?->eligibility ?? 'General' }} • {{ $prog?->is_stage ? 'Stage Event' : 'Non-stage Event' }} • {{ $prog?->stage?->name ?? 'Main Stage' }}
                                     </span>
                                 </div>
-                                <h3 class="text-2xl font-bold text-slate-900 font-serif">{{ $prog?->name }}</h3>
+                                <h3 class="text-2xl font-bold text-slate-900 font-sora">{{ $prog?->name }}</h3>
                                 @if($prog?->malayalam_name)
                                     <p class="text-sm text-slate-500 font-ml mt-0.5">{{ $prog->malayalam_name }}</p>
                                 @endif
@@ -231,10 +231,10 @@
                             <!-- 1st Place -->
                             <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 font-sans">1st Place</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 font-sora">1st Place</span>
                                     <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">Rank 1</span>
                                 </div>
-                                <div class="font-bold text-slate-900 text-base font-serif">
+                                <div class="font-bold text-slate-900 text-base font-sora">
                                     {{ $firstWinnerName }}
                                 </div>
                                 <div class="text-xs text-slate-600 mt-1">
@@ -245,10 +245,10 @@
                             <!-- 2nd Place -->
                             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 font-sans">2nd Place</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 font-sora">2nd Place</span>
                                     <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800">Rank 2</span>
                                 </div>
-                                <div class="font-bold text-slate-900 text-base font-serif">
+                                <div class="font-bold text-slate-900 text-base font-sora">
                                     {{ $secondWinnerName }}
                                 </div>
                                 <div class="text-xs text-slate-600 mt-1">
@@ -259,10 +259,10 @@
                             <!-- 3rd Place -->
                             <div class="p-4 rounded-2xl bg-red-50/60 border border-red-200">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-[#be1e2d] font-sans">3rd Place</span>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-[#be1e2d] font-sora">3rd Place</span>
                                     <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-[#be1e2d]">Rank 3</span>
                                 </div>
-                                <div class="font-bold text-slate-900 text-base font-serif">
+                                <div class="font-bold text-slate-900 text-base font-sora">
                                     {{ $thirdWinnerName }}
                                 </div>
                                 <div class="text-xs text-slate-600 mt-1">

@@ -10,7 +10,7 @@
             </a>
             <div>
                 <div class="flex items-center gap-2">
-                    <h1 class="text-base font-serif font-bold text-slate-900">{{ $program->name }}</h1>
+                    <h1 class="text-base font-sora font-bold text-slate-900">{{ $program->name }}</h1>
                     @if($program->malayalam_name)
                         <span class="text-xs font-ml text-slate-500">({{ $program->malayalam_name }})</span>
                     @endif
@@ -203,7 +203,7 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h3 class="text-lg font-serif font-black text-slate-900 tracking-wide">{{ $displayCode }}</h3>
+                                    <h3 class="text-lg font-sora font-black text-slate-900 tracking-wide">{{ $displayCode }}</h3>
                                     <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-semibold">
                                         Anonymous Entry #{{ $index + 1 }}
                                     </span>
@@ -310,7 +310,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                         <div class="flex-1">
                             <input type="text" name="remarks" x-model="remarks" @input="saveDraftLocal()" placeholder="Confidential remarks for this performance..."
-                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sans">
+                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sora">
                             <div x-show="errorMessage" class="text-xs font-mono font-bold text-red-600 mt-1" x-text="errorMessage"></div>
                             <div x-show="saveSuccess" class="text-xs font-mono font-bold text-emerald-600 mt-1 flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -359,7 +359,7 @@
             <div class="flex items-start justify-between pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-[10px] font-mono uppercase tracking-widest text-[#f3bd2e] font-bold">Program Guidelines</span>
-                    <h2 class="text-xl font-serif font-black text-slate-900 mt-1">{{ $program->name }}</h2>
+                    <h2 class="text-xl font-sora font-black text-slate-900 mt-1">{{ $program->name }}</h2>
                     @if($program->malayalam_name)
                         <p class="text-xs font-ml text-slate-500 mt-0.5">{{ $program->malayalam_name }}</p>
                     @endif
@@ -392,7 +392,7 @@
             <!-- Rules Content -->
             <div class="space-y-3">
                 <h3 class="text-sm font-mono font-bold text-slate-800 uppercase tracking-wider">Rules & Guidelines</h3>
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-sans text-slate-700 leading-relaxed max-h-60 overflow-y-auto">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-sora text-slate-700 leading-relaxed max-h-60 overflow-y-auto">
                     @if($program->rules)
                         {!! nl2br(e($program->rules)) !!}
                     @else

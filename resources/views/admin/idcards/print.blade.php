@@ -28,12 +28,12 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans p-6 min-h-screen">
+<body class="bg-slate-100 text-slate-900 font-sora p-6 min-h-screen">
 
     <!-- Action Bar -->
     <div class="no-print max-w-5xl mx-auto mb-6 p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
         <div>
-            <h1 class="font-serif font-bold text-lg text-slate-900">Batch ID Badges Print ({{ $students->count() }} Cards)</h1>
+            <h1 class="font-sora font-bold text-lg text-slate-900">Batch ID Badges Print ({{ $students->count() }} Cards)</h1>
             <p class="text-xs font-mono text-slate-500">Formatted for standard A4 sheets (6 cards per page).</p>
         </div>
         <div class="flex items-center gap-3">
@@ -54,11 +54,11 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-[#f3bd2e] text-white flex items-center justify-center font-serif font-black text-[10px]">
+                        <div class="w-6 h-6 rounded bg-[#f3bd2e] text-white flex items-center justify-center font-sora font-black text-[10px]">
                             Q9
                         </div>
                         <div>
-                            <h4 class="font-serif font-black text-xs uppercase tracking-wider text-slate-900">QUAF '09</h4>
+                            <h4 class="font-sora font-black text-xs uppercase tracking-wider text-slate-900">QUAF '09</h4>
                             <p class="text-[7px] font-mono text-slate-500 uppercase">Ihyaussunna • Markaz</p>
                         </div>
                     </div>
@@ -70,7 +70,7 @@
                 <!-- Body -->
                 <div class="flex items-center gap-4 py-2">
                     <!-- Photo / Initial -->
-                    <div class="w-20 h-20 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center font-serif text-2xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0">
+                    <div class="w-20 h-20 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center font-sora text-2xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0">
                         @if($student->photo_path)
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                         @else
@@ -83,7 +83,7 @@
                         <div class="inline-block px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[9px] font-mono font-bold text-slate-800">
                             CHEST #{{ $student->chest_number ?? '---' }}
                         </div>
-                        <h3 class="text-base font-serif font-bold text-slate-900 truncate mt-1">
+                        <h3 class="text-base font-sora font-bold text-slate-900 truncate mt-1">
                             {{ $student->name }}
                         </h3>
                         <p class="text-[10px] font-mono text-slate-500">ID: {{ $student->student_id }}</p>

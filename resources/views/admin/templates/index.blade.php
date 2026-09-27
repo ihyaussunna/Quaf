@@ -14,8 +14,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sans tracking-tight">Certificate & Document Templates</h1>
-            <p class="text-xs text-slate-500 mt-1 font-sans">Official high-resolution templates for participant badges, certificates, prize certificates, and publication posters.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sora tracking-tight">Certificate & Document Templates</h1>
+            <p class="text-xs text-slate-500 mt-1 font-sora">Official high-resolution templates for participant badges, certificates, prize certificates, and publication posters.</p>
         </div>
         <div class="flex items-center gap-2.5">
             <a href="{{ route('admin.idcards.print') }}" target="_blank" class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-semibold text-xs hover:bg-[#a01624] transition-all flex items-center gap-2 shadow-xs">
@@ -83,7 +83,7 @@
                     <div class="w-7 h-7 rounded-lg bg-red-50 text-[#be1e2d] flex items-center justify-center">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-sm font-sans">Customize Template Canvas</h3>
+                    <h3 class="font-bold text-slate-900 text-sm font-sora">Customize Template Canvas</h3>
                 </div>
                 <button @click="participantName = 'Muhammed Nihal'; chestNo = '101'; category = 'A Zone'; unit = 'Al Falah Unit'; competition = 'Arabana (10 Mem)'; grade = 'A Grade'; position = '1st Place'"
                         class="text-[11px] text-[#be1e2d] hover:underline font-medium">

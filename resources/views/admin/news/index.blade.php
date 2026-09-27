@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Festival Journal</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Festival Journal</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Publish dispatches, editorial reviews, and official festival announcements.</p>
         </div>
         <a href="{{ route('admin.news.create') }}" class="px-4 py-2.5 rounded-xl bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg shadow-[#f3bd2e]/20">

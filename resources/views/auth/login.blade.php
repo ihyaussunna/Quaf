@@ -11,7 +11,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#18181b] text-white font-sans antialiased min-h-screen flex items-center justify-center p-4 selection:bg-[#be1e2d] selection:text-white">
+<body class="bg-[#18181b] text-white font-sora antialiased min-h-screen flex items-center justify-center p-4 selection:bg-[#be1e2d] selection:text-white">
 
     <div class="w-full max-w-[340px] mx-auto text-center">
         <!-- Circular Festival Emblem -->
@@ -24,7 +24,7 @@
         </div>
 
         <!-- Heading & Subtitle -->
-        <h1 class="text-2xl sm:text-[28px] font-bold text-white tracking-tight mb-1.5 font-serif">Login to Festival</h1>
+        <h1 class="text-2xl sm:text-[28px] font-bold text-white tracking-tight mb-1.5 font-sora">Login to Festival</h1>
         <p class="text-sm text-slate-400 mb-7 font-normal">Enter your login details below</p>
 
         <!-- Success / Info Notification -->

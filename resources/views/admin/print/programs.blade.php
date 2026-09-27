@@ -42,7 +42,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen py-6 px-3 sm:px-6"
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen py-6 px-3 sm:px-6"
       x-data="{
           colCode: true,
           colMalName: true,
@@ -196,7 +196,7 @@
             <div class="flex items-center gap-4">
                 <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-14 w-auto object-contain">
                 <div>
-                    <h1 class="text-xl font-black font-serif text-slate-900 uppercase tracking-tight">Master Competition Schedule & Event Manual</h1>
+                    <h1 class="text-xl font-black font-sora text-slate-900 uppercase tracking-tight">Master Competition Schedule & Event Manual</h1>
                     <p class="text-xs font-semibold text-slate-600">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
                 </div>
             </div>
@@ -236,7 +236,7 @@
                             <th x-show="colRules" class="py-2 px-3 max-w-xs">Guidelines</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 font-sans">
+                    <tbody class="divide-y divide-slate-200 font-sora">
                         @foreach($programs as $idx => $p)
                             <tr class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
                                 <td class="py-2 px-2 text-center font-mono text-slate-500 text-[11px]">

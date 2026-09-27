@@ -50,7 +50,7 @@
                     @endif
                 </div>
 
-                <h1 class="text-3xl font-serif font-black text-slate-900">{{ $program->name }}</h1>
+                <h1 class="text-3xl font-sora font-black text-slate-900">{{ $program->name }}</h1>
                 @if($program->malayalam_name)
                     <h2 class="text-xl font-malayalam font-bold text-slate-600 mt-0.5">{{ $program->malayalam_name }}</h2>
                 @endif
@@ -81,7 +81,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
             <div>
                 <div class="flex items-center gap-2">
-                    <h3 class="text-lg font-serif font-bold text-slate-900">Official Rules (Niyamavali)</h3>
+                    <h3 class="text-lg font-sora font-bold text-slate-900">Official Rules (Niyamavali)</h3>
                     @if(!empty($program->rules))
                         <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
                             Active ✓
@@ -105,7 +105,7 @@
         </div>
 
         @if(!empty($program->rules))
-            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm leading-relaxed text-slate-800 font-sans whitespace-pre-line">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm leading-relaxed text-slate-800 font-sora whitespace-pre-line">
 {{ $program->rules }}
             </div>
         @else
@@ -125,7 +125,7 @@
     <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-                <h3 class="text-lg font-serif font-bold text-slate-900">Scoring & Evaluation Criteria</h3>
+                <h3 class="text-lg font-sora font-bold text-slate-900">Scoring & Evaluation Criteria</h3>
                 <p class="text-[11px] font-mono text-slate-500 mt-0.5">Evaluation criteria and maximum marks for judges.</p>
             </div>
             <span class="text-xs font-mono font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-800">
@@ -138,7 +138,7 @@
                 <thead>
                     <tr class="border-b border-slate-100 text-slate-400 uppercase">
                         <th class="py-2.5 px-3 w-16">Sl No</th>
-                        <th class="py-2.5 px-3 font-sans">Criterion</th>
+                        <th class="py-2.5 px-3 font-sora">Criterion</th>
                         <th class="py-2.5 px-3 text-right">Max Marks</th>
                         <th class="py-2.5 px-3 text-right">Weightage</th>
                     </tr>
@@ -148,7 +148,7 @@
                     @forelse($program->scoringCriteria as $idx => $crit)
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3 px-3 font-bold text-slate-400">{{ $idx + 1 }}</td>
-                            <td class="py-3 px-3 font-sans font-bold text-slate-900 text-sm">
+                            <td class="py-3 px-3 font-sora font-bold text-slate-900 text-sm">
                                 {{ $crit->criterion_name }}
                             </td>
                             <td class="py-3 px-3 text-right font-bold text-brand-burgundy text-sm">

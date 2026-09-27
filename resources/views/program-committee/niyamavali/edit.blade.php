@@ -97,7 +97,7 @@
                         {{ $program->type }}
                     </span>
                 </div>
-                <h1 class="text-2xl font-serif font-black text-slate-900">{{ $program->name }}</h1>
+                <h1 class="text-2xl font-sora font-black text-slate-900">{{ $program->name }}</h1>
                 @if($program->malayalam_name)
                     <h2 class="text-lg font-malayalam font-bold text-slate-600">{{ $program->malayalam_name }}</h2>
                 @endif

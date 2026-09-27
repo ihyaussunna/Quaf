@@ -8,7 +8,7 @@
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-[#f3bd2e] text-xs font-mono font-bold">
                 <span>⚖️ OFFICIAL JURY DESK</span>
             </div>
-            <h1 class="text-3xl font-serif font-bold text-slate-900">Welcome, {{ $judge->name }}</h1>
+            <h1 class="text-3xl font-sora font-bold text-slate-900">Welcome, {{ $judge->name }}</h1>
             <p class="text-xs font-mono text-slate-500">
                 Designation: <span class="text-slate-800 font-semibold">{{ $judge->designation ?? 'Adjudicator' }}</span> • Specialization: <span class="text-[#f3bd2e] font-semibold">{{ $judge->specialization ?? 'General Arts' }}</span>
             </p>
@@ -16,15 +16,15 @@
 
         <div class="flex items-center gap-4 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
             <div class="text-center px-4 border-r border-slate-200">
-                <div class="text-2xl font-serif font-bold text-slate-900">{{ $assignedPrograms->count() }}</div>
+                <div class="text-2xl font-sora font-bold text-slate-900">{{ $assignedPrograms->count() }}</div>
                 <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">Assigned</div>
             </div>
             <div class="text-center px-4 border-r border-slate-200">
-                <div class="text-2xl font-serif font-bold text-amber-600">{{ $inProgress->count() }}</div>
+                <div class="text-2xl font-sora font-bold text-amber-600">{{ $inProgress->count() }}</div>
                 <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">In Progress</div>
             </div>
             <div class="text-center px-4">
-                <div class="text-2xl font-serif font-bold text-emerald-600">{{ $completed->count() }}</div>
+                <div class="text-2xl font-sora font-bold text-emerald-600">{{ $completed->count() }}</div>
                 <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">Completed</div>
             </div>
         </div>
@@ -33,7 +33,7 @@
     <!-- Assigned Programs Grid (Light Theme) -->
     <div class="space-y-4">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-serif font-bold text-slate-900">Your Evaluation Schedule</h2>
+            <h2 class="text-xl font-sora font-bold text-slate-900">Your Evaluation Schedule</h2>
             <span class="text-xs font-mono text-slate-500 font-semibold">Total: {{ $assignedPrograms->count() }} Events</span>
         </div>
 
@@ -65,7 +65,7 @@
                             @endif
                         </div>
 
-                        <h3 class="text-xl font-serif font-bold text-slate-900 mt-3">{{ $prog->name }}</h3>
+                        <h3 class="text-xl font-sora font-bold text-slate-900 mt-3">{{ $prog->name }}</h3>
                         <p class="text-xs font-mono text-slate-500 mt-1">Code: {{ $prog->code }} • Type: {{ ucfirst($prog->type) }}</p>
 
                         <!-- Stage & Timing Info -->

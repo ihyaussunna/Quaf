@@ -205,13 +205,11 @@
 }
 
 @theme {
-    --font-sans: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-serif: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif;
-    --font-mono: 'JetBrains Mono', 'Malayalam Sangam MN', monospace;
+    --font-sora: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
     --font-rockwell: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Malayalam Sangam MN', monospace;
     --font-ml-mn: 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
     --font-ml-sangam: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-sora: 'Sora', 'Malayalam Sangam MN', sans-serif;
     --font-ml: 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
     --font-ar: 'Amiri', 'Noto Naskh Arabic', serif;
     --font-ur: 'Noto Nastaliq Urdu', serif;
@@ -241,17 +239,24 @@
     --color-gold-dark: #f3bd2e;
 }
 
-.font-rockwell,
-.font-serif {
-    font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
+/* Base typography: Titles and UI globally enforce Sora */
+body,
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
 }
 
 .font-sora,
-.font-sans {
+.font-sans,
+.font-serif {
     font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
 }
 
-.font-mono {
+.font-rockwell {
+    font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
+}
+
+.font-mono,
+[data-mono] {
     font-family: 'JetBrains Mono', 'Malayalam Sangam MN', monospace !important;
 }
 

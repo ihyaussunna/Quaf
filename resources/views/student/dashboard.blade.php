@@ -5,7 +5,7 @@
     <!-- Student Profile Hero (Light Theme) -->
     <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm">
         <div class="flex items-center gap-6 relative z-10">
-            <div class="w-20 h-20 rounded-2xl bg-slate-100 border-2 border-[#f3bd2e]/60 flex items-center justify-center font-serif text-3xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0 shadow-md">
+            <div class="w-20 h-20 rounded-2xl bg-slate-100 border-2 border-[#f3bd2e]/60 flex items-center justify-center font-sora text-3xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0 shadow-md">
                 @if($student->photo_path)
                     <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                 @else
@@ -20,7 +20,7 @@
                     </span>
                     <span class="text-[10px] font-mono text-slate-500">• {{ $student->zone_name }}</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900">{{ $student->name }}</h1>
+                <h1 class="text-2xl sm:text-3xl font-sora font-black text-slate-900">{{ $student->name }}</h1>
                 <p class="text-xs font-mono text-slate-500">
                     Chest #: <strong class="text-[#f3bd2e] font-bold">{{ $student->chest_number ?? '---' }}</strong> • Student ID: {{ $student->student_id }}
                 </p>
@@ -45,13 +45,13 @@
                 <span class="w-2.5 h-2.5 rounded-full {{ ($individualCount ?? 0) >= 5 ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse' }}"></span>
                 <h3 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-900">Individual Programme Quota</h3>
             </div>
-            <p class="text-xs text-slate-500 font-sans">
+            <p class="text-xs text-slate-500 font-sora">
                 Each student can participate in a maximum of 5 individual programmes (Own Zone + Mix Zone).
             </p>
         </div>
         <div class="flex items-center gap-5 flex-shrink-0 bg-slate-50 border border-slate-200/80 px-6 py-3 rounded-2xl">
             <div class="text-right">
-                <div class="text-2xl font-serif font-black">
+                <div class="text-2xl font-sora font-black">
                     <span class="{{ ($individualCount ?? 0) >= 5 ? 'text-[#be1e2d]' : 'text-emerald-700' }}">{{ $individualCount ?? 0 }}</span>
                     <span class="text-slate-400 text-lg">/ {{ $maxSlots ?? 5 }}</span>
                 </div>
@@ -59,7 +59,7 @@
             </div>
             <div class="h-8 w-[1px] bg-slate-300"></div>
             <div class="text-left">
-                <div class="text-2xl font-serif font-black {{ ($remainingSlots ?? 0) > 0 ? 'text-[#f3bd2e]' : 'text-slate-400' }}">
+                <div class="text-2xl font-sora font-black {{ ($remainingSlots ?? 0) > 0 ? 'text-[#f3bd2e]' : 'text-slate-400' }}">
                     {{ $remainingSlots ?? 5 }}
                 </div>
                 <span class="text-[10px] font-mono font-bold uppercase text-slate-500">Remaining</span>
@@ -77,7 +77,7 @@
                 </div>
 
                 @if($nextEntry)
-                    <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-wide">
+                    <h2 class="text-2xl sm:text-3xl font-sora font-black text-slate-900 tracking-wide">
                         {{ $nextEntry->program->name }}
                     </h2>
                     <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-600">
@@ -88,7 +88,7 @@
                         <span>Chest: <strong class="text-slate-900">#{{ $nextEntry->chest_number }}</strong></span>
                     </div>
                 @else
-                    <h2 class="text-xl font-serif font-bold text-slate-700">
+                    <h2 class="text-xl font-sora font-bold text-slate-700">
                         No upcoming programs scheduled at this time.
                     </h2>
                     <p class="text-xs font-mono text-slate-500">
@@ -149,7 +149,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-[#f3bd2e] animate-pulse"></span>
-                <h2 class="text-xl font-serif font-bold text-slate-900">Anonymous Code Scratch Card</h2>
+                <h2 class="text-xl font-sora font-bold text-slate-900">Anonymous Code Scratch Card</h2>
             </div>
             <span class="text-xs font-mono text-[#f3bd2e] font-bold">Strictly Confidential</span>
         </div>
@@ -250,7 +250,7 @@
                             <span class="text-xs font-mono text-slate-500">Chest #{{ $scratchEntry->chest_number }}</span>
                         </div>
 
-                        <h3 class="text-2xl font-serif font-black text-slate-900">{{ $scratchEntry->program->name }}</h3>
+                        <h3 class="text-2xl font-sora font-black text-slate-900">{{ $scratchEntry->program->name }}</h3>
                         
                         <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-600">
                             <span>Venue: <strong class="text-slate-900">{{ $scratchEntry->program->stage->name ?? 'TBA' }}</strong></span>
@@ -259,7 +259,7 @@
                         </div>
 
                         <!-- Anonymity Notice -->
-                        <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl text-xs text-amber-950 font-sans leading-relaxed flex items-start gap-2.5">
+                        <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl text-xs text-amber-950 font-sora leading-relaxed flex items-start gap-2.5">
                             <svg class="w-4 h-4 text-[#f3bd2e] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <div>
                                 <strong class="font-bold text-slate-900 block font-mono text-[11px]">Strict Anonymity Rule:</strong>
@@ -282,7 +282,7 @@
                             <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-amber-100 flex flex-col items-center justify-center p-4 text-center">
                                 @if($scratchEntry->code_letter)
                                     <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Secret Code Letter</span>
-                                    <div class="text-6xl font-serif font-black text-[#f3bd2e] tracking-wider my-1 animate-bounce">
+                                    <div class="text-6xl font-sora font-black text-[#f3bd2e] tracking-wider my-1 animate-bounce">
                                         Code {{ $scratchEntry->code_letter }}
                                     </div>
                                     <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
@@ -316,7 +316,7 @@
     <!-- Enrolled Programs Grid (Light Theme) -->
     <div class="space-y-4">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-serif font-bold text-slate-900">My Enrolled Programs</h2>
+            <h2 class="text-xl font-sora font-bold text-slate-900">My Enrolled Programs</h2>
             <span class="text-xs font-mono text-slate-500 font-semibold">Total: {{ $myPrograms->count() }} Events</span>
         </div>
 
@@ -334,7 +334,7 @@
                     </div>
 
                     <div>
-                        <h3 class="text-xl font-serif font-bold text-slate-900">{{ $entry->program->name }}</h3>
+                        <h3 class="text-xl font-sora font-bold text-slate-900">{{ $entry->program->name }}</h3>
                         <p class="text-xs font-mono text-slate-500 mt-1">Code: {{ $entry->program->code }} • Chest #{{ $entry->chest_number }}</p>
                     </div>
 
@@ -360,15 +360,15 @@
     <!-- Announcements -->
     @if($announcements->isNotEmpty())
         <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
-            <h3 class="text-lg font-serif font-bold text-slate-900">Festival Announcements</h3>
+            <h3 class="text-lg font-sora font-bold text-slate-900">Festival Announcements</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @foreach($announcements as $ann)
                     <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-serif font-bold text-slate-900">{{ $ann->title }}</h4>
+                            <h4 class="text-xs font-sora font-bold text-slate-900">{{ $ann->title }}</h4>
                             <span class="text-[10px] font-mono text-slate-400">{{ $ann->created_at->diffForHumans() }}</span>
                         </div>
-                        <p class="text-xs font-sans text-slate-700">{{ $ann->content }}</p>
+                        <p class="text-xs font-sora text-slate-700">{{ $ann->content }}</p>
                     </div>
                 @endforeach
             </div>

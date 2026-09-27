@@ -5,8 +5,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sans tracking-tight">Top Scorers & Champions</h1>
-            <p class="text-xs text-slate-500 mt-1 font-sans">Individual star performers, Kalaprathibha, Kalathilakam, and special zone badge winners.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sora tracking-tight">Top Scorers & Champions</h1>
+            <p class="text-xs text-slate-500 mt-1 font-sora">Individual star performers, Kalaprathibha, Kalathilakam, and special zone badge winners.</p>
         </div>
         <div class="flex items-center gap-2.5">
             <a href="{{ route('admin.points.index') }}" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-2xs">
@@ -126,7 +126,7 @@
     <!-- Top Scorers Table (Columns: Participant Name, Special Badges, Gender, Team, Zone, Offstage Points, Stage Points, Total Points) -->
     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200 text-[11px] font-semibold">
                     <tr>
                         <th class="px-5 py-3.5">Rank</th>

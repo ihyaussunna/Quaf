@@ -20,7 +20,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 antialiased overflow-x-hidden" x-data="{
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col font-sora selection:bg-amber-100 selection:text-amber-900 antialiased overflow-x-hidden" x-data="{
     time: '',
     date: '',
     isFullscreen: false,
@@ -43,7 +43,7 @@
     <!-- Top Header Bar -->
     <header class="bg-white border-b border-slate-200 px-6 lg:px-10 py-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20 font-serif font-black text-xl tracking-wider">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20 font-sora font-black text-xl tracking-wider">
                 Q9
             </div>
             <div>
@@ -54,7 +54,7 @@
                         LIVE STAGE SCREEN
                     </span>
                 </div>
-                <h1 class="text-xl lg:text-2xl font-black tracking-tight text-slate-900 font-serif mt-0.5">
+                <h1 class="text-xl lg:text-2xl font-black tracking-tight text-slate-900 font-sora mt-0.5">
                     {{ $stage->name }} <span class="text-amber-700 font-mono text-base font-bold">({{ $stage->code }})</span>
                 </h1>
             </div>
@@ -98,7 +98,7 @@
                                 {{ strtoupper(str_replace('_', ' ', $stage->currentProgram->type)) }}
                             </span>
                         </div>
-                        <h2 class="text-3xl lg:text-5xl font-black text-slate-900 tracking-tight font-serif">
+                        <h2 class="text-3xl lg:text-5xl font-black text-slate-900 tracking-tight font-sora">
                             {{ $stage->currentProgram->name }}
                         </h2>
                         @if($stage->currentProgram->malayalam_name)
@@ -168,7 +168,7 @@
 
                                 <!-- Contestant / Team Name -->
                                 <div class="space-y-2 pt-2 border-t border-slate-200/80">
-                                    <div class="text-2xl lg:text-4xl font-extrabold text-slate-900 tracking-tight font-serif">
+                                    <div class="text-2xl lg:text-4xl font-extrabold text-slate-900 tracking-tight font-sora">
                                         {{ $student ? $student->name : ($group ? $group->name . ' Team' : 'Contestant') }}
                                     </div>
                                     @if($student && $student->admission_number)
@@ -186,7 +186,7 @@
                                         <span class="w-5 h-5 rounded-full border border-slate-300 shadow-sm" style="background-color: {{ $group->color_code ?? '#f3bd2e' }}"></span>
                                         <div>
                                             <div class="text-[11px] font-mono uppercase font-bold text-slate-500 tracking-wider">Group / Team</div>
-                                            <div class="text-base font-bold text-slate-900 font-serif">{{ $group->name }}</div>
+                                            <div class="text-base font-bold text-slate-900 font-sora">{{ $group->name }}</div>
                                         </div>
                                     </div>
                                     <span class="px-3 py-1 rounded-lg text-xs font-mono font-bold uppercase tracking-wider bg-slate-100 text-slate-700">
@@ -198,11 +198,11 @@
                     @else
                         <!-- Standby State -->
                         <div class="bg-white rounded-3xl border border-slate-200 p-12 shadow-sm flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                            <div class="w-20 h-20 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 text-3xl font-serif font-black animate-pulse-slow">
+                            <div class="w-20 h-20 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 text-3xl font-sora font-black animate-pulse-slow">
                                 Q9
                             </div>
                             <div class="space-y-1">
-                                <h3 class="text-2xl lg:text-3xl font-bold text-slate-900 font-serif">Awaiting Next Performer</h3>
+                                <h3 class="text-2xl lg:text-3xl font-bold text-slate-900 font-sora">Awaiting Next Performer</h3>
                                 <p class="text-slate-500 text-sm max-w-md mx-auto">
                                     Green Room coordinator is preparing the next contestant for stage presentation.
                                 </p>
@@ -266,7 +266,7 @@
                             <div class="text-[10px] font-mono font-extrabold uppercase tracking-widest text-slate-500 mb-1">
                                 UPCOMING EVENT
                             </div>
-                            <div class="font-serif font-bold text-base text-slate-900 line-clamp-1">
+                            <div class="font-sora font-bold text-base text-slate-900 line-clamp-1">
                                 {{ $stage->nextProgram->name }}
                             </div>
                             <div class="flex items-center gap-2 mt-2">
@@ -284,11 +284,11 @@
         @else
             <!-- Stage Idle -->
             <div class="bg-white rounded-3xl border border-slate-200 p-16 shadow-sm flex-1 flex flex-col items-center justify-center text-center space-y-6">
-                <div class="w-24 h-24 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 text-4xl font-serif font-black shadow-md">
+                <div class="w-24 h-24 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 text-4xl font-sora font-black shadow-md">
                     Q9
                 </div>
                 <div class="space-y-2 max-w-lg">
-                    <h2 class="text-3xl lg:text-4xl font-black text-slate-900 font-serif tracking-tight">Stage Currently Idle</h2>
+                    <h2 class="text-3xl lg:text-4xl font-black text-slate-900 font-sora tracking-tight">Stage Currently Idle</h2>
                     <p class="text-slate-500 text-sm">
                         There is no active program scheduled right now on {{ $stage->name }}. The stage screen will automatically update when the festival session resumes.
                     </p>

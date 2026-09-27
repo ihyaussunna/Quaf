@@ -31,7 +31,7 @@
                     <div class="text-xs font-mono text-amber-400 font-bold uppercase tracking-widest">
                         QUAF 09 &bull; {{ $result->program->category->name ?? 'General' }}
                     </div>
-                    <h1 class="text-xl sm:text-3xl font-black mt-1 font-sans tracking-tight">
+                    <h1 class="text-xl sm:text-3xl font-black mt-1 font-sora tracking-tight">
                         {{ $result->program->name }}
                     </h1>
                     @if($result->program->malayalam_name)

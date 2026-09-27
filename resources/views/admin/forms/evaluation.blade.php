@@ -76,7 +76,7 @@
 
             <!-- Table (Code Letter, Criteria columns, Out of 100) -->
             <div class="w-full overflow-x-auto print:overflow-visible">
-                <table class="w-full text-black border-collapse border border-black text-xs font-sans">
+                <table class="w-full text-black border-collapse border border-black text-xs font-sora">
                     <thead>
                         <tr class="h-10 bg-white">
                             <th class="border border-black px-2 py-1.5 w-[14%] text-center font-bold">Code Letter</th>

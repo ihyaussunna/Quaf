@@ -18,7 +18,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col">
 
     <!-- Top Evaluation Header (Light Theme) -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">

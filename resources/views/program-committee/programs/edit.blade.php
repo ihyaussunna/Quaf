@@ -46,7 +46,7 @@
                 <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 text-slate-700">
                     {{ $program->code }}
                 </span>
-                <h2 class="text-2xl font-serif font-black text-slate-900 mt-1">Edit Program: {{ $program->name }}</h2>
+                <h2 class="text-2xl font-sora font-black text-slate-900 mt-1">Edit Program: {{ $program->name }}</h2>
                 <p class="text-xs font-mono text-slate-500 mt-1">
                     Edit competition details and official rules.
                 </p>

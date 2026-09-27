@@ -3,7 +3,7 @@
 @section('content')
 <div class="space-y-6">
     <div>
-        <h1 class="text-3xl font-serif font-black text-slate-900">Security & Operation Audit Logs</h1>
+        <h1 class="text-3xl font-sora font-black text-slate-900">Security & Operation Audit Logs</h1>
         <p class="text-xs font-mono text-slate-500 mt-1">Immutable audit trail of all administrative, scoring, publishing, and green room activities.</p>
     </div>
 

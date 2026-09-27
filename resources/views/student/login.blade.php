@@ -14,16 +14,16 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-[#f3bd2e] selection:text-white">
+<body class="bg-slate-50 text-slate-900 font-sora antialiased min-h-screen flex flex-col justify-between selection:bg-[#f3bd2e] selection:text-white">
 
     <!-- Header -->
     <header class="h-20 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#f3bd2e] to-[#be1e2d] flex items-center justify-center p-0.5 shadow-sm">
-                <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-serif font-black text-sm text-[#f3bd2e]">Q9</div>
+                <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-sora font-black text-sm text-[#f3bd2e]">Q9</div>
             </div>
             <div>
-                <span class="font-serif font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF 09</span>
+                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF 09</span>
                 <span class="text-[10px] font-mono tracking-widest text-[#f3bd2e] block uppercase font-bold">Student Portal</span>
             </div>
         </a>
@@ -44,7 +44,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                 </div>
-                <h1 class="text-2xl font-serif font-black text-slate-900">Student Portal Login</h1>
+                <h1 class="text-2xl font-sora font-black text-slate-900">Student Portal Login</h1>
                 <p class="text-xs font-mono text-slate-500">
                     Enter your Chest Number or Student ID to access your dashboard (no password required).
                 </p>

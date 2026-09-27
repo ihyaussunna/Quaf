@@ -18,7 +18,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-sans antialiased min-h-screen flex overflow-x-hidden max-w-full"
+<body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex overflow-x-hidden max-w-full"
       x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Backdrop -->
@@ -48,7 +48,7 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex-1 px-3 py-4 space-y-1.5 text-xs font-sans text-slate-400">
+        <nav class="flex-1 px-3 py-4 space-y-1.5 text-xs font-sora text-slate-400">
             <!-- 1. Dashboard -->
             <a href="{{ route('media.dashboard') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('media.dashboard') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">

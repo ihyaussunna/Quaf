@@ -5,7 +5,7 @@
     <div class="flex items-center justify-between">
         <div>
             <a href="{{ route('admin.groups.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-1.5 block font-semibold">← Back to Groups</a>
-            <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900">Edit Group: {{ $group->name }}</h1>
+            <h1 class="text-2xl sm:text-3xl font-sora font-black text-slate-900">Edit Group: {{ $group->name }}</h1>
         </div>
         <div class="flex items-center gap-2">
             <span class="w-4 h-4 rounded-full border border-slate-300 shadow-xs" style="background-color: {{ $group->color_hex ?? '#be1e2d' }}"></span>

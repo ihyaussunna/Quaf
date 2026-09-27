@@ -116,7 +116,7 @@
     @if($selectedStudent)
         <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-2xs">
             <!-- Student Header (Matches Screenshot) -->
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs font-sans">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs font-sora">
                 <div>
                     <span class="text-slate-500">Student Id:</span>
                     <span class="font-bold text-slate-900 ml-1">{{ $selectedStudent->student_id }}</span>
@@ -141,7 +141,7 @@
 
             <!-- Table -->
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs font-sans">
+                <table class="w-full text-left text-xs font-sora">
                     <thead class="bg-slate-50/50 text-slate-500 uppercase border-b border-slate-200 text-[11px] font-semibold">
                         <tr>
                             <th class="px-6 py-3.5">No</th>

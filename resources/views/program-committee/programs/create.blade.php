@@ -75,7 +75,7 @@
             <span class="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-mono font-bold uppercase">
                 Program Committee
             </span>
-            <h2 class="text-2xl font-serif font-black text-slate-900 mt-2">Add New Competition Program</h2>
+            <h2 class="text-2xl font-sora font-black text-slate-900 mt-2">Add New Competition Program</h2>
             <p class="text-xs font-mono text-slate-500 mt-1">
                 Add competition event details, official rules, and evaluation criteria.
             </p>

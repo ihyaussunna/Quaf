@@ -74,9 +74,9 @@
         /* Public Portal Typography: Sora for all Headings, Body & UI; JetBrains Mono for Numbers/IDs */
         body,
         h1, h2, h3, h4, h5, h6,
-        .font-sans,
         .font-sora,
-        .font-serif {
+        .font-sora,
+        .font-sora {
             font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
         }
 
@@ -90,7 +90,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-[#be1e2d] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden">
+<body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden">
 
     <!-- Top Announcement Bar / Live Alert -->
     @php
@@ -311,7 +311,7 @@
 
                 <!-- Col 2: Quick Links -->
                 <div>
-                    <h4 class="font-serif text-slate-900 font-bold text-xs sm:text-sm tracking-wider uppercase mb-3 sm:mb-4">Festival Portal</h4>
+                    <h4 class="font-sora text-slate-900 font-bold text-xs sm:text-sm tracking-wider uppercase mb-3 sm:mb-4">Festival Portal</h4>
                     <ul class="space-y-2 text-xs sm:text-sm">
                         <li><a href="{{ route('home') }}" class="text-slate-600 hover:text-[#f3bd2e] transition-colors">Home Page</a></li>
                         <li><a href="{{ route('results.index') }}" class="text-slate-600 hover:text-[#f3bd2e] transition-colors">Official Results</a></li>
@@ -323,7 +323,7 @@
 
                 <!-- Col 3: Verifications & Management -->
                 <div>
-                    <h4 class="font-serif text-slate-900 font-bold text-xs sm:text-sm tracking-wider uppercase mb-3 sm:mb-4">Verifications</h4>
+                    <h4 class="font-sora text-slate-900 font-bold text-xs sm:text-sm tracking-wider uppercase mb-3 sm:mb-4">Verifications</h4>
                     <ul class="space-y-2 text-xs sm:text-sm">
                         <li>
                             <a href="{{ route('verify.certificate', 'SAMPLE') }}" class="text-slate-600 hover:text-[#f3bd2e] transition-colors flex items-center gap-1.5">

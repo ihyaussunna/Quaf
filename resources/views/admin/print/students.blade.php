@@ -42,7 +42,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen py-6 px-3 sm:px-6"
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen py-6 px-3 sm:px-6"
       x-data="{
           colChestNo: true,
           colGroup: true,
@@ -179,7 +179,7 @@
             <div class="flex items-center gap-4">
                 <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-14 w-auto object-contain">
                 <div>
-                    <h1 class="text-xl font-black font-serif text-slate-900 uppercase tracking-tight">Participant Delegate Registry & Roll Sheet</h1>
+                    <h1 class="text-xl font-black font-sora text-slate-900 uppercase tracking-tight">Participant Delegate Registry & Roll Sheet</h1>
                     <p class="text-xs font-semibold text-slate-600">Ihyaussunna Students Union, Jamia Markaz</p>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                             <th x-show="colSign" class="py-2 px-3 text-center w-24">Signature</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 font-sans">
+                    <tbody class="divide-y divide-slate-200 font-sora">
                         @foreach($students as $idx => $st)
                             <tr class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
                                 <td class="py-2 px-2.5 text-center font-mono text-slate-500 text-[11px]">

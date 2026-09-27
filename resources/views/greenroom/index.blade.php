@@ -16,7 +16,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col">
 
     <!-- Backstage High-Speed Topbar (Light Theme) -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
@@ -85,10 +85,10 @@
                 <div class="space-y-1">
                     <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-semibold">Now On Stage</span>
                     @if($currentProgram)
-                        <h3 class="text-xl font-serif font-bold text-slate-900">{{ $currentProgram->name }}</h3>
+                        <h3 class="text-xl font-sora font-bold text-slate-900">{{ $currentProgram->name }}</h3>
                         <p class="text-xs font-mono text-[#f3bd2e] font-semibold">Code: {{ $currentProgram->code }} • {{ $currentProgram->category->name ?? 'General' }}</p>
                     @else
-                        <h3 class="text-lg font-serif italic text-slate-400">No Program Active</h3>
+                        <h3 class="text-lg font-sora italic text-slate-400">No Program Active</h3>
                         <p class="text-xs font-mono text-slate-500">Stage is currently on intermission</p>
                     @endif
                 </div>
@@ -97,10 +97,10 @@
                 <div class="space-y-1 md:border-l md:border-slate-200 md:pl-6">
                     <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-semibold">Up Next in Line</span>
                     @if($nextProgram)
-                        <h3 class="text-xl font-serif font-bold text-slate-800">{{ $nextProgram->name }}</h3>
+                        <h3 class="text-xl font-sora font-bold text-slate-800">{{ $nextProgram->name }}</h3>
                         <p class="text-xs font-mono text-slate-500">Scheduled: {{ $nextProgram->scheduled_time?->format('h:i A') ?? 'TBA' }}</p>
                     @else
-                        <h3 class="text-lg font-serif italic text-slate-400">None Queued</h3>
+                        <h3 class="text-lg font-sora italic text-slate-400">None Queued</h3>
                         <p class="text-xs font-mono text-slate-500">Awaiting next schedule slot</p>
                     @endif
                 </div>
@@ -132,7 +132,7 @@
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-xl font-serif font-bold text-slate-900">Backstage Lineup & Call Board</h2>
+                        <h2 class="text-xl font-sora font-bold text-slate-900">Backstage Lineup & Call Board</h2>
                         <p class="text-xs font-mono text-slate-500 mt-0.5">Program: {{ $activeProgram?->name ?? 'None' }} ({{ $calls->count() }} Participants)</p>
                     </div>
                     <div class="flex items-center gap-2 text-xs font-mono">
@@ -171,7 +171,7 @@
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
-                                        <h4 class="text-base font-serif font-bold text-slate-900">{{ $call->entry->student?->name ?? 'Participant' }}</h4>
+                                        <h4 class="text-base font-sora font-bold text-slate-900">{{ $call->entry->student?->name ?? 'Participant' }}</h4>
                                         <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" style="background-color: {{ $call->entry->student?->group->color_hex ?? '#f3bd2e' }}20; color: {{ $call->entry->student?->group->color_hex ?? '#f3bd2e' }}">
                                             {{ $call->entry->student?->group->name ?? $call->entry->group?->name }}
                                         </span>

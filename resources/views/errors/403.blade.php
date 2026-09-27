@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manjari:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#0f1115] text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 selection:bg-[#be1e2d] selection:text-white">
+<body class="bg-[#0f1115] text-slate-100 font-sora antialiased min-h-screen flex items-center justify-center p-4 selection:bg-[#be1e2d] selection:text-white">
 
     <div class="w-full max-w-xl mx-auto text-center space-y-6">
         <!-- Logo -->

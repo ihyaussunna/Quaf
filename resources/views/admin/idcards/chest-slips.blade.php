@@ -27,7 +27,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans p-6 min-h-screen">
+<body class="bg-slate-100 text-slate-900 font-sora p-6 min-h-screen">
 
     <!-- Action & Filter Bar (Hidden on Print) -->
     <div class="no-print max-w-5xl mx-auto mb-6 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
@@ -39,7 +39,7 @@
                     </span>
                     <span class="text-xs font-mono text-slate-500">• {{ $students->count() }} Contestant Slips</span>
                 </div>
-                <h1 class="font-serif font-black text-xl text-slate-900 mt-1">Printable Chest Number Slips</h1>
+                <h1 class="font-sora font-black text-xl text-slate-900 mt-1">Printable Chest Number Slips</h1>
                 <p class="text-xs font-mono text-slate-500">Standard A4 grid with high-visibility chest badges for contestant chest pinning & green room check-in.</p>
             </div>
             <div class="flex items-center gap-3">
@@ -111,7 +111,7 @@
 
                     <!-- Center: Student Name & Reg Info -->
                     <div class="flex-1 px-4 min-w-0">
-                        <h4 class="font-serif font-bold text-base text-slate-900 truncate">
+                        <h4 class="font-sora font-bold text-base text-slate-900 truncate">
                             {{ $student->name }}
                         </h4>
                         <p class="text-[10px] font-mono text-slate-500">ID: {{ $student->student_id }}</p>

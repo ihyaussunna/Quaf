@@ -8,7 +8,7 @@
             <a href="{{ route('admin.groups.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-1.5 block font-semibold">← Back to Groups</a>
             <div class="flex items-center gap-3">
                 <span class="w-4 h-4 rounded-full border border-slate-300 shadow-xs shrink-0" style="background-color: {{ $group->color_hex ?? '#be1e2d' }}"></span>
-                <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900">{{ $group->name }}</h1>
+                <h1 class="text-2xl sm:text-3xl font-sora font-black text-slate-900">{{ $group->name }}</h1>
                 <span class="px-2.5 py-1 text-xs font-mono font-bold rounded-lg border bg-slate-100 text-slate-700 border-slate-200">{{ $group->code }}</span>
             </div>
         </div>
@@ -26,27 +26,27 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Rank</span>
-            <span class="text-2xl font-serif font-black text-slate-900 mt-1 block">#{{ $group->rank_cache ?: '—' }}</span>
+            <span class="text-2xl font-sora font-black text-slate-900 mt-1 block">#{{ $group->rank_cache ?: '—' }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Total Points</span>
-            <span class="text-2xl font-serif font-black text-[#be1e2d] mt-1 block">{{ $group->points_cache ?? 0 }}</span>
+            <span class="text-2xl font-sora font-black text-[#be1e2d] mt-1 block">{{ $group->points_cache ?? 0 }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Total Students</span>
-            <span class="text-2xl font-serif font-black text-slate-900 mt-1 block">{{ $group->students->count() }}</span>
+            <span class="text-2xl font-sora font-black text-slate-900 mt-1 block">{{ $group->students->count() }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">A Zone</span>
-            <span class="text-2xl font-serif font-black text-emerald-600 mt-1 block">{{ $group->students->where('category', 'A Zone')->count() }}</span>
+            <span class="text-2xl font-sora font-black text-emerald-600 mt-1 block">{{ $group->students->where('category', 'A Zone')->count() }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">B Zone</span>
-            <span class="text-2xl font-serif font-black text-amber-600 mt-1 block">{{ $group->students->where('category', 'B Zone')->count() }}</span>
+            <span class="text-2xl font-sora font-black text-amber-600 mt-1 block">{{ $group->students->where('category', 'B Zone')->count() }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">C Zone</span>
-            <span class="text-2xl font-serif font-black text-blue-600 mt-1 block">{{ $group->students->where('category', 'C Zone')->count() }}</span>
+            <span class="text-2xl font-sora font-black text-blue-600 mt-1 block">{{ $group->students->where('category', 'C Zone')->count() }}</span>
         </div>
     </div>
 
@@ -55,7 +55,7 @@
         <h2 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-900 mb-4 pb-2 border-b border-slate-100">
             Leadership & Management Details
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-xs font-sans">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-xs font-sora">
             <div>
                 <span class="text-slate-400 font-mono uppercase tracking-wider text-[11px] block font-semibold mb-1">Official Manager</span>
                 <span class="font-bold text-slate-900 text-sm block">{{ $group->manager_name ?: '—' }}</span>
@@ -145,7 +145,7 @@
 
         <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs font-sans">
+                <table class="w-full text-left text-xs font-sora">
                     <thead class="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200 font-mono uppercase text-[11px]">
                         <tr>
                             <th class="px-5 py-3.5">Chest No</th>
@@ -212,7 +212,7 @@
 
         <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs font-sans">
+                <table class="w-full text-left text-xs font-sora">
                     <thead class="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200 font-mono uppercase text-[11px]">
                         <tr>
                             <th class="px-5 py-3.5">Code</th>

@@ -11,7 +11,7 @@
             <span>•</span>
             <span>{{ $article->published_at?->format('F d, Y — h:i A') }}</span>
         </div>
-        <h1 class="text-3xl sm:text-5xl font-serif font-black text-slate-900 leading-tight mb-6">
+        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 leading-tight mb-6">
             {{ $article->title }}
         </h1>
         @if($article->excerpt)
@@ -35,12 +35,12 @@
     <!-- Related Articles (Light Theme) -->
     @if($related->isNotEmpty())
         <div class="mt-20 pt-12 border-t border-slate-200">
-            <h3 class="font-serif font-bold text-2xl text-slate-900 mb-6">Related Chronicles</h3>
+            <h3 class="font-sora font-bold text-2xl text-slate-900 mb-6">Related Chronicles</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach($related as $rel)
                     <a href="{{ route('news.show', $rel->slug) }}" class="group block rounded-2xl bg-white border border-slate-200 p-5 hover:border-[#f3bd2e]/40 transition-all shadow-sm hover:shadow-md">
                         <span class="text-[10px] font-mono text-[#f3bd2e] uppercase font-bold block mb-1">{{ $rel->category }}</span>
-                        <h4 class="font-serif font-bold text-slate-900 text-base group-hover:text-[#f3bd2e] transition-colors leading-snug">
+                        <h4 class="font-sora font-bold text-slate-900 text-base group-hover:text-[#f3bd2e] transition-colors leading-snug">
                             {{ $rel->title }}
                         </h4>
                     </a>

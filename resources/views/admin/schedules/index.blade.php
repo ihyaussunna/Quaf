@@ -8,8 +8,8 @@
     <!-- Top Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sans tracking-tight">Festival Schedule</h1>
-            <p class="text-xs text-slate-500 mt-1 font-sans">Timeline & stage allocations with automated clash detection for participants, judges, and stages.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sora tracking-tight">Festival Schedule</h1>
+            <p class="text-xs text-slate-500 mt-1 font-sora">Timeline & stage allocations with automated clash detection for participants, judges, and stages.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2.5">
             <!-- Auto-scheduling Trigger Button -->
@@ -63,7 +63,7 @@
     <!-- VIEW 1: TABLE VIEW -->
     <div x-show="viewMode === 'table'" class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200 text-[11px] font-semibold">
                     <tr>
                         <th class="px-5 py-3.5 font-mono">Time Slot</th>
@@ -211,8 +211,8 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-base font-sans">Run Auto-Scheduler</h3>
-                    <p class="text-xs text-slate-500 font-sans">Optimize timeline without participant or jury clashes.</p>
+                    <h3 class="font-bold text-slate-900 text-base font-sora">Run Auto-Scheduler</h3>
+                    <p class="text-xs text-slate-500 font-sora">Optimize timeline without participant or jury clashes.</p>
                 </div>
             </div>
 

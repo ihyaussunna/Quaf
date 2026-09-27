@@ -10,7 +10,7 @@
                     <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-[#f3bd2e]/30">{{ $program->code }}</span>
                     <span class="text-xs font-mono text-slate-500">{{ $program->eligibility ?? 'A Zone' }} • {{ ucfirst($program->type) }}</span>
                 </div>
-                <h1 class="text-3xl font-serif font-black text-slate-900">{{ $program->name }}</h1>
+                <h1 class="text-3xl font-sora font-black text-slate-900">{{ $program->name }}</h1>
             </div>
             <div class="flex items-center gap-3">
                 @if(!$program->result)
@@ -68,7 +68,7 @@
     }">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="font-serif font-bold text-lg text-slate-900">Scoring Rubric Criteria</h3>
+                <h3 class="font-sora font-bold text-lg text-slate-900">Scoring Rubric Criteria</h3>
                 <p class="text-xs font-mono text-slate-500">Custom rubric parameters used by assigned judges on score sheets</p>
             </div>
             <div class="text-xs font-mono text-slate-600">
@@ -108,7 +108,7 @@
     <!-- Registered Entries Roster -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-            <h3 class="font-serif font-bold text-lg text-slate-900">Contestants Roster</h3>
+            <h3 class="font-sora font-bold text-lg text-slate-900">Contestants Roster</h3>
             <span class="text-xs font-mono text-slate-500">{{ $program->entries->count() }} Entries</span>
         </div>
         <div class="overflow-x-auto">

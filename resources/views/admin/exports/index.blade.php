@@ -16,8 +16,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sans tracking-tight">Data Exports & Reports</h1>
-            <p class="text-xs text-slate-500 mt-1 font-sans">Generate, customize, and print/export official rosters, jury score sheets, and verdict reports in PDF and CSV format.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 font-sora tracking-tight">Data Exports & Reports</h1>
+            <p class="text-xs text-slate-500 mt-1 font-sora">Generate, customize, and print/export official rosters, jury score sheets, and verdict reports in PDF and CSV format.</p>
         </div>
     </div>
 
@@ -194,13 +194,13 @@
                 <div class="w-7 h-7 rounded-lg bg-red-50 text-[#be1e2d] flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h2 class="font-bold text-slate-900 text-sm font-sans">Recent Generated Reports</h2>
+                <h2 class="font-bold text-slate-900 text-sm font-sora">Recent Generated Reports</h2>
             </div>
-            <span class="text-xs text-slate-400 font-sans">Auto-refreshed</span>
+            <span class="text-xs text-slate-400 font-sora">Auto-refreshed</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200 text-[11px] font-semibold">
                     <tr>
                         <th class="px-6 py-3.5">Export Type</th>

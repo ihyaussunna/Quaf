@@ -23,10 +23,10 @@
                 </span>
                 <span class="text-xs text-slate-500 font-mono">Security & Access Hub</span>
             </div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-2 font-sans">
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-2 font-sora">
                 Panel Access & Credentials Hub
             </h1>
-            <p class="text-sm text-slate-600 mt-1 max-w-2xl font-sans">
+            <p class="text-sm text-slate-600 mt-1 max-w-2xl font-sora">
                 View, copy credentials, and manage access security for all system panels in one place.
             </p>
         </div>

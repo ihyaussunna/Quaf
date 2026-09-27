@@ -67,7 +67,7 @@
                 <div class="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">
                     Markazu Saquafathi Sunniyya • Ihyaussunna
                 </div>
-                <h1 class="text-2xl font-serif font-black tracking-tight text-slate-900 uppercase">
+                <h1 class="text-2xl font-sora font-black tracking-tight text-slate-900 uppercase">
                     OFFICIAL NIYAMAVALI & RULES
                 </h1>
                 <p class="text-xs font-malayalam font-bold text-slate-700">
@@ -104,7 +104,7 @@
 
         <!-- Program Title -->
         <div class="text-center py-2 border-b border-slate-200">
-            <h2 class="text-2xl font-serif font-black text-slate-900">{{ $program->name }}</h2>
+            <h2 class="text-2xl font-sora font-black text-slate-900">{{ $program->name }}</h2>
             @if($program->malayalam_name)
                 <h3 class="text-xl font-malayalam font-bold text-slate-700 mt-1">{{ $program->malayalam_name }}</h3>
             @endif
@@ -115,7 +115,7 @@
             <h4 class="text-xs font-mono uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1">
                 Rules & Regulations
             </h4>
-            <div class="text-xs leading-relaxed text-slate-800 font-sans whitespace-pre-line p-4 rounded-xl bg-slate-50/70 border border-slate-200">
+            <div class="text-xs leading-relaxed text-slate-800 font-sora whitespace-pre-line p-4 rounded-xl bg-slate-50/70 border border-slate-200">
 {{ $program->rules ?: 'Please strictly adhere to official competition guidelines and allocated timings.' }}
             </div>
         </div>
@@ -131,7 +131,7 @@
                     <thead>
                         <tr class="bg-slate-100 border-b border-slate-300 text-slate-600 uppercase">
                             <th class="p-2 border-r border-slate-300 w-12 text-center">No</th>
-                            <th class="p-2 border-r border-slate-300 font-sans">Criterion</th>
+                            <th class="p-2 border-r border-slate-300 font-sora">Criterion</th>
                             <th class="p-2 text-right w-24">Max Marks</th>
                         </tr>
                     </thead>
@@ -139,7 +139,7 @@
                         @foreach($program->scoringCriteria as $i => $crit)
                             <tr>
                                 <td class="p-2 border-r border-slate-200 text-center font-bold text-slate-500">{{ $i + 1 }}</td>
-                                <td class="p-2 border-r border-slate-200 font-sans font-bold text-slate-900">{{ $crit->criterion_name }}</td>
+                                <td class="p-2 border-r border-slate-200 font-sora font-bold text-slate-900">{{ $crit->criterion_name }}</td>
                                 <td class="p-2 text-right font-bold text-slate-900">{{ $crit->max_marks }}</td>
                             </tr>
                         @endforeach

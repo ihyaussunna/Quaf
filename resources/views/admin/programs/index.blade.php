@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 font-sans">Competitions</h1>
+            <h1 class="text-2xl font-bold text-slate-900 font-sora">Competitions</h1>
             <p class="text-xs text-slate-500 mt-0.5">Manage events and competitions</p>
         </div>
         <div class="flex items-center gap-2">
@@ -62,7 +62,7 @@
     <!-- Competitions Table -->
     <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 uppercase text-[11px] font-mono">
                     <tr>
                         <th class="px-5 py-3.5">Prog ID</th>

@@ -4,7 +4,7 @@
 <div class="space-y-8 max-w-6xl mx-auto">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Points Engine & Standings</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Points Engine & Standings</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Configure placement weights, group multipliers, and recalculate group standings dynamically.</p>
         </div>
         <form method="POST" action="{{ route('admin.points.recalculate') }}">
@@ -17,7 +17,7 @@
 
     <!-- Point Configuration Matrix Form -->
     <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm">
-        <h3 class="font-serif font-bold text-lg text-slate-900 mb-2">Scoring Rules Matrix</h3>
+        <h3 class="font-sora font-bold text-lg text-slate-900 mb-2">Scoring Rules Matrix</h3>
         <p class="text-xs font-mono text-slate-500 mb-6">These parameters govern point allocation whenever an official program result is published.</p>
 
         <form method="POST" action="{{ route('admin.points.update') }}" class="grid grid-cols-1 sm:grid-cols-5 gap-4">
@@ -64,7 +64,7 @@
     <!-- Live Leaderboard Table -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-            <h3 class="font-serif font-bold text-lg text-slate-900">Current Group Standings</h3>
+            <h3 class="font-sora font-bold text-lg text-slate-900">Current Group Standings</h3>
             <span class="text-xs font-mono text-slate-500">Auto-ranked by aggregate points</span>
         </div>
         <div class="overflow-x-auto">
@@ -91,7 +91,7 @@
                                 <div class="flex items-center gap-3">
                                     <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-xs shrink-0" style="background-color: {{ $grp->color_hex }}"></span>
                                     <div>
-                                        <span class="font-serif font-bold text-slate-900 text-sm block">{{ $grp->name }}</span>
+                                        <span class="font-sora font-bold text-slate-900 text-sm block">{{ $grp->name }}</span>
                                         <span class="text-[10px] text-slate-500 font-mono">{{ $grp->code }}</span>
                                     </div>
                                 </div>
@@ -100,7 +100,7 @@
                             <td class="px-6 py-4 text-slate-900 font-medium">{{ $grp->students_count }} students</td>
                             <td class="px-6 py-4 text-slate-900 font-medium">{{ $grp->entries_count }} entries</td>
                             <td class="px-6 py-4 text-right">
-                                <span class="font-serif font-black text-2xl" style="color: {{ $grp->color_hex }}">
+                                <span class="font-sora font-black text-2xl" style="color: {{ $grp->color_hex }}">
                                     {{ number_format($grp->points_cache) }}
                                 </span>
                                 <span class="text-slate-500 text-[10px]"> pts</span>
@@ -116,7 +116,7 @@
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h3 class="font-serif font-bold text-lg text-slate-900">Points Transaction Ledger</h3>
+                <h3 class="font-sora font-bold text-lg text-slate-900">Points Transaction Ledger</h3>
                 <p class="text-xs font-mono text-slate-500 mt-0.5">Auditable record of every point awarded (Position 5/3/1, Grade A+:6 / A:5 / B:3 / C:1)</p>
             </div>
 

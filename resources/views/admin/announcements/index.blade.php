@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Announcements</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Announcements</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Broadcast urgent stage calls, jury notices, and group alerts.</p>
         </div>
         <a href="{{ route('admin.announcements.create') }}" class="px-4 py-2.5 rounded-xl bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg shadow-[#f3bd2e]/20">
@@ -34,7 +34,7 @@
                         @endif
                     </div>
 
-                    <h3 class="text-xl font-serif font-bold text-slate-900 mb-2">{{ $ann->title }}</h3>
+                    <h3 class="text-xl font-sora font-bold text-slate-900 mb-2">{{ $ann->title }}</h3>
                     <p class="text-sm text-slate-600 font-normal max-w-3xl leading-relaxed">{{ $ann->message }}</p>
                 </div>
 

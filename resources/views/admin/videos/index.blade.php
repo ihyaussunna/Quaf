@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Festival Videos</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Festival Videos</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Manage live broadcast feeds, promotional teasers, and performance recordings.</p>
         </div>
         <a href="{{ route('admin.videos.create') }}" class="px-4 py-2.5 rounded-xl bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg shadow-[#f3bd2e]/20">
@@ -24,7 +24,7 @@
                         @endif
                     </div>
                     <span class="text-[10px] font-mono text-[#f3bd2e] uppercase block mb-1 font-bold">{{ $vid->category }}</span>
-                    <h4 class="font-serif font-bold text-slate-900 text-sm line-clamp-2 leading-snug">{{ $vid->title }}</h4>
+                    <h4 class="font-sora font-bold text-slate-900 text-sm line-clamp-2 leading-snug">{{ $vid->title }}</h4>
                     <span class="text-[10px] font-mono text-slate-500 block mt-1">YouTube ID: {{ $vid->youtube_id }}</span>
                 </div>
 

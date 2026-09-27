@@ -30,7 +30,7 @@
             <!-- Student Details -->
             <div class="p-6 text-center space-y-4">
                 <div class="relative inline-block">
-                    <div class="w-28 h-28 mx-auto rounded-2xl bg-slate-50 border-2 border-[#f3bd2e] flex items-center justify-center font-serif text-4xl font-bold text-[#f3bd2e] overflow-hidden shadow-md">
+                    <div class="w-28 h-28 mx-auto rounded-2xl bg-slate-50 border-2 border-[#f3bd2e] flex items-center justify-center font-sora text-4xl font-bold text-[#f3bd2e] overflow-hidden shadow-md">
                         @if($student->photo_path)
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                         @else
@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="pt-2">
-                    <h3 class="text-xl font-serif font-bold text-slate-900 tracking-wide print:text-black">
+                    <h3 class="text-xl font-sora font-bold text-slate-900 tracking-wide print:text-black">
                         {{ $student->name }}
                     </h3>
                     <p class="text-xs font-mono text-slate-500 mt-0.5">ID: {{ $student->student_id }}</p>

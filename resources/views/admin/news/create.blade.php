@@ -4,7 +4,7 @@
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">
         <a href="{{ route('admin.news.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to News</a>
-        <h1 class="text-3xl font-serif font-black text-slate-900">Create Article</h1>
+        <h1 class="text-3xl font-sora font-black text-slate-900">Create Article</h1>
     </div>
 
     <form method="POST" action="{{ route('admin.news.store') }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">

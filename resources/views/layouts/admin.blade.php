@@ -70,19 +70,22 @@
             font-display: swap;
         }
 
-        /* Typography Hierarchy: Headings -> Rockwell, Body/UI -> Sora, IDs/Numbers -> JetBrains Mono */
+        /* Typography Hierarchy: Titles & UI -> Sora, Brand -> Rockwell, IDs/Numbers -> JetBrains Mono */
         h1:not(.font-mono),
         h2:not(.font-mono),
         h3:not(.font-mono),
-        .font-rockwell,
-        .font-serif {
-            font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
+        h4:not(.font-mono),
+        h5:not(.font-mono),
+        h6:not(.font-mono),
+        body,
+        .font-sora,
+        .font-sora,
+        .font-sora {
+            font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
         }
 
-        body,
-        .font-sans,
-        .font-sora {
-            font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', system-ui, -apple-system, sans-serif !important;
+        .font-rockwell {
+            font-family: 'Rockwell', 'Rockwell Std', 'Sora', sans-serif !important;
         }
 
         .font-mono,
@@ -113,7 +116,7 @@
         }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-sans antialiased min-h-screen flex overflow-x-hidden max-w-full" 
+<body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex overflow-x-hidden max-w-full" 
       x-data="{ 
           sidebarOpen: false, 
           settingsDrawerOpen: false, 
@@ -140,7 +143,7 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex-1 px-3 py-4 space-y-1 text-xs font-sans text-slate-400">
+        <nav class="flex-1 px-3 py-4 space-y-1 text-xs font-sora text-slate-400">
             <!-- 1. Dashboard -->
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -340,7 +343,7 @@
 
             <!-- Admin Popover Menu -->
             <div x-show="adminMenuOpen" @click.away="adminMenuOpen = false" 
-                 class="absolute bottom-16 left-3 right-3 bg-[#1e2329] border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs font-sans space-y-0.5" 
+                 class="absolute bottom-16 left-3 right-3 bg-[#1e2329] border border-slate-700/80 rounded-2xl shadow-2xl py-2 z-50 text-xs font-sora space-y-0.5" 
                  style="display: none;">
                 <a href="{{ route('admin.panel-access.index') }}" class="flex items-center gap-2 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50">
                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>

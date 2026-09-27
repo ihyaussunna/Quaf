@@ -7,7 +7,7 @@
 }">
     <div class="mb-6 sm:mb-10">
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">CINEMATIC ARCHIVES</span>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 mt-1 sm:mt-2">Festival Theater</h1>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Theater</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
             Watch live broadcasts, event highlights, and grand choral performances.
         </p>
@@ -26,7 +26,7 @@
             <div class="px-1 sm:px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                 <div>
                     <span class="text-[10px] sm:text-xs font-mono text-[#f3bd2e] uppercase tracking-wider block mb-0.5 font-bold">NOW PLAYING</span>
-                    <h2 class="text-lg sm:text-2xl font-serif font-bold text-slate-900 leading-snug" x-text="activeTitle">
+                    <h2 class="text-lg sm:text-2xl font-sora font-bold text-slate-900 leading-snug" x-text="activeTitle">
                         {{ $featured->title }}
                     </h2>
                 </div>
@@ -59,7 +59,7 @@
                     @endif
                 </div>
                 <span class="text-[10px] font-mono text-[#f3bd2e] uppercase tracking-wider block mb-1 font-bold">{{ $video->category }}</span>
-                <h3 class="font-serif font-bold text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors line-clamp-2 leading-snug">
+                <h3 class="font-sora font-bold text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors line-clamp-2 leading-snug">
                     {{ $video->title }}
                 </h3>
             </div>

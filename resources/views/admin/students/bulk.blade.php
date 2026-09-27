@@ -8,7 +8,7 @@
             <a href="{{ route('admin.students.index') }}" class="text-xs font-mono text-[#be1e2d] hover:underline mb-1.5 block font-semibold">
                 ← Back to Participants
             </a>
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-sans">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-sora">
                 Bulk Register Participants
             </h1>
             <p class="text-xs text-slate-500 mt-1">

@@ -6,7 +6,7 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900 tracking-tight">Program Samithi Portal</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900 tracking-tight">Program Samithi Portal</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">
                 Program Committee Portal: Manage festival programs, categories, schedules, and official guidelines.
             </p>
@@ -31,7 +31,7 @@
         <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                 <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block">Total Programs</span>
-                <span class="text-3xl font-serif font-black text-slate-900 mt-1 block">{{ $totalPrograms }}</span>
+                <span class="text-3xl font-sora font-black text-slate-900 mt-1 block">{{ $totalPrograms }}</span>
                 <span class="text-[11px] font-mono text-slate-500">All registered events</span>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center font-mono font-bold text-lg">
@@ -44,7 +44,7 @@
            class="p-6 rounded-3xl bg-white border-2 border-emerald-500/40 hover:border-emerald-500 shadow-sm flex items-center justify-between transition-colors">
             <div>
                 <span class="text-[11px] font-mono uppercase text-emerald-600 font-bold block">Niyamavali Added</span>
-                <span class="text-3xl font-serif font-black text-emerald-700 mt-1 block">{{ $withRulesCount }}</span>
+                <span class="text-3xl font-sora font-black text-emerald-700 mt-1 block">{{ $withRulesCount }}</span>
                 <span class="text-[11px] font-mono text-emerald-600">Guidelines registered</span>
             </div>
             <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
@@ -57,7 +57,7 @@
            class="p-6 rounded-3xl bg-white border-2 border-amber-500/40 hover:border-amber-500 shadow-sm flex items-center justify-between transition-colors">
             <div>
                 <span class="text-[11px] font-mono uppercase text-amber-600 font-bold block">Pending Niyamavali</span>
-                <span class="text-3xl font-serif font-black text-amber-700 mt-1 block">{{ $missingRulesCount }}</span>
+                <span class="text-3xl font-sora font-black text-amber-700 mt-1 block">{{ $missingRulesCount }}</span>
                 <span class="text-[11px] font-mono text-amber-600">Awaiting guidelines</span>
             </div>
             <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-mono font-bold">
@@ -89,7 +89,7 @@
     <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-                <h3 class="text-base font-serif font-bold text-slate-900">Programs by Festival Zone</h3>
+                <h3 class="text-base font-sora font-bold text-slate-900">Programs by Festival Zone</h3>
                 <p class="text-[11px] font-mono text-slate-500">Number of competitions by zone</p>
             </div>
             <a href="{{ route('program-committee.programs.index') }}" class="text-xs font-mono font-bold text-brand-burgundy hover:underline">
@@ -120,7 +120,7 @@
         <div class="rounded-3xl bg-white border border-amber-200 p-6 sm:p-8 space-y-4 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                    <h3 class="text-base font-serif font-bold text-slate-900 flex items-center gap-2">
+                    <h3 class="text-base font-sora font-bold text-slate-900 flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                         Programs Pending Niyamavali
                     </h3>
@@ -163,7 +163,7 @@
         <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                    <h3 class="text-base font-serif font-bold text-slate-900">Recently Updated Programs</h3>
+                    <h3 class="text-base font-sora font-bold text-slate-900">Recently Updated Programs</h3>
                     <p class="text-[11px] font-mono text-slate-500">Recently updated competitions</p>
                 </div>
                 <a href="{{ route('program-committee.programs.index') }}" class="text-xs font-mono font-bold text-brand-burgundy hover:underline">

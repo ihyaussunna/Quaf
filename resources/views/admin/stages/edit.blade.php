@@ -4,7 +4,7 @@
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
         <a href="{{ route('admin.stages.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to Stages</a>
-        <h1 class="text-3xl font-serif font-black text-slate-900">Edit Stage: {{ $stage->name }}</h1>
+        <h1 class="text-3xl font-sora font-black text-slate-900">Edit Stage: {{ $stage->name }}</h1>
     </div>
 
     <form method="POST" action="{{ route('admin.stages.update', $stage) }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">

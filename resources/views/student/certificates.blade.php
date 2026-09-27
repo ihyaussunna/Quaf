@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">My Digital Certificates</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">My Digital Certificates</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Official festival merit and participation credentials.</p>
         </div>
         <div>
@@ -29,7 +29,7 @@
                     </div>
 
                     <div>
-                        <h3 class="text-xl font-serif font-bold text-slate-900">{{ $cert->program->name }}</h3>
+                        <h3 class="text-xl font-sora font-bold text-slate-900">{{ $cert->program->name }}</h3>
                         <p class="text-xs font-mono text-slate-500 mt-0.5">Certificate Serial: <strong class="text-[#f3bd2e]">{{ $cert->certificate_number }}</strong></p>
                     </div>
 

@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Student QR ID Badges</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Student QR ID Badges</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Official participant festival credentials with encrypted QR verification tokens.</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
@@ -52,7 +52,7 @@
         @forelse($students as $student)
             <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#f3bd2e]/40 transition-all group flex flex-col justify-between shadow-sm hover:shadow-md">
                 <div class="flex items-start gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-serif text-2xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0">
+                    <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-sora text-2xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0">
                         @if($student->photo_path)
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                         @else
@@ -66,7 +66,7 @@
                             </span>
                             <span class="text-[10px] font-mono text-slate-500">{{ $student->category }}</span>
                         </div>
-                        <h3 class="text-base font-serif font-bold text-slate-900 truncate mt-1 group-hover:text-[#f3bd2e] transition-colors">
+                        <h3 class="text-base font-sora font-bold text-slate-900 truncate mt-1 group-hover:text-[#f3bd2e] transition-colors">
                             {{ $student->name }}
                         </h3>
                         <p class="text-xs font-mono text-slate-500">ID: {{ $student->student_id }}</p>

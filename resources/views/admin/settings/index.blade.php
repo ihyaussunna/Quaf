@@ -3,7 +3,7 @@
 @section('content')
 <div class="space-y-6 max-w-4xl">
     <div>
-        <h1 class="text-3xl font-serif font-black text-slate-900">Festival Settings</h1>
+        <h1 class="text-3xl font-sora font-black text-slate-900">Festival Settings</h1>
         <p class="text-xs font-mono text-slate-500 mt-1">Configure global festival behavior, Live Fest Mode, registration deadlines, and branding metadata.</p>
     </div>
 
@@ -18,9 +18,9 @@
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <h2 class="text-lg font-serif font-bold text-slate-900">Live Fest Mode</h2>
+                        <h2 class="text-lg font-sora font-bold text-slate-900">Live Fest Mode</h2>
                     </div>
-                    <p class="text-xs font-sans text-slate-600 max-w-xl leading-relaxed">
+                    <p class="text-xs font-sora text-slate-600 max-w-xl leading-relaxed">
                         When enabled, the public homepage transforms into an active Festival Live Center featuring real-time stage progress monitors, breaking result ticker, and live group rankings.
                     </p>
                 </div>
@@ -43,12 +43,12 @@
                 <div class="space-y-1">
                     <div class="flex items-center gap-2.5">
                         <span class="w-3 h-3 rounded-full {{ $isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
-                        <h2 class="text-lg font-serif font-bold text-slate-900">Group Entry Registration Portal</h2>
+                        <h2 class="text-lg font-sora font-bold text-slate-900">Group Entry Registration Portal</h2>
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase {{ $isOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
                             {{ $isOpen ? 'OPEN' : 'CLOSED' }}
                         </span>
                     </div>
-                    <p class="text-xs font-sans text-slate-500 max-w-xl">
+                    <p class="text-xs font-sora text-slate-500 max-w-xl">
                         Allow Group Leaders to submit participant entries and register students for upcoming programs.
                     </p>
                 </div>
@@ -86,7 +86,7 @@
 
         <!-- General Metadata -->
         <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
-            <h2 class="text-lg font-serif font-bold text-slate-900 border-b border-slate-100 pb-4">Conclave Branding & Organization</h2>
+            <h2 class="text-lg font-sora font-bold text-slate-900 border-b border-slate-100 pb-4">Conclave Branding & Organization</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>

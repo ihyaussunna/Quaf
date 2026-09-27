@@ -6,7 +6,7 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-serif font-black text-slate-900 tracking-tight">Competitions & Programs</h1>
+            <h1 class="text-2xl font-sora font-black text-slate-900 tracking-tight">Competitions & Programs</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">
                 Manage all festival competitions, schedules, and official rules.
             </p>
@@ -94,7 +94,7 @@
                 <thead>
                     <tr class="bg-slate-50/75 border-b border-slate-200 text-slate-500 uppercase tracking-wider">
                         <th class="py-3.5 px-4">Code</th>
-                        <th class="py-3.5 px-4 font-sans">Program Name</th>
+                        <th class="py-3.5 px-4 font-sora">Program Name</th>
                         <th class="py-3.5 px-4">Zone</th>
                         <th class="py-3.5 px-4">Type</th>
                         <th class="py-3.5 px-4">Duration</th>
@@ -113,7 +113,7 @@
                                     {{ $p->code }}
                                 </span>
                             </td>
-                            <td class="py-3.5 px-4 font-sans">
+                            <td class="py-3.5 px-4 font-sora">
                                 <a href="{{ route('program-committee.programs.show', $p) }}" class="font-bold text-slate-900 hover:text-brand-burgundy transition block">
                                     {{ $p->name }}
                                 </a>
@@ -121,7 +121,7 @@
                                     <span class="text-[11px] font-malayalam text-slate-500 block">{{ $p->malayalam_name }}</span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 font-sans">
+                            <td class="py-3.5 px-4 font-sora">
                                 <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-50 border border-slate-200 text-slate-700">
                                     {{ $p->zone?->name ?? $p->eligibility }}
                                 </span>

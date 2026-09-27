@@ -5,7 +5,7 @@
     <div class="flex items-center justify-between">
         <div>
             <a href="{{ route('admin.programs.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-1.5 block font-semibold">← Back to Programs</a>
-            <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900">Edit Program: {{ $program->name }}</h1>
+            <h1 class="text-2xl sm:text-3xl font-sora font-black text-slate-900">Edit Program: {{ $program->name }}</h1>
         </div>
         <div class="flex items-center gap-2">
             <span class="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">{{ $program->code }}</span>

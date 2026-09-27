@@ -4,11 +4,11 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Group Students Roster</h1>
-            <p class="text-xs font-sans text-slate-500 mt-1">All registered participants belonging to {{ $group->name }}.</p>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Group Students Roster</h1>
+            <p class="text-xs font-sora text-slate-500 mt-1">All registered participants belonging to {{ $group->name }}.</p>
         </div>
         <div class="flex items-center gap-3">
-            <span class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-sans text-slate-700 font-bold shadow-xs">
+            <span class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-sora text-slate-700 font-bold shadow-xs">
                 Total: <span class="font-mono text-slate-900 font-bold">{{ $students->total() }}</span> Students
             </span>
         </div>
@@ -17,7 +17,7 @@
     <!-- Students Table (Light Theme) -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50 text-slate-600 uppercase border-b border-slate-200 font-semibold text-[11px] tracking-wider">
                     <tr>
                         <th class="px-6 py-4">Chest Number</th>

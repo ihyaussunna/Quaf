@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Festival Stages</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Festival Stages</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Configure venues, switch live stage statuses (Active/Break/Closed), and set current events.</p>
         </div>
         <a href="{{ route('admin.stages.create') }}" class="px-4 py-2.5 rounded-xl bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg shadow-[#f3bd2e]/20">
@@ -34,7 +34,7 @@
                         @endif
                     </div>
 
-                    <h3 class="text-2xl font-serif font-bold text-slate-900 mb-1">{{ $stage->name }}</h3>
+                    <h3 class="text-2xl font-sora font-bold text-slate-900 mb-1">{{ $stage->name }}</h3>
                     <p class="text-xs text-slate-500 mb-6 flex items-center gap-1">
                         <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
                         <span>Location: {{ $stage->location ?? 'Campus Arena' }}</span>

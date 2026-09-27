@@ -94,7 +94,7 @@
 
             <!-- SVG Multi-Line Chart -->
             <div class="w-full overflow-x-auto">
-                <svg viewBox="0 0 750 340" class="w-full h-72 text-xs font-sans select-none" style="min-width: 550px;">
+                <svg viewBox="0 0 750 340" class="w-full h-72 text-xs font-sora select-none" style="min-width: 550px;">
                     <!-- Horizontal Grid lines & Y Axis labels -->
                     <g stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2">
                         <line x1="60" y1="40" x2="720" y2="40"/>

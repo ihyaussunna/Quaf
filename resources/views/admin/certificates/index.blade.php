@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-serif font-black text-slate-900">Digital Certificates</h1>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Digital Certificates</h1>
             <p class="text-xs font-mono text-slate-500 mt-1">Official merit and participation certificates with unique serial numbers and QR authentication.</p>
         </div>
     </div>

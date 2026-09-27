@@ -28,13 +28,13 @@
                 <a href="{{ route('leader.registrations') }}" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </a>
-                <h1 class="text-2xl font-serif font-black text-slate-900">Edit Registration</h1>
+                <h1 class="text-2xl font-sora font-black text-slate-900">Edit Registration</h1>
             </div>
-            <p class="text-xs font-sans text-slate-500 mt-1 pl-9">
+            <p class="text-xs font-sora text-slate-500 mt-1 pl-9">
                 Update participant assignments for <span class="font-bold text-slate-800">{{ $program->name }}</span> (Chest No: <span class="font-mono font-bold">{{ ltrim((string)$entry->chest_number, '#') }}</span>).
             </p>
         </div>
-        <span class="px-3 py-1 rounded-full text-xs font-sans font-bold uppercase {{ $entry->status === 'verified' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+        <span class="px-3 py-1 rounded-full text-xs font-sora font-bold uppercase {{ $entry->status === 'verified' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
             Status: {{ $entry->status }}
         </span>
     </div>
@@ -42,7 +42,7 @@
     @if($errors->any())
         <div class="p-4 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs space-y-1 shadow-2xs">
             <p class="font-bold text-sm text-[#be1e2d]">Cannot Save Changes:</p>
-            <ul class="list-disc list-inside space-y-0.5 font-sans font-medium text-red-700">
+            <ul class="list-disc list-inside space-y-0.5 font-sora font-medium text-red-700">
                 @foreach($errors->all() as $err)
                     <li>{{ $err }}</li>
                 @endforeach
@@ -52,7 +52,7 @@
 
     <!-- Program Metadata Card -->
     <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-sans">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-sora">
             <div>
                 <span class="text-slate-400 block text-[10px] uppercase font-bold">Program ID</span>
                 <span class="font-bold text-slate-900 font-mono">{{ $program->code ?? $program->id }}</span>
@@ -131,7 +131,7 @@
             <!-- INDIVIDUAL MODE -->
             <template x-if="!isGroup">
                 <div class="space-y-3">
-                    <label class="block text-xs font-sans uppercase text-slate-700 font-bold">
+                    <label class="block text-xs font-sora uppercase text-slate-700 font-bold">
                         Select Participant Student *
                     </label>
 
@@ -141,7 +141,7 @@
                                @focus="showStudentDropdown = true" 
                                @input="showStudentDropdown = true" 
                                placeholder="Search participant by name or chest number..."
-                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors font-sans">
+                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors font-sora">
 
                         <input type="hidden" name="student_id" :value="selectedStudentId">
 
@@ -151,19 +151,19 @@
                             <template x-for="st in individualFilteredStudents" :key="st.id">
                                 <button type="button" 
                                         @click="selectedStudentId = st.id; studentSearch = st.name + ' (Chest: ' + st.chest + ')'; showStudentDropdown = false" 
-                                        class="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between text-xs transition-colors font-sans">
+                                        class="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between text-xs transition-colors font-sora">
                                     <div>
                                         <span class="font-bold text-slate-900 block" x-text="st.name"></span>
-                                        <span class="text-slate-400 font-sans text-[11px]"><span class="font-mono font-bold text-slate-700" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '—'"></span></span>
+                                        <span class="text-slate-400 font-sora text-[11px]"><span class="font-mono font-bold text-slate-700" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '—'"></span></span>
                                     </div>
-                                    <span x-show="selectedStudentId == st.id" class="text-emerald-600 font-bold font-sans">Selected ✓</span>
+                                    <span x-show="selectedStudentId == st.id" class="text-emerald-600 font-bold font-sora">Selected ✓</span>
                                 </button>
                             </template>
                         </div>
                     </div>
 
                     @if($entry->student)
-                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-sans flex items-center justify-between">
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-sora flex items-center justify-between">
                             <div>
                                 <span class="text-slate-400 block text-[10px] uppercase font-bold">Current Participant</span>
                                 <span class="font-bold text-slate-800">{{ $entry->student->name }}</span>
@@ -178,10 +178,10 @@
             <template x-if="isGroup">
                 <div class="space-y-5">
                     <div class="flex items-center justify-between">
-                        <label class="block text-xs font-sans uppercase text-slate-700 font-bold">
+                        <label class="block text-xs font-sora uppercase text-slate-700 font-bold">
                             Team Participants & Designated Leader *
                         </label>
-                        <span class="px-3 py-1 rounded-full text-xs font-sans font-bold"
+                        <span class="px-3 py-1 rounded-full text-xs font-sora font-bold"
                               :class="groupStudents.length === participantLimit ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
                             Enrolled: <span class="font-mono" x-text="groupStudents.length"></span> / <span class="font-mono" x-text="participantLimit"></span>
                         </span>
@@ -205,28 +205,28 @@
                                            class="w-4 h-4 text-[#be1e2d] focus:ring-[#be1e2d]">
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-slate-900 font-sans" x-text="st.name"></span>
-                                            <span x-show="leaderStudentId == st.id" class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px] uppercase font-sans">
+                                            <span class="font-bold text-sm text-slate-900 font-sora" x-text="st.name"></span>
+                                            <span x-show="leaderStudentId == st.id" class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px] uppercase font-sora">
                                                 Team Leader
                                             </span>
                                         </div>
-                                        <span class="text-xs text-slate-400 font-sans"><span class="font-mono font-bold text-slate-700" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '—'"></span></span>
+                                        <span class="text-xs text-slate-400 font-sora"><span class="font-mono font-bold text-slate-700" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '—'"></span></span>
                                     </div>
                                 </div>
-                                <button type="button" @click="removeGroupStudent(idx)" class="text-xs font-sans text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded hover:bg-rose-50">
+                                <button type="button" @click="removeGroupStudent(idx)" class="text-xs font-sora text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded hover:bg-rose-50">
                                     Remove
                                 </button>
                             </div>
                         </template>
 
-                        <div x-show="groupStudents.length === 0" class="p-6 text-center text-xs font-sans text-slate-400">
+                        <div x-show="groupStudents.length === 0" class="p-6 text-center text-xs font-sora text-slate-400">
                             No team members added yet. Search and add students below.
                         </div>
                     </div>
 
                     <!-- Add Student to Team Section -->
                     <div x-show="groupStudents.length < participantLimit" class="relative" @click.outside="showGroupStudentDropdown = false">
-                        <label class="block text-xs font-sans uppercase text-slate-600 mb-1 font-bold">
+                        <label class="block text-xs font-sora uppercase text-slate-600 mb-1 font-bold">
                             Add Participant (Search by Name or Chest Number)
                         </label>
                         <div class="relative">
@@ -235,7 +235,7 @@
                                    @focus="showGroupStudentDropdown = true" 
                                    @input="showGroupStudentDropdown = true" 
                                    placeholder="Type name or chest number to add student..."
-                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors font-sans">
+                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors font-sora">
                         </div>
 
                         <!-- Autocomplete dropdown for group student add -->
@@ -245,12 +245,12 @@
                             <template x-for="st in groupSearchFilteredStudents" :key="st.id">
                                 <button type="button" 
                                         @click="addGroupStudent(st)" 
-                                        class="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between gap-3 text-xs transition-colors font-sans">
+                                        class="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between gap-3 text-xs transition-colors font-sora">
                                     <div>
                                         <span class="font-bold text-slate-800 block" x-text="st.name"></span>
-                                        <span class="text-slate-400 font-sans text-[11px]"><span class="font-mono font-bold text-slate-700" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '—'"></span></span>
+                                        <span class="text-slate-400 font-sora text-[11px]"><span class="font-mono font-bold text-slate-700" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '—'"></span></span>
                                     </div>
-                                    <span class="px-2.5 py-1 rounded-lg bg-[#be1e2d] text-white font-sans font-bold text-[10px]">
+                                    <span class="px-2.5 py-1 rounded-lg bg-[#be1e2d] text-white font-sora font-bold text-[10px]">
                                         + Add
                                     </span>
                                 </button>
@@ -262,10 +262,10 @@
 
             <!-- Action Buttons -->
             <div class="pt-5 border-t border-slate-100 flex items-center justify-between">
-                <a href="{{ route('leader.registrations') }}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-sans font-semibold transition-colors">
+                <a href="{{ route('leader.registrations') }}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-sora font-semibold transition-colors">
                     Cancel
                 </a>
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-sans font-bold uppercase tracking-wider shadow-md shadow-[#be1e2d]/25 transition-all">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-sora font-bold uppercase tracking-wider shadow-md shadow-[#be1e2d]/25 transition-all">
                     Save Changes
                 </button>
             </div>

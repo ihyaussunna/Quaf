@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 font-sans">Judges</h1>
+            <h1 class="text-2xl font-bold text-slate-900 font-sora">Judges</h1>
             <p class="text-xs text-slate-500 mt-0.5">Manage event judges</p>
         </div>
         <div>
@@ -34,7 +34,7 @@
     <!-- Judges Table -->
     <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs font-sans">
+            <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-white text-slate-600 font-semibold border-b border-slate-200">
                     <tr>
                         <th class="px-5 py-3.5">Name</th>
@@ -128,14 +128,14 @@
                 
                 <!-- Drawer Header -->
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-slate-900 font-sans">New Judge</h2>
+                    <h2 class="text-lg font-bold text-slate-900 font-sora">New Judge</h2>
                     <button @click="newJudgeOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
                 <!-- Drawer Body / Form -->
-                <form method="POST" action="{{ route('admin.judges.store') }}" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs font-sans">
+                <form method="POST" action="{{ route('admin.judges.store') }}" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs font-sora">
                     @csrf
 
                     <!-- Name -->

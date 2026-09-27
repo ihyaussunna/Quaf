@@ -8,7 +8,7 @@
             <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-[#f3bd2e]/30">{{ $result->program->code }}</span>
             <span class="text-xs font-mono text-slate-500">{{ $result->program->eligibility ?? 'A Zone' }} • {{ ucfirst($result->program->type) }}</span>
         </div>
-        <h1 class="text-3xl font-serif font-black text-slate-900">Edit Verdict: {{ $result->program->name }}</h1>
+        <h1 class="text-3xl font-sora font-black text-slate-900">Edit Verdict: {{ $result->program->name }}</h1>
     </div>
 
     <form method="POST" action="{{ route('admin.results.update', $result) }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">

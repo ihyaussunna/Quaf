@@ -13,7 +13,7 @@
                 </span>
                 <span class="text-xs text-slate-500 font-mono">Result Poster Frames</span>
             </div>
-            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-2 font-sans">
+            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-2 font-sora">
                 Result Poster Templates
             </h1>
             <p class="text-xs text-slate-600 mt-1 max-w-2xl">
