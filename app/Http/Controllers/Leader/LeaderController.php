@@ -268,17 +268,46 @@ class LeaderController extends Controller
 
         $entries = $entriesQuery->latest()->paginate(15)->withQueryString();
 
-        $allGroupEntries = ProgramEntry::where('group_id', $group->id)->get();
+        $allGroupEntries = ProgramEntry::where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->with('participants')
+            ->get();
+        $entriesByProgram = $allGroupEntries->groupBy('program_id');
         $registeredProgramIds = $allGroupEntries->pluck('program_id')->unique()->toArray();
 
         $eligiblePrograms = Program::with('zone')->where('status', 'upcoming')->orderBy('name')->get();
 
         $totalProgramsCount = $eligiblePrograms->count();
         $registeredProgramsCount = count($registeredProgramIds);
-        $unregisteredProgramsCount = max(0, $totalProgramsCount - $registeredProgramsCount);
 
-        // List of unregistered programs for the Unregistered tab
-        $unregisteredPrograms = $eligiblePrograms->whereNotIn('id', $registeredProgramIds);
+        $fullyRegisteredCount = 0;
+        $partiallyRegisteredCount = 0;
+        $unregisteredPrograms = collect();
+
+        foreach ($eligiblePrograms as $p) {
+            $limit = $p->type === 'group'
+                ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
+                : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+
+            $pEntries = $entriesByProgram->get($p->id, collect());
+            if ($p->type === 'group') {
+                $firstEntry = $pEntries->first();
+                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+            } else {
+                $enrolled = $pEntries->count();
+            }
+
+            if ($enrolled >= $limit) {
+                $fullyRegisteredCount++;
+            } elseif ($enrolled > 0) {
+                $partiallyRegisteredCount++;
+                $unregisteredPrograms->push($p);
+            } else {
+                $unregisteredPrograms->push($p);
+            }
+        }
+
+        $unregisteredProgramsCount = max(0, $totalProgramsCount - $fullyRegisteredCount - $partiallyRegisteredCount);
 
         $students = $group->students()->with('zone')->orderBy('name')->get();
         $zones = Zone::orderBy('display_order')->get();
@@ -302,8 +331,11 @@ class LeaderController extends Controller
             'eligiblePrograms',
             'unregisteredPrograms',
             'registeredProgramIds',
+            'entriesByProgram',
             'totalProgramsCount',
             'registeredProgramsCount',
+            'fullyRegisteredCount',
+            'partiallyRegisteredCount',
             'unregisteredProgramsCount',
             'tab',
             'students',

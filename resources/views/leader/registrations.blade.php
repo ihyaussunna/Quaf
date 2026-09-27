@@ -2,11 +2,37 @@
 
 @section('content')
 @php
-    $programsData = $eligiblePrograms->map(function ($p) use ($registeredProgramIds) {
-        $isReg = in_array($p->id, $registeredProgramIds ?? []);
+    $programsData = $eligiblePrograms->map(function ($p) use ($registeredProgramIds, $entriesByProgram) {
         $limit = $p->type === 'group' 
             ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
             : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+            
+        $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($p->id, collect()) : collect();
+        if ($p->type === 'group') {
+            $firstEntry = $pEntries->first();
+            $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+        } else {
+            $enrolled = $pEntries->count();
+        }
+        
+        $remaining = max(0, $limit - $enrolled);
+        $isFull = ($enrolled >= $limit);
+        $isRegistered = ($enrolled > 0);
+        
+        if ($enrolled === 0) {
+            $tag = "[UNREGISTERED - 0/{$limit}]";
+            $statusLabel = "Unregistered (0/{$limit})";
+            $statusType = "unregistered";
+        } elseif ($enrolled < $limit) {
+            $tag = "[PARTIAL ✓ {$enrolled}/{$limit} - {$remaining} SLOT LEFT]";
+            $statusLabel = "Partially Registered ({$enrolled}/{$limit} — {$remaining} Left)";
+            $statusType = "partial";
+        } else {
+            $tag = "[FULL ✓ {$enrolled}/{$limit}]";
+            $statusLabel = "Quota Full ({$enrolled}/{$limit} ✓)";
+            $statusType = "full";
+        }
+
         return [
             'id' => $p->id,
             'code' => $p->code,
@@ -15,8 +41,14 @@
             'zone_id' => $p->zone_id,
             'zone_name' => $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone'),
             'limit' => $limit,
+            'enrolled' => $enrolled,
+            'remaining' => $remaining,
+            'is_full' => $isFull,
+            'is_registered' => $isRegistered,
+            'tag' => $tag,
+            'status_label' => $statusLabel,
+            'status_type' => $statusType,
             'is_stage' => (bool)$p->is_stage,
-            'is_registered' => $isReg,
         ];
     });
 
@@ -80,7 +112,8 @@ function registrationManager() {
         },
         
         get participantLimit() {
-            return this.currentProgram ? (this.currentProgram.limit || 1) : 1;
+            if (!this.currentProgram) return 1;
+            return this.currentProgram.remaining !== undefined ? this.currentProgram.remaining : (this.currentProgram.limit || 1);
         },
         
         get filteredPrograms() {
@@ -134,9 +167,8 @@ function registrationManager() {
             progs.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
-                const regStatus = p.is_registered ? ' [REGISTERED ✓]' : ' [UNREGISTERED]';
-                const typeInfo = p.type === 'group' ? `Group - Limit: ${p.limit}` : `Individual - Limit: ${p.limit}`;
-                opt.textContent = `[${p.code}] ${p.name}${regStatus} (${typeInfo})`;
+                const typeInfo = p.type === 'group' ? 'Group' : 'Individual';
+                opt.textContent = `[${p.code}] ${p.name} ${p.tag} (${typeInfo} - Limit: ${p.limit})`;
                 if (p.id == currentProgId) {
                     opt.selected = true;
                 }
@@ -154,12 +186,12 @@ function registrationManager() {
             
             this.updateProgramDropdown();
             
-            // Auto-select first unregistered program in this zone
-            const firstUnreg = this.filteredPrograms.find(p => !p.is_registered);
-            if (firstUnreg) {
-                this.selectedProgramId = firstUnreg.id;
+            // Auto-select first program that still has open quota in this zone
+            const firstOpen = this.filteredPrograms.find(p => !p.is_full);
+            if (firstOpen) {
+                this.selectedProgramId = firstOpen.id;
                 const select = this.$refs.programSelect || document.getElementById('program_select');
-                if (select) select.value = firstUnreg.id;
+                if (select) select.value = firstOpen.id;
             }
             this.onProgramChange();
         },
@@ -193,6 +225,10 @@ function registrationManager() {
             if (this.isSubmitting) return;
             if (!this.currentProgram) {
                 this.feedbackError = 'Please select a competition program first.';
+                return;
+            }
+            if (this.currentProgram.is_full) {
+                this.feedbackError = `Quota is already full (${this.currentProgram.enrolled}/${this.currentProgram.limit}) for "${this.currentProgram.name}".`;
                 return;
             }
             if (this.selectedStudents.length === 0) {
@@ -229,9 +265,25 @@ function registrationManager() {
                 const enrolledProgName = enrolledProg ? enrolledProg.name : 'Program';
                 const enrolledCount = this.selectedStudents.length;
                 
-                // 1. Mark current program registered in state
+                // 1. Update enrolled, remaining, and tags in state
                 if (enrolledProg) {
-                    enrolledProg.is_registered = true;
+                    enrolledProg.enrolled = (enrolledProg.enrolled || 0) + enrolledCount;
+                    enrolledProg.remaining = Math.max(0, enrolledProg.limit - enrolledProg.enrolled);
+                    enrolledProg.is_full = (enrolledProg.enrolled >= enrolledProg.limit);
+                    enrolledProg.is_registered = (enrolledProg.enrolled > 0);
+                    if (enrolledProg.enrolled === 0) {
+                        enrolledProg.tag = `[UNREGISTERED - 0/${enrolledProg.limit}]`;
+                        enrolledProg.status_label = `Unregistered (0/${enrolledProg.limit})`;
+                        enrolledProg.status_type = 'unregistered';
+                    } else if (enrolledProg.enrolled < enrolledProg.limit) {
+                        enrolledProg.tag = `[PARTIAL ✓ ${enrolledProg.enrolled}/${enrolledProg.limit} - ${enrolledProg.remaining} SLOT LEFT]`;
+                        enrolledProg.status_label = `Partially Registered (${enrolledProg.enrolled}/${enrolledProg.limit} — ${enrolledProg.remaining} Left)`;
+                        enrolledProg.status_type = 'partial';
+                    } else {
+                        enrolledProg.tag = `[FULL ✓ ${enrolledProg.enrolled}/${enrolledProg.limit}]`;
+                        enrolledProg.status_label = `Quota Full (${enrolledProg.enrolled}/${enrolledProg.limit} ✓)`;
+                        enrolledProg.status_type = 'full';
+                    }
                 }
                 
                 // 2. Clear current enrolled students
@@ -239,19 +291,26 @@ function registrationManager() {
                 this.leaderStudentId = null;
                 this.studentSearch = '';
                 
-                // 3. Update program dropdown to show updated [REGISTERED ✓] tag
+                // 3. Update program dropdown to show updated status tags
                 this.updateProgramDropdown();
                 
-                // 4. Find next unregistered program in the same zone
-                const nextUnreg = this.filteredPrograms.find(p => !p.is_registered);
-                if (nextUnreg) {
-                    this.selectedProgramId = nextUnreg.id;
+                // 4. Auto-advance if full, or keep on same program if slots still remain
+                if (enrolledProg && !enrolledProg.is_full) {
+                    this.selectedProgramId = enrolledProg.id;
                     const select = this.$refs.programSelect || document.getElementById('program_select');
-                    if (select) select.value = nextUnreg.id;
-                    this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! Switched to next program: "${nextUnreg.name}".`;
+                    if (select) select.value = enrolledProg.id;
+                    this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}". Notice: ${enrolledProg.remaining} slot(s) still open for this competition. You can enroll another student now!`;
                 } else {
-                    this.selectedProgramId = '';
-                    this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! All programs in ${this.selectedZone} have been completed.`;
+                    const nextOpen = this.filteredPrograms.find(p => !p.is_full);
+                    if (nextOpen) {
+                        this.selectedProgramId = nextOpen.id;
+                        const select = this.$refs.programSelect || document.getElementById('program_select');
+                        if (select) select.value = nextOpen.id;
+                        this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! Switched to next open competition: "${nextOpen.name}".`;
+                    } else {
+                        this.selectedProgramId = '';
+                        this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! All program quotas in ${this.selectedZone} have been completely filled.`;
+                    }
                 }
             } catch (err) {
                 this.feedbackError = 'Connection error: Could not complete registration. Please check your network.';
@@ -271,8 +330,8 @@ function registrationManager() {
         </div>
     </div>
 
-    <!-- Summary Counters (Total, Registered, Unregistered) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Summary Counters (Total, Fully Registered, Partially Registered, Unregistered) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                 <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block">Total Programs</span>
@@ -285,21 +344,31 @@ function registrationManager() {
 
         <a href="#entries-table-section" class="p-5 rounded-3xl bg-white border-2 border-emerald-500/40 shadow-sm flex items-center justify-between hover:border-emerald-500 transition-colors">
             <div>
-                <span class="text-[11px] font-mono uppercase text-emerald-600 font-bold block">Registered Programs</span>
-                <span class="text-2xl font-serif font-black text-emerald-700">{{ $registeredProgramsCount ?? 0 }}</span>
+                <span class="text-[11px] font-mono uppercase text-emerald-600 font-bold block">Fully Registered</span>
+                <span class="text-2xl font-serif font-black text-emerald-700">{{ $fullyRegisteredCount ?? 0 }}</span>
             </div>
             <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
-                Registered ✓
+                Full Quota ✓
             </span>
         </a>
 
         <a href="#unregistered-section" class="p-5 rounded-3xl bg-white border-2 border-amber-500/40 shadow-sm flex items-center justify-between hover:border-amber-500 transition-colors">
             <div>
-                <span class="text-[11px] font-mono uppercase text-amber-600 font-bold block">Unregistered Programs</span>
-                <span class="text-2xl font-serif font-black text-amber-700">{{ $unregisteredProgramsCount ?? 0 }}</span>
+                <span class="text-[11px] font-mono uppercase text-amber-600 font-bold block">Partially Registered</span>
+                <span class="text-2xl font-serif font-black text-amber-700">{{ $partiallyRegisteredCount ?? 0 }}</span>
             </div>
             <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-mono font-bold">
-                Pending !
+                Slots Left !
+            </span>
+        </a>
+
+        <a href="#unregistered-section" class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 transition-colors">
+            <div>
+                <span class="text-[11px] font-mono uppercase text-slate-400 font-bold block">Unregistered Programs</span>
+                <span class="text-2xl font-serif font-black text-slate-700">{{ $unregisteredProgramsCount ?? 0 }}</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-mono font-bold">
+                0 Enrolled
             </span>
         </a>
     </div>
@@ -416,28 +485,80 @@ function registrationManager() {
                     @foreach($eligiblePrograms as $p)
                         @php
                             $pZone = $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone');
-                            $isReg = in_array($p->id, $registeredProgramIds ?? []);
                             $limit = $p->type === 'group' 
                                 ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
                                 : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+                            
+                            $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($p->id, collect()) : collect();
+                            if ($p->type === 'group') {
+                                $firstEntry = $pEntries->first();
+                                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+                            } else {
+                                $enrolled = $pEntries->count();
+                            }
+                            $remaining = max(0, $limit - $enrolled);
+                            if ($enrolled === 0) {
+                                $tag = "[UNREGISTERED - 0/{$limit}]";
+                            } elseif ($enrolled < $limit) {
+                                $tag = "[PARTIAL ✓ {$enrolled}/{$limit} - {$remaining} SLOT LEFT]";
+                            } else {
+                                $tag = "[FULL ✓ {$enrolled}/{$limit}]";
+                            }
                         @endphp
                         <option value="{{ $p->id }}" data-zone="{{ strtolower(trim($pZone)) }}">
-                            [{{ $p->code }}] {{ $p->name }} {{ $isReg ? ' [REGISTERED ✓]' : ' [UNREGISTERED]' }} ({{ $p->type === 'group' ? 'Group - Limit: '.$limit : 'Individual - Limit: '.$limit }})
+                            [{{ $p->code }}] {{ $p->name }} {{ $tag }} ({{ $p->type === 'group' ? 'Group - Limit: '.$limit : 'Individual - Limit: '.$limit }})
                         </option>
                     @endforeach
                 </select>
                 <template x-if="currentProgram">
-                    <div class="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono flex flex-wrap items-center justify-between gap-2">
-                        <span>Competition Type: <strong class="text-slate-800" x-text="currentProgram.type === 'group' ? 'Group Competition' : 'Individual Competition'"></strong></span>
-                        <span x-show="currentProgram.is_registered" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Already Registered by {{ $group->name }}</span>
-                        <span x-show="!currentProgram.is_registered" class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Not Yet Registered</span>
-                        <span>Group Participant Limit: <strong class="text-brand-orange font-bold" x-text="participantLimit"></strong></span>
+                    <div class="mt-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono flex flex-wrap items-center justify-between gap-2.5 shadow-2xs">
+                        <div class="flex items-center gap-2">
+                            <span>Type: <strong class="text-slate-800" x-text="currentProgram.type === 'group' ? 'Group Competition' : 'Individual Competition'"></strong></span>
+                            <span class="text-slate-300">•</span>
+                            <span>Limit: <strong class="text-slate-800" x-text="currentProgram.limit"></strong></span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <template x-if="currentProgram.enrolled === 0">
+                                <span class="px-2.5 py-1 rounded-xl bg-slate-200 text-slate-700 font-bold">
+                                    Not Registered (0 / <span x-text="currentProgram.limit"></span> slots)
+                                </span>
+                            </template>
+                            <template x-if="currentProgram.enrolled > 0 && !currentProgram.is_full">
+                                <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 font-bold flex items-center gap-1.5">
+                                    <span>Partially Registered (<span x-text="currentProgram.enrolled"></span>/<span x-text="currentProgram.limit"></span>)</span>
+                                    <span class="text-amber-700 font-black">— <span x-text="currentProgram.remaining"></span> Slot(s) Available</span>
+                                </span>
+                            </template>
+                            <template x-if="currentProgram.is_full">
+                                <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
+                                    Quota Full (<span x-text="currentProgram.enrolled"></span>/<span x-text="currentProgram.limit"></span> slots filled ✓)
+                                </span>
+                            </template>
+                        </div>
                     </div>
                 </template>
             </div>
 
             <!-- STEP 3: PARTICIPANTS ENROLLMENT -->
-            <template x-if="currentProgram">
+            <template x-if="currentProgram && currentProgram.is_full">
+                <div class="pt-4 border-t border-slate-100">
+                    <div class="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 text-xs font-mono space-y-2 shadow-xs">
+                        <div class="font-bold flex items-center gap-2 text-sm text-emerald-800">
+                            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Quota Complete: All <span x-text="currentProgram.enrolled"></span> of <span x-text="currentProgram.limit"></span> Allowed Slots Filled</span>
+                        </div>
+                        <p>
+                            All participant quota slots for <strong>"<span x-text="currentProgram.name"></span>"</strong> are fully enrolled by {{ $group->name }}.
+                        </p>
+                        <p class="text-[11px] text-emerald-700 font-medium">
+                            To replace or edit candidate entries, check the <strong>Registered Program Entries</strong> table below.
+                        </p>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="currentProgram && !currentProgram.is_full">
                 <div class="space-y-4 pt-2 border-t border-slate-100">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
@@ -445,13 +566,22 @@ function registrationManager() {
                                 3. Select Participant(s) <span class="text-red-500">*</span>
                             </label>
                             <p class="text-[11px] font-mono text-slate-500">
-                                Add up to <strong class="text-slate-800" x-text="participantLimit"></strong> participant(s) from {{ $group->name }} for this competition.
+                                <template x-if="currentProgram.enrolled > 0">
+                                    <span>
+                                        <strong><span x-text="currentProgram.enrolled"></span> of <span x-text="currentProgram.limit"></span></strong> slots already enrolled. You can add <strong><span class="text-amber-800" x-text="participantLimit"></span> more</strong> participant(s) now.
+                                    </span>
+                                </template>
+                                <template x-if="currentProgram.enrolled === 0">
+                                    <span>
+                                        Add up to <strong class="text-slate-800" x-text="participantLimit"></strong> participant(s) from {{ $group->name }} for this competition.
+                                    </span>
+                                </template>
                                 <span x-show="isGroup" class="text-amber-700 font-semibold ml-1">(Designate one student as Team Leader)</span>
                             </p>
                         </div>
                         <div class="text-xs font-mono px-3 py-1.5 rounded-xl border font-bold"
                              :class="selectedStudents.length >= participantLimit ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-orange-50 border-orange-200 text-orange-800'">
-                            Enrolled: <span x-text="selectedStudents.length"></span> / <span x-text="participantLimit"></span>
+                            Enrolling: <span x-text="selectedStudents.length"></span> / <span x-text="participantLimit"></span> Slot(s)
                         </div>
                     </div>
 
@@ -481,8 +611,8 @@ function registrationManager() {
                                                    @change="leaderStudentId = st.id" 
                                                    class="text-brand-orange focus:ring-brand-orange">
                                             <span class="text-[11px] font-mono font-bold" 
-                                                  :class="leaderStudentId == st.id ? 'text-brand-orange' : 'text-slate-400'" 
-                                                  x-text="leaderStudentId == st.id ? 'LEADER' : 'Member'"></span>
+                                                   :class="leaderStudentId == st.id ? 'text-brand-orange' : 'text-slate-400'" 
+                                                   x-text="leaderStudentId == st.id ? 'LEADER' : 'Member'"></span>
                                         </label>
                                     </template>
                                     <div class="h-10 w-10 rounded-xl bg-brand-orange text-white flex flex-col items-center justify-center font-mono font-black text-xs shadow-xs flex-shrink-0">
@@ -560,20 +690,20 @@ function registrationManager() {
 
                     <div x-show="selectedStudents.length >= participantLimit" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-semibold flex items-center gap-2">
                         <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Participant limit reached (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>). Click Submit Registration below to complete.</span>
+                        <span>Available slot limit reached (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>). Click Submit Registration below to complete.</span>
                     </div>
                 </div>
             </template>
 
             <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
                 <button type="submit" 
-                        :disabled="isSubmitting || selectedStudents.length === 0 || !selectedProgramId"
-                        :class="isSubmitting || selectedStudents.length === 0 || !selectedProgramId ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
+                        :disabled="isSubmitting || selectedStudents.length === 0 || !selectedProgramId || (currentProgram && currentProgram.is_full)"
+                        :class="isSubmitting || selectedStudents.length === 0 || !selectedProgramId || (currentProgram && currentProgram.is_full) ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
                         class="px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-brand-orange text-white transition-all flex items-center gap-2">
                     <template x-if="isSubmitting">
                         <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                     </template>
-                    <span x-text="isSubmitting ? 'Submitting Registration...' : (selectedStudents.length > 1 ? 'Submit All ' + selectedStudents.length + ' Participants' : 'Submit Registration')"></span>
+                    <span x-text="isSubmitting ? 'Submitting Registration...' : (currentProgram && currentProgram.is_full ? 'Quota Already Full' : (selectedStudents.length > 1 ? 'Submit All ' + selectedStudents.length + ' Participants' : 'Submit Registration'))"></span>
                 </button>
             </div>
         </form>
@@ -587,7 +717,7 @@ function registrationManager() {
                 <p class="text-[11px] font-mono text-slate-500">All programs enrolled by {{ $group->name }}. You can edit participants or remove an entry while registration is open.</p>
             </div>
             <span class="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-bold">
-                {{ $registeredProgramsCount ?? 0 }} Unique Programs Registered
+                {{ $registeredProgramsCount ?? 0 }} Unique Programs Registered ({{ $fullyRegisteredCount ?? 0 }} Full • {{ $partiallyRegisteredCount ?? 0 }} Partial)
             </span>
         </div>
 
@@ -669,12 +799,12 @@ function registrationManager() {
         </div>
     </div>
 
-    <!-- Unregistered Programs List -->
+    <!-- Open Competitions & Quota Slots List -->
     <div id="unregistered-section" class="bg-white rounded-3xl border border-amber-200 p-6 sm:p-8 space-y-4 shadow-sm" x-data="{ filterZone: '' }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-                <h3 class="text-base font-serif font-bold text-slate-900">Unregistered Programs ({{ ($unregisteredPrograms ?? collect())->count() }})</h3>
-                <p class="text-[11px] font-mono text-slate-500">Programs in which {{ $group->name }} has not registered any participant yet.</p>
+                <h3 class="text-base font-serif font-bold text-slate-900">Unregistered Programs & Open Quota Slots ({{ ($unregisteredPrograms ?? collect())->count() }})</h3>
+                <p class="text-[11px] font-mono text-slate-500">Competitions with available or partially enrolled participant slots for {{ $group->name }}.</p>
             </div>
             <div class="flex items-center gap-2">
                 <select x-model="filterZone" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-700 focus:outline-none">
@@ -694,30 +824,63 @@ function registrationManager() {
                         <th class="py-2.5 px-3">Program Name</th>
                         <th class="py-2.5 px-3">Zone</th>
                         <th class="py-2.5 px-3">Type</th>
-                        <th class="py-2.5 px-3">Participant Limit</th>
-                        <th class="py-2.5 px-3 text-right">Status</th>
+                        <th class="py-2.5 px-3">Quota Slots</th>
+                        <th class="py-2.5 px-3">Status</th>
+                        <th class="py-2.5 px-3 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @forelse($unregisteredPrograms ?? [] as $up)
                         @php
                             $upZone = $up->zone?->name ?? ($up->eligibility ?? 'Mix Zone');
+                            $limit = $up->type === 'group' 
+                                ? max(1, (int) ($up->participant_count ?? $up->max_participants ?? 2))
+                                : max(1, (int) ($up->max_participants_per_group ?? $up->participant_count ?? 1));
+                            $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($up->id, collect()) : collect();
+                            if ($up->type === 'group') {
+                                $firstEntry = $pEntries->first();
+                                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+                            } else {
+                                $enrolled = $pEntries->count();
+                            }
+                            $remaining = max(0, $limit - $enrolled);
+                            $isPartial = ($enrolled > 0 && $enrolled < $limit);
                         @endphp
                         <tr x-show="!filterZone || filterZone === '{{ addslashes($upZone) }}'" class="hover:bg-amber-50/40 transition">
                             <td class="py-2.5 px-3 font-bold text-slate-600">{{ $up->code }}</td>
                             <td class="py-2.5 px-3 font-sans font-semibold text-slate-900">{{ $up->name }}</td>
                             <td class="py-2.5 px-3">{{ $upZone }}</td>
                             <td class="py-2.5 px-3 capitalize">{{ $up->type }}</td>
-                            <td class="py-2.5 px-3">{{ $up->participant_count ?? 2 }}</td>
-                            <td class="py-2.5 px-3 text-right">
-                                <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold uppercase">
-                                    Unregistered
+                            <td class="py-2.5 px-3">
+                                <span class="font-bold {{ $isPartial ? 'text-amber-800' : 'text-slate-700' }}">
+                                    {{ $enrolled }} / {{ $limit }} Filled
                                 </span>
+                                <span class="text-[10px] text-slate-400 block font-normal">({{ $remaining }} slot{{ $remaining > 1 ? 's' : '' }} remaining)</span>
+                            </td>
+                            <td class="py-2.5 px-3">
+                                @if($isPartial)
+                                    <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold uppercase">
+                                        Partial ({{ $remaining }} Left)
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold uppercase">
+                                        Unregistered
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="py-2.5 px-3 text-right">
+                                @if($isRegistrationOpen)
+                                    <a href="#zone_select" 
+                                       @click="selectedZone = '{{ addslashes($upZone) }}'; onZoneChange(); selectedProgramId = {{ $up->id }}; onProgramChange();"
+                                       class="inline-block px-2.5 py-1 rounded-lg bg-brand-orange text-white hover:bg-orange-600 text-[11px] font-mono font-bold transition-colors shadow-2xs">
+                                        + Enroll
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-emerald-600 font-bold">All eligible programs have been registered by {{ $group->name }}!</td>
+                            <td colspan="7" class="py-8 text-center text-emerald-600 font-bold">All eligible program quotas have been completely filled by {{ $group->name }}!</td>
                         </tr>
                     @endforelse
                 </tbody>

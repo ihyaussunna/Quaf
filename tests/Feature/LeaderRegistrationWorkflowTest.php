@@ -259,4 +259,37 @@ class LeaderRegistrationWorkflowTest extends TestCase
         ]);
         $failRes->assertSessionHasErrors();
     }
+
+    public function test_portal_displays_quota_slot_counts_and_partial_registration_status(): void
+    {
+        // indProgram has limit 2. Enroll 1 student first (partial registration)
+        ProgramEntry::create([
+            'program_id' => $this->indProgram->id,
+            'group_id' => $this->group->id,
+            'student_id' => $this->student1->id,
+            'chest_number' => $this->student1->student_id,
+            'status' => 'pending',
+        ]);
+
+        $res = $this->actingAs($this->leaderUser)->get(route('leader.registrations'));
+        $res->assertStatus(200);
+        $res->assertSee('Partially Registered');
+        $res->assertSee('1 / 2 Filled');
+        $res->assertSee('1 slot remaining');
+        $res->assertSee('PARTIAL');
+
+        // Enroll 2nd student to complete quota
+        ProgramEntry::create([
+            'program_id' => $this->indProgram->id,
+            'group_id' => $this->group->id,
+            'student_id' => $this->student2->id,
+            'chest_number' => $this->student2->student_id,
+            'status' => 'pending',
+        ]);
+
+        $resFull = $this->actingAs($this->leaderUser)->get(route('leader.registrations'));
+        $resFull->assertStatus(200);
+        $resFull->assertSee('Fully Registered');
+        $resFull->assertSee('Full Quota');
+    }
 }
