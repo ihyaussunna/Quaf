@@ -269,4 +269,18 @@ class AdminViewsTest extends TestCase
             'category' => 'A Zone',
         ]);
     }
+
+    public function test_admin_can_view_group_show_details_page(): void
+    {
+        $group = Group::first();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.groups.show', $group));
+
+        $response->assertStatus(200);
+        $response->assertSee($group->name);
+        $response->assertSee($group->code);
+        $response->assertSee('Leadership & Management Details', false);
+        $response->assertSee('Students Roster');
+        $response->assertSee('Program Registrations');
+    }
 }

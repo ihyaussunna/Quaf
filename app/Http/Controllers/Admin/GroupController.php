@@ -70,8 +70,9 @@ class GroupController extends Controller
     {
         $group->load([
             'leader',
-            'students',
+            'students.zone',
             'entries.program.category',
+            'entries.student',
         ]);
 
         return view('admin.groups.show', compact('group'));
