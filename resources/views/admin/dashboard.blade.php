@@ -103,17 +103,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left: Performance Over Time Multi-line Chart (2 cols) -->
         <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6 shadow-2xs">
+            @php
+                $chartData = $chartData ?? app(\App\Services\PointCalculationService::class)->getPerformanceChartData();
+            @endphp
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-                <h2 class="text-lg font-bold text-slate-900 tracking-tight font-sora">Performance Over Time</h2>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 tracking-tight font-sora">Performance Over Time</h2>
+                    <p class="text-xs text-slate-400 font-medium font-sora mt-0.5">Real-time team points progress</p>
+                </div>
                 <!-- Legend -->
                 <div class="flex flex-wrap items-center gap-3 text-xs">
-                    @php
-                        $chartColors = ['#be1e2d', '#f3bd2e', '#005c94', '#009444', '#0f172a'];
-                    @endphp
-                    @foreach($leaderboard->take(5) as $idx => $grp)
+                    @foreach(($chartData['series'] ?? []) as $ser)
                         <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-xs" style="background-color: {{ $chartColors[$idx] ?? $grp->color_hex }}"></span>
-                            <span class="text-slate-600 font-medium font-sora">{{ $grp->name }}</span>
+                            <span class="w-3 h-3 rounded-xs" style="background-color: {{ $ser['color'] }}"></span>
+                            <span class="text-slate-600 font-semibold font-sora">{{ $ser['name'] }}</span>
                         </div>
                     @endforeach
                 </div>
@@ -122,69 +125,45 @@
             <!-- SVG Multi-Line Chart -->
             <div class="mt-6 w-full overflow-x-auto">
                 <div class="min-w-[500px]">
-                    <svg viewBox="0 0 650 300" class="w-full h-72">
-                        <!-- Grid Lines & Y-Axis Labels -->
-                        @php
-                            $ySteps = [
-                                ['val' => '1,000', 'y' => 30],
-                                ['val' => '800', 'y' => 80],
-                                ['val' => '600', 'y' => 130],
-                                ['val' => '400', 'y' => 180],
-                                ['val' => '200', 'y' => 230],
-                                ['val' => '0', 'y' => 280],
-                            ];
-                            $xSteps = [
-                                ['label' => '0', 'x' => 60],
-                                ['label' => '10%', 'x' => 140],
-                                ['label' => '30%', 'x' => 220],
-                                ['label' => '50%', 'x' => 300],
-                                ['label' => '60%', 'x' => 380],
-                                ['label' => '75%', 'x' => 460],
-                                ['label' => '90%', 'x' => 540],
-                                ['label' => 'Final', 'x' => 620],
-                            ];
-                        @endphp
+                    <svg viewBox="0 0 750 340" class="w-full h-72 text-xs font-sora select-none">
+                        <!-- Horizontal Grid Lines -->
+                        <g stroke="#f1f5f9" stroke-width="1.5">
+                            @foreach(($chartData['ySteps'] ?? []) as $ys)
+                                <line x1="60" y1="{{ $ys['y'] }}" x2="720" y2="{{ $ys['y'] }}" />
+                            @endforeach
+                        </g>
 
-                        @foreach($ySteps as $ys)
-                            <line x1="60" y1="{{ $ys['y'] }}" x2="630" y2="{{ $ys['y'] }}" stroke="#f1f5f9" stroke-width="1.5" />
-                            <text x="50" y="{{ $ys['y'] + 4 }}" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" text-anchor="end">{{ $ys['val'] }}</text>
-                        @endforeach
+                        <!-- Y-Axis Labels -->
+                        <g fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" text-anchor="end">
+                            @foreach(($chartData['ySteps'] ?? []) as $ys)
+                                <text x="50" y="{{ $ys['y'] + 4 }}">{{ number_format($ys['val']) }}</text>
+                            @endforeach
+                        </g>
 
-                        <!-- Y-axis Label -->
-                        <text x="15" y="155" fill="#64748b" font-size="10" font-family="'Sora', sans-serif" font-weight="bold" transform="rotate(-90 15,155)">Scores</text>
+                        <!-- Y-axis Title -->
+                        <text x="15" y="165" fill="#64748b" font-size="10" font-family="'Sora', sans-serif" font-weight="bold" transform="rotate(-90 15,165)">Scores</text>
 
                         <!-- X-axis Labels -->
-                        @foreach($xSteps as $xs)
-                            <text x="{{ $xs['x'] }}" y="295" fill="#64748b" font-size="11" font-family="'JetBrains Mono', monospace" font-weight="600" text-anchor="middle">{{ $xs['label'] }}</text>
-                        @endforeach
+                        <g fill="#64748b" font-size="11" font-family="'JetBrains Mono', monospace" font-weight="600" text-anchor="middle">
+                            @foreach(($chartData['xSteps'] ?? []) as $xs)
+                                <text x="{{ $xs['x'] }}" y="308">{{ $xs['label'] }}</text>
+                                @if(!empty($xs['sub']))
+                                    <text x="{{ $xs['x'] }}" y="321" font-size="9" fill="#94a3b8">{{ $xs['sub'] }}</text>
+                                @endif
+                            @endforeach
+                        </g>
 
                         <!-- Trend Lines for each Team -->
-                        @foreach($leaderboard->take(5) as $idx => $grp)
-                            @php
-                                $color = $chartColors[$idx] ?? $grp->color_hex;
-                                $finalPts = max(1, (int)$grp->points_cache);
-                                // Checkpoint ratios matching the historical curves
-                                $ratios = [0.0, 0.12, 0.32, 0.48, 0.62, 0.78, 0.92, 1.0];
-                                $pts = [];
-                                foreach ($ratios as $i => $r) {
-                                    $x = $xSteps[$i]['x'];
-                                    // Calculate y position: y=280 is 0 pts, y=30 is 1000 pts
-                                    $val = $finalPts * $r;
-                                    $y = 280 - (($val / 1000) * 250);
-                                    $pts[] = ['x' => $x, 'y' => $y];
-                                }
-                                $pathD = "M {$pts[0]['x']} {$pts[0]['y']}";
-                                for ($k = 1; $k < count($pts); $k++) {
-                                    $pathD .= " L {$pts[$k]['x']} {$pts[$k]['y']}";
-                                }
-                            @endphp
+                        @foreach(($chartData['series'] ?? []) as $ser)
+                            <polyline fill="none" stroke="{{ $ser['color'] }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                points="{{ $ser['polyline_points'] }}">
+                                <title>{{ $ser['name'] }}: {{ $ser['final_points'] }} pts</title>
+                            </polyline>
 
-                            <!-- Line Path -->
-                            <path d="{{ $pathD }}" fill="none" stroke="{{ $color }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-
-                            <!-- Point Dots -->
-                            @foreach($pts as $p)
-                                <circle cx="{{ $p['x'] }}" cy="{{ $p['y'] }}" r="3.5" fill="#ffffff" stroke="{{ $color }}" stroke-width="2" />
+                            @foreach($ser['coords'] as $c)
+                                <circle cx="{{ $c['x'] }}" cy="{{ $c['y'] }}" r="3.5" fill="#ffffff" stroke="{{ $ser['color'] }}" stroke-width="2">
+                                    <title>{{ $ser['name'] }}: {{ $c['pts'] }} pts</title>
+                                </circle>
                             @endforeach
                         @endforeach
                     </svg>

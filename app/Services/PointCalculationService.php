@@ -373,5 +373,250 @@ class PointCalculationService
         Cache::forget('admin_leaderboard');
         Cache::forget('public_leaderboard');
         Cache::forget('public_results_summary');
+        Cache::forget('chart_performance_data_cached');
+    }
+
+    /**
+     * Generate dynamic, real-time data for the "Performance Over Time" chart.
+     * Matches the actual declared results and points_cache identically.
+     *
+     * @return array{
+     *     ySteps: array<int, array{val: int, y: int}>,
+     *     xSteps: array<int, array{label: string, sub: string, x: float, result_index: int}>,
+     *     series: array<int, array{
+     *         group_id: int,
+     *         name: string,
+     *         code: string,
+     *         color: string,
+     *         final_points: int,
+     *         polyline_points: string,
+     *         coords: array<int, array{x: float, y: float, pts: int}>
+     *     }>,
+     *     declaredCount: int,
+     *     totalPrograms: int,
+     *     maxScore: int,
+     *     yMax: int
+     * }
+     */
+    public function getPerformanceChartData(): array
+    {
+        $groups = Group::orderBy('rank_cache')->orderByDesc('points_cache')->get();
+        if ($groups->isEmpty()) {
+            $groups = Group::all();
+        }
+
+        $totalPrograms = Cache::remember('chart_total_programs_cached', 60, fn () => Program::count());
+        $totalPrograms = max(1, (int) $totalPrograms);
+
+        $results = Result::where('status', 'published')
+            ->orderBy('published_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $declaredCount = $results->count();
+
+        // 1. Fetch transactions by result and group
+        $transactions = PointsTransaction::whereNotNull('result_id')
+            ->whereIn('result_id', $results->pluck('id'))
+            ->select('result_id', 'group_id', DB::raw('SUM(points) as pts'))
+            ->groupBy('result_id', 'group_id')
+            ->get();
+
+        // If results exist but transaction log is empty, recalculate
+        if ($declaredCount > 0 && $transactions->isEmpty()) {
+            $this->recalculateAllPoints();
+            $transactions = PointsTransaction::whereNotNull('result_id')
+                ->whereIn('result_id', $results->pluck('id'))
+                ->select('result_id', 'group_id', DB::raw('SUM(points) as pts'))
+                ->groupBy('result_id', 'group_id')
+                ->get();
+        }
+
+        $ptsByResultAndGroup = [];
+        foreach ($transactions as $t) {
+            $ptsByResultAndGroup[$t->result_id][$t->group_id] = (int) $t->pts;
+        }
+
+        // 2. Determine Y-Axis Scale
+        $highestPoint = (int) ($groups->max('points_cache') ?? 0);
+        if ($highestPoint <= 25) {
+            $yMax = 50;
+            $yStep = 10;
+        } elseif ($highestPoint <= 50) {
+            $yMax = 50;
+            $yStep = 10;
+        } elseif ($highestPoint <= 100) {
+            $yMax = 100;
+            $yStep = 20;
+        } elseif ($highestPoint <= 200) {
+            $yMax = 200;
+            $yStep = 40;
+        } elseif ($highestPoint <= 300) {
+            $yMax = 300;
+            $yStep = 60;
+        } elseif ($highestPoint <= 500) {
+            $yMax = 500;
+            $yStep = 100;
+        } elseif ($highestPoint <= 750) {
+            $yMax = 750;
+            $yStep = 150;
+        } elseif ($highestPoint <= 1000) {
+            $yMax = 1000;
+            $yStep = 200;
+        } else {
+            $step = (int) ceil($highestPoint / 5 / 50) * 50;
+            $yMax = $step * 5;
+            $yStep = $step;
+        }
+
+        $ySteps = [];
+        for ($i = 0; $i <= 5; $i++) {
+            $val = $yMax - ($i * $yStep);
+            $yPos = 40 + ($i * 50); // 40, 90, 140, 190, 240, 290
+            $ySteps[] = [
+                'val' => $val,
+                'y' => $yPos,
+            ];
+        }
+
+        // 3. Determine Checkpoints for X-Axis
+        $checkpoints = [];
+        if ($declaredCount === 0) {
+            $checkpoints = [
+                ['label' => 'Start', 'sub' => '0%', 'result_index' => 0],
+                ['label' => 'Progress', 'sub' => '0%', 'result_index' => 0],
+            ];
+        } elseif ($declaredCount <= 7) {
+            $checkpoints[] = ['label' => 'Start', 'sub' => '0%', 'result_index' => 0];
+            for ($k = 1; $k <= $declaredCount; $k++) {
+                $isLast = ($k === $declaredCount);
+                $pct = round(($k / $totalPrograms) * 100, 1);
+                $checkpoints[] = [
+                    'label' => $isLast ? "Result {$k} (Now)" : "Result {$k}",
+                    'sub' => "{$pct}%",
+                    'result_index' => $k,
+                ];
+            }
+        } else {
+            $checkpoints[] = ['label' => 'Start', 'sub' => '0%', 'result_index' => 0];
+            $sampleCount = 5;
+            for ($s = 1; $s <= $sampleCount; $s++) {
+                $rIdx = (int) round(($s / ($sampleCount + 1)) * $declaredCount);
+                $rIdx = max(1, min($declaredCount - 1, $rIdx));
+                $pct = round(($rIdx / $totalPrograms) * 100, 1);
+                $checkpoints[] = [
+                    'label' => "R {$rIdx}",
+                    'sub' => "{$pct}%",
+                    'result_index' => $rIdx,
+                ];
+            }
+            $finalPct = round(($declaredCount / $totalPrograms) * 100, 1);
+            $checkpoints[] = [
+                'label' => "R {$declaredCount} (Now)",
+                'sub' => "{$finalPct}%",
+                'result_index' => $declaredCount,
+            ];
+        }
+
+        $numCheckpoints = count($checkpoints);
+        $xStart = 60.0;
+        $xEnd = 710.0;
+        $xSteps = [];
+
+        foreach ($checkpoints as $cIdx => $cp) {
+            $xPos = $numCheckpoints > 1
+                ? $xStart + (($cIdx / ($numCheckpoints - 1)) * ($xEnd - $xStart))
+                : $xStart;
+
+            $xSteps[] = [
+                'label' => $cp['label'],
+                'sub' => $cp['sub'],
+                'x' => round($xPos, 1),
+                'result_index' => $cp['result_index'] ?? 0,
+            ];
+        }
+
+        // 4. Compute Cumulative Points across Results
+        $cumulativePerResult = [];
+        $running = [];
+        foreach ($groups as $g) {
+            $running[$g->id] = 0;
+        }
+
+        $resArray = $results->values()->all();
+        for ($r = 0; $r < $declaredCount; $r++) {
+            $rId = $resArray[$r]->id;
+            foreach ($groups as $g) {
+                $ptsThis = $ptsByResultAndGroup[$rId][$g->id] ?? 0;
+                $running[$g->id] += $ptsThis;
+                $cumulativePerResult[$r + 1][$g->id] = $running[$g->id];
+            }
+        }
+
+        // 5. Build SVG Series for each group
+        $brandColors = [
+            'PACTO' => '#be1e2d',
+            'YUGO' => '#f3bd2e',
+            'CONCO' => '#005c94',
+            'LUMO' => '#009444',
+            'UNIO' => '#0f172a',
+        ];
+
+        $series = [];
+        $chartAreaHeight = 250.0; // from y=40 to y=290
+        $yBase = 290.0;
+
+        foreach ($groups as $g) {
+            $codeUpper = strtoupper(trim((string) $g->code));
+            $color = $brandColors[$codeUpper] ?? $g->color_hex ?? '#0284c7';
+            $finalCache = (int) $g->points_cache;
+
+            $coords = [];
+            $ptsStrings = [];
+
+            foreach ($xSteps as $stepIdx => $xStep) {
+                $rIdx = $xStep['result_index'] ?? 0;
+                $x = $xStep['x'];
+
+                if ($rIdx === 0) {
+                    $scoreAtStep = 0;
+                } elseif ($rIdx === $declaredCount || $stepIdx === $numCheckpoints - 1) {
+                    // Always anchor the final checkpoint to points_cache for 100% scoreboard consistency
+                    $scoreAtStep = $finalCache;
+                } else {
+                    $scoreAtStep = $cumulativePerResult[$rIdx][$g->id] ?? 0;
+                }
+
+                $fraction = $yMax > 0 ? min(1.0, max(0.0, $scoreAtStep / $yMax)) : 0.0;
+                $y = round($yBase - ($fraction * $chartAreaHeight), 1);
+
+                $coords[] = [
+                    'x' => $x,
+                    'y' => $y,
+                    'pts' => $scoreAtStep,
+                ];
+                $ptsStrings[] = "{$x},{$y}";
+            }
+
+            $series[] = [
+                'group_id' => $g->id,
+                'name' => $g->name,
+                'code' => $g->code,
+                'color' => $color,
+                'final_points' => $finalCache,
+                'polyline_points' => implode(' ', $ptsStrings),
+                'coords' => $coords,
+            ];
+        }
+
+        return [
+            'ySteps' => $ySteps,
+            'xSteps' => $xSteps,
+            'series' => $series,
+            'declaredCount' => $declaredCount,
+            'totalPrograms' => $totalPrograms,
+            'maxScore' => $highestPoint,
+            'yMax' => $yMax,
+        ];
     }
 }

@@ -8,6 +8,7 @@ use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\PointCalculationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -83,5 +84,31 @@ class ResultPublishTest extends TestCase
             'first_entry_id' => $entry1->id,
             'status' => 'published',
         ]);
+
+        // Verify chart data reflects the published result
+        $chartData = app(PointCalculationService::class)->getPerformanceChartData();
+        $this->assertEquals(1, $chartData['declaredCount']);
+        $this->assertNotEmpty($chartData['series']);
+
+        $lumoSeries = collect($chartData['series'])->firstWhere('group_id', $groupA->id);
+        $this->assertNotNull($lumoSeries);
+        $this->assertGreaterThan(0, $lumoSeries['final_points']);
+        $this->assertStringContainsString((string) $lumoSeries['final_points'], $lumoSeries['polyline_points'].json_encode($lumoSeries['coords']));
+
+        // Verify admin dashboard renders the dynamic chart
+        $dashResponse = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $dashResponse->assertOk();
+        $dashResponse->assertSee('Performance Over Time');
+        $dashResponse->assertSee($groupA->name);
+        $dashResponse->assertSee('Result 1 (Now)');
+
+        // Verify leader dashboard renders the dynamic chart
+        $leaderUser = User::factory()->create(['role' => 'group_leader', 'is_active' => true]);
+        $groupA->update(['leader_id' => $leaderUser->id]);
+        $leaderResponse = $this->actingAs($leaderUser)->get(route('leader.dashboard'));
+        $leaderResponse->assertOk();
+        $leaderResponse->assertSee('Performance Over Time');
+        $leaderResponse->assertSee($groupA->name);
+        $leaderResponse->assertSee('Result 1 (Now)');
     }
 }

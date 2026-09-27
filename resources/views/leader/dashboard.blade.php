@@ -66,118 +66,72 @@
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
         <!-- Performance Over Time SVG Chart matching screenshot -->
         <div class="xl:col-span-8 bg-white rounded-3xl p-6 border border-gray-100 shadow-xs">
-            <h3 class="text-center font-bold text-gray-900 text-lg mb-6">Performance Over Time</h3>
+            @php
+                $chartData = $chartData ?? app(\App\Services\PointCalculationService::class)->getPerformanceChartData();
+            @endphp
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6">
+                <div>
+                    <h3 class="font-bold text-gray-900 text-lg font-sora">Performance Over Time</h3>
+                    <p class="text-xs text-gray-400 font-medium mt-0.5">Real-time team points progress</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 font-sora">
+                    Declared {{ $chartData['declaredCount'] ?? 0 }} of {{ $chartData['totalPrograms'] ?? 144 }} Results
+                </span>
+            </div>
 
             <!-- Team Legends matching screenshot -->
             <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-6 text-xs font-semibold">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-3.5 rounded-xs" style="background-color: #be1e2d;"></span>
-                    <span class="text-gray-700">PACTO HIKMIC</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-3.5 rounded-xs" style="background-color: #f3bd2e;"></span>
-                    <span class="text-gray-700">YUGO RUSHDIC</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-3.5 rounded-xs" style="background-color: #005c94;"></span>
-                    <span class="text-gray-700">CONCO MAJDIC</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-3.5 rounded-xs" style="background-color: #009444;"></span>
-                    <span class="text-gray-700">LUMO FIKRIC</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-4 h-3.5 rounded-xs" style="background-color: #0f172a;"></span>
-                    <span class="text-gray-700">UNIO HILMIC</span>
-                </div>
+                @foreach(($chartData['series'] ?? []) as $ser)
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-4 h-3.5 rounded-xs" style="background-color: {{ $ser['color'] }};"></span>
+                        <span class="text-gray-700 uppercase font-sora">{{ $ser['name'] }}</span>
+                    </div>
+                @endforeach
             </div>
 
             <!-- SVG Multi-Line Chart -->
             <div class="w-full overflow-x-auto">
                 <svg viewBox="0 0 750 340" class="w-full h-72 text-xs font-sora select-none" style="min-width: 550px;">
-                    <!-- Horizontal Grid lines & Y Axis labels -->
+                    <!-- Horizontal Grid lines -->
                     <g stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2">
-                        <line x1="60" y1="40" x2="720" y2="40"/>
-                        <line x1="60" y1="90" x2="720" y2="90"/>
-                        <line x1="60" y1="140" x2="720" y2="140"/>
-                        <line x1="60" y1="190" x2="720" y2="190"/>
-                        <line x1="60" y1="240" x2="720" y2="240"/>
-                        <line x1="60" y1="290" x2="720" y2="290" stroke-dasharray="0" stroke="#94a3b8"/>
+                        @foreach(($chartData['ySteps'] ?? []) as $ys)
+                            <line x1="60" y1="{{ $ys['y'] }}" x2="720" y2="{{ $ys['y'] }}" @if($ys['val'] === 0) stroke-dasharray="0" stroke="#94a3b8" @endif />
+                        @endforeach
                     </g>
                     <!-- Y Axis Labels -->
                     <g fill="#64748b" font-size="10" text-anchor="end">
-                        <text x="50" y="44">1,000</text>
-                        <text x="50" y="94">800</text>
-                        <text x="50" y="144">600</text>
-                        <text x="50" y="194">400</text>
-                        <text x="50" y="244">200</text>
-                        <text x="50" y="294">0</text>
+                        @foreach(($chartData['ySteps'] ?? []) as $ys)
+                            <text x="50" y="{{ $ys['y'] + 4 }}">{{ number_format($ys['val']) }}</text>
+                        @endforeach
                         <!-- Y axis title rotated -->
                         <text x="-160" y="15" transform="rotate(-90)" font-weight="bold" fill="#334155">Scores</text>
                     </g>
 
                     <!-- X Axis Labels -->
                     <g fill="#64748b" font-size="10" text-anchor="middle">
-                        <text x="60" y="308">0</text>
-                        <text x="160" y="308">After 10 %</text>
-                        <text x="260" y="308">After 30 %</text>
-                        <text x="360" y="308">After 50 %</text>
-                        <text x="460" y="308">After 60 %</text>
-                        <text x="560" y="308">After 75 %</text>
-                        <text x="645" y="308">After 90 %</text>
-                        <text x="710" y="308">Final</text>
+                        @foreach(($chartData['xSteps'] ?? []) as $xs)
+                            <text x="{{ $xs['x'] }}" y="308">{{ $xs['label'] }}</text>
+                            @if(!empty($xs['sub']))
+                                <text x="{{ $xs['x'] }}" y="321" font-size="8.5" fill="#94a3b8">{{ $xs['sub'] }}</text>
+                            @endif
+                        @endforeach
                         <!-- X axis title -->
-                        <text x="385" y="330" font-weight="bold" fill="#334155">Results</text>
+                        <text x="385" y="335" font-weight="bold" fill="#334155">Declared Results</text>
                     </g>
 
-                    <!-- LUMO FIKRIC (Green #009444) -->
-                    <polyline fill="none" stroke="#009444" stroke-width="2.5"
-                        points="60,290 160,270 260,225 360,195 460,175 560,145 645,105 710,65"/>
-                    <circle cx="710" cy="65" r="4" fill="#ffffff" stroke="#009444" stroke-width="2"/>
-                    <circle cx="645" cy="105" r="3.5" fill="#ffffff" stroke="#009444" stroke-width="1.5"/>
-                    <circle cx="560" cy="145" r="3.5" fill="#ffffff" stroke="#009444" stroke-width="1.5"/>
-                    <circle cx="460" cy="175" r="3.5" fill="#ffffff" stroke="#009444" stroke-width="1.5"/>
-                    <circle cx="360" cy="195" r="3.5" fill="#ffffff" stroke="#009444" stroke-width="1.5"/>
-                    <circle cx="260" cy="225" r="3.5" fill="#ffffff" stroke="#009444" stroke-width="1.5"/>
-                    <circle cx="160" cy="270" r="3.5" fill="#ffffff" stroke="#009444" stroke-width="1.5"/>
+                    <!-- Dynamic Lines & Markers for each team -->
+                    @foreach(($chartData['series'] ?? []) as $ser)
+                        <polyline fill="none" stroke="{{ $ser['color'] }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                            points="{{ $ser['polyline_points'] }}">
+                            <title>{{ $ser['name'] }}: {{ $ser['final_points'] }} pts</title>
+                        </polyline>
 
-                    <!-- PACTO HIKMIC (Red #be1e2d) -->
-                    <polyline fill="none" stroke="#be1e2d" stroke-width="2.5"
-                        points="60,290 160,268 260,222 360,198 460,180 560,155 645,110 710,68"/>
-                    <circle cx="710" cy="68" r="4" fill="#ffffff" stroke="#be1e2d" stroke-width="2"/>
-                    <circle cx="645" cy="110" r="3.5" fill="#ffffff" stroke="#be1e2d" stroke-width="1.5"/>
-                    <circle cx="560" cy="155" r="3.5" fill="#ffffff" stroke="#be1e2d" stroke-width="1.5"/>
-                    <circle cx="460" cy="180" r="3.5" fill="#ffffff" stroke="#be1e2d" stroke-width="1.5"/>
-                    <circle cx="360" cy="198" r="3.5" fill="#ffffff" stroke="#be1e2d" stroke-width="1.5"/>
-                    <circle cx="260" cy="222" r="3.5" fill="#ffffff" stroke="#be1e2d" stroke-width="1.5"/>
-                    <circle cx="160" cy="268" r="3.5" fill="#ffffff" stroke="#be1e2d" stroke-width="1.5"/>
-
-                    <!-- CONCO MAJDIC (Blue #005c94) -->
-                    <polyline fill="none" stroke="#005c94" stroke-width="2.5"
-                        points="60,290 160,272 260,228 360,192 460,172 560,150 645,115 710,78"/>
-                    <circle cx="710" cy="78" r="4" fill="#ffffff" stroke="#005c94" stroke-width="2"/>
-                    <circle cx="645" cy="115" r="3.5" fill="#ffffff" stroke="#005c94" stroke-width="1.5"/>
-                    <circle cx="560" cy="150" r="3.5" fill="#ffffff" stroke="#005c94" stroke-width="1.5"/>
-                    <circle cx="460" cy="172" r="3.5" fill="#ffffff" stroke="#005c94" stroke-width="1.5"/>
-                    <circle cx="360" cy="192" r="3.5" fill="#ffffff" stroke="#005c94" stroke-width="1.5"/>
-                    <circle cx="260" cy="228" r="3.5" fill="#ffffff" stroke="#005c94" stroke-width="1.5"/>
-                    <circle cx="160" cy="272" r="3.5" fill="#ffffff" stroke="#005c94" stroke-width="1.5"/>
-
-                    <!-- UNIO HILMIC (Black #0f172a) -->
-                    <polyline fill="none" stroke="#0f172a" stroke-width="2"
-                        points="60,290 160,274 260,230 360,194 460,174 560,152 645,118 710,80"/>
-                    <circle cx="710" cy="80" r="3.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
-
-                    <!-- YUGO RUSHDIC (Gold #f3bd2e) -->
-                    <polyline fill="none" stroke="#f3bd2e" stroke-width="2.5"
-                        points="60,290 160,278 260,238 360,205 460,190 560,170 645,150 710,120"/>
-                    <circle cx="710" cy="120" r="4" fill="#ffffff" stroke="#f3bd2e" stroke-width="2"/>
-                    <circle cx="645" cy="150" r="3.5" fill="#ffffff" stroke="#f3bd2e" stroke-width="1.5"/>
-                    <circle cx="560" cy="170" r="3.5" fill="#ffffff" stroke="#f3bd2e" stroke-width="1.5"/>
-                    <circle cx="460" cy="190" r="3.5" fill="#ffffff" stroke="#f3bd2e" stroke-width="1.5"/>
-                    <circle cx="360" cy="205" r="3.5" fill="#ffffff" stroke="#f3bd2e" stroke-width="1.5"/>
-                    <circle cx="260" cy="238" r="3.5" fill="#ffffff" stroke="#f3bd2e" stroke-width="1.5"/>
-                    <circle cx="160" cy="278" r="3.5" fill="#ffffff" stroke="#f3bd2e" stroke-width="1.5"/>
+                        @foreach($ser['coords'] as $c)
+                            <circle cx="{{ $c['x'] }}" cy="{{ $c['y'] }}" r="3.5" fill="#ffffff" stroke="{{ $ser['color'] }}" stroke-width="2">
+                                <title>{{ $ser['name'] }}: {{ $c['pts'] }} pts</title>
+                            </circle>
+                        @endforeach
+                    @endforeach
                 </svg>
             </div>
         </div>

@@ -13,6 +13,7 @@ use App\Models\Stage;
 use App\Models\Student;
 use App\Models\Zone;
 use App\Services\EligibilityService;
+use App\Services\PointCalculationService;
 use App\Services\ScheduleConflictService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -27,7 +28,8 @@ class LeaderController extends Controller
 {
     public function __construct(
         protected ScheduleConflictService $conflictService,
-        protected EligibilityService $eligibilityService
+        protected EligibilityService $eligibilityService,
+        protected PointCalculationService $pointCalculationService
     ) {}
 
     public function isRegistrationOpen(): bool
@@ -123,6 +125,7 @@ class LeaderController extends Controller
             : 0;
 
         $leaderboard = Group::orderByDesc('points_cache')->get();
+        $chartData = $this->pointCalculationService->getPerformanceChartData();
 
         return view('leader.dashboard', compact(
             'group',
@@ -133,7 +136,8 @@ class LeaderController extends Controller
             'announcements',
             'isRegistrationOpen',
             'stats',
-            'leaderboard'
+            'leaderboard',
+            'chartData'
         ));
 
     }

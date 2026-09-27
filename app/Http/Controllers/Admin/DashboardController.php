@@ -61,6 +61,8 @@ class DashboardController extends Controller
 
         $recentAuditLogs = AuditLog::with('user')->latest()->take(6)->get();
 
+        $chartData = app(PointCalculationService::class)->getPerformanceChartData();
+
         return view('admin.dashboard', compact(
             'stats',
             'leaderboard',
@@ -68,7 +70,8 @@ class DashboardController extends Controller
             'upcomingPrograms',
             'stages',
             'recentAnnouncements',
-            'recentAuditLogs'
+            'recentAuditLogs',
+            'chartData'
         ));
     }
 
