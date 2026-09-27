@@ -11,7 +11,7 @@
             <span class="text-slate-500 text-xs font-mono">{{ $program->eligibility ?? 'A Zone' }} • {{ ucfirst($program->type) }}</span>
         </div>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-extrabold text-slate-900 leading-tight">
+            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-extrabold text-slate-900 leading-tight break-words">
                 {{ $program->name }}
             </h1>
             @if($result->poster_image)
@@ -86,8 +86,8 @@
             <h3 class="font-sora font-bold text-base sm:text-lg text-slate-900">All Contestants</h3>
             <span class="text-xs font-mono text-slate-500">{{ $program->entries->count() }} Registered</span>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm min-w-[500px]">
+        <div class="table-mobile-scroll overflow-x-auto">
+            <table class="w-full text-left text-sm min-w-[480px]">
                 <thead class="bg-slate-100 text-slate-600 font-mono text-xs uppercase">
                     <tr>
                         <th class="px-5 sm:px-6 py-3">Chest No.</th>

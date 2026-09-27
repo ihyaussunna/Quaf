@@ -10,13 +10,13 @@
         </p>
     </div>
 
-    <!-- Category Filter Tabs (Light Theme & Mobile Horizontal Scrollable) -->
-    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-6 sm:mb-10">
-        <a href="{{ route('news.index') }}" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all {{ empty($category) ? 'bg-[#f3bd2e] text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+    <!-- Category Filter Tabs (Light Theme & Mobile App Horizontal Scrollable) -->
+    <div class="flex items-center gap-1.5 sm:gap-2 mb-6 sm:mb-10 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap select-none">
+        <a href="{{ route('news.index') }}" class="app-tap px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all whitespace-nowrap {{ empty($category) ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
             All Dispatches
         </a>
         @foreach($categories as $cat)
-            <a href="{{ route('news.index', ['category' => $cat]) }}" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all {{ $category === $cat ? 'bg-[#f3bd2e] text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+            <a href="{{ route('news.index', ['category' => $cat]) }}" class="app-tap px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all whitespace-nowrap {{ $category === $cat ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                 {{ $cat }}
             </a>
         @endforeach

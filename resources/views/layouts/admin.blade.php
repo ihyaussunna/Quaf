@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-hidden">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-clip">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121417">
+    <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? 'Admin Control' }} | QUAF 09</title>
@@ -118,7 +123,7 @@
         }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex overflow-x-hidden max-w-full" 
+<body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-[100dvh] flex overflow-x-clip max-w-full w-full" 
       x-data="{ 
           sidebarOpen: false, 
           settingsDrawerOpen: false, 
@@ -448,10 +453,29 @@
                  x-transition:leave="transform transition ease-in-out duration-300"
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="translate-x-full"
-                 class="w-screen max-w-2xl bg-[#181a1e] text-white flex flex-row shadow-2xl border-l border-slate-800">
+                 class="w-screen max-w-2xl bg-[#181a1e] text-white flex flex-col sm:flex-row shadow-2xl border-l border-slate-800 h-full overflow-hidden">
                 
+                <!-- Mobile Header & Tab Pills for Settings Drawer -->
+                <div class="sm:hidden flex items-center justify-between p-3 border-b border-slate-800 bg-[#1f2228] shrink-0">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span>Festival Settings</span>
+                    </span>
+                    <button @click="settingsDrawerOpen = false" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-slate-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="sm:hidden flex items-center gap-1.5 p-2 bg-[#1a1d22] border-b border-slate-800 overflow-x-auto no-scrollbar shrink-0 text-xs">
+                    <button @click="activeDrawerTab = 'add_mark'" :class="activeDrawerTab === 'add_mark' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Marks</button>
+                    <button @click="activeDrawerTab = 'update_limit'" :class="activeDrawerTab === 'update_limit' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Limits</button>
+                    <button @click="activeDrawerTab = 'message'" :class="activeDrawerTab === 'message' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Broadcast</button>
+                    <button @click="activeDrawerTab = 'deadline'" :class="activeDrawerTab === 'deadline' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Deadline</button>
+                    <button @click="activeDrawerTab = 'score_handle'" :class="activeDrawerTab === 'score_handle' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Score Mode</button>
+                    <button @click="activeDrawerTab = 'registration'" :class="activeDrawerTab === 'registration' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Reg Portal</button>
+                </div>
+
                 <!-- Left Content Area of Drawer -->
-                <div class="flex-1 flex flex-col p-6 sm:p-8 overflow-y-auto">
+                <div class="flex-1 flex flex-col p-4 sm:p-8 overflow-y-auto min-w-0">
                     <!-- Tab 1: Mark's Settings -->
                     <div x-show="activeDrawerTab === 'add_mark'" class="space-y-6">
                         <div>
@@ -626,8 +650,8 @@
                     </div>
                 </div>
 
-                <!-- Right Sub-Sidebar of Drawer (Settings Tabs) -->
-                <div class="w-48 bg-[#1f2228] border-l border-slate-800 flex flex-col justify-between p-4 flex-shrink-0">
+                <!-- Right Sub-Sidebar of Drawer (Settings Tabs - Desktop only) -->
+                <div class="hidden sm:flex sm:w-48 bg-[#1f2228] border-l border-slate-800 flex-col justify-between p-4 flex-shrink-0">
                     <div>
                         <!-- Header with Close Button -->
                         <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">

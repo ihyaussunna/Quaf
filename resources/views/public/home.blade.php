@@ -110,7 +110,7 @@
         <!-- Visual Interactive Group Blocks (No Profile Pictures) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
             @foreach($groups as $group)
-                <div class="group relative rounded-2xl bg-white border-2 border-slate-200/80 hover:border-slate-300 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden flex flex-col justify-between"
+                <div class="app-tap group relative rounded-2xl bg-white border-2 border-slate-200/80 hover:border-slate-300 p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden flex flex-col justify-between"
                      style="border-top-color: {{ $group->color_hex }}; border-top-width: 4px;">
                     <!-- Ambient Group Highlight on Hover -->
                     <div class="absolute -right-16 -top-16 w-36 h-36 rounded-full opacity-10 group-hover:opacity-20 blur-2xl transition-opacity duration-500"
@@ -166,7 +166,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             @foreach($zones as $key => $zoneItem)
-                <div class="rounded-2xl bg-white border-2 border-slate-200/90 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-md flex flex-col justify-between"
+                <div class="app-tap rounded-2xl bg-white border-2 border-slate-200/90 p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-md flex flex-col justify-between"
                      style="border-top-color: {{ $zoneItem['color'] }}; border-top-width: 4px;">
                     <div>
                         <div class="flex items-center justify-between mb-3">
@@ -214,7 +214,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             @foreach($stages as $stage)
-                <div class="rounded-2xl bg-white border border-slate-200/90 p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
+                <div class="app-tap rounded-2xl bg-white border border-slate-200/90 p-4 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
                     <div>
                         <!-- Stage Header -->
                         <div class="flex items-center justify-between mb-3 sm:mb-4">
@@ -237,7 +237,7 @@
                         <!-- Current Program -->
                         <div class="bg-slate-50 rounded-xl p-3 sm:p-3.5 border border-slate-200 mb-2.5 sm:mb-3">
                             <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider block mb-0.5 font-semibold">CURRENT PROGRAM</span>
-                            <div class="font-bold text-xs sm:text-sm text-slate-900 truncate">
+                            <div class="font-bold text-xs sm:text-sm text-slate-900 line-clamp-1 break-words">
                                 {{ $stage->currentProgram?->name ?? 'Stage Intermission' }}
                             </div>
                             @if($stage->currentProgram)
@@ -248,7 +248,7 @@
                         <!-- Next Program -->
                         <div class="bg-white rounded-xl p-2.5 sm:p-3 border border-slate-200">
                             <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider block mb-0.5 font-semibold">NEXT UP</span>
-                            <div class="text-xs text-slate-700 truncate font-medium">
+                            <div class="text-xs text-slate-700 line-clamp-1 break-words font-medium">
                                 {{ $stage->nextProgram?->name ?? 'To be scheduled' }}
                             </div>
                         </div>
@@ -280,33 +280,33 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             @forelse($latestResults as $result)
-                <div class="rounded-2xl bg-white border border-slate-200 hover:border-[#f3bd2e]/40 p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-md">
+                <div class="app-tap rounded-2xl bg-white border border-slate-200 hover:border-[#be1e2d]/40 p-4 sm:p-6 transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-md">
                     <div>
                         <!-- Header -->
                         <div class="flex items-center justify-between text-xs font-mono text-slate-500 mb-2 sm:mb-3">
-                            <span class="text-[#f3bd2e] font-bold">{{ $result->program->code }}</span>
+                            <span class="text-[#be1e2d] font-bold">{{ $result->program->code }}</span>
                             <span>{{ $result->published_at?->diffForHumans() ?? 'Just now' }}</span>
                         </div>
-                        <h3 class="text-lg sm:text-xl font-sora font-bold text-slate-900 mb-1 leading-snug">
+                        <h3 class="text-base sm:text-xl font-sora font-bold text-slate-900 mb-1 leading-snug break-words">
                             {{ $result->program->name }}
                         </h3>
-                        <span class="text-xs text-slate-500 block mb-4 sm:mb-6 font-medium">{{ $result->program->eligibility ?? 'A Zone' }}</span>
+                        <span class="text-xs text-slate-500 block mb-3 sm:mb-5 font-medium">{{ $result->program->eligibility ?? 'A Zone' }}</span>
 
                         <!-- Placements -->
-                        <div class="space-y-2.5 sm:space-y-3">
+                        <div class="space-y-2 sm:space-y-2.5">
                             <!-- 1st Place -->
                             <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-amber-50/70 border border-amber-300/80 gap-2">
                                 <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                                     <span class="w-6 h-6 rounded-full bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-sora shadow-xs shrink-0">1</span>
                                     <div class="min-w-0 flex-1">
-                                        <div class="font-bold text-xs sm:text-sm text-slate-900 truncate">
+                                        <div class="font-bold text-xs sm:text-sm text-slate-900 line-clamp-1">
                                             {{ $result->firstEntry?->student?->name ?? 'Team ' . $result->firstEntry?->group?->name }}
                                         </div>
                                         <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest #{{ $result->firstEntry?->chest_number }}</span>
                                     </div>
                                 </div>
-                                <span class="text-[11px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-[#f3bd2e] border border-amber-200 shrink-0">
-                                    {{ $result->firstEntry?->group?->code }}
+                                <span class="text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-[#be1e2d] border border-amber-200 shrink-0 uppercase" title="{{ $result->firstEntry?->group?->name }}">
+                                    {{ $result->firstEntry?->group?->code ?? $result->firstEntry?->group?->name }}
                                 </span>
                             </div>
 
@@ -316,14 +316,14 @@
                                     <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                                         <span class="w-6 h-6 rounded-full bg-slate-400 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">2</span>
                                         <div class="min-w-0 flex-1">
-                                            <div class="font-medium text-xs sm:text-sm text-slate-800 truncate">
+                                            <div class="font-medium text-xs sm:text-sm text-slate-800 line-clamp-1">
                                                 {{ $result->secondEntry?->student?->name ?? 'Team ' . $result->secondEntry?->group?->name }}
                                             </div>
                                             <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest #{{ $result->secondEntry?->chest_number }}</span>
                                         </div>
                                     </div>
-                                    <span class="text-[11px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 shrink-0">
-                                        {{ $result->secondEntry?->group?->code }}
+                                    <span class="text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 shrink-0 uppercase" title="{{ $result->secondEntry?->group?->name }}">
+                                        {{ $result->secondEntry?->group?->code ?? $result->secondEntry?->group?->name }}
                                     </span>
                                 </div>
                             @endif
@@ -334,14 +334,14 @@
                                     <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                                         <span class="w-6 h-6 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">3</span>
                                         <div class="min-w-0 flex-1">
-                                            <div class="font-medium text-xs sm:text-sm text-slate-800 truncate">
+                                            <div class="font-medium text-xs sm:text-sm text-slate-800 line-clamp-1">
                                                 {{ $result->thirdEntry?->student?->name ?? 'Team ' . $result->thirdEntry?->group?->name }}
                                             </div>
                                             <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest #{{ $result->thirdEntry?->chest_number }}</span>
                                         </div>
                                     </div>
-                                    <span class="text-[11px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 shrink-0">
-                                        {{ $result->thirdEntry?->group?->code }}
+                                    <span class="text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 shrink-0 uppercase" title="{{ $result->thirdEntry?->group?->name }}">
+                                        {{ $result->thirdEntry?->group?->code ?? $result->thirdEntry?->group?->name }}
                                     </span>
                                 </div>
                             @endif

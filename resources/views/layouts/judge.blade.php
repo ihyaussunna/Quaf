@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? 'Judges Portal' }} | QUAF 09</title>
@@ -18,39 +23,39 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-[100dvh] flex flex-col w-full overflow-x-clip">
 
-    <!-- Top Evaluation Header (Light Theme) -->
-    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('judge.dashboard') }}" class="flex items-center gap-3 group">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 sm:h-12 w-auto object-contain">
+    <!-- Top Evaluation Header (Light Theme, Mobile App Friendly) -->
+    <header class="h-16 sm:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-40 shadow-xs">
+        <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+            <a href="{{ route('judge.dashboard') }}" class="flex items-center gap-2 sm:gap-3 group shrink-0">
+                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-9 sm:h-12 w-auto object-contain">
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold tracking-wider text-sm sm:text-base text-slate-900 group-hover:text-[#be1e2d] transition-colors">JUDGES JURY</span>
-                        <span class="px-2 py-0.5 rounded-full bg-red-50 text-[#be1e2d] border border-red-200 text-[10px] font-mono font-bold">CONFIDENTIAL</span>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="font-bold tracking-wider text-xs sm:text-base text-slate-900 group-hover:text-[#be1e2d] transition-colors">JUDGES JURY</span>
+                        <span class="px-1.5 py-0.5 rounded-full bg-red-50 text-[#be1e2d] border border-red-200 text-[9px] sm:text-[10px] font-mono font-bold">JURY</span>
                     </div>
-                    <span class="text-[10px] font-mono tracking-widest text-slate-500 block uppercase">EVALUATION CONSOLE</span>
+                    <span class="text-[9px] sm:text-[10px] font-mono tracking-widest text-slate-500 block uppercase">EVALUATION CONSOLE</span>
                 </div>
             </a>
         </div>
 
-        <!-- Center: Quick Judge Info -->
-        <div class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
+        <!-- Center: Quick Judge Info (hidden on small mobile) -->
+        <div class="hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
             <span class="text-slate-500">Juror:</span>
             <span class="text-slate-900 font-bold">{{ Auth::user()->name }}</span>
             <span class="text-slate-300">•</span>
             <span class="text-[#f3bd2e] font-semibold">{{ Auth::user()->judgeProfile->designation ?? 'Official Adjudicator' }}</span>
         </div>
 
-        <!-- Right: Sign Out -->
-        <div class="flex items-center gap-3">
-            <a href="{{ route('judge.dashboard') }}" class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 border border-slate-200 transition-all">
-                My Programs
+        <!-- Right: Actions with app-tap -->
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <a href="{{ route('judge.dashboard') }}" class="app-tap px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 border border-slate-200 transition-all">
+                Programs
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all">
+                <button type="submit" class="app-tap px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all">
                     Sign Out
                 </button>
             </form>
@@ -59,27 +64,27 @@
 
     <!-- Flash Messages -->
     @if(session('success'))
-        <div class="max-w-6xl w-full mx-auto px-6 mt-6">
-            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-mono flex items-center justify-between shadow-sm">
+        <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 mt-4">
+            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-mono flex items-center justify-between shadow-xs">
                 <span>{{ session('success') }}</span>
             </div>
         </div>
     @endif
     @if(session('error'))
-        <div class="max-w-6xl w-full mx-auto px-6 mt-6">
-            <div class="p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 text-xs font-mono flex items-center justify-between shadow-sm">
+        <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 mt-4">
+            <div class="p-3.5 rounded-xl bg-red-50 border border-red-300 text-red-800 text-xs font-mono flex items-center justify-between shadow-xs">
                 <span>{{ session('error') }}</span>
             </div>
         </div>
     @endif
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 md:p-8 min-w-0 max-w-full overflow-x-clip">
         @yield('content')
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-200 py-4 text-center text-slate-500 text-[11px] font-mono bg-white">
+    <footer class="border-t border-slate-200 py-4 px-4 text-center text-slate-500 text-[11px] font-mono bg-white safe-bottom-padding">
         QUAF '09 Adjudication Engine • Ihyaussunna Students Union • Strictly Confidential Scoring System
     </footer>
 

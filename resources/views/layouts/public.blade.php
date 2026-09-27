@@ -2,7 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? 'QUAF' }} | Ihyaussunna Students Union</title>
@@ -97,7 +102,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-screen flex flex-col relative overflow-x-hidden">
+<body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip">
 
     <!-- Top Announcement Bar / Live Alert -->
     @php
@@ -247,41 +252,41 @@
         </div>
     @endif
 
-    <!-- Main Content (With safe padding for mobile bottom bar) -->
-    <main class="flex-1 pb-20 md:pb-0">
+    <!-- Main Content (With safe padding for mobile bottom bar and notch) -->
+    <main class="flex-1 pb-[max(5.5rem,calc(4.5rem+env(safe-area-inset-bottom,0px)))] md:pb-0 min-w-0 w-full overflow-x-clip">
         {{ $slot ?? '' }}
         @yield('content')
     </main>
 
-    <!-- Mobile Bottom App Bar (Sticky Thumb-Friendly Navigation) -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 shadow-lg px-2 py-1.5 flex items-center justify-around">
-        <a href="{{ route('home') }}" class="flex flex-col items-center py-1 px-3 rounded-xl text-center transition-colors {{ request()->routeIs('home') ? 'text-[#f3bd2e] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+    <!-- Mobile Bottom App Bar (Sticky Native-Style Thumb Navigation) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] px-2 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] flex items-center justify-around select-none">
+        <a href="{{ route('home') }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center transition-all {{ request()->routeIs('home') ? 'text-[#be1e2d] font-bold bg-red-50/80' : 'text-slate-500 hover:text-slate-800' }}">
             <svg class="w-5 h-5 mb-0.5 {{ request()->routeIs('home') ? 'stroke-current stroke-[2.5]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             <span class="text-[10px] font-mono tracking-tight">Home</span>
         </a>
 
-        <a href="{{ route('results.index') }}" class="flex flex-col items-center py-1 px-3 rounded-xl text-center transition-colors {{ request()->routeIs('results.*') ? 'text-[#f3bd2e] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+        <a href="{{ route('results.index') }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center transition-all {{ request()->routeIs('results.*') ? 'text-[#be1e2d] font-bold bg-red-50/80' : 'text-slate-500 hover:text-slate-800' }}">
             <svg class="w-5 h-5 mb-0.5 {{ request()->routeIs('results.*') ? 'stroke-current stroke-[2.5]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
             <span class="text-[10px] font-mono tracking-tight">Results</span>
         </a>
 
-        <a href="{{ route('news.index') }}" class="flex flex-col items-center py-1 px-3 rounded-xl text-center transition-colors {{ request()->routeIs('news.*') ? 'text-[#f3bd2e] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+        <a href="{{ route('news.index') }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center transition-all {{ request()->routeIs('news.*') ? 'text-[#be1e2d] font-bold bg-red-50/80' : 'text-slate-500 hover:text-slate-800' }}">
             <svg class="w-5 h-5 mb-0.5 {{ request()->routeIs('news.*') ? 'stroke-current stroke-[2.5]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
             <span class="text-[10px] font-mono tracking-tight">News</span>
         </a>
 
-        <a href="{{ route('gallery.index') }}" class="flex flex-col items-center py-1 px-3 rounded-xl text-center transition-colors {{ request()->routeIs('gallery.*') ? 'text-[#f3bd2e] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+        <a href="{{ route('gallery.index') }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center transition-all {{ request()->routeIs('gallery.*') ? 'text-[#be1e2d] font-bold bg-red-50/80' : 'text-slate-500 hover:text-slate-800' }}">
             <svg class="w-5 h-5 mb-0.5 {{ request()->routeIs('gallery.*') ? 'stroke-current stroke-[2.5]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             <span class="text-[10px] font-mono tracking-tight">Gallery</span>
         </a>
 
         @auth
-            <a href="{{ $targetRoute }}" class="flex flex-col items-center py-1 px-3 rounded-xl text-center text-[#f3bd2e] font-bold">
-                <div class="w-5 h-5 mb-0.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</div>
+            <a href="{{ $targetRoute }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center text-[#be1e2d] font-bold bg-red-50/80">
+                <div class="w-5 h-5 mb-0.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow-xs">✓</div>
                 <span class="text-[10px] font-mono tracking-tight">Portal</span>
             </a>
         @else
-            <a href="{{ route('login') }}" class="flex flex-col items-center py-1 px-3 rounded-xl text-center transition-colors {{ request()->routeIs('login') ? 'text-[#f3bd2e] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+            <a href="{{ route('login') }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center transition-all {{ request()->routeIs('login') ? 'text-[#be1e2d] font-bold bg-red-50/80' : 'text-slate-500 hover:text-slate-800' }}">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                 <span class="text-[10px] font-mono tracking-tight">Login</span>
             </a>

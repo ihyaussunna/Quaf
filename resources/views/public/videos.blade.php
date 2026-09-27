@@ -44,13 +44,13 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         @forelse($videos as $video)
             <div @click="activeVideo = '{{ $video->youtube_id }}'; activeTitle = '{{ addslashes($video->title) }}'; window.scrollTo({ top: 100, behavior: 'smooth' })"
-                 class="group rounded-2xl bg-white border border-slate-200 hover:border-[#f3bd2e]/60 p-4 cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md">
+                 class="app-tap group rounded-2xl bg-white border border-slate-200 hover:border-[#be1e2d]/60 p-4 cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md">
                 <div class="aspect-video w-full rounded-xl overflow-hidden bg-slate-100 relative mb-4">
                     <img src="{{ $video->thumbnail_path ?? 'https://img.youtube.com/vi/' . $video->youtube_id . '/hqdefault.jpg' }}"
                          alt="{{ $video->title }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     <div class="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/10 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-[#f3bd2e] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <div class="w-12 h-12 rounded-full bg-[#be1e2d] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                             <svg class="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </div>
                     </div>
@@ -58,8 +58,8 @@
                         <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-red-600 text-white shadow-xs">LIVE</span>
                     @endif
                 </div>
-                <span class="text-[10px] font-mono text-[#f3bd2e] uppercase tracking-wider block mb-1 font-bold">{{ $video->category }}</span>
-                <h3 class="font-sora font-bold text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors line-clamp-2 leading-snug">
+                <span class="text-[10px] font-mono text-[#be1e2d] uppercase tracking-wider block mb-1 font-bold">{{ $video->category }}</span>
+                <h3 class="font-sora font-bold text-base text-slate-900 group-hover:text-[#be1e2d] transition-colors line-clamp-2 leading-snug break-words">
                     {{ $video->title }}
                 </h3>
             </div>

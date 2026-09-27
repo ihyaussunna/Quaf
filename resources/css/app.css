@@ -350,26 +350,115 @@ input[data-script="malayalam"] {
     }
 }
 
-/* Mobile UX & Font Enhancements */
-html, body {
+/* ========================================================================= */
+/* Comprehensive Mobile & Native App UX Optimization                         */
+/* ========================================================================= */
+:root {
+    --app-safe-top: env(safe-area-inset-top, 0px);
+    --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --app-safe-left: env(safe-area-inset-left, 0px);
+    --app-safe-right: env(safe-area-inset-right, 0px);
+}
+
+html {
     max-width: 100%;
-    overflow-x: hidden;
-    -webkit-tap-highlight-color: rgba(190, 30, 45, 0.15);
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+}
+
+body {
+    max-width: 100%;
+    min-height: 100dvh;
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    text-rendering: optimizeLegibility;
+}
+
+/* Prevent horizontal overflow while ensuring responsive media */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
 }
 
 input, textarea, select, button {
     font-family: inherit;
 }
 
+/* Prevent auto-zooming on iOS for all form inputs */
 @media (max-width: 640px) {
     input[type="text"],
     input[type="email"],
     input[type="password"],
     input[type="number"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
     select,
     textarea {
         font-size: 16px !important;
+        line-height: 1.4 !important;
     }
+}
+
+/* App-like tactile press state */
+.app-tap {
+    transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.app-tap:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+}
+
+/* App-like chip scroller with hidden scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Safe Area Insets for Mobile App Navigation */
+.safe-bottom-padding {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+.safe-top-padding {
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+/* Mobile responsive table container with touch scrolling */
+.table-mobile-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+}
+
+/* Text balance and cut prevention */
+.text-balance-mobile {
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Comfortable mobile touch targets (min 44px) */
+.touch-target-44 {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Custom Scrollbar */
@@ -387,3 +476,4 @@ input, textarea, select, button {
 ::-webkit-scrollbar-thumb:hover {
     background: #be1e2d;
 }
+
