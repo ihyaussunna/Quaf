@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Verify Program Registrations'])
+@extends('layouts.admin', ['title' => 'Program Entries & Registrations'])
 
 @section('content')
 <div class="space-y-6">
@@ -6,29 +6,14 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">Verify Program Registrations</h1>
-                @if($pendingCount > 0)
-                    <span class="px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-black text-xs font-mono animate-pulse">
-                        {{ $pendingCount }} Pending
-                    </span>
-                @else
-                    <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs font-mono">
-                        All Verified
-                    </span>
-                @endif
+                <h1 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">Program Entries & Registrations</h1>
+                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-xs font-mono">
+                    {{ $totalEntriesCount }} Total Entries
+                </span>
             </div>
-            <p class="text-xs font-mono text-slate-500 mt-1">Review, approve, or reject participant entries submitted by Group Leaders.</p>
+            <p class="text-xs font-mono text-slate-500 mt-1">Review participant entries and teams submitted by Group Leaders across all zones.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            @if($pendingCount > 0)
-                <form method="POST" action="{{ route('admin.registrations.verify-all') }}" onsubmit="return confirm('Verify all {{ $pendingCount }} pending entries now?');">
-                    @csrf
-                    <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Verify All Pending ({{ $pendingCount }})</span>
-                    </button>
-                </form>
-            @endif
             <a href="{{ route('admin.registrations.create') }}" class="px-4 py-2.5 rounded-xl bg-[#005c94] hover:bg-[#004875] text-white font-medium text-xs font-mono flex items-center gap-1.5 shadow-sm transition-colors">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span>Add Entry</span>
@@ -53,11 +38,11 @@
 
     <!-- Status Tabs -->
     <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto text-xs font-mono font-semibold">
-        <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'pending'])) }}" 
-           class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? 'pending') === 'pending' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-            <span>Pending Verification</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'pending') === 'pending' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">
-                {{ $pendingCount }}
+        <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'all'])) }}" 
+           class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? 'all') === 'all' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
+            <span>All Entries</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'all') === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">
+                {{ $totalEntriesCount }}
             </span>
         </a>
         <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'verified'])) }}" 
@@ -74,19 +59,21 @@
                 {{ $rejectedCount }}
             </span>
         </a>
-        <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'all'])) }}" 
-           class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? '') === 'all' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-            <span>All Entries</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? '') === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">
-                {{ $totalEntriesCount }}
-            </span>
-        </a>
+        @if($pendingCount > 0)
+            <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'pending'])) }}" 
+               class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? '') === 'pending' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
+                <span>Pending</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? '') === 'pending' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">
+                    {{ $pendingCount }}
+                </span>
+            </a>
+        @endif
     </div>
 
     <!-- Filters Bar -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
         <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex flex-wrap items-center justify-between gap-3">
-            <input type="hidden" name="status" value="{{ $status ?? 'pending' }}">
+            <input type="hidden" name="status" value="{{ $status ?? 'all' }}">
 
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Zone Dropdown -->
@@ -133,7 +120,7 @@
                         <th class="px-5 py-3.5">Group / Team</th>
                         <th class="px-5 py-3.5">Participant / Team Leader</th>
                         <th class="px-5 py-3.5">Status</th>
-                        <th class="px-5 py-3.5 text-right">Verification Action</th>
+                        <th class="px-5 py-3.5 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -221,15 +208,6 @@
                             </td>
                             <td class="px-5 py-3.5 text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    @if($entry->status !== 'verified')
-                                        <form method="POST" action="{{ route('admin.registrations.verify', $entry) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-colors">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                <span>Verify</span>
-                                            </button>
-                                        </form>
-                                    @endif
 
                                     @if($entry->status !== 'rejected')
                                         <form method="POST" action="{{ route('admin.registrations.reject', $entry) }}" class="inline" onsubmit="return confirm('Reject this entry? The slot will be released.');">

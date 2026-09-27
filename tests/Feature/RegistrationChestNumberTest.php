@@ -173,7 +173,7 @@ class RegistrationChestNumberTest extends TestCase
             'student_id' => $this->student->id,
             'group_id' => $this->group->id,
             'chest_number' => '101',
-            'status' => 'pending',
+            'status' => 'verified',
         ]);
     }
 

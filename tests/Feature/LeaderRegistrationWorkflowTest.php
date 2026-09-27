@@ -208,14 +208,14 @@ class LeaderRegistrationWorkflowTest extends TestCase
         $this->assertDatabaseMissing('program_entries', ['id' => $entry->id]);
     }
 
-    public function test_admin_can_verify_and_batch_verify_entries(): void
+    public function test_admin_can_view_program_entries(): void
     {
         $entry1 = ProgramEntry::create([
             'program_id' => $this->indProgram->id,
             'group_id' => $this->group->id,
             'student_id' => $this->student1->id,
             'chest_number' => $this->student1->student_id,
-            'status' => 'pending',
+            'status' => 'verified',
         ]);
 
         $entry2 = ProgramEntry::create([
@@ -223,19 +223,13 @@ class LeaderRegistrationWorkflowTest extends TestCase
             'group_id' => $this->group->id,
             'student_id' => $this->student2->id,
             'chest_number' => $this->student2->student_id,
-            'status' => 'pending',
+            'status' => 'verified',
         ]);
 
-        // Admin verification page view
+        // Admin entries page view
         $viewRes = $this->actingAs($this->adminUser)->get(route('admin.registrations.index'));
         $viewRes->assertStatus(200);
-        $viewRes->assertSee('Verify Registrations');
-
-        // Admin batch verify
-        $batchRes = $this->actingAs($this->adminUser)->post(route('admin.registrations.verify-all'), [
-            'entry_ids' => [$entry1->id, $entry2->id],
-        ]);
-        $batchRes->assertRedirect();
+        $viewRes->assertSee('Program Entries');
 
         $this->assertEquals('verified', $entry1->fresh()->status);
         $this->assertEquals('verified', $entry2->fresh()->status);
@@ -291,5 +285,46 @@ class LeaderRegistrationWorkflowTest extends TestCase
         $resFull->assertStatus(200);
         $resFull->assertSee('Fully Registered');
         $resFull->assertSee('Full Quota');
+    }
+
+    public function test_leader_can_update_roster_by_swapping_students_and_delete_by_program(): void
+    {
+        // 1. Initially register student1 for indProgram
+        $res1 = $this->actingAs($this->leaderUser)->postJson(route('leader.registrations.store'), [
+            'program_id' => $this->indProgram->id,
+            'student_ids' => [$this->student1->id],
+        ]);
+        $res1->assertStatus(200);
+        $res1->assertJson(['success' => true]);
+        $this->assertDatabaseHas('program_entries', [
+            'program_id' => $this->indProgram->id,
+            'student_id' => $this->student1->id,
+            'status' => 'verified',
+        ]);
+
+        // 2. Swap student1 with student2 via store
+        $resSwap = $this->actingAs($this->leaderUser)->postJson(route('leader.registrations.store'), [
+            'program_id' => $this->indProgram->id,
+            'student_ids' => [$this->student2->id],
+        ]);
+        $resSwap->assertStatus(200);
+        $resSwap->assertJson(['success' => true]);
+        $this->assertDatabaseMissing('program_entries', [
+            'program_id' => $this->indProgram->id,
+            'student_id' => $this->student1->id,
+        ]);
+        $this->assertDatabaseHas('program_entries', [
+            'program_id' => $this->indProgram->id,
+            'student_id' => $this->student2->id,
+            'status' => 'verified',
+        ]);
+
+        // 3. Delete all entries for indProgram
+        $resDel = $this->actingAs($this->leaderUser)->deleteJson(route('leader.registrations.destroy-by-program', $this->indProgram));
+        $resDel->assertStatus(200);
+        $resDel->assertJson(['success' => true]);
+        $this->assertDatabaseMissing('program_entries', [
+            'program_id' => $this->indProgram->id,
+        ]);
     }
 }

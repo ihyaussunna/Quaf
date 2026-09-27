@@ -364,6 +364,7 @@ Route::prefix('leader')->name('leader.')->middleware(['auth', 'role:group_leader
     Route::get('/registrations/{entry}/edit', [LeaderController::class, 'editRegistration'])->name('registrations.edit');
     Route::put('/registrations/{entry}', [LeaderController::class, 'updateRegistration'])->name('registrations.update');
     Route::delete('/registrations/{entry}', [LeaderController::class, 'destroyRegistration'])->name('registrations.destroy');
+    Route::delete('/registrations/by-program/{program}', [LeaderController::class, 'destroyByProgram'])->name('registrations.destroy-by-program');
 });
 
 /*

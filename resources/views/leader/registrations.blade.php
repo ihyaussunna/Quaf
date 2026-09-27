@@ -8,12 +8,55 @@
             : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
             
         $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($p->id, collect()) : collect();
+        $enrolledStudents = [];
         if ($p->type === 'group') {
             $firstEntry = $pEntries->first();
-            $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+            if ($firstEntry) {
+                $leaderStudent = $firstEntry->leaderStudent() ?? $firstEntry->student;
+                if ($firstEntry->participants && $firstEntry->participants->isNotEmpty()) {
+                    $enrolledStudents = $firstEntry->participants->map(function ($st) use ($firstEntry, $leaderStudent) {
+                        return [
+                            'id' => $st->id,
+                            'chest' => (string)($st->student_id ?: $st->id),
+                            'name' => $st->name,
+                            'class' => $st->class_level ?? '',
+                            'zone_id' => $st->zone_id,
+                            'zone_name' => $st->zone?->name ?? 'N/A',
+                            'is_leader' => ($leaderStudent && $leaderStudent->id === $st->id),
+                            'entry_id' => $firstEntry->id,
+                        ];
+                    })->values()->all();
+                } elseif ($firstEntry->student) {
+                    $st = $firstEntry->student;
+                    $enrolledStudents = [[
+                        'id' => $st->id,
+                        'chest' => (string)($st->student_id ?: $st->id),
+                        'name' => $st->name,
+                        'class' => $st->class_level ?? '',
+                        'zone_id' => $st->zone_id,
+                        'zone_name' => $st->zone?->name ?? 'N/A',
+                        'is_leader' => true,
+                        'entry_id' => $firstEntry->id,
+                    ]];
+                }
+            }
         } else {
-            $enrolled = $pEntries->count();
+            $enrolledStudents = $pEntries->map(function ($entry) {
+                $st = $entry->student;
+                if (!$st) return null;
+                return [
+                    'id' => $st->id,
+                    'chest' => (string)($st->student_id ?: $st->id),
+                    'name' => $st->name,
+                    'class' => $st->class_level ?? '',
+                    'zone_id' => $st->zone_id,
+                    'zone_name' => $st->zone?->name ?? 'N/A',
+                    'is_leader' => false,
+                    'entry_id' => $entry->id,
+                ];
+            })->filter()->values()->all();
         }
+        $enrolled = count($enrolledStudents);
         
         $remaining = max(0, $limit - $enrolled);
         $isFull = ($enrolled >= $limit);
@@ -45,6 +88,7 @@
             'remaining' => $remaining,
             'is_full' => $isFull,
             'is_registered' => $isRegistered,
+            'enrolled_students' => $enrolledStudents,
             'tag' => $tag,
             'status_label' => $statusLabel,
             'status_type' => $statusType,
@@ -112,8 +156,7 @@ function registrationManager() {
         },
         
         get participantLimit() {
-            if (!this.currentProgram) return 1;
-            return this.currentProgram.remaining !== undefined ? this.currentProgram.remaining : (this.currentProgram.limit || 1);
+            return this.currentProgram ? (this.currentProgram.limit || 1) : 1;
         },
         
         get filteredPrograms() {
@@ -202,11 +245,29 @@ function registrationManager() {
             this.studentSearch = '';
             this.feedbackSuccess = '';
             this.feedbackError = '';
+            
+            if (this.currentProgram && Array.isArray(this.currentProgram.enrolled_students) && this.currentProgram.enrolled_students.length > 0) {
+                this.selectedStudents = this.currentProgram.enrolled_students.map(s => ({ ...s }));
+                if (this.isGroup) {
+                    const ldr = this.selectedStudents.find(s => s.is_leader);
+                    this.leaderStudentId = ldr ? ldr.id : (this.selectedStudents[0] ? this.selectedStudents[0].id : null);
+                } else {
+                    this.leaderStudentId = this.selectedStudents[0] ? this.selectedStudents[0].id : null;
+                }
+            }
         },
         
         addStudent(st) {
             if (this.selectedStudents.length >= this.participantLimit) return;
-            this.selectedStudents.push(st);
+            if (this.selectedStudents.some(s => s.id == st.id)) return;
+            this.selectedStudents.push({
+                id: st.id,
+                chest: st.chest,
+                name: st.name,
+                class: st.class,
+                zone_name: st.zone_name,
+                is_leader: false
+            });
             if (!this.leaderStudentId) {
                 this.leaderStudentId = st.id;
             }
@@ -220,6 +281,50 @@ function registrationManager() {
                 this.leaderStudentId = this.selectedStudents.length > 0 ? this.selectedStudents[0].id : null;
             }
         },
+
+        async deleteCurrentProgramRegistration() {
+            if (!this.currentProgram || !this.currentProgram.is_registered) return;
+            if (!confirm(`Are you sure you want to remove all registered participants for "${this.currentProgram.name}"?`)) return;
+            
+            this.isSubmitting = true;
+            this.feedbackSuccess = '';
+            this.feedbackError = '';
+            
+            try {
+                const res = await fetch(`{{ url('leader/registrations/by-program') }}/${this.currentProgram.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    this.feedbackError = data.message || 'Failed to remove program registration.';
+                    return;
+                }
+                
+                const prog = this.currentProgram;
+                prog.enrolled = 0;
+                prog.enrolled_students = [];
+                prog.remaining = prog.limit;
+                prog.is_full = false;
+                prog.is_registered = false;
+                prog.tag = `[UNREGISTERED - 0/${prog.limit}]`;
+                prog.status_label = `Unregistered (0/${prog.limit})`;
+                prog.status_type = 'unregistered';
+                
+                this.selectedStudents = [];
+                this.leaderStudentId = null;
+                this.updateProgramDropdown();
+                this.feedbackSuccess = data.message || `All registrations for "${prog.name}" removed successfully.`;
+            } catch (err) {
+                this.feedbackError = 'Connection error while removing registration.';
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
         
         async submitRegistration(e) {
             if (this.isSubmitting) return;
@@ -227,11 +332,11 @@ function registrationManager() {
                 this.feedbackError = 'Please select a competition program first.';
                 return;
             }
-            if (this.currentProgram.is_full) {
-                this.feedbackError = `Quota is already full (${this.currentProgram.enrolled}/${this.currentProgram.limit}) for "${this.currentProgram.name}".`;
+            if (this.selectedStudents.length > this.participantLimit) {
+                this.feedbackError = `Maximum limit is ${this.participantLimit} participant(s). You have selected ${this.selectedStudents.length}.`;
                 return;
             }
-            if (this.selectedStudents.length === 0) {
+            if (this.selectedStudents.length === 0 && !this.currentProgram.is_registered) {
                 this.feedbackError = 'Please select at least one student participant.';
                 return;
             }
@@ -260,14 +365,15 @@ function registrationManager() {
                     return;
                 }
                 
-                // Registration Success!
+                // Registration / Update Success!
                 const enrolledProg = this.currentProgram;
                 const enrolledProgName = enrolledProg ? enrolledProg.name : 'Program';
-                const enrolledCount = this.selectedStudents.length;
+                const freshEnrolled = data.enrolled_students || this.selectedStudents;
+                const enrolledCount = data.enrolled_count !== undefined ? data.enrolled_count : freshEnrolled.length;
                 
-                // 1. Update enrolled, remaining, and tags in state
                 if (enrolledProg) {
-                    enrolledProg.enrolled = (enrolledProg.enrolled || 0) + enrolledCount;
+                    enrolledProg.enrolled = enrolledCount;
+                    enrolledProg.enrolled_students = freshEnrolled;
                     enrolledProg.remaining = Math.max(0, enrolledProg.limit - enrolledProg.enrolled);
                     enrolledProg.is_full = (enrolledProg.enrolled >= enrolledProg.limit);
                     enrolledProg.is_registered = (enrolledProg.enrolled > 0);
@@ -286,32 +392,19 @@ function registrationManager() {
                     }
                 }
                 
-                // 2. Clear current enrolled students
-                this.selectedStudents = [];
-                this.leaderStudentId = null;
-                this.studentSearch = '';
+                // Keep leader on this program and reflect fresh enrolled roster
+                this.selectedStudents = freshEnrolled.map(s => ({ ...s }));
+                if (this.isGroup) {
+                    const ldr = this.selectedStudents.find(s => s.is_leader);
+                    this.leaderStudentId = ldr ? ldr.id : (this.selectedStudents[0] ? this.selectedStudents[0].id : null);
+                } else {
+                    this.leaderStudentId = this.selectedStudents[0] ? this.selectedStudents[0].id : null;
+                }
                 
-                // 3. Update program dropdown to show updated status tags
+                this.studentSearch = '';
                 this.updateProgramDropdown();
                 
-                // 4. Auto-advance if full, or keep on same program if slots still remain
-                if (enrolledProg && !enrolledProg.is_full) {
-                    this.selectedProgramId = enrolledProg.id;
-                    const select = this.$refs.programSelect || document.getElementById('program_select');
-                    if (select) select.value = enrolledProg.id;
-                    this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}". Notice: ${enrolledProg.remaining} slot(s) still open for this competition. You can enroll another student now!`;
-                } else {
-                    const nextOpen = this.filteredPrograms.find(p => !p.is_full);
-                    if (nextOpen) {
-                        this.selectedProgramId = nextOpen.id;
-                        const select = this.$refs.programSelect || document.getElementById('program_select');
-                        if (select) select.value = nextOpen.id;
-                        this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! Switched to next open competition: "${nextOpen.name}".`;
-                    } else {
-                        this.selectedProgramId = '';
-                        this.feedbackSuccess = `✓ Successfully enrolled ${enrolledCount} participant(s) for "${enrolledProgName}"! All program quotas in ${this.selectedZone} have been completely filled.`;
-                    }
-                }
+                this.feedbackSuccess = data.message || `✓ Saved & updated participants for "${enrolledProgName}".`;
             } catch (err) {
                 this.feedbackError = 'Connection error: Could not complete registration. Please check your network.';
             } finally {
@@ -540,38 +633,21 @@ function registrationManager() {
                 </template>
             </div>
 
-            <!-- STEP 3: PARTICIPANTS ENROLLMENT -->
-            <template x-if="currentProgram && currentProgram.is_full">
-                <div class="pt-4 border-t border-slate-100">
-                    <div class="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 text-xs font-mono space-y-2 shadow-xs">
-                        <div class="font-bold flex items-center gap-2 text-sm text-emerald-800">
-                            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Quota Complete: All <span x-text="currentProgram.enrolled"></span> of <span x-text="currentProgram.limit"></span> Allowed Slots Filled</span>
-                        </div>
-                        <p>
-                            All participant quota slots for <strong>"<span x-text="currentProgram.name"></span>"</strong> are fully enrolled by {{ $group->name }}.
-                        </p>
-                        <p class="text-[11px] text-emerald-700 font-medium">
-                            To replace or edit candidate entries, check the <strong>Registered Program Entries</strong> table below.
-                        </p>
-                    </div>
-                </div>
-            </template>
-
-            <template x-if="currentProgram && !currentProgram.is_full">
+            <!-- STEP 3: PARTICIPANTS ENROLLMENT & ROSTER MANAGEMENT -->
+            <template x-if="currentProgram">
                 <div class="space-y-4 pt-2 border-t border-slate-100">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <label class="block text-xs font-mono uppercase text-slate-700 font-bold">
-                                3. Select Participant(s) <span class="text-red-500">*</span>
+                                3. Selected Participants & Quota Roster <span class="text-red-500">*</span>
                             </label>
                             <p class="text-[11px] font-mono text-slate-500">
-                                <template x-if="currentProgram.enrolled > 0">
+                                <template x-if="currentProgram.is_registered">
                                     <span>
-                                        <strong><span x-text="currentProgram.enrolled"></span> of <span x-text="currentProgram.limit"></span></strong> slots already enrolled. You can add <strong><span class="text-amber-800" x-text="participantLimit"></span> more</strong> participant(s) now.
+                                        Showing registered students for this competition. You can <strong>Remove</strong> any student to open a slot and search to add a replacement.
                                     </span>
                                 </template>
-                                <template x-if="currentProgram.enrolled === 0">
+                                <template x-if="!currentProgram.is_registered">
                                     <span>
                                         Add up to <strong class="text-slate-800" x-text="participantLimit"></strong> participant(s) from {{ $group->name }} for this competition.
                                     </span>
@@ -581,7 +657,7 @@ function registrationManager() {
                         </div>
                         <div class="text-xs font-mono px-3 py-1.5 rounded-xl border font-bold"
                              :class="selectedStudents.length >= participantLimit ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-orange-50 border-orange-200 text-orange-800'">
-                            Enrolling: <span x-text="selectedStudents.length"></span> / <span x-text="participantLimit"></span> Slot(s)
+                            Enrolled: <span x-text="selectedStudents.length"></span> / <span x-text="participantLimit"></span> Slot(s)
                         </div>
                     </div>
 
@@ -595,7 +671,7 @@ function registrationManager() {
                     <!-- Selected Students List -->
                     <div class="rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden bg-slate-50/50">
                         <div class="p-3 bg-slate-100/80 font-mono text-xs font-bold text-slate-700 flex items-center justify-between">
-                            <span>Selected Students (<span x-text="selectedStudents.length"></span>)</span>
+                            <span>Selected Students (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>)</span>
                             <span x-show="isGroup" class="text-[11px] text-slate-500">Select Leader (Name appears on result poster)</span>
                         </div>
 
@@ -641,7 +717,7 @@ function registrationManager() {
                         </template>
 
                         <div x-show="selectedStudents.length === 0" class="p-6 text-center text-xs font-mono text-slate-400">
-                            No students added yet. Search and select students below.
+                            No students currently selected. Search and add candidates below.
                         </div>
                     </div>
 
@@ -690,21 +766,35 @@ function registrationManager() {
 
                     <div x-show="selectedStudents.length >= participantLimit" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-semibold flex items-center gap-2">
                         <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Available slot limit reached (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>). Click Submit Registration below to complete.</span>
+                        <span>Available quota limit reached (<span x-text="selectedStudents.length"></span> of <span x-text="participantLimit"></span>). To replace a student, click Remove above. Click Save & Update Participants below to confirm.</span>
                     </div>
                 </div>
             </template>
 
-            <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button type="submit" 
-                        :disabled="isSubmitting || selectedStudents.length === 0 || !selectedProgramId || (currentProgram && currentProgram.is_full)"
-                        :class="isSubmitting || selectedStudents.length === 0 || !selectedProgramId || (currentProgram && currentProgram.is_full) ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
-                        class="px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-brand-orange text-white transition-all flex items-center gap-2">
-                    <template x-if="isSubmitting">
-                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+            <div class="pt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
+                <div>
+                    <template x-if="currentProgram && currentProgram.is_registered">
+                        <button type="button" 
+                                @click="deleteCurrentProgramRegistration()" 
+                                :disabled="isSubmitting"
+                                class="px-4 py-2.5 rounded-xl text-xs font-mono font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>Remove All Registrations for this Program</span>
+                        </button>
                     </template>
-                    <span x-text="isSubmitting ? 'Submitting Registration...' : (currentProgram && currentProgram.is_full ? 'Quota Already Full' : (selectedStudents.length > 1 ? 'Submit All ' + selectedStudents.length + ' Participants' : 'Submit Registration'))"></span>
-                </button>
+                </div>
+
+                <div class="flex items-center gap-3 ml-auto">
+                    <button type="submit" 
+                            :disabled="isSubmitting || !selectedProgramId || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit"
+                            :class="isSubmitting || !selectedProgramId || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
+                            class="px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-brand-orange text-white transition-all flex items-center gap-2">
+                        <template x-if="isSubmitting">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        </template>
+                        <span x-text="isSubmitting ? 'Saving Changes...' : (currentProgram && currentProgram.is_registered ? 'Save & Update Participants (' + selectedStudents.length + '/' + participantLimit + ')' : (selectedStudents.length > 1 ? 'Submit All ' + selectedStudents.length + ' Participants' : 'Submit Registration'))"></span>
+                    </button>
+                </div>
             </div>
         </form>
     </div>

@@ -115,11 +115,7 @@
                 </button>
                 <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-[11px]" style="display: none;">
                     <a href="{{ route('admin.registrations.index') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.registrations.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
-                        <span>Verify Registrations</span>
-                        @php $navPending = \App\Models\ProgramEntry::where('status', 'pending')->count(); @endphp
-                        @if($navPending > 0)
-                            <span class="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-900 font-bold text-[10px]">{{ $navPending }}</span>
-                        @endif
+                        <span>Program Entries</span>
                     </a>
                     <a href="{{ route('admin.programs.create') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.programs.create') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Create Programs</a>
                     <a href="{{ route('admin.programs.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.programs.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Program List</a>

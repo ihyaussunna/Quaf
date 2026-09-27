@@ -32,7 +32,7 @@ class RegistrationController extends Controller
         $selectedZoneId = $request->query('zone_id');
         $selectedZone = $request->query('zone', $request->query('category'));
         $search = $request->query('search');
-        $status = $request->query('status', 'pending'); // default to pending for verification
+        $status = $request->query('status', 'all');
 
         // Query direct program entries for verification
         $entriesQuery = ProgramEntry::with(['program.zone', 'program.category', 'group', 'student', 'participants']);

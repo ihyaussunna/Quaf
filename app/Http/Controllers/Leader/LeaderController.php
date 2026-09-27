@@ -270,7 +270,7 @@ class LeaderController extends Controller
 
         $allGroupEntries = ProgramEntry::where('group_id', $group->id)
             ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
-            ->with('participants')
+            ->with(['student.zone', 'participants.zone'])
             ->get();
         $entriesByProgram = $allGroupEntries->groupBy('program_id');
         $registeredProgramIds = $allGroupEntries->pluck('program_id')->unique()->toArray();
@@ -369,43 +369,79 @@ class LeaderController extends Controller
         $group = $this->getGroup();
 
         // Support both single student_id or array student_ids for individual programs
+        $isRosterSync = $request->has('student_ids');
         $studentIds = $request->input('student_ids');
         if (empty($studentIds) && $request->filled('student_id')) {
             $studentIds = [(int) $request->input('student_id')];
         }
-        $studentIds = array_values(array_filter((array) $studentIds));
+        $studentIds = array_values(array_unique(array_filter((array) $studentIds)));
 
+        $maxPerGroup = (int) ($program->max_participants_per_group ?? $program->participant_count ?? 1);
+
+        // Fetch existing active entries for this program and group
+        $existingEntries = ProgramEntry::where('program_id', $program->id)
+            ->where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->get();
+        $existingStudentIds = $existingEntries->pluck('student_id')->toArray();
+
+        // If a single student was submitted (legacy/direct submit) and they are already registered
+        if (! $isRosterSync && $request->filled('student_id') && in_array((int) $request->input('student_id'), $existingStudentIds)) {
+            $msg = 'Student is already registered for this competition.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['student_id' => $msg]);
+        }
+
+        // If no student_ids provided:
         if (empty($studentIds)) {
+            if ($existingEntries->isNotEmpty()) {
+                foreach ($existingEntries as $ee) {
+                    $ee->participants()->detach();
+                    $ee->delete();
+                }
+                $msg = "All participants for '{$program->name}' have been removed.";
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => $msg,
+                        'program_id' => $program->id,
+                        'program_name' => $program->name,
+                        'is_group' => false,
+                        'enrolled_students' => [],
+                        'enrolled_count' => 0,
+                    ]);
+                }
+
+                return back()->with('success', $msg);
+            }
+
             $msg = 'Please select at least one student for this competition.';
             if ($isAjax) {
                 return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
             }
 
-            return back()->withInput()->withErrors([
-                'student_id' => $msg,
-            ]);
+            return back()->withInput()->withErrors(['student_id' => $msg]);
         }
 
-        // Check group-wise limit for individual program
-        $maxPerGroup = (int) ($program->max_participants_per_group ?? $program->participant_count ?? 1);
-        $existingCount = ProgramEntry::where('program_id', $program->id)
-            ->where('group_id', $group->id)
-            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
-            ->count();
-
-        if (($existingCount + count($studentIds)) > $maxPerGroup) {
-            $msg = "This program allows at most {$maxPerGroup} participants per group. Your group already has {$existingCount} enrolled.";
+        // Limit check on new desired list
+        if (count($studentIds) > $maxPerGroup) {
+            $msg = "This program allows at most {$maxPerGroup} participants per group. ".count($studentIds).' selected.';
             if ($isAjax) {
                 return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
             }
 
-            return back()->withInput()->withErrors([
-                'student_id' => $msg,
-            ]);
+            return back()->withInput()->withErrors(['student_id' => $msg]);
         }
 
-        $studentsToRegister = [];
-        foreach ($studentIds as $stId) {
+        $studentsToRemove = array_diff($existingStudentIds, $studentIds);
+        $studentsToAdd = array_diff($studentIds, $existingStudentIds);
+
+        // Validate newly added students
+        $newStudentsToRegister = [];
+        foreach ($studentsToAdd as $stId) {
             $student = Student::with(['group', 'zone'])->where('group_id', $group->id)->find($stId);
             if (! $student) {
                 $msg = "Selected student (ID: {$stId}) does not belong to {$group->name}.";
@@ -429,15 +465,27 @@ class LeaderController extends Controller
                 ]);
             }
 
-            $studentsToRegister[] = $student;
+            $newStudentsToRegister[] = $student;
         }
 
-        $registeredEntries = [];
         $conflictsFound = [];
 
         DB::beginTransaction();
         try {
-            foreach ($studentsToRegister as $student) {
+            // 1. Remove deleted entries
+            if (! empty($studentsToRemove)) {
+                $entriesToDelete = ProgramEntry::where('program_id', $program->id)
+                    ->where('group_id', $group->id)
+                    ->whereIn('student_id', $studentsToRemove)
+                    ->get();
+                foreach ($entriesToDelete as $ed) {
+                    $ed->participants()->detach();
+                    $ed->delete();
+                }
+            }
+
+            // 2. Add new students with status 'verified' (directly verified)
+            foreach ($newStudentsToRegister as $student) {
                 $conflictFlag = false;
                 $notes = null;
 
@@ -458,13 +506,24 @@ class LeaderController extends Controller
 
                 $entry = $this->eligibilityService->registerIndividual($student, $program, [
                     'chest_number' => $student->student_id,
-                    'status' => 'pending',
+                    'status' => 'verified',
                     'conflict_flag' => $conflictFlag,
                     'notes' => $notes,
                 ]);
 
-                $registeredEntries[] = $entry;
+                // Create GreenRoomCall
+                $order = $program->greenRoomCalls()->count() + 1;
+                $program->greenRoomCalls()->firstOrCreate(
+                    ['entry_id' => $entry->id],
+                    ['order_num' => $order, 'status' => 'waiting']
+                );
             }
+
+            // 3. Ensure any existing retained entries are marked 'verified'
+            ProgramEntry::where('program_id', $program->id)
+                ->where('group_id', $group->id)
+                ->whereIn('status', ['pending'])
+                ->update(['status' => 'verified']);
 
             DB::commit();
         } catch (\Throwable $e) {
@@ -479,8 +538,31 @@ class LeaderController extends Controller
             ]);
         }
 
-        $count = count($registeredEntries);
-        $msg = "Successfully enrolled {$count} participant(s) for '{$program->name}' (Pending Admin Verification).";
+        // Fetch fresh enrolled students list for JSON response
+        $freshEntries = ProgramEntry::where('program_id', $program->id)
+            ->where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->with(['student.zone'])
+            ->get();
+
+        $freshEnrolledStudents = [];
+        foreach ($freshEntries as $fe) {
+            if ($fe->student) {
+                $st = $fe->student;
+                $freshEnrolledStudents[] = [
+                    'id' => $st->id,
+                    'chest' => (string) ($st->student_id ?: $st->id),
+                    'name' => $st->name,
+                    'class' => $st->class_level ?? '',
+                    'zone_name' => $st->zone?->name ?? ($st->category ?? 'Mix Zone'),
+                    'is_leader' => false,
+                    'entry_id' => $fe->id,
+                ];
+            }
+        }
+
+        $count = count($freshEnrolledStudents);
+        $msg = "Successfully updated participants for '{$program->name}' ({$count} enrolled).";
         if (! empty($conflictsFound)) {
             $msg .= ' NOTICE: Schedule conflict detected for: '.implode(', ', $conflictsFound);
         }
@@ -492,6 +574,8 @@ class LeaderController extends Controller
                 'program_id' => $program->id,
                 'program_name' => $program->name,
                 'is_group' => false,
+                'enrolled_students' => $freshEnrolledStudents,
+                'enrolled_count' => $count,
                 'registered_count' => $count,
             ]);
         }
@@ -525,11 +609,23 @@ class LeaderController extends Controller
         ]);
 
         $program = Program::with(['schedule', 'zone'])->findOrFail($validated['program_id']);
-        $studentIds = $validated['student_ids'];
+        $studentIds = array_values(array_unique(array_filter((array) $validated['student_ids'])));
         $leaderId = $validated['leader_id'] ?? ($studentIds[0] ?? null);
 
-        // Validate via Eligibility Engine
-        $eligibility = $this->eligibilityService->validateGroupRegistration($group, $program, $studentIds);
+        // Check if an existing group entry already exists for this group
+        $existingEntry = ProgramEntry::where('program_id', $program->id)
+            ->where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->first();
+
+        // Validate via Eligibility Engine (pass existing entry ID to exclude if updating)
+        $eligibility = $this->eligibilityService->validateGroupRegistration(
+            $group,
+            $program,
+            $studentIds,
+            $existingEntry?->id
+        );
+
         if (! $eligibility['valid']) {
             $msg = $eligibility['error'];
             if ($isAjax) {
@@ -542,11 +638,38 @@ class LeaderController extends Controller
         }
 
         try {
-            $entry = $this->eligibilityService->registerGroup($group, $program, $studentIds, [
-                'status' => 'pending',
-                'leader_id' => $leaderId,
-                'chest_number' => $validated['chest_number'] ?? null,
-            ]);
+            if ($existingEntry) {
+                // Update existing entry participants
+                $existingEntry->participants()->detach();
+                $leaderStudent = Student::find($leaderId) ?? Student::find($studentIds[0] ?? null);
+                $allParticipantIds = array_values(array_unique(array_filter(array_merge([$leaderStudent?->id], $studentIds))));
+
+                foreach ($allParticipantIds as $stId) {
+                    $role = ($stId == $leaderStudent?->id) ? 'captain' : 'participant';
+                    $existingEntry->participants()->attach($stId, ['role' => $role]);
+                }
+
+                $existingEntry->student_id = $leaderStudent?->id;
+                $existingEntry->status = 'verified';
+                if (! empty($validated['chest_number'])) {
+                    $existingEntry->chest_number = $validated['chest_number'];
+                }
+                $existingEntry->save();
+                $entry = $existingEntry;
+            } else {
+                $entry = $this->eligibilityService->registerGroup($group, $program, $studentIds, [
+                    'status' => 'verified',
+                    'leader_id' => $leaderId,
+                    'chest_number' => $validated['chest_number'] ?? null,
+                ]);
+            }
+
+            // Create GreenRoomCall
+            $order = $program->greenRoomCalls()->count() + 1;
+            $program->greenRoomCalls()->firstOrCreate(
+                ['entry_id' => $entry->id],
+                ['order_num' => $order, 'status' => 'waiting']
+            );
         } catch (\Throwable $e) {
             $msg = 'Group registration failed: '.$e->getMessage();
             if ($isAjax) {
@@ -558,7 +681,25 @@ class LeaderController extends Controller
             ]);
         }
 
-        $msg = "Group entry submitted for '{$program->name}' with ".count($studentIds).' participants (Pending Admin Verification).';
+        $freshEntry = ProgramEntry::where('id', $entry->id)->with(['participants.zone', 'student.zone'])->first();
+        $freshEnrolledStudents = [];
+        $leaderStudent = $freshEntry ? ($freshEntry->leaderStudent() ?? $freshEntry->student) : null;
+        if ($freshEntry && $freshEntry->participants) {
+            foreach ($freshEntry->participants as $st) {
+                $freshEnrolledStudents[] = [
+                    'id' => $st->id,
+                    'chest' => (string) ($st->student_id ?: $st->id),
+                    'name' => $st->name,
+                    'class' => $st->class_level ?? '',
+                    'zone_name' => $st->zone?->name ?? ($st->category ?? 'Mix Zone'),
+                    'is_leader' => ($leaderStudent && $leaderStudent->id === $st->id),
+                    'entry_id' => $freshEntry->id,
+                ];
+            }
+        }
+
+        $participantCount = count($freshEnrolledStudents);
+        $msg = "Successfully registered {$group->name} team with {$participantCount} member(s) for '{$program->name}'.";
 
         if ($isAjax) {
             return response()->json([
@@ -567,7 +708,9 @@ class LeaderController extends Controller
                 'program_id' => $program->id,
                 'program_name' => $program->name,
                 'is_group' => true,
-                'registered_count' => count($studentIds),
+                'enrolled_students' => $freshEnrolledStudents,
+                'enrolled_count' => $participantCount,
+                'registered_count' => $participantCount,
             ]);
         }
 
@@ -637,7 +780,7 @@ class LeaderController extends Controller
             }
 
             $entry->student_id = $leaderStudent?->id;
-            $entry->status = 'pending'; // Require re-verification
+            $entry->status = 'verified';
             $entry->save();
 
             return redirect()->route('leader.registrations')->with('success', "Group entry for '{$program->name}' updated successfully.");
@@ -656,14 +799,14 @@ class LeaderController extends Controller
 
             $entry->student_id = $student->id;
             $entry->chest_number = $student->student_id;
-            $entry->status = 'pending';
+            $entry->status = 'verified';
             $entry->save();
 
             return redirect()->route('leader.registrations')->with('success', "Entry for '{$program->name}' updated with participant {$student->name}.");
         }
     }
 
-    public function destroyRegistration(ProgramEntry $entry): RedirectResponse
+    public function destroyRegistration(ProgramEntry $entry): JsonResponse|RedirectResponse
     {
         $group = $this->getGroup();
         if ($entry->group_id !== $group->id) {
@@ -671,8 +814,13 @@ class LeaderController extends Controller
         }
 
         if (! $this->isRegistrationOpen()) {
+            $msg = 'Registration window is currently closed. Cancellations are not permitted.';
+            if (request()->expectsJson() || request()->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
             return back()->withErrors([
-                'registration' => 'Registration window is currently closed. Cancellations are not permitted.',
+                'registration' => $msg,
             ]);
         }
 
@@ -680,6 +828,45 @@ class LeaderController extends Controller
         $entry->participants()->detach();
         $entry->delete();
 
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Registration for '{$programName}' has been removed successfully.",
+            ]);
+        }
+
         return redirect()->route('leader.registrations')->with('success', "Registration for '{$programName}' has been removed successfully.");
+    }
+
+    public function destroyByProgram(Program $program): JsonResponse|RedirectResponse
+    {
+        $group = $this->getGroup();
+        if (! $this->isRegistrationOpen()) {
+            $msg = 'Registration window is currently closed. Cancellations are not permitted.';
+            if (request()->expectsJson() || request()->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->withErrors(['registration' => $msg]);
+        }
+
+        $entries = ProgramEntry::where('program_id', $program->id)
+            ->where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->get();
+
+        foreach ($entries as $entry) {
+            $entry->participants()->detach();
+            $entry->delete();
+        }
+
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "All participants for '{$program->name}' have been removed successfully.",
+            ]);
+        }
+
+        return redirect()->route('leader.registrations')->with('success', "All participants for '{$program->name}' have been removed.");
     }
 }
