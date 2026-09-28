@@ -79,6 +79,9 @@ class Program extends Model
             if (! Schema::hasColumn('programs', 'has_criteria')) {
                 unset($program->attributes['has_criteria']);
             }
+            if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
+                unset($program->attributes['is_call_list_locked']);
+            }
         });
     }
 
@@ -88,24 +91,28 @@ class Program extends Model
         if ($checked) {
             return;
         }
-        $checked = true;
 
         try {
-            if (! Schema::hasColumn('programs', 'has_time_limit') ||
-                ! Schema::hasColumn('programs', 'has_criteria')) {
-                Artisan::call('migrate', ['--force' => true]);
+            if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->boolean('is_call_list_locked')->default(false)->after('status');
+                });
             }
+            if (! Schema::hasColumn('programs', 'has_time_limit')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->boolean('has_time_limit')->default(true)->after('rules');
+                });
+            }
+            if (! Schema::hasColumn('programs', 'has_criteria')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->boolean('has_criteria')->default(true)->after('has_time_limit');
+                });
+            }
+            $checked = true;
         } catch (\Throwable) {
             try {
-                Schema::table('programs', function (Blueprint $table) {
-                    if (! Schema::hasColumn('programs', 'has_time_limit')) {
-                        $table->boolean('has_time_limit')->default(true)->after('rules');
-                    }
-                    if (! Schema::hasColumn('programs', 'has_criteria')) {
-                        $table->boolean('has_criteria')->default(true)->after('has_time_limit');
-                    }
-                    $table->unsignedInteger('duration_minutes')->nullable()->change();
-                });
+                Artisan::call('migrate', ['--force' => true]);
+                $checked = true;
             } catch (\Throwable) {
             }
         }

@@ -9,8 +9,10 @@ use App\Models\ProgramEntry;
 use App\Models\Stage;
 use App\Services\AuditLogger;
 use Carbon\Carbon;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class GreenRoomController extends Controller
@@ -197,8 +199,22 @@ class GreenRoomController extends Controller
 
     public function toggleLockCallList(Program $program): RedirectResponse
     {
-        $program->is_call_list_locked = ! $program->is_call_list_locked;
-        $program->save();
+        Program::ensureSchema();
+
+        $currentStatus = (bool) ($program->is_call_list_locked ?? false);
+        $newStatus = ! $currentStatus;
+
+        try {
+            if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->boolean('is_call_list_locked')->default(false)->after('status');
+                });
+            }
+            $program->is_call_list_locked = $newStatus;
+            $program->save();
+        } catch (\Throwable) {
+            return back()->with('error', 'ഡാറ്റാബേസിൽ പുതിയ കോളം അപ്‌ഡേറ്റ് ചെയ്യാൻ https://quaf.ihyaussunna.in/migrate-db?token=quaf2026setup സന്ദർശിക്കുക.');
+        }
 
         $statusText = $program->is_call_list_locked ? 'ലോക്ക് ചെയ്തു' : 'അൺലോക്ക് ചെയ്തു';
 
@@ -212,6 +228,8 @@ class GreenRoomController extends Controller
 
     public function callList(Request $request): View
     {
+        Program::ensureSchema();
+
         $zones = Program::ZONES;
         $selectedZone = $request->query('zone', $request->query('category'));
         $selectedProgramId = $request->query('program');

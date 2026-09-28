@@ -18,6 +18,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -99,20 +100,29 @@ class JudgeController extends Controller
         $inProgress = $assignedPrograms->where('status', 'in_progress');
         $completed = $assignedPrograms->where('status', 'completed');
 
+        Program::ensureSchema();
+
         // Check evaluation completeness using bulk queries
         // Exclude absent participants and only include present with code letters when call list is locked
         $progIds = $assignedPrograms->pluck('id');
-        $entriesCounts = ProgramEntry::whereIn('program_id', $progIds)
+        $hasLockCol = Schema::hasColumn('programs', 'is_call_list_locked');
+
+        $entriesQuery = ProgramEntry::whereIn('program_id', $progIds)
             ->where('status', 'verified')
-            ->where('attendance_status', '!=', 'absent')
-            ->where(function ($q) {
+            ->where('attendance_status', '!=', 'absent');
+
+        if ($hasLockCol) {
+            $entriesQuery->where(function ($q) {
                 $q->whereHas('program', function ($pq) {
                     $pq->where('is_call_list_locked', true);
                 })->where('attendance_status', 'present')->whereNotNull('code_letter')
                     ->orWhereHas('program', function ($pq) {
                         $pq->where('is_call_list_locked', false);
                     });
-            })
+            });
+        }
+
+        $entriesCounts = $entriesQuery
             ->groupBy('program_id')
             ->selectRaw('program_id, count(*) as total')
             ->pluck('total', 'program_id');
