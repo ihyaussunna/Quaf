@@ -177,7 +177,9 @@ class ProgramCommitteeController extends Controller
             'mix_zone_open_to_all' => ['nullable', 'boolean'],
             'eligibility' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
-            'duration_minutes' => ['required', 'integer', 'min:1'],
+            'has_time_limit' => ['nullable', 'boolean'],
+            'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'has_criteria' => ['nullable', 'boolean'],
             'stage_id' => ['nullable', 'exists:stages,id'],
             'points_weight' => ['required', 'numeric', 'min:0.5', 'max:20'],
             'status' => ['required', 'in:upcoming,in_progress,completed,cancelled'],
@@ -192,6 +194,17 @@ class ProgramCommitteeController extends Controller
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
+
+        $hasTimeLimit = $request->boolean('has_time_limit', true);
+        $validated['has_time_limit'] = $hasTimeLimit;
+        if (! $hasTimeLimit) {
+            $validated['duration_minutes'] = null;
+        } elseif (empty($validated['duration_minutes'])) {
+            $validated['duration_minutes'] = 15;
+        }
+
+        $hasCriteria = $request->boolean('has_criteria', true);
+        $validated['has_criteria'] = $hasCriteria;
 
         if (! empty($validated['zone_id'])) {
             $zone = Zone::find($validated['zone_id']);
@@ -211,8 +224,8 @@ class ProgramCommitteeController extends Controller
 
         $program = Program::create($validated);
 
-        // Scoring criteria handling
-        if (! empty($validated['criteria'])) {
+        // Scoring criteria handling: only create criteria if hasCriteria is true
+        if ($hasCriteria && ! empty($validated['criteria'])) {
             foreach ($validated['criteria'] as $c) {
                 if (! empty($c['name']) && ! empty($c['max_marks'])) {
                     $program->scoringCriteria()->create([
@@ -223,8 +236,8 @@ class ProgramCommitteeController extends Controller
             }
         }
 
-        // If no criteria entered, supply sensible defaults
-        if ($program->scoringCriteria()->count() === 0) {
+        // If hasCriteria is true and no criteria entered, supply sensible defaults
+        if ($hasCriteria && $program->scoringCriteria()->count() === 0) {
             $defaults = [
                 ['criterion_name' => 'അവതരണ മികവ് / Performance', 'max_marks' => 30],
                 ['criterion_name' => 'ഉള്ളടക്കവും അറിവും / Content', 'max_marks' => 30],
@@ -293,7 +306,9 @@ class ProgramCommitteeController extends Controller
             'mix_zone_open_to_all' => ['nullable', 'boolean'],
             'eligibility' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
-            'duration_minutes' => ['required', 'integer', 'min:1'],
+            'has_time_limit' => ['nullable', 'boolean'],
+            'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'has_criteria' => ['nullable', 'boolean'],
             'stage_id' => ['nullable', 'exists:stages,id'],
             'points_weight' => ['required', 'numeric', 'min:0.5', 'max:20'],
             'status' => ['required', 'in:upcoming,in_progress,completed,cancelled'],
@@ -308,6 +323,17 @@ class ProgramCommitteeController extends Controller
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
+
+        $hasTimeLimit = $request->boolean('has_time_limit', true);
+        $validated['has_time_limit'] = $hasTimeLimit;
+        if (! $hasTimeLimit) {
+            $validated['duration_minutes'] = null;
+        } elseif (empty($validated['duration_minutes'])) {
+            $validated['duration_minutes'] = $program->duration_minutes ?: 15;
+        }
+
+        $hasCriteria = $request->boolean('has_criteria', true);
+        $validated['has_criteria'] = $hasCriteria;
 
         if (! empty($validated['zone_id'])) {
             $zone = Zone::find($validated['zone_id']);
@@ -328,7 +354,9 @@ class ProgramCommitteeController extends Controller
         $old = $program->toArray();
         $program->update($validated);
 
-        if ($request->has('criteria')) {
+        if (! $hasCriteria) {
+            $program->scoringCriteria()->delete();
+        } elseif ($request->has('criteria')) {
             $program->scoringCriteria()->delete();
             foreach ($request->input('criteria', []) as $c) {
                 if (! empty($c['name']) && ! empty($c['max_marks'])) {
@@ -435,24 +463,35 @@ class ProgramCommitteeController extends Controller
     {
         $validated = $request->validate([
             'rules' => ['nullable', 'string'],
+            'has_time_limit' => ['nullable', 'boolean'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'has_criteria' => ['nullable', 'boolean'],
             'criteria' => ['nullable', 'array'],
             'criteria.*.name' => ['required_with:criteria.*.max_marks', 'string', 'max:255'],
             'criteria.*.max_marks' => ['required_with:criteria.*.name', 'integer', 'min:1', 'max:100'],
         ]);
 
+        $hasTimeLimit = $request->boolean('has_time_limit', true);
+        $hasCriteria = $request->boolean('has_criteria', true);
+
         $programData = [
             'rules' => $validated['rules'] ?? null,
+            'has_time_limit' => $hasTimeLimit,
+            'has_criteria' => $hasCriteria,
         ];
 
-        if (! empty($validated['duration_minutes'])) {
-            $programData['duration_minutes'] = $validated['duration_minutes'];
+        if ($hasTimeLimit) {
+            $programData['duration_minutes'] = ! empty($validated['duration_minutes']) ? (int) $validated['duration_minutes'] : ($program->duration_minutes ?: 15);
+        } else {
+            $programData['duration_minutes'] = null;
         }
 
         $program->update($programData);
 
-        // Update Scoring Criteria
-        if ($request->has('criteria')) {
+        // Update Scoring Criteria: if hasCriteria is false, remove all criteria rows
+        if (! $hasCriteria) {
+            $program->scoringCriteria()->delete();
+        } elseif ($request->has('criteria')) {
             $program->scoringCriteria()->delete();
             foreach ($request->input('criteria', []) as $c) {
                 if (! empty($c['name']) && ! empty($c['max_marks'])) {
@@ -464,7 +503,11 @@ class ProgramCommitteeController extends Controller
             }
         }
 
-        AuditLogger::log('update_niyamavali', $program, null, ['rules' => $program->rules]);
+        AuditLogger::log('update_niyamavali', $program, null, [
+            'rules' => $program->rules,
+            'has_time_limit' => $hasTimeLimit,
+            'has_criteria' => $hasCriteria,
+        ]);
 
         return redirect()->route('program-committee.programs.show', $program)
             ->with('success', "Niyamavali (നിയമാവലി) for '{$program->name}' updated successfully.");

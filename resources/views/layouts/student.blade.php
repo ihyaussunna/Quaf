@@ -29,7 +29,7 @@
     <header class="h-16 sm:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-40 shadow-xs">
         <div class="flex items-center gap-2 sm:gap-4 min-w-0">
             <a href="{{ route('student.dashboard') }}" class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-9 sm:h-12 w-auto object-contain">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF Logo" class="h-9 sm:h-11 w-auto object-contain">
                 <div>
                     <span class="font-bold tracking-wider text-xs sm:text-base text-slate-900">STUDENT PORTAL</span>
                     <span class="text-[9px] sm:text-[10px] font-mono tracking-widest text-[#be1e2d] block uppercase font-bold">DELEGATE CONSOLE</span>

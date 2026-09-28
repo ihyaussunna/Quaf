@@ -21,7 +21,7 @@
     <!-- Backstage High-Speed Topbar (Light Theme) -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
         <div class="flex items-center gap-4">
-            <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF 09" class="h-10 w-auto object-contain">
+            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 09" class="h-10 w-auto object-contain">
             <div>
                 <div class="flex items-center gap-2">
                     <span class="font-rockwell font-bold tracking-wider text-base text-slate-900">GREEN ROOM DESK</span>

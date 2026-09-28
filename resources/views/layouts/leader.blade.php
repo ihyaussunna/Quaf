@@ -46,7 +46,7 @@
             <!-- Sidebar Header / Brand -->
             <div class="h-16 sm:h-20 flex items-center justify-between px-4 border-b border-white/10">
                 <a href="{{ route('leader.dashboard') }}" class="flex items-center py-2">
-                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 sm:h-12 w-auto object-contain max-w-[180px]">
+                    <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-10 sm:h-11 w-auto object-contain max-w-[180px]">
                 </a>
                 <button type="button" @click="sidebarOpen = false" class="lg:hidden text-white/60 hover:text-white p-1 rounded-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

@@ -60,7 +60,11 @@
             <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center font-mono">
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase block">Duration</span>
-                    <span class="text-lg font-bold text-slate-900">{{ $program->duration_minutes }} Min</span>
+                    @if($program->has_time_limit && $program->duration_minutes)
+                        <span class="text-lg font-bold text-slate-900">{{ $program->duration_minutes }} Min</span>
+                    @else
+                        <span class="text-sm font-bold text-slate-500">No Time Limit</span>
+                    @endif
                 </div>
                 <div class="h-8 w-px bg-slate-200"></div>
                 <div>
@@ -129,10 +133,24 @@
                 <p class="text-[11px] font-sora text-slate-500 mt-0.5">Evaluation criteria and maximum marks for judges.</p>
             </div>
             <span class="text-xs font-rockwell font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-800">
-                Total: {{ $program->scoringCriteria->sum('max_marks') }} Marks
+                @if(!$program->has_criteria || $program->scoringCriteria->isEmpty())
+                    Total Mark Only (100 Marks)
+                @else
+                    Total: {{ $program->scoringCriteria->sum('max_marks') }} Marks
+                @endif
             </span>
         </div>
 
+        @if(!$program->has_criteria || $program->scoringCriteria->isEmpty())
+            <div class="p-6 rounded-2xl bg-amber-50/60 border border-amber-200 text-center space-y-2">
+                <p class="text-sm font-sora font-bold text-amber-950">
+                    ടോട്ടൽ മാർക്ക് മാത്രം (Total Mark Only - 100 Marks)
+                </p>
+                <p class="text-xs font-sora text-amber-800">
+                    ഈ മത്സരത്തിന് പ്രത്യേകം ക്രൈറ്റീരിയകൾ ആവശ്യമില്ല. ജഡ്ജ് നേരിട്ട് 100-ൽ ടോട്ടൽ മാർക്ക് നൽകുന്നതാണ്.
+                </p>
+            </div>
+        @else
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead>
@@ -145,7 +163,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @php $totalM = max(1, $program->scoringCriteria->sum('max_marks')); @endphp
-                    @forelse($program->scoringCriteria as $idx => $crit)
+                    @foreach($program->scoringCriteria as $idx => $crit)
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3 px-3 font-bold text-slate-400 font-rockwell">{{ $idx + 1 }}</td>
                             <td class="py-3 px-3 font-bold text-slate-900 text-sm {{ preg_match('/[\x{0D00}-\x{0D7F}]/u', $crit->criterion_name) ? 'font-anek' : 'font-sora' }}">
@@ -158,16 +176,11 @@
                                 {{ round(($crit->max_marks / $totalM) * 100) }}%
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="py-6 text-center text-slate-400">
-                                No specific scoring criteria defined yet. Default evaluation will be used.
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
+        @endif
     </div>
 
 </div>

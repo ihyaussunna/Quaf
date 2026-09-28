@@ -98,15 +98,37 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Duration (Minutes) <span class="text-red-500">*</span></label>
-                <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $program->duration_minutes) }}" required min="1"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-mono uppercase text-slate-600 font-bold">Duration (Min)</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-mono text-slate-500">
+                        <input type="checkbox" name="has_time_limit" value="1" id="admin_edit_has_time_limit" {{ old('has_time_limit', $program->has_time_limit) ? 'checked' : '' }}
+                               onchange="document.getElementById('admin_edit_duration').disabled = !this.checked;"
+                               class="rounded border-slate-300 text-[#be1e2d] focus:ring-[#be1e2d]">
+                        <span>Time Limit</span>
+                    </label>
+                </div>
+                <input type="number" id="admin_edit_duration" name="duration_minutes" value="{{ old('duration_minutes', $program->duration_minutes) }}" min="1"
+                       {{ !old('has_time_limit', $program->has_time_limit) ? 'disabled' : '' }}
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors disabled:opacity-40">
             </div>
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Points Weight <span class="text-red-500">*</span></label>
                 <input type="number" step="0.5" min="0.5" max="10" name="points_weight" value="{{ old('points_weight', $program->points_weight) }}" required
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
             </div>
+        </div>
+
+        <!-- Evaluation Mode -->
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div>
+                <span class="text-xs font-mono font-bold text-slate-900 block">Scoring Criteria</span>
+                <span class="text-[11px] font-mono text-slate-500">Enable criteria breakdown or use direct total mark only (100 Marks).</span>
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="has_criteria" value="1" {{ old('has_criteria', $program->has_criteria) ? 'checked' : '' }}
+                       class="w-4 h-4 rounded border-slate-300 text-[#be1e2d] focus:ring-[#be1e2d]">
+                <span class="text-xs font-mono font-bold text-slate-700">Has Criteria Breakdown</span>
+            </label>
         </div>
 
         <!-- Stage Event -->

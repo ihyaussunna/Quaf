@@ -65,7 +65,7 @@
     <!-- COVER PAGE -->
     <div class="border-4 border-slate-900 p-12 rounded-3xl min-h-[90vh] flex flex-col justify-between text-center page-break">
         <div class="pt-8">
-            <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-24 w-auto object-contain mx-auto mb-6">
+            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF Logo" class="h-20 w-auto object-contain mx-auto mb-6">
             <div class="text-xs font-mono uppercase tracking-widest text-slate-500 font-bold mb-2">
                 Ihyaussunna Students Union • Jamia Markaz
             </div>
@@ -122,7 +122,11 @@
                 </div>
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase block">Duration</span>
-                    <strong>{{ $program->duration_minutes }} Minutes</strong>
+                    @if($program->has_time_limit && $program->duration_minutes)
+                        <strong>{{ $program->duration_minutes }} Minutes</strong>
+                    @else
+                        <strong>ബാധകമല്ല</strong>
+                    @endif
                 </div>
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase block">Weightage</span>
@@ -141,7 +145,7 @@
             </div>
 
             <!-- Scoring Criteria -->
-            @if($program->scoringCriteria->count() > 0)
+            @if($program->has_criteria && $program->scoringCriteria->count() > 0)
                 <div class="space-y-2">
                     <h4 class="text-xs font-sora uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1 flex justify-between">
                         <span>Scoring Rubric & Evaluation Criteria</span>
@@ -165,6 +169,16 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+            @else
+                <div class="space-y-2">
+                    <h4 class="text-xs font-sora uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1 flex justify-between">
+                        <span>Evaluation Method</span>
+                        <span class="font-rockwell font-bold">Total: 100 Marks</span>
+                    </h4>
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+                        <strong class="font-bold text-slate-900">ടോട്ടൽ മാർക്ക് മാത്രം:</strong> ഈ മത്സരത്തിന് പ്രത്യേക ക്രൈറ്റീരിയകൾ നിശ്ചയിച്ചിട്ടില്ല. ജഡ്ജ് നേരിട്ട് 100-ൽ ടോട്ടൽ മാർക്ക് നൽകുന്നതാണ്.
+                    </div>
                 </div>
             @endif
         </div>

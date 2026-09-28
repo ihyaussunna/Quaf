@@ -123,7 +123,7 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <!-- Brand Logo & Identity -->
                 <a href="{{ route('home') }}" class="flex items-center group py-2">
-                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-12 sm:h-14 w-auto object-contain">
+                    <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF Logo" class="h-10 sm:h-12 w-auto object-contain">
                 </a>
 
                 <!-- Desktop Nav Links -->

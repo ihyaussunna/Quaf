@@ -146,7 +146,9 @@ class ProgramController extends Controller
             'mix_zone_open_to_all' => ['nullable', 'boolean'],
             'eligibility' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
-            'duration_minutes' => ['required', 'integer', 'min:1'],
+            'has_time_limit' => ['nullable', 'boolean'],
+            'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'has_criteria' => ['nullable', 'boolean'],
             'stage_id' => ['nullable', 'exists:stages,id'],
             'scheduled_time' => ['nullable', 'date'],
             'points_weight' => ['required', 'numeric', 'min:0.5', 'max:10'],
@@ -159,6 +161,17 @@ class ProgramController extends Controller
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
+
+        $hasTimeLimit = $request->boolean('has_time_limit', true);
+        $validated['has_time_limit'] = $hasTimeLimit;
+        if (! $hasTimeLimit) {
+            $validated['duration_minutes'] = null;
+        } elseif (empty($validated['duration_minutes'])) {
+            $validated['duration_minutes'] = 15;
+        }
+
+        $hasCriteria = $request->boolean('has_criteria', true);
+        $validated['has_criteria'] = $hasCriteria;
 
         if (! empty($validated['zone_id'])) {
             $zone = Zone::find($validated['zone_id']);
@@ -178,16 +191,18 @@ class ProgramController extends Controller
 
         $program = Program::create($validated);
 
-        // Default scoring criteria
-        $criteria = [
-            ['criterion_name' => 'Performance & Skill', 'max_marks' => 30],
-            ['criterion_name' => 'Content & Depth', 'max_marks' => 30],
-            ['criterion_name' => 'Presentation & Stage Presence', 'max_marks' => 25],
-            ['criterion_name' => 'Timing & Adherence', 'max_marks' => 15],
-        ];
+        // Default scoring criteria only if has_criteria is true
+        if ($hasCriteria) {
+            $criteria = [
+                ['criterion_name' => 'Performance & Skill', 'max_marks' => 30],
+                ['criterion_name' => 'Content & Depth', 'max_marks' => 30],
+                ['criterion_name' => 'Presentation & Stage Presence', 'max_marks' => 25],
+                ['criterion_name' => 'Timing & Adherence', 'max_marks' => 15],
+            ];
 
-        foreach ($criteria as $c) {
-            $program->scoringCriteria()->create($c);
+            foreach ($criteria as $c) {
+                $program->scoringCriteria()->create($c);
+            }
         }
 
         AuditLogger::log('create_program', $program, null, $program->toArray());
@@ -239,7 +254,9 @@ class ProgramController extends Controller
             'mix_zone_open_to_all' => ['nullable', 'boolean'],
             'eligibility' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
-            'duration_minutes' => ['required', 'integer', 'min:1'],
+            'has_time_limit' => ['nullable', 'boolean'],
+            'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'has_criteria' => ['nullable', 'boolean'],
             'stage_id' => ['nullable', 'exists:stages,id'],
             'scheduled_time' => ['nullable', 'date'],
             'points_weight' => ['required', 'numeric', 'min:0.5', 'max:10'],
@@ -252,6 +269,17 @@ class ProgramController extends Controller
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
+
+        $hasTimeLimit = $request->boolean('has_time_limit', true);
+        $validated['has_time_limit'] = $hasTimeLimit;
+        if (! $hasTimeLimit) {
+            $validated['duration_minutes'] = null;
+        } elseif (empty($validated['duration_minutes'])) {
+            $validated['duration_minutes'] = $program->duration_minutes ?: 15;
+        }
+
+        $hasCriteria = $request->boolean('has_criteria', true);
+        $validated['has_criteria'] = $hasCriteria;
 
         if (! empty($validated['zone_id'])) {
             $zone = Zone::find($validated['zone_id']);
@@ -271,6 +299,10 @@ class ProgramController extends Controller
 
         $old = $program->toArray();
         $program->update($validated);
+
+        if (! $hasCriteria) {
+            $program->scoringCriteria()->delete();
+        }
 
         AuditLogger::log('update_program', $program, $old, $program->toArray());
 

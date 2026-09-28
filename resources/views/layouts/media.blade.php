@@ -36,7 +36,7 @@
         <!-- Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0">
             <a href="{{ route('media.dashboard') }}" class="flex items-center group py-2">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px]">
+                <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px]">
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>

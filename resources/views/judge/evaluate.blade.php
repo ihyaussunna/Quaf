@@ -38,14 +38,16 @@
     <!-- Scoring Rules & Criteria Overview Banner (Light Theme) -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono shadow-2xs">
         <span class="text-slate-500 font-bold uppercase tracking-wider">Evaluation Rubric:</span>
-        @forelse($program->scoringCriteria as $criterion)
-            <div class="px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-                <span class="text-slate-800 font-medium">{{ $criterion->criterion_name }}</span>
-                <span class="text-[#f3bd2e] font-bold">({{ $criterion->max_marks }} pts)</span>
-            </div>
-        @empty
-            <span class="text-slate-400">Standard 100-Point Scoring Scale</span>
-        @endforelse
+        @if(!$program->has_criteria || $program->scoringCriteria->isEmpty())
+            <span class="px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold">Total Mark Only (100-Point Scale)</span>
+        @else
+            @foreach($program->scoringCriteria as $criterion)
+                <div class="px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+                    <span class="text-slate-800 font-medium">{{ $criterion->criterion_name }}</span>
+                    <span class="text-[#f3bd2e] font-bold">({{ $criterion->max_marks }} pts)</span>
+                </div>
+            @endforeach
+        @endif
     </div>
 
     <!-- Network Connectivity Status Indicator -->
@@ -83,7 +85,7 @@
                              '{{ $criterion->id }}': {{ $criterion->max_marks }},
                          @endforeach
                      },
-                     hasCriteria: {{ $program->scoringCriteria->isNotEmpty() ? 'true' : 'false' }},
+                     hasCriteria: {{ ($program->has_criteria && $program->scoringCriteria->isNotEmpty()) ? 'true' : 'false' }},
                      directScore: {{ $sheet ? ($sheet->total_score ?? 0) : 0 }},
                      selectedGrade: '{{ $savedScores['grade'] ?? '' }}',
                      remarks: '{{ addslashes($sheet->remarks ?? '') }}',
@@ -247,7 +249,7 @@
                     </div>
 
                     <!-- Criteria Score Inputs -->
-                    @if($program->scoringCriteria->isNotEmpty())
+                    @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             @foreach($program->scoringCriteria as $criterion)
                                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">

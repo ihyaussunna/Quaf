@@ -29,7 +29,7 @@
     <header class="h-16 sm:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-40 shadow-xs">
         <div class="flex items-center gap-2 sm:gap-4 min-w-0">
             <a href="{{ route('judge.dashboard') }}" class="flex items-center gap-2 sm:gap-3 group shrink-0">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-9 sm:h-12 w-auto object-contain">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF Logo" class="h-9 sm:h-11 w-auto object-contain">
                 <div>
                     <div class="flex items-center gap-1.5 sm:gap-2">
                         <span class="font-bold tracking-wider text-xs sm:text-base text-slate-900 group-hover:text-[#be1e2d] transition-colors">JUDGES JURY</span>

@@ -139,12 +139,12 @@
            class="fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#121417] text-slate-300 border-r border-slate-800 flex flex-col transition-transform duration-300 overflow-y-auto shadow-xl print:hidden">
         
         <!-- Sidebar Brand -->
-        <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center group py-2">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-12 w-auto object-contain max-w-[190px]">
+        <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0 overflow-hidden">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center group py-2 min-w-0">
+                <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px] drop-shadow-xs">
             </a>
             <!-- Close button on mobile -->
-            <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+            <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>

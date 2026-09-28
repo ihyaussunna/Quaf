@@ -283,7 +283,7 @@
                                 </td>
 
                                 <td x-show="colDuration" class="py-2 px-2 text-right font-mono text-[11px] text-slate-700">
-                                    {{ $p->duration_minutes }}m
+                                    {{ $p->has_time_limit && $p->duration_minutes ? $p->duration_minutes . 'm' : '—' }}
                                 </td>
 
                                 <td x-show="colWeight" class="py-2 px-2 text-right font-mono text-[11px] text-slate-700">

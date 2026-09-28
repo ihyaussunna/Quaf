@@ -288,4 +288,69 @@ class ProgramCommitteePortalTest extends TestCase
             'name' => 'Auto Fallback Category Competition',
         ]);
     }
+
+    public function test_program_can_be_created_without_time_limit_and_with_total_mark_only(): void
+    {
+        $response = $this->actingAs($this->committeeUser)->post(route('program-committee.programs.store'), [
+            'code' => 'Q9-NOTIME',
+            'name' => 'Painting Competition',
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'has_time_limit' => 0,
+            'has_criteria' => 0,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $program = Program::where('code', 'Q9-NOTIME')->first();
+        $this->assertNotNull($program);
+        $this->assertFalse($program->has_time_limit);
+        $this->assertNull($program->duration_minutes);
+        $this->assertFalse($program->has_criteria);
+        $this->assertCount(0, $program->scoringCriteria);
+
+        $showView = $this->actingAs($this->committeeUser)->get(route('program-committee.programs.show', $program));
+        $showView->assertOk();
+        $showView->assertSee('No Time Limit');
+        $showView->assertSee('Total Mark Only');
+    }
+
+    public function test_rules_update_can_toggle_off_time_limit_and_criteria(): void
+    {
+        $program = Program::create([
+            'code' => 'Q9-TESTCRIT',
+            'name' => 'Speech with Criteria',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'has_time_limit' => true,
+            'duration_minutes' => 10,
+            'has_criteria' => true,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $program->scoringCriteria()->createMany([
+            ['criterion_name' => 'Presentation', 'max_marks' => 50],
+            ['criterion_name' => 'Content', 'max_marks' => 50],
+        ]);
+
+        $this->assertCount(2, $program->scoringCriteria);
+
+        // Now update rules to disable criteria and time limit
+        $response = $this->actingAs($this->committeeUser)->put(route('program-committee.programs.rules.update', $program), [
+            'rules' => 'General guidelines only.',
+            'has_time_limit' => 0,
+            'has_criteria' => 0,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $program->refresh();
+
+        $this->assertFalse($program->has_time_limit);
+        $this->assertNull($program->duration_minutes);
+        $this->assertFalse($program->has_criteria);
+        $this->assertCount(0, $program->scoringCriteria);
+    }
 }

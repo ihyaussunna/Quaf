@@ -37,7 +37,9 @@ class Program extends Model
         'gender_restriction',
         'eligibility',
         'rules',
+        'has_time_limit',
         'duration_minutes',
+        'has_criteria',
         'stage_id',
         'scheduled_time',
         'points_weight',
@@ -55,6 +57,8 @@ class Program extends Model
             'mix_zone_open_to_all' => 'boolean',
             'eligibility_rules' => 'array',
             'is_stage' => 'boolean',
+            'has_time_limit' => 'boolean',
+            'has_criteria' => 'boolean',
         ];
     }
 

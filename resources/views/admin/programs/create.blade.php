@@ -71,15 +71,36 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Duration (Minutes)</label>
-                <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 30) }}" required
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-mono uppercase text-slate-600 font-bold">Duration (Min)</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-mono text-slate-500">
+                        <input type="checkbox" name="has_time_limit" value="1" id="admin_has_time_limit" {{ old('has_time_limit', '1') == '1' ? 'checked' : '' }}
+                               onchange="document.getElementById('admin_duration_input').disabled = !this.checked;"
+                               class="rounded border-slate-300 text-amber-500 focus:ring-amber-500">
+                        <span>Time Limit</span>
+                    </label>
+                </div>
+                <input type="number" id="admin_duration_input" name="duration_minutes" value="{{ old('duration_minutes', 30) }}"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors disabled:opacity-40">
             </div>
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Points Multiplier</label>
                 <input type="number" step="0.5" name="points_weight" value="{{ old('points_weight', 1.0) }}" required
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
             </div>
+        </div>
+
+        <!-- Evaluation Mode -->
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div>
+                <span class="text-xs font-mono font-bold text-slate-900 block">Scoring Criteria</span>
+                <span class="text-[11px] font-mono text-slate-500">Enable criteria breakdown or use direct total mark only (100 Marks).</span>
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="has_criteria" value="1" {{ old('has_criteria', '1') == '1' ? 'checked' : '' }}
+                       class="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500">
+                <span class="text-xs font-mono font-bold text-slate-700">Has Criteria Breakdown</span>
+            </label>
         </div>
 
         <div>

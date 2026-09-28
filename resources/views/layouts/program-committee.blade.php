@@ -62,15 +62,15 @@
            class="fixed lg:static inset-y-0 left-0 w-64 bg-[#14171d] text-white flex-shrink-0 flex flex-col justify-between transition-transform duration-300 ease-in-out z-50 select-none shadow-2xl lg:shadow-none">
         <div class="flex-1 flex flex-col min-h-0">
             <!-- Sidebar Header / Brand -->
-            <div class="h-20 flex items-center justify-between px-5 border-b border-white/10">
-                <a href="{{ route('program-committee.dashboard') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-10 w-auto object-contain">
-                    <div>
-                        <div class="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">SAMITHI DESK</div>
-                        <div class="text-[11px] font-bold text-slate-200">Program Samithi</div>
+            <div class="h-20 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0 overflow-hidden">
+                <a href="{{ route('program-committee.dashboard') }}" class="flex items-center gap-2.5 min-w-0 group py-1">
+                    <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-9 w-auto object-contain shrink-0 max-w-[125px]">
+                    <div class="min-w-0 border-l border-white/15 pl-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-amber-400 font-mono leading-none">SAMITHI</div>
+                        <div class="text-[11px] font-bold text-slate-200 truncate mt-0.5">Program Hub</div>
                     </div>
                 </a>
-                <button type="button" @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
+                <button type="button" @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1 shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>

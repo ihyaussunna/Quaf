@@ -18,7 +18,7 @@
         <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border-2 border-[#f3bd2e]/40 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
             <!-- Header Stripe -->
             <div class="p-4 text-center border-b border-slate-100 bg-gradient-to-b from-amber-50/60 to-white print:from-gray-100 print:to-white">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF" class="h-10 mx-auto mb-1.5 object-contain">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-9 mx-auto mb-1.5 object-contain">
                 <p class="text-[9px] font-mono tracking-[0.2em] text-[#f3bd2e] font-bold uppercase">
                     IHYAUSSUNNA STUDENTS UNION
                 </p>

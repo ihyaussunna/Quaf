@@ -76,7 +76,7 @@
             </div>
 
             <div class="text-right flex-shrink-0">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-16 w-auto object-contain ml-auto">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF Logo" class="h-14 w-auto object-contain ml-auto">
             </div>
         </div>
 
@@ -98,7 +98,11 @@
             </div>
             <div>
                 <span class="text-[10px] uppercase text-slate-400 font-bold block">Time Duration</span>
-                <strong class="text-sm font-bold text-slate-900">{{ $program->duration_minutes }} Minutes</strong>
+                @if($program->has_time_limit && $program->duration_minutes)
+                    <strong class="text-sm font-bold text-slate-900">{{ $program->duration_minutes }} Minutes</strong>
+                @else
+                    <strong class="text-sm font-bold text-slate-700">ബാധകമല്ല (No Limit)</strong>
+                @endif
             </div>
         </div>
 
@@ -121,7 +125,7 @@
         </div>
 
         <!-- Section: Scoring Criteria -->
-        @if($program->scoringCriteria->count() > 0)
+        @if($program->has_criteria && $program->scoringCriteria->count() > 0)
             <div class="space-y-2">
                 <h4 class="text-xs font-sora uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1 flex justify-between">
                     <span>Evaluation Criteria</span>
@@ -145,6 +149,16 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        @else
+            <div class="space-y-2">
+                <h4 class="text-xs font-sora uppercase tracking-wider text-slate-900 font-bold border-b border-slate-200 pb-1 flex justify-between">
+                    <span>Evaluation Method</span>
+                    <span class="font-rockwell font-bold">Total: 100 Marks</span>
+                </h4>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+                    <strong class="font-bold text-slate-900">ടോട്ടൽ മാർക്ക് മാത്രം:</strong> ഈ മത്സരത്തിന് പ്രത്യേക ക്രൈറ്റീരിയകൾ നിശ്ചയിച്ചിട്ടില്ല. ജഡ്ജ് നേരിട്ട് 100-ൽ ടോട്ടൽ മാർക്ക് നൽകുന്നതാണ്.
+                </div>
             </div>
         @endif
 
