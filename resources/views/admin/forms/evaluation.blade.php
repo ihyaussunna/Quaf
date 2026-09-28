@@ -106,7 +106,21 @@
                     </thead>
                     <tbody>
                         @php
-                            $codeLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+                            $assignedCodes = $selectedProgram->entries
+                                ->where('status', 'verified')
+                                ->filter(function($entry) use ($selectedProgram) {
+                                    if ($selectedProgram->is_call_list_locked) {
+                                        return $entry->attendance_status === 'present' && !empty($entry->code_letter);
+                                    }
+                                    return $entry->attendance_status !== 'absent';
+                                })
+                                ->pluck('code_letter')
+                                ->filter()
+                                ->sort()
+                                ->values()
+                                ->toArray();
+
+                            $codeLetters = !empty($assignedCodes) ? $assignedCodes : ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
                         @endphp
                         @foreach($codeLetters as $letter)
                             <tr class="h-11">

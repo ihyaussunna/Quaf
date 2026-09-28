@@ -53,6 +53,10 @@ class CodeLetterController extends Controller
 
     public function save(Request $request, Program $program): RedirectResponse
     {
+        if ($program->is_call_list_locked) {
+            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. കോഡ് ലെറ്ററുകൾ ഇനി മാറ്റാൻ കഴിയില്ല.');
+        }
+
         $letters = $request->input('letters', []);
 
         foreach ($letters as $entryId => $letter) {
@@ -68,13 +72,31 @@ class CodeLetterController extends Controller
 
     public function autoAssign(Request $request, Program $program): RedirectResponse
     {
-        $entries = ProgramEntry::where('program_id', $program->id)->get()->shuffle();
+        if ($program->is_call_list_locked) {
+            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. കോഡ് ലെറ്ററുകൾ ഇനി മാറ്റാൻ കഴിയില്ല.');
+        }
+
+        $entriesQuery = ProgramEntry::where('program_id', $program->id)
+            ->where('status', 'verified');
+
+        // If attendance has been marked, only shuffle present ones
+        $presentCount = (clone $entriesQuery)->where('attendance_status', 'present')->count();
+        if ($presentCount > 0) {
+            $entriesQuery->where('attendance_status', 'present');
+        }
+
+        $entries = $entriesQuery->get()->shuffle();
         $alphabet = range('A', 'Z');
 
         foreach ($entries as $index => $entry) {
             $letter = $alphabet[$index] ?? ('C'.($index + 1));
             $entry->update(['code_letter' => $letter]);
         }
+
+        // Clear absent entries
+        ProgramEntry::where('program_id', $program->id)
+            ->where('attendance_status', 'absent')
+            ->update(['code_letter' => null]);
 
         AuditLogger::log('auto_assign_code_letters', $program, null, ['count' => $entries->count()]);
 

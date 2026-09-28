@@ -47,6 +47,7 @@ class Program extends Model
         'scheduled_time',
         'points_weight',
         'status',
+        'is_call_list_locked',
     ];
 
     protected function casts(): array
@@ -58,6 +59,7 @@ class Program extends Model
             'max_participants_per_group' => 'integer',
             'individual_limit_counted' => 'boolean',
             'mix_zone_open_to_all' => 'boolean',
+            'is_call_list_locked' => 'boolean',
             'eligibility_rules' => 'array',
             'is_stage' => 'boolean',
             'has_time_limit' => 'boolean',

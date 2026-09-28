@@ -441,6 +441,13 @@
     </div>
 </div>
 
+@php
+    $templatesMap = [];
+    foreach ($templates as $t) {
+        $templatesMap[$t->id] = $t->posterSetting ? $t->posterSetting->toArray() : \App\Models\PosterSetting::defaultSettings();
+    }
+@endphp
+
 <script>
 function posterStudio() {
     return {
@@ -449,6 +456,8 @@ function posterStudio() {
         publishing: false,
         statusMsg: '',
         statusType: 'success',
+
+        templatesMap: @json($templatesMap),
 
         templateImageObj: null,
         medals: {
@@ -566,6 +575,38 @@ function posterStudio() {
         selectTemplate(id, src) {
             this.settings.template_id = id;
             this.settings.template_image = src;
+
+            // Dynamically apply template-specific coordinates and colors
+            if (this.templatesMap && this.templatesMap[id]) {
+                const tplSettings = this.templatesMap[id];
+                const numericKeys = [
+                    'result_x', 'result_y', 'result_size',
+                    'category_x', 'category_y', 'category_size',
+                    'competition_x', 'competition_y', 'competition_size', 'competition_max_width', 'competition_line_height',
+                    'block_left', 'first_top', 'row_gap', 'item_gap', 'medal_size',
+                    'winner_name_size', 'winner_unit_size'
+                ];
+                const stringKeys = [
+                    'result_weight', 'result_color',
+                    'category_weight', 'category_color', 'category_align',
+                    'competition_weight', 'competition_color', 'competition_align',
+                    'winner_name_weight', 'winner_name_color',
+                    'winner_unit_weight', 'winner_unit_color'
+                ];
+
+                numericKeys.forEach(k => {
+                    if (tplSettings[k] !== undefined && tplSettings[k] !== null) {
+                        this.settings[k] = parseFloat(tplSettings[k]);
+                    }
+                });
+
+                stringKeys.forEach(k => {
+                    if (tplSettings[k] !== undefined && tplSettings[k] !== null && tplSettings[k] !== '') {
+                        this.settings[k] = tplSettings[k];
+                    }
+                });
+            }
+
             this.loadTemplateImage(src);
         },
 

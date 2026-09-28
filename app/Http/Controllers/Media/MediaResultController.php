@@ -81,10 +81,10 @@ class MediaResultController extends Controller
             'template',
         ]);
 
-        $templates = ResultTemplate::where('is_active', true)->orderByDesc('id')->get();
+        $templates = ResultTemplate::with('posterSetting')->where('is_active', true)->orderByDesc('id')->get();
         if ($templates->isEmpty()) {
             // Fallback template
-            $templates = ResultTemplate::orderByDesc('id')->get();
+            $templates = ResultTemplate::with('posterSetting')->orderByDesc('id')->get();
         }
 
         $activeTemplate = $result->template ?? $templates->first();
@@ -332,5 +332,64 @@ class MediaResultController extends Controller
         $winners = $result->getPosterWinners();
 
         return view('public.poster-view', compact('result', 'winners'));
+    }
+
+    /**
+     * Visual Customizer for a specific template.
+     */
+    public function templateCustomize(ResultTemplate $template): View
+    {
+        $template->load('posterSetting');
+        $defaultSettings = PosterSetting::defaultSettings();
+        $savedSettings = $template->posterSetting?->toArray() ?? [];
+        $settings = array_merge($defaultSettings, $savedSettings);
+
+        $themeColor = FestivalSetting::get('theme_color', '#be1e2d');
+
+        // Sample placeholder data for visual adjustment
+        $sampleData = [
+            'result_no' => '01',
+            'category' => 'General / Zone A',
+            'competition' => 'മാപ്പിളപ്പാട്ട് (Mappilappattu)',
+            'winners' => [
+                'first' => [
+                    ['name' => 'മുഹമ്മദ് യാസീൻ പി. (Muhammed Yaseen)', 'unit' => 'റെഡ് ഫോക്സ് (Red Fox Team)'],
+                ],
+                'second' => [
+                    ['name' => 'അഹ്മദ് റയ്യാൻ കെ. (Ahmad Rayyan)', 'unit' => 'ഗ്രീൻ വാരിയേഴ്സ് (Green Warriors)'],
+                ],
+                'third' => [
+                    ['name' => 'ബിലാൽ മുഹമ്മദ് (Bilal Muhammed)', 'unit' => 'ബ്ലൂ റൈഡേഴ്സ് (Blue Riders)'],
+                ],
+            ],
+        ];
+
+        return view('media.results.template-customizer', compact('template', 'settings', 'themeColor', 'sampleData'));
+    }
+
+    /**
+     * Save custom layout settings for a template.
+     */
+    public function templateSaveCustomization(Request $request, ResultTemplate $template): RedirectResponse|JsonResponse
+    {
+        $validated = $request->validate([
+            'settings' => ['required', 'array'],
+        ]);
+
+        $posterSetting = PosterSetting::updateOrCreate(
+            ['template_id' => $template->id],
+            $validated['settings']
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് സെറ്റിംഗ്സുകൾ സേവ് ചെയ്തു.",
+                'settings' => $posterSetting,
+            ]);
+        }
+
+        return redirect()->route('media.results.templates')
+            ->with('success', "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് സെറ്റിംഗ്സുകൾ സേവ് ചെയ്തു.");
     }
 }

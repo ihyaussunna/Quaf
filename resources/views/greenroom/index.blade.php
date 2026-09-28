@@ -19,27 +19,40 @@
 <body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col">
 
     <!-- Backstage High-Speed Topbar (Light Theme) -->
-    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
-        <div class="flex items-center gap-4">
-            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 09" class="h-10 w-auto object-contain">
-            <div>
+    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-40 shadow-xs gap-4 flex-nowrap">
+        <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 09" class="h-9 sm:h-10 w-auto shrink-0 object-contain">
+            <div class="hidden xs:block shrink-0">
                 <div class="flex items-center gap-2">
-                    <span class="font-rockwell font-bold tracking-wider text-base text-slate-900">GREEN ROOM DESK</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="font-rockwell font-bold tracking-wider text-sm sm:text-base text-slate-900 whitespace-nowrap">GREEN ROOM DESK</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
                 </div>
-                <span class="text-[10px] font-mono tracking-widest text-[#f3bd2e] block uppercase font-bold">Backstage Dispatch Center • QUAF 09</span>
+                <span class="text-[10px] font-mono tracking-widest text-[#f3bd2e] block uppercase font-bold whitespace-nowrap">Backstage Dispatch Center • QUAF 09</span>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <!-- Fest Navigation Triad: Green Room -> Announcer -> Call List -->
+        <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+            <a href="{{ route('greenroom.index') }}" class="px-3.5 py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs font-bold font-sora">
+                Green Room Desk
+            </a>
+            <a href="{{ route('greenroom.call-list') }}" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all font-sora">
+                Digital Call List
+            </a>
+            <a href="{{ route('announcer.stage') }}" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all font-sora">
+                Announcer Tab
+            </a>
+        </nav>
+
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
             @if(Auth::user()->role === 'admin' || Auth::user()->role === 'super_admin')
-                <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-semibold">
+                <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-semibold whitespace-nowrap">
                     &larr; Admin Panel
                 </a>
             @endif
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all">
+                <button type="submit" class="px-3 sm:px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all whitespace-nowrap">
                     Sign Out
                 </button>
             </form>

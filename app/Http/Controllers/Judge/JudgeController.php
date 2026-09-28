@@ -99,10 +99,20 @@ class JudgeController extends Controller
         $inProgress = $assignedPrograms->where('status', 'in_progress');
         $completed = $assignedPrograms->where('status', 'completed');
 
-        // Check evaluation completeness using 2 high-performance bulk queries instead of N+1
+        // Check evaluation completeness using bulk queries
+        // Exclude absent participants and only include present with code letters when call list is locked
         $progIds = $assignedPrograms->pluck('id');
         $entriesCounts = ProgramEntry::whereIn('program_id', $progIds)
             ->where('status', 'verified')
+            ->where('attendance_status', '!=', 'absent')
+            ->where(function ($q) {
+                $q->whereHas('program', function ($pq) {
+                    $pq->where('is_call_list_locked', true);
+                })->where('attendance_status', 'present')->whereNotNull('code_letter')
+                    ->orWhereHas('program', function ($pq) {
+                        $pq->where('is_call_list_locked', false);
+                    });
+            })
             ->groupBy('program_id')
             ->selectRaw('program_id, count(*) as total')
             ->pluck('total', 'program_id');
@@ -146,9 +156,19 @@ class JudgeController extends Controller
         ]);
 
         // STRICT ANONYMITY: Do NOT load student names, photos, or groups.
-        // Order by code_letter (e.g. Code A, Code B...)
-        $entries = $program->entries()
-            ->where('status', 'verified')
+        // If call list is locked, only present participants with code letters are eligible for evaluation.
+        // Absent participants are strictly excluded from evaluation sheet.
+        $entriesQuery = $program->entries()
+            ->where('status', 'verified');
+
+        if ($program->is_call_list_locked) {
+            $entriesQuery->where('attendance_status', 'present')
+                ->whereNotNull('code_letter');
+        } else {
+            $entriesQuery->where('attendance_status', '!=', 'absent');
+        }
+
+        $entries = $entriesQuery
             ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, id ASC')
             ->get();
 

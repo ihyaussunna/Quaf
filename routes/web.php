@@ -366,6 +366,8 @@ Route::prefix('judge')->name('judge.')->middleware(['auth', 'role:judge'])->grou
 */
 Route::prefix('greenroom')->name('greenroom.')->middleware(['auth', 'role:green_room_coordinator,admin,super_admin'])->group(function () {
     Route::get('/', [GreenRoomController::class, 'index'])->name('index');
+    Route::get('/call-list', [GreenRoomController::class, 'callList'])->name('call-list');
+    Route::post('/call-list/{program}/toggle-lock', [GreenRoomController::class, 'toggleLockCallList'])->name('toggle-lock');
     Route::get('/code-letters', [GreenRoomController::class, 'codeLetters'])->name('code-letters');
     Route::post('/status/{call}', [GreenRoomController::class, 'updateStatus'])->name('update-status');
     Route::post('/call-next/{program}', [GreenRoomController::class, 'callNext'])->name('call-next');
@@ -380,6 +382,10 @@ Route::prefix('greenroom')->name('greenroom.')->middleware(['auth', 'role:green_
 */
 Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,super_admin,announcer'])->group(function () {
     Route::get('/', [AnnouncerController::class, 'index'])->name('index');
+    Route::get('/stage', [AnnouncerController::class, 'stageCalling'])->name('stage');
+    Route::post('/call-stage/{call}', [AnnouncerController::class, 'callToStage'])->name('call-stage');
+    Route::post('/enter-stage/{call}', [AnnouncerController::class, 'enterStage'])->name('enter-stage');
+    Route::post('/complete-stage/{call}', [AnnouncerController::class, 'completeStage'])->name('complete-stage');
     Route::post('/{result}/announced', [AnnouncerController::class, 'markAnnounced'])->name('announced');
 });
 
@@ -482,4 +488,6 @@ Route::prefix('media')->name('media.')->middleware(['auth', 'role:media_team,med
     Route::post('/results/templates', [MediaResultController::class, 'templateStore'])->name('results.templates.store');
     Route::post('/results/templates/{template}/toggle', [MediaResultController::class, 'templateToggleActive'])->name('results.templates.toggle');
     Route::delete('/results/templates/{template}', [MediaResultController::class, 'templateDestroy'])->name('results.templates.destroy');
+    Route::get('/results/templates/{template}/customize', [MediaResultController::class, 'templateCustomize'])->name('results.templates.customize');
+    Route::post('/results/templates/{template}/customize', [MediaResultController::class, 'templateSaveCustomization'])->name('results.templates.save-customization');
 });

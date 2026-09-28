@@ -115,6 +115,10 @@ class GreenRoomController extends Controller
 
     public function markAttendance(Request $request, ProgramEntry $entry): RedirectResponse
     {
+        if ($entry->program?->is_call_list_locked) {
+            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. ഹാജർ നില മാറ്റാൻ സാധ്യമല്ല.');
+        }
+
         $validated = $request->validate([
             'status' => ['required', 'in:present,absent,waiting'],
         ]);
@@ -122,6 +126,11 @@ class GreenRoomController extends Controller
         $entry->update([
             'attendance_status' => $validated['status'],
         ]);
+
+        // If marked absent, clear code letter automatically
+        if ($validated['status'] === 'absent') {
+            $entry->update(['code_letter' => null]);
+        }
 
         // Sync with GreenRoomCall if exists
         $call = GreenRoomCall::where('entry_id', $entry->id)->first();
@@ -145,6 +154,10 @@ class GreenRoomController extends Controller
 
     public function generateCodeLetters(Program $program): RedirectResponse
     {
+        if ($program->is_call_list_locked) {
+            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. കോഡ് ലെറ്ററുകൾ ഇനി മാറ്റാൻ കഴിയില്ല.');
+        }
+
         // Get all verified entries marked as 'present'
         $entries = $program->entries()
             ->where('status', 'verified')
@@ -180,6 +193,56 @@ class GreenRoomController extends Controller
         ]);
 
         return back()->with('success', "നറുക്കെടുപ്പ് വിജയകരം! {$shuffled->count()} പേർക്ക് റാൻഡം കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകി.");
+    }
+
+    public function toggleLockCallList(Program $program): RedirectResponse
+    {
+        $program->is_call_list_locked = ! $program->is_call_list_locked;
+        $program->save();
+
+        $statusText = $program->is_call_list_locked ? 'ലോക്ക് ചെയ്തു' : 'അൺലോക്ക് ചെയ്തു';
+
+        AuditLogger::log('toggle_lock_call_list', $program, null, [
+            'program_id' => $program->id,
+            'is_call_list_locked' => $program->is_call_list_locked,
+        ]);
+
+        return back()->with('success', "പ്രോഗ്രാം '{$program->name}' കോൾ ലിസ്റ്റ് വിജയകരമായി {$statusText}.");
+    }
+
+    public function callList(Request $request): View
+    {
+        $zones = Program::ZONES;
+        $selectedZone = $request->query('zone', $request->query('category'));
+        $selectedProgramId = $request->query('program');
+
+        $programsQuery = Program::query();
+        if ($selectedZone) {
+            $programsQuery->where('eligibility', $selectedZone);
+        }
+        $programs = $programsQuery->orderBy('name')->get();
+
+        $selectedProgram = null;
+        $entries = collect();
+
+        if ($selectedProgramId) {
+            $selectedProgram = Program::with(['category', 'stage', 'schedule'])->find($selectedProgramId);
+            if ($selectedProgram) {
+                $entries = ProgramEntry::where('program_id', $selectedProgram->id)
+                    ->with(['student.group', 'group'])
+                    ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
+                    ->get();
+            }
+        }
+
+        return view('greenroom.call-list', compact(
+            'zones',
+            'programs',
+            'selectedZone',
+            'selectedProgramId',
+            'selectedProgram',
+            'entries'
+        ));
     }
 
     public function codeLetters(Request $request): View
