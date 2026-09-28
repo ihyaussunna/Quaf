@@ -37,10 +37,15 @@
             </div>
             <div class="md:col-span-5">
                 <label class="block text-xs font-semibold text-gray-600 mb-1 font-sora">Program</label>
-                <select name="program" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
+                <select name="program" onchange="if(this.value) this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
                     <option value="">-- Select Program --</option>
                     @foreach($programs as $prog)
-                        <option value="{{ $prog->id }}" {{ (string)$selectedProgramId === (string)$prog->id ? 'selected' : '' }}>{{ $prog->name }} (Code: {{ $prog->code ?: $prog->id }})</option>
+                        <option value="{{ $prog->id }}" {{ (string)$selectedProgramId === (string)$prog->id ? 'selected' : '' }}>
+                            {{ $prog->name }}
+                            @if(isset($prog->my_entries_count) && $prog->my_entries_count > 0)
+                                (✓ {{ $prog->my_entries_count }} Registered)
+                            @endif
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -117,8 +122,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-400">
-                                    No students registered from your team for this program.
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                    <div class="max-w-md mx-auto space-y-3">
+                                        <p class="text-sm font-medium">No students registered from your team for this program.</p>
+                                        <a href="{{ route('leader.registrations', ['zone' => $selectedProgram->zone?->name ?? $selectedProgram->eligibility, 'program_id' => $selectedProgram->id]) }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs">
+                                            + Enroll Students in this Program
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse

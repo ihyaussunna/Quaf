@@ -181,7 +181,7 @@ class LeaderController extends Controller
         $selectedZone = $request->query('zone', $request->query('category'));
         $selectedProgramId = $request->query('program');
 
-        $programsQuery = Program::whereHas('entries', fn ($q) => $q->where('group_id', $group->id));
+        $programsQuery = Program::query();
         if ($selectedZoneId) {
             $programsQuery->where('zone_id', $selectedZoneId);
         } elseif ($selectedZone) {
@@ -190,7 +190,9 @@ class LeaderController extends Controller
                     ->orWhereHas('zone', fn ($zq) => $zq->where('name', $selectedZone));
             });
         }
-        $programs = $programsQuery->orderBy('name')->get();
+        $programs = $programsQuery->withCount(['entries as my_entries_count' => fn ($q) => $q->where('group_id', $group->id)])
+            ->orderBy('name')
+            ->get();
 
         $selectedProgram = null;
         if ($selectedProgramId) {

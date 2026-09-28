@@ -270,7 +270,7 @@ class LeaderRegistrationWorkflowTest extends TestCase
         $res->assertSee('Partially Registered');
         $res->assertSee('1 / 2 Filled');
         $res->assertSee('1 slot remaining');
-        $res->assertSee('PARTIAL');
+        $res->assertSee('1/2 • 1 left');
 
         // Enroll 2nd student to complete quota
         ProgramEntry::create([
@@ -326,5 +326,18 @@ class LeaderRegistrationWorkflowTest extends TestCase
         $this->assertDatabaseMissing('program_entries', [
             'program_id' => $this->indProgram->id,
         ]);
+    }
+
+    public function test_leader_can_view_program_wise_dropdown_even_with_no_entries_in_zone(): void
+    {
+        $response = $this->actingAs($this->leaderUser)->get(route('leader.programs-wise', ['zone' => 'A Zone']));
+        $response->assertStatus(200);
+        $response->assertSee($this->indProgram->name);
+        $response->assertSee($this->groupProgram->name);
+
+        $responseProg = $this->actingAs($this->leaderUser)->get(route('leader.programs-wise', ['zone' => 'A Zone', 'program' => $this->indProgram->id]));
+        $responseProg->assertStatus(200);
+        $responseProg->assertSee('No students registered from your team for this program.');
+        $responseProg->assertSee('+ Enroll Students in this Program');
     }
 }

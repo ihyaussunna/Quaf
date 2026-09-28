@@ -63,16 +63,16 @@
         $isRegistered = ($enrolled > 0);
         
         if ($enrolled === 0) {
-            $tag = "[UNREGISTERED - 0/{$limit}]";
-            $statusLabel = "Unregistered (0/{$limit})";
+            $tag = "[0/{$limit} • {$limit} left]";
+            $statusLabel = "0/{$limit} • {$limit} left";
             $statusType = "unregistered";
         } elseif ($enrolled < $limit) {
-            $tag = "[PARTIAL ✓ {$enrolled}/{$limit} - {$remaining} SLOT LEFT]";
-            $statusLabel = "Partially Registered ({$enrolled}/{$limit} — {$remaining} Left)";
+            $tag = "[{$enrolled}/{$limit} • {$remaining} left]";
+            $statusLabel = "{$enrolled}/{$limit} • {$remaining} left";
             $statusType = "partial";
         } else {
-            $tag = "[FULL ✓ {$enrolled}/{$limit}]";
-            $statusLabel = "Quota Full ({$enrolled}/{$limit} ✓)";
+            $tag = "[✓ {$enrolled}/{$limit} Full]";
+            $statusLabel = "✓ {$enrolled}/{$limit} Full";
             $statusType = "full";
         }
 
@@ -210,8 +210,7 @@ function registrationManager() {
             progs.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
-                const typeInfo = p.type === 'group' ? 'Group' : 'Individual';
-                opt.textContent = `[${p.code}] ${p.name} ${p.tag} (${typeInfo} - Limit: ${p.limit})`;
+                opt.textContent = `${p.name} ${p.tag}`;
                 if (p.id == currentProgId) {
                     opt.selected = true;
                 }
@@ -311,8 +310,8 @@ function registrationManager() {
                 prog.remaining = prog.limit;
                 prog.is_full = false;
                 prog.is_registered = false;
-                prog.tag = `[UNREGISTERED - 0/${prog.limit}]`;
-                prog.status_label = `Unregistered (0/${prog.limit})`;
+                prog.tag = `[0/${prog.limit} • ${prog.limit} left]`;
+                prog.status_label = `0/${prog.limit} • ${prog.limit} left`;
                 prog.status_type = 'unregistered';
                 
                 this.selectedStudents = [];
@@ -378,16 +377,16 @@ function registrationManager() {
                     enrolledProg.is_full = (enrolledProg.enrolled >= enrolledProg.limit);
                     enrolledProg.is_registered = (enrolledProg.enrolled > 0);
                     if (enrolledProg.enrolled === 0) {
-                        enrolledProg.tag = `[UNREGISTERED - 0/${enrolledProg.limit}]`;
-                        enrolledProg.status_label = `Unregistered (0/${enrolledProg.limit})`;
+                        enrolledProg.tag = `[0/${enrolledProg.limit} • ${enrolledProg.limit} left]`;
+                        enrolledProg.status_label = `0/${enrolledProg.limit} • ${enrolledProg.limit} left`;
                         enrolledProg.status_type = 'unregistered';
                     } else if (enrolledProg.enrolled < enrolledProg.limit) {
-                        enrolledProg.tag = `[PARTIAL ✓ ${enrolledProg.enrolled}/${enrolledProg.limit} - ${enrolledProg.remaining} SLOT LEFT]`;
-                        enrolledProg.status_label = `Partially Registered (${enrolledProg.enrolled}/${enrolledProg.limit} — ${enrolledProg.remaining} Left)`;
+                        enrolledProg.tag = `[${enrolledProg.enrolled}/${enrolledProg.limit} • ${enrolledProg.remaining} left]`;
+                        enrolledProg.status_label = `${enrolledProg.enrolled}/${enrolledProg.limit} • ${enrolledProg.remaining} left`;
                         enrolledProg.status_type = 'partial';
                     } else {
-                        enrolledProg.tag = `[FULL ✓ ${enrolledProg.enrolled}/${enrolledProg.limit}]`;
-                        enrolledProg.status_label = `Quota Full (${enrolledProg.enrolled}/${enrolledProg.limit} ✓)`;
+                        enrolledProg.tag = `[✓ ${enrolledProg.enrolled}/${enrolledProg.limit} Full]`;
+                        enrolledProg.status_label = `✓ ${enrolledProg.enrolled}/${enrolledProg.limit} Full`;
                         enrolledProg.status_type = 'full';
                     }
                 }
@@ -591,15 +590,15 @@ function registrationManager() {
                             }
                             $remaining = max(0, $limit - $enrolled);
                             if ($enrolled === 0) {
-                                $tag = "[UNREGISTERED - 0/{$limit}]";
+                                $tag = "[0/{$limit} • {$limit} left]";
                             } elseif ($enrolled < $limit) {
-                                $tag = "[PARTIAL ✓ {$enrolled}/{$limit} - {$remaining} SLOT LEFT]";
+                                $tag = "[{$enrolled}/{$limit} • {$remaining} left]";
                             } else {
-                                $tag = "[FULL ✓ {$enrolled}/{$limit}]";
+                                $tag = "[✓ {$enrolled}/{$limit} Full]";
                             }
                         @endphp
                         <option value="{{ $p->id }}" data-zone="{{ strtolower(trim($pZone)) }}">
-                            [{{ $p->code }}] {{ $p->name }} {{ $tag }} ({{ $p->type === 'group' ? 'Group - Limit: '.$limit : 'Individual - Limit: '.$limit }})
+                            {{ $p->name }} {{ $tag }}
                         </option>
                     @endforeach
                 </select>
