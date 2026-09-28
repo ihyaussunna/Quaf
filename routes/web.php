@@ -182,10 +182,22 @@ Route::get('/git-pull/{token}', function (string $token) {
         $output = 'shell_exec is disabled on this server.';
     }
 
+    try {
+        @set_time_limit(300);
+        Artisan::call('migrate', ['--force' => true]);
+        $output .= "\n\n--- Migration Output ---\n".(Artisan::output() ?: 'Database up to date.');
+        Artisan::call('optimize:clear');
+        Cache::flush();
+        $output .= "\n\nCache cleared successfully.";
+    } catch (Throwable $e) {
+        $output .= "\n\nMigration Error: ".$e->getMessage();
+    }
+
     return response('<html><body style="font-family:sans-serif;padding:30px;background:#0d1117;color:#c9d1d9;">'
-        .'<h2>Git Pull Output</h2><pre style="background:#161b22;padding:16px;border-radius:6px;border:1px solid #30363d;">'
+        .'<h2 style="color:#3fb950;">Git Pull & Migration Output</h2>'
+        .'<pre style="background:#161b22;padding:16px;border-radius:6px;border:1px solid #30363d;white-space:pre-wrap;color:#58a6ff;">'
         .htmlspecialchars($output).'</pre>'
-        .'<p><a href="/init-database/quaf2026setup" style="color:#58a6ff;">Run Database Sync Now &rarr;</a></p>'
+        .'<p style="margin-top:20px;"><a href="/judge" style="display:inline-block;padding:10px 18px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Go to Judge Panel &rarr;</a></p>'
         .'</body></html>');
 });
 

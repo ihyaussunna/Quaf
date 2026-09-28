@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Program;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,5 +28,13 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('malayalam', function ($text) {
             return preg_match('/[\x{0D00}-\x{0D7F}]/u', (string) $text);
         });
+
+        // Ensure newly migrated columns exist dynamically
+        try {
+            if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+                Program::ensureSchema();
+            }
+        } catch (\Throwable) {
+        }
     }
 }

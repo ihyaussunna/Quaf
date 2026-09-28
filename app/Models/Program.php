@@ -93,6 +93,10 @@ class Program extends Model
         }
 
         try {
+            if (! Schema::hasTable('programs')) {
+                return;
+            }
+
             if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
                 Schema::table('programs', function (Blueprint $table) {
                     $table->boolean('is_call_list_locked')->default(false)->after('status');
