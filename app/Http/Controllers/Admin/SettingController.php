@@ -21,6 +21,7 @@ class SettingController extends Controller
             'festival_dates' => FestivalSetting::get('festival_dates', 'October 24 - 28, 2026'),
             'tagline' => FestivalSetting::get('tagline', 'The Grand Cultural Conclave of Talents'),
             'registration_open' => FestivalSetting::get('registration_open', '1'),
+            'student_editing_open' => FestivalSetting::get('student_editing_open', '1'),
             'registration_start' => FestivalSetting::get('registration_start', ''),
             'registration_end' => FestivalSetting::get('registration_end', ''),
             'organizer' => FestivalSetting::get('organizer', 'Ihyaussunna Students Union, Markazu Saquafathi Sunniyya'),
@@ -37,6 +38,7 @@ class SettingController extends Controller
             'festival_dates',
             'tagline',
             'registration_open',
+            'student_editing_open',
             'registration_start',
             'registration_end',
             'organizer',
@@ -58,10 +60,22 @@ class SettingController extends Controller
         $new = ($current === '1' || $current === true) ? '0' : '1';
         FestivalSetting::set('registration_open', $new);
 
-        $statusText = $new === '1' ? 'തുറന്നു (Opened)' : 'അവസാനിപ്പിച്ചു / ക്ലോസ് ചെയ്തു (Closed)';
+        $statusText = $new === '1' ? 'തുറന്നു (Opened / Allowed)' : 'ബ്ലോക്ക് ചെയ്തു (Blocked / Closed)';
         AuditLogger::log('toggle_registration', null, ['registration_open' => $current], ['registration_open' => $new]);
 
-        return back()->with('success', "രജിസ്ട്രേഷൻ പോർട്ടൽ വിജയകരമായി {$statusText}.");
+        return back()->with('success', "പ്രോഗ്രാം രജിസ്ട്രേഷൻ പോർട്ടൽ വിജയകരമായി {$statusText}.");
+    }
+
+    public function toggleStudentEditing(Request $request): RedirectResponse
+    {
+        $current = FestivalSetting::get('student_editing_open', '1');
+        $new = ($current === '1' || $current === true) ? '0' : '1';
+        FestivalSetting::set('student_editing_open', $new);
+
+        $statusText = $new === '1' ? 'തുറന്നു (Allowed / Open)' : 'ബ്ലോക്ക് ചെയ്തു (Blocked / Closed)';
+        AuditLogger::log('toggle_student_editing', null, ['student_editing_open' => $current], ['student_editing_open' => $new]);
+
+        return back()->with('success', "വിദ്യാർത്ഥികളുടെ പേര് / വിവരങ്ങൾ തിരുത്താനുള്ള സൗകര്യം വിജയകരമായി {$statusText}.");
     }
 
     public function markSettings(Request $request): RedirectResponse

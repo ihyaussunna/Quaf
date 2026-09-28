@@ -337,6 +337,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [AdminSettingController::class, 'update'])->name('settings.update');
     Route::post('settings/toggle-registration', [AdminSettingController::class, 'toggleRegistration'])->name('settings.toggle-registration');
+    Route::post('settings/toggle-student-editing', [AdminSettingController::class, 'toggleStudentEditing'])->name('settings.toggle-student-editing');
     Route::get('audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
 
     // Panel Access & Credentials Hub
@@ -388,6 +389,7 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
 Route::prefix('leader')->name('leader.')->middleware(['auth', 'role:group_leader'])->group(function () {
     Route::get('/', [LeaderController::class, 'dashboard'])->name('dashboard');
     Route::get('/students', [LeaderController::class, 'students'])->name('students');
+    Route::put('/students/{student}', [LeaderController::class, 'updateStudent'])->name('students.update');
     Route::get('/programs', [LeaderController::class, 'programs'])->name('programs');
     Route::get('/programs-wise', [LeaderController::class, 'programWise'])->name('programs-wise');
     Route::get('/students-wise', [LeaderController::class, 'studentWise'])->name('students-wise');

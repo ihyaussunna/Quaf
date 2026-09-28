@@ -12,6 +12,7 @@ use App\Models\Result;
 use App\Models\Stage;
 use App\Models\Student;
 use App\Models\Zone;
+use App\Services\AuditLogger;
 use App\Services\EligibilityService;
 use App\Services\PointCalculationService;
 use App\Services\ScheduleConflictService;
@@ -245,16 +246,79 @@ class LeaderController extends Controller
             'students',
             'selectedStudentId',
             'selectedStudent',
-            'search'
+            'search',
+            'isEditingOpen'
         ));
     }
 
-    public function students(): View
+    public function students(Request $request): View
     {
         $group = $this->getGroup();
-        $students = $group->students()->with(['zone', 'entries.program.category'])->paginate(15);
+        $isEditingOpen = (FestivalSetting::get('student_editing_open', '1') == '1');
+        $search = $request->query('search');
 
-        return view('leader.students', compact('group', 'students'));
+        $query = $group->students()->with(['zone', 'entries.program.category']);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('student_id', 'like', "%{$search}%");
+            });
+        }
+        $students = $query->orderBy('name')->paginate(15)->withQueryString();
+
+        return view('leader.students', compact('group', 'students', 'isEditingOpen', 'search'));
+    }
+
+    public function updateStudent(Request $request, Student $student): JsonResponse|RedirectResponse
+    {
+        $group = $this->getGroup();
+        if ($student->group_id !== $group->id) {
+            abort(403, 'Unauthorized student access.');
+        }
+
+        $isEditingOpen = (FestivalSetting::get('student_editing_open', '1') == '1');
+        if (! $isEditingOpen) {
+            $msg = 'സ്റ്റുഡന്റ് വിവരങ്ങൾ എഡിറ്റ് ചെയ്യുന്നത് അഡ്മിൻ ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു (Student editing is currently blocked by Admin).';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 403);
+            }
+
+            return back()->withErrors(['student_editing' => $msg]);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+        ]);
+
+        $oldName = $student->name;
+        $newName = trim($validated['name']);
+
+        $student->update([
+            'name' => $newName,
+        ]);
+
+        if ($student->user) {
+            $student->user->update([
+                'name' => $newName,
+            ]);
+        }
+
+        AuditLogger::log('leader_edit_student_name', $student, ['name' => $oldName], ['name' => $newName]);
+
+        $successMsg = "വിദ്യാർത്ഥിയുടെ പേര് '{$oldName}' എന്നതിൽ നിന്ന് '{$newName}' എന്ന് വിജയകരമായി തിരുത്തി.";
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMsg,
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                ],
+            ]);
+        }
+
+        return back()->with('success', $successMsg);
     }
 
     public function registrations(): View

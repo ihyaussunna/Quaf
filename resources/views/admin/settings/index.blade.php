@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        <!-- Registration Status Card & Window -->
+        <!-- 1. Leader Program Registration Portal Toggle & Window -->
         @php
             $isOpen = ($settings['registration_open'] ?? '1') == '1';
         @endphp
@@ -43,23 +43,24 @@
                 <div class="space-y-1">
                     <div class="flex items-center gap-2.5">
                         <span class="w-3 h-3 rounded-full {{ $isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
-                        <h2 class="text-lg font-sora font-bold text-slate-900">Group Entry Registration Portal</h2>
+                        <h2 class="text-lg font-sora font-bold text-slate-900">Leader Program Registration Portal</h2>
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase {{ $isOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
-                            {{ $isOpen ? 'OPEN' : 'CLOSED' }}
+                            {{ $isOpen ? 'OPEN / ALLOWED' : 'BLOCKED / CLOSED' }}
                         </span>
                     </div>
                     <p class="text-xs font-sora text-slate-500 max-w-xl">
-                        Allow Group Leaders to submit participant entries and register students for upcoming programs.
+                        Allow or block Group Leaders from enrolling participants and registering students for competition programs.
                     </p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <form method="POST" action="{{ route('admin.settings.toggle-registration') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-sm {{ $isOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                            {{ $isOpen ? 'Close Registration Now' : 'Open Registration Now' }}
-                        </button>
-                    </form>
-                    <input type="hidden" name="registration_open" value="{{ $isOpen ? '1' : '0' }}">
+                <div class="flex items-center gap-4">
+                    <label class="relative inline-flex items-center cursor-pointer" title="Toggle Program Registration">
+                        <input type="hidden" name="registration_open" value="0">
+                        <input type="checkbox" name="registration_open" value="1" {{ $isOpen ? 'checked' : '' }} class="sr-only peer">
+                        <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                    <button type="submit" form="toggle-registration-form" class="px-4 py-2 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-sm {{ $isOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                        {{ $isOpen ? 'Block Registration Now' : 'Open Registration Now' }}
+                    </button>
                 </div>
             </div>
 
@@ -80,6 +81,37 @@
                     <input type="datetime-local" name="registration_end" value="{{ $settings['registration_end'] ?? '' }}"
                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                     <span class="text-[10px] font-mono text-slate-400 block mt-1">Registration automatically closes after this time</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Leader Student Name / Spelling Editing Toggle -->
+        @php
+            $isEditingOpen = ($settings['student_editing_open'] ?? '1') == '1';
+        @endphp
+        <div class="rounded-3xl bg-white border-2 {{ $isEditingOpen ? 'border-emerald-500/40' : 'border-rose-500/40' }} p-6 sm:p-8 space-y-4 shadow-sm relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full {{ $isEditingOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <h2 class="text-lg font-sora font-bold text-slate-900">Leader Student Name / Spelling Editing</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase {{ $isEditingOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                            {{ $isEditingOpen ? 'OPEN / ALLOWED' : 'BLOCKED / LOCKED' }}
+                        </span>
+                    </div>
+                    <p class="text-xs font-sora text-slate-500 max-w-xl">
+                        Allow or block Group Leaders from editing student names to correct spelling errors. When blocked, leaders cannot edit any student details.
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="relative inline-flex items-center cursor-pointer" title="Toggle Student Editing">
+                        <input type="hidden" name="student_editing_open" value="0">
+                        <input type="checkbox" name="student_editing_open" value="1" {{ $isEditingOpen ? 'checked' : '' }} class="sr-only peer">
+                        <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                    <button type="submit" form="toggle-student-editing-form" class="px-4 py-2 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-sm {{ $isEditingOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                        {{ $isEditingOpen ? 'Block Student Editing' : 'Allow Student Editing' }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -117,6 +149,14 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <!-- Standalone Quick Action Forms (HTML5 Valid, Not Nested) -->
+    <form id="toggle-registration-form" method="POST" action="{{ route('admin.settings.toggle-registration') }}" class="hidden">
+        @csrf
+    </form>
+    <form id="toggle-student-editing-form" method="POST" action="{{ route('admin.settings.toggle-student-editing') }}" class="hidden">
+        @csrf
     </form>
 </div>
 @endsection
