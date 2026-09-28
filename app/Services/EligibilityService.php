@@ -111,17 +111,18 @@ class EligibilityService
                 ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
                 ->when($excludeEntryId, fn ($q) => $q->where('id', '!=', $excludeEntryId))
                 ->whereHas('program', function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->where('type', 'individual')
-                            ->orWhere('individual_limit_counted', true);
-                    });
+                    $q->where('type', 'individual')
+                        ->where(function ($sub) {
+                            $sub->whereNull('individual_limit_counted')
+                                ->orWhere('individual_limit_counted', true);
+                        });
                 })
                 ->count();
 
             if ($activeIndividualCount >= Student::MAX_INDIVIDUAL_PROGRAMS) {
                 return [
                     'valid' => false,
-                    'error' => 'Maximum individual programme limit reached. A student can participate in a maximum of 5 individual programmes.',
+                    'error' => 'ഈ വിദ്യാർത്ഥിക്ക് പരമാവധി 5 വ്യക്തിഗത (Individual) മത്സരങ്ങളിൽ മാത്രമേ പങ്കെടുക്കാൻ സാധിക്കൂ. ഗ്രൂപ്പ് ഇനങ്ങളിൽ എത്രയും പങ്കെടുക്കാം (Maximum 5 individual programmes reached for this student).',
                     'field' => 'individual_limit',
                 ];
             }

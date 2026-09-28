@@ -219,10 +219,19 @@ class LeaderController extends Controller
     public function studentWise(Request $request): View
     {
         $group = $this->getGroup();
+        $isEditingOpen = (FestivalSetting::get('student_editing_open', '1') == '1');
         $selectedStudentId = $request->query('student');
         $search = $request->query('search');
 
-        $studentsQuery = Student::where('group_id', $group->id)->with('zone');
+        $studentsQuery = Student::where('group_id', $group->id)->with([
+            'zone',
+            'entries.program.category',
+            'entries.program.stage',
+            'entries.program.zone',
+            'participations.program.category',
+            'participations.program.stage',
+            'participations.program.zone',
+        ]);
         if ($search) {
             $studentsQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -238,6 +247,9 @@ class LeaderController extends Controller
                 'entries.program.category',
                 'entries.program.stage',
                 'entries.program.zone',
+                'participations.program.category',
+                'participations.program.stage',
+                'participations.program.zone',
             ])->where('group_id', $group->id)->find($selectedStudentId);
         }
 

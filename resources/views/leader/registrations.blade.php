@@ -97,12 +97,15 @@
     });
 
     $studentsData = $students->map(function ($s) {
+        $indCount = $s->getIndividualParticipationCount();
         return [
             'id' => $s->id,
             'chest' => ltrim((string)($s->chest_number ?: ($s->student_id ?: $s->id)), '#'),
             'name' => $s->name,
             'class' => $s->class_level ?? '',
             'zone_name' => $s->zone?->name ?? ($s->category ?? 'A Zone'),
+            'individual_count' => $indCount,
+            'has_reached_individual_limit' => ($indCount >= 5),
         ];
     });
 
@@ -259,6 +262,11 @@ function registrationManager() {
         addStudent(st) {
             if (this.selectedStudents.length >= this.participantLimit) return;
             if (this.selectedStudents.some(s => s.id == st.id)) return;
+            if (!this.isGroup && st.individual_count >= 5) {
+                this.feedbackError = `"${st.name}" ഇതിനകം പരമാവധി 5 വ്യക്തിഗത (Individual) മത്സരങ്ങളിൽ പങ്കെടുത്തിട്ടുണ്ട്. ഗ്രൂപ്പ് ഇനങ്ങളിൽ മാത്രമേ ഇനി ചേർക്കാനാവൂ.`;
+                return;
+            }
+            this.feedbackError = '';
             this.selectedStudents.push({
                 id: st.id,
                 chest: st.chest,
@@ -747,14 +755,36 @@ function registrationManager() {
                             <template x-for="st in availableStudents" :key="st.id">
                                 <button type="button" 
                                         @click="addStudent(st)" 
-                                        class="w-full text-left px-4 py-2.5 hover:bg-orange-50 flex items-center justify-between gap-3 transition-colors">
+                                        :disabled="!isGroup && st.has_reached_individual_limit"
+                                        :class="!isGroup && st.has_reached_individual_limit ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'hover:bg-orange-50'"
+                                        class="w-full text-left px-4 py-2.5 flex items-center justify-between gap-3 transition-colors font-sora">
                                     <div>
-                                        <span class="font-bold text-sm text-slate-800 block" x-text="st.name"></span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-sm text-slate-800" x-text="st.name"></span>
+                                            <template x-if="!isGroup && st.has_reached_individual_limit">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700">5/5 Limit Reached</span>
+                                            </template>
+                                            <template x-if="!isGroup && !st.has_reached_individual_limit">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700" x-text="(st.individual_count || 0) + '/5 Ind'"></span>
+                                            </template>
+                                            <template x-if="isGroup">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">Group Eligible (No Limit)</span>
+                                            </template>
+                                        </div>
                                         <span class="text-[11px] text-slate-500 font-sora"><span class="font-mono font-bold text-slate-800" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '-'"></span></span>
                                     </div>
-                                    <span class="px-2.5 py-1 rounded-lg bg-brand-orange text-white text-[11px] font-sora font-bold">
-                                        + Add
-                                    </span>
+                                    <div>
+                                        <template x-if="!isGroup && st.has_reached_individual_limit">
+                                            <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-500 text-[11px] font-sora font-semibold">
+                                                Max 5
+                                            </span>
+                                        </template>
+                                        <template x-if="isGroup || !st.has_reached_individual_limit">
+                                            <span class="px-2.5 py-1 rounded-lg bg-brand-orange text-white text-[11px] font-sora font-bold">
+                                                + Add
+                                            </span>
+                                        </template>
+                                    </div>
                                 </button>
                             </template>
                             <div x-show="availableStudents.length === 0" class="p-3 text-center text-xs font-sora text-slate-400">

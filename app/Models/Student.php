@@ -117,10 +117,11 @@ class Student extends Model
         return $this->entries()
             ->whereIn('status', ['pending', 'verified', 'confirmed'])
             ->whereHas('program', function ($q) {
-                $q->where(function ($sub) {
-                    $sub->where('type', 'individual')
-                        ->orWhere('individual_limit_counted', true);
-                });
+                $q->where('type', 'individual')
+                    ->where(function ($sub) {
+                        $sub->whereNull('individual_limit_counted')
+                            ->orWhere('individual_limit_counted', true);
+                    });
             })
             ->count();
     }

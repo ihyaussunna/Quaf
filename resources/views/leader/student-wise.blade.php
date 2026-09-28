@@ -102,9 +102,16 @@
     <!-- Student Cards matching screenshot -->
     <div class="space-y-6">
         @forelse($studentsToDisplay as $studentItem)
+            @php
+                $indCount = $studentItem->getIndividualParticipationCount();
+                $allEntries = $studentItem->entries
+                    ->merge($studentItem->participations ?? collect())
+                    ->unique('id');
+                $groupCount = $allEntries->where('program.type', 'group')->count();
+            @endphp
             <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
                 <!-- Header matching screenshot -->
-                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-sora">
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs font-sora">
                     <div>
                         <span class="text-gray-400 font-medium">Name:</span>
                         <span class="font-bold text-gray-800 ml-1 capitalize">{{ $studentItem->name }}</span>
@@ -125,6 +132,13 @@
                         <span class="text-gray-400 font-medium">Class:</span>
                         <span class="font-bold text-gray-800 ml-1">{{ $studentItem->class_level ?? '-' }}</span>
                     </div>
+                    <div>
+                        <span class="text-gray-400 font-medium">Participation:</span>
+                        <span class="font-bold ml-1 {{ $indCount >= 5 ? 'text-brand-orange' : 'text-emerald-700' }}">{{ $indCount }}/5 Ind</span>
+                        @if($groupCount > 0)
+                            <span class="text-gray-500 font-normal">({{ $groupCount }} Group)</span>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Table matching screenshot -->
@@ -141,13 +155,19 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            @forelse($studentItem->entries as $index => $entry)
+                            @forelse($allEntries as $index => $entry)
                                 <tr class="hover:bg-gray-50/50 transition">
                                     <td class="px-4 py-3 text-center text-gray-500 text-xs font-medium font-mono">{{ $index + 1 }}</td>
                                     <td class="px-4 py-3 text-gray-700 font-mono text-xs">{{ $entry->program?->code ?: $entry->program?->id }}</td>
                                     <td class="px-6 py-3 text-gray-900 font-medium capitalize">{{ $entry->program?->name }}</td>
                                     <td class="px-4 py-3 text-gray-600 text-xs">{{ $entry->program?->eligibility ?? 'A Zone' }}</td>
-                                    <td class="px-4 py-3 text-gray-600 text-xs">{{ ucfirst($entry->program?->type ?? 'Individual') }}</td>
+                                    <td class="px-4 py-3 text-gray-600 text-xs">
+                                        @if($entry->program?->isGroup())
+                                            <span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-semibold text-[11px]">Group</span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-semibold text-[11px]">Individual</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-gray-600 text-xs">{{ $entry->program?->is_stage ? 'Stage' : 'Non-stage' }}</td>
                                 </tr>
                             @empty
