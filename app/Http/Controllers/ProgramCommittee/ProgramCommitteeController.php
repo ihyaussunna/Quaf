@@ -10,6 +10,7 @@ use App\Models\Zone;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class ProgramCommitteeController extends Controller
@@ -195,8 +196,15 @@ class ProgramCommitteeController extends Controller
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
 
+        Program::ensureSchema();
+
         $hasTimeLimit = $request->boolean('has_time_limit', true);
-        $validated['has_time_limit'] = $hasTimeLimit;
+        if (Schema::hasColumn('programs', 'has_time_limit')) {
+            $validated['has_time_limit'] = $hasTimeLimit;
+        } else {
+            unset($validated['has_time_limit']);
+        }
+
         if (! $hasTimeLimit) {
             $validated['duration_minutes'] = null;
         } elseif (empty($validated['duration_minutes'])) {
@@ -204,7 +212,11 @@ class ProgramCommitteeController extends Controller
         }
 
         $hasCriteria = $request->boolean('has_criteria', true);
-        $validated['has_criteria'] = $hasCriteria;
+        if (Schema::hasColumn('programs', 'has_criteria')) {
+            $validated['has_criteria'] = $hasCriteria;
+        } else {
+            unset($validated['has_criteria']);
+        }
 
         if (! empty($validated['zone_id'])) {
             $zone = Zone::find($validated['zone_id']);
@@ -324,8 +336,15 @@ class ProgramCommitteeController extends Controller
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
 
+        Program::ensureSchema();
+
         $hasTimeLimit = $request->boolean('has_time_limit', true);
-        $validated['has_time_limit'] = $hasTimeLimit;
+        if (Schema::hasColumn('programs', 'has_time_limit')) {
+            $validated['has_time_limit'] = $hasTimeLimit;
+        } else {
+            unset($validated['has_time_limit']);
+        }
+
         if (! $hasTimeLimit) {
             $validated['duration_minutes'] = null;
         } elseif (empty($validated['duration_minutes'])) {
@@ -333,7 +352,11 @@ class ProgramCommitteeController extends Controller
         }
 
         $hasCriteria = $request->boolean('has_criteria', true);
-        $validated['has_criteria'] = $hasCriteria;
+        if (Schema::hasColumn('programs', 'has_criteria')) {
+            $validated['has_criteria'] = $hasCriteria;
+        } else {
+            unset($validated['has_criteria']);
+        }
 
         if (! empty($validated['zone_id'])) {
             $zone = Zone::find($validated['zone_id']);
@@ -471,14 +494,22 @@ class ProgramCommitteeController extends Controller
             'criteria.*.max_marks' => ['required_with:criteria.*.name', 'integer', 'min:1', 'max:100'],
         ]);
 
+        Program::ensureSchema();
+
         $hasTimeLimit = $request->boolean('has_time_limit', true);
         $hasCriteria = $request->boolean('has_criteria', true);
 
         $programData = [
             'rules' => $validated['rules'] ?? null,
-            'has_time_limit' => $hasTimeLimit,
-            'has_criteria' => $hasCriteria,
         ];
+
+        if (Schema::hasColumn('programs', 'has_time_limit')) {
+            $programData['has_time_limit'] = $hasTimeLimit;
+        }
+
+        if (Schema::hasColumn('programs', 'has_criteria')) {
+            $programData['has_criteria'] = $hasCriteria;
+        }
 
         if ($hasTimeLimit) {
             $programData['duration_minutes'] = ! empty($validated['duration_minutes']) ? (int) $validated['duration_minutes'] : ($program->duration_minutes ?: 15);

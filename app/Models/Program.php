@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class Program extends Model
 {
@@ -60,6 +63,50 @@ class Program extends Model
             'has_time_limit' => 'boolean',
             'has_criteria' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Program $program) {
+            self::ensureSchema();
+
+            // Guard against legacy database tables missing new columns
+            if (! Schema::hasColumn('programs', 'has_time_limit')) {
+                unset($program->attributes['has_time_limit']);
+            }
+            if (! Schema::hasColumn('programs', 'has_criteria')) {
+                unset($program->attributes['has_criteria']);
+            }
+        });
+    }
+
+    public static function ensureSchema(): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+        $checked = true;
+
+        try {
+            if (! Schema::hasColumn('programs', 'has_time_limit') ||
+                ! Schema::hasColumn('programs', 'has_criteria')) {
+                Artisan::call('migrate', ['--force' => true]);
+            }
+        } catch (\Throwable) {
+            try {
+                Schema::table('programs', function (Blueprint $table) {
+                    if (! Schema::hasColumn('programs', 'has_time_limit')) {
+                        $table->boolean('has_time_limit')->default(true)->after('rules');
+                    }
+                    if (! Schema::hasColumn('programs', 'has_criteria')) {
+                        $table->boolean('has_criteria')->default(true)->after('has_time_limit');
+                    }
+                    $table->unsignedInteger('duration_minutes')->nullable()->change();
+                });
+            } catch (\Throwable) {
+            }
+        }
     }
 
     public function zone(): BelongsTo

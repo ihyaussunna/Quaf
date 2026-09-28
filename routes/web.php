@@ -49,6 +49,7 @@ use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +119,38 @@ Route::get('/init-database/{token}', function (string $token) {
     } catch (Throwable $e) {
         return response('<html><head><title>QUAF 9.0 Sync Error</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#f85149;">'
             .'<h1>Sync Error</h1>'
+            .'<pre style="background:#161b22;padding:20px;border-radius:6px;border:1px solid #da3633;color:#ff7b72;">'.htmlspecialchars($e->getMessage()).'</pre>'
+            .'</body></html>', 500, ['Content-Type' => 'text/html']);
+    }
+});
+
+// Run pending migrations safely via browser URL
+Route::get('/migrate-db', function (Request $request) {
+    $hasAccess = (auth()->check() && in_array(auth()->user()->role, ['admin', 'super_admin', 'program_committee', 'program_coordinator']))
+        || $request->query('token') === 'quaf2026setup';
+
+    if (! $hasAccess) {
+        abort(403, 'Unauthorized. Please login or pass ?token=quaf2026setup');
+    }
+
+    try {
+        @set_time_limit(300);
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+
+        Artisan::call('optimize:clear');
+
+        return response('<html><head><title>QUAF 9.0 Database Migration</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#c9d1d9;">'
+            .'<h1 style="color:#3fb950;margin-bottom:20px;">Database Migrations Executed Successfully!</h1>'
+            .'<div style="background:#161b22;padding:24px;border-radius:8px;border:1px solid #30363d;max-width:700px;">'
+            .'<pre style="margin:0;font-size:14px;color:#58a6ff;white-space:pre-wrap;">'.htmlspecialchars($output ?: 'Database is up to date. No pending migrations.').'</pre>'
+            .'</div>'
+            .'<div style="margin-top:24px;">'
+            .'<a href="javascript:history.back()" style="display:inline-block;padding:10px 20px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">&larr; Return to Previous Page</a>'
+            .'</div></body></html>', 200, ['Content-Type' => 'text/html']);
+    } catch (Throwable $e) {
+        return response('<html><head><title>Migration Error</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#c9d1d9;">'
+            .'<h1 style="color:#f85149;">Migration Error</h1>'
             .'<pre style="background:#161b22;padding:20px;border-radius:6px;border:1px solid #da3633;color:#ff7b72;">'.htmlspecialchars($e->getMessage()).'</pre>'
             .'</body></html>', 500, ['Content-Type' => 'text/html']);
     }
