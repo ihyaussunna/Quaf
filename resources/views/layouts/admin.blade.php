@@ -472,6 +472,7 @@
                     <button @click="activeDrawerTab = 'deadline'" :class="activeDrawerTab === 'deadline' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Deadline</button>
                     <button @click="activeDrawerTab = 'score_handle'" :class="activeDrawerTab === 'score_handle' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Score Mode</button>
                     <button @click="activeDrawerTab = 'registration'" :class="activeDrawerTab === 'registration' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Reg Portal</button>
+                    <button @click="activeDrawerTab = 'student_editing'" :class="activeDrawerTab === 'student_editing' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-800/80 text-slate-300'" class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0">Student Edit</button>
                 </div>
 
                 <!-- Left Content Area of Drawer -->
@@ -648,6 +649,34 @@
                             </form>
                         </div>
                     </div>
+
+                    <!-- Tab 7: Student Name Editing Control -->
+                    <div x-show="activeDrawerTab === 'student_editing'" class="space-y-6" style="display: none;">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white tracking-tight">Student Name Editing</h2>
+                            <p class="text-xs text-slate-400 mt-1">Allow or Block group leaders from editing student names</p>
+                        </div>
+                        @php
+                            $drawerEditingOpen = (\App\Models\FestivalSetting::get('student_editing_open', '1') == '1');
+                        @endphp
+                        <div class="p-5 rounded-2xl {{ $drawerEditingOpen ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200' : 'bg-rose-950/60 border border-rose-500/40 text-rose-200' }} text-xs space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerEditingOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
+                                    Status: {{ $drawerEditingOpen ? 'EDITING ALLOWED' : 'EDITING BLOCKED' }}
+                                </span>
+                            </div>
+                            <p class="text-slate-300 text-[11px] leading-relaxed">
+                                {{ $drawerEditingOpen ? 'Group leaders can currently edit student names to fix spelling errors. Click the button below to block editing.' : 'Student name editing is currently blocked. Leaders cannot modify any student names.' }}
+                            </p>
+                            <form method="POST" action="{{ route('admin.settings.toggle-student-editing') }}">
+                                @csrf
+                                <button type="submit" class="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerEditingOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                                    {{ $drawerEditingOpen ? 'Block Student Editing Now' : 'Allow Student Editing Now' }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Right Sub-Sidebar of Drawer (Settings Tabs - Desktop only) -->
@@ -723,6 +752,16 @@
                                 <div>
                                     <div class="font-semibold">Registration</div>
                                     <div class="text-[10px] opacity-70">Open / Close Portal</div>
+                                </div>
+                            </button>
+
+                            <button @click="activeDrawerTab = 'student_editing'" 
+                                    :class="activeDrawerTab === 'student_editing' ? 'bg-[#be1e2d] text-white font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'"
+                                    class="w-full flex items-start gap-2.5 p-2.5 rounded-xl text-left transition-all">
+                                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                <div>
+                                    <div class="font-semibold">Student Editing</div>
+                                    <div class="text-[10px] opacity-70">Block / Allow Names</div>
                                 </div>
                             </button>
                         </div>
