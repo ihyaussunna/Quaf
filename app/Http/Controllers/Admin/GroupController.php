@@ -29,8 +29,9 @@ class GroupController extends Controller
         }
 
         $groups = $query->orderBy('name')->get();
+        $leaders = User::where('role', 'group_leader')->get();
 
-        return view('admin.groups.index', compact('groups', 'search'));
+        return view('admin.groups.index', compact('groups', 'search', 'leaders'));
     }
 
     public function create(): View
@@ -46,6 +47,8 @@ class GroupController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'code' => ['nullable', 'string', 'max:20'],
             'color_hex' => ['nullable', 'string', 'max:10'],
+            'leader_id' => ['nullable', 'exists:users,id'],
+            'logo_url' => ['nullable', 'string', 'max:255'],
             'manager_name' => ['nullable', 'string', 'max:255'],
             'manager_contact' => ['nullable', 'string', 'max:50'],
             'name_in_results' => ['nullable', 'string', 'max:255'],
@@ -55,9 +58,32 @@ class GroupController extends Controller
             'assistant_managers' => ['nullable', 'array'],
         ]);
 
-        $validated['code'] = $validated['code'] ?: Str::upper(Str::substr(Str::slug($validated['name']), 0, 8));
-        $validated['color_hex'] = $validated['color_hex'] ?: '#e05a2b';
-        $validated['slug'] = Str::slug($validated['name']);
+        $code = ! empty($validated['code'])
+            ? Str::upper(trim($validated['code']))
+            : Str::upper(Str::substr(preg_replace('/[^A-Za-z0-9]/', '', $validated['name']), 0, 8));
+
+        if (empty($code)) {
+            $code = 'GRP'.rand(100, 999);
+        }
+
+        $baseCode = $code;
+        $counter = 1;
+        while (Group::where('code', $code)->exists()) {
+            $code = Str::substr($baseCode, 0, 5).$counter;
+            $counter++;
+        }
+        $validated['code'] = $code;
+
+        $validated['color_hex'] = ! empty($validated['color_hex']) ? $validated['color_hex'] : '#2E3192';
+
+        $slug = Str::slug($validated['name']) ?: Str::lower($code);
+        $baseSlug = $slug;
+        $slugCounter = 1;
+        while (Group::where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$slugCounter;
+            $slugCounter++;
+        }
+        $validated['slug'] = $slug;
 
         $group = Group::create($validated);
 
