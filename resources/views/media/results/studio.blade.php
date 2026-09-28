@@ -215,10 +215,9 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Font Family</label>
                                 <select x-model="settings.competition_font" @change="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
-                                    <option value="Malayalam Sangam MN">Malayalam Sangam MN</option>
-                                    <option value="Malayalam MN">Malayalam MN</option>
-                                    <option value="Rockwell Std">Rockwell Std</option>
+                                    <option value="Anek Malayalam">Anek Malayalam</option>
                                     <option value="Sora">Sora</option>
+                                    <option value="Rockwell Std">Rockwell Std</option>
                                 </select>
                             </div>
                             <div>
@@ -285,10 +284,9 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Name Font Family</label>
                                 <select x-model="settings.winner_font" @change="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
-                                    <option value="Malayalam Sangam MN">Malayalam Sangam MN</option>
-                                    <option value="Malayalam MN">Malayalam MN</option>
-                                    <option value="Rockwell Std">Rockwell Std</option>
+                                    <option value="Anek Malayalam">Anek Malayalam</option>
                                     <option value="Sora">Sora</option>
+                                    <option value="Rockwell Std">Rockwell Std</option>
                                 </select>
                             </div>
                             <div>
@@ -501,8 +499,8 @@ function posterStudio() {
             winner_unit_weight: '{{ $currentSettings["winner_unit_weight"] ?? "400" }}',
             winner_unit_color: '{{ (strlen($currentSettings["winner_unit_color"] ?? "") === 7) ? $currentSettings["winner_unit_color"] : "#e2e8f0" }}',
 
-            competition_font: '{{ $currentSettings["competition_font"] ?? "Malayalam Sangam MN" }}',
-            winner_font: '{{ $currentSettings["winner_font"] ?? "Malayalam Sangam MN" }}',
+            competition_font: '{{ $currentSettings["competition_font"] ?? "Anek Malayalam" }}',
+            winner_font: '{{ $currentSettings["winner_font"] ?? "Anek Malayalam" }}',
         },
 
         // Content Data
@@ -598,7 +596,7 @@ function posterStudio() {
             // 3. Draw Category
             ctx.save();
             ctx.fillStyle = this.settings.category_color;
-            ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Malayalam Sangam MN", "Malayalam MN", Sora, sans-serif`;
+            ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Anek Malayalam", Sora, sans-serif`;
             ctx.textAlign = this.settings.category_align;
             ctx.textBaseline = 'top';
             ctx.fillText(this.data.category, this.settings.category_x, this.settings.category_y);
@@ -607,8 +605,8 @@ function posterStudio() {
             // 4. Draw Competition Name (Multi-line text wrapping support)
             ctx.save();
             ctx.fillStyle = this.settings.competition_color;
-            const compFont = this.settings.competition_font || 'Malayalam Sangam MN';
-            ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "${compFont}", "Malayalam Sangam MN", "Malayalam MN", Sora, sans-serif`;
+            const compFont = this.settings.competition_font || 'Anek Malayalam';
+            ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "${compFont}", "Anek Malayalam", Sora, sans-serif`;
             ctx.textAlign = this.settings.competition_align;
             ctx.textBaseline = 'top';
 
@@ -649,13 +647,13 @@ function posterStudio() {
                 ctx.textBaseline = 'top';
 
                 ctx.fillStyle = this.settings.winner_name_color;
-                const winFont = this.settings.winner_font || 'Malayalam Sangam MN';
-                ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "${winFont}", "Malayalam Sangam MN", "Malayalam MN", Sora, sans-serif`;
+                const winFont = this.settings.winner_font || 'Anek Malayalam';
+                ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
                 ctx.fillText(item.name, textX, currentY);
 
                 // Draw Team / Unit below name
                 ctx.fillStyle = this.settings.winner_unit_color;
-                ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "${winFont}", "Malayalam Sangam MN", "Malayalam MN", Sora, sans-serif`;
+                ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
                 const nameOffset = this.settings.winner_name_size * 1.15;
                 ctx.fillText(item.unit, textX, currentY + nameOffset);
                 ctx.restore();

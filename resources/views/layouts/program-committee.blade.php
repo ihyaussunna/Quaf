@@ -12,10 +12,10 @@
 
     <title>{{ $title ?? 'Program Samithi Portal' }} | QUAF Fest 09</title>
 
-    <!-- Google Fonts (Anek Malayalam, JetBrains Mono, Sora, Manjari, Gayathri, Amiri) -->
+    <!-- Google Fonts (Anek Malayalam, JetBrains Mono, Sora, Amiri) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Anek+Malayalam:wght@300;400;500;600;700;800&family=Gayathri:wght@400;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Manjari:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
@@ -25,7 +25,13 @@
 
     <style>
         .font-malayalam, .font-anek {
-            font-family: 'Anek Malayalam', 'Manjari', 'Gayathri', sans-serif !important;
+            font-family: 'Anek Malayalam' !important;
+        }
+        body, h1, h2, h3, h4, h5, h6, .font-sora {
+            font-family: 'Sora' !important;
+        }
+        .font-rockwell {
+            font-family: 'Rockwell', 'Rockwell Std' !important;
         }
         @media print {
             aside, header, nav, .no-print, [x-cloak] {

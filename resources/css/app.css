@@ -116,93 +116,15 @@
     font-display: swap;
 }
 
-@font-face {
-    font-family: 'Malayalam Sangam MN';
-    src: url('/fonts/Malayalam-Sangam-MN-Regular.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 400;
-    font-style: normal;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Malayalam Sangam MN';
-    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 700;
-    font-style: normal;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Malayalam MN';
-    src: url('/fonts/Malayalam-MN-Regular.ttf') format('truetype'),
-         url('/fonts/Malayalam MN.ttc');
-    font-weight: 400;
-    font-style: normal;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Malayalam MN';
-    src: url('/fonts/Malayalam-MN-Bold.ttf') format('truetype'),
-         url('/fonts/Malayalam MN.ttc');
-    font-weight: 700;
-    font-style: normal;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-/* Automatic Malayalam Unicode fallback for Sora font-sans */
-@font-face {
-    font-family: 'Sora';
-    src: url('/fonts/Malayalam-Sangam-MN-Regular.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 300 500;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Sora';
-    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 600 900;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-/* Automatic Malayalam Unicode fallback for Rockwell */
-@font-face {
-    font-family: 'Rockwell';
-    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 400 900;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Rockwell Std';
-    src: url('/fonts/Malayalam-Sangam-MN-Bold.ttf') format('truetype'),
-         url('/fonts/Malayalam Sangam MN.ttc');
-    font-weight: 400 900;
-    unicode-range: U+0D00-0D7F;
-    font-display: swap;
-}
-
 @theme {
-    --font-sora: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-rockwell: 'Rockwell', 'Rockwell Std', serif;
+    --font-sora: 'Sora';
+    --font-rockwell: 'Rockwell', 'Rockwell Std';
     --font-mono: 'JetBrains Mono', monospace;
     --font-jetbrains: 'JetBrains Mono', monospace;
-    --font-anek: 'Anek Malayalam', 'Malayalam Sangam MN', 'Manjari', sans-serif;
-    --font-ml-mn: 'Anek Malayalam', 'Malayalam MN', 'Malayalam Sangam MN', 'Manjari', sans-serif;
-    --font-ml-sangam: 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
-    --font-ml: 'Anek Malayalam', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    --font-anek: 'Anek Malayalam';
+    --font-ml-mn: 'Anek Malayalam';
+    --font-ml-sangam: 'Anek Malayalam';
+    --font-ml: 'Anek Malayalam';
     --font-ar: 'Amiri', 'Noto Naskh Arabic', serif;
     --font-ur: 'Noto Nastaliq Urdu', serif;
 
@@ -238,20 +160,20 @@
     --color-gold-dark: #f3bd2e;
 }
 
-/* Base typography: Titles and UI globally enforce Sora */
+/* Base typography: English UI and Titles strictly use Sora */
 body,
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif;
+    font-family: 'Sora';
 }
 
 .font-sora,
 .font-sans,
 .font-serif {
-    font-family: 'Sora', 'Malayalam Sangam MN', 'Malayalam MN', 'Manjari', sans-serif !important;
+    font-family: 'Sora' !important;
 }
 
 .font-rockwell {
-    font-family: 'Rockwell', 'Rockwell Std', serif !important;
+    font-family: 'Rockwell', 'Rockwell Std' !important;
 }
 
 /* Monospace font for numbers, chest numbers, codes, stats */
@@ -270,7 +192,7 @@ h1, h2, h3, h4, h5, h6 {
 .malayalam-text,
 .font-malayalam,
 [data-script="malayalam"] {
-    font-family: 'Anek Malayalam', 'Malayalam Sangam MN', 'Manjari', sans-serif !important;
+    font-family: 'Anek Malayalam' !important;
     letter-spacing: 0 !important;
 }
 
@@ -278,7 +200,7 @@ textarea.font-anek,
 input.font-anek,
 textarea[data-script="malayalam"],
 input[data-script="malayalam"] {
-    font-family: 'Anek Malayalam', 'Sora', sans-serif !important;
+    font-family: 'Anek Malayalam' !important;
     line-height: 1.6 !important;
 }
 

@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=Gayathri:wght@400;700&family=Manjari:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css'])
 
@@ -18,12 +18,15 @@
             margin: 15mm;
         }
         body {
-            font-family: 'Sora', 'Anek Malayalam', 'Manjari', sans-serif;
+            font-family: 'Sora';
             background: #ffffff;
             color: #0f172a;
         }
         .font-malayalam, .font-anek {
-            font-family: 'Anek Malayalam', 'Manjari', 'Gayathri', sans-serif !important;
+            font-family: 'Anek Malayalam' !important;
+        }
+        .font-rockwell {
+            font-family: 'Rockwell', 'Rockwell Std' !important;
         }
         .page-break {
             page-break-after: always;
