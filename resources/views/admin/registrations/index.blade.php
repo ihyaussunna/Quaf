@@ -36,44 +36,9 @@
         </div>
     @endif
 
-    <!-- Status Tabs -->
-    <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto text-xs font-mono font-semibold">
-        <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'all'])) }}" 
-           class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? 'all') === 'all' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-            <span>All Entries</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? 'all') === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">
-                {{ $totalEntriesCount }}
-            </span>
-        </a>
-        <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'verified'])) }}" 
-           class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? '') === 'verified' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-            <span>Verified</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? '') === 'verified' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800' }}">
-                {{ $verifiedCount }}
-            </span>
-        </a>
-        <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'rejected'])) }}" 
-           class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? '') === 'rejected' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-            <span>Rejected</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? '') === 'rejected' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800' }}">
-                {{ $rejectedCount }}
-            </span>
-        </a>
-        @if($pendingCount > 0)
-            <a href="{{ route('admin.registrations.index', array_merge(request()->query(), ['status' => 'pending'])) }}" 
-               class="px-4 py-2 rounded-xl transition-all flex items-center gap-2 {{ ($status ?? '') === 'pending' ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-                <span>Pending</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] {{ ($status ?? '') === 'pending' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">
-                    {{ $pendingCount }}
-                </span>
-            </a>
-        @endif
-    </div>
-
     <!-- Filters Bar -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
         <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex flex-wrap items-center justify-between gap-3">
-            <input type="hidden" name="status" value="{{ $status ?? 'all' }}">
 
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Zone Dropdown -->
@@ -119,7 +84,6 @@
                         <th class="px-5 py-3.5">Program</th>
                         <th class="px-5 py-3.5">Group / Team</th>
                         <th class="px-5 py-3.5">Participant / Team Leader</th>
-                        <th class="px-5 py-3.5">Status</th>
                         <th class="px-5 py-3.5 text-right">Actions</th>
                     </tr>
                 </thead>
@@ -185,43 +149,12 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-5 py-3.5">
-                                @if($entry->status === 'verified')
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        Verified
-                                    </span>
-                                @elseif($entry->status === 'pending')
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 animate-pulse">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Pending
-                                    </span>
-                                @elseif($entry->status === 'rejected')
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-800">
-                                        Rejected
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
-                                        {{ $entry->status }}
-                                    </span>
-                                @endif
-                            </td>
                             <td class="px-5 py-3.5 text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1.5">
-
-                                    @if($entry->status !== 'rejected')
-                                        <form method="POST" action="{{ route('admin.registrations.reject', $entry) }}" class="inline" onsubmit="return confirm('Reject this entry? The slot will be released.');">
-                                            @csrf
-                                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-medium text-xs transition-colors">
-                                                Reject
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    <form method="POST" action="{{ route('admin.registrations.destroy', $entry) }}" class="inline" onsubmit="return confirm('Delete this entry permanently?');">
+                                    <form method="POST" action="{{ route('admin.registrations.destroy', $entry) }}" class="inline" onsubmit="return confirm('Delete this registration entry for Chest #{{ $entry->chest_number }} ({{ addslashes($entry->program?->name ?? 'Program') }}) permanently?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100" title="Delete">
+                                        <button type="submit" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition-colors" title="Delete Entry">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </form>
@@ -230,7 +163,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-12 text-center text-slate-400">
+                            <td colspan="6" class="px-5 py-12 text-center text-slate-400">
                                 No registration entries found matching the filter criteria.
                             </td>
                         </tr>

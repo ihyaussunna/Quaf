@@ -307,14 +307,24 @@ class RegistrationController extends Controller
         return back()->with('success', "Entry for Chest #{$entry->chest_number} cancelled. Slot has been released.");
     }
 
-    public function destroy(ProgramEntry $entry): RedirectResponse
+    public function destroy(Request $request, $entry): RedirectResponse
     {
-        $old = $entry->toArray();
-        $chest = $entry->chest_number;
-        $entry->delete();
+        $programEntry = $entry instanceof ProgramEntry ? $entry : ProgramEntry::findOrFail($entry);
+        $chest = $programEntry->chest_number;
+        $programName = $programEntry->program?->name ?? 'Program';
+        $old = $programEntry->toArray();
+
+        DB::transaction(function () use ($programEntry) {
+            $programEntry->participants()->detach();
+            $programEntry->greenRoomCall()?->delete();
+            $programEntry->scoreSheets()->delete();
+            $programEntry->pointsTransactions()->delete();
+            $programEntry->certificate()?->delete();
+            $programEntry->delete();
+        });
 
         AuditLogger::log('delete_entry', null, $old, null);
 
-        return back()->with('success', "Entry for Chest #{$chest} deleted.");
+        return back()->with('success', "Entry for Chest #{$chest} ({$programName}) deleted successfully.");
     }
 }

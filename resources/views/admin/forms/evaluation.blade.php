@@ -57,8 +57,8 @@
     @if($selectedProgram)
         <div class="evaluation-paper bg-white p-6 sm:p-10 rounded-2xl border border-slate-200 shadow-sm mx-auto print:p-0 print:border-none print:shadow-none print:m-0 print:w-full">
             <!-- Official Centered Logo with Tagline -->
-            <div class="text-center mb-2.5">
-                <img src="{{ asset('images/forms-header-logo.svg') }}" alt="QUAF" class="h-16 sm:h-20 mx-auto object-contain">
+            <div class="text-center mb-2">
+                <img src="{{ asset('images/forms-header-logo.svg') }}" alt="QUAF" class="mx-auto header-logo" style="height: 48px; max-height: 48px; width: auto; max-width: 180px; object-fit: contain; display: block; margin: 0 auto;">
             </div>
 
             <!-- Title -->
@@ -174,9 +174,26 @@
         border: 1.5px solid #000000 !important;
         color: #000000 !important;
     }
-    th {
-        background-color: #ffffff !important;
+    .evaluation-paper img,
+    .evaluation-paper .header-logo {
+        height: 48px !important;
+        max-height: 48px !important;
+        width: auto !important;
+        max-width: 180px !important;
+        display: block !important;
+        margin: 0 auto 6px auto !important;
+        object-fit: contain !important;
     }
+}
+.evaluation-paper img,
+.evaluation-paper .header-logo {
+    height: 48px !important;
+    max-height: 48px !important;
+    width: auto !important;
+    max-width: 180px !important;
+    display: block !important;
+    margin: 0 auto 8px auto !important;
+    object-fit: contain !important;
 }
 </style>
 @endsection

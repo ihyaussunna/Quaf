@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\Program;
+use App\Models\ProgramEntry;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
@@ -199,6 +200,33 @@ class AdminSettingAndStudentEditingTest extends TestCase
         $this->assertDatabaseMissing('program_entries', [
             'program_id' => $program->id,
             'student_id' => $this->student->id,
+        ]);
+    }
+
+    public function test_admin_can_delete_registration_entry(): void
+    {
+        $program = Program::create([
+            'name' => 'Speech',
+            'code' => 'SPH01',
+            'type' => 'individual',
+            'eligibility' => 'A Zone',
+            'zone_id' => $this->zone->id,
+            'max_participants_per_group' => 1,
+            'status' => 'upcoming',
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '101',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->delete(route('admin.registrations.destroy', $entry));
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('program_entries', [
+            'id' => $entry->id,
         ]);
     }
 }

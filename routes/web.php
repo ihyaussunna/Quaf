@@ -256,7 +256,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::post('registrations/verify-all', [AdminRegistrationController::class, 'verifyAllPending'])->name('registrations.verify-all');
     Route::post('registrations/{entry}/verify', [AdminRegistrationController::class, 'verify'])->name('registrations.verify');
     Route::post('registrations/{entry}/reject', [AdminRegistrationController::class, 'reject'])->name('registrations.reject');
-    Route::resource('registrations', AdminRegistrationController::class);
+    Route::resource('registrations', AdminRegistrationController::class)->parameters([
+        'registrations' => 'entry',
+    ]);
 
     // Schedule Management
     Route::resource('schedules', AdminScheduleController::class);
