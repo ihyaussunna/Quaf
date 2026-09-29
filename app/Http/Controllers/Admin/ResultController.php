@@ -71,11 +71,28 @@ class ResultController extends Controller
         $program = Program::with(['entries.student.group', 'entries.scoreSheets', 'scoringCriteria'])
             ->findOrFail($programId);
 
-        return view('admin.results.create', compact('program'));
+        $podium = PointCalculationService::determinePodiumForProgram($program);
+
+        return view('admin.results.create', compact('program', 'podium'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $programId = $request->input('program_id');
+        $program = Program::findOrFail($programId);
+
+        $podium = PointCalculationService::determinePodiumForProgram($program);
+
+        $firstEntryId = $request->input('first_entry_id') ?: $podium['first']?->id;
+        $secondEntryId = $request->input('second_entry_id') ?: $podium['second']?->id;
+        $thirdEntryId = $request->input('third_entry_id') ?: $podium['third']?->id;
+
+        $request->merge([
+            'first_entry_id' => $firstEntryId,
+            'second_entry_id' => $secondEntryId,
+            'third_entry_id' => $thirdEntryId,
+        ]);
+
         $validated = $request->validate([
             'program_id' => ['required', 'exists:programs,id', 'unique:results,program_id'],
             'first_entry_id' => ['required', 'exists:program_entries,id'],
@@ -112,7 +129,22 @@ class ResultController extends Controller
             'thirdEntry',
         ]);
 
-        return view('admin.results.edit', compact('result'));
+        $podium = PointCalculationService::determinePodiumForProgram($result->program);
+
+        return view('admin.results.edit', compact('result', 'podium'));
+    }
+
+    public function autoDetermine(Program $program): RedirectResponse
+    {
+        $result = PointCalculationService::autoAssignResultPodium($program);
+
+        if (! $result) {
+            return back()->with('error', "No submitted judge marks found for '{$program->name}'.");
+        }
+
+        $this->pointService->recalculateForProgram($program);
+
+        return back()->with('success', "1st, 2nd, and 3rd place winners for '{$program->name}' automatically determined from judge marks!");
     }
 
     public function update(Request $request, Result $result): RedirectResponse

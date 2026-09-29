@@ -117,7 +117,7 @@
             @if($program->entries->count() > 0)
                 <div class="flex justify-end">
                     <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-mono font-bold text-xs uppercase hover:bg-slate-900 shadow-xs">
-                        💾 Save Marks
+                        Save Marks
                     </button>
                 </div>
             @endif
@@ -132,10 +132,37 @@
                     <span>2. Publish Official Verdict & Results</span>
                 </h2>
                 <p class="text-xs font-mono text-slate-600">
-                    Assign 1st, 2nd, and 3rd rank winners. <strong class="text-[#f3bd2e]">Leaderboard points update automatically in real-time!</strong>
+                    1st, 2nd, and 3rd rank winners are auto-calculated from judge marks. <strong class="text-[#f3bd2e]">Leaderboard points update automatically in real-time!</strong>
                 </p>
             </div>
         </div>
+
+        @if(!empty($podium['first']))
+            <div class="p-6 bg-slate-50/60 border-b border-slate-200">
+                <span class="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider block mb-2">Auto-Calculated Standings from Judge Marks:</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="p-3 bg-white rounded-xl border border-amber-300">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f3bd2e] text-slate-950 uppercase">1st Place</span>
+                        <div class="font-bold text-sm text-slate-900 mt-1 truncate">{{ $podium['first']->student?->name ?? $podium['first']->group?->name }}</div>
+                        <div class="text-xs font-mono text-slate-500">{{ $podium['first']->computed_avg_score }} pts &bull; Grade {{ $podium['first']->computed_grade ?? 'None' }}</div>
+                    </div>
+                    @if(!empty($podium['second']))
+                        <div class="p-3 bg-white rounded-xl border border-slate-200">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-800 uppercase">2nd Place</span>
+                            <div class="font-bold text-sm text-slate-900 mt-1 truncate">{{ $podium['second']->student?->name ?? $podium['second']->group?->name }}</div>
+                            <div class="text-xs font-mono text-slate-500">{{ $podium['second']->computed_avg_score }} pts &bull; Grade {{ $podium['second']->computed_grade ?? 'None' }}</div>
+                        </div>
+                    @endif
+                    @if(!empty($podium['third']))
+                        <div class="p-3 bg-white rounded-xl border border-amber-200">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 uppercase">3rd Place</span>
+                            <div class="font-bold text-sm text-slate-900 mt-1 truncate">{{ $podium['third']->student?->name ?? $podium['third']->group?->name }}</div>
+                            <div class="text-xs font-mono text-slate-500">{{ $podium['third']->computed_avg_score }} pts &bull; Grade {{ $podium['third']->computed_grade ?? 'None' }}</div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <form method="POST" action="{{ route('admin.mark-entry.publish', $program) }}" class="p-6 space-y-6">
             @csrf
@@ -149,10 +176,14 @@
                     <select name="first_entry_id" required class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-white border border-amber-300 focus:outline-none focus:border-[#f3bd2e] text-slate-900">
                         <option value="">-- Select Winner --</option>
                         @foreach($program->entries as $entry)
-                            <option value="{{ $entry->id }}" {{ (string)$program->result?->first_entry_id === (string)$entry->id ? 'selected' : '' }}>
+                            @php $isFirst = (string)old('first_entry_id', $program->result?->first_entry_id ?? $podium['first']?->id ?? '') === (string)$entry->id; @endphp
+                            <option value="{{ $entry->id }}" {{ $isFirst ? 'selected' : '' }}>
                                 {{ $entry->student?->student_id ? '['.$entry->student->student_id.'] ' : '' }}
                                 {{ $entry->student?->name ?? $entry->group?->name }} 
                                 ({{ $entry->group?->name ?? $entry->student?->group?->name }})
+                                @if(!empty($podium['first']) && $podium['first']->id === $entry->id)
+                                    [AUTO 1ST - {{ $podium['first']->computed_avg_score }} pts]
+                                @endif
                             </option>
                         @endforeach
                     </select>
@@ -166,10 +197,14 @@
                     <select name="second_entry_id" class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-[#f3bd2e] text-slate-900">
                         <option value="">-- Select 2nd Place --</option>
                         @foreach($program->entries as $entry)
-                            <option value="{{ $entry->id }}" {{ (string)$program->result?->second_entry_id === (string)$entry->id ? 'selected' : '' }}>
+                            @php $isSecond = (string)old('second_entry_id', $program->result?->second_entry_id ?? $podium['second']?->id ?? '') === (string)$entry->id; @endphp
+                            <option value="{{ $entry->id }}" {{ $isSecond ? 'selected' : '' }}>
                                 {{ $entry->student?->student_id ? '['.$entry->student->student_id.'] ' : '' }}
                                 {{ $entry->student?->name ?? $entry->group?->name }}
                                 ({{ $entry->group?->name ?? $entry->student?->group?->name }})
+                                @if(!empty($podium['second']) && $podium['second']->id === $entry->id)
+                                    [AUTO 2ND - {{ $podium['second']->computed_avg_score }} pts]
+                                @endif
                             </option>
                         @endforeach
                     </select>
@@ -183,10 +218,14 @@
                     <select name="third_entry_id" class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-white border border-amber-200 focus:outline-none focus:border-[#f3bd2e] text-slate-900">
                         <option value="">-- Select 3rd Place --</option>
                         @foreach($program->entries as $entry)
-                            <option value="{{ $entry->id }}" {{ (string)$program->result?->third_entry_id === (string)$entry->id ? 'selected' : '' }}>
+                            @php $isThird = (string)old('third_entry_id', $program->result?->third_entry_id ?? $podium['third']?->id ?? '') === (string)$entry->id; @endphp
+                            <option value="{{ $entry->id }}" {{ $isThird ? 'selected' : '' }}>
                                 {{ $entry->student?->student_id ? '['.$entry->student->student_id.'] ' : '' }}
                                 {{ $entry->student?->name ?? $entry->group?->name }}
                                 ({{ $entry->group?->name ?? $entry->student?->group?->name }})
+                                @if(!empty($podium['third']) && $podium['third']->id === $entry->id)
+                                    [AUTO 3RD - {{ $podium['third']->computed_avg_score }} pts]
+                                @endif
                             </option>
                         @endforeach
                     </select>

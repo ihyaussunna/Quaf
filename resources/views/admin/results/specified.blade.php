@@ -71,7 +71,7 @@
                                 <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $item->student?->class_level ?? '-' }}</td>
                                 <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $item->group?->name ?? $item->student?->group?->name ?? '-' }}</td>
                                 <td class="px-4 py-3.5 text-center">
-                                    <span class="inline-block px-2 py-0.5 rounded text-xs font-bold {{ $item->computed_grade === 'A+' || $item->computed_grade === 'A' ? 'bg-emerald-100 text-emerald-700' : ($item->computed_grade === 'B+' || $item->computed_grade === 'B' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700') }}">
+                                    <span class="inline-block px-2 py-0.5 rounded text-xs font-bold {{ $item->computed_grade === 'A+' || $item->computed_grade === 'A' ? 'bg-emerald-100 text-emerald-700' : ($item->computed_grade === 'B' ? 'bg-blue-100 text-blue-700' : ($item->computed_grade === 'C' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700')) }}">
                                         {{ $item->computed_grade }}
                                     </span>
                                 </td>

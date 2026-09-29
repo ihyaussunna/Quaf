@@ -159,9 +159,9 @@ class QuafSeason09WorkflowTest extends TestCase
 
     public function test_judge_evaluation_is_strictly_anonymous(): void
     {
-        // Assign code letters
-        $this->entry1->update(['code_letter' => 'A']);
-        $this->entry2->update(['code_letter' => 'B']);
+        // Assign code letters and mark present
+        $this->entry1->update(['code_letter' => 'A', 'attendance_status' => 'present']);
+        $this->entry2->update(['code_letter' => 'B', 'attendance_status' => 'present']);
 
         // Log in judge
         $this->post('/judge/login', ['pin' => '4567']);

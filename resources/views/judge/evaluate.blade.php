@@ -1,5 +1,4 @@
 @extends('layouts.judge', ['title' => 'Evaluation: ' . $program->name])
-
 @section('content')
 <div class="space-y-6" x-data="{ rulesModalOpen: false }">
     <!-- Top Bar (Light Theme) -->
@@ -20,7 +19,6 @@
                 </p>
             </div>
         </div>
-
         <div class="flex items-center gap-2">
             <!-- Rules Button -->
             <button type="button" @click="rulesModalOpen = true"
@@ -28,13 +26,11 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>View Rules & Guidelines</span>
             </button>
-
             <span class="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-bold">
                 {{ $entries->count() }} Candidates
             </span>
         </div>
     </div>
-
     <!-- Scoring Rules & Criteria Overview Banner (Light Theme) -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono shadow-2xs">
         <span class="text-slate-500 font-bold uppercase tracking-wider">Evaluation Rubric:</span>
@@ -49,7 +45,6 @@
             @endforeach
         @endif
     </div>
-
     <!-- Network Connectivity Status Indicator -->
     <div x-data="{ online: navigator.onLine }"
          x-init="window.addEventListener('online', () => online = true); window.addEventListener('offline', () => online = false)"
@@ -62,7 +57,6 @@
         </div>
         <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-800">Local Draft Active</span>
     </div>
-
     <!-- Anonymous Participants Evaluation Cards (Strict Confidentiality: Code Letters Only) -->
     <div class="space-y-6">
         @forelse($entries as $index => $entry)
@@ -72,7 +66,6 @@
                 $savedScores = $sheet ? ($sheet->criteria_scores ?? []) : [];
                 $displayCode = $entry->code_letter ? 'Code ' . $entry->code_letter : 'Participant ' . ($index + 1);
             @endphp
-
             <div class="bg-white border {{ $isSubmitted ? 'border-emerald-300' : 'border-slate-200' }} rounded-3xl p-6 transition-all relative overflow-hidden shadow-sm hover:shadow-md"
                  x-data="{
                      scores: {
@@ -135,21 +128,19 @@
                      get computedGrade() {
                          if (this.selectedGrade) return this.selectedGrade;
                          const t = this.total;
-                         if (t >= 80) return 'A+';
+                         if (t >= 90) return 'A+';
                          if (t >= 70) return 'A';
-                         if (t >= 60) return 'B+';
-                         if (t >= 50) return 'B';
-                         if (t >= 40) return 'C';
+                         if (t >= 60) return 'B';
+                         if (t >= 50) return 'C';
                          return '-';
                      },
                      setGrade(g) {
                          this.selectedGrade = g;
                          if (!this.hasCriteria && (!this.directScore || this.directScore == 0)) {
-                             if (g === 'A+') this.directScore = 85;
-                             else if (g === 'A') this.directScore = 75;
-                             else if (g === 'B+') this.directScore = 65;
-                             else if (g === 'B') this.directScore = 55;
-                             else if (g === 'C') this.directScore = 45;
+                             if (g === 'A+') this.directScore = 95;
+                             else if (g === 'A') this.directScore = 80;
+                             else if (g === 'B') this.directScore = 65;
+                             else if (g === 'C') this.directScore = 55;
                          }
                          this.saveDraftLocal();
                      },
@@ -158,10 +149,8 @@
                          this.isSaving = true;
                          this.saveSuccess = false;
                          this.errorMessage = '';
-
                          const form = e.target;
                          const formData = new FormData(form);
-
                          fetch(form.action, {
                              method: 'POST',
                              body: formData,
@@ -193,10 +182,8 @@
                          });
                      }
                  }">
-
                 <form method="POST" action="{{ route('judge.evaluate.save', [$program, $entry]) }}" @submit.prevent="submitEvaluation($event)" class="space-y-6">
                     @csrf
-
                     <!-- Anonymous Header (No Name, No Group, No Photo) -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-4">
@@ -215,7 +202,6 @@
                                 </p>
                             </div>
                         </div>
-
                         <div class="flex items-center gap-3">
                             <template x-if="isSubmitted">
                                 <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold flex items-center gap-1.5 shadow-2xs">
@@ -228,18 +214,16 @@
                                     Pending Evaluation
                                 </span>
                             </template>
-
                             <div class="px-4 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[80px]">
                                 <span class="text-[9px] text-slate-400 block uppercase font-semibold">Total Score</span>
                                 <span class="text-xl font-bold text-[#f3bd2e]" x-text="total">0</span>
                             </div>
-
                             <div class="px-3.5 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[65px]">
                                 <span class="text-[9px] text-slate-400 block uppercase font-semibold">Grade</span>
                                 <span class="text-sm font-black px-2 py-0.5 rounded-lg inline-block transition-colors"
                                       :class="{
                                           'bg-emerald-100 text-emerald-800': computedGrade === 'A+' || computedGrade === 'A',
-                                          'bg-blue-100 text-blue-800': computedGrade === 'B+' || computedGrade === 'B',
+                                          'bg-blue-100 text-blue-800': computedGrade === 'B',
                                           'bg-amber-100 text-amber-800': computedGrade === 'C',
                                           'bg-slate-100 text-slate-400': computedGrade === '-'
                                       }"
@@ -247,7 +231,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Criteria Score Inputs -->
                     @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -282,8 +265,7 @@
                                    class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 text-center font-bold focus:outline-none focus:border-[#f3bd2e]">
                         </div>
                     @endif
-
-                    <!-- Grade Selector Buttons (A+, A, B+, B, C) -->
+                    <!-- Grade Selector Buttons (A+, A, B, C) -->
                     <div class="bg-slate-50/75 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="text-xs font-mono">
                             <span class="font-bold text-slate-700 uppercase tracking-wider">Grade Option:</span>
@@ -291,11 +273,11 @@
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <input type="hidden" name="grade" :value="selectedGrade || (computedGrade !== '-' ? computedGrade : '')">
-                            <template x-for="g in ['A+', 'A', 'B+', 'B', 'C']" :key="g">
+                            <template x-for="g in ['A+', 'A', 'B', 'C']" :key="g">
                                 <button type="button" 
                                         @click="setGrade(g)"
                                         :class="(selectedGrade === g || (!selectedGrade && computedGrade === g))
-                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600' : (g === 'B+' || g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600' : 'bg-amber-600 text-white shadow-xs border-amber-600'))
+                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600' : (g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600' : 'bg-amber-600 text-white shadow-xs border-amber-600'))
                                             : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
                                         class="px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shadow-2xs">
                                     <span x-text="g"></span>
@@ -307,7 +289,6 @@
                             </button>
                         </div>
                     </div>
-
                     <!-- Remarks & Submit Action -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                         <div class="flex-1">
@@ -336,7 +317,6 @@
                     </div>
                 </form>
             </div>
-
         @empty
             <div class="py-16 text-center text-slate-500 font-mono text-xs bg-white rounded-3xl border border-slate-200 shadow-sm space-y-2">
                 <svg class="w-8 h-8 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -345,7 +325,6 @@
             </div>
         @endforelse
     </div>
-
     <!-- Rules & Niyamavali Modal (Light Theme) -->
     <div x-show="rulesModalOpen"
          x-transition:enter="transition ease-out duration-200"
@@ -356,10 +335,8 @@
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
          style="display: none;">
-
         <div class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative"
              @click.away="rulesModalOpen = false">
-
             <div class="flex items-start justify-between pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-[10px] font-mono uppercase tracking-widest text-[#f3bd2e] font-bold">Program Guidelines</span>
@@ -372,7 +349,6 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-
             <!-- Program Meta Badges -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
@@ -392,7 +368,6 @@
                     <span class="text-slate-800 font-bold">{{ $program->eligibility ?? 'All' }}</span>
                 </div>
             </div>
-
             <!-- Rules Content -->
             <div class="space-y-3">
                 <h3 class="text-sm font-mono font-bold text-slate-800 uppercase tracking-wider">Rules & Guidelines</h3>
@@ -404,7 +379,6 @@
                     @endif
                 </div>
             </div>
-
             <!-- Scoring Criteria List -->
             <div class="space-y-3">
                 <h3 class="text-sm font-mono font-bold text-slate-800 uppercase tracking-wider">Scoring Rubric</h3>
@@ -417,7 +391,6 @@
                     @endforeach
                 </div>
             </div>
-
             <div class="pt-2 text-right">
                 <button type="button" @click="rulesModalOpen = false"
                         class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-all">

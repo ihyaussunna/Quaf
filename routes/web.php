@@ -302,6 +302,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('results/all', [AdminResultController::class, 'allResults'])->name('results.all');
     Route::post('results/{result}/publish', [AdminResultController::class, 'publish'])->name('results.publish');
     Route::post('results/{result}/send-to-announcer', [AdminResultController::class, 'sendToAnnouncer'])->name('results.send-to-announcer');
+    Route::post('results/{program}/auto-determine', [AdminResultController::class, 'autoDetermine'])->name('results.auto-determine');
     Route::resource('results', AdminResultController::class);
 
     // Points & Rankings

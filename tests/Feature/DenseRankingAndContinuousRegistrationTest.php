@@ -144,6 +144,7 @@ class DenseRankingAndContinuousRegistrationTest extends TestCase
                 'group_id' => $this->group->id,
                 'chest_number' => $student->student_id,
                 'status' => 'verified',
+                'attendance_status' => 'present',
             ]);
 
             ScoreSheet::create([
@@ -179,7 +180,7 @@ class DenseRankingAndContinuousRegistrationTest extends TestCase
         $this->assertEquals('third', $ranked[3]->computed_rank);
     }
 
-    public function test_judge_can_save_evaluation_with_grade_b_plus(): void
+    public function test_judge_can_save_evaluation_with_official_grade_scale(): void
     {
         $cat = ProgramCategory::firstOrCreate(['slug' => 'general'], ['name' => 'General', 'code' => 'GEN']);
 
@@ -225,12 +226,12 @@ class DenseRankingAndContinuousRegistrationTest extends TestCase
             'group_id' => $this->group->id,
             'chest_number' => 'QF6001',
             'status' => 'verified',
+            'attendance_status' => 'present',
         ]);
 
-        // Submit evaluation with Grade B+ and score 68 via JSON
+        // Submit evaluation with score 68 (Grade B on 60-69 scale)
         $res = $this->actingAs($judgeUser)->postJson(route('judge.evaluate.save', [$prog, $entry]), [
             'total_score' => 68.0,
-            'grade' => 'B+',
             'remarks' => 'Good performance',
         ]);
 
@@ -238,19 +239,22 @@ class DenseRankingAndContinuousRegistrationTest extends TestCase
         $res->assertJson([
             'success' => true,
             'total_score' => 68.0,
-            'grade' => 'B+',
+            'grade' => 'B',
         ]);
 
         $sheet = ScoreSheet::where('entry_id', $entry->id)->first();
         $this->assertNotNull($sheet);
-        $this->assertEquals('B+', $sheet->criteria_scores['grade'] ?? null);
+        $this->assertEquals('B', $sheet->criteria_scores['grade'] ?? null);
 
-        // Create published result and verify PointCalculationService awards 4 points for Grade B+
-        Result::create([
-            'program_id' => $prog->id,
+        // Verify that podium was auto-assigned from judge score
+        $progResult = Result::where('program_id', $prog->id)->first();
+        $this->assertNotNull($progResult);
+        $this->assertEquals($entry->id, $progResult->first_entry_id);
+
+        // Publish and verify Grade B awards 3 points (Rule 11)
+        $progResult->update([
             'status' => 'published',
             'published_at' => now(),
-            'first_entry_id' => $entry->id,
         ]);
 
         PointCalculationService::recalculateAll();
@@ -260,7 +264,7 @@ class DenseRankingAndContinuousRegistrationTest extends TestCase
             ->first();
 
         $this->assertNotNull($gradeTx);
-        $this->assertEquals(4, $gradeTx->points);
+        $this->assertEquals(3, $gradeTx->points);
     }
 
     public function test_leader_continuous_registration_returns_json_and_supports_multi_students(): void

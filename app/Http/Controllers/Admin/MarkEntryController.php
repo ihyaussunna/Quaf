@@ -74,8 +74,9 @@ class MarkEntryController extends Controller
         ]);
 
         $judges = Judge::orderBy('name')->get();
+        $podium = PointCalculationService::determinePodiumForProgram($program);
 
-        return view('admin.mark-entry.show', compact('program', 'judges'));
+        return view('admin.mark-entry.show', compact('program', 'judges', 'podium'));
     }
 
     public function saveMarks(Request $request, Program $program): RedirectResponse
@@ -120,16 +121,31 @@ class MarkEntryController extends Controller
             }
         });
 
+        // Automatically determine and assign podium winners from the latest saved marks
+        PointCalculationService::autoAssignResultPodium($program);
+
         AuditLogger::log('save_marks', $program, null, [
             'program_id' => $program->id,
             'entries_count' => count($validated['scores']),
         ]);
 
-        return back()->with('success', "Marks saved for '{$program->name}'.");
+        return back()->with('success', "Marks saved and podium winners updated for '{$program->name}'.");
     }
 
     public function publish(Request $request, Program $program): RedirectResponse
     {
+        $podium = PointCalculationService::determinePodiumForProgram($program);
+
+        $firstEntryId = $request->input('first_entry_id') ?: $podium['first']?->id;
+        $secondEntryId = $request->input('second_entry_id') ?: $podium['second']?->id;
+        $thirdEntryId = $request->input('third_entry_id') ?: $podium['third']?->id;
+
+        $request->merge([
+            'first_entry_id' => $firstEntryId,
+            'second_entry_id' => $secondEntryId,
+            'third_entry_id' => $thirdEntryId,
+        ]);
+
         $validated = $request->validate([
             'first_entry_id' => ['required', 'exists:program_entries,id'],
             'second_entry_id' => ['nullable', 'exists:program_entries,id', 'different:first_entry_id'],
@@ -240,19 +256,8 @@ class MarkEntryController extends Controller
 
         // Auto-assign top 3 winner entries from recorded scores if not already set
         if (! $result->first_entry_id) {
-            $topEntries = ProgramEntry::where('program_id', $program->id)
-                ->where('attendance_status', 'present')
-                ->with('scores')
-                ->get()
-                ->filter(fn ($e) => $e->scores->isNotEmpty() && (float) $e->scores->avg('total_score') > 0)
-                ->sortByDesc(fn ($e) => (float) $e->scores->avg('total_score'))
-                ->values();
-
-            if ($topEntries->isNotEmpty()) {
-                $result->first_entry_id = $topEntries[0]->id;
-                $result->second_entry_id = $topEntries->get(1)?->id;
-                $result->third_entry_id = $topEntries->get(2)?->id;
-            }
+            PointCalculationService::autoAssignResultPodium($program);
+            $result = $program->fresh()->result ?? $result;
         }
 
         if ($action === 'verify') {

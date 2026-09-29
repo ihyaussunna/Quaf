@@ -3,17 +3,20 @@
 namespace App\Services;
 
 use App\Models\Group;
+use App\Models\PointSetting;
 use App\Models\PointsTransaction;
 use App\Models\Program;
+use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Student;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PointCalculationService
 {
     /**
-     * Handbook official position points:
+     * Handbook official position points for individual programs:
      * 1st Place = 5 points
      * 2nd Place = 3 points
      * 3rd Place = 1 point
@@ -25,29 +28,28 @@ class PointCalculationService
     ];
 
     /**
-     * Handbook official grade points:
-     * A+ = 6 points
-     * A  = 5 points
-     * B+ = 4 points
-     * B  = 3 points
-     * C  = 1 point
+     * Handbook official grade points (Rule 11):
+     * A+ = 90% - 100% -> 6 points
+     * A  = 70% - 89%  -> 5 points
+     * B  = 60% - 69%  -> 3 points
+     * C  = 50% - 59%  -> 1 point
+     * (Below 50% = 0 points / No Grade)
      */
     public const GRADE_POINTS = [
         'A+' => 6,
         'A' => 5,
-        'B+' => 4,
         'B' => 3,
         'C' => 1,
     ];
 
     /**
      * Calculate grade name and points from mark (0-100 scale).
-     * Handbook grade points:
-     * A+ = 90–100 -> 6 points
-     * A  = 70–89  -> 5 points
-     * B  = 60–69  -> 3 points
-     * C  = 50–59  -> 1 point
-     * (B+ is awarded at 4 points when explicitly designated)
+     * Official Rulebook:
+     * A+ : 90% - 100% -> 6 points
+     * A  : 70% - 89%  -> 5 points
+     * B  : 60% - 69%  -> 3 points
+     * C  : 50% - 59%  -> 1 point
+     * Below 50%       -> No grade (0 points)
      *
      * @return array{grade: ?string, points: int}
      */
@@ -67,6 +69,139 @@ class PointCalculationService
         }
 
         return ['grade' => null, 'points' => 0];
+    }
+
+    /**
+     * Get position points (1st, 2nd, 3rd) based on Program type, member count, and General Shifting rules.
+     *
+     * Official Rulebook (Rule 11):
+     * - Individual: 1st = 5, 2nd = 3, 3rd = 1
+     * - Group (2 members): 1st = 7, 2nd = 5, 3rd = 3
+     * - Group (3 members): 1st = 10, 2nd = 7, 3rd = 4
+     * - Group (4, 5 members): 1st = 15, 2nd = 10, 3rd = 5
+     * - General Shifting (>5 members or General Shifting): 1st = 20, 2nd = 15, 3rd = 10
+     *
+     * @return array<int, int> [1 => 1st_pts, 2 => 2nd_pts, 3 => 3rd_pts]
+     */
+    public static function getPositionPointsForProgram(Program $program): array
+    {
+        if ($program->isIndividual()) {
+            return [
+                1 => 5,
+                2 => 3,
+                3 => 1,
+            ];
+        }
+
+        // Check for General Shifting (ജനറൽ ഷിഫ്റ്റിങ്)
+        $nameLower = strtolower($program->name.' '.($program->malayalam_name ?? '').' '.($program->rules ?? ''));
+        $isGeneralShifting = str_contains($nameLower, 'shift')
+            || str_contains($nameLower, 'general')
+            || str_contains($nameLower, 'ഷിഫ്റ്റ്')
+            || str_contains($nameLower, 'ജനറൽ');
+
+        $members = max(1, (int) ($program->participant_count ?: $program->max_participants_per_group ?: 2));
+
+        if ($isGeneralShifting || $members > 5) {
+            return [
+                1 => 20,
+                2 => 15,
+                3 => 10,
+            ];
+        }
+
+        if ($members >= 4) { // 4 or 5 members
+            return [
+                1 => 15,
+                2 => 10,
+                3 => 5,
+            ];
+        }
+
+        if ($members === 3) {
+            return [
+                1 => 10,
+                2 => 7,
+                3 => 4,
+            ];
+        }
+
+        // 2 members (or 1 member group)
+        return [
+            1 => 7,
+            2 => 5,
+            3 => 3,
+        ];
+    }
+
+    /**
+     * Automatically determine 1st, 2nd, and 3rd place entries from judge marks.
+     * Only 'present' entries with submitted judge scores are considered.
+     *
+     * @return array{
+     *     first: ?ProgramEntry,
+     *     second: ?ProgramEntry,
+     *     third: ?ProgramEntry,
+     *     ranked: Collection<int, ProgramEntry>
+     * }
+     */
+    public static function determinePodiumForProgram(Program $program): array
+    {
+        $entries = $program->entries()
+            ->where('attendance_status', 'present')
+            ->whereIn('status', ['verified', 'confirmed'])
+            ->with(['scores', 'student.group', 'group'])
+            ->get()
+            ->map(function ($entry) {
+                $submittedSheets = $entry->scores->where('is_submitted', true);
+                $avgScore = $submittedSheets->isNotEmpty()
+                    ? (float) $submittedSheets->avg('total_score')
+                    : 0.0;
+
+                $entry->computed_avg_score = round($avgScore, 2);
+                $gradeInfo = self::getGradeFromScore($entry->computed_avg_score);
+                $entry->computed_grade = $gradeInfo['grade'];
+                $entry->computed_grade_points = $gradeInfo['points'];
+
+                return $entry;
+            })
+            ->filter(fn ($entry) => $entry->computed_avg_score > 0)
+            ->sortByDesc('computed_avg_score')
+            ->values();
+
+        return [
+            'first' => $entries->get(0),
+            'second' => $entries->get(1),
+            'third' => $entries->get(2),
+            'ranked' => $entries,
+        ];
+    }
+
+    /**
+     * Auto-assign and save podium winners from judge scores to the Program's Result.
+     */
+    public static function autoAssignResultPodium(Program $program, ?string $status = null): ?Result
+    {
+        $podium = self::determinePodiumForProgram($program);
+        if (! $podium['first']) {
+            return null;
+        }
+
+        $result = $program->result ?? new Result(['program_id' => $program->id]);
+
+        $result->first_entry_id = $podium['first']->id;
+        $result->second_entry_id = $podium['second']?->id;
+        $result->third_entry_id = $podium['third']?->id;
+
+        if ($status) {
+            $result->status = $status;
+        } elseif (! $result->status) {
+            $result->status = 'draft';
+        }
+
+        $result->save();
+
+        return $result;
     }
 
     /**
@@ -190,10 +325,12 @@ class PointCalculationService
         $isGroupProg = $program->isGroup();
         $now = now();
 
+        $posPointsMap = self::getPositionPointsForProgram($program);
+
         $placements = [
-            1 => ['entry' => $result->firstEntry, 'label' => '1st Place', 'pts' => (int) round(self::POSITION_POINTS[1] * $weight)],
-            2 => ['entry' => $result->secondEntry, 'label' => '2nd Place', 'pts' => (int) round(self::POSITION_POINTS[2] * $weight)],
-            3 => ['entry' => $result->thirdEntry, 'label' => '3rd Place', 'pts' => (int) round(self::POSITION_POINTS[3] * $weight)],
+            1 => ['entry' => $result->firstEntry, 'label' => '1st Place', 'pts' => (int) round($posPointsMap[1] * $weight)],
+            2 => ['entry' => $result->secondEntry, 'label' => '2nd Place', 'pts' => (int) round($posPointsMap[2] * $weight)],
+            3 => ['entry' => $result->thirdEntry, 'label' => '3rd Place', 'pts' => (int) round($posPointsMap[3] * $weight)],
         ];
 
         foreach ($placements as $pos => $data) {
@@ -284,7 +421,8 @@ class PointCalculationService
             ->with(['group', 'student', 'scoreSheets'])
             ->get();
 
-        $partPts = (int) round(1 * $weight);
+        $baseParticipation = (int) (PointSetting::value('participation_points') ?? 0);
+        $partPts = (int) round($baseParticipation * $weight);
 
         foreach ($otherEntries as $entry) {
             if (! $entry->group_id) {

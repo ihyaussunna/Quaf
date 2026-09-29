@@ -2,14 +2,53 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-8">
-    <div class="mb-6">
-        <a href="{{ route('admin.results.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to Results</a>
-        <div class="flex items-center gap-2 mb-1">
-            <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-[#f3bd2e]/30">{{ $result->program->code }}</span>
-            <span class="text-xs font-mono text-slate-500">{{ $result->program->eligibility ?? 'A Zone' }} • {{ ucfirst($result->program->type) }}</span>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <a href="{{ route('admin.results.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">&larr; Back to Results</a>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-[#f3bd2e]/30">{{ $result->program->code }}</span>
+                <span class="text-xs font-mono text-slate-500">{{ $result->program->eligibility ?? 'A Zone' }} &bull; {{ ucfirst($result->program->type) }}</span>
+            </div>
+            <h1 class="text-3xl font-sora font-black text-slate-900">Edit Verdict: {{ $result->program->name }}</h1>
         </div>
-        <h1 class="text-3xl font-sora font-black text-slate-900">Edit Verdict: {{ $result->program->name }}</h1>
+
+        @if(!empty($podium['first']))
+            <form method="POST" action="{{ route('admin.results.auto-determine', $result->program) }}">
+                @csrf
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-mono font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-xs">
+                    Auto-Fill from Judge Scores
+                </button>
+            </form>
+        @endif
     </div>
+
+    @if(!empty($podium['first']))
+        <!-- Judge Scores Auto-Podium Reference -->
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-5 space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider font-bold text-slate-500">Judge Scores Ranking:</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+                <div class="p-3 rounded-xl bg-white border border-amber-200">
+                    <span class="text-[10px] font-bold text-amber-700 uppercase">1st: </span>
+                    <span class="font-bold text-slate-900">{{ $podium['first']->student?->name ?? $podium['first']->group?->name }}</span>
+                    <div class="text-[11px] text-slate-500">{{ $podium['first']->computed_avg_score }} pts &bull; Grade {{ $podium['first']->computed_grade ?? 'None' }}</div>
+                </div>
+                @if(!empty($podium['second']))
+                    <div class="p-3 rounded-xl bg-white border border-slate-200">
+                        <span class="text-[10px] font-bold text-slate-700 uppercase">2nd: </span>
+                        <span class="font-bold text-slate-900">{{ $podium['second']->student?->name ?? $podium['second']->group?->name }}</span>
+                        <div class="text-[11px] text-slate-500">{{ $podium['second']->computed_avg_score }} pts &bull; Grade {{ $podium['second']->computed_grade ?? 'None' }}</div>
+                    </div>
+                @endif
+                @if(!empty($podium['third']))
+                    <div class="p-3 rounded-xl bg-white border border-slate-200">
+                        <span class="text-[10px] font-bold text-amber-900 uppercase">3rd: </span>
+                        <span class="font-bold text-slate-900">{{ $podium['third']->student?->name ?? $podium['third']->group?->name }}</span>
+                        <div class="text-[11px] text-slate-500">{{ $podium['third']->computed_avg_score }} pts &bull; Grade {{ $podium['third']->computed_grade ?? 'None' }}</div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
 
     <form method="POST" action="{{ route('admin.results.update', $result) }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
         @csrf
@@ -20,7 +59,10 @@
             <select name="first_entry_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                 @foreach($result->program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('first_entry_id', $result->first_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                        @if(!empty($podium['first']) && $podium['first']->id === $entry->id)
+                            [AUTO 1ST - {{ $podium['first']->computed_avg_score }} pts]
+                        @endif
                     </option>
                 @endforeach
             </select>
@@ -32,7 +74,10 @@
                 <option value="">-- None --</option>
                 @foreach($result->program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('second_entry_id', $result->second_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                        @if(!empty($podium['second']) && $podium['second']->id === $entry->id)
+                            [AUTO 2ND - {{ $podium['second']->computed_avg_score }} pts]
+                        @endif
                     </option>
                 @endforeach
             </select>
@@ -44,7 +89,10 @@
                 <option value="">-- None --</option>
                 @foreach($result->program->entries as $entry)
                     <option value="{{ $entry->id }}" {{ old('third_entry_id', $result->third_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} — {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group->name }})
+                        Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                        @if(!empty($podium['third']) && $podium['third']->id === $entry->id)
+                            [AUTO 3RD - {{ $podium['third']->computed_avg_score }} pts]
+                        @endif
                     </option>
                 @endforeach
             </select>

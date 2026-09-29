@@ -221,13 +221,23 @@ class JudgeController extends Controller
             }
         }
 
-        // Judge Grade option (A+, A, B+, B, C)
-        $grade = $request->input('grade');
+        // Judge Grade option (A+, A, B, C) - strictly no B+
+        $grade = null;
+        $gradeInput = $request->input('grade');
+        if (! empty($gradeInput)) {
+            $normalizedGrade = strtoupper(trim($gradeInput));
+            if ($normalizedGrade === 'B+') {
+                $normalizedGrade = 'B';
+            }
+            if (in_array($normalizedGrade, ['A+', 'A', 'B', 'C'], true)) {
+                $grade = $normalizedGrade;
+            }
+        }
         if (empty($grade) && $total > 0) {
             $grade = PointCalculationService::getGradeFromScore($total)['grade'] ?? null;
         }
         if ($grade) {
-            $criteriaScores['grade'] = strtoupper(trim($grade));
+            $criteriaScores['grade'] = $grade;
         }
 
         $remarks = $request->input('remarks');
@@ -248,6 +258,12 @@ class JudgeController extends Controller
                 ]
             );
         });
+
+        // Automatically determine and synchronize podium winners (1st, 2nd, 3rd) from judge scores
+        $existingResult = $program->result;
+        if (! $existingResult || ! in_array($existingResult->status, ['published', 'announced'], true)) {
+            PointCalculationService::autoAssignResultPodium($program);
+        }
 
         AuditLogger::log('judge_submit_score', $sheet, null, [
             'judge_id' => $judge->id,

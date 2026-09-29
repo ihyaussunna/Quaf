@@ -317,30 +317,38 @@
                 <table class="w-full text-left border border-slate-200">
                     <thead class="bg-slate-100 font-mono font-bold text-slate-700 uppercase border-b border-slate-200">
                         <tr>
-                            <th class="p-2">Position / Place</th>
-                            <th class="p-2 text-right">Individual</th>
-                            <th class="p-2 text-right">Group (2-3)</th>
-                            <th class="p-2 text-right">Group (4-5)</th>
+                            <th class="p-1.5">Position</th>
+                            <th class="p-1.5 text-right">Indiv</th>
+                            <th class="p-1.5 text-right">2 Mem</th>
+                            <th class="p-1.5 text-right">3 Mem</th>
+                            <th class="p-1.5 text-right">4-5 Mem</th>
+                            <th class="p-1.5 text-right">General</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 font-mono">
+                    <tbody class="divide-y divide-slate-200 font-mono text-[11px]">
                         <tr>
-                            <td class="p-2 font-bold text-[#be1e2d]">1st Place</td>
-                            <td class="p-2 text-right font-bold">5 pts</td>
-                            <td class="p-2 text-right font-bold">7-10 pts</td>
-                            <td class="p-2 text-right font-bold">15-20 pts</td>
+                            <td class="p-1.5 font-bold text-[#be1e2d]">1st</td>
+                            <td class="p-1.5 text-right font-bold">5 pts</td>
+                            <td class="p-1.5 text-right font-bold">7 pts</td>
+                            <td class="p-1.5 text-right font-bold">10 pts</td>
+                            <td class="p-1.5 text-right font-bold">15 pts</td>
+                            <td class="p-1.5 text-right font-bold">20 pts</td>
                         </tr>
                         <tr>
-                            <td class="p-2 font-bold text-slate-800">2nd Place</td>
-                            <td class="p-2 text-right">3 pts</td>
-                            <td class="p-2 text-right">5-7 pts</td>
-                            <td class="p-2 text-right">10-15 pts</td>
+                            <td class="p-1.5 font-bold text-slate-800">2nd</td>
+                            <td class="p-1.5 text-right">3 pts</td>
+                            <td class="p-1.5 text-right">5 pts</td>
+                            <td class="p-1.5 text-right">7 pts</td>
+                            <td class="p-1.5 text-right">10 pts</td>
+                            <td class="p-1.5 text-right">15 pts</td>
                         </tr>
                         <tr>
-                            <td class="p-2 font-bold text-amber-800">3rd Place</td>
-                            <td class="p-2 text-right">1 pt</td>
-                            <td class="p-2 text-right">3-4 pts</td>
-                            <td class="p-2 text-right">5-10 pts</td>
+                            <td class="p-1.5 font-bold text-amber-800">3rd</td>
+                            <td class="p-1.5 text-right">1 pt</td>
+                            <td class="p-1.5 text-right">3 pts</td>
+                            <td class="p-1.5 text-right">4 pts</td>
+                            <td class="p-1.5 text-right">5 pts</td>
+                            <td class="p-1.5 text-right">10 pts</td>
                         </tr>
                     </tbody>
                 </table>
