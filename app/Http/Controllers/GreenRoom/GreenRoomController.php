@@ -119,7 +119,7 @@ class GreenRoomController extends Controller
     public function markAttendance(Request $request, ProgramEntry $entry): JsonResponse|RedirectResponse
     {
         if ($entry->program?->is_call_list_locked) {
-            $msg = 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. ഹാജർ നില മാറ്റാൻ സാധ്യമല്ല.';
+            $msg = 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു. ഗ്രീൻ റൂം എഡിറ്റിംഗ് ആക്സസ് ഒഴിവാക്കി.';
             if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
@@ -207,7 +207,7 @@ class GreenRoomController extends Controller
     public function generateCodeLetters(Program $program): RedirectResponse
     {
         if ($program->is_call_list_locked) {
-            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. കോഡ് ലെറ്ററുകൾ ഇനി മാറ്റാൻ കഴിയില്ല.');
+            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു. ഗ്രീൻ റൂം എഡിറ്റിംഗ് ആക്സസ് ഒഴിവാക്കി.');
         }
 
         // Get all verified entries marked as 'present'
@@ -248,6 +248,10 @@ class GreenRoomController extends Controller
 
     public function toggleLockCallList(Program $program): RedirectResponse
     {
+        if (! in_array(auth()->user()?->role, ['admin', 'super_admin'])) {
+            return back()->with('error', 'അഡ്മിന് മാത്രമേ കോൾ ലിസ്റ്റ് ലോക്ക് / അൺലോക്ക് ചെയ്യാൻ അനുവാദമുള്ളൂ.');
+        }
+
         Program::ensureSchema();
 
         $currentStatus = (bool) ($program->is_call_list_locked ?? false);

@@ -56,6 +56,13 @@
                 </select>
             </div>
 
+            @if(($absentCount ?? 0) > 0)
+                <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs font-mono flex items-center justify-between">
+                    <span>Note: <strong>{{ $absentCount }}</strong> participant(s) marked ABSENT in Call List are excluded from jury evaluation.</span>
+                    <a href="{{ route('admin.call-list.index', ['program_id' => $program->id]) }}" class="underline font-bold text-amber-800 hover:text-amber-950">View Call List</a>
+                </div>
+            @endif
+
             <!-- Entries Table -->
             <div class="border border-slate-200 rounded-xl overflow-hidden">
                 <table class="w-full text-left text-xs font-mono">
@@ -69,7 +76,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
-                        @forelse($program->entries as $entry)
+                        @forelse($presentEntries as $entry)
                             @php
                                 $score = $entry->scores->first()?->total_score ?? '';
                                 $remarks = $entry->scores->first()?->remarks ?? '';
@@ -105,8 +112,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-slate-400">
-                                    No participants registered for this competition yet.
+                                <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-mono">
+                                    No candidates marked PRESENT in Call List yet. Please record attendance in Call List before entering marks.
                                 </td>
                             </tr>
                         @endforelse
@@ -114,7 +121,7 @@
                 </table>
             </div>
 
-            @if($program->entries->count() > 0)
+            @if($presentEntries->count() > 0)
                 <div class="flex justify-end">
                     <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-mono font-bold text-xs uppercase hover:bg-slate-900 shadow-xs">
                         Save Marks
@@ -175,7 +182,7 @@
                     </label>
                     <select name="first_entry_id" required class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-white border border-amber-300 focus:outline-none focus:border-[#f3bd2e] text-slate-900">
                         <option value="">-- Select Winner --</option>
-                        @foreach($program->entries as $entry)
+                        @foreach($presentEntries as $entry)
                             @php $isFirst = (string)old('first_entry_id', $program->result?->first_entry_id ?? $podium['first']?->id ?? '') === (string)$entry->id; @endphp
                             <option value="{{ $entry->id }}" {{ $isFirst ? 'selected' : '' }}>
                                 {{ $entry->student?->student_id ? '['.$entry->student->student_id.'] ' : '' }}
@@ -196,7 +203,7 @@
                     </label>
                     <select name="second_entry_id" class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-[#f3bd2e] text-slate-900">
                         <option value="">-- Select 2nd Place --</option>
-                        @foreach($program->entries as $entry)
+                        @foreach($presentEntries as $entry)
                             @php $isSecond = (string)old('second_entry_id', $program->result?->second_entry_id ?? $podium['second']?->id ?? '') === (string)$entry->id; @endphp
                             <option value="{{ $entry->id }}" {{ $isSecond ? 'selected' : '' }}>
                                 {{ $entry->student?->student_id ? '['.$entry->student->student_id.'] ' : '' }}
@@ -217,7 +224,7 @@
                     </label>
                     <select name="third_entry_id" class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-white border border-amber-200 focus:outline-none focus:border-[#f3bd2e] text-slate-900">
                         <option value="">-- Select 3rd Place --</option>
-                        @foreach($program->entries as $entry)
+                        @foreach($presentEntries as $entry)
                             @php $isThird = (string)old('third_entry_id', $program->result?->third_entry_id ?? $podium['third']?->id ?? '') === (string)$entry->id; @endphp
                             <option value="{{ $entry->id }}" {{ $isThird ? 'selected' : '' }}>
                                 {{ $entry->student?->student_id ? '['.$entry->student->student_id.'] ' : '' }}

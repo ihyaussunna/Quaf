@@ -16,7 +16,7 @@
                 @if($selectedProgram)
                     Digital Call List for <strong>[{{ $selectedProgram->code }}] {{ $selectedProgram->name }}</strong>
                 @else
-                    Programs Call List Directory &bull; Each program operates as its own verified call list.
+                    Programs Call List Directory &bull; Each program operates as its own verified call list. Historical attendance data is permanently preserved across all completed programs.
                 @endif
             </p>
         </div>
@@ -73,7 +73,7 @@
                 {{ $selectedProgram ? number_format($displayStats['total']) : number_format($stats['total_programs']) }}
             </span>
             <span class="text-[10px] text-slate-400 font-mono">
-                {{ $selectedProgram ? 'Registered Students' : number_format($stats['total_entries']) . ' Total Entries' }}
+                {{ $selectedProgram ? 'Registered Students' : number_format($stats['completed_programs'] ?? 0) . ' Completed & Preserved' }}
             </span>
         </div>
 
@@ -158,7 +158,7 @@
 
                 <!-- Lock Status Filter -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Call List Status</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Call List Lock</label>
                     <select name="lock_status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
                         <option value="">All Call Lists</option>
                         <option value="locked" {{ ($lockStatus ?? '') === 'locked' ? 'selected' : '' }}>Locked Only</option>
@@ -166,8 +166,19 @@
                     </select>
                 </div>
 
+                <!-- Program Status Filter (Completed, In Progress, Upcoming) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Program Status</label>
+                    <select name="program_status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                        <option value="">All Programs (All Data)</option>
+                        <option value="completed" {{ ($programStatus ?? '') === 'completed' ? 'selected' : '' }}>Completed (കഴിഞ്ഞവ)</option>
+                        <option value="in_progress" {{ ($programStatus ?? '') === 'in_progress' ? 'selected' : '' }}>In Progress (നടക്കുന്നവ)</option>
+                        <option value="upcoming" {{ ($programStatus ?? '') === 'upcoming' ? 'selected' : '' }}>Upcoming (വരാനിരിക്കുന്നവ)</option>
+                    </select>
+                </div>
+
                 <!-- Filter Actions -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 sm:col-span-2 md:col-span-4 lg:col-span-1">
                     <button type="submit" class="flex-1 py-2 px-3 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 font-sora">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                         <span>Filter</span>
@@ -204,7 +215,8 @@
                             <th class="px-4 py-3.5">Venue & Schedule</th>
                             <th class="px-4 py-3.5 text-center">Call List Count</th>
                             <th class="px-4 py-3.5 text-center">Attendance Summary</th>
-                            <th class="px-4 py-3.5 text-center">Call List Status</th>
+                            <th class="px-4 py-3.5 text-center">Program Status</th>
+                            <th class="px-4 py-3.5 text-center">Call List Lock</th>
                             <th class="px-4 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -272,7 +284,24 @@
                                     </div>
                                 </td>
 
-                                <!-- Call List Status -->
+                                <!-- Program Status (Upcoming, In Progress, Completed) -->
+                                <td class="px-4 py-3.5 text-center">
+                                    @if($prog->status === 'completed')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            Completed
+                                        </span>
+                                    @elseif($prog->status === 'in_progress')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-amber-100 text-amber-800 border border-amber-200">
+                                            In Progress
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                                            Upcoming
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- Call List Lock Status -->
                                 <td class="px-4 py-3.5 text-center">
                                     @if($prog->is_call_list_locked)
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-red-100 text-red-800 border border-red-200">
@@ -309,7 +338,7 @@
                                             @csrf
                                             <button type="submit" 
                                                     class="p-1.5 rounded-xl transition {{ $prog->is_call_list_locked ? 'bg-red-50 hover:bg-red-100 text-red-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-600' }}"
-                                                    title="{{ $prog->is_call_list_locked ? 'Unlock Call List' : 'Lock Call List' }}">
+                                                    title="{{ $prog->is_call_list_locked ? 'Unlock Call List' : 'Lock Call List (Remove Green Room Access)' }}">
                                                 @if($prog->is_call_list_locked)
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                                 @else
@@ -322,7 +351,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-slate-400 font-mono">
+                                <td colspan="8" class="px-6 py-12 text-center text-slate-400 font-mono">
                                     No programs match your search or filter.
                                 </td>
                             </tr>

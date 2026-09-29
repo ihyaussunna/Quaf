@@ -68,15 +68,25 @@ class MarkEntryController extends Controller
             'result.firstEntry.student',
             'result.secondEntry.student',
             'result.thirdEntry.student',
-            'entries.student.group',
-            'entries.group',
-            'entries.scores.judge',
         ]);
+
+        // STRICT REQUIREMENT: Only candidates marked PRESENT in Call List appear in evaluation
+        $presentEntries = $program->entries()
+            ->where('status', 'verified')
+            ->where('attendance_status', 'present')
+            ->with(['student.group', 'group', 'scores.judge'])
+            ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
+            ->get();
+
+        $absentCount = $program->entries()
+            ->where('status', 'verified')
+            ->where('attendance_status', 'absent')
+            ->count();
 
         $judges = Judge::orderBy('name')->get();
         $podium = PointCalculationService::determinePodiumForProgram($program);
 
-        return view('admin.mark-entry.show', compact('program', 'judges', 'podium'));
+        return view('admin.mark-entry.show', compact('program', 'presentEntries', 'absentCount', 'judges', 'podium'));
     }
 
     public function saveMarks(Request $request, Program $program): RedirectResponse
@@ -98,6 +108,8 @@ class MarkEntryController extends Controller
         DB::transaction(function () use ($validated, $judgeId, $program) {
             $validEntries = ProgramEntry::whereIn('id', array_keys($validated['scores']))
                 ->where('program_id', $program->id)
+                ->where('status', 'verified')
+                ->where('attendance_status', 'present')
                 ->pluck('id')
                 ->flip();
 

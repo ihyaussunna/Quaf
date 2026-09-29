@@ -118,7 +118,7 @@
                         <option value="">-- Choose Program --</option>
                         @foreach($programs as $prog)
                             <option value="{{ $prog->id }}" {{ (string)$selectedProgramId === (string)$prog->id ? 'selected' : '' }}>
-                                {{ $prog->name }} (ID: {{ $prog->code ?: $prog->id }})
+                                {{ $prog->name }} (ID: {{ $prog->code ?: $prog->id }}){{ $prog->is_call_list_locked ? ' [LOCKED BY ADMIN - ACCESS REMOVED]' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -182,12 +182,12 @@
                                 {{ $selectedProgram->category->name ?? $selectedProgram->eligibility ?? 'General' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
                             </span>
                             @if($selectedProgram->is_call_list_locked)
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    LOCKED (ലോക്ക് ചെയ്തു)
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
+                                    <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    LOCKED BY ADMIN (ഗ്രീൻ റൂം ആക്സസ് ഒഴിവാക്കി)
                                 </span>
                             @else
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 font-mono">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                     OPEN / EDITABLE (തുറന്നിരിക്കുന്നു)
                                 </span>
@@ -213,21 +213,12 @@
                             </button>
                         </form>
 
-                        <!-- Lock Call List Toggle Button -->
-                        <form method="POST" action="{{ route('greenroom.toggle-lock', $selectedProgram->id) }}" onsubmit="return confirm('{{ $selectedProgram->is_call_list_locked ? 'കോൾ ലിസ്റ്റ് അൺലോക്ക് ചെയ്യണോ?' : 'കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്യണോ? ലോക്ക് ചെയ്താൽ ഹാജർ നില മാറ്റാൻ കഴിയില്ല. ജഡ്ജ് പാനലിൽ ഹാജരായവർ മാത്രമേ ലഭ്യമാകൂ.' }}');">
-                            @csrf
-                            @if($selectedProgram->is_call_list_locked)
-                                <button type="submit" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                                    <span>കോൾ ലിസ്റ്റ് അൺലോക്ക് ചെയ്യുക</span>
-                                </button>
-                            @else
-                                <button type="submit" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    <span>കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്യുക (Lock)</span>
-                                </button>
-                            @endif
-                        </form>
+                        @if($selectedProgram->is_call_list_locked)
+                            <div class="px-4 py-2.5 rounded-xl bg-red-50 text-red-700 border border-red-200 font-bold text-xs flex items-center gap-1.5 shadow-2xs">
+                                <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <span>അഡ്മിൻ ലോക്ക് ചെയ്തു (Access Removed)</span>
+                            </div>
+                        @endif
 
                         <!-- Print Call Sheet -->
                         <a href="{{ route('admin.forms.call-list', ['program' => $selectedProgram->id, 'print' => 1]) }}" target="_blank"
@@ -273,9 +264,12 @@
                 </div>
 
                 @if($selectedProgram->is_call_list_locked)
-                    <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs font-mono flex items-center justify-between">
-                        <span>ശ്രദ്ധിക്കുക: ഈ കോൾ ലിസ്റ്റ് ഫ്രോസൺ ചെയ്തിരിക്കുന്നു. ഹാജരായവർ മാത്രമേ മൂല്യനിർണ്ണയത്തിനായി ജഡ്ജ് പാനലിൽ ലഭ്യമാകൂ.</span>
-                        <span class="font-bold uppercase tracking-wider text-[10px] bg-red-200 text-red-900 px-2 py-0.5 rounded">FROZEN</span>
+                    <div class="p-4 rounded-2xl bg-red-50 border-2 border-red-200 text-red-900 text-xs font-mono flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <div>
+                            <span class="font-bold uppercase tracking-wider block text-red-800">കോൾ ലിസ്റ്റ് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു — ഗ്രീൻ റൂം എഡിറ്റിംഗ് ആക്സസ് ഒഴിവാക്കി</span>
+                            <p class="text-red-700 mt-1 leading-relaxed">പ്രോഗ്രാം ആരംഭിക്കുന്നതിന് മുന്നോടിയായി അഡ്മിൻ ഗ്രീൻ റൂം എഡിറ്റിംഗ് അനുമതി റദ്ദാക്കി. ഇനി ഹാജർ നിലയോ കോഡുകളോ മാറ്റാൻ കഴിയില്ല. ഹാജരായ (PRESENT) മത്സരാർത്ഥികൾ മാത്രമേ ജഡ്ജ് മൂല്യനിർണ്ണയ പാനലിൽ ലഭ്യമാകൂ.</p>
+                        </div>
                     </div>
                 @endif
             </div>

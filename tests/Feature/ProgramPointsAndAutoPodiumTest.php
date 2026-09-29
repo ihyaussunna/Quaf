@@ -377,4 +377,159 @@ class ProgramPointsAndAutoPodiumTest extends TestCase
         // Unjudged program MUST NOT be in handler list
         $this->assertFalse($viewPrograms->pluck('name')->contains('Unjudged Program Off Stage'));
     }
+
+    public function test_evaluation_form_only_includes_present_students_from_call_list(): void
+    {
+        $prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-EVAL-CALL',
+            'name' => 'Call List Present Eval Program',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'in_progress',
+        ]);
+
+        $studentPresent = Student::create(['group_id' => $this->groupA->id, 'zone_id' => $this->zone->id, 'student_id' => 'ST-P', 'name' => 'Present Student', 'qr_token' => 'qr-p', 'is_active' => true]);
+        $studentAbsent = Student::create(['group_id' => $this->groupB->id, 'zone_id' => $this->zone->id, 'student_id' => 'ST-AB', 'name' => 'Absent Student', 'qr_token' => 'qr-ab', 'is_active' => true]);
+
+        $entryPresent = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $studentPresent->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => '111',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+            'code_letter' => 'A',
+        ]);
+
+        $entryAbsent = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $studentAbsent->id,
+            'group_id' => $this->groupB->id,
+            'chest_number' => '222',
+            'status' => 'verified',
+            'attendance_status' => 'absent',
+            'code_letter' => null,
+        ]);
+
+        $res = $this->actingAs($this->admin)->get(route('admin.mark-entry.show', $prog));
+        $res->assertStatus(200);
+
+        $presentEntries = $res->viewData('presentEntries');
+        $this->assertTrue($presentEntries->pluck('id')->contains($entryPresent->id));
+        $this->assertFalse($presentEntries->pluck('id')->contains($entryAbsent->id));
+        $this->assertEquals(1, $res->viewData('absentCount'));
+
+        // Saving marks should only persist for present entry
+        $judge = Judge::create([
+            'name' => 'Eval Judge',
+            'access_code' => '4444',
+        ]);
+
+        $this->actingAs($this->admin)->post(route('admin.mark-entry.save', $prog), [
+            'judge_id' => $judge->id,
+            'scores' => [
+                $entryPresent->id => ['total_score' => 88.0, 'remarks' => 'Good'],
+                $entryAbsent->id => ['total_score' => 95.0, 'remarks' => 'Absent should not be scored'],
+            ],
+        ]);
+
+        $this->assertDatabaseHas('score_sheets', [
+            'program_id' => $prog->id,
+            'entry_id' => $entryPresent->id,
+            'total_score' => 88.0,
+        ]);
+
+        $this->assertDatabaseMissing('score_sheets', [
+            'program_id' => $prog->id,
+            'entry_id' => $entryAbsent->id,
+        ]);
+    }
+
+    public function test_green_room_access_removed_when_call_list_locked_by_admin(): void
+    {
+        $prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-LOCK-TEST',
+            'name' => 'Locked Call List Program',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'upcoming',
+            'is_call_list_locked' => false,
+        ]);
+
+        $student = Student::create(['group_id' => $this->groupA->id, 'zone_id' => $this->zone->id, 'student_id' => 'ST-LCK', 'name' => 'Lock Student', 'qr_token' => 'qr-lck', 'is_active' => true]);
+        $entry = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $student->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => '333',
+            'status' => 'verified',
+            'attendance_status' => 'waiting',
+        ]);
+
+        // Admin locks call list
+        $this->actingAs($this->admin)->post(route('admin.call-list.toggle-lock', $prog));
+        $this->assertTrue((bool) $prog->fresh()->is_call_list_locked);
+
+        // Regular green room user attempts to mark attendance -> rejected
+        $greenRoomUser = User::create([
+            'name' => 'Green Room Staff',
+            'email' => 'greenroom@quaf.test',
+            'password' => Hash::make('secret123'),
+            'role' => 'green_room_coordinator',
+            'is_active' => true,
+        ]);
+
+        $resAttendance = $this->actingAs($greenRoomUser)->postJson(route('greenroom.mark-attendance', $entry), [
+            'status' => 'present',
+        ]);
+        $resAttendance->assertStatus(422);
+
+        // Attempting to shuffle codes -> rejected
+        $resShuffle = $this->actingAs($greenRoomUser)->post(route('greenroom.generate-codes', $prog));
+        $resShuffle->assertSessionHas('error');
+
+        // Non-admin attempting to unlock -> rejected
+        $resToggle = $this->actingAs($greenRoomUser)->post(route('greenroom.toggle-lock', $prog));
+        $resToggle->assertSessionHas('error');
+        $this->assertTrue((bool) $prog->fresh()->is_call_list_locked);
+    }
+
+    public function test_call_list_data_permanently_preserved_and_filterable_by_program_status(): void
+    {
+        $completedProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-COMP-HIST',
+            'name' => 'Historical Completed Program',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+            'is_call_list_locked' => true,
+        ]);
+
+        $student = Student::create(['group_id' => $this->groupA->id, 'zone_id' => $this->zone->id, 'student_id' => 'ST-HIST', 'name' => 'History Student', 'qr_token' => 'qr-hist', 'is_active' => true]);
+        ProgramEntry::create([
+            'program_id' => $completedProg->id,
+            'student_id' => $student->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => '777',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+            'code_letter' => 'A',
+        ]);
+
+        // Filter Call list index by program_status=completed
+        $res = $this->actingAs($this->admin)->get(route('admin.call-list.index', ['program_status' => 'completed']));
+        $res->assertStatus(200);
+
+        $viewLists = $res->viewData('programCallLists');
+        $this->assertTrue($viewLists->pluck('name')->contains('Historical Completed Program'));
+
+        // Open specific completed program's call list
+        $resDetail = $this->actingAs($this->admin)->get(route('admin.call-list.index', ['program_id' => $completedProg->id]));
+        $resDetail->assertStatus(200);
+        $resDetail->assertSee('History Student');
+        $resDetail->assertSee('Code A');
+    }
 }

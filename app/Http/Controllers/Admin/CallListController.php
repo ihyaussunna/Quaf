@@ -31,6 +31,7 @@ class CallListController extends Controller
         $stageId = $request->query('stage_id');
         $programId = $request->query('program_id') ?: $request->query('program');
         $lockStatus = $request->query('lock_status');
+        $programStatus = $request->query('program_status');
         $attendance = $request->query('attendance');
         $evalStatus = $request->query('eval_status');
 
@@ -42,6 +43,7 @@ class CallListController extends Controller
         // Macro counters across the whole festival system
         $stats = [
             'total_programs' => Program::count(),
+            'completed_programs' => Program::where('status', 'completed')->count(),
             'total_entries' => ProgramEntry::where('status', 'verified')->count(),
             'present' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->count(),
             'absent' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'absent')->count(),
@@ -142,6 +144,10 @@ class CallListController extends Controller
             });
         }
 
+        if ($programStatus) {
+            $programsQuery->where('status', $programStatus);
+        }
+
         $programCallLists = $programsQuery->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.call-list.index', compact(
@@ -159,6 +165,7 @@ class CallListController extends Controller
             'stageId',
             'programId',
             'lockStatus',
+            'programStatus',
             'attendance',
             'evalStatus'
         ));
