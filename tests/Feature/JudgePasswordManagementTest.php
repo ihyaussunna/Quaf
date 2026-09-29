@@ -226,4 +226,64 @@ class JudgePasswordManagementTest extends TestCase
         $response->assertRedirect(route('judge.dashboard'));
         $this->assertAuthenticatedAs($user);
     }
+
+    public function test_judge_can_login_using_4digit_pin_as_username_on_main_login(): void
+    {
+        $user = User::create([
+            'name' => 'Pin Username Judge',
+            'email' => 'pinuser@quaf.fest',
+            'password' => Hash::make('SecretPass123'),
+            'plain_password' => 'SecretPass123',
+            'role' => 'judge',
+            'is_active' => true,
+        ]);
+
+        Judge::create([
+            'user_id' => $user->id,
+            'name' => 'Pin Username Judge',
+            'access_code' => '5541',
+        ]);
+
+        // Login using 4-digit PIN as username and PIN as password
+        $response = $this->post(route('login'), [
+            'username' => '5541',
+            'password' => '5541',
+        ]);
+
+        $response->assertRedirect(route('judge.dashboard'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_legacy_judge_without_plain_password_self_heals(): void
+    {
+        $user = User::create([
+            'name' => 'Rujhan Judge',
+            'email' => 'rujhan865@judge.festfloww',
+            'password' => Hash::make('unknown_old_hash'),
+            'plain_password' => null,
+            'role' => 'judge',
+            'is_active' => true,
+        ]);
+
+        $judge = Judge::create([
+            'user_id' => $user->id,
+            'name' => 'Rujhan Judge',
+            'access_code' => '4192',
+        ]);
+
+        // Trigger ensureCredentials
+        Judge::ensureCredentials();
+
+        $user->refresh();
+        $this->assertEquals('4192', $user->plain_password);
+
+        // Now test login using email and the access_code as password
+        $response = $this->post(route('login'), [
+            'username' => 'rujhan865@judge.festfloww',
+            'password' => '4192',
+        ]);
+
+        $response->assertRedirect(route('judge.dashboard'));
+        $this->assertAuthenticatedAs($user);
+    }
 }

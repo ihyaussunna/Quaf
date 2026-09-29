@@ -42,4 +42,20 @@ class Judge extends Model
     {
         return $this->hasMany(ScoreSheet::class);
     }
+
+    /**
+     * Self-heal credentials for legacy judges with missing plain_password.
+     */
+    public static function ensureCredentials(): void
+    {
+        self::with('user')->whereNotNull('access_code')->chunk(50, function ($judges) {
+            foreach ($judges as $j) {
+                if ($j->user && empty($j->user->plain_password)) {
+                    $j->user->update([
+                        'plain_password' => $j->access_code,
+                    ]);
+                }
+            }
+        });
+    }
 }

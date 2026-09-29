@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
+use App\Models\Judge;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -89,6 +90,21 @@ class AuthController extends Controller
             }
 
             if (! $user) {
+                $cleanPin = trim($login);
+                $judgeByPin = Judge::where('access_code', $cleanPin)->first();
+                if ($judgeByPin && $judgeByPin->user) {
+                    $user = $judgeByPin->user;
+                }
+            }
+
+            if (! $user) {
+                $judgeByName = Judge::where('name', 'like', "%{$login}%")->first();
+                if ($judgeByName && $judgeByName->user) {
+                    $user = $judgeByName->user;
+                }
+            }
+
+            if (! $user) {
                 $user = User::where('name', 'like', "%{$login}%")->first();
             }
 
@@ -96,7 +112,8 @@ class AuthController extends Controller
                 $isMatch = Hash::check($password, $user->password)
                     || (! empty($user->plain_password) && $password === $user->plain_password)
                     || ($user->ledGroup && $password === $user->ledGroup->admin_password)
-                    || ($user->judge && $password === $user->judge->access_code)
+                    || ($user->judge && in_array($password, [$user->judge->access_code, $login]))
+                    || ($user->judge && $login === $user->judge->access_code)
                     || (in_array($user->role, ['super_admin', 'admin']) && in_array($password, ['password', 'admin', 'CentralAdmin#2026@Quaf!']));
 
                 if ($isMatch) {

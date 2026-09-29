@@ -86,6 +86,16 @@
                 </button>
             </div>
         </form>
+
+        <!-- Judge PIN Login Link -->
+        <div class="mt-6 pt-5 border-t border-white/10 text-center">
+            <p class="text-xs font-mono text-slate-400">
+                Are you a Judge? 
+                <a href="{{ route('judge.login') }}" class="text-[#f3bd2e] hover:underline font-bold ml-1">
+                    Login with 4-Digit PIN &rarr;
+                </a>
+            </p>
+        </div>
     </div>
 
 </body>
