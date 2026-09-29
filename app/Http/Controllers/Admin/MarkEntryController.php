@@ -223,7 +223,17 @@ class MarkEntryController extends Controller
         $search = $request->query('search');
         $status = $request->query('status');
 
-        $query = Program::with(['category', 'result']);
+        // Strictly only show programs where judge evaluation is completed / marks submitted
+        $query = Program::with(['category', 'result'])
+            ->where(function ($q) {
+                $q->whereHas('result', fn ($rq) => $rq->whereNotNull('first_entry_id'))
+                    ->orWhere(function ($sub) {
+                        $sub->whereHas('entries', function ($eq) {
+                            $eq->where('attendance_status', 'present')
+                                ->whereHas('scoreSheets', fn ($sq) => $sq->where('is_submitted', true));
+                        });
+                    });
+            });
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -235,8 +245,11 @@ class MarkEntryController extends Controller
         if ($status) {
             if ($status === 'passed') {
                 $query->where(function ($q) {
-                    $q->doesntHave('result')
-                        ->orWhereHas('result', fn ($rq) => $rq->where('status', 'passed'));
+                    $q->whereHas('result', fn ($rq) => $rq->where('status', 'passed'))
+                        ->orWhere(function ($sub) {
+                            $sub->doesntHave('result')
+                                ->orWhereHas('result', fn ($rq) => $rq->whereNull('status')->orWhere('status', 'draft'));
+                        });
                 });
             } else {
                 $query->whereHas('result', fn ($rq) => $rq->where('status', $status));

@@ -10,6 +10,7 @@ use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
+use App\Models\ScoreSheet;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
@@ -279,5 +280,101 @@ class ProgramPointsAndAutoPodiumTest extends TestCase
         $this->assertEquals(1, $this->groupA->fresh()->rank_cache);
         $this->assertEquals(2, $this->groupB->fresh()->rank_cache);
         $this->assertEquals(3, $this->groupC->fresh()->rank_cache);
+    }
+
+    public function test_admin_can_destroy_result_and_recalculate_points(): void
+    {
+        $prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-DEL',
+            'name' => 'To Delete Program',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+
+        $student = Student::create(['group_id' => $this->groupA->id, 'zone_id' => $this->zone->id, 'student_id' => 'ST-DEL', 'name' => 'Del Student', 'qr_token' => 'qr-del', 'is_active' => true]);
+        $entry = ProgramEntry::create(['program_id' => $prog->id, 'student_id' => $student->id, 'group_id' => $this->groupA->id, 'chest_number' => '999', 'status' => 'verified', 'attendance_status' => 'present']);
+
+        $result = Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry->id,
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        PointCalculationService::recalculateAll();
+        $this->assertGreaterThan(0, $this->groupA->fresh()->points_cache);
+
+        // Send DELETE to destroy result
+        $res = $this->actingAs($this->admin)->delete(route('admin.results.destroy', $result));
+        $res->assertRedirect(route('admin.results.index'));
+        $res->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('results', ['id' => $result->id]);
+        $this->assertEquals(0, $this->groupA->fresh()->points_cache);
+        $this->assertEquals('upcoming', $prog->fresh()->status);
+    }
+
+    public function test_marks_handler_only_shows_evaluated_programs(): void
+    {
+        // 1. Program without any evaluation / result
+        $unjudgedProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-UNJUDGED',
+            'name' => 'Unjudged Program Off Stage',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'upcoming',
+        ]);
+
+        // 2. Program with submitted judge evaluation / result
+        $judgedProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-JUDGED',
+            'name' => 'Judged Completed Program',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'in_progress',
+        ]);
+
+        $student = Student::create(['group_id' => $this->groupA->id, 'zone_id' => $this->zone->id, 'student_id' => 'ST-JUD', 'name' => 'Judged Student', 'qr_token' => 'qr-jud', 'is_active' => true]);
+        $entry = ProgramEntry::create(['program_id' => $judgedProg->id, 'student_id' => $student->id, 'group_id' => $this->groupA->id, 'chest_number' => '888', 'status' => 'verified', 'attendance_status' => 'present']);
+
+        $judgeUser = User::create([
+            'name' => 'Handler Judge',
+            'email' => 'handler_judge@quaf.test',
+            'password' => Hash::make('secret123'),
+            'role' => 'judge',
+            'is_active' => true,
+        ]);
+
+        $judge = Judge::create([
+            'name' => 'Handler Judge',
+            'access_code' => '5555',
+            'user_id' => $judgeUser->id,
+        ]);
+
+        $judgedProg->judges()->attach($judge->id);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $judgedProg->id,
+            'entry_id' => $entry->id,
+            'total_score' => 85.0,
+            'is_submitted' => true,
+        ]);
+
+        PointCalculationService::autoAssignResultPodium($judgedProg);
+
+        // Fetch mark handler page
+        $res = $this->actingAs($this->admin)->get(route('admin.mark-entry.handler'));
+        $res->assertStatus(200);
+
+        // Evaluated program MUST be present in handler list
+        $viewPrograms = $res->viewData('programs');
+        $this->assertTrue($viewPrograms->pluck('name')->contains('Judged Completed Program'));
+        // Unjudged program MUST NOT be in handler list
+        $this->assertFalse($viewPrograms->pluck('name')->contains('Unjudged Program Off Stage'));
     }
 }

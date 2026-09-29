@@ -283,6 +283,24 @@ class ResultController extends Controller
         return back()->with('success', "Result for '{$programName}' has been undeclared.");
     }
 
+    public function destroy(Result $result): RedirectResponse
+    {
+        $program = $result->program;
+        $programName = $program?->name ?? 'Program';
+
+        if ($program && $program->status === 'completed') {
+            $program->update(['status' => 'upcoming']);
+        }
+
+        $result->delete();
+
+        $this->pointService->recalculateAllPoints();
+
+        AuditLogger::log('delete_result', null, ['program' => $programName], null);
+
+        return redirect()->route('admin.results.index')->with('success', "Verdict for '{$programName}' deleted successfully and points recalculated.");
+    }
+
     public function specified(Request $request): View
     {
         $programQuery = $request->query('program_id');

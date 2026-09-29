@@ -105,8 +105,8 @@
                 </div>
             </div>
         @empty
-            <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-                No programs found.
+            <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400 font-mono text-xs">
+                No evaluated programs found. Programs appear here only after judge evaluation is completed.
             </div>
         @endforelse
     </div>
