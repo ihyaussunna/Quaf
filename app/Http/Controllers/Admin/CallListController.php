@@ -43,7 +43,12 @@ class CallListController extends Controller
         // Macro counters across the whole festival system
         $stats = [
             'total_programs' => Program::count(),
+            'locked_programs' => Program::where('is_call_list_locked', true)->count(),
+            'pending_programs' => Program::where('status', '!=', 'completed')->count(),
             'completed_programs' => Program::where('status', 'completed')->count(),
+            'open_programs' => Program::where(function ($q) {
+                $q->whereNull('is_call_list_locked')->orWhere('is_call_list_locked', false);
+            })->count(),
             'total_entries' => ProgramEntry::where('status', 'verified')->count(),
             'present' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->count(),
             'absent' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'absent')->count(),
@@ -52,7 +57,6 @@ class CallListController extends Controller
             })->count(),
             'evaluated' => ProgramEntry::where('status', 'verified')->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
             'pending_evaluation' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
-            'locked_programs' => Program::where('is_call_list_locked', true)->count(),
         ];
 
         $selectedProgram = null;
@@ -332,14 +336,24 @@ class CallListController extends Controller
 
         $programs = $query->orderBy('name')->paginate(20)->withQueryString();
 
-        // Calculate macro statistics
+        // Calculate macro statistics: program-level evaluation metrics
+        $evaluatedProgramsCount = Program::where(function ($q) {
+            $q->whereHas('result', fn ($rq) => $rq->whereNotNull('first_entry_id'))
+                ->orWhere(function ($sub) {
+                    $sub->whereHas('entries', function ($eq) {
+                        $eq->where('attendance_status', 'present')
+                            ->whereHas('scoreSheets', fn ($sq) => $sq->where('is_submitted', true));
+                    });
+                });
+        })->count();
+
         $stats = [
             'total_programs' => Program::count(),
+            'evaluated_programs' => $evaluatedProgramsCount,
+            'pending_programs' => max(0, Program::count() - $evaluatedProgramsCount),
             'completed_programs' => Program::where('status', 'completed')->count(),
-            'total_participants' => ProgramEntry::where('status', 'verified')->count(),
-            'present_participants' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->count(),
-            'evaluated_participants' => ProgramEntry::where('status', 'verified')->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
-            'pending_evaluations' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
+            'in_progress_programs' => Program::where('status', 'in_progress')->count(),
+            'upcoming_programs' => Program::where('status', 'upcoming')->count(),
         ];
 
         $zones = Program::ZONES;

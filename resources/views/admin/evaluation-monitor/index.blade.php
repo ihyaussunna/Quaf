@@ -29,37 +29,32 @@
         </div>
     </div>
 
-    <!-- Section 11: 6 Macro Stat Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+    <!-- Program Evaluation Stat Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
             <span class="text-slate-500 font-mono block text-[11px] uppercase font-bold">Total Programs</span>
             <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ number_format($stats['total_programs']) }}</span>
             <span class="text-[10px] text-slate-400 font-mono">Festival Competitions</span>
         </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
-            <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Completed Events</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($stats['completed_programs']) }}</span>
-            <span class="text-[10px] text-emerald-600 font-mono">Published / Declared</span>
-        </div>
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
-            <span class="text-slate-500 font-mono block text-[11px] uppercase font-bold">Total Participants</span>
-            <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ number_format($stats['total_participants']) }}</span>
-            <span class="text-[10px] text-slate-400 font-mono">Across All Events</span>
-        </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
-            <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Present Participants</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($stats['present_participants']) }}</span>
-            <span class="text-[10px] text-emerald-600 font-mono">Eligible for Scoring</span>
-        </div>
         <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 text-purple-900 shadow-2xs">
-            <span class="font-mono block text-purple-700 text-[11px] uppercase font-bold">Evaluated</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($stats['evaluated_participants']) }}</span>
-            <span class="text-[10px] text-purple-600 font-mono">Marks Submitted</span>
+            <span class="font-mono block text-purple-700 text-[11px] uppercase font-bold">Evaluated Programs</span>
+            <span class="text-2xl font-black mt-1 block font-mono text-purple-900">{{ number_format($stats['evaluated_programs']) }}</span>
+            <span class="text-[10px] text-purple-600 font-mono font-medium">Jury Done (മൂല്യനിർണ്ണയം കഴിഞ്ഞവ)</span>
         </div>
         <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 shadow-2xs">
-            <span class="font-mono block text-amber-700 text-[11px] uppercase font-bold">Pending Evaluations</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($stats['pending_evaluations']) }}</span>
-            <span class="text-[10px] text-amber-600 font-mono">Awaiting Jury Scores</span>
+            <span class="font-mono block text-amber-700 text-[11px] uppercase font-bold">Pending Programs</span>
+            <span class="text-2xl font-black mt-1 block font-mono text-amber-900">{{ number_format($stats['pending_programs']) }}</span>
+            <span class="text-[10px] text-amber-600 font-mono font-medium">Pending (കഴിയാത്തവ)</span>
+        </div>
+        <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
+            <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Completed / Declared</span>
+            <span class="text-2xl font-black mt-1 block font-mono text-emerald-900">{{ number_format($stats['completed_programs']) }}</span>
+            <span class="text-[10px] text-emerald-600 font-mono font-medium">Published (പൂർത്തിയായവ)</span>
+        </div>
+        <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 shadow-2xs">
+            <span class="font-mono block text-blue-700 text-[11px] uppercase font-bold">In Progress / Stage</span>
+            <span class="text-2xl font-black mt-1 block font-mono text-blue-900">{{ number_format($stats['in_progress_programs']) }}</span>
+            <span class="text-[10px] text-blue-600 font-mono font-medium">Active (വേദിയിൽ നടക്കുന്നവ)</span>
         </div>
     </div>
 

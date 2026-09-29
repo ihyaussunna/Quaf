@@ -59,59 +59,79 @@
         <span x-text="toast.message"></span>
     </div>
 
-    <!-- Live Summary Counter Cards -->
-    @php
-        $displayStats = $selectedProgram ? $programStats : $stats;
-    @endphp
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-        <!-- 1. Total Call List -->
-        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
-            <span class="text-slate-500 font-mono block text-[11px] uppercase font-bold">
-                {{ $selectedProgram ? 'Program Entries' : 'Total Programs' }}
-            </span>
-            <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">
-                {{ $selectedProgram ? number_format($displayStats['total']) : number_format($stats['total_programs']) }}
-            </span>
-            <span class="text-[10px] text-slate-400 font-mono">
-                {{ $selectedProgram ? 'Registered Students' : number_format($stats['completed_programs'] ?? 0) . ' Completed & Preserved' }}
-            </span>
-        </div>
+    @if(!$selectedProgram)
+        <!-- Program-Wise Macro Summary Cards (Directory Level) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+            <!-- 1. Total Programs -->
+            <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                <span class="text-slate-500 font-mono block text-[11px] uppercase font-bold">Total Programs</span>
+                <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ number_format($stats['total_programs']) }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">Festival Competitions</span>
+            </div>
 
-        <!-- 2. Present -->
-        <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
-            <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Total Present</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($displayStats['present']) }}</span>
-            <span class="text-[10px] text-emerald-600 font-mono">Eligible for Jury</span>
-        </div>
+            <!-- 2. Call List Locked (Competition Started) -->
+            <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-red-900 shadow-2xs">
+                <span class="font-mono block text-red-700 text-[11px] uppercase font-bold">Call List Locked</span>
+                <span class="text-2xl font-black mt-1 block font-mono text-red-900">{{ number_format($stats['locked_programs']) }}</span>
+                <span class="text-[10px] text-red-600 font-mono font-medium">Stage Started (മത്സരം ആരംഭിച്ചവ)</span>
+            </div>
 
-        <!-- 3. Absent -->
-        <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-red-900 shadow-2xs">
-            <span class="font-mono block text-red-700 text-[11px] uppercase font-bold">Total Absent</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($displayStats['absent']) }}</span>
-            <span class="text-[10px] text-red-600 font-mono">Excluded from Jury</span>
-        </div>
+            <!-- 3. Pending Programs (Competition Not Finished) -->
+            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 shadow-2xs">
+                <span class="font-mono block text-amber-700 text-[11px] uppercase font-bold">Pending Programs</span>
+                <span class="text-2xl font-black mt-1 block font-mono text-amber-900">{{ number_format($stats['pending_programs']) }}</span>
+                <span class="text-[10px] text-amber-600 font-mono font-medium">To Be Finished (കഴിയാത്തവ)</span>
+            </div>
 
-        <!-- 4. Pending Calls / Waiting -->
-        <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 shadow-2xs">
-            <span class="font-mono block text-amber-700 text-[11px] uppercase font-bold">Waiting Calls</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($displayStats['waiting']) }}</span>
-            <span class="text-[10px] text-amber-600 font-mono">Pending Check-in</span>
-        </div>
+            <!-- 4. Completed Programs -->
+            <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
+                <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Completed Programs</span>
+                <span class="text-2xl font-black mt-1 block font-mono text-emerald-900">{{ number_format($stats['completed_programs']) }}</span>
+                <span class="text-[10px] text-emerald-600 font-mono font-medium">Finished (മത്സരം കഴിഞ്ഞവ)</span>
+            </div>
 
-        <!-- 5. Pending Evaluation -->
-        <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 shadow-2xs">
-            <span class="font-mono block text-blue-700 text-[11px] uppercase font-bold">Pending Eval</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($displayStats['pending_evaluation']) }}</span>
-            <span class="text-[10px] text-blue-600 font-mono">Present without Score</span>
+            <!-- 5. Open Call Lists -->
+            <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 shadow-2xs">
+                <span class="font-mono block text-blue-700 text-[11px] uppercase font-bold">Open Call Lists</span>
+                <span class="text-2xl font-black mt-1 block font-mono text-blue-900">{{ number_format($stats['open_programs']) }}</span>
+                <span class="text-[10px] text-blue-600 font-mono font-medium">Green Room Editable (തുറന്നവ)</span>
+            </div>
         </div>
-
-        <!-- 6. Completed Evaluation -->
-        <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 text-purple-900 shadow-2xs">
-            <span class="font-mono block text-purple-700 text-[11px] uppercase font-bold">Completed Eval</span>
-            <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($displayStats['evaluated']) }}</span>
-            <span class="text-[10px] text-purple-600 font-mono">Score Submitted</span>
+    @else
+        <!-- Specific Program Attendance Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+            <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                <span class="text-slate-500 font-mono block text-[11px] uppercase font-bold">Registered Students</span>
+                <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ number_format($programStats['total']) }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">Program Call List</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
+                <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Present (ഹാജർ)</span>
+                <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($programStats['present']) }}</span>
+                <span class="text-[10px] text-emerald-600 font-mono">Eligible for Jury</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-red-900 shadow-2xs">
+                <span class="font-mono block text-red-700 text-[11px] uppercase font-bold">Absent (ഹാജരില്ല)</span>
+                <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($programStats['absent']) }}</span>
+                <span class="text-[10px] text-red-600 font-mono">Excluded from Jury</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 shadow-2xs">
+                <span class="font-mono block text-amber-700 text-[11px] uppercase font-bold">Waiting Calls</span>
+                <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($programStats['waiting']) }}</span>
+                <span class="text-[10px] text-amber-600 font-mono">Pending Check-in</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 shadow-2xs">
+                <span class="font-mono block text-blue-700 text-[11px] uppercase font-bold">Pending Eval</span>
+                <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($programStats['pending_evaluation']) }}</span>
+                <span class="text-[10px] text-blue-600 font-mono">Present without Score</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 text-purple-900 shadow-2xs">
+                <span class="font-mono block text-purple-700 text-[11px] uppercase font-bold">Completed Eval</span>
+                <span class="text-2xl font-black mt-1 block font-mono">{{ number_format($programStats['evaluated']) }}</span>
+                <span class="text-[10px] text-purple-600 font-mono">Score Submitted</span>
+            </div>
         </div>
-    </div>
+    @endif
 
     @if(!$selectedProgram)
         <!-- ========================================== -->
