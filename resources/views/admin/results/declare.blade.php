@@ -71,8 +71,21 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-400">
-                                No pending verified programs to declare.
+                            <td colspan="8" class="px-6 py-12 text-center">
+                                <div class="max-w-md mx-auto space-y-2">
+                                    <p class="text-sm font-semibold text-slate-700">No pending verified programs to declare</p>
+                                    <p class="text-xs text-slate-400 leading-relaxed">
+                                        Programs appear here when jury evaluation is completed and marked as verified, awaiting official declaration. If this program has already been published, please check Declared Results.
+                                    </p>
+                                    <div class="pt-2 flex items-center justify-center gap-2">
+                                        <a href="{{ route('admin.results.declared') }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
+                                            View Declared Results
+                                        </a>
+                                        <a href="{{ route('admin.results.specified') }}" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
+                                            Check Program Ranking
+                                        </a>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
