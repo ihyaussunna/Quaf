@@ -157,6 +157,54 @@ Route::get('/migrate-db', function (Request $request) {
     }
 });
 
+// Reset festival state (reset all completed programs, call list locks, results, score sheets)
+Route::match(['get', 'post'], '/reset-festival-state', function (Request $request) {
+    $hasAccess = (auth()->check() && in_array(auth()->user()->role, ['admin', 'super_admin', 'program_committee', 'program_coordinator']))
+        || $request->query('token') === 'quaf2026setup';
+
+    if (! $hasAccess) {
+        abort(403, 'Unauthorized. Please login or pass ?token=quaf2026setup');
+    }
+
+    try {
+        @set_time_limit(300);
+        Artisan::call('migrate', ['--force' => true]);
+
+        Program::query()->update([
+            'status' => 'upcoming',
+            'is_call_list_locked' => false,
+        ]);
+
+        DB::table('results')->delete();
+        DB::table('score_sheets')->delete();
+        DB::table('green_room_calls')->delete();
+        DB::table('program_entry_participants')->delete();
+        DB::table('program_entries')->delete();
+        DB::table('points_transactions')->delete();
+        DB::table('groups')->update(['points_cache' => 0, 'rank_cache' => 1]);
+        DB::table('students')->update(['points_cache' => 0]);
+
+        Artisan::call('optimize:clear');
+        Cache::flush();
+
+        return response('<html><head><title>QUAF 9.0 Festival Reset</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#c9d1d9;">'
+            .'<h1 style="color:#3fb950;margin-bottom:20px;">Festival State Successfully Reset!</h1>'
+            .'<div style="background:#161b22;padding:24px;border-radius:8px;border:1px solid #30363d;max-width:600px;">'
+            .'<p style="margin:8px 0;font-size:16px;">All completed programs reset to Upcoming.</p>'
+            .'<p style="margin:8px 0;font-size:16px;">All call list locks unlocked.</p>'
+            .'<p style="margin:8px 0;font-size:16px;">All evaluations, results, and calls cleared.</p>'
+            .'<div style="margin-top:24px;">'
+            .'<a href="/admin/call-list" style="display:inline-block;padding:10px 20px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Back to Call List &rarr;</a>'
+            .'</div></div>'
+            .'</body></html>', 200, ['Content-Type' => 'text/html']);
+    } catch (Throwable $e) {
+        return response('<html><head><title>QUAF 9.0 Reset Error</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#f85149;">'
+            .'<h1>Reset Error</h1>'
+            .'<pre style="background:#161b22;padding:20px;border-radius:6px;border:1px solid #da3633;color:#ff7b72;">'.htmlspecialchars($e->getMessage()).'</pre>'
+            .'</body></html>', 500, ['Content-Type' => 'text/html']);
+    }
+});
+
 Route::get('/clear-cache/{token}', function (string $token) {
     if ($token !== 'quaf2026setup') {
         abort(403, 'Unauthorized setup token.');
@@ -275,6 +323,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Call List & Attendance Center
     Route::get('call-list', [AdminCallListController::class, 'index'])->name('call-list.index');
+    Route::post('call-list/reset-all', [AdminCallListController::class, 'resetAll'])->name('call-list.reset-all');
+    Route::post('call-list/{program}/reset', [AdminCallListController::class, 'resetProgram'])->name('call-list.reset-program');
     Route::post('call-list/{entry}/attendance', [AdminCallListController::class, 'markAttendance'])->name('call-list.attendance');
     Route::post('call-list/{program}/toggle-lock', [AdminCallListController::class, 'toggleLock'])->name('call-list.toggle-lock');
     Route::post('call-list/{program}/shuffle', [AdminCallListController::class, 'shuffle'])->name('call-list.shuffle');

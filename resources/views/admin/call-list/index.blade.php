@@ -41,6 +41,15 @@
                class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <span>Judge Marks &rarr;</span>
             </a>
+            <form method="POST" action="{{ route('admin.call-list.reset-all') }}" onsubmit="return confirm('Are you sure you want to reset all completed programs and locked call lists back to upcoming? This will reset the festival to starting stage.');" class="inline">
+                @csrf
+                <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-xs uppercase hover:bg-red-700 transition-colors shadow-2xs flex items-center gap-1.5 font-sora"
+                        title="Reset All Completed Programs & Call List Locks">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>Reset All Programs</span>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -366,6 +375,20 @@
                                                 @endif
                                             </button>
                                         </form>
+
+                                        <!-- Quick Reset Program Status / Lock -->
+                                        @if($prog->status !== 'upcoming' || $prog->is_call_list_locked)
+                                            <form method="POST" action="{{ route('admin.call-list.reset-program', $prog) }}" 
+                                                  onsubmit="return confirm('Reset {{ $prog->name }} back to Upcoming and unlock call list?');" 
+                                                  class="inline">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 transition"
+                                                        title="Reset Program Status to Upcoming">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

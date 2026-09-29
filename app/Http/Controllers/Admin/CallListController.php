@@ -259,6 +259,65 @@ class CallListController extends Controller
     }
 
     /**
+     * Reset all programs to 'upcoming' and unlock all call lists.
+     */
+    public function resetAll(): RedirectResponse
+    {
+        Program::ensureSchema();
+
+        DB::transaction(function () {
+            Program::query()->update([
+                'status' => 'upcoming',
+                'is_call_list_locked' => false,
+            ]);
+
+            DB::table('results')->delete();
+            DB::table('score_sheets')->delete();
+            DB::table('green_room_calls')->delete();
+            DB::table('program_entry_participants')->delete();
+            DB::table('program_entries')->delete();
+            DB::table('points_transactions')->delete();
+            DB::table('groups')->update(['points_cache' => 0, 'rank_cache' => 1]);
+            DB::table('students')->update(['points_cache' => 0]);
+        });
+
+        AuditLogger::log('admin_reset_festival_call_lists_and_status', null, null, [
+            'action' => 'Reset all completed programs, call list locks, evaluations, and results',
+        ]);
+
+        return back()->with('success', 'All completed programs, locked call lists, evaluations, and results have been successfully reset.');
+    }
+
+    /**
+     * Reset a single program to upcoming and unlock call list.
+     */
+    public function resetProgram(Program $program): RedirectResponse
+    {
+        Program::ensureSchema();
+
+        DB::transaction(function () use ($program) {
+            $program->update([
+                'status' => 'upcoming',
+                'is_call_list_locked' => false,
+            ]);
+
+            DB::table('results')->where('program_id', $program->id)->delete();
+            DB::table('score_sheets')->where('program_id', $program->id)->delete();
+            DB::table('green_room_calls')->where('program_id', $program->id)->delete();
+            $entryIds = ProgramEntry::where('program_id', $program->id)->pluck('id');
+            DB::table('program_entry_participants')->whereIn('entry_id', $entryIds)->delete();
+            DB::table('program_entries')->where('program_id', $program->id)->delete();
+        });
+
+        AuditLogger::log('admin_reset_program_call_list', $program, null, [
+            'program_id' => $program->id,
+            'name' => $program->name,
+        ]);
+
+        return back()->with('success', "Program '{$program->name}' has been reset to Upcoming with call list unlocked.");
+    }
+
+    /**
      * Shuffle and assign random anonymous code letters to present participants.
      */
     public function shuffle(Program $program): RedirectResponse
