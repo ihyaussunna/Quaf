@@ -41,8 +41,10 @@ return new class extends Migration
 
         $groupsToImport = [
             'LUMO' => base_path('database/data/LUMO_FIKRIC.csv'),
-            'CONCO' => base_path('database/data/CONCO_MAJDIC.csv'),
             'PACTO' => base_path('database/data/PACTO_HIKMIC.csv'),
+            'CONCO' => base_path('database/data/CONCO_MAJDIC.csv'),
+            'UNIO' => base_path('database/data/UNIO_HILMIC.csv'),
+            'YUGO' => base_path('database/data/YUGO_RUSHDIC.csv'),
         ];
 
         foreach ($groupsToImport as $code => $csvPath) {
@@ -71,10 +73,10 @@ return new class extends Migration
                     continue;
                 }
 
-                $name = trim(preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{00A0}]+/u', ' ', (string) ($row[1] ?? '')));
+                $name = trim(preg_replace('/[\p{Cf}\x{00a0}\x{200b}-\x{200f}\x{202a}-\x{202e}\x{2060}-\x{206f}\x{feff}]+/u', ' ', (string) ($row[1] ?? '')));
                 $name = trim(preg_replace('/\s+/', ' ', $name));
 
-                $class = trim(preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{00A0}]+/u', ' ', (string) ($row[2] ?? '')));
+                $class = trim(preg_replace('/[\p{Cf}\x{00a0}\x{200b}-\x{200f}\x{202a}-\x{202e}\x{2060}-\x{206f}\x{feff}]+/u', ' ', (string) ($row[2] ?? '')));
                 $class = trim(preg_replace('/\s+/', ' ', $class));
 
                 $zoneStr = strtoupper(trim((string) ($row[3] ?? '')));

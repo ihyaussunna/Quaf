@@ -18,6 +18,10 @@ return new class extends Migration
             return;
         }
 
+        if (Group::count() === 0 || Zone::count() === 0) {
+            return;
+        }
+
         $allZones = Zone::all();
         $zoneMap = [
             'A ZONE' => $allZones->firstWhere('code', 'A_ZONE')?->id ?? 1,
@@ -90,7 +94,7 @@ return new class extends Migration
                     'updated_at' => now(),
                 ];
 
-                if (count($batch) >= 100) {
+                if (count($batch) >= 50) {
                     Student::insert($batch);
                     $batch = [];
                 }

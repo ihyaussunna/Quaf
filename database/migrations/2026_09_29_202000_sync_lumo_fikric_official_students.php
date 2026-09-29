@@ -19,6 +19,10 @@ return new class extends Migration
             return;
         }
 
+        if (Group::count() === 0 || Zone::count() === 0) {
+            return;
+        }
+
         // Find or reference LUMO group
         $lumo = Group::where('code', 'LUMO')->orWhere('slug', 'lumo-fikric')->first();
         $groupId = $lumo ? $lumo->id : 4;
@@ -105,7 +109,7 @@ return new class extends Migration
                 'updated_at' => now(),
             ];
 
-            if (count($batch) >= 100) {
+            if (count($batch) >= 50) {
                 Student::insert($batch);
                 $batch = [];
             }
