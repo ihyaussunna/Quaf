@@ -409,4 +409,36 @@ class CallListAndEvaluationWorkflowTest extends TestCase
         $callListResponse->assertSee('1 Absent');
         $callListResponse->assertSee('1 Waiting');
     }
+
+    public function test_admin_can_reset_individual_program_and_call_list_lock(): void
+    {
+        $this->program->update([
+            'status' => 'completed',
+            'is_call_list_locked' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->post(route('admin.call-list.reset-program', $this->program));
+
+        $response->assertRedirect();
+        $this->program->refresh();
+        $this->assertEquals('upcoming', $this->program->status);
+        $this->assertFalse((bool) $this->program->is_call_list_locked);
+    }
+
+    public function test_admin_can_reset_all_programs_and_locks(): void
+    {
+        $this->program->update([
+            'status' => 'completed',
+            'is_call_list_locked' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->post(route('admin.call-list.reset-all'));
+
+        $response->assertRedirect();
+        $this->program->refresh();
+        $this->assertEquals('upcoming', $this->program->status);
+        $this->assertFalse((bool) $this->program->is_call_list_locked);
+    }
 }
