@@ -69,12 +69,6 @@ class DashboardController extends Controller
 
         $recentAuditLogs = AuditLog::with('user')->latest()->take(6)->get();
 
-        $recentCallEntries = ProgramEntry::with(['program.stage', 'student.group', 'group'])
-            ->where('status', 'verified')
-            ->latest('updated_at')
-            ->take(6)
-            ->get();
-
         $chartData = app(PointCalculationService::class)->getPerformanceChartData();
 
         return view('admin.dashboard', compact(
@@ -85,7 +79,6 @@ class DashboardController extends Controller
             'stages',
             'recentAnnouncements',
             'recentAuditLogs',
-            'recentCallEntries',
             'chartData'
         ));
     }

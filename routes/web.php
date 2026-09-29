@@ -276,6 +276,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Call List & Attendance Center
     Route::get('call-list', [AdminCallListController::class, 'index'])->name('call-list.index');
     Route::post('call-list/{entry}/attendance', [AdminCallListController::class, 'markAttendance'])->name('call-list.attendance');
+    Route::post('call-list/{program}/toggle-lock', [AdminCallListController::class, 'toggleLock'])->name('call-list.toggle-lock');
+    Route::post('call-list/{program}/shuffle', [AdminCallListController::class, 'shuffle'])->name('call-list.shuffle');
 
     // Evaluation Monitor Dashboard
     Route::get('evaluation-monitor', [AdminCallListController::class, 'evaluationMonitor'])->name('evaluation-monitor.index');

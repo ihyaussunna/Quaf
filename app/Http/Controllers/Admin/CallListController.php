@@ -29,65 +29,20 @@ class CallListController extends Controller
         $search = $request->query('search');
         $zone = $request->query('zone');
         $stageId = $request->query('stage_id');
-        $programId = $request->query('program_id');
-        $groupId = $request->query('group_id');
+        $programId = $request->query('program_id') ?: $request->query('program');
+        $lockStatus = $request->query('lock_status');
         $attendance = $request->query('attendance');
         $evalStatus = $request->query('eval_status');
 
-        $query = ProgramEntry::with([
-            'program.category',
-            'program.stage',
-            'student.group',
-            'group',
-            'scoreSheets.judge',
-        ])->where('status', 'verified');
+        $zones = Program::ZONES;
+        $stages = Stage::orderBy('name')->get();
+        $allPrograms = Program::orderBy('name')->get();
+        $groups = Group::orderBy('name')->get();
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('chest_number', 'like', "%{$search}%")
-                    ->orWhere('code_letter', 'like', "%{$search}%")
-                    ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
-                    ->orWhereHas('program', fn ($pq) => $pq->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"))
-                    ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%"));
-            });
-        }
-
-        if ($zone) {
-            $query->whereHas('program', fn ($pq) => $pq->where('eligibility', $zone));
-        }
-
-        if ($stageId) {
-            $query->whereHas('program', fn ($pq) => $pq->where('stage_id', $stageId));
-        }
-
-        if ($programId) {
-            $query->where('program_id', $programId);
-        }
-
-        if ($groupId) {
-            $query->where('group_id', $groupId);
-        }
-
-        if ($attendance === 'present') {
-            $query->where('attendance_status', 'present');
-        } elseif ($attendance === 'absent') {
-            $query->where('attendance_status', 'absent');
-        } elseif ($attendance === 'waiting') {
-            $query->where(function ($q) {
-                $q->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
-            });
-        }
-
-        if ($evalStatus === 'evaluated') {
-            $query->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true));
-        } elseif ($evalStatus === 'pending') {
-            $query->where('attendance_status', 'present')
-                ->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true));
-        }
-
-        // Live Operational Counters across the whole festival system
+        // Macro counters across the whole festival system
         $stats = [
-            'total' => ProgramEntry::where('status', 'verified')->count(),
+            'total_programs' => Program::count(),
+            'total_entries' => ProgramEntry::where('status', 'verified')->count(),
             'present' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->count(),
             'absent' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'absent')->count(),
             'waiting' => ProgramEntry::where('status', 'verified')->where(function ($q) {
@@ -95,30 +50,115 @@ class CallListController extends Controller
             })->count(),
             'evaluated' => ProgramEntry::where('status', 'verified')->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
             'pending_evaluation' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
+            'locked_programs' => Program::where('is_call_list_locked', true)->count(),
         ];
 
-        $entries = $query->orderBy('program_id')
-            ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
-            ->paginate(25)
-            ->withQueryString();
+        $selectedProgram = null;
+        $entries = collect();
+        $programStats = [];
 
-        $zones = Program::ZONES;
-        $stages = Stage::orderBy('name')->get();
-        $programs = Program::orderBy('name')->get();
-        $groups = Group::orderBy('name')->get();
+        if ($programId) {
+            $selectedProgram = Program::with(['category', 'stage', 'schedule'])->find($programId);
+
+            if ($selectedProgram) {
+                $entriesQuery = ProgramEntry::where('program_id', $selectedProgram->id)
+                    ->where('status', 'verified')
+                    ->with(['student.group', 'group', 'scoreSheets.judge']);
+
+                if ($search) {
+                    $entriesQuery->where(function ($q) use ($search) {
+                        $q->where('chest_number', 'like', "%{$search}%")
+                            ->orWhere('code_letter', 'like', "%{$search}%")
+                            ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
+                            ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%"));
+                    });
+                }
+
+                if ($attendance === 'present') {
+                    $entriesQuery->where('attendance_status', 'present');
+                } elseif ($attendance === 'absent') {
+                    $entriesQuery->where('attendance_status', 'absent');
+                } elseif ($attendance === 'waiting') {
+                    $entriesQuery->where(function ($q) {
+                        $q->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
+                    });
+                }
+
+                if ($evalStatus === 'evaluated') {
+                    $entriesQuery->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true));
+                } elseif ($evalStatus === 'pending') {
+                    $entriesQuery->where('attendance_status', 'present')
+                        ->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true));
+                }
+
+                $entries = $entriesQuery->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')->get();
+
+                // Compute stats for selected program
+                $allProgEntries = ProgramEntry::where('program_id', $selectedProgram->id)->where('status', 'verified')->get();
+                $programStats = [
+                    'total' => $allProgEntries->count(),
+                    'present' => $allProgEntries->where('attendance_status', 'present')->count(),
+                    'absent' => $allProgEntries->where('attendance_status', 'absent')->count(),
+                    'waiting' => $allProgEntries->where('attendance_status', '!=', 'present')->where('attendance_status', '!=', 'absent')->count(),
+                    'evaluated' => $allProgEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATED')->count(),
+                    'pending_evaluation' => $allProgEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATION_PENDING')->count(),
+                ];
+            }
+        }
+
+        // Program-wise Call Lists (One Program = One Call List)
+        $programsQuery = Program::with(['category', 'stage', 'schedule'])
+            ->withCount([
+                'entries as total_count' => fn ($q) => $q->where('status', 'verified'),
+                'entries as present_count' => fn ($q) => $q->where('status', 'verified')->where('attendance_status', 'present'),
+                'entries as absent_count' => fn ($q) => $q->where('status', 'verified')->where('attendance_status', 'absent'),
+                'entries as waiting_count' => fn ($q) => $q->where('status', 'verified')->where(function ($sq) {
+                    $sq->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
+                }),
+                'entries as evaluated_count' => fn ($q) => $q->where('status', 'verified')->whereHas('scoreSheets', fn ($sq) => $sq->where('is_submitted', true)),
+            ]);
+
+        if ($search && ! $selectedProgram) {
+            $programsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('malayalam_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($zone) {
+            $programsQuery->where('eligibility', $zone);
+        }
+
+        if ($stageId) {
+            $programsQuery->where('stage_id', $stageId);
+        }
+
+        if ($lockStatus === 'locked') {
+            $programsQuery->where('is_call_list_locked', true);
+        } elseif ($lockStatus === 'open') {
+            $programsQuery->where(function ($q) {
+                $q->whereNull('is_call_list_locked')->orWhere('is_call_list_locked', false);
+            });
+        }
+
+        $programCallLists = $programsQuery->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.call-list.index', compact(
+            'programCallLists',
+            'selectedProgram',
             'entries',
             'stats',
+            'programStats',
             'zones',
             'stages',
-            'programs',
+            'allPrograms',
             'groups',
             'search',
             'zone',
             'stageId',
             'programId',
-            'groupId',
+            'lockStatus',
             'attendance',
             'evalStatus'
         ));
@@ -189,6 +229,55 @@ class CallListController extends Controller
         }
 
         return back()->with('success', $msg);
+    }
+
+    /**
+     * Toggle lock status on program call list.
+     */
+    public function toggleLock(Program $program): RedirectResponse
+    {
+        Program::ensureSchema();
+
+        $newStatus = ! ((bool) ($program->is_call_list_locked ?? false));
+        $program->update(['is_call_list_locked' => $newStatus]);
+
+        $statusText = $newStatus ? 'LOCKED' : 'UNLOCKED';
+        AuditLogger::log('admin_toggle_call_list_lock', $program, null, ['is_call_list_locked' => $newStatus]);
+
+        return back()->with('success', "Call list for '{$program->name}' has been {$statusText}.");
+    }
+
+    /**
+     * Shuffle and assign random anonymous code letters to present participants.
+     */
+    public function shuffle(Program $program): RedirectResponse
+    {
+        if ($program->is_call_list_locked) {
+            return back()->with('error', 'Call list is locked. Cannot shuffle codes.');
+        }
+
+        $presentEntries = ProgramEntry::where('program_id', $program->id)
+            ->where('status', 'verified')
+            ->where('attendance_status', 'present')
+            ->get();
+
+        if ($presentEntries->isEmpty()) {
+            return back()->with('error', 'No present participants found to assign codes.');
+        }
+
+        $shuffled = $presentEntries->shuffle()->values();
+
+        foreach ($shuffled as $index => $entry) {
+            $codeLetter = ProgramEntry::formatCodeLetter($index);
+            $entry->update(['code_letter' => $codeLetter]);
+        }
+
+        AuditLogger::log('admin_shuffle_codes', $program, null, [
+            'program_id' => $program->id,
+            'assigned_count' => $shuffled->count(),
+        ]);
+
+        return back()->with('success', "Assigned random code letters to {$shuffled->count()} present participants.");
     }
 
     /**

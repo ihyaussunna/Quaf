@@ -383,21 +383,30 @@ class CallListAndEvaluationWorkflowTest extends TestCase
         $judgeMarksResponse->assertSee('70.00');
     }
 
-    public function test_admin_dashboard_shows_live_call_list_and_attendance_stats(): void
+    public function test_admin_call_list_index_shows_program_call_lists_and_dashboard_is_clean(): void
     {
         $this->entry1->update(['attendance_status' => 'present', 'code_letter' => 'A']);
         $this->entry2->update(['attendance_status' => 'absent', 'code_letter' => null]);
         $this->entry3->update(['attendance_status' => 'waiting', 'code_letter' => null]);
 
-        $response = $this->actingAs($this->admin)
+        // 1. Dashboard should be clean without the Call List workflow table
+        $dashboardResponse = $this->actingAs($this->admin)
             ->get(route('admin.dashboard'));
 
-        $response->assertOk();
-        $response->assertSee('Call List, Attendance');
-        $response->assertSee('Total Call List');
-        $response->assertSee('Present (Ready)');
-        $response->assertSee('Absent');
-        $response->assertSee('Call List Desk');
-        $response->assertSee('Evaluation Monitor');
+        $dashboardResponse->assertOk();
+        $dashboardResponse->assertDontSee('Recent Participant Call Status Updates');
+        $dashboardResponse->assertDontSee('Call List, Attendance &amp; Evaluation Workflow', false);
+
+        // 2. Call List center displays each program as its own Call List (One Program = One Call List)
+        $callListResponse = $this->actingAs($this->admin)
+            ->get(route('admin.call-list.index'));
+
+        $callListResponse->assertOk();
+        $callListResponse->assertSee('Call List &amp; Attendance Center', false);
+        $callListResponse->assertSee($this->program->name);
+        $callListResponse->assertSee('Open Call List');
+        $callListResponse->assertSee('1 Present');
+        $callListResponse->assertSee('1 Absent');
+        $callListResponse->assertSee('1 Waiting');
     }
 }
