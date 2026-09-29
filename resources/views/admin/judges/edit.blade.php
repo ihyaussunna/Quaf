@@ -12,9 +12,53 @@
         @method('PUT')
 
         <div>
-            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Judge Full Name</label>
+            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Judge Full Name *</label>
             <input type="text" name="name" value="{{ old('name', $judge->name) }}" required
                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Login Email</label>
+                <input type="email" name="email" value="{{ old('email', $judge->user?->email) }}" placeholder="judge@quaf.fest"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                <p class="text-[11px] font-mono text-slate-400 mt-1">Judge username/email for logging into panel.</p>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-mono uppercase text-slate-600 font-bold">Login Password</label>
+                    <button type="button" 
+                            onclick="document.getElementById('editJudgePassword').value = 'Judge@' + Math.floor(1000 + Math.random() * 9000);" 
+                            class="text-[11px] text-[#be1e2d] hover:underline font-bold font-mono">
+                        Generate Password
+                    </button>
+                </div>
+                <input type="text" id="editJudgePassword" name="password" placeholder="Leave empty to keep current password"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                @if($judge->user?->plain_password)
+                    <p class="text-[11px] font-mono text-slate-500 mt-1">
+                        Current: <span class="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded select-all">{{ $judge->user->plain_password }}</span>
+                    </p>
+                @endif
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-mono uppercase text-slate-600 font-bold">Access PIN (for /judge/login)</label>
+                    <button type="button" onclick="document.getElementById('accessCodeInput').value = Math.floor(1000 + Math.random() * 9000);" class="text-[11px] text-[#be1e2d] hover:underline font-bold font-mono">
+                        Generate Tough PIN
+                    </button>
+                </div>
+                <input type="text" id="accessCodeInput" name="access_code" maxlength="6" value="{{ old('access_code', $judge->access_code) }}" placeholder="e.g. 8429"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono font-bold tracking-widest focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+            </div>
+            <div>
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Contact Number</label>
+                <input type="text" name="contact" value="{{ old('contact', $judge->contact) }}"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+            </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -27,24 +71,6 @@
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Specialization</label>
                 <input type="text" name="specialization" value="{{ old('specialization', $judge->specialization) }}"
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Contact Number</label>
-                <input type="text" name="contact" value="{{ old('contact', $judge->contact) }}"
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-            </div>
-            <div>
-                <div class="flex items-center justify-between mb-1.5">
-                    <label class="block text-xs font-mono uppercase text-slate-600 font-bold">Access PIN</label>
-                    <button type="button" onclick="document.getElementById('accessCodeInput').value = Math.floor(1000 + Math.random() * 9000);" class="text-[11px] text-[#be1e2d] hover:underline font-bold">
-                        Generate Tough PIN
-                    </button>
-                </div>
-                <input type="text" id="accessCodeInput" name="access_code" maxlength="6" value="{{ old('access_code', $judge->access_code) }}" placeholder="e.g. 8429"
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono font-bold tracking-widest focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
             </div>
         </div>
 

@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class JudgeController extends Controller
@@ -49,7 +50,7 @@ class JudgeController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'access_code' => ['nullable', 'string', 'max:10'],
             'email' => ['nullable', 'email', 'unique:users,email'],
-            'password' => ['nullable', 'string', 'min:6'],
+            'password' => ['nullable', 'string', 'min:4'],
             'designation' => ['nullable', 'string'],
             'specialization' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
@@ -59,15 +60,22 @@ class JudgeController extends Controller
             'program_ids.*' => ['exists:programs,id'],
         ]);
 
-        $email = $validated['email'] ?? (Str::slug($validated['name']).rand(100, 999).'@judge.festfloww');
-        $password = $validated['password'] ?? 'judge'.rand(1000, 9999);
-        $accessCode = ! empty($validated['access_code']) ? $validated['access_code'] : self::generateToughPin(4);
+        $email = ! empty($validated['email'])
+            ? trim($validated['email'])
+            : (Str::slug($validated['name']).rand(100, 999).'@quaf.fest');
+
+        $rawPassword = ! empty($validated['password'])
+            ? trim($validated['password'])
+            : ('Judge@'.rand(1000, 9999));
+
+        $accessCode = ! empty($validated['access_code']) ? trim($validated['access_code']) : self::generateToughPin(4);
 
         // Create User account for judge
         $user = User::create([
             'name' => $validated['name'],
             'email' => $email,
-            'password' => Hash::make($password),
+            'password' => Hash::make($rawPassword),
+            'plain_password' => $rawPassword,
             'role' => 'judge',
             'phone' => $validated['contact'] ?? null,
             'is_active' => true,
@@ -90,7 +98,7 @@ class JudgeController extends Controller
 
         AuditLogger::log('create_judge', $judge, null, $judge->toArray());
 
-        return redirect()->route('admin.judges.index')->with('success', "Judge '{$judge->name}' registered with PIN: {$accessCode}.");
+        return redirect()->route('admin.judges.index')->with('success', "Judge '{$judge->name}' registered successfully! Password: {$rawPassword} | PIN: {$accessCode}");
     }
 
     public function edit(Judge $judge): View
@@ -106,6 +114,8 @@ class JudgeController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'access_code' => ['nullable', 'string', 'max:10'],
+            'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($judge->user_id)],
+            'password' => ['nullable', 'string', 'min:4'],
             'designation' => ['nullable', 'string'],
             'specialization' => ['nullable', 'string'],
             'contact' => ['nullable', 'string'],
@@ -116,22 +126,93 @@ class JudgeController extends Controller
         ]);
 
         $old = $judge->toArray();
-        $judge->update($validated);
+        $judge->update([
+            'name' => $validated['name'],
+            'access_code' => $validated['access_code'] ?? $judge->access_code,
+            'designation' => $validated['designation'] ?? $judge->designation,
+            'specialization' => $validated['specialization'] ?? $judge->specialization,
+            'contact' => $validated['contact'] ?? $judge->contact,
+            'bio' => $validated['bio'] ?? $judge->bio,
+            'notes' => $validated['notes'] ?? $judge->notes,
+        ]);
 
         if (isset($validated['program_ids'])) {
             $judge->programs()->sync($validated['program_ids']);
         }
 
         if ($judge->user) {
-            $judge->user->update([
+            $userUpdates = [
                 'name' => $validated['name'],
                 'phone' => $validated['contact'] ?? null,
+            ];
+            if (! empty($validated['email'])) {
+                $userUpdates['email'] = trim($validated['email']);
+            }
+            if (! empty($validated['password'])) {
+                $userUpdates['password'] = Hash::make(trim($validated['password']));
+                $userUpdates['plain_password'] = trim($validated['password']);
+            }
+            $judge->user->update($userUpdates);
+        } else {
+            $email = ! empty($validated['email'])
+                ? trim($validated['email'])
+                : (Str::slug($validated['name']).rand(100, 999).'@quaf.fest');
+            $password = ! empty($validated['password'])
+                ? trim($validated['password'])
+                : ('Judge@'.rand(1000, 9999));
+
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $email,
+                'password' => Hash::make($password),
+                'plain_password' => $password,
+                'role' => 'judge',
+                'phone' => $validated['contact'] ?? null,
+                'is_active' => true,
             ]);
+            $judge->update(['user_id' => $user->id]);
         }
 
         AuditLogger::log('update_judge', $judge, $old, $judge->toArray());
 
-        return redirect()->route('admin.judges.index')->with('success', "Judge '{$judge->name}' details updated.");
+        $passwordNotice = ! empty($validated['password']) ? " Password updated to: {$validated['password']}." : '';
+
+        return redirect()->route('admin.judges.index')->with('success', "Judge '{$judge->name}' details updated.{$passwordNotice}");
+    }
+
+    /**
+     * Quick password update for judge from index table or modal.
+     */
+    public function updatePassword(Request $request, Judge $judge): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:4'],
+        ]);
+
+        $newPassword = trim($validated['password']);
+
+        if (! $judge->user) {
+            $email = Str::slug($judge->name).rand(100, 999).'@quaf.fest';
+            $user = User::create([
+                'name' => $judge->name,
+                'email' => $email,
+                'password' => Hash::make($newPassword),
+                'plain_password' => $newPassword,
+                'role' => 'judge',
+                'phone' => $judge->contact,
+                'is_active' => true,
+            ]);
+            $judge->update(['user_id' => $user->id]);
+        } else {
+            $judge->user->update([
+                'password' => Hash::make($newPassword),
+                'plain_password' => $newPassword,
+            ]);
+        }
+
+        AuditLogger::log('update_judge_password', $judge, null, ['updated_by' => auth()->id()]);
+
+        return back()->with('success', "Password for Judge '{$judge->name}' updated to: {$newPassword}");
     }
 
     public function destroy(Judge $judge): RedirectResponse

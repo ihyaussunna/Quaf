@@ -290,6 +290,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Judges Management
     Route::resource('judges', AdminJudgeController::class);
     Route::post('judges/{judge}/regenerate-pin', [AdminJudgeController::class, 'regeneratePin'])->name('judges.regenerate-pin');
+    Route::post('judges/{judge}/update-password', [AdminJudgeController::class, 'updatePassword'])->name('judges.update-password');
 
     // Result Management & Approval Workflow
     Route::get('results/declare', [AdminResultController::class, 'declareIndex'])->name('results.declare');

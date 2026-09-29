@@ -12,7 +12,7 @@
         @csrf
 
         <div>
-            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Judge Full Name</label>
+            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Judge Full Name *</label>
             <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. Dr. Anas Al-Azhari"
                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
         </div>
@@ -20,12 +20,40 @@
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Login Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required placeholder="judge@quaf.fest"
+                <input type="email" name="email" value="{{ old('email') }}" placeholder="judge@quaf.fest (optional)"
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                <p class="text-[11px] font-mono text-slate-400 mt-1">Leave empty to auto-generate from name.</p>
             </div>
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Login Password</label>
-                <input type="password" name="password" required placeholder="••••••••"
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-mono uppercase text-slate-600 font-bold">Login Password</label>
+                    <button type="button" 
+                            onclick="document.getElementById('createJudgePassword').value = 'Judge@' + Math.floor(1000 + Math.random() * 9000);" 
+                            class="text-[11px] text-[#be1e2d] hover:underline font-bold font-mono">
+                        Generate Password
+                    </button>
+                </div>
+                <input type="text" id="createJudgePassword" name="password" value="{{ old('password') }}" placeholder="Leave empty for auto-generate"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                <p class="text-[11px] font-mono text-slate-400 mt-1">Leave empty to auto-create e.g. Judge@4921.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-mono uppercase text-slate-600 font-bold">Access PIN (for /judge/login)</label>
+                    <button type="button" onclick="document.getElementById('accessCodeInput').value = Math.floor(1000 + Math.random() * 9000);" class="text-[11px] text-[#be1e2d] hover:underline font-bold font-mono">
+                        Generate Tough PIN
+                    </button>
+                </div>
+                <input type="text" id="accessCodeInput" name="access_code" maxlength="6" value="{{ old('access_code') }}" placeholder="e.g. 8429"
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono font-bold tracking-widest focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                <p class="text-[11px] font-mono text-slate-400 mt-1">Leave empty to auto-generate tough PIN.</p>
+            </div>
+            <div>
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Contact Number</label>
+                <input type="text" name="contact" value="{{ old('contact') }}" placeholder="+91 ..."
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
             </div>
         </div>
@@ -41,12 +69,6 @@
                 <input type="text" name="specialization" value="{{ old('specialization') }}" placeholder="e.g. Vocal Music / Elocution"
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
             </div>
-        </div>
-
-        <div>
-            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Contact Number</label>
-            <input type="text" name="contact" value="{{ old('contact') }}" placeholder="+91 ..."
-                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
         </div>
 
         <div>
