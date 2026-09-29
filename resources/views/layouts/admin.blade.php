@@ -209,6 +209,18 @@
                 </div>
             </div>
 
+            <!-- Call List & Attendance Desk -->
+            <a href="{{ route('admin.call-list.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.call-list.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                <span>Call List & Attendance</span>
+            </a>
+
+            <!-- Evaluation Monitor -->
+            <a href="{{ route('admin.evaluation-monitor.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.evaluation-monitor.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span>Evaluation Monitor</span>
+            </a>
+
             <!-- 6. Code letter -->
             <a href="{{ route('admin.code-letters.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.code-letters.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
@@ -232,8 +244,8 @@
             </div>
 
             <!-- 8. Marks (Dropdown) -->
-            <div x-data="{ open: {{ request()->routeIs('admin.mark-entry.*') ? 'true' : 'false' }} }" class="space-y-0.5">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('admin.mark-entry.*') ? 'text-white font-semibold' : '' }}">
+            <div x-data="{ open: {{ request()->routeIs('admin.mark-entry.*') || request()->routeIs('admin.judge-marks.*') ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('admin.mark-entry.*') || request()->routeIs('admin.judge-marks.*') ? 'text-white font-semibold' : '' }}">
                     <div class="flex items-center gap-3">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         <span>Marks</span>
@@ -242,6 +254,7 @@
                 </button>
                 <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-[11px]" style="display: none;">
                     <a href="{{ route('admin.mark-entry.view-marks') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.mark-entry.view-marks') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">View Marks</a>
+                    <a href="{{ route('admin.judge-marks.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.judge-marks.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Judge Marks Audit</a>
                     <a href="{{ route('admin.mark-entry.handler') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.mark-entry.handler') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Marks Handler</a>
                     <a href="{{ route('admin.mark-entry.check') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.mark-entry.check') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Mark Check</a>
                 </div>

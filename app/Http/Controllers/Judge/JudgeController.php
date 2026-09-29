@@ -18,7 +18,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -102,47 +101,39 @@ class JudgeController extends Controller
 
         Program::ensureSchema();
 
-        // Check evaluation completeness using bulk queries
-        // Exclude absent participants and only include present with code letters when call list is locked
         $progIds = $assignedPrograms->pluck('id');
-        $hasLockCol = Schema::hasColumn('programs', 'is_call_list_locked');
 
-        $entriesQuery = ProgramEntry::whereIn('program_id', $progIds)
+        // Present verified participants count per program
+        $presentCounts = ProgramEntry::whereIn('program_id', $progIds)
             ->where('status', 'verified')
-            ->where('attendance_status', '!=', 'absent');
-
-        if ($hasLockCol) {
-            $entriesQuery->where(function ($q) {
-                $q->whereHas('program', function ($pq) {
-                    $pq->where('is_call_list_locked', true);
-                })->where('attendance_status', 'present')->whereNotNull('code_letter')
-                    ->orWhereHas('program', function ($pq) {
-                        $pq->where('is_call_list_locked', false);
-                    });
-            });
-        }
-
-        $entriesCounts = $entriesQuery
+            ->where('attendance_status', 'present')
             ->groupBy('program_id')
             ->selectRaw('program_id, count(*) as total')
             ->pluck('total', 'program_id');
 
+        // Submitted scores count by this judge for present participants
         $submittedCounts = ScoreSheet::where('judge_id', $judge->id)
             ->whereIn('program_id', $progIds)
             ->where('is_submitted', true)
+            ->whereHas('entry', function ($eq) {
+                $eq->where('attendance_status', 'present');
+            })
             ->groupBy('program_id')
             ->selectRaw('program_id, count(*) as total')
             ->pluck('total', 'program_id');
 
         $evaluationStatus = [];
         foreach ($assignedPrograms as $prog) {
-            $totalEntries = (int) ($entriesCounts[$prog->id] ?? 0);
+            $present = (int) ($presentCounts[$prog->id] ?? 0);
             $submittedScores = (int) ($submittedCounts[$prog->id] ?? 0);
+            $pending = max(0, $present - $submittedScores);
 
             $evaluationStatus[$prog->id] = [
-                'total' => $totalEntries,
+                'total' => $present,
+                'present' => $present,
                 'submitted' => $submittedScores,
-                'is_complete' => ($totalEntries > 0 && $submittedScores >= $totalEntries),
+                'pending' => $pending,
+                'is_complete' => ($present > 0 && $submittedScores >= $present),
             ];
         }
 
@@ -165,21 +156,14 @@ class JudgeController extends Controller
             'scoringCriteria',
         ]);
 
-        // STRICT ANONYMITY: Do NOT load student names, photos, or groups.
-        // If call list is locked, only present participants with code letters are eligible for evaluation.
+        // STRICT ANONYMITY & ATTENDANCE FILTER:
+        // Do NOT load student names, photos, or groups to preserve total anonymity.
+        // ONLY present participants with attendance_status = 'present' are eligible for evaluation.
         // Absent participants are strictly excluded from evaluation sheet.
-        $entriesQuery = $program->entries()
-            ->where('status', 'verified');
-
-        if ($program->is_call_list_locked) {
-            $entriesQuery->where('attendance_status', 'present')
-                ->whereNotNull('code_letter');
-        } else {
-            $entriesQuery->where('attendance_status', '!=', 'absent');
-        }
-
-        $entries = $entriesQuery
-            ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, id ASC')
+        $entries = $program->entries()
+            ->where('status', 'verified')
+            ->where('attendance_status', 'present')
+            ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
             ->get();
 
         // Load judge's existing score sheets for these entries
@@ -197,6 +181,24 @@ class JudgeController extends Controller
 
         if (! $judge->programs()->where('programs.id', $program->id)->exists() && ! in_array(Auth::user()?->role, ['admin', 'super_admin'])) {
             abort(403, 'Unauthorized.');
+        }
+
+        if ((int) $entry->program_id !== (int) $program->id) {
+            abort(404, 'Participant entry does not belong to this program.');
+        }
+
+        // STRICT REQUIREMENT 8: Prevent Invalid Evaluation
+        // Backend validation: IF participant attendance != PRESENT THEN evaluation submission must be rejected
+        if ($entry->attendance_status !== 'present') {
+            $errMsg = 'ഹാജരില്ലാത്ത (ABSENT/WAITING) മത്സരാർത്ഥിക്ക് മാർക്ക് നൽകാൻ സാധ്യമല്ല. (Evaluation rejected: participant attendance is not PRESENT).';
+            if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errMsg,
+                ], 422);
+            }
+
+            return back()->with('error', $errMsg);
         }
 
         $criteria = $program->scoringCriteria;

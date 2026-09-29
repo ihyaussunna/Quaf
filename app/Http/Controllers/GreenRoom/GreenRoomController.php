@@ -10,6 +10,7 @@ use App\Models\Stage;
 use App\Services\AuditLogger;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -115,29 +116,51 @@ class GreenRoomController extends Controller
         return back()->with('success', "CALLED NEXT: Chest #{$next->entry->chest_number} ({$next->entry->student?->name})");
     }
 
-    public function markAttendance(Request $request, ProgramEntry $entry): RedirectResponse
+    public function markAttendance(Request $request, ProgramEntry $entry): JsonResponse|RedirectResponse
     {
         if ($entry->program?->is_call_list_locked) {
-            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. ഹാജർ നില മാറ്റാൻ സാധ്യമല്ല.');
+            $msg = 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. ഹാജർ നില മാറ്റാൻ സാധ്യമല്ല.';
+            if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $validated = $request->validate([
             'status' => ['required', 'in:present,absent,waiting'],
         ]);
 
-        $entry->update([
-            'attendance_status' => $validated['status'],
-        ]);
+        $oldStatus = $entry->attendance_status;
+        $newStatus = $validated['status'];
 
-        // If marked absent, clear code letter automatically
-        if ($validated['status'] === 'absent') {
-            $entry->update(['code_letter' => null]);
+        $entry->attendance_status = $newStatus;
+
+        // Auto-assign next code letter if marked present and code letter is missing
+        if ($newStatus === 'present' && empty($entry->code_letter)) {
+            $assignedCodes = ProgramEntry::where('program_id', $entry->program_id)
+                ->whereNotNull('code_letter')
+                ->pluck('code_letter')
+                ->all();
+
+            for ($i = 0; $i < 500; $i++) {
+                $candidate = ProgramEntry::formatCodeLetter($i);
+                if (! in_array($candidate, $assignedCodes, true)) {
+                    $entry->code_letter = $candidate;
+                    break;
+                }
+            }
+        } elseif ($newStatus === 'absent') {
+            // If marked absent, clear code letter automatically
+            $entry->code_letter = null;
         }
+
+        $entry->save();
 
         // Sync with GreenRoomCall if exists
         $call = GreenRoomCall::where('entry_id', $entry->id)->first();
         if ($call) {
-            $callStatus = match ($validated['status']) {
+            $callStatus = match ($newStatus) {
                 'present' => 'ready',
                 'absent' => 'absent',
                 default => 'waiting',
@@ -145,13 +168,40 @@ class GreenRoomController extends Controller
             $call->update(['status' => $callStatus]);
         }
 
-        AuditLogger::log('green_room_attendance', $entry, null, [
+        AuditLogger::log('green_room_attendance', $entry, ['attendance_status' => $oldStatus], [
             'entry_id' => $entry->id,
             'chest_number' => $entry->chest_number,
-            'attendance_status' => $validated['status'],
+            'previous_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'code_letter' => $entry->code_letter,
         ]);
 
-        return back()->with('success', "ചെസ്റ്റ് #{$entry->chest_number} ഹാജർ നില: ".strtoupper($validated['status']));
+        $statusText = strtoupper($newStatus);
+        $message = "ചെസ്റ്റ് #{$entry->chest_number} ഹാജർ നില: {$statusText}";
+
+        if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+            $programEntries = ProgramEntry::where('program_id', $entry->program_id)->with('scoreSheets')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'entry_id' => $entry->id,
+                'attendance_status' => $entry->attendance_status,
+                'code_letter' => $entry->code_letter,
+                'display_code' => $entry->display_code,
+                'evaluation_status' => $entry->evaluation_status,
+                'stats' => [
+                    'total' => $programEntries->count(),
+                    'present' => $programEntries->where('attendance_status', 'present')->count(),
+                    'absent' => $programEntries->where('attendance_status', 'absent')->count(),
+                    'waiting' => $programEntries->where('attendance_status', '!=', 'present')->where('attendance_status', '!=', 'absent')->count(),
+                    'evaluated' => $programEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATED')->count(),
+                    'pending_evaluation' => $programEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATION_PENDING')->count(),
+                ],
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function generateCodeLetters(Program $program): RedirectResponse
@@ -172,10 +222,9 @@ class GreenRoomController extends Controller
 
         // Random shuffle
         $shuffled = $entries->shuffle();
-        $alphabet = range('A', 'Z');
 
         foreach ($shuffled as $index => $entry) {
-            $letter = $alphabet[$index] ?? ('C'.($index + 1));
+            $letter = ProgramEntry::formatCodeLetter($index);
             $entry->update(['code_letter' => $letter]);
 
             // Update call order
@@ -231,35 +280,95 @@ class GreenRoomController extends Controller
         Program::ensureSchema();
 
         $zones = Program::ZONES;
+        $stages = Stage::orderBy('name')->get();
+
         $selectedZone = $request->query('zone', $request->query('category'));
-        $selectedProgramId = $request->query('program');
+        $selectedStageId = $request->query('stage_id');
+        $selectedProgramId = $request->query('program') ?: $request->query('program_id');
+        $search = $request->query('search');
+        $attendanceFilter = $request->query('attendance');
+        $evalFilter = $request->query('eval_status');
 
         $programsQuery = Program::query();
         if ($selectedZone) {
             $programsQuery->where('eligibility', $selectedZone);
         }
+        if ($selectedStageId) {
+            $programsQuery->where('stage_id', $selectedStageId);
+        }
         $programs = $programsQuery->orderBy('name')->get();
 
         $selectedProgram = null;
         $entries = collect();
+        $stats = [
+            'total' => 0,
+            'present' => 0,
+            'absent' => 0,
+            'waiting' => 0,
+            'evaluated' => 0,
+            'pending_evaluation' => 0,
+        ];
 
         if ($selectedProgramId) {
             $selectedProgram = Program::with(['category', 'stage', 'schedule'])->find($selectedProgramId);
             if ($selectedProgram) {
-                $entries = ProgramEntry::where('program_id', $selectedProgram->id)
-                    ->with(['student.group', 'group'])
-                    ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
+                $query = ProgramEntry::where('program_id', $selectedProgram->id)
+                    ->with(['student.group', 'group', 'scoreSheets']);
+
+                // Calculate summary counters across all verified entries of the selected program
+                $allEntries = (clone $query)->get();
+                $stats['total'] = $allEntries->count();
+                $stats['present'] = $allEntries->where('attendance_status', 'present')->count();
+                $stats['absent'] = $allEntries->where('attendance_status', 'absent')->count();
+                $stats['waiting'] = $allEntries->where('attendance_status', '!=', 'present')->where('attendance_status', '!=', 'absent')->count();
+                $stats['evaluated'] = $allEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATED')->count();
+                $stats['pending_evaluation'] = $allEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATION_PENDING')->count();
+
+                // Apply Search & Filters
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('chest_number', 'like', "%{$search}%")
+                            ->orWhere('code_letter', 'like', "%{$search}%")
+                            ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
+                            ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%"));
+                    });
+                }
+
+                if ($attendanceFilter === 'present') {
+                    $query->where('attendance_status', 'present');
+                } elseif ($attendanceFilter === 'absent') {
+                    $query->where('attendance_status', 'absent');
+                } elseif ($attendanceFilter === 'waiting') {
+                    $query->where(function ($q) {
+                        $q->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
+                    });
+                }
+
+                if ($evalFilter === 'evaluated') {
+                    $query->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true));
+                } elseif ($evalFilter === 'pending') {
+                    $query->where('attendance_status', 'present')
+                        ->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true));
+                }
+
+                $entries = $query->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
                     ->get();
             }
         }
 
         return view('greenroom.call-list', compact(
             'zones',
+            'stages',
             'programs',
             'selectedZone',
+            'selectedStageId',
             'selectedProgramId',
             'selectedProgram',
-            'entries'
+            'entries',
+            'stats',
+            'search',
+            'attendanceFilter',
+            'evalFilter'
         ));
     }
 

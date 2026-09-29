@@ -83,8 +83,12 @@
                         <!-- Evaluation Progress Bar -->
                         <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
                             <div class="flex items-center justify-between text-xs font-mono">
-                                <span class="text-slate-500">Scoring Progress</span>
-                                <span class="text-[#f3bd2e] font-bold">{{ $eval['submitted'] }} / {{ $eval['total'] }} Evaluated ({{ $percent }}%)</span>
+                                <span class="text-slate-500">
+                                    Present: <strong class="text-slate-900">{{ $eval['present'] }}</strong> &bull; 
+                                    Evaluated: <strong class="text-emerald-700">{{ $eval['submitted'] }}</strong> &bull; 
+                                    Pending: <strong class="text-amber-700">{{ $eval['pending'] }}</strong>
+                                </span>
+                                <span class="text-[#f3bd2e] font-bold">{{ $percent }}%</span>
                             </div>
                             <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                                 <div class="h-full bg-gradient-to-r from-[#f3bd2e] to-amber-500 rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>

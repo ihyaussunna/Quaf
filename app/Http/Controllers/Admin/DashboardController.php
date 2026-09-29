@@ -36,7 +36,15 @@ class DashboardController extends Controller
             'pending_registrations' => ProgramEntry::where('status', 'pending')->count(),
             'pending_results' => Result::whereIn('status', ['submitted', 'under_review'])->count(),
             'published_results' => Result::where('status', 'published')->count(),
-            'programs_in_progress' => Program::where('status', 'in_progress')->count(),
+            // Call List & Evaluation metrics
+            'call_list_total' => ProgramEntry::where('status', 'verified')->count(),
+            'call_list_present' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->count(),
+            'call_list_absent' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'absent')->count(),
+            'call_list_waiting' => ProgramEntry::where('status', 'verified')->where(function ($q) {
+                $q->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
+            })->count(),
+            'evaluations_completed' => ProgramEntry::where('status', 'verified')->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
+            'evaluations_pending' => ProgramEntry::where('status', 'verified')->where('attendance_status', 'present')->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true))->count(),
         ];
 
         // Real-time Leaderboard of all groups
@@ -61,6 +69,12 @@ class DashboardController extends Controller
 
         $recentAuditLogs = AuditLog::with('user')->latest()->take(6)->get();
 
+        $recentCallEntries = ProgramEntry::with(['program.stage', 'student.group', 'group'])
+            ->where('status', 'verified')
+            ->latest('updated_at')
+            ->take(6)
+            ->get();
+
         $chartData = app(PointCalculationService::class)->getPerformanceChartData();
 
         return view('admin.dashboard', compact(
@@ -71,6 +85,7 @@ class DashboardController extends Controller
             'stages',
             'recentAnnouncements',
             'recentAuditLogs',
+            'recentCallEntries',
             'chartData'
         ));
     }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Digital Call List | QUAF 09</title>
+    <title>Digital Call List & Attendance Desk | QUAF 09</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -16,7 +16,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col"
+      x-data="callListManager()">
 
     <!-- Topbar -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-40 shadow-xs gap-4 flex-nowrap">
@@ -27,7 +28,7 @@
                     <span class="font-rockwell font-bold tracking-wider text-sm sm:text-base text-slate-900 whitespace-nowrap">DIGITAL CALL LIST</span>
                     <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping shrink-0"></span>
                 </div>
-                <span class="text-[10px] font-mono tracking-widest text-[#005c94] block uppercase font-bold whitespace-nowrap">Interactive Attendance & Code Locking</span>
+                <span class="text-[10px] font-mono tracking-widest text-[#005c94] block uppercase font-bold whitespace-nowrap">Real-Time Attendance & Jury Sync</span>
             </div>
         </div>
 
@@ -45,9 +46,12 @@
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-            @if(Auth::user()->role === 'admin' || Auth::user()->role === 'super_admin')
+            @if(in_array(Auth::user()->role, ['admin', 'super_admin']))
+                <a href="{{ route('admin.call-list.index') }}" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xl text-xs font-mono font-semibold whitespace-nowrap">
+                    Admin Call Center &rarr;
+                </a>
                 <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-semibold whitespace-nowrap">
-                    &larr; Admin Panel
+                    Admin Panel
                 </a>
             @endif
             <form method="POST" action="{{ route('logout') }}">
@@ -58,6 +62,21 @@
             </form>
         </div>
     </header>
+
+    <!-- Floating Live Toast Notification -->
+    <div x-show="toast.show" 
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl px-4 py-3 shadow-xl font-mono text-xs flex items-center gap-3 border"
+         :class="toast.isError ? 'bg-red-950 text-red-200 border-red-800' : 'bg-slate-900 text-emerald-300 border-slate-700'"
+         style="display: none;">
+        <span class="w-2.5 h-2.5 rounded-full" :class="toast.isError ? 'bg-red-500' : 'bg-emerald-400 animate-pulse'"></span>
+        <span x-text="toast.message"></span>
+    </div>
 
     <!-- Flash Messages -->
     @if(session('success'))
@@ -77,12 +96,12 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6">
 
-        <!-- Filter Card -->
+        <!-- Search & Filter Card -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs">
-            <form method="GET" action="{{ route('greenroom.call-list') }}" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                <div class="md:col-span-4">
+            <form method="GET" action="{{ route('greenroom.call-list') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
+                <div class="md:col-span-3">
                     <label class="block text-xs font-bold text-slate-700 mb-1">Zone / Category</label>
-                    <select name="zone" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#005c94]">
+                    <select name="zone" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#005c94]">
                         <option value="">-- All Zones --</option>
                         @foreach($zones as $zKey => $zVal)
                             @php
@@ -93,9 +112,9 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="md:col-span-5">
+                <div class="md:col-span-4">
                     <label class="block text-xs font-bold text-slate-700 mb-1">Select Program</label>
-                    <select name="program" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#005c94]">
+                    <select name="program" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#005c94]">
                         <option value="">-- Choose Program --</option>
                         @foreach($programs as $prog)
                             <option value="{{ $prog->id }}" {{ (string)$selectedProgramId === (string)$prog->id ? 'selected' : '' }}>
@@ -105,16 +124,53 @@
                     </select>
                 </div>
                 <div class="md:col-span-3">
-                    <button type="submit" class="w-full bg-[#005c94] text-white py-2.5 px-4 rounded-xl text-xs font-bold hover:bg-[#004b78] transition flex items-center justify-center gap-2 shadow-xs">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span>Open Call List</span>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Search Participant</label>
+                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Name, Chest #, Code..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#005c94]">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full bg-[#005c94] text-white py-2 px-4 rounded-xl text-xs font-bold hover:bg-[#004b78] transition flex items-center justify-center gap-1.5 shadow-xs">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Filter</span>
                     </button>
                 </div>
+
+                @if($selectedProgram)
+                    <!-- Secondary Filters -->
+                    <div class="sm:col-span-2 md:col-span-12 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Attendance Filter:</span>
+                        <a href="{{ request()->fullUrlWithQuery(['attendance' => null, 'eval_status' => null]) }}"
+                           class="px-2.5 py-1 rounded-lg font-mono font-semibold {{ empty($attendanceFilter) && empty($evalFilter) ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                            All
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['attendance' => 'present', 'eval_status' => null]) }}"
+                           class="px-2.5 py-1 rounded-lg font-mono font-semibold {{ ($attendanceFilter ?? '') === 'present' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100' }}">
+                            Present Only
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['attendance' => 'absent', 'eval_status' => null]) }}"
+                           class="px-2.5 py-1 rounded-lg font-mono font-semibold {{ ($attendanceFilter ?? '') === 'absent' ? 'bg-red-600 text-white' : 'bg-red-50 text-red-800 hover:bg-red-100' }}">
+                            Absent Only
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['attendance' => 'waiting', 'eval_status' => null]) }}"
+                           class="px-2.5 py-1 rounded-lg font-mono font-semibold {{ ($attendanceFilter ?? '') === 'waiting' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-800 hover:bg-amber-100' }}">
+                            Waiting Only
+                        </a>
+                        <span class="text-slate-300">|</span>
+                        <a href="{{ request()->fullUrlWithQuery(['eval_status' => 'evaluated', 'attendance' => null]) }}"
+                           class="px-2.5 py-1 rounded-lg font-mono font-semibold {{ ($evalFilter ?? '') === 'evaluated' ? 'bg-purple-600 text-white' : 'bg-purple-50 text-purple-800 hover:bg-purple-100' }}">
+                            Evaluated
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['eval_status' => 'pending', 'attendance' => null]) }}"
+                           class="px-2.5 py-1 rounded-lg font-mono font-semibold {{ ($evalFilter ?? '') === 'pending' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100' }}">
+                            Pending Evaluation
+                        </a>
+                    </div>
+                @endif
             </form>
         </div>
 
         @if($selectedProgram)
-            <!-- Program Details & Lock Status Card -->
+            <!-- Program Header & Live Summary Cards -->
             <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs space-y-5">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                     <div>
@@ -145,7 +201,7 @@
                         @endif
                     </div>
 
-                    <!-- Lock / Unlock & Shuffle Actions -->
+                    <!-- Actions Bar -->
                     <div class="flex flex-wrap items-center gap-2">
                         <!-- Auto Shuffle Code Letters -->
                         <form method="POST" action="{{ route('greenroom.generate-codes', $selectedProgram->id) }}" onsubmit="return confirm('ഹാജരായവർക്ക് മാത്രം റാൻഡം ആയി കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകണോ?');">
@@ -158,7 +214,7 @@
                         </form>
 
                         <!-- Lock Call List Toggle Button -->
-                        <form method="POST" action="{{ route('greenroom.toggle-lock', $selectedProgram->id) }}" onsubmit="return confirm('{{ $selectedProgram->is_call_list_locked ? 'കോൾ ലിസ്റ്റ് അൺലോക്ക് ചെയ്യണോ?' : 'കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്യണോ? ലോക്ക് ചെയ്താൽ ഹാജർ നിലയും കോഡ് ലെറ്ററുകളും മാറ്റാൻ കഴിയില്ല. ജഡ്ജ് പാനലിൽ ഹാജരായവർ മാത്രമേ ലഭ്യമാകൂ.' }}');">
+                        <form method="POST" action="{{ route('greenroom.toggle-lock', $selectedProgram->id) }}" onsubmit="return confirm('{{ $selectedProgram->is_call_list_locked ? 'കോൾ ലിസ്റ്റ് അൺലോക്ക് ചെയ്യണോ?' : 'കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്യണോ? ലോക്ക് ചെയ്താൽ ഹാജർ നില മാറ്റാൻ കഴിയില്ല. ജഡ്ജ് പാനലിൽ ഹാജരായവർ മാത്രമേ ലഭ്യമാകൂ.' }}');">
                             @csrf
                             @if($selectedProgram->is_call_list_locked)
                                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
@@ -173,11 +229,11 @@
                             @endif
                         </form>
 
-                        <!-- Print Call List Button -->
+                        <!-- Print Call Sheet -->
                         <a href="{{ route('admin.forms.call-list', ['program' => $selectedProgram->id, 'print' => 1]) }}" target="_blank"
                            class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 transition-colors">
                             <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span>പ്രിന്റ് ചെയ്യുക (Print)</span>
+                            <span>Print Sheet</span>
                         </a>
 
                         <!-- Go to Announcer Tab -->
@@ -188,53 +244,55 @@
                     </div>
                 </div>
 
-                <!-- Call List Quick Stat Cards -->
-                @php
-                    $totalCount = $entries->count();
-                    $presentCount = $entries->where('attendance_status', 'present')->count();
-                    $absentCount = $entries->where('attendance_status', 'absent')->count();
-                    $waitingCount = $entries->where('attendance_status', '!=', 'present')->where('attendance_status', '!=', 'absent')->count();
-                    $codedCount = $entries->whereNotNull('code_letter')->count();
-                @endphp
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+                <!-- 6 Quick Summary Counters -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                        <span class="text-slate-500 font-mono block">ആകെ രജിസ്ട്രേഷൻ</span>
-                        <span class="text-xl font-bold text-slate-900 mt-1 block">{{ $totalCount }} പേർ</span>
+                        <span class="text-slate-500 font-mono block text-[11px]">Total Call List</span>
+                        <span class="text-xl font-black text-slate-900 mt-1 block" x-text="stats.total">{{ $stats['total'] }}</span>
                     </div>
                     <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-                        <span class="font-mono block text-emerald-700">ഹാജരുണ്ട് (Present)</span>
-                        <span class="text-xl font-bold mt-1 block">{{ $presentCount }} പേർ</span>
+                        <span class="font-mono block text-emerald-700 text-[11px]">Present (ഹാജർ)</span>
+                        <span class="text-xl font-black mt-1 block" x-text="stats.present">{{ $stats['present'] }}</span>
                     </div>
                     <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900">
-                        <span class="font-mono block text-red-700">ഹാജരില്ല (Absent)</span>
-                        <span class="text-xl font-bold mt-1 block">{{ $absentCount }} പേർ</span>
+                        <span class="font-mono block text-red-700 text-[11px]">Absent (ഹാജരില്ല)</span>
+                        <span class="text-xl font-black mt-1 block" x-text="stats.absent">{{ $stats['absent'] }}</span>
                     </div>
                     <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
-                        <span class="font-mono block text-amber-700">കാത്തിരിക്കുന്നു (Waiting)</span>
-                        <span class="text-xl font-bold mt-1 block">{{ $waitingCount }} പേർ</span>
+                        <span class="font-mono block text-amber-700 text-[11px]">Waiting (കാത്തിരിപ്പ്)</span>
+                        <span class="text-xl font-black mt-1 block" x-text="stats.waiting">{{ $stats['waiting'] }}</span>
                     </div>
                     <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900">
-                        <span class="font-mono block text-purple-700">കോഡ് നൽകി (Coded)</span>
-                        <span class="text-xl font-bold mt-1 block">{{ $codedCount }} പേർ</span>
+                        <span class="font-mono block text-purple-700 text-[11px]">Evaluated</span>
+                        <span class="text-xl font-black mt-1 block" x-text="stats.evaluated">{{ $stats['evaluated'] }}</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900">
+                        <span class="font-mono block text-blue-700 text-[11px]">Pending Eval</span>
+                        <span class="text-xl font-black mt-1 block" x-text="stats.pending_evaluation">{{ $stats['pending_evaluation'] }}</span>
                     </div>
                 </div>
 
                 @if($selectedProgram->is_call_list_locked)
                     <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs font-mono flex items-center justify-between">
-                        <span>ശ്രദ്ധിക്കുക: ഈ കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തിരിക്കുന്നു. ഹാജരായ {{ $presentCount }} പേർ മാത്രമേ മൂല്യനിർണ്ണയത്തിനായി ജഡ്ജ് പാനലിൽ ദൃശ്യമാകൂ.</span>
+                        <span>ശ്രദ്ധിക്കുക: ഈ കോൾ ലിസ്റ്റ് ഫ്രോസൺ ചെയ്തിരിക്കുന്നു. ഹാജരായവർ മാത്രമേ മൂല്യനിർണ്ണയത്തിനായി ജഡ്ജ് പാനലിൽ ലഭ്യമാകൂ.</span>
                         <span class="font-bold uppercase tracking-wider text-[10px] bg-red-200 text-red-900 px-2 py-0.5 rounded">FROZEN</span>
                     </div>
                 @endif
             </div>
 
-            <!-- Interactive Digital Table -->
+            <!-- Digital Interactive Table -->
             <div class="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
-                <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 font-sora">
-                        മത്സരാർത്ഥികളുടെ ഡിജിറ്റൽ കോൾ ലിസ്റ്റ്
-                    </h3>
-                    <span class="text-[11px] text-slate-500 font-mono">
-                        ഹാജർ രേഖപ്പെടുത്തിയ ശേഷം "നറുക്കെടുപ്പ്" നടത്തി "ലോക്ക്" ചെയ്യുക.
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 font-sora">
+                            മത്സരാർത്ഥികളുടെ തത്സമയ ഹാജർ പട്ടിക (Live Call Sheet)
+                        </h3>
+                        <p class="text-[11px] text-slate-500 font-mono mt-0.5">
+                            PRESENT അടയാളപ്പെടുത്തുമ്പോൾ മത്സരാർത്ഥി തത്സമയം വിധികർത്താവിന്റെ മൂല്യനിർണ്ണയ പട്ടികയിൽ ലഭ്യമാകും.
+                        </p>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-600 bg-white px-3 py-1 rounded-xl border border-slate-200">
+                        {{ $entries->count() }} Records Loaded
                     </span>
                 </div>
 
@@ -243,67 +301,81 @@
                         <thead>
                             <tr class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                                 <th class="px-4 py-3 text-center w-12">No</th>
-                                <th class="px-4 py-3 w-28">Chest #</th>
+                                <th class="px-4 py-3 text-center w-28">Code Letter</th>
+                                <th class="px-4 py-3 w-24">Chest #</th>
                                 <th class="px-4 py-3">Student Name</th>
-                                <th class="px-4 py-3">Team / Group</th>
-                                <th class="px-4 py-3 text-center w-36">Code Letter</th>
-                                <th class="px-4 py-3 text-center w-64">Attendance Status</th>
+                                <th class="px-4 py-3">Group / Team</th>
+                                <th class="px-4 py-3 text-center w-72">Attendance Action</th>
+                                <th class="px-4 py-3 text-center w-36">Evaluation Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @forelse($entries as $index => $entry)
-                                <tr class="hover:bg-slate-50/75 transition-colors {{ $entry->attendance_status === 'absent' ? 'opacity-50 bg-red-50/20' : '' }}">
+                                <tr id="entry-row-{{ $entry->id }}"
+                                    class="hover:bg-slate-50/75 transition-colors {{ $entry->attendance_status === 'absent' ? 'opacity-50 bg-red-50/20' : '' }}">
                                     <td class="px-4 py-3 text-center font-mono text-slate-400">
                                         {{ $index + 1 }}
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span id="code-badge-{{ $entry->id }}"
+                                              class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black font-mono {{ $entry->code_letter ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-slate-100 text-slate-400 italic' }}">
+                                            {{ $entry->code_letter ? 'Code ' . $entry->code_letter : '- None -' }}
+                                        </span>
                                     </td>
                                     <td class="px-4 py-3 font-mono font-bold text-slate-900">
                                         #{{ $entry->chest_number }}
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="font-bold text-slate-900">{{ $entry->student?->name ?? 'Participant' }}</div>
-                                        <div class="text-[10px] text-slate-400 font-mono">{{ $entry->student?->class ?? '' }}</div>
+                                        <div class="text-[10px] text-slate-400 font-mono">{{ $entry->student?->student_id ?? '' }}</div>
                                     </td>
                                     <td class="px-4 py-3 font-medium text-slate-700">
                                         {{ $entry->student?->group?->name ?? $entry->group?->name ?? '-' }}
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        @if($entry->code_letter)
-                                            <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black bg-purple-100 text-purple-900 border border-purple-300 font-mono">
-                                                Code {{ $entry->code_letter }}
-                                            </span>
-                                        @else
-                                            <span class="text-[11px] text-slate-400 font-mono italic">- None -</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
                                         @if($selectedProgram->is_call_list_locked)
-                                            <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold font-mono {{ $entry->attendance_status === 'present' ? 'bg-emerald-100 text-emerald-800' : ($entry->attendance_status === 'absent' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-700') }}">
+                                            <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold font-mono {{ $entry->attendance_status === 'present' ? 'bg-emerald-100 text-emerald-800' : ($entry->attendance_status === 'absent' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-700') }}">
                                                 {{ strtoupper($entry->attendance_status ?? 'waiting') }}
                                             </span>
                                         @else
-                                            <!-- Attendance Toggle Form -->
-                                            <form method="POST" action="{{ route('greenroom.mark-attendance', $entry->id) }}" class="inline-flex items-center gap-1.5">
-                                                @csrf
-                                                <button type="submit" name="status" value="present"
-                                                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-200' }}">
-                                                    Present
+                                            <!-- Interactive Large Buttons for Fast Attendance Marking -->
+                                            <div class="inline-flex items-center gap-1.5" id="attendance-buttons-{{ $entry->id }}">
+                                                <button type="button"
+                                                        @click="markAttendance({{ $entry->id }}, 'present', '{{ route('greenroom.mark-attendance', $entry->id) }}')"
+                                                        id="btn-present-{{ $entry->id }}"
+                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white font-black' : 'bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-200' }}">
+                                                    PRESENT
                                                 </button>
-                                                <button type="submit" name="status" value="absent"
-                                                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-red-50 text-slate-700 border border-slate-200' }}">
-                                                    Absent
+                                                <button type="button"
+                                                        @click="markAttendance({{ $entry->id }}, 'absent', '{{ route('greenroom.mark-attendance', $entry->id) }}')"
+                                                        id="btn-absent-{{ $entry->id }}"
+                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white font-black' : 'bg-slate-100 hover:bg-red-50 text-slate-700 border border-slate-200' }}">
+                                                    ABSENT
                                                 </button>
-                                                <button type="submit" name="status" value="waiting"
-                                                        class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all {{ $entry->attendance_status === 'waiting' || empty($entry->attendance_status) ? 'bg-amber-500 text-white shadow-xs' : 'bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-200' }}">
-                                                    Waiting
+                                                <button type="button"
+                                                        @click="markAttendance({{ $entry->id }}, 'waiting', '{{ route('greenroom.mark-attendance', $entry->id) }}')"
+                                                        id="btn-waiting-{{ $entry->id }}"
+                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs {{ $entry->attendance_status === 'waiting' || empty($entry->attendance_status) ? 'bg-amber-500 text-white font-black' : 'bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-200' }}">
+                                                    WAITING
                                                 </button>
-                                            </form>
+                                            </div>
                                         @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span id="eval-status-{{ $entry->id }}"
+                                              class="inline-flex items-center px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase
+                                              @if($entry->evaluation_status === 'EVALUATED') bg-purple-100 text-purple-900 border border-purple-200
+                                              @elseif($entry->evaluation_status === 'EVALUATION_PENDING') bg-blue-100 text-blue-900 border border-blue-200
+                                              @elseif($entry->evaluation_status === 'NOT_ELIGIBLE') bg-red-100 text-red-800 border border-red-200
+                                              @else bg-slate-100 text-slate-600 border border-slate-200 @endif">
+                                            {{ $entry->evaluation_status }}
+                                        </span>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="p-8 text-center text-slate-400 text-xs">
-                                        ഈ പ്രോഗ്രാമിൽ വെരിഫൈ ചെയ്ത മത്സരാർത്ഥികളില്ല.
+                                    <td colspan="7" class="p-8 text-center text-slate-400 text-xs">
+                                        തിരഞ്ഞെടുത്ത ഫിൽട്ടറുകളിൽ മത്സരാർത്ഥികളൊന്നും ലഭ്യമല്ല.
                                     </td>
                                 </tr>
                             @endforelse
@@ -312,12 +384,124 @@
                 </div>
             </div>
         @else
-            <div class="p-12 bg-white rounded-3xl border border-slate-200 text-center text-xs text-slate-500">
-                മുകളിലെ ഡ്രോപ്പ് ഡൗണിൽ നിന്ന് പ്രോഗ്രാം സെലക്ട് ചെയ്യുക.
+            <div class="p-12 bg-white rounded-3xl border border-slate-200 text-center text-xs text-slate-500 space-y-2">
+                <svg class="w-8 h-8 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <div class="font-bold text-slate-700">ഡിജിറ്റൽ കോൾ ലിസ്റ്റ് തുറക്കാൻ മുകളിലെ ഡ്രോപ്പ് ഡൗണിൽ നിന്ന് പ്രോഗ്രാം തിരഞ്ഞെടുക്കുക.</div>
             </div>
         @endif
 
     </main>
 
+    <!-- Alpine.js Call List Manager Script -->
+    <script>
+        function callListManager() {
+            return {
+                stats: {
+                    total: {{ (int) ($stats['total'] ?? 0) }},
+                    present: {{ (int) ($stats['present'] ?? 0) }},
+                    absent: {{ (int) ($stats['absent'] ?? 0) }},
+                    waiting: {{ (int) ($stats['waiting'] ?? 0) }},
+                    evaluated: {{ (int) ($stats['evaluated'] ?? 0) }},
+                    pending_evaluation: {{ (int) ($stats['pending_evaluation'] ?? 0) }},
+                },
+                toast: {
+                    show: false,
+                    message: '',
+                    isError: false,
+                    timeout: null
+                },
+                showToast(msg, isErr = false) {
+                    this.toast.message = msg;
+                    this.toast.isError = isErr;
+                    this.toast.show = true;
+                    if (this.toast.timeout) clearTimeout(this.toast.timeout);
+                    this.toast.timeout = setTimeout(() => {
+                        this.toast.show = false;
+                    }, 3500);
+                },
+                async markAttendance(entryId, status, actionUrl) {
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        const response = await fetch(actionUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ status: status })
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Failed to update attendance');
+                        }
+
+                        // Update local button states
+                        const btnPresent = document.getElementById('btn-present-' + entryId);
+                        const btnAbsent = document.getElementById('btn-absent-' + entryId);
+                        const btnWaiting = document.getElementById('btn-waiting-' + entryId);
+                        const row = document.getElementById('entry-row-' + entryId);
+                        const codeBadge = document.getElementById('code-badge-' + entryId);
+                        const evalBadge = document.getElementById('eval-status-' + entryId);
+
+                        if (btnPresent && btnAbsent && btnWaiting) {
+                            btnPresent.className = status === 'present' 
+                                ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs bg-emerald-600 text-white font-black'
+                                : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-200';
+                            btnAbsent.className = status === 'absent'
+                                ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs bg-red-600 text-white font-black'
+                                : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs bg-slate-100 hover:bg-red-50 text-slate-700 border border-slate-200';
+                            btnWaiting.className = status === 'waiting'
+                                ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs bg-amber-500 text-white font-black'
+                                : 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-200';
+                        }
+
+                        if (row) {
+                            if (status === 'absent') {
+                                row.classList.add('opacity-50', 'bg-red-50/20');
+                            } else {
+                                row.classList.remove('opacity-50', 'bg-red-50/20');
+                            }
+                        }
+
+                        if (codeBadge) {
+                            if (data.code_letter) {
+                                codeBadge.textContent = 'Code ' + data.code_letter;
+                                codeBadge.className = 'inline-flex items-center px-3 py-1 rounded-xl text-xs font-black font-mono bg-purple-100 text-purple-900 border border-purple-300';
+                            } else {
+                                codeBadge.textContent = '- None -';
+                                codeBadge.className = 'inline-flex items-center px-3 py-1 rounded-xl text-xs font-black font-mono bg-slate-100 text-slate-400 italic';
+                            }
+                        }
+
+                        if (evalBadge && data.evaluation_status) {
+                            evalBadge.textContent = data.evaluation_status;
+                            if (data.evaluation_status === 'EVALUATED') {
+                                evalBadge.className = 'inline-flex items-center px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase bg-purple-100 text-purple-900 border border-purple-200';
+                            } else if (data.evaluation_status === 'EVALUATION_PENDING') {
+                                evalBadge.className = 'inline-flex items-center px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase bg-blue-100 text-blue-900 border border-blue-200';
+                            } else if (data.evaluation_status === 'NOT_ELIGIBLE') {
+                                evalBadge.className = 'inline-flex items-center px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase bg-red-100 text-red-800 border border-red-200';
+                            } else {
+                                evalBadge.className = 'inline-flex items-center px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200';
+                            }
+                        }
+
+                        // Update counters from live server stats
+                        if (data.stats) {
+                            this.stats = data.stats;
+                        }
+
+                        this.showToast(data.message || 'Attendance saved.');
+                    } catch (err) {
+                        this.showToast(err.message || 'Error saving attendance.', true);
+                    }
+                }
+            };
+        }
+    </script>
 </body>
 </html>

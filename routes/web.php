@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
+use App\Http\Controllers\Admin\CallListController as AdminCallListController;
 use App\Http\Controllers\Admin\CertificateController as AdminCertificateController;
 use App\Http\Controllers\Admin\CodeLetterController as AdminCodeLetterController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -271,6 +272,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::resource('registrations', AdminRegistrationController::class)->parameters([
         'registrations' => 'entry',
     ]);
+
+    // Call List & Attendance Center
+    Route::get('call-list', [AdminCallListController::class, 'index'])->name('call-list.index');
+    Route::post('call-list/{entry}/attendance', [AdminCallListController::class, 'markAttendance'])->name('call-list.attendance');
+
+    // Evaluation Monitor Dashboard
+    Route::get('evaluation-monitor', [AdminCallListController::class, 'evaluationMonitor'])->name('evaluation-monitor.index');
+    Route::get('evaluation-monitor/{program}', [AdminCallListController::class, 'evaluationDetails'])->name('evaluation-monitor.show');
+
+    // Dedicated Judge Marks Dashboard
+    Route::get('judge-marks', [AdminCallListController::class, 'judgeMarks'])->name('judge-marks.index');
 
     // Schedule Management
     Route::resource('schedules', AdminScheduleController::class);

@@ -241,12 +241,14 @@ class MarkEntryController extends Controller
         // Auto-assign top 3 winner entries from recorded scores if not already set
         if (! $result->first_entry_id) {
             $topEntries = ProgramEntry::where('program_id', $program->id)
+                ->where('attendance_status', 'present')
                 ->with('scores')
                 ->get()
-                ->sortByDesc(fn ($e) => $e->scores->sum('total_score'))
+                ->filter(fn ($e) => $e->scores->isNotEmpty() && (float) $e->scores->avg('total_score') > 0)
+                ->sortByDesc(fn ($e) => (float) $e->scores->avg('total_score'))
                 ->values();
 
-            if ($topEntries->isNotEmpty() && $topEntries[0]->scores->sum('total_score') > 0) {
+            if ($topEntries->isNotEmpty()) {
                 $result->first_entry_id = $topEntries[0]->id;
                 $result->second_entry_id = $topEntries->get(1)?->id;
                 $result->third_entry_id = $topEntries->get(2)?->id;

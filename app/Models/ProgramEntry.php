@@ -107,4 +107,43 @@ class ProgramEntry extends Model
 
         return $captain ?? $participants->first();
     }
+
+    public function getEvaluationStatusAttribute(): string
+    {
+        if ($this->attendance_status === 'absent') {
+            return 'NOT_ELIGIBLE';
+        }
+
+        if ($this->attendance_status !== 'present') {
+            return 'WAITING';
+        }
+
+        $hasSubmitted = $this->relationLoaded('scoreSheets')
+            ? $this->scoreSheets->where('is_submitted', true)->isNotEmpty()
+            : $this->scoreSheets()->where('is_submitted', true)->exists();
+
+        return $hasSubmitted ? 'EVALUATED' : 'EVALUATION_PENDING';
+    }
+
+    public function getDisplayCodeAttribute(): string
+    {
+        if (! empty($this->code_letter)) {
+            return 'Code '.$this->code_letter;
+        }
+
+        return 'Chest #'.($this->chest_number ?? $this->id);
+    }
+
+    public static function formatCodeLetter(int $index): string
+    {
+        $alphabet = range('A', 'Z');
+        if ($index < 26) {
+            return $alphabet[$index];
+        }
+
+        $first = $alphabet[intdiv($index, 26) - 1];
+        $second = $alphabet[$index % 26];
+
+        return $first.$second;
+    }
 }

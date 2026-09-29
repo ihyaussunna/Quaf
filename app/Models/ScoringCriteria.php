@@ -18,6 +18,11 @@ class ScoringCriteria extends Model
         'max_marks',
     ];
 
+    public function getNameAttribute(): string
+    {
+        return $this->criterion_name ?? '';
+    }
+
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class);

@@ -338,8 +338,10 @@
             </div>
 
         @empty
-            <div class="py-16 text-center text-slate-500 font-mono text-xs bg-white rounded-3xl border border-slate-200 shadow-sm">
-                No evaluated entries available for this program. Once greenroom marks attendance and assigns code letters, they will appear here.
+            <div class="py-16 text-center text-slate-500 font-mono text-xs bg-white rounded-3xl border border-slate-200 shadow-sm space-y-2">
+                <svg class="w-8 h-8 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div class="font-bold text-slate-800">No Candidates Marked PRESENT Yet</div>
+                <p class="text-slate-400 max-w-md mx-auto">Only candidates marked "PRESENT" by the Green Room desk become eligible and appear here for jury evaluation. Absent candidates are strictly excluded.</p>
             </div>
         @endforelse
     </div>

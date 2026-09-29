@@ -297,6 +297,7 @@ class ResultController extends Controller
 
             if ($selectedProgram) {
                 $entries = ProgramEntry::where('program_id', $selectedProgram->id)
+                    ->where('attendance_status', 'present')
                     ->with(['student.group', 'group', 'scores'])
                     ->get()
                     ->map(function ($entry) {
