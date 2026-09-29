@@ -58,8 +58,8 @@ class OfficialGroupStudentsSeeder extends Seeder
                 'color_hex' => '#F8E709',
                 'manager_name' => 'SINAN SAQAFI VELLIMUTTAM',
                 'assistant_managers' => ['MUSHARAF PONNANI', 'ZAINUL ABID VAVAD'],
-                'file' => base_path('database/data/conco_majdic_students.tsv'),
-                'delimiter' => "\t",
+                'file' => base_path('database/data/CONCO_MAJDIC.csv'),
+                'delimiter' => ',',
             ],
             'UNIO' => [
                 'code' => 'UNIO',

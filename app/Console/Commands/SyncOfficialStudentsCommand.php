@@ -229,8 +229,28 @@ class SyncOfficialStudentsCommand extends Command
                 }
 
                 // Check for student row with QF chest number
-                if (preg_match('/^(QF\d{4})$/i', $firstCol, $match) && $currentGroup) {
+                if (preg_match('/^(QF\d{4})$/i', $firstCol, $match)) {
                     $chestNo = strtoupper($match[1]);
+                    $targetGroup = $currentGroup;
+                    if (! $targetGroup) {
+                        $cNum = (int) substr($chestNo, 2);
+                        if ($cNum >= 1000 && $cNum < 2000) {
+                            $targetGroup = $lumo;
+                        } elseif ($cNum >= 2000 && $cNum < 3000) {
+                            $targetGroup = $pacto;
+                        } elseif ($cNum >= 3000 && $cNum < 4000) {
+                            $targetGroup = $conco;
+                        } elseif ($cNum >= 4000 && $cNum < 5000) {
+                            $targetGroup = $unio;
+                        } elseif ($cNum >= 5000 && $cNum < 6000) {
+                            $targetGroup = $yugo;
+                        }
+                    }
+
+                    if (! $targetGroup) {
+                        continue;
+                    }
+
                     $rawName = $row[1] ?? '';
                     $rawClass = $row[2] ?? '';
                     $rawZone = $row[3] ?? '';
@@ -256,7 +276,7 @@ class SyncOfficialStudentsCommand extends Command
                     $studentsBatch[] = [
                         'student_id' => $chestNo,
                         'name' => $name,
-                        'group_id' => $currentGroup->id,
+                        'group_id' => $targetGroup->id,
                         'zone_id' => $zoneModel->id,
                         'category' => $zoneModel->name,
                         'class_level' => $class,
@@ -269,7 +289,7 @@ class SyncOfficialStudentsCommand extends Command
                         'updated_at' => now(),
                     ];
 
-                    $groupCounts[$currentGroup->code]++;
+                    $groupCounts[$targetGroup->code]++;
                     $totalCount++;
 
                     // Insert in chunks of 100
