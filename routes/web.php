@@ -157,7 +157,7 @@ Route::get('/migrate-db', function (Request $request) {
     }
 });
 
-// Reset festival state (reset all completed programs, call list locks, results, score sheets)
+// Reset festival state (reset all completed programs, call list locks, results, score sheets, students)
 Route::match(['get', 'post'], '/reset-festival-state', function (Request $request) {
     $hasAccess = (auth()->check() && in_array(auth()->user()->role, ['admin', 'super_admin', 'program_committee', 'program_coordinator']))
         || $request->query('token') === 'quaf2026setup';
@@ -181,20 +181,22 @@ Route::match(['get', 'post'], '/reset-festival-state', function (Request $reques
         DB::table('program_entry_participants')->delete();
         DB::table('program_entries')->delete();
         DB::table('points_transactions')->delete();
+        DB::table('certificates')->delete();
+        DB::table('students')->delete();
         DB::table('groups')->update(['points_cache' => 0, 'rank_cache' => 1]);
-        DB::table('students')->update(['points_cache' => 0]);
 
         Artisan::call('optimize:clear');
         Cache::flush();
 
         return response('<html><head><title>QUAF 9.0 Festival Reset</title></head><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#c9d1d9;">'
-            .'<h1 style="color:#3fb950;margin-bottom:20px;">Festival State Successfully Reset!</h1>'
+            .'<h1 style="color:#3fb950;margin-bottom:20px;">Festival State & Students Successfully Reset!</h1>'
             .'<div style="background:#161b22;padding:24px;border-radius:8px;border:1px solid #30363d;max-width:600px;">'
+            .'<p style="margin:8px 0;font-size:16px;">All students and chest numbers deleted (Count: 0).</p>'
             .'<p style="margin:8px 0;font-size:16px;">All completed programs reset to Upcoming.</p>'
             .'<p style="margin:8px 0;font-size:16px;">All call list locks unlocked.</p>'
             .'<p style="margin:8px 0;font-size:16px;">All evaluations, results, and calls cleared.</p>'
             .'<div style="margin-top:24px;">'
-            .'<a href="/admin/call-list" style="display:inline-block;padding:10px 20px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Back to Call List &rarr;</a>'
+            .'<a href="/admin" style="display:inline-block;padding:10px 20px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Back to Admin Dashboard &rarr;</a>'
             .'</div></div>'
             .'</body></html>', 200, ['Content-Type' => 'text/html']);
     } catch (Throwable $e) {
@@ -202,6 +204,41 @@ Route::match(['get', 'post'], '/reset-festival-state', function (Request $reques
             .'<h1>Reset Error</h1>'
             .'<pre style="background:#161b22;padding:20px;border-radius:6px;border:1px solid #da3633;color:#ff7b72;">'.htmlspecialchars($e->getMessage()).'</pre>'
             .'</body></html>', 500, ['Content-Type' => 'text/html']);
+    }
+});
+
+// Dedicated 1-click endpoint to wipe all students and chest numbers
+Route::match(['get', 'post'], '/wipe-all-students/{token}', function (string $token) {
+    if ($token !== 'quaf2026setup') {
+        abort(403, 'Unauthorized setup token.');
+    }
+
+    try {
+        @set_time_limit(300);
+        DB::transaction(function () {
+            DB::table('program_entry_participants')->delete();
+            DB::table('program_entries')->delete();
+            DB::table('certificates')->delete();
+            DB::table('points_transactions')->delete();
+            DB::table('results')->delete();
+            DB::table('score_sheets')->delete();
+            DB::table('green_room_calls')->delete();
+            DB::table('students')->delete();
+            DB::table('groups')->update(['points_cache' => 0, 'rank_cache' => 1]);
+        });
+
+        Artisan::call('optimize:clear');
+        Cache::flush();
+
+        return response('<html><body style="font-family:sans-serif;padding:40px;background:#0d1117;color:#c9d1d9;">'
+            .'<h1 style="color:#3fb950;margin-bottom:16px;">All Students & Chest Numbers Deleted Successfully!</h1>'
+            .'<div style="background:#161b22;padding:24px;border-radius:8px;border:1px solid #30363d;max-width:600px;">'
+            .'<p style="font-size:16px;margin:0 0 16px 0;">Student count in database is now: <strong>0</strong></p>'
+            .'<a href="/admin/students" style="display:inline-block;padding:10px 20px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Go to Students List &rarr;</a>'
+            .'</div>'
+            .'</body></html>', 200, ['Content-Type' => 'text/html']);
+    } catch (Throwable $e) {
+        return response('Error wiping students: '.htmlspecialchars($e->getMessage()), 500);
     }
 });
 
@@ -225,10 +262,25 @@ Route::get('/git-pull/{token}', function (string $token) {
     }
 
     $output = '';
-    if (function_exists('shell_exec')) {
-        $output = (string) shell_exec('git pull origin main 2>&1');
+    $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+    $cmd = 'git pull origin main 2>&1';
+
+    if (function_exists('exec') && ! in_array('exec', $disabled, true)) {
+        $lines = [];
+        @exec($cmd, $lines);
+        $output = implode("\n", $lines);
+    } elseif (function_exists('shell_exec') && ! in_array('shell_exec', $disabled, true)) {
+        $output = (string) @shell_exec($cmd);
+    } elseif (function_exists('passthru') && ! in_array('passthru', $disabled, true)) {
+        ob_start();
+        @passthru($cmd);
+        $output = (string) ob_get_clean();
+    } elseif (function_exists('system') && ! in_array('system', $disabled, true)) {
+        ob_start();
+        @system($cmd);
+        $output = (string) ob_get_clean();
     } else {
-        $output = 'shell_exec is disabled on this server.';
+        $output = 'PHP shell command execution is disabled in php.ini on this hosting server. In Hostinger hPanel, please navigate to: Advanced -> Git -> and click "Deploy" or "Pull" to fetch the latest code from GitHub.';
     }
 
     try {
@@ -246,7 +298,7 @@ Route::get('/git-pull/{token}', function (string $token) {
         .'<h2 style="color:#3fb950;">Git Pull & Migration Output</h2>'
         .'<pre style="background:#161b22;padding:16px;border-radius:6px;border:1px solid #30363d;white-space:pre-wrap;color:#58a6ff;">'
         .htmlspecialchars($output).'</pre>'
-        .'<p style="margin-top:20px;"><a href="/judge" style="display:inline-block;padding:10px 18px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Go to Judge Panel &rarr;</a></p>'
+        .'<p style="margin-top:20px;"><a href="/admin" style="display:inline-block;padding:10px 18px;background:#238636;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;">Go to Admin Dashboard &rarr;</a></p>'
         .'</body></html>');
 });
 
