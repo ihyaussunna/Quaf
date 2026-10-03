@@ -197,12 +197,16 @@ class LeaderController extends Controller
 
         $selectedProgram = null;
         if ($selectedProgramId) {
-            $selectedProgram = Program::with([
-                'category',
-                'stage',
-                'zone',
-                'entries' => fn ($q) => $q->where('group_id', $group->id)->with(['student', 'participants']),
-            ])->find($selectedProgramId);
+            if (($selectedZone || $selectedZoneId) && ! $programs->contains('id', (int) $selectedProgramId)) {
+                $selectedProgramId = null;
+            } else {
+                $selectedProgram = Program::with([
+                    'category',
+                    'stage',
+                    'zone',
+                    'entries' => fn ($q) => $q->where('group_id', $group->id)->with(['student', 'participants']),
+                ])->find($selectedProgramId);
+            }
         }
 
         return view('leader.program-wise', compact(

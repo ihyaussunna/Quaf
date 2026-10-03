@@ -60,11 +60,21 @@ function studentWisePageManager() {
             this.feedbackSuccess = '';
         },
         
+        normalizeZone(str) {
+            if (!str) return '';
+            const s = String(str).toLowerCase().trim();
+            if (s.includes('mix')) return 'mix';
+            if (s.includes('a') && !s.includes('b') && !s.includes('c')) return 'a';
+            if (s.includes('b')) return 'b';
+            if (s.includes('c')) return 'c';
+            return s.replace(/[^a-z0-9]/g, '');
+        },
+
         get eligibleProgramsForModal() {
             if (!this.modalStudent) return [];
             const st = this.modalStudent;
             const enrolledProgIds = st.entries.map(e => Number(e.program_id));
-            const stZone = (st.zone || '').toLowerCase().trim();
+            const stZone = this.normalizeZone(st.zone);
             const q = (this.programSearch || '').toLowerCase().trim();
             
             return this.allPrograms.filter(p => {
@@ -73,11 +83,11 @@ function studentWisePageManager() {
                 
                 // Zone check:
                 if (!p.is_mix_zone) {
-                    const pZone = (p.zone_name || '').toLowerCase().trim();
+                    const pZone = this.normalizeZone(p.zone_name);
                     if (pZone !== stZone) return false;
                 } else {
                     if (!p.mix_zone_open_to_all && Array.isArray(p.allowed_zones) && p.allowed_zones.length > 0) {
-                        const allowed = p.allowed_zones.map(z => String(z).toLowerCase().trim());
+                        const allowed = p.allowed_zones.map(z => this.normalizeZone(z));
                         if (!allowed.includes(stZone)) return false;
                     }
                 }
@@ -567,11 +577,20 @@ function studentWisePageManager() {
                 <!-- Search destination program -->
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1" x-text="activeModal === 'swap' ? 'Select Replacement Program' : 'Select Program to Register'"></label>
-                    <div class="relative">
-                        <input type="text"
-                               x-model="programSearch"
-                               placeholder="Type to filter eligible programs..."
-                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange">
+                    <div class="space-y-2">
+                        <select x-model="selectedToProgramId"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange">
+                            <option value="">-- Choose Program from Dropdown --</option>
+                            <template x-for="p in eligibleProgramsForModal" :key="'opt-' + p.id">
+                                <option :value="p.id" x-text="p.name + ' [' + p.code + '] (' + p.remaining + ' slot(s) left)'"></option>
+                            </template>
+                        </select>
+                        <div class="relative">
+                            <input type="text"
+                                   x-model="programSearch"
+                                   placeholder="Or type to search program list below..."
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange">
+                        </div>
                     </div>
                 </div>
 

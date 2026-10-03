@@ -117,9 +117,9 @@
 
 <script>
 window.quafRegistrationData = {
-    programs: @json($programsData),
-    students: @json($studentsData),
-    zones: @json($zonesData)
+    programs: {!! json_encode($programsData, JSON_UNESCAPED_UNICODE) !!},
+    students: {!! json_encode($studentsData, JSON_UNESCAPED_UNICODE) !!},
+    zones: {!! json_encode($zonesData, JSON_UNESCAPED_UNICODE) !!}
 };
 
 function registrationManager() {
@@ -139,17 +139,24 @@ function registrationManager() {
         allZones: window.quafRegistrationData ? (window.quafRegistrationData.zones || []) : [],
         
         init() {
-            if (this.selectedZone) {
-                this.updateProgramDropdown();
-                if (this.selectedProgramId) {
-                    const sel = this.$refs.programSelect || document.getElementById('program_select');
-                    if (sel) sel.value = this.selectedProgramId;
-                }
+            this.updateProgramDropdown();
+            if (this.selectedZone && this.selectedProgramId) {
+                this.onProgramChange(this.selectedProgramId);
             }
         },
         
+        normalizeZone(str) {
+            if (!str) return '';
+            const s = String(str).toLowerCase().trim();
+            if (s.includes('mix')) return 'mix';
+            if (s.includes('a') && !s.includes('b') && !s.includes('c')) return 'a';
+            if (s.includes('b')) return 'b';
+            if (s.includes('c')) return 'c';
+            return s.replace(/[^a-z0-9]/g, '');
+        },
+
         get currentProgram() {
-            return this.allPrograms.find(p => p.id == this.selectedProgramId) || null;
+            return this.allPrograms.find(p => String(p.id) === String(this.selectedProgramId)) || null;
         },
         
         get isGroup() {
@@ -162,63 +169,86 @@ function registrationManager() {
         
         get filteredPrograms() {
             if (!this.selectedZone) return [];
-            const z = this.selectedZone.toLowerCase().trim();
+            const z = this.normalizeZone(this.selectedZone);
             return this.allPrograms.filter(p => {
-                const pZone = (p.zone_name || '').toLowerCase().trim();
-                return pZone === z || (z === 'mix zone' && pZone.includes('mix'));
+                const pZone = this.normalizeZone(p.zone_name);
+                return pZone === z || (z === 'mix' && (p.is_mix_zone || pZone === 'mix'));
             });
         },
         
         get eligibleStudents() {
             if (!this.selectedZone) return this.allStudents;
-            const z = this.selectedZone.toLowerCase().trim();
+            const z = this.normalizeZone(this.selectedZone);
+            const isMix = (z === 'mix');
             return this.allStudents.filter(s => {
-                const isMix = z === 'mix zone';
-                const sZone = (s.zone_name || '').toLowerCase().trim();
+                const sZone = this.normalizeZone(s.zone_name);
                 return isMix || sZone === z;
             });
         },
         
         get availableStudents() {
-            const addedIds = this.selectedStudents.map(s => s.id);
+            const addedIds = this.selectedStudents.map(s => Number(s.id));
             const q = (this.studentSearch || '').toLowerCase().trim();
-            const base = this.eligibleStudents.filter(s => !addedIds.includes(s.id));
-            if (!q) return base.slice(0, 30);
-            return base.filter(s => (s.name || '').toLowerCase().includes(q) || (s.chest || '').toLowerCase().includes(q)).slice(0, 30);
+            const base = this.eligibleStudents.filter(s => !addedIds.includes(Number(s.id)));
+            if (!q) return base.slice(0, 40);
+            return base.filter(s => 
+                (s.name || '').toLowerCase().includes(q) || 
+                String(s.chest || '').toLowerCase().includes(q) ||
+                String(s.id || '').includes(q)
+            ).slice(0, 40);
+        },
+
+        isStudentIndividualLimitReached(st) {
+            if (this.isGroup) return false;
+            // If the student was already registered in the database for the current program,
+            // they already occupy 1 slot for this program, so their effective count is (individual_count - 1)
+            const isEnrolledInCurrent = this.currentProgram && Array.isArray(this.currentProgram.enrolled_students) &&
+                this.currentProgram.enrolled_students.some(es => Number(es.id) === Number(st.id));
+            
+            const count = isEnrolledInCurrent ? Math.max(0, (st.individual_count || 0) - 1) : (st.individual_count || 0);
+            return count >= 5;
         },
         
         updateProgramDropdown() {
             const select = this.$refs.programSelect || document.getElementById('program_select');
             if (!select) return;
             
-            const zone = (this.selectedZone || '').toLowerCase().trim();
-            const currentProgId = this.selectedProgramId;
-            select.innerHTML = '';
+            const zone = this.selectedZone ? this.selectedZone.trim() : '';
+            const currentProgId = String(this.selectedProgramId || '');
             
-            const defaultOpt = document.createElement('option');
-            defaultOpt.value = '';
+            // Clear options safely using standard HTML OptionsCollection API
+            select.options.length = 0;
             
-            if (!zone) {
-                defaultOpt.textContent = '-- Please select a Zone first --';
-                select.appendChild(defaultOpt);
-                return;
-            }
+            const defaultPrompt = zone 
+                ? `-- Choose Competition Program (${this.filteredPrograms.length} available) --` 
+                : '-- Please select a Zone first --';
             
-            const progs = this.filteredPrograms;
-            defaultOpt.textContent = `-- Choose Competition Program (${progs.length} available) --`;
-            select.appendChild(defaultOpt);
+            select.options[0] = new Option(defaultPrompt, '', false, !currentProgId);
             
-            progs.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = `${p.name} ${p.tag}`;
-                if (p.id == currentProgId) {
-                    opt.selected = true;
-                }
-                select.appendChild(opt);
+            let matched = false;
+            this.filteredPrograms.forEach((p, idx) => {
+                const isSelected = String(p.id) === currentProgId;
+                if (isSelected) matched = true;
+                select.options[idx + 1] = new Option(`${p.name} ${p.tag}`, String(p.id), false, isSelected);
             });
+            
+            if (matched && currentProgId) {
+                select.value = currentProgId;
+            } else if (!matched && this.filteredPrograms.length > 0 && currentProgId) {
+                select.value = '';
+                this.selectedProgramId = '';
+            }
         },
         
+        selectProgram(zoneName, progId) {
+            if (zoneName) {
+                this.selectedZone = zoneName;
+            }
+            this.selectedProgramId = String(progId || '');
+            this.updateProgramDropdown();
+            this.onProgramChange(this.selectedProgramId);
+        },
+
         onZoneChange() {
             this.selectedProgramId = '';
             this.selectedStudents = [];
@@ -227,28 +257,34 @@ function registrationManager() {
             this.feedbackSuccess = '';
             this.feedbackError = '';
             
-            this.updateProgramDropdown();
-            
-            // Auto-select first program that still has open quota in this zone
-            const firstOpen = this.filteredPrograms.find(p => !p.is_full);
+            const progs = this.filteredPrograms;
+            const firstOpen = progs.find(p => !p.is_full) || (progs.length > 0 ? progs[0] : null);
             if (firstOpen) {
-                this.selectedProgramId = firstOpen.id;
-                const select = this.$refs.programSelect || document.getElementById('program_select');
-                if (select) select.value = firstOpen.id;
+                this.selectedProgramId = String(firstOpen.id);
             }
-            this.onProgramChange();
+            
+            this.updateProgramDropdown();
+            this.onProgramChange(this.selectedProgramId);
         },
         
-        onProgramChange() {
+        onProgramChange(newId) {
+            if (newId !== undefined && newId !== null) {
+                this.selectedProgramId = String(newId);
+            }
+            const select = this.$refs.programSelect || document.getElementById('program_select');
+            if (select && select.value !== this.selectedProgramId) {
+                select.value = this.selectedProgramId;
+            }
             this.selectedStudents = [];
             this.leaderStudentId = null;
             this.studentSearch = '';
             this.feedbackSuccess = '';
             this.feedbackError = '';
             
-            if (this.currentProgram && Array.isArray(this.currentProgram.enrolled_students) && this.currentProgram.enrolled_students.length > 0) {
-                this.selectedStudents = this.currentProgram.enrolled_students.map(s => ({ ...s }));
-                if (this.isGroup) {
+            const prog = this.currentProgram;
+            if (prog && Array.isArray(prog.enrolled_students) && prog.enrolled_students.length > 0) {
+                this.selectedStudents = prog.enrolled_students.map(s => ({ ...s }));
+                if (prog.type === 'group') {
                     const ldr = this.selectedStudents.find(s => s.is_leader);
                     this.leaderStudentId = ldr ? ldr.id : (this.selectedStudents[0] ? this.selectedStudents[0].id : null);
                 } else {
@@ -259,8 +295,8 @@ function registrationManager() {
         
         addStudent(st) {
             if (this.selectedStudents.length >= this.participantLimit) return;
-            if (this.selectedStudents.some(s => s.id == st.id)) return;
-            if (!this.isGroup && st.individual_count >= 5) {
+            if (this.selectedStudents.some(s => Number(s.id) === Number(st.id))) return;
+            if (!this.isGroup && this.isStudentIndividualLimitReached(st)) {
                 this.feedbackError = `"${st.name}" ഇതിനകം പരമാവധി 5 വ്യക്തിഗത (Individual) മത്സരങ്ങളിൽ പങ്കെടുത്തിട്ടുണ്ട്. ഗ്രൂപ്പ് ഇനങ്ങളിൽ മാത്രമേ ഇനി ചേർക്കാനാവൂ.`;
                 return;
             }
@@ -281,7 +317,8 @@ function registrationManager() {
         },
         
         removeStudent(stId) {
-            this.selectedStudents = this.selectedStudents.filter(s => s.id !== stId);
+            const removedId = Number(stId);
+            this.selectedStudents = this.selectedStudents.filter(s => Number(s.id) !== removedId);
             if (this.leaderStudentId == stId) {
                 this.leaderStudentId = this.selectedStudents.length > 0 ? this.selectedStudents[0].id : null;
             }
@@ -591,35 +628,13 @@ function registrationManager() {
                         id="program_select"
                         x-ref="programSelect"
                         x-model="selectedProgramId" 
-                        @change="onProgramChange(); selectedProgramId = $event.target.value;" 
+                        @change="onProgramChange($event.target.value)" 
                         :disabled="!selectedZone"
                         required 
                         class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <option value="" x-text="selectedZone ? '-- Choose Competition Program (' + filteredPrograms.length + ' available) --' : '-- Please select a Zone first --'"></option>
-                    @foreach($eligiblePrograms as $p)
-                        @php
-                            $pZone = $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone');
-                            $limit = $p->limit;
-                            
-                            $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($p->id, collect()) : collect();
-                            if ($p->type === 'group') {
-                                $firstEntry = $pEntries->first();
-                                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
-                            } else {
-                                $enrolled = $pEntries->count();
-                            }
-                            $remaining = max(0, $limit - $enrolled);
-                            if ($enrolled === 0) {
-                                $tag = "[0/{$limit} • {$limit} left]";
-                            } elseif ($enrolled < $limit) {
-                                $tag = "[{$enrolled}/{$limit} • {$remaining} left]";
-                            } else {
-                                $tag = "[✓ {$enrolled}/{$limit} Full]";
-                            }
-                        @endphp
-                        <option value="{{ $p->id }}" data-zone="{{ strtolower(trim($pZone)) }}">
-                            {{ $p->name }} {{ $tag }}
-                        </option>
+                    <option value="">-- Please select a Zone first --</option>
+                    @foreach($programsData as $pData)
+                        <option value="{{ $pData['id'] }}">{{ $pData['name'] }} {{ $pData['tag'] }}</option>
                     @endforeach
                 </select>
                 <template x-if="currentProgram">
@@ -767,16 +782,16 @@ function registrationManager() {
                             <template x-for="st in availableStudents" :key="st.id">
                                 <button type="button" 
                                         @click="addStudent(st)" 
-                                        :disabled="!isGroup && st.has_reached_individual_limit"
-                                        :class="!isGroup && st.has_reached_individual_limit ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'hover:bg-orange-50'"
+                                        :disabled="!isGroup && isStudentIndividualLimitReached(st)"
+                                        :class="!isGroup && isStudentIndividualLimitReached(st) ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'hover:bg-orange-50'"
                                         class="w-full text-left px-4 py-2.5 flex items-center justify-between gap-3 transition-colors font-sora">
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <span class="font-bold text-sm text-slate-800" x-text="st.name"></span>
-                                            <template x-if="!isGroup && st.has_reached_individual_limit">
+                                            <template x-if="!isGroup && isStudentIndividualLimitReached(st)">
                                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700">5/5 Limit Reached</span>
                                             </template>
-                                            <template x-if="!isGroup && !st.has_reached_individual_limit">
+                                            <template x-if="!isGroup && !isStudentIndividualLimitReached(st)">
                                                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700" x-text="(st.individual_count || 0) + '/5 Ind'"></span>
                                             </template>
                                             <template x-if="isGroup">
@@ -786,12 +801,12 @@ function registrationManager() {
                                         <span class="text-[11px] text-slate-500 font-sora"><span class="font-mono font-bold text-slate-800" x-text="'Chest: ' + st.chest"></span> • Zone: <span x-text="st.zone_name"></span> • Class: <span x-text="st.class || '-'"></span></span>
                                     </div>
                                     <div>
-                                        <template x-if="!isGroup && st.has_reached_individual_limit">
+                                        <template x-if="!isGroup && isStudentIndividualLimitReached(st)">
                                             <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-500 text-[11px] font-sora font-semibold">
                                                 Max 5
                                             </span>
                                         </template>
-                                        <template x-if="isGroup || !st.has_reached_individual_limit">
+                                        <template x-if="isGroup || !isStudentIndividualLimitReached(st)">
                                             <span class="px-2.5 py-1 rounded-lg bg-brand-orange text-white text-[11px] font-sora font-bold">
                                                 + Add
                                             </span>
@@ -1000,7 +1015,7 @@ function registrationManager() {
                             <td class="py-2.5 px-3 text-right">
                                 @if($isRegistrationOpen)
                                     <a href="#zone_select" 
-                                       @click="selectedZone = '{{ addslashes($upZone) }}'; onZoneChange(); selectedProgramId = {{ $up->id }}; onProgramChange();"
+                                       @click.prevent="selectProgram('{{ addslashes($upZone) }}', {{ $up->id }}); document.getElementById('zone_select')?.scrollIntoView({ behavior: 'smooth' });"
                                        class="inline-block px-2.5 py-1 rounded-lg bg-brand-orange text-white hover:bg-orange-600 text-[11px] font-sora font-bold transition-colors shadow-2xs">
                                         + Enroll
                                     </a>

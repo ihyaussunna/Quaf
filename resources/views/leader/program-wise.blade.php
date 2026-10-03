@@ -24,7 +24,7 @@
         <form method="GET" action="{{ route('leader.programs-wise') }}" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
             <div class="md:col-span-5">
                 <label class="block text-xs font-semibold text-gray-600 mb-1 font-sora">Zone</label>
-                <select name="zone" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
+                <select name="zone" onchange="if(this.form.program) { this.form.program.value = ''; } this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
                     <option value="">-- All Zones --</option>
                     @foreach($zones as $zKey => $zVal)
                         @php
