@@ -102,7 +102,7 @@ class LeaderRegistrationWorkflowTest extends TestCase
             'slug' => 'elocution',
             'type' => 'individual',
             'zone_id' => $this->zone->id,
-            'participant_count' => 1,
+            'participant_count' => 2,
             'is_active' => true,
         ]);
 

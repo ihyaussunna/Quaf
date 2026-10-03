@@ -82,6 +82,37 @@ class Program extends Model
             if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
                 unset($program->attributes['is_call_list_locked']);
             }
+
+            // Keep participant limits synchronized across all columns
+            if ($program->isGroup()) {
+                if ($program->isDirty('participant_count') && $program->participant_count !== null) {
+                    $limit = (int) $program->participant_count;
+                } elseif ($program->isDirty('max_participants') && $program->max_participants !== null) {
+                    $limit = (int) $program->max_participants;
+                } else {
+                    $limit = (int) ($program->participant_count ?: ($program->max_participants ?: 2));
+                }
+
+                $limit = max(1, $limit);
+                $program->participant_count = $limit;
+                $program->max_participants = $limit;
+                $program->max_participants_per_group = 1;
+            } else {
+                if ($program->isDirty('participant_count') && $program->participant_count !== null) {
+                    $limit = (int) $program->participant_count;
+                } elseif ($program->isDirty('max_participants_per_group') && $program->max_participants_per_group !== null) {
+                    $limit = (int) $program->max_participants_per_group;
+                } elseif ($program->isDirty('max_participants') && $program->max_participants !== null) {
+                    $limit = max(1, (int) round($program->max_participants / 5));
+                } else {
+                    $limit = (int) ($program->participant_count ?: ($program->max_participants_per_group ?: 1));
+                }
+
+                $limit = max(1, $limit);
+                $program->participant_count = $limit;
+                $program->max_participants_per_group = $limit;
+                $program->max_participants = $limit * 5;
+            }
         });
     }
 
@@ -213,5 +244,14 @@ class Program extends Model
     public function getZoneNameAttribute(): string
     {
         return $this->zone?->name ?? $this->eligibility ?? 'A Zone';
+    }
+
+    public function getLimitAttribute(): int
+    {
+        if ($this->isGroup()) {
+            return max(1, (int) ($this->participant_count ?: ($this->max_participants ?: 2)));
+        }
+
+        return max(1, (int) ($this->participant_count ?: ($this->max_participants_per_group ?: 1)));
     }
 }

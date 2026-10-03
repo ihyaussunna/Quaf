@@ -3,9 +3,7 @@
 @section('content')
 @php
     $programsData = $eligiblePrograms->map(function ($p) use ($registeredProgramIds, $entriesByProgram) {
-        $limit = $p->type === 'group' 
-            ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
-            : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+        $limit = $p->limit;
             
         $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($p->id, collect()) : collect();
         $enrolledStudents = [];
@@ -585,9 +583,7 @@ function registrationManager() {
                     @foreach($eligiblePrograms as $p)
                         @php
                             $pZone = $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone');
-                            $limit = $p->type === 'group' 
-                                ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
-                                : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+                            $limit = $p->limit;
                             
                             $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($p->id, collect()) : collect();
                             if ($p->type === 'group') {
@@ -952,9 +948,7 @@ function registrationManager() {
                     @forelse($unregisteredPrograms ?? [] as $up)
                         @php
                             $upZone = $up->zone?->name ?? ($up->eligibility ?? 'Mix Zone');
-                            $limit = $up->type === 'group' 
-                                ? max(1, (int) ($up->participant_count ?? $up->max_participants ?? 2))
-                                : max(1, (int) ($up->max_participants_per_group ?? $up->participant_count ?? 1));
+                            $limit = $up->limit;
                             $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($up->id, collect()) : collect();
                             if ($up->type === 'group') {
                                 $firstEntry = $pEntries->first();

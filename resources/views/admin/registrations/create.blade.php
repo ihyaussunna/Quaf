@@ -10,7 +10,7 @@
             'type' => $p->type,
             'zone_id' => $p->zone_id,
             'zone_name' => $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone'),
-            'limit' => $p->participant_count ?? 2,
+            'limit' => $p->limit,
             'is_stage' => (bool)$p->is_stage,
         ];
     });

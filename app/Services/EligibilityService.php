@@ -21,7 +21,7 @@ class EligibilityService
     public function validateIndividualRegistration(
         Student|int $student,
         Program|int $program,
-        ?int $excludeEntryId = null
+        int|array|null $excludeEntryId = null
     ): array {
         // Check 1: Student exists
         if (! ($student instanceof Student)) {
@@ -144,13 +144,40 @@ class EligibilityService
             }
         }
 
+        // Check 8: Duplicate Registration
+        $alreadyRegistered = ProgramEntry::where('program_id', $program->id)
+            ->where('student_id', $student->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->when($excludeEntryId, function ($q) use ($excludeEntryId) {
+                if (is_array($excludeEntryId)) {
+                    return $q->whereNotIn('id', $excludeEntryId);
+                }
+
+                return $q->where('id', '!=', $excludeEntryId);
+            })
+            ->exists();
+
+        if ($alreadyRegistered) {
+            return [
+                'valid' => false,
+                'error' => "Student '{$student->name}' is already registered for this programme.",
+                'field' => 'student_id',
+            ];
+        }
+
         // Check 7: Group-Wise Participant Limit
-        $maxPerGroup = $program->max_participants_per_group ?? 2;
+        $maxPerGroup = $program->limit;
         if ($maxPerGroup > 0) {
             $activeGroupEntries = ProgramEntry::where('program_id', $program->id)
                 ->where('group_id', $student->group_id)
                 ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
-                ->when($excludeEntryId, fn ($q) => $q->where('id', '!=', $excludeEntryId))
+                ->when($excludeEntryId, function ($q) use ($excludeEntryId) {
+                    if (is_array($excludeEntryId)) {
+                        return $q->whereNotIn('id', $excludeEntryId);
+                    }
+
+                    return $q->where('id', '!=', $excludeEntryId);
+                })
                 ->count();
 
             if ($activeGroupEntries >= $maxPerGroup) {
@@ -162,21 +189,6 @@ class EligibilityService
                     'field' => 'max_participants_per_group',
                 ];
             }
-        }
-
-        // Check 8: Duplicate Registration
-        $alreadyRegistered = ProgramEntry::where('program_id', $program->id)
-            ->where('student_id', $student->id)
-            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
-            ->when($excludeEntryId, fn ($q) => $q->where('id', '!=', $excludeEntryId))
-            ->exists();
-
-        if ($alreadyRegistered) {
-            return [
-                'valid' => false,
-                'error' => "Student '{$student->name}' is already registered for this programme.",
-                'field' => 'student_id',
-            ];
         }
 
         // Check 10: Specific Eligibility Rules (e.g. gender or class)
@@ -236,7 +248,7 @@ class EligibilityService
         }
 
         // Check 9: Participant Count Limit
-        $maxAllowed = (int) ($program->max_participants ?? $program->participant_count ?? 10);
+        $maxAllowed = $program->limit;
         if (count($studentIds) < 1) {
             return [
                 'valid' => false,

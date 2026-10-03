@@ -196,6 +196,17 @@ class ProgramCommitteeController extends Controller
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
 
+        $limitCount = (int) ($validated['participant_count'] ?? 1);
+        if (($validated['type'] ?? 'individual') === 'group') {
+            $validated['participant_count'] = max(1, $limitCount);
+            $validated['max_participants'] = max(1, $limitCount);
+            $validated['max_participants_per_group'] = 1;
+        } else {
+            $validated['participant_count'] = max(1, $limitCount);
+            $validated['max_participants_per_group'] = max(1, $limitCount);
+            $validated['max_participants'] = max(1, $limitCount) * 5;
+        }
+
         Program::ensureSchema();
 
         $hasTimeLimit = $request->boolean('has_time_limit', true);
@@ -335,6 +346,18 @@ class ProgramCommitteeController extends Controller
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
+
+        $limitCount = (int) ($validated['participant_count'] ?? $program->participant_count ?? 1);
+        $type = $validated['type'] ?? $program->type ?? 'individual';
+        if ($type === 'group') {
+            $validated['participant_count'] = max(1, $limitCount);
+            $validated['max_participants'] = max(1, $limitCount);
+            $validated['max_participants_per_group'] = 1;
+        } else {
+            $validated['participant_count'] = max(1, $limitCount);
+            $validated['max_participants_per_group'] = max(1, $limitCount);
+            $validated['max_participants'] = max(1, $limitCount) * 5;
+        }
 
         Program::ensureSchema();
 

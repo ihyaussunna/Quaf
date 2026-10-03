@@ -367,9 +367,7 @@ class LeaderController extends Controller
         $unregisteredPrograms = collect();
 
         foreach ($eligiblePrograms as $p) {
-            $limit = $p->type === 'group'
-                ? max(1, (int) ($p->participant_count ?? $p->max_participants ?? 2))
-                : max(1, (int) ($p->max_participants_per_group ?? $p->participant_count ?? 1));
+            $limit = $p->limit;
 
             $pEntries = $entriesByProgram->get($p->id, collect());
             if ($p->type === 'group') {
@@ -450,15 +448,7 @@ class LeaderController extends Controller
 
         $group = $this->getGroup();
 
-        // Support both single student_id or array student_ids for individual programs
-        $isRosterSync = $request->has('student_ids');
-        $studentIds = $request->input('student_ids');
-        if (empty($studentIds) && $request->filled('student_id')) {
-            $studentIds = [(int) $request->input('student_id')];
-        }
-        $studentIds = array_values(array_unique(array_filter((array) $studentIds)));
-
-        $maxPerGroup = (int) ($program->max_participants_per_group ?? $program->participant_count ?? 1);
+        $maxPerGroup = $program->limit;
 
         // Fetch existing active entries for this program and group
         $existingEntries = ProgramEntry::where('program_id', $program->id)
@@ -467,15 +457,22 @@ class LeaderController extends Controller
             ->get();
         $existingStudentIds = $existingEntries->pluck('student_id')->toArray();
 
-        // If a single student was submitted (legacy/direct submit) and they are already registered
-        if (! $isRosterSync && $request->filled('student_id') && in_array((int) $request->input('student_id'), $existingStudentIds)) {
-            $msg = 'Student is already registered for this competition.';
-            if ($isAjax) {
-                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
-            }
+        // Support both single student_id or array student_ids for individual programs
+        $isRosterSync = $request->has('student_ids');
+        $studentIds = $request->input('student_ids');
+        if (empty($studentIds) && $request->filled('student_id')) {
+            $submittedId = (int) $request->input('student_id');
+            if (in_array($submittedId, $existingStudentIds)) {
+                $msg = 'Student is already registered for this competition.';
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+                }
 
-            return back()->withInput()->withErrors(['student_id' => $msg]);
+                return back()->withInput()->withErrors(['student_id' => $msg]);
+            }
+            $studentIds = array_merge($existingStudentIds, [$submittedId]);
         }
+        $studentIds = array_values(array_unique(array_filter((array) $studentIds)));
 
         // If no student_ids provided:
         if (empty($studentIds)) {
@@ -522,6 +519,7 @@ class LeaderController extends Controller
         $studentsToAdd = array_diff($studentIds, $existingStudentIds);
 
         // Validate newly added students
+        $excludedEntryIds = $existingEntries->whereIn('student_id', $studentsToRemove)->pluck('id')->all();
         $newStudentsToRegister = [];
         foreach ($studentsToAdd as $stId) {
             $student = Student::with(['group', 'zone'])->where('group_id', $group->id)->find($stId);
@@ -534,7 +532,7 @@ class LeaderController extends Controller
                 return back()->withInput()->withErrors(['student_id' => $msg]);
             }
 
-            $eligibility = $this->eligibilityService->validateIndividualRegistration($student, $program);
+            $eligibility = $this->eligibilityService->validateIndividualRegistration($student, $program, $excludedEntryIds);
             if (! $eligibility['valid']) {
                 $errorField = $eligibility['field'] ?? 'student_id';
                 $errorMsg = $eligibility['error'];

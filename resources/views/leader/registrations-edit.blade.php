@@ -67,7 +67,7 @@
             </div>
             <div>
                 <span class="text-slate-400 block text-[10px] uppercase font-bold">Participant Limit</span>
-                <span class="font-bold text-slate-900"><span class="font-mono">{{ $isGroup ? ($program->participant_count ?? 4) : 1 }}</span> {{ $isGroup ? 'Members' : 'Student' }}</span>
+                <span class="font-bold text-slate-900"><span class="font-mono">{{ $program->limit }}</span> {{ $isGroup ? 'Members' : ($program->limit > 1 ? 'Students' : 'Student') }}</span>
             </div>
         </div>
     </div>
@@ -78,7 +78,7 @@
               x-data="{
                   allStudents: {{ json_encode($studentsData) }},
                   isGroup: {{ $isGroup ? 'true' : 'false' }},
-                  participantLimit: {{ (int)($program->participant_count ?? 4) }},
+                  participantLimit: {{ (int) $program->limit }},
                   
                   // Individual
                   selectedStudentId: '{{ old('student_id', $entry->student_id) }}',
