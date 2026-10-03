@@ -3,11 +3,275 @@
 @section('title', 'Student Wise Programs - Leader Panel')
 
 @section('content')
-<div class="space-y-6">
+<script>
+window.quafStudentWiseData = {
+    csrf: '{{ csrf_token() }}',
+    swapUrl: '{{ route('leader.registrations.swap') }}',
+    registerUrl: '{{ route('leader.registrations.store') }}',
+    destroyUrlBase: '{{ url('leader/registrations') }}',
+    isRegistrationOpen: {{ $isRegistrationOpen ? 'true' : 'false' }},
+    availablePrograms: @json($individualPrograms ?? [])
+};
+
+function studentWisePageManager() {
+    return {
+        activeModal: null, // 'swap' or 'add'
+        modalStudent: null,
+        modalFromEntry: null,
+        selectedToProgramId: '',
+        programSearch: '',
+        isSubmitting: false,
+        feedbackSuccess: '',
+        feedbackError: '',
+        isRegistrationOpen: window.quafStudentWiseData ? window.quafStudentWiseData.isRegistrationOpen : true,
+        allPrograms: window.quafStudentWiseData ? (window.quafStudentWiseData.availablePrograms || []) : [],
+        
+        openSwapModal(student, entry) {
+            this.modalStudent = student;
+            this.modalFromEntry = entry;
+            this.selectedToProgramId = '';
+            this.programSearch = '';
+            this.feedbackError = '';
+            this.feedbackSuccess = '';
+            this.activeModal = 'swap';
+        },
+        
+        openAddModal(student) {
+            if (student.indCount >= 5) {
+                alert('This student has already reached the maximum 5 individual programs limit. To add another program, please remove or swap an existing program.');
+                return;
+            }
+            this.modalStudent = student;
+            this.modalFromEntry = null;
+            this.selectedToProgramId = '';
+            this.programSearch = '';
+            this.feedbackError = '';
+            this.feedbackSuccess = '';
+            this.activeModal = 'add';
+        },
+        
+        closeModal() {
+            this.activeModal = null;
+            this.modalStudent = null;
+            this.modalFromEntry = null;
+            this.selectedToProgramId = '';
+            this.programSearch = '';
+            this.feedbackError = '';
+            this.feedbackSuccess = '';
+        },
+        
+        get eligibleProgramsForModal() {
+            if (!this.modalStudent) return [];
+            const st = this.modalStudent;
+            const enrolledProgIds = st.entries.map(e => Number(e.program_id));
+            const stZone = (st.zone || '').toLowerCase().trim();
+            const q = (this.programSearch || '').toLowerCase().trim();
+            
+            return this.allPrograms.filter(p => {
+                // Skip if student is already enrolled in this program
+                if (enrolledProgIds.includes(Number(p.id))) return false;
+                
+                // Zone check:
+                if (!p.is_mix_zone) {
+                    const pZone = (p.zone_name || '').toLowerCase().trim();
+                    if (pZone !== stZone) return false;
+                } else {
+                    if (!p.mix_zone_open_to_all && Array.isArray(p.allowed_zones) && p.allowed_zones.length > 0) {
+                        const allowed = p.allowed_zones.map(z => String(z).toLowerCase().trim());
+                        if (!allowed.includes(stZone)) return false;
+                    }
+                }
+                
+                // Group quota check: must have remaining slot
+                if (p.remaining <= 0) return false;
+                
+                // Text search
+                if (q) {
+                    const matchName = (p.name || '').toLowerCase().includes(q);
+                    const matchCode = (p.code || '').toLowerCase().includes(q);
+                    if (!matchName && !matchCode) return false;
+                }
+                
+                return true;
+            });
+        },
+        
+        async submitSwap() {
+            if (!this.selectedToProgramId) {
+                this.feedbackError = 'Please select a replacement program.';
+                return;
+            }
+            this.isSubmitting = true;
+            this.feedbackError = '';
+            this.feedbackSuccess = '';
+            
+            try {
+                const res = await fetch(window.quafStudentWiseData.swapUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': window.quafStudentWiseData.csrf,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        student_id: this.modalStudent.id,
+                        from_entry_id: this.modalFromEntry.id,
+                        to_program_id: this.selectedToProgramId
+                    })
+                });
+                
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    this.feedbackError = data.message || 'Swap failed. Please check candidate eligibility.';
+                    return;
+                }
+                
+                // Update student entries in UI
+                const st = this.modalStudent;
+                const idx = st.entries.findIndex(e => e.id == this.modalFromEntry.id);
+                if (idx !== -1) {
+                    st.entries.splice(idx, 1, data.new_entry);
+                }
+                
+                // Update quota in allPrograms
+                const oldP = this.allPrograms.find(p => p.id == this.modalFromEntry.program_id);
+                if (oldP) {
+                    oldP.enrolled = Math.max(0, oldP.enrolled - 1);
+                    oldP.remaining = Math.min(oldP.limit, oldP.remaining + 1);
+                    oldP.is_full = false;
+                }
+                const newP = this.allPrograms.find(p => p.id == this.selectedToProgramId);
+                if (newP) {
+                    newP.enrolled = newP.enrolled + 1;
+                    newP.remaining = Math.max(0, newP.limit - newP.enrolled);
+                    newP.is_full = (newP.enrolled >= newP.limit);
+                }
+                
+                this.feedbackSuccess = data.message || 'Program swapped successfully!';
+                setTimeout(() => {
+                    this.closeModal();
+                }, 800);
+            } catch (err) {
+                this.feedbackError = 'Connection error while swapping program.';
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+        
+        async submitAdd() {
+            if (!this.selectedToProgramId) {
+                this.feedbackError = 'Please select a competition program to add.';
+                return;
+            }
+            this.isSubmitting = true;
+            this.feedbackError = '';
+            this.feedbackSuccess = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('program_id', this.selectedToProgramId);
+                formData.append('student_id', this.modalStudent.id);
+                
+                const res = await fetch(window.quafStudentWiseData.registerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': window.quafStudentWiseData.csrf,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    this.feedbackError = data.message || 'Failed to add student to program.';
+                    return;
+                }
+                
+                const st = this.modalStudent;
+                const newProg = this.allPrograms.find(p => p.id == this.selectedToProgramId);
+                const assignedEntryId = (data.enrolled_students && data.enrolled_students.length > 0)
+                    ? (data.enrolled_students.find(es => es.id == st.id)?.entry_id || data.enrolled_students[0].entry_id)
+                    : Date.now();
+
+                st.entries.push({
+                    id: assignedEntryId,
+                    program_id: newProg ? newProg.id : this.selectedToProgramId,
+                    program_code: newProg ? newProg.code : '',
+                    program_name: newProg ? newProg.name : (data.program_name || 'Program'),
+                    zone_name: newProg ? newProg.zone_name : (st.zone || 'Mix Zone'),
+                    type: 'individual',
+                    is_stage: (newProg && newProg.is_stage) ? 'Stage' : 'Non-stage'
+                });
+                st.indCount++;
+                
+                if (newProg) {
+                    newProg.enrolled = newProg.enrolled + 1;
+                    newProg.remaining = Math.max(0, newProg.limit - newProg.enrolled);
+                    newProg.is_full = (newProg.enrolled >= newProg.limit);
+                }
+                
+                this.feedbackSuccess = data.message || 'Student added to program successfully!';
+                setTimeout(() => {
+                    this.closeModal();
+                }, 800);
+            } catch (err) {
+                this.feedbackError = 'Connection error while adding student to program.';
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+        
+        async removeStudentFromProgram(student, entry) {
+            if (!confirm(`Are you sure you want to remove "${student.name}" from "${entry.program_name}"?`)) {
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${window.quafStudentWiseData.destroyUrlBase}/${entry.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': window.quafStudentWiseData.csrf,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    alert(data.message || 'Failed to remove program registration.');
+                    return;
+                }
+                
+                // Remove from student.entries
+                student.entries = student.entries.filter(e => e.id !== entry.id);
+                if (entry.type === 'individual') {
+                    student.indCount = Math.max(0, student.indCount - 1);
+                } else {
+                    student.groupCount = Math.max(0, student.groupCount - 1);
+                }
+                
+                // Update quota in allPrograms
+                const p = this.allPrograms.find(prog => prog.id == entry.program_id);
+                if (p) {
+                    p.enrolled = Math.max(0, p.enrolled - 1);
+                    p.remaining = Math.min(p.limit, p.remaining + 1);
+                    p.is_full = false;
+                }
+            } catch (err) {
+                alert('Connection error while removing registration.');
+            }
+        }
+    };
+}
+</script>
+
+<div class="space-y-6" x-data="studentWisePageManager()">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold font-sora text-gray-900">Student Wise Programs</h1>
-            <p class="text-xs text-gray-500 mt-1 font-sora">Check individual program participation and schedules for students</p>
+            <p class="text-xs text-gray-500 mt-1 font-sora">Check individual program participation, fast swap, and manage student rosters</p>
         </div>
         <div class="flex items-center gap-2">
             <button onclick="window.print()" class="px-5 py-2 bg-brand-orange text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition shadow-xs flex items-center gap-1.5 font-sora">
@@ -99,7 +363,7 @@
         $studentsToDisplay = $selectedStudent ? collect([$selectedStudent]) : $students;
     @endphp
 
-    <!-- Student Cards matching screenshot -->
+    <!-- Student Cards -->
     <div class="space-y-6">
         @forelse($studentsToDisplay as $studentItem)
             @php
@@ -109,20 +373,43 @@
                     ->unique('id');
                 $groupCount = $allEntries->where('program.type', 'group')->count();
             @endphp
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
-                <!-- Header matching screenshot -->
-                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs font-sora">
+            <div x-data="{
+                student: {
+                    id: {{ $studentItem->id }},
+                    name: '{{ addslashes($studentItem->name) }}',
+                    chest: '{{ ltrim((string)($studentItem->chest_number ?: ($studentItem->student_id ?: $studentItem->id)), '#') }}',
+                    zone: '{{ addslashes($studentItem->category ?? 'ZONE A') }}',
+                    class: '{{ addslashes($studentItem->class_level ?? '-') }}',
+                    indCount: {{ $indCount }},
+                    groupCount: {{ $groupCount }},
+                    entries: [
+                        @foreach($allEntries as $entry)
+                            {
+                                id: {{ $entry->id }},
+                                program_id: {{ $entry->program_id }},
+                                program_code: '{{ addslashes($entry->program?->code ?: (string)$entry->program?->id) }}',
+                                program_name: '{{ addslashes($entry->program?->name ?? '') }}',
+                                zone_name: '{{ addslashes($entry->program?->eligibility ?? ($entry->program?->zone?->name ?? 'A Zone')) }}',
+                                type: '{{ $entry->program?->type }}',
+                                is_stage: '{{ $entry->program?->is_stage ? 'Stage' : 'Non-stage' }}'
+                            },
+                        @endforeach
+                    ]
+                }
+            }" class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+                <!-- Header -->
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs font-sora items-center">
                     <div>
                         <span class="text-gray-400 font-medium">Name:</span>
-                        <span class="font-bold text-gray-800 ml-1 capitalize">{{ $studentItem->name }}</span>
+                        <span class="font-bold text-gray-800 ml-1 capitalize" x-text="student.name"></span>
                     </div>
                     <div>
                         <span class="text-gray-400 font-medium">Chest No:</span>
-                        <span class="font-bold text-gray-800 ml-1 font-mono">{{ ltrim((string)($studentItem->chest_number ?: ($studentItem->student_id ?: $studentItem->id)), '#') }}</span>
+                        <span class="font-bold text-gray-800 ml-1 font-mono" x-text="student.chest"></span>
                     </div>
                     <div>
                         <span class="text-gray-400 font-medium">Zone:</span>
-                        <span class="font-bold text-gray-800 ml-1">{{ $studentItem->category ?? 'ZONE A' }}</span>
+                        <span class="font-bold text-gray-800 ml-1" x-text="student.zone"></span>
                     </div>
                     <div>
                         <span class="text-gray-400 font-medium">Team:</span>
@@ -130,18 +417,39 @@
                     </div>
                     <div>
                         <span class="text-gray-400 font-medium">Class:</span>
-                        <span class="font-bold text-gray-800 ml-1">{{ $studentItem->class_level ?? '-' }}</span>
+                        <span class="font-bold text-gray-800 ml-1" x-text="student.class"></span>
                     </div>
-                    <div>
-                        <span class="text-gray-400 font-medium">Participation:</span>
-                        <span class="font-bold ml-1 {{ $indCount >= 5 ? 'text-brand-orange' : 'text-emerald-700' }}">{{ $indCount }}/5 Ind</span>
-                        @if($groupCount > 0)
-                            <span class="text-gray-500 font-normal">({{ $groupCount }} Group)</span>
-                        @endif
+                    <div class="flex items-center justify-between sm:justify-start gap-2">
+                        <div>
+                            <span class="text-gray-400 font-medium">Participation:</span>
+                            <span class="font-bold ml-1" :class="student.indCount >= 5 ? 'text-brand-orange' : 'text-emerald-700'" x-text="student.indCount + '/5 Ind'"></span>
+                            <template x-if="student.groupCount > 0">
+                                <span class="text-gray-500 font-normal" x-text="'(' + student.groupCount + ' Group)'"></span>
+                            </template>
+                        </div>
                     </div>
+
+                    <!-- Add Program Action Button -->
+                    <template x-if="isRegistrationOpen">
+                        <div class="col-span-2 sm:col-span-6 flex items-center justify-between pt-2 border-t border-gray-100 sm:border-0 sm:pt-1">
+                            <template x-if="student.indCount < 5">
+                                <button type="button"
+                                        @click="openAddModal(student)"
+                                        class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold font-sora shadow-xs flex items-center gap-1.5 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    + Add Program
+                                </button>
+                            </template>
+                            <template x-if="student.indCount >= 5">
+                                <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold font-sora flex items-center gap-1">
+                                    5/5 Full • Maximum individual limit reached. Use Swap or Remove to change programs.
+                                </span>
+                            </template>
+                        </div>
+                    </template>
                 </div>
 
-                <!-- Table matching screenshot -->
+                <!-- Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm font-sora">
                         <thead>
@@ -152,31 +460,64 @@
                                 <th class="px-4 py-3">Zone</th>
                                 <th class="px-4 py-3">Type</th>
                                 <th class="px-4 py-3">Stage</th>
+                                <template x-if="isRegistrationOpen">
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </template>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            @forelse($allEntries as $index => $entry)
+                            <template x-for="(entry, index) in student.entries" :key="entry.id">
                                 <tr class="hover:bg-gray-50/50 transition">
-                                    <td class="px-4 py-3 text-center text-gray-500 text-xs font-medium font-mono">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 text-gray-700 font-mono text-xs">{{ $entry->program?->code ?: $entry->program?->id }}</td>
-                                    <td class="px-6 py-3 text-gray-900 font-medium capitalize">{{ $entry->program?->name }}</td>
-                                    <td class="px-4 py-3 text-gray-600 text-xs">{{ $entry->program?->eligibility ?? 'A Zone' }}</td>
+                                    <td class="px-4 py-3 text-center text-gray-500 text-xs font-medium font-mono" x-text="index + 1"></td>
+                                    <td class="px-4 py-3 text-gray-700 font-mono text-xs" x-text="entry.program_code"></td>
+                                    <td class="px-6 py-3 text-gray-900 font-medium capitalize" x-text="entry.program_name"></td>
+                                    <td class="px-4 py-3 text-gray-600 text-xs" x-text="entry.zone_name"></td>
                                     <td class="px-4 py-3 text-gray-600 text-xs">
-                                        @if($entry->program?->isGroup())
+                                        <template x-if="entry.type === 'group'">
                                             <span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-semibold text-[11px]">Group</span>
-                                        @else
+                                        </template>
+                                        <template x-if="entry.type !== 'group'">
                                             <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-semibold text-[11px]">Individual</span>
-                                        @endif
+                                        </template>
                                     </td>
-                                    <td class="px-4 py-3 text-gray-600 text-xs">{{ $entry->program?->is_stage ? 'Stage' : 'Non-stage' }}</td>
+                                    <td class="px-4 py-3 text-gray-600 text-xs" x-text="entry.is_stage"></td>
+                                    <template x-if="isRegistrationOpen">
+                                        <td class="px-4 py-3 text-right text-xs">
+                                            <template x-if="entry.type !== 'group'">
+                                                <div class="flex items-center justify-end gap-1.5">
+                                                    <button type="button"
+                                                            @click="openSwapModal(student, entry)"
+                                                            title="Swap this competition with another program"
+                                                            class="px-2.5 py-1 rounded-lg bg-orange-50 text-brand-orange hover:bg-orange-100 font-semibold text-xs transition flex items-center gap-1 font-sora">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                                        Swap
+                                                    </button>
+                                                    <button type="button"
+                                                            @click="removeStudentFromProgram(student, entry)"
+                                                            title="Remove student from this program"
+                                                            class="px-2.5 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-xs transition flex items-center gap-1 font-sora">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="entry.type === 'group'">
+                                                <div class="flex items-center justify-end">
+                                                    <a :href="'{{ url('leader/registrations') }}/' + entry.id + '/edit'"
+                                                       class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold text-xs transition font-sora">
+                                                        Edit Team
+                                                    </a>
+                                                </div>
+                                            </template>
+                                        </td>
+                                    </template>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center text-gray-400 text-xs">
-                                        No registered programs found for this student.
-                                    </td>
-                                </tr>
-                            @endforelse
+                            </template>
+                            <tr x-show="student.entries.length === 0">
+                                <td :colspan="isRegistrationOpen ? 7 : 6" class="px-6 py-8 text-center text-gray-400 text-xs">
+                                    No registered programs found for this student.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -186,6 +527,109 @@
                 No students found.
             </div>
         @endforelse
+    </div>
+
+    <!-- Live Swap & Add Modal -->
+    <div x-show="activeModal"
+         x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4"
+         style="display: none;">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 font-sora relative"
+             @click.outside="closeModal()">
+            
+            <!-- Header -->
+            <div class="flex items-start justify-between pb-4 border-b border-gray-100">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" x-text="activeModal === 'swap' ? 'Swap Competition Program' : 'Register for New Program'"></h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Student: <strong class="text-gray-800" x-text="modalStudent?.name"></strong> (<span class="font-mono font-bold text-brand-orange" x-text="modalStudent?.chest"></span>)
+                    </p>
+                </div>
+                <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Alert messages -->
+            <div x-show="feedbackError" class="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium" x-text="feedbackError"></div>
+            <div x-show="feedbackSuccess" class="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium" x-text="feedbackSuccess"></div>
+
+            <div class="space-y-4 mt-4 text-xs">
+                <!-- Current Program Info (for swap) -->
+                <template x-if="activeModal === 'swap' && modalFromEntry">
+                    <div class="p-3 bg-orange-50/70 border border-orange-200 rounded-xl">
+                        <span class="text-[10px] uppercase font-bold text-orange-600 block">Current Program Being Replaced:</span>
+                        <span class="text-sm font-bold text-gray-900 block mt-0.5" x-text="modalFromEntry.program_name"></span>
+                        <span class="text-[11px] text-gray-500 font-mono" x-text="'Code: ' + modalFromEntry.program_code + ' • Zone: ' + modalFromEntry.zone_name"></span>
+                    </div>
+                </template>
+
+                <!-- Search destination program -->
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1" x-text="activeModal === 'swap' ? 'Select Replacement Program' : 'Select Program to Register'"></label>
+                    <div class="relative">
+                        <input type="text"
+                               x-model="programSearch"
+                               placeholder="Type to filter eligible programs..."
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange">
+                    </div>
+                </div>
+
+                <!-- Programs List Selection -->
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Available Programs (<span x-text="eligibleProgramsForModal.length"></span> available):</label>
+                    <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-xl divide-y divide-gray-100 bg-white">
+                        <template x-for="p in eligibleProgramsForModal" :key="p.id">
+                            <label class="p-2.5 hover:bg-orange-50/60 flex items-center justify-between cursor-pointer transition">
+                                <div class="flex items-center gap-2">
+                                    <input type="radio"
+                                           name="modal_selected_program"
+                                           :value="p.id"
+                                           :checked="selectedToProgramId == p.id"
+                                           @change="selectedToProgramId = p.id"
+                                           class="text-brand-orange focus:ring-brand-orange">
+                                    <div>
+                                        <span class="font-bold text-gray-900 block" x-text="p.name"></span>
+                                        <span class="text-[10px] text-gray-500 font-mono" x-text="'Code: ' + p.code + ' • ' + p.zone_name + ' • ' + (p.is_stage ? 'Stage' : 'Non-stage')"></span>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 font-mono" x-text="p.remaining + ' slot(s) left'"></span>
+                            </label>
+                        </template>
+                        <div x-show="eligibleProgramsForModal.length === 0" class="p-4 text-center text-gray-400 text-xs">
+                            No eligible programs found with open quota for this zone.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-end gap-2 text-xs">
+                <button type="button"
+                        @click="closeModal()"
+                        class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-semibold transition">
+                    Cancel
+                </button>
+                <template x-if="activeModal === 'swap'">
+                    <button type="button"
+                            @click="submitSwap()"
+                            :disabled="!selectedToProgramId || isSubmitting"
+                            :class="!selectedToProgramId || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-600'"
+                            class="px-5 py-2 rounded-xl bg-brand-orange text-white font-bold transition flex items-center gap-1.5 shadow-xs">
+                        <span x-text="isSubmitting ? 'Swapping...' : 'Confirm Program Swap'"></span>
+                    </button>
+                </template>
+                <template x-if="activeModal === 'add'">
+                    <button type="button"
+                            @click="submitAdd()"
+                            :disabled="!selectedToProgramId || isSubmitting"
+                            :class="!selectedToProgramId || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-700'"
+                            class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold transition flex items-center gap-1.5 shadow-xs">
+                        <span x-text="isSubmitting ? 'Registering...' : 'Register Student'"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

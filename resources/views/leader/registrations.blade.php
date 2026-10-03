@@ -320,6 +320,8 @@ function registrationManager() {
                 prog.status_label = `0/${prog.limit} • ${prog.limit} left`;
                 prog.status_type = 'unregistered';
                 
+                this.updateStudentCounts(data.updated_students);
+                
                 this.selectedStudents = [];
                 this.leaderStudentId = null;
                 this.updateProgramDropdown();
@@ -331,6 +333,17 @@ function registrationManager() {
             }
         },
         
+        updateStudentCounts(updatedStudents) {
+            if (!Array.isArray(updatedStudents)) return;
+            updatedStudents.forEach(us => {
+                const found = this.allStudents.find(s => s.id == us.id);
+                if (found) {
+                    found.individual_count = us.individual_count;
+                    found.has_reached_individual_limit = !!us.has_reached_individual_limit;
+                }
+            });
+        },
+
         async submitRegistration(e) {
             if (this.isSubmitting) return;
             if (!this.currentProgram) {
@@ -397,6 +410,9 @@ function registrationManager() {
                     }
                 }
                 
+                // Update live student individual counts across memory
+                this.updateStudentCounts(data.updated_students);
+
                 // Keep leader on this program and reflect fresh enrolled roster
                 this.selectedStudents = freshEnrolled.map(s => ({ ...s }));
                 if (this.isGroup) {

@@ -109,7 +109,13 @@ class EligibilityService
         if ($program->countsTowardIndividualLimit()) {
             $activeIndividualCount = ProgramEntry::where('student_id', $student->id)
                 ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
-                ->when($excludeEntryId, fn ($q) => $q->where('id', '!=', $excludeEntryId))
+                ->when($excludeEntryId, function ($q) use ($excludeEntryId) {
+                    if (is_array($excludeEntryId)) {
+                        return $q->whereNotIn('id', $excludeEntryId);
+                    }
+
+                    return $q->where('id', '!=', $excludeEntryId);
+                })
                 ->whereHas('program', function ($q) {
                     $q->where('type', 'individual')
                         ->where(function ($sub) {
@@ -132,7 +138,13 @@ class EligibilityService
         if (! empty($program->max_participants)) {
             $activeTotalEntries = ProgramEntry::where('program_id', $program->id)
                 ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
-                ->when($excludeEntryId, fn ($q) => $q->where('id', '!=', $excludeEntryId))
+                ->when($excludeEntryId, function ($q) use ($excludeEntryId) {
+                    if (is_array($excludeEntryId)) {
+                        return $q->whereNotIn('id', $excludeEntryId);
+                    }
+
+                    return $q->where('id', '!=', $excludeEntryId);
+                })
                 ->count();
 
             if ($activeTotalEntries >= $program->max_participants) {

@@ -535,6 +535,8 @@ Route::prefix('leader')->name('leader.')->middleware(['auth', 'role:group_leader
     Route::get('/registrations', [LeaderController::class, 'registrations'])->name('registrations');
     Route::post('/registrations', [LeaderController::class, 'storeRegistration'])->name('registrations.store');
     Route::post('/registrations/group', [LeaderController::class, 'storeGroupRegistration'])->name('registrations.group.store');
+    Route::post('/registrations/swap', [LeaderController::class, 'swapStudentProgram'])->name('registrations.swap');
+    Route::get('/students/{student}/eligible-programs', [LeaderController::class, 'eligibleProgramsForStudent'])->name('students.eligible-programs');
     Route::get('/registrations/{entry}/edit', [LeaderController::class, 'editRegistration'])->name('registrations.edit');
     Route::put('/registrations/{entry}', [LeaderController::class, 'updateRegistration'])->name('registrations.update');
     Route::delete('/registrations/{entry}', [LeaderController::class, 'destroyRegistration'])->name('registrations.destroy');

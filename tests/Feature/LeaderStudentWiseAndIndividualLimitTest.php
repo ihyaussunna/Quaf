@@ -305,4 +305,173 @@ class LeaderStudentWiseAndIndividualLimitTest extends TestCase
         $this->assertEquals(5, $student->fresh()->getRemainingIndividualSlots());
         $this->assertFalse($student->fresh()->hasReachedIndividualLimit());
     }
+
+    public function test_leader_can_swap_student_program_atomically_even_when_student_has_reached_5_programs_limit(): void
+    {
+        $student = Student::create([
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zoneA->id,
+            'student_id' => 'QF1007',
+            'name' => 'SWAP CANDIDATE',
+            'class_level' => '10',
+            'category' => 'A Zone',
+            'qr_token' => 'qr-token-test-swap',
+        ]);
+
+        $firstEntry = null;
+        for ($i = 1; $i <= 5; $i++) {
+            $prog = Program::create([
+                'category_id' => $this->category->id,
+                'code' => "SWAP-A-{$i}",
+                'name' => "Zone A Swap Event {$i}",
+                'type' => 'individual',
+                'zone_id' => $this->zoneA->id,
+                'eligibility' => 'A Zone',
+                'max_participants_per_group' => 2,
+                'individual_limit_counted' => true,
+            ]);
+
+            $entry = $this->eligibilityService->registerIndividual($student, $prog, [
+                'status' => 'verified',
+            ]);
+
+            if ($i === 1) {
+                $firstEntry = $entry;
+            }
+        }
+
+        // Student is now 5/5 Full
+        $this->assertEquals(5, $student->fresh()->getIndividualParticipationCount());
+        $this->assertTrue($student->fresh()->hasReachedIndividualLimit());
+
+        // Target new program to swap into
+        $newTargetProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'TARGET-PROG-1',
+            'name' => 'Destination Event',
+            'type' => 'individual',
+            'zone_id' => $this->zoneA->id,
+            'eligibility' => 'A Zone',
+            'max_participants_per_group' => 2,
+            'individual_limit_counted' => true,
+        ]);
+
+        // Attempting to register directly without swap would fail because student is at 5
+        $directReg = $this->eligibilityService->validateIndividualRegistration($student, $newTargetProg);
+        $this->assertFalse($directReg['valid']);
+
+        // But Atomic Swap from firstEntry to newTargetProg MUST SUCCEED
+        $response = $this->actingAs($this->leaderUser)
+            ->postJson(route('leader.registrations.swap'), [
+                'student_id' => $student->id,
+                'from_entry_id' => $firstEntry->id,
+                'to_program_id' => $newTargetProg->id,
+            ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'old_entry_id' => $firstEntry->id,
+            'new_entry' => [
+                'program_id' => $newTargetProg->id,
+                'program_name' => 'Destination Event',
+            ],
+        ]);
+
+        // First entry was deleted
+        $this->assertDatabaseMissing('program_entries', ['id' => $firstEntry->id]);
+
+        // New entry exists
+        $this->assertDatabaseHas('program_entries', [
+            'program_id' => $newTargetProg->id,
+            'student_id' => $student->id,
+            'group_id' => $this->group->id,
+        ]);
+
+        // Student count remains exactly 5
+        $this->assertEquals(5, $student->fresh()->getIndividualParticipationCount());
+    }
+
+    public function test_leader_can_remove_student_registration_via_ajax_and_quota_is_returned_immediately(): void
+    {
+        $student = Student::create([
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zoneA->id,
+            'student_id' => 'QF1008',
+            'name' => 'REMOVE CANDIDATE',
+            'class_level' => '10',
+            'category' => 'A Zone',
+            'qr_token' => 'qr-token-test-remove',
+        ]);
+
+        $prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'DEL-PROG-1',
+            'name' => 'Delete Event',
+            'type' => 'individual',
+            'zone_id' => $this->zoneA->id,
+            'eligibility' => 'A Zone',
+            'max_participants_per_group' => 2,
+            'individual_limit_counted' => true,
+        ]);
+
+        $entry = $this->eligibilityService->registerIndividual($student, $prog, [
+            'status' => 'verified',
+        ]);
+
+        $this->assertEquals(1, $student->fresh()->getIndividualParticipationCount());
+
+        $response = $this->actingAs($this->leaderUser)
+            ->deleteJson(route('leader.registrations.destroy', $entry->id));
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'entry_id' => $entry->id,
+            'updated_students' => [
+                [
+                    'id' => $student->id,
+                    'individual_count' => 0,
+                    'has_reached_individual_limit' => false,
+                ],
+            ],
+        ]);
+
+        $this->assertEquals(0, $student->fresh()->getIndividualParticipationCount());
+    }
+
+    public function test_eligible_programs_for_student_api_returns_available_programs(): void
+    {
+        $student = Student::create([
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zoneA->id,
+            'student_id' => 'QF1009',
+            'name' => 'ELIGIBLE API CANDIDATE',
+            'class_level' => '10',
+            'category' => 'A Zone',
+            'qr_token' => 'qr-token-test-api',
+        ]);
+
+        $eligibleProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'ELIG-PROG-1',
+            'name' => 'Eligible Event',
+            'type' => 'individual',
+            'zone_id' => $this->zoneA->id,
+            'eligibility' => 'A Zone',
+            'max_participants_per_group' => 2,
+            'individual_limit_counted' => true,
+            'status' => 'upcoming',
+        ]);
+
+        $response = $this->actingAs($this->leaderUser)
+            ->getJson(route('leader.students.eligible-programs', $student->id));
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+        $response->assertJsonFragment([
+            'id' => $eligibleProg->id,
+            'name' => 'Eligible Event',
+        ]);
+    }
 }

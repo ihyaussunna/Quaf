@@ -253,13 +253,46 @@ class LeaderController extends Controller
             ])->where('group_id', $group->id)->find($selectedStudentId);
         }
 
+        $isRegistrationOpen = $this->isRegistrationOpen();
+        $allGroupEntries = ProgramEntry::where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->get();
+        $groupEntriesCount = $allGroupEntries->groupBy('program_id')->map->count();
+
+        $individualPrograms = Program::with('zone')
+            ->where('status', 'upcoming')
+            ->where('type', 'individual')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($p) use ($groupEntriesCount) {
+                $enrolled = $groupEntriesCount->get($p->id, 0);
+
+                return [
+                    'id' => $p->id,
+                    'code' => $p->code ?: (string) $p->id,
+                    'name' => $p->name,
+                    'zone_id' => $p->zone_id,
+                    'zone_name' => $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone'),
+                    'is_mix_zone' => (bool) $p->isMixZone(),
+                    'mix_zone_open_to_all' => (bool) $p->mix_zone_open_to_all,
+                    'allowed_zones' => $p->eligibility_rules['allowed_zones'] ?? [],
+                    'limit' => $p->limit,
+                    'enrolled' => $enrolled,
+                    'remaining' => max(0, $p->limit - $enrolled),
+                    'is_full' => ($enrolled >= $p->limit),
+                    'is_stage' => (bool) $p->is_stage,
+                ];
+            });
+
         return view('leader.student-wise', compact(
             'group',
             'students',
             'selectedStudentId',
             'selectedStudent',
             'search',
-            'isEditingOpen'
+            'isEditingOpen',
+            'isRegistrationOpen',
+            'individualPrograms'
         ));
     }
 
@@ -491,6 +524,7 @@ class LeaderController extends Controller
                         'is_group' => false,
                         'enrolled_students' => [],
                         'enrolled_count' => 0,
+                        'updated_students' => $this->getGroupStudentsQuotaData($group, $existingStudentIds),
                     ]);
                 }
 
@@ -647,6 +681,8 @@ class LeaderController extends Controller
             $msg .= ' NOTICE: Schedule conflict detected for: '.implode(', ', $conflictsFound);
         }
 
+        $allAffectedStudentIds = array_values(array_unique(array_filter(array_merge($existingStudentIds, $studentIds))));
+
         if ($isAjax) {
             return response()->json([
                 'success' => true,
@@ -657,6 +693,7 @@ class LeaderController extends Controller
                 'enrolled_students' => $freshEnrolledStudents,
                 'enrolled_count' => $count,
                 'registered_count' => $count,
+                'updated_students' => $this->getGroupStudentsQuotaData($group, $allAffectedStudentIds),
             ]);
         }
 
@@ -791,6 +828,7 @@ class LeaderController extends Controller
                 'enrolled_students' => $freshEnrolledStudents,
                 'enrolled_count' => $participantCount,
                 'registered_count' => $participantCount,
+                'updated_students' => $this->getGroupStudentsQuotaData($group, $studentIds),
             ]);
         }
 
@@ -904,7 +942,12 @@ class LeaderController extends Controller
             ]);
         }
 
-        $programName = $entry->program?->name ?? 'Program';
+        $program = $entry->program;
+        $programName = $program?->name ?? 'Program';
+        $studentId = $entry->student_id;
+        $participantIds = $entry->participants()->pluck('students.id')->all();
+        $affectedStudentIds = array_values(array_unique(array_filter(array_merge([$studentId], $participantIds))));
+
         $entry->participants()->detach();
         $entry->delete();
 
@@ -912,6 +955,10 @@ class LeaderController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => "Registration for '{$programName}' has been removed successfully.",
+                'program_id' => $program?->id,
+                'program_name' => $programName,
+                'entry_id' => $entry->id,
+                'updated_students' => $this->getGroupStudentsQuotaData($group, $affectedStudentIds),
             ]);
         }
 
@@ -935,18 +982,281 @@ class LeaderController extends Controller
             ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
             ->get();
 
+        $affectedStudentIds = [];
         foreach ($entries as $entry) {
+            if ($entry->student_id) {
+                $affectedStudentIds[] = $entry->student_id;
+            }
+            $pIds = $entry->participants()->pluck('students.id')->all();
+            $affectedStudentIds = array_merge($affectedStudentIds, $pIds);
             $entry->participants()->detach();
             $entry->delete();
         }
+        $affectedStudentIds = array_values(array_unique(array_filter($affectedStudentIds)));
 
         if (request()->expectsJson() || request()->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => "All participants for '{$program->name}' have been removed successfully.",
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'updated_students' => $this->getGroupStudentsQuotaData($group, $affectedStudentIds),
             ]);
         }
 
         return redirect()->route('leader.registrations')->with('success', "All participants for '{$program->name}' have been removed.");
+    }
+
+    /**
+     * Atomically swap a student from one program to another.
+     */
+    public function swapStudentProgram(Request $request): JsonResponse|RedirectResponse
+    {
+        $isAjax = $request->expectsJson() || $request->ajax();
+
+        if (! $this->isRegistrationOpen()) {
+            $msg = 'Registration window is currently closed. Program swaps are not permitted.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['registration' => $msg]);
+        }
+
+        $validated = $request->validate([
+            'student_id' => ['required', 'exists:students,id'],
+            'from_entry_id' => ['required', 'exists:program_entries,id'],
+            'to_program_id' => ['required', 'exists:programs,id'],
+        ]);
+
+        $group = $this->getGroup();
+        $student = Student::with(['group', 'zone'])->where('group_id', $group->id)->findOrFail($validated['student_id']);
+
+        $fromEntry = ProgramEntry::with('program')->where('group_id', $group->id)->findOrFail($validated['from_entry_id']);
+        $fromProgram = $fromEntry->program;
+
+        $toProgram = Program::with(['zone', 'schedule'])->findOrFail($validated['to_program_id']);
+
+        if ($fromProgram->id === $toProgram->id) {
+            $msg = 'Source and destination programs cannot be the same.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['to_program_id' => $msg]);
+        }
+
+        if ($toProgram->isGroup()) {
+            $msg = 'Group programs cannot be swapped via individual swap.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['to_program_id' => $msg]);
+        }
+
+        // Validate eligibility for the destination program excluding the from_entry
+        $eligibility = $this->eligibilityService->validateIndividualRegistration($student, $toProgram, $fromEntry->id);
+        if (! $eligibility['valid']) {
+            $errorMsg = $eligibility['error'];
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $errorMsg, 'errors' => [$errorMsg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['to_program_id' => $errorMsg]);
+        }
+
+        $conflictFlag = false;
+        $notes = null;
+        if ($toProgram->schedule) {
+            $conflicts = $this->conflictService->checkStudentConflict(
+                $student->id,
+                $toProgram->schedule->start_time,
+                $toProgram->schedule->end_time,
+                $toProgram->id
+            );
+
+            if ($conflicts->isNotEmpty()) {
+                $conflictFlag = true;
+                $notes = $conflicts->first()['conflict_reason'];
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            // Delete old entry
+            $fromEntry->participants()->detach();
+            $fromEntry->delete();
+
+            // Create new entry
+            $newEntry = $this->eligibilityService->registerIndividual($student, $toProgram, [
+                'chest_number' => $student->student_id,
+                'status' => 'verified',
+                'conflict_flag' => $conflictFlag,
+                'notes' => $notes,
+            ]);
+
+            // Create GreenRoomCall
+            $order = $toProgram->greenRoomCalls()->count() + 1;
+            $toProgram->greenRoomCalls()->firstOrCreate(
+                ['entry_id' => $newEntry->id],
+                ['order_num' => $order, 'status' => 'waiting']
+            );
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $msg = 'Program swap failed: '.$e->getMessage();
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['registration' => $msg]);
+        }
+
+        $successMsg = "വിദ്യാർത്ഥി '{$student->name}' ൻ്റെ മത്സരം '{$fromProgram->name}' ൽ നിന്ന് '{$toProgram->name}' ലേക്ക് വിജയകരമായി മാറ്റി.";
+
+        if ($isAjax) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMsg,
+                'old_entry_id' => $fromEntry->id,
+                'new_entry' => [
+                    'id' => $newEntry->id,
+                    'program_id' => $toProgram->id,
+                    'program_code' => $toProgram->code ?: (string) $toProgram->id,
+                    'program_name' => $toProgram->name,
+                    'zone_name' => $toProgram->zone?->name ?? ($toProgram->eligibility ?? 'Mix Zone'),
+                    'type' => $toProgram->type,
+                    'is_stage' => (bool) $toProgram->is_stage,
+                ],
+                'updated_students' => $this->getGroupStudentsQuotaData($group, [$student->id]),
+            ]);
+        }
+
+        return redirect()->route('leader.students-wise', ['student' => $student->id])->with('success', $successMsg);
+    }
+
+    /**
+     * Get list of eligible, available programs for a given student (for fast inline add/swap).
+     */
+    public function eligibleProgramsForStudent(Request $request, Student $student): JsonResponse
+    {
+        $group = $this->getGroup();
+        if ($student->group_id !== $group->id) {
+            abort(403, 'Unauthorized student access.');
+        }
+
+        $excludeEntryId = $request->query('exclude_entry_id') ? (int) $request->query('exclude_entry_id') : null;
+
+        // Fetch registered program ids for this student (excluding excludeEntryId)
+        $studentRegisteredProgIds = ProgramEntry::where('student_id', $student->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->when($excludeEntryId, fn ($q) => $q->where('id', '!=', $excludeEntryId))
+            ->pluck('program_id')
+            ->toArray();
+
+        // Student's zone
+        $studentZoneId = $student->zone_id;
+        $studentZoneCode = $student->zone?->code ?? $student->category;
+        $studentZoneName = $student->zone?->name ?? $student->category;
+
+        // All active entries of the group to calculate group limit
+        $allGroupEntries = ProgramEntry::where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->get();
+        $groupEntriesCount = $allGroupEntries->groupBy('program_id')->map->count();
+
+        // Eligible programs: individual programs where zone matches or mix zone
+        $programs = Program::with('zone')
+            ->where('status', 'upcoming')
+            ->where('type', 'individual')
+            ->orderBy('name')
+            ->get()
+            ->filter(function ($prog) use ($studentZoneId, $studentZoneCode, $studentZoneName, $studentRegisteredProgIds, $groupEntriesCount) {
+                // If student is already registered, skip
+                if (in_array($prog->id, $studentRegisteredProgIds)) {
+                    return false;
+                }
+
+                // Check zone
+                if (! $prog->isMixZone()) {
+                    if ($prog->zone_id && $studentZoneId && $prog->zone_id !== $studentZoneId) {
+                        return false;
+                    }
+                } else {
+                    if (! $prog->mix_zone_open_to_all) {
+                        $rules = $prog->eligibility_rules ?? [];
+                        if (! empty($rules['allowed_zones'])) {
+                            $allowed = (array) $rules['allowed_zones'];
+                            if (! in_array($studentZoneCode, $allowed) && ! in_array($studentZoneName, $allowed)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                // Check group quota
+                $enrolledForGroup = $groupEntriesCount->get($prog->id, 0);
+                if ($enrolledForGroup >= $prog->limit) {
+                    return false;
+                }
+
+                return true;
+            })
+            ->map(function ($prog) use ($groupEntriesCount) {
+                $enrolled = $groupEntriesCount->get($prog->id, 0);
+                $remaining = max(0, $prog->limit - $enrolled);
+
+                return [
+                    'id' => $prog->id,
+                    'code' => $prog->code ?: (string) $prog->id,
+                    'name' => $prog->name,
+                    'zone_name' => $prog->zone?->name ?? ($prog->eligibility ?? 'Mix Zone'),
+                    'limit' => $prog->limit,
+                    'enrolled' => $enrolled,
+                    'remaining' => $remaining,
+                    'is_stage' => (bool) $prog->is_stage,
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'programs' => $programs,
+            'student' => [
+                'id' => $student->id,
+                'name' => $student->name,
+                'chest' => ltrim((string) ($student->chest_number ?: ($student->student_id ?: $student->id)), '#'),
+                'individual_count' => $student->getIndividualParticipationCount(),
+                'remaining_slots' => $student->getRemainingIndividualSlots(),
+                'has_reached_individual_limit' => $student->hasReachedIndividualLimit(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get updated quota counts for given students or all group students.
+     *
+     * @param  array<int>|null  $studentIds
+     * @return array<array{id: int, individual_count: int, has_reached_individual_limit: bool, remaining_slots: int}>
+     */
+    protected function getGroupStudentsQuotaData(Group $group, ?array $studentIds = null): array
+    {
+        $query = Student::where('group_id', $group->id);
+        if (! empty($studentIds)) {
+            $query->whereIn('id', $studentIds);
+        }
+
+        return $query->get()->map(function ($s) {
+            $indCount = $s->getIndividualParticipationCount();
+
+            return [
+                'id' => $s->id,
+                'individual_count' => $indCount,
+                'has_reached_individual_limit' => ($indCount >= Student::MAX_INDIVIDUAL_PROGRAMS),
+                'remaining_slots' => max(0, Student::MAX_INDIVIDUAL_PROGRAMS - $indCount),
+            ];
+        })->values()->all();
     }
 }
