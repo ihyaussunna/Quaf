@@ -12,6 +12,11 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('program-committee.team-entries.index') }}" 
+               class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold flex items-center gap-2 shadow-sm transition">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Team Entries Data</span>
+            </a>
             <a href="{{ route('program-committee.programs.create') }}" 
                class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-mono font-bold flex items-center gap-2 shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -110,6 +115,45 @@
                     @if($z->description)
                         <p class="text-[11px] font-malayalam text-slate-500 mt-1 line-clamp-1">{{ $z->description }}</p>
                     @endif
+                </a>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Team Entries & Group Quota Status Quick Banner -->
+    <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+                <h3 class="text-base font-sora font-bold text-slate-900">Live Team Entries & Group Quota Status</h3>
+                <p class="text-[11px] font-mono text-slate-500">Live candidate registrations and quota fulfillment across all 5 groups</p>
+            </div>
+            <a href="{{ route('program-committee.team-entries.index') }}" class="text-xs font-mono font-bold text-brand-burgundy hover:underline flex items-center gap-1">
+                <span>View Full Matrix & Entries ({{ $totalEntriesCount }}) →</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            @foreach($statsData['groups'] as $stat)
+                @php
+                    $grp = $stat['group'];
+                    $color = $grp->color_hex ?? '#be1e2d';
+                @endphp
+                <a href="{{ route('program-committee.team-entries.index', ['group' => $grp->id]) }}" 
+                   class="p-4 rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs transition-all space-y-2 block">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: {{ $color }}"></span>
+                            <span class="font-sora font-bold text-xs text-slate-900 truncate">{{ $grp->name }}</span>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold text-slate-700">{{ $stat['progress_percent'] }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                        <div class="h-1.5 rounded-full" style="width: {{ $stat['progress_percent'] }}%; background-color: {{ $color }}"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
+                        <span>Entries: <strong class="text-slate-800">{{ $stat['total_entries'] }}</strong></span>
+                        <span class="text-emerald-700 font-bold">{{ $stat['full_count'] }} Full</span>
+                    </div>
                 </a>
             @endforeach
         </div>

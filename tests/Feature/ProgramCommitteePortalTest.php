@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\ProgramEntry;
+use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -352,5 +355,174 @@ class ProgramCommitteePortalTest extends TestCase
         $this->assertNull($program->duration_minutes);
         $this->assertFalse($program->has_criteria);
         $this->assertCount(0, $program->scoringCriteria);
+    }
+
+    public function test_program_committee_user_can_access_program_list_with_limits_and_entries_count(): void
+    {
+        $group = Group::create([
+            'name' => 'Lumo Fikric',
+            'code' => 'LUMO',
+            'slug' => 'lumo-fikric',
+            'color_hex' => '#56286b',
+        ]);
+
+        $program = Program::create([
+            'code' => 'Q9-111',
+            'name' => 'Malayalam Speech',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'participant_count' => 2,
+            'duration_minutes' => 7,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Ahmad Test',
+            'student_id' => 'STU-111',
+            'chest_number' => 'QF3001',
+            'group_id' => $group->id,
+            'zone' => 'A Zone',
+            'class' => 'TQS',
+            'qr_token' => 'qr_test_token_111',
+            'is_active' => true,
+        ]);
+
+        ProgramEntry::create([
+            'program_id' => $program->id,
+            'group_id' => $group->id,
+            'student_id' => $student->id,
+            'chest_number' => 'QF3001',
+            'status' => 'verified',
+        ]);
+
+        $response = $this->actingAs($this->committeeUser)->get(route('program-committee.programs.index'));
+        $response->assertOk();
+        $response->assertSee('Program List');
+        $response->assertSee('Malayalam Speech');
+        $response->assertSee('Limit:');
+        $response->assertSee('1 entries');
+        $response->assertSee('Team Entries');
+    }
+
+    public function test_program_committee_user_can_access_team_entries_matrix_and_stats(): void
+    {
+        $groupPacto = Group::create([
+            'name' => 'Pacto Hikmic',
+            'code' => 'PACTO',
+            'slug' => 'pacto-hikmic',
+            'color_hex' => '#005c94',
+        ]);
+
+        $groupLumo = Group::create([
+            'name' => 'Lumo Fikric',
+            'code' => 'LUMO',
+            'slug' => 'lumo-fikric',
+            'color_hex' => '#56286b',
+        ]);
+
+        $program = Program::create([
+            'code' => 'Q9-222',
+            'name' => 'English Essay',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'participant_count' => 1,
+            'duration_minutes' => 60,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Basith Test',
+            'student_id' => 'STU-222',
+            'chest_number' => 'QF3002',
+            'group_id' => $groupPacto->id,
+            'zone' => 'A Zone',
+            'class' => 'S4',
+            'qr_token' => 'qr_test_token_222',
+            'is_active' => true,
+        ]);
+
+        ProgramEntry::create([
+            'program_id' => $program->id,
+            'group_id' => $groupPacto->id,
+            'student_id' => $student->id,
+            'chest_number' => 'QF3002',
+            'status' => 'verified',
+        ]);
+
+        $response = $this->actingAs($this->committeeUser)->get(route('program-committee.team-entries.index'));
+        $response->assertOk();
+        $response->assertSee('Team Entries Data');
+        $response->assertSee('Competition Quota Matrix');
+        $response->assertSee('Pacto Hikmic');
+        $response->assertSee('Full (1/1)');
+        $response->assertSee('0/1 Pending');
+    }
+
+    public function test_program_committee_user_can_view_itemized_candidate_entries_tab(): void
+    {
+        $group = Group::create([
+            'name' => 'Conco Majdic',
+            'code' => 'CONCO',
+            'slug' => 'conco-majdic',
+            'color_hex' => '#00857c',
+        ]);
+
+        $program = Program::create([
+            'code' => 'Q9-333',
+            'name' => 'Quran Hifz',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'individual',
+            'participant_count' => 1,
+            'duration_minutes' => 10,
+            'points_weight' => 5,
+            'status' => 'upcoming',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Imran Mavinakatt',
+            'student_id' => 'STU-333',
+            'chest_number' => 'QF3003',
+            'group_id' => $group->id,
+            'zone' => 'A Zone',
+            'class' => 'TQS',
+            'qr_token' => 'qr_test_token_333',
+            'is_active' => true,
+        ]);
+
+        ProgramEntry::create([
+            'program_id' => $program->id,
+            'group_id' => $group->id,
+            'student_id' => $student->id,
+            'chest_number' => 'QF3003',
+            'status' => 'verified',
+        ]);
+
+        $response = $this->actingAs($this->committeeUser)->get(route('program-committee.team-entries.index', ['tab' => 'entries']));
+        $response->assertOk();
+        $response->assertSee('Registered Candidate Entries');
+        $response->assertSee('QF3003');
+        $response->assertSee('Imran Mavinakatt');
+        $response->assertSee('Conco Majdic');
+    }
+
+    public function test_program_committee_user_can_export_team_entries_csv(): void
+    {
+        $response = $this->actingAs($this->committeeUser)->get(route('program-committee.team-entries.export'));
+        $response->assertOk();
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+    }
+
+    public function test_unauthorized_student_cannot_access_team_entries(): void
+    {
+        $response = $this->actingAs($this->studentUser)->get(route('program-committee.team-entries.index'));
+        $response->assertRedirect(route('login'));
+
+        $jsonRes = $this->actingAs($this->studentUser)->getJson(route('program-committee.team-entries.index'));
+        $jsonRes->assertForbidden();
     }
 }

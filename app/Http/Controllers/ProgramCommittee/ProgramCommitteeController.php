@@ -3,18 +3,26 @@
 namespace App\Http\Controllers\ProgramCommittee;
 
 use App\Http\Controllers\Controller;
+use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\ProgramEntry;
 use App\Models\Stage;
 use App\Models\Zone;
 use App\Services\AuditLogger;
+use App\Services\GroupEntryStatsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProgramCommitteeController extends Controller
 {
+    public function __construct(
+        protected GroupEntryStatsService $groupStatsService
+    ) {}
+
     /**
      * Display Program Committee Dashboard with summary metrics.
      */
@@ -45,6 +53,9 @@ class ProgramCommitteeController extends Controller
             ->take(10)
             ->get();
 
+        $totalEntriesCount = ProgramEntry::count();
+        $statsData = $this->groupStatsService->buildGroupStats();
+
         return view('program-committee.dashboard', compact(
             'totalPrograms',
             'withRulesCount',
@@ -55,7 +66,9 @@ class ProgramCommitteeController extends Controller
             'groupCount',
             'zones',
             'recentPrograms',
-            'pendingRulesPrograms'
+            'pendingRulesPrograms',
+            'totalEntriesCount',
+            'statsData'
         ));
     }
 
@@ -119,6 +132,7 @@ class ProgramCommitteeController extends Controller
         $totalCount = Program::count();
         $withRulesTotal = Program::whereNotNull('rules')->where('rules', '!=', '')->count();
         $missingRulesTotal = $totalCount - $withRulesTotal;
+        $totalEntriesTotal = ProgramEntry::count();
 
         return view('program-committee.programs.index', compact(
             'programs',
@@ -134,7 +148,8 @@ class ProgramCommitteeController extends Controller
             'search',
             'totalCount',
             'withRulesTotal',
-            'missingRulesTotal'
+            'missingRulesTotal',
+            'totalEntriesTotal'
         ));
     }
 
@@ -595,5 +610,155 @@ class ProgramCommitteeController extends Controller
         $zone = $zoneId ? Zone::find($zoneId) : null;
 
         return view('program-committee.niyamavali.print-all', compact('programs', 'zone'));
+    }
+
+    /**
+     * Display Team Entries Data, quota fulfillment, and competition matrix.
+     */
+    public function teamEntries(Request $request): View
+    {
+        $zones = Zone::orderBy('display_order')->get();
+        $groups = Group::orderBy('name')->get();
+
+        $selectedZoneId = $request->query('zone_id');
+        $selectedGroupId = $request->query('group');
+        $filterStatus = $request->query('filter_status', 'all'); // all, full, partial, pending
+        $search = $request->query('search');
+        $activeTab = $request->query('tab', 'matrix'); // matrix or entries
+        $entryStatus = $request->query('entry_status', 'all');
+
+        $statsData = $this->groupStatsService->buildGroupStats($selectedZoneId ? (int) $selectedZoneId : null);
+
+        $matrix = $this->groupStatsService->buildMatrix(
+            $statsData['programs'],
+            $groups,
+            $search,
+            $filterStatus,
+            $selectedGroupId ? (int) $selectedGroupId : null
+        );
+
+        // Query direct program entries for itemized view
+        $entriesQuery = ProgramEntry::with(['program.zone', 'program.category', 'group', 'student', 'participants'])
+            ->latest();
+
+        if ($selectedGroupId) {
+            $entriesQuery->where('group_id', $selectedGroupId);
+        }
+
+        if ($selectedZoneId) {
+            $entriesQuery->whereHas('program', fn ($q) => $q->where('zone_id', $selectedZoneId));
+        }
+
+        if ($entryStatus && $entryStatus !== 'all') {
+            $entriesQuery->where('status', $entryStatus);
+        }
+
+        if ($search) {
+            $entriesQuery->where(function ($q) use ($search) {
+                $q->where('chest_number', 'like', "%{$search}%")
+                    ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
+                    ->orWhereHas('program', fn ($pq) => $pq->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%")->orWhere('malayalam_name', 'like', "%{$search}%"));
+            });
+        }
+
+        $entries = $entriesQuery->paginate(25)->withQueryString();
+
+        $selectedGroup = $selectedGroupId ? $groups->firstWhere('id', $selectedGroupId) : null;
+
+        return view('program-committee.entries.index', compact(
+            'zones',
+            'groups',
+            'selectedZoneId',
+            'selectedGroupId',
+            'selectedGroup',
+            'filterStatus',
+            'search',
+            'activeTab',
+            'entryStatus',
+            'statsData',
+            'matrix',
+            'entries'
+        ));
+    }
+
+    /**
+     * Export team entries as a CSV file.
+     */
+    public function exportTeamEntries(Request $request): StreamedResponse
+    {
+        $selectedZoneId = $request->query('zone_id');
+        $selectedGroupId = $request->query('group');
+        $entryStatus = $request->query('entry_status', 'all');
+
+        $entriesQuery = ProgramEntry::with(['program.zone', 'group', 'student', 'participants'])
+            ->latest();
+
+        if ($selectedGroupId) {
+            $entriesQuery->where('group_id', $selectedGroupId);
+        }
+
+        if ($selectedZoneId) {
+            $entriesQuery->whereHas('program', fn ($q) => $q->where('zone_id', $selectedZoneId));
+        }
+
+        if ($entryStatus && $entryStatus !== 'all') {
+            $entriesQuery->where('status', $entryStatus);
+        }
+
+        $entries = $entriesQuery->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="QUAF-Team-Entries-'.now()->format('Y-m-d-His').'.csv"',
+        ];
+
+        return response()->stream(function () use ($entries) {
+            $file = fopen('php://output', 'w');
+            fwrite($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, [
+                'Program Code',
+                'Program Name',
+                'Zone',
+                'Format',
+                'Limit',
+                'Group',
+                'Candidate Chest No',
+                'Candidate Name',
+                'Class',
+                'Participants Count',
+                'Entry Status',
+                'Created At',
+            ]);
+
+            foreach ($entries as $e) {
+                $candidates = $e->student?->name ?? 'Group Entry';
+                if ($e->participants->isNotEmpty()) {
+                    $candidates = $e->participants->pluck('name')->implode(', ');
+                }
+
+                $chestNos = $e->chest_number ?? ($e->student?->chest_number ?? '');
+                if ($e->participants->isNotEmpty()) {
+                    $chestNos = $e->participants->pluck('chest_number')->filter()->implode(', ');
+                }
+
+                fputcsv($file, [
+                    $e->program?->code ?? '-',
+                    $e->program?->name ?? '-',
+                    $e->program?->zone?->name ?? ($e->program?->eligibility ?? 'Mix Zone'),
+                    ucfirst($e->program?->type ?? 'individual'),
+                    $e->program?->limit ?? 1,
+                    $e->group?->name ?? '-',
+                    $chestNos,
+                    $candidates,
+                    $e->student?->class ?? '-',
+                    $e->participants->count() ?: 1,
+                    ucfirst($e->status ?? 'pending'),
+                    $e->created_at?->format('Y-m-d H:i') ?? '-',
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
     }
 }

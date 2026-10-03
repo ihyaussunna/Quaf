@@ -573,6 +573,10 @@ Route::prefix('program-committee')->name('program-committee.')->middleware(['aut
     Route::put('/programs/{program}/rules', [ProgramCommitteeController::class, 'updateRules'])->name('programs.rules.update');
     Route::get('/programs/{program}/rules/print', [ProgramCommitteeController::class, 'printRules'])->name('programs.rules.print');
     Route::get('/niyamavali/print-book', [ProgramCommitteeController::class, 'printAllRules'])->name('niyamavali.print-book');
+
+    // Team Entries Data & Quota Tracking
+    Route::get('/team-entries', [ProgramCommitteeController::class, 'teamEntries'])->name('team-entries.index');
+    Route::get('/team-entries/export', [ProgramCommitteeController::class, 'exportTeamEntries'])->name('team-entries.export');
 });
 
 /*

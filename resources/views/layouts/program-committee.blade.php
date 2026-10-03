@@ -93,13 +93,23 @@
                     </div>
                 </a>
 
-                <!-- All Programs -->
+                <!-- Program List -->
                 <a href="{{ route('program-committee.programs.index') }}" 
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('program-committee.programs.index') || request()->routeIs('program-committee.programs.show') ? 'bg-[#be1e2d] text-white font-semibold shadow-sm' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
                     <svg class="w-5 h-5 flex-shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     <div>
-                        <span>All Programs</span>
+                        <span>Program List</span>
                         <span class="block text-[10px] opacity-75">Competition Registry</span>
+                    </div>
+                </a>
+
+                <!-- Team Entries Data -->
+                <a href="{{ route('program-committee.team-entries.index') }}" 
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('program-committee.team-entries.*') ? 'bg-[#be1e2d] text-white font-semibold shadow-sm' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
+                    <svg class="w-5 h-5 flex-shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <div>
+                        <span>Team Entries Data</span>
+                        <span class="block text-[10px] opacity-75">Group Quotas & Matrix</span>
                     </div>
                 </a>
 
@@ -182,6 +192,11 @@
             </div>
 
             <div class="flex items-center gap-2 sm:gap-3">
+                <a href="{{ route('program-committee.team-entries.index') }}" 
+                   class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm transition">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="hidden sm:inline">Team Entries</span>
+                </a>
                 <a href="{{ route('program-committee.programs.create') }}" 
                    class="px-3.5 py-1.5 rounded-xl bg-brand-burgundy hover:bg-[#850d18] text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>

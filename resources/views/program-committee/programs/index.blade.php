@@ -25,19 +25,26 @@
         </div>
     </div>
 
-    <!-- Quick Status Tabs -->
-    <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 text-xs font-mono">
-        <a href="{{ route('program-committee.programs.index') }}" 
-           class="px-3.5 py-1.5 rounded-xl transition {{ empty($rulesStatus) && empty($isStage) ? 'bg-slate-900 text-white font-bold' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-            All Programs ({{ $totalCount }})
-        </a>
-        <a href="{{ route('program-committee.programs.index', array_merge(request()->query(), ['rules_status' => 'with_rules'])) }}" 
-           class="px-3.5 py-1.5 rounded-xl transition {{ $rulesStatus === 'with_rules' ? 'bg-emerald-600 text-white font-bold' : 'bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50' }}">
-            Niyamavali Added ({{ $withRulesTotal }}) ✓
-        </a>
-        <a href="{{ route('program-committee.programs.index', array_merge(request()->query(), ['rules_status' => 'missing_rules'])) }}" 
-           class="px-3.5 py-1.5 rounded-xl transition {{ $rulesStatus === 'missing_rules' ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-white border border-amber-200 text-amber-800 hover:bg-amber-50' }}">
-            Niyamavali Missing ({{ $missingRulesTotal }}) !
+    <!-- Quick Status Tabs & Actions -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 text-xs font-mono">
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('program-committee.programs.index') }}" 
+               class="px-3.5 py-1.5 rounded-xl transition {{ empty($rulesStatus) && empty($isStage) ? 'bg-slate-900 text-white font-bold' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
+                All Programs ({{ $totalCount }})
+            </a>
+            <a href="{{ route('program-committee.programs.index', array_merge(request()->query(), ['rules_status' => 'with_rules'])) }}" 
+               class="px-3.5 py-1.5 rounded-xl transition {{ $rulesStatus === 'with_rules' ? 'bg-emerald-600 text-white font-bold' : 'bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50' }}">
+                Niyamavali Added ({{ $withRulesTotal }}) ✓
+            </a>
+            <a href="{{ route('program-committee.programs.index', array_merge(request()->query(), ['rules_status' => 'missing_rules'])) }}" 
+               class="px-3.5 py-1.5 rounded-xl transition {{ $rulesStatus === 'missing_rules' ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-white border border-amber-200 text-amber-800 hover:bg-amber-50' }}">
+                Niyamavali Missing ({{ $missingRulesTotal }}) !
+            </a>
+        </div>
+        <a href="{{ route('program-committee.team-entries.index') }}" 
+           class="px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold flex items-center gap-1.5 shadow-2xs transition">
+            <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>View Team Entries & Live Matrix ({{ $totalEntriesTotal ?? 0 }}) →</span>
         </a>
     </div>
 
@@ -96,7 +103,8 @@
                         <th class="py-3.5 px-4">Code</th>
                         <th class="py-3.5 px-4 font-sora">Program Name</th>
                         <th class="py-3.5 px-4">Zone</th>
-                        <th class="py-3.5 px-4">Type</th>
+                        <th class="py-3.5 px-4">Format & Limit</th>
+                        <th class="py-3.5 px-4 text-center">Entries</th>
                         <th class="py-3.5 px-4">Duration</th>
                         <th class="py-3.5 px-4 text-center">Rules (Niyamavali)</th>
                         <th class="py-3.5 px-4 text-right">Actions</th>
@@ -126,11 +134,18 @@
                                     {{ $p->zone?->name ?? $p->eligibility }}
                                 </span>
                             </td>
-                            <td class="py-3.5 px-4 capitalize">
-                                <span>{{ $p->type }}</span>
-                                @if($p->type === 'group')
-                                    <span class="text-[10px] text-slate-400 block">(Max: {{ $p->participant_count ?? $p->max_participants }})</span>
-                                @endif
+                            <td class="py-3.5 px-4">
+                                <span class="capitalize font-bold text-slate-900 block">{{ $p->type }}</span>
+                                <span class="text-[10px] text-slate-500 font-mono block">
+                                    Limit: <strong class="text-slate-800">{{ $p->limit }}</strong> / group
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                <a href="{{ route('program-committee.team-entries.index', ['search' => $p->code]) }}" 
+                                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition {{ $p->entries_count > 0 ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100' : 'bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200' }}"
+                                   title="Click to view submitted team entries">
+                                    <span>{{ $p->entries_count }} entries</span>
+                                </a>
                             </td>
                             <td class="py-3.5 px-4">
                                 {{ $p->duration_minutes }} Min
@@ -154,6 +169,11 @@
                             </td>
                             <td class="py-3.5 px-4 text-right">
                                 <div class="inline-flex items-center gap-1.5">
+                                    <a href="{{ route('program-committee.team-entries.index', ['search' => $p->code]) }}" 
+                                       class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 font-mono text-[11px] font-bold transition-colors"
+                                       title="View Group Entries">
+                                        Entries
+                                    </a>
                                     <a href="{{ route('program-committee.programs.rules', $p) }}" 
                                        class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-400 hover:text-slate-950 text-amber-900 font-mono text-[11px] font-bold transition-colors"
                                        title="Niyamavali & Criteria">
@@ -178,7 +198,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-slate-400">
+                            <td colspan="8" class="py-12 text-center text-slate-400">
                                 No programs found matching your filter criteria.
                             </td>
                         </tr>
