@@ -198,6 +198,10 @@
                     <a href="{{ route('admin.registrations.index') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.registrations.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
                         <span>Program Entries</span>
                     </a>
+                    <a href="{{ route('admin.registrations.stats') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.registrations.stats') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                        <span>Group Entry Stats</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-mono">LIVE</span>
+                    </a>
                     <a href="{{ route('admin.programs.create') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.programs.create') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Create Programs</a>
                     <a href="{{ route('admin.programs.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.programs.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Program List</a>
                     <a href="{{ route('admin.registrations.create') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.registrations.create') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Add Student To Program</a>

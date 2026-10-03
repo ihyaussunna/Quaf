@@ -36,6 +36,215 @@
         </div>
     @endif
 
+    <!-- Group-Wise Entries & Quota Statistics -->
+    <div id="group-stats" class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-5" x-data="{ activeGroupModal: null }">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#be1e2d] animate-pulse"></span>
+                    <h2 class="text-base sm:text-lg font-sora font-black text-slate-900 tracking-tight">Group Entry Statistics</h2>
+                    <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-bold">
+                        {{ $statsData['total_programs'] }} Competitions
+                    </span>
+                </div>
+                <p class="text-xs font-mono text-slate-500 mt-1">Live tracking of Registered (Full), Partial (Slots remaining), and Pending competition entries per group.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('admin.registrations.stats') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors">
+                    <svg class="w-3.5 h-3.5 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span>Full Statistics Matrix &rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 5 Group Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            @foreach($statsData['groups'] as $stat)
+                @php
+                    $grp = $stat['group'];
+                    $color = $grp->color_hex ?? '#005c94';
+                    $isSelected = (string)$selectedGroupId === (string)$grp->id;
+                @endphp
+                <div class="bg-slate-50/80 rounded-2xl border transition-all p-3.5 flex flex-col justify-between space-y-3 {{ $isSelected ? 'border-slate-900 bg-white ring-2 ring-slate-900/10 shadow-sm' : 'border-slate-200 hover:border-slate-300 hover:bg-white' }}">
+                    <!-- Card Top: Group Name + Color Dot + Code -->
+                    <div>
+                        <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: {{ $color }}"></span>
+                                <h3 class="font-sora font-bold text-xs text-slate-900 truncate" title="{{ $grp->name }}">{{ $grp->name }}</h3>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 text-white" style="background-color: {{ $color }}">
+                                {{ $grp->code ?? 'GRP' }}
+                            </span>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mt-2 space-y-1">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-500">
+                                <span>Progress</span>
+                                <span class="font-bold text-slate-800">{{ $stat['progress_percent'] }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                <div class="h-1.5 rounded-full transition-all" style="width: {{ $stat['progress_percent'] }}%; background-color: {{ $color }}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Status Counts Grid (Registered, Partial, Pending) -->
+                        <div class="grid grid-cols-3 gap-1.5 mt-3 text-center">
+                            <!-- Registered / Full -->
+                            <div class="p-1.5 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center">
+                                <span class="text-xs font-mono font-bold text-emerald-800">{{ $stat['full_count'] }}</span>
+                                <span class="text-[9px] font-mono font-bold text-emerald-600 uppercase">Registered</span>
+                            </div>
+                            <!-- Partial -->
+                            <div class="p-1.5 rounded-xl bg-amber-50 border border-amber-100 flex flex-col items-center">
+                                <span class="text-xs font-mono font-bold text-amber-800">{{ $stat['partial_count'] }}</span>
+                                <span class="text-[9px] font-mono font-bold text-amber-600 uppercase">Partial</span>
+                            </div>
+                            <!-- Pending -->
+                            <div class="p-1.5 rounded-xl bg-rose-50 border border-rose-100 flex flex-col items-center">
+                                <span class="text-xs font-mono font-bold text-rose-800">{{ $stat['pending_count'] }}</span>
+                                <span class="text-[9px] font-mono font-bold text-rose-600 uppercase">Pending</span>
+                            </div>
+                        </div>
+
+                        <!-- Entries breakdown (Total, Verified, Pending Verification) -->
+                        <div class="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                            <span>Entries: <strong class="text-slate-800">{{ $stat['total_entries'] }}</strong></span>
+                            <span>Verif: <strong class="text-emerald-700">{{ $stat['verified_entries'] }}</strong> • Pend: <strong class="text-amber-700">{{ $stat['pending_verif_entries'] }}</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Card Actions -->
+                    <div class="pt-2 flex items-center gap-1.5">
+                        <button type="button" @click="activeGroupModal = '{{ $grp->id }}'" 
+                                class="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[10px] font-bold text-center transition-colors">
+                            Breakdown
+                        </button>
+                        @if($isSelected)
+                            <a href="{{ route('admin.registrations.index', array_filter(['zone_id' => $selectedZoneId, 'search' => $search])) }}" 
+                               class="py-1.5 px-2.5 rounded-xl bg-slate-900 text-white font-mono text-[10px] font-bold text-center transition-colors">
+                                Selected ✓
+                            </a>
+                        @else
+                            <a href="{{ route('admin.registrations.index', array_filter(['group' => $grp->id, 'zone_id' => $selectedZoneId, 'search' => $search])) }}" 
+                               class="py-1.5 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[10px] font-bold text-center transition-colors">
+                                Filter
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Breakdown Modals for each group -->
+        @foreach($statsData['groups'] as $stat)
+            @php $grp = $stat['group']; @endphp
+            <div x-show="activeGroupModal === '{{ $grp->id }}'" 
+                 x-cloak
+                 class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+                 @keydown.escape.window="activeGroupModal = null">
+                <div class="bg-white w-full max-w-3xl rounded-3xl border border-slate-200 shadow-2xl p-6 space-y-4 max-h-[85vh] flex flex-col"
+                     @click.away="activeGroupModal = null"
+                     x-data="{ tab: 'partial' }">
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 rounded-full" style="background-color: {{ $grp->color_hex ?? '#005c94' }}"></span>
+                            <h3 class="text-lg font-sora font-black text-slate-900">{{ $grp->name }}</h3>
+                            <span class="px-2 py-0.5 rounded text-xs font-mono font-bold text-white" style="background-color: {{ $grp->color_hex ?? '#005c94' }}">
+                                {{ $grp->code }}
+                            </span>
+                        </div>
+                        <button type="button" @click="activeGroupModal = null" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal Tabs: Partial, Pending, Full -->
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-2 text-xs font-mono">
+                        <button type="button" @click="tab = 'partial'" :class="tab === 'partial' ? 'bg-amber-100 text-amber-900 font-bold' : 'text-slate-500 hover:bg-slate-100'" class="px-3 py-1.5 rounded-xl transition">
+                            Partial ({{ $stat['partial_count'] }})
+                        </button>
+                        <button type="button" @click="tab = 'pending'" :class="tab === 'pending' ? 'bg-rose-100 text-rose-900 font-bold' : 'text-slate-500 hover:bg-slate-100'" class="px-3 py-1.5 rounded-xl transition">
+                            Pending ({{ $stat['pending_count'] }})
+                        </button>
+                        <button type="button" @click="tab = 'full'" :class="tab === 'full' ? 'bg-emerald-100 text-emerald-900 font-bold' : 'text-slate-500 hover:bg-slate-100'" class="px-3 py-1.5 rounded-xl transition">
+                            Registered ({{ $stat['full_count'] }})
+                        </button>
+                    </div>
+
+                    <!-- Modal Content list (Scrollable) -->
+                    <div class="overflow-y-auto flex-1 divide-y divide-slate-100 text-xs">
+                        <!-- Partial Tab -->
+                        <div x-show="tab === 'partial'" class="space-y-2 py-2">
+                            @forelse($stat['partial_programs'] as $pp)
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/50 border border-amber-100 hover:bg-amber-50 transition">
+                                    <div>
+                                        <div class="font-bold text-slate-900">{{ $pp['name'] }}</div>
+                                        <div class="text-[10px] font-mono text-slate-500">{{ $pp['code'] }} • {{ $pp['zone'] }} • {{ ucfirst($pp['type']) }}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-mono font-bold text-[11px]">
+                                            {{ $pp['enrolled'] }} / {{ $pp['limit'] }} Filled
+                                        </span>
+                                        <span class="block text-[10px] font-mono text-amber-600 mt-0.5">({{ $pp['remaining'] }} slot left)</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="py-8 text-center text-slate-400 font-mono">No partially registered programs for this group.</div>
+                            @endforelse
+                        </div>
+
+                        <!-- Pending Tab -->
+                        <div x-show="tab === 'pending'" class="space-y-2 py-2">
+                            @forelse($stat['pending_programs'] as $pp)
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition">
+                                    <div>
+                                        <div class="font-bold text-slate-800">{{ $pp['name'] }}</div>
+                                        <div class="text-[10px] font-mono text-slate-400">{{ $pp['code'] }} • {{ $pp['zone'] }} • {{ ucfirst($pp['type']) }}</div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono font-bold text-[10px]">
+                                        0 / {{ $pp['limit'] }} (Unregistered)
+                                    </span>
+                                </div>
+                            @empty
+                                <div class="py-8 text-center text-slate-400 font-mono">All programs have at least one registration.</div>
+                            @endforelse
+                        </div>
+
+                        <!-- Full Tab -->
+                        <div x-show="tab === 'full'" class="space-y-2 py-2">
+                            @forelse($stat['full_programs'] as $pp)
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50/40 border border-emerald-100 hover:bg-emerald-50 transition">
+                                    <div>
+                                        <div class="font-bold text-slate-900">{{ $pp['name'] }}</div>
+                                        <div class="text-[10px] font-mono text-slate-500">{{ $pp['code'] }} • {{ $pp['zone'] }} • {{ ucfirst($pp['type']) }}</div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-mono font-bold text-[11px]">
+                                        ✓ {{ $pp['enrolled'] }} / {{ $pp['limit'] }} Full
+                                    </span>
+                                </div>
+                            @empty
+                                <div class="py-8 text-center text-slate-400 font-mono">No fully completed programs yet.</div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <a href="{{ route('admin.registrations.index', ['group' => $grp->id]) }}" class="text-xs font-mono font-bold text-[#005c94] hover:underline">
+                            Filter main table to {{ $grp->name }} &rarr;
+                        </a>
+                        <button type="button" @click="activeGroupModal = null" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs font-bold transition">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
     <!-- Filters Bar -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
         <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex flex-wrap items-center justify-between gap-3">
