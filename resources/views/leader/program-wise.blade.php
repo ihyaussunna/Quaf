@@ -4,7 +4,8 @@
 
 @section('content')
 @php
-    $allProgramIdsToDisplay = $selectedProgram ? collect([$selectedProgram->id]) : $displayedPrograms->pluck('id');
+    $programsCollection = $selectedProgram ? collect([$selectedProgram]) : $displayedPrograms;
+    $allProgramIdsToDisplay = $programsCollection->pluck('id');
 @endphp
 <div class="space-y-6" x-data="{
     allProgIds: @json($allProgramIdsToDisplay->values()),
@@ -50,6 +51,7 @@
                 color: #000000 !important;
                 overflow: visible !important;
                 height: auto !important;
+                font-size: 11px !important;
             }
             main {
                 padding: 0 !important;
@@ -60,15 +62,26 @@
             .print-only {
                 display: block !important;
             }
-            .avoid-break {
+            .avoid-break, tr {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
-            tr {
-                page-break-inside: avoid !important;
-            }
             thead {
-                display: table-header-group;
+                display: table-header-group !important;
+            }
+            .program-wise-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            .program-wise-table th,
+            .program-wise-table td {
+                border: 1px solid #64748b !important;
+                padding: 5px 6px !important;
+                color: #0f172a !important;
+            }
+            .program-wise-table th {
+                background-color: #f1f5f9 !important;
+                font-weight: 700 !important;
             }
         }
         @media screen {
@@ -78,12 +91,12 @@
         }
         @page {
             size: A4 portrait;
-            margin: 10mm;
+            margin: 8mm;
         }
     </style>
 
     <!-- Official Print Header (Visible only when printing or saving to PDF) -->
-    <div class="print-only mb-6">
+    <div class="print-only mb-4">
         @include('partials.print-pdf-header', [
             'title' => 'Program Wise Students Roster',
             'subtitle' => 'Ihyaussunna Students Union, Markazu Saquafathi Sunniyya',
@@ -98,7 +111,7 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold font-sora text-gray-900">Program Wise Students</h1>
                 <span class="px-3 py-1 rounded-full bg-slate-900 text-amber-400 font-bold text-xs font-mono">
-                    {{ $displayedPrograms->count() }} Competitions
+                    {{ $programsCollection->count() }} Competitions
                 </span>
             </div>
             <p class="text-xs text-gray-500 mt-1 font-sora">
@@ -120,7 +133,7 @@
     <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-xs filter-card no-print">
         <form method="GET" action="{{ route('leader.programs-wise') }}" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
             <!-- Zone Filter -->
-            <div class="md:col-span-4">
+            <div class="md:col-span-3">
                 <label class="block text-xs font-semibold text-gray-600 mb-1 font-sora">Zone</label>
                 <select name="zone" onchange="if(this.form.program) { this.form.program.value = ''; } this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
                     <option value="">-- All Zones --</option>
@@ -134,8 +147,19 @@
                 </select>
             </div>
 
+            <!-- Status Filter -->
+            <div class="md:col-span-3">
+                <label class="block text-xs font-semibold text-gray-600 mb-1 font-sora">Registration Status</label>
+                <select name="status" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
+                    <option value="all" {{ ($statusFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Programs</option>
+                    <option value="registered" {{ ($statusFilter ?? '') === 'registered' ? 'selected' : '' }}>Registered Only</option>
+                    <option value="pending" {{ ($statusFilter ?? '') === 'pending' ? 'selected' : '' }}>Pending / Incomplete Only</option>
+                    <option value="completed" {{ ($statusFilter ?? '') === 'completed' ? 'selected' : '' }}>Completed Only</option>
+                </select>
+            </div>
+
             <!-- Program Filter -->
-            <div class="md:col-span-5">
+            <div class="md:col-span-4">
                 <label class="block text-xs font-semibold text-gray-600 mb-1 font-sora">Program</label>
                 <select name="program" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
                     <option value="">-- All Programs (View All) --</option>
@@ -151,12 +175,12 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="md:col-span-3 flex items-center gap-2">
+            <div class="md:col-span-2 flex items-center gap-2">
                 <button type="submit" class="flex-1 bg-brand-orange text-white py-2.5 px-4 rounded-xl text-sm font-semibold hover:bg-orange-600 transition flex items-center justify-center gap-2 font-sora">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     Filter
                 </button>
-                @if($selectedZone || $selectedProgramId)
+                @if($selectedZone || $selectedProgramId || ($statusFilter ?? 'all') !== 'all')
                     <a href="{{ route('leader.programs-wise') }}" class="px-3 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-sora font-semibold transition" title="Clear Filters">
                         Reset
                     </a>
@@ -192,248 +216,189 @@
         </div>
     </div>
 
-    <!-- Main Programs List -->
-    @if($selectedProgram)
-        <!-- Single Program Focused View -->
-        <div :class="isProgExcluded({{ $selectedProgram->id }}) ? 'opacity-40 border-dashed bg-gray-50/50 print-hidden-section' : ''"
-             class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break transition-all">
-            <!-- Program Header -->
-            <div class="px-6 py-4 bg-gray-50/75 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 text-xs font-sora">
-                <div class="flex items-center gap-3">
-                    <span class="px-2.5 py-1 rounded-lg bg-gray-900 text-amber-400 font-mono font-bold text-xs">
-                        {{ $selectedProgram->code ?: $selectedProgram->id }}
-                    </span>
-                    <div>
-                        <h2 class="font-bold text-gray-900 text-sm inline">{{ $selectedProgram->name }}</h2>
-                        @if($selectedProgram->malayalam_name)
-                            <span class="text-xs text-gray-500 font-malayalam ml-2">{{ $selectedProgram->malayalam_name }}</span>
-                        @endif
-                    </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ ($selectedProgram->type ?? 'individual') === 'group' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
-                        {{ ucfirst($selectedProgram->type ?? 'Individual') }}
-                    </span>
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono bg-gray-100 text-gray-700 border border-gray-200">
-                        {{ $selectedProgram->zone?->name ?? $selectedProgram->eligibility ?? 'A Zone' }}
-                    </span>
-                    @if($selectedProgram->stage)
-                        <span class="px-2.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            {{ $selectedProgram->stage->name }}
-                        </span>
-                    @endif
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                        {{ $selectedProgram->entries->count() }} Registered
-                    </span>
-                    <label class="no-print inline-flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-semibold hover:border-brand-orange transition select-none">
-                        <input type="checkbox"
-                               :checked="!isProgExcluded({{ $selectedProgram->id }})"
-                               @change="toggleProg({{ $selectedProgram->id }})"
-                               class="rounded text-brand-orange focus:ring-0">
-                        <span x-text="isProgExcluded({{ $selectedProgram->id }}) ? 'Excluded from PDF' : 'In PDF'"
-                              :class="isProgExcluded({{ $selectedProgram->id }}) ? 'text-gray-400 font-normal italic' : 'text-gray-800 font-bold'"></span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Table of Students -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm font-sora">
-                    <thead>
-                        <tr class="bg-gray-50/50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider font-sora">
-                            <th class="px-4 py-3.5 text-center w-12">No</th>
-                            <th class="px-4 py-3.5">Chest No</th>
-                            <th class="px-6 py-3.5">Participant Name</th>
-                            <th class="px-4 py-3.5">Team</th>
-                            <th class="px-4 py-3.5">Zone</th>
-                            <th class="px-4 py-3.5">Class</th>
-                            <th class="px-4 py-3.5 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($selectedProgram->entries as $index => $entry)
-                            @php
-                                $isGroup = $entry->isGroupEntry();
-                                $leaderStudent = $isGroup
-                                    ? ($entry->participants()->wherePivot('role', 'captain')->first() ?? $entry->student ?? $entry->participants()->first())
-                                    : $entry->student;
-                                $displayChest = ltrim((string)($entry->chest_number ?: $leaderStudent?->student_id), '#');
-                                $displayName = $leaderStudent?->name ?: ('Chest ' . ltrim((string)$entry->chest_number, '#'));
-                                $displayZone = $leaderStudent?->category ?? ($selectedProgram->zone?->name ?? ($selectedProgram->eligibility ?? 'A Zone'));
-                                $displayClass = $leaderStudent?->class_level ?? '-';
-                            @endphp
-                            <tr class="hover:bg-gray-50/50 transition">
-                                <td class="px-4 py-3.5 text-center text-gray-500 text-xs font-medium font-mono">{{ $index + 1 }}</td>
-                                <td class="px-4 py-3.5 text-gray-700 font-mono text-xs font-bold">{{ $displayChest ?: '—' }}</td>
-                                <td class="px-6 py-3.5 text-gray-900 font-medium">
-                                    <span class="font-bold block text-gray-900">{{ $displayName }}</span>
-                                    @if($isGroup)
-                                        @if($entry->participants->isNotEmpty())
-                                            <div class="text-[11px] text-gray-500 font-mono mt-0.5">
-                                                Members ({{ $entry->participants->count() }}): {{ $entry->participants->pluck('name')->implode(', ') }}
-                                            </div>
-                                        @else
-                                            <span class="text-[10px] text-gray-400 block font-sora">Group Team</span>
-                                        @endif
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $group->name }}</td>
-                                <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $displayZone }}</td>
-                                <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $displayClass }}</td>
-                                <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    @if($entry->status === 'verified' || $entry->status === 'confirmed')
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Verified</span>
-                                    @elseif($entry->status === 'pending')
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pending</span>
-                                    @else
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-700 capitalize">{{ $entry->status }}</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                                    <div class="max-w-md mx-auto space-y-3">
-                                        <p class="text-sm font-medium">No students registered from your team for this program.</p>
-                                        <a href="{{ route('leader.registrations', ['zone' => $selectedProgram->zone?->name ?? $selectedProgram->eligibility, 'program_id' => $selectedProgram->id]) }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs">
-                                            + Enroll Students in this Program
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @elseif($displayedPrograms->isNotEmpty())
-        <!-- All Registered Programs List (Default Multi-View) -->
-        <div class="space-y-6">
-            @foreach($displayedPrograms as $prog)
-                <div :class="isProgExcluded({{ $prog->id }}) ? 'opacity-40 border-dashed bg-gray-50/50 print-hidden-section' : ''"
-                     class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break transition-all">
-                    <!-- Program Header -->
-                    <div class="px-6 py-4 bg-gray-50/75 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 text-xs font-sora">
-                        <div class="flex items-center gap-3">
-                            <span class="px-2.5 py-1 rounded-lg bg-gray-900 text-amber-400 font-mono font-bold text-xs">
-                                {{ $prog->code ?: $prog->id }}
-                            </span>
-                            <div>
-                                <h2 class="font-bold text-gray-900 text-sm inline">{{ $prog->name }}</h2>
-                                @if($prog->malayalam_name)
-                                    <span class="text-xs text-gray-500 font-malayalam ml-2">{{ $prog->malayalam_name }}</span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ ($prog->type ?? 'individual') === 'group' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
-                                {{ ucfirst($prog->type ?? 'Individual') }}
-                            </span>
-                            <span class="px-2.5 py-0.5 rounded text-[10px] font-mono bg-gray-100 text-gray-700 border border-gray-200">
-                                {{ $prog->zone?->name ?? $prog->eligibility ?? 'A Zone' }}
-                            </span>
-                            @if($prog->stage)
-                                <span class="px-2.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                    {{ $prog->stage->name }}
-                                </span>
-                            @endif
-                            <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                                {{ $prog->entries->count() }} Registered
-                            </span>
-                            <label class="no-print inline-flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-semibold hover:border-brand-orange transition select-none">
-                                <input type="checkbox"
-                                       :checked="!isProgExcluded({{ $prog->id }})"
-                                       @change="toggleProg({{ $prog->id }})"
-                                       class="rounded text-brand-orange focus:ring-0">
-                                <span x-text="isProgExcluded({{ $prog->id }}) ? 'Excluded from PDF' : 'In PDF'"
-                                      :class="isProgExcluded({{ $prog->id }}) ? 'text-gray-400 font-normal italic' : 'text-gray-800 font-bold'"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Students Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm font-sora">
-                            <thead>
-                                <tr class="bg-gray-50/50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider font-sora">
-                                    <th class="px-4 py-3 text-center w-12">No</th>
-                                    <th class="px-4 py-3">Chest No</th>
-                                    <th class="px-6 py-3">Participant Name</th>
-                                    <th class="px-4 py-3">Team</th>
-                                    <th class="px-4 py-3">Zone</th>
-                                    <th class="px-4 py-3">Class</th>
-                                    <th class="px-4 py-3 text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                @forelse($prog->entries as $index => $entry)
-                                    @php
-                                        $isGroup = $entry->isGroupEntry();
-                                        $leaderStudent = $isGroup
-                                            ? ($entry->participants()->wherePivot('role', 'captain')->first() ?? $entry->student ?? $entry->participants()->first())
-                                            : $entry->student;
-                                        $displayChest = ltrim((string)($entry->chest_number ?: $leaderStudent?->student_id), '#');
-                                        $displayName = $leaderStudent?->name ?: ('Chest ' . ltrim((string)$entry->chest_number, '#'));
-                                        $displayZone = $leaderStudent?->category ?? ($prog->zone?->name ?? ($prog->eligibility ?? 'A Zone'));
-                                        $displayClass = $leaderStudent?->class_level ?? '-';
-                                    @endphp
-                                    <tr class="hover:bg-gray-50/50 transition">
-                                        <td class="px-4 py-3 text-center text-gray-500 text-xs font-medium font-mono">{{ $index + 1 }}</td>
-                                        <td class="px-4 py-3 text-gray-700 font-mono text-xs font-bold">{{ $displayChest ?: '—' }}</td>
-                                        <td class="px-6 py-3 text-gray-900 font-medium">
-                                            <span class="font-bold block text-gray-900">{{ $displayName }}</span>
-                                            @if($isGroup)
-                                                @if($entry->participants->isNotEmpty())
-                                                    <div class="text-[11px] text-gray-500 font-mono mt-0.5">
-                                                        Members ({{ $entry->participants->count() }}): {{ $entry->participants->pluck('name')->implode(', ') }}
-                                                    </div>
-                                                @else
-                                                    <span class="text-[10px] text-gray-400 block font-sora">Group Team</span>
-                                                @endif
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3 text-gray-600 text-xs">{{ $group->name }}</td>
-                                        <td class="px-4 py-3 text-gray-600 text-xs">{{ $displayZone }}</td>
-                                        <td class="px-4 py-3 text-gray-600 text-xs">{{ $displayClass }}</td>
-                                        <td class="px-4 py-3 text-center whitespace-nowrap">
-                                            @if($entry->status === 'verified' || $entry->status === 'confirmed')
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Verified</span>
-                                            @elseif($entry->status === 'pending')
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pending</span>
-                                            @else
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-700 capitalize">{{ $entry->status }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="px-6 py-6 text-center text-gray-400 text-xs">
-                                            No students registered for this program yet.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @else
-        <!-- Empty State -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-            <div class="w-16 h-16 rounded-full bg-orange-50 text-brand-orange mx-auto flex items-center justify-center mb-3">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            </div>
-            <h3 class="text-base font-sora font-bold text-gray-900">No registered students found</h3>
-            <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto font-sora">
-                {{ $selectedZone ? 'No students from your team are registered for ' . $selectedZone . ' competitions yet.' : 'Your team has not registered students in any competitions yet.' }}
-            </p>
-            <div class="mt-4">
-                <a href="{{ route('leader.registrations') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs font-sora">
-                    + Enroll Students in Competitions
-                </a>
-            </div>
+    <!-- Empty State for Single Program Selection -->
+    @if($selectedProgram && $selectedProgram->entries->isEmpty())
+        <div class="p-6 text-center text-gray-500 bg-amber-50/60 rounded-2xl border border-amber-200 no-print">
+            <p class="text-sm font-medium text-gray-700 font-sora">No students registered from your team for this program.</p>
+            <a href="{{ route('leader.registrations', ['zone' => $selectedProgram->zone?->name ?? $selectedProgram->eligibility, 'program_id' => $selectedProgram->id]) }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs mt-3 font-sora">
+                + Enroll Students in this Program
+            </a>
         </div>
     @endif
+
+    <!-- Program-Wise Comprehensive Table (Print & Screen View) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="program-wise-table w-full text-left text-xs font-sora">
+                <thead>
+                    <tr class="bg-slate-50 border-b-2 border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-tight">
+                        <th class="no-print px-3 py-3 text-center w-12">In PDF</th>
+                        <th class="px-3 py-3 text-left w-20">Program id</th>
+                        <th class="px-4 py-3 text-left min-w-[140px]">Program</th>
+                        <th class="px-3 py-3 text-center w-24">Type</th>
+                        <th class="px-3 py-3 text-center w-20">zone</th>
+                        <th class="px-3 py-3 text-center w-20">Stage/off</th>
+                        <th class="px-3 py-3 text-center w-14">limit</th>
+                        <th class="px-3 py-3 text-center w-36">registerd status</th>
+                        <th class="px-4 py-3 text-left min-w-[180px]">Students Name</th>
+                        <th class="no-print px-3 py-3 text-center w-20">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    @forelse($programsCollection as $prog)
+                        @php
+                            $isGroupType = ($prog->type ?? 'individual') === 'group';
+                            $isStage = (bool)($prog->is_stage || ($prog->stage_id && strtolower($prog->stage?->name ?? '') !== 'off stage'));
+                            $regCount = $prog->entries->count();
+                            $limit = (int)($prog->limit ?: 1);
+                            $pending = max(0, $limit - $regCount);
+                            $zoneName = $prog->zone?->name ?? ($prog->eligibility ?? 'A Zone');
+                            $progId = $prog->code ?: (string)$prog->id;
+                        @endphp
+                        <tr :class="isProgExcluded({{ $prog->id }}) ? 'opacity-40 bg-slate-50/60 border-dashed print-hidden-section' : ''"
+                            class="hover:bg-slate-50/60 transition-colors avoid-break">
+
+                            <!-- In PDF Checkbox (Screen Only) -->
+                            <td class="no-print px-3 py-3 text-center align-top">
+                                <label class="inline-flex items-center cursor-pointer" title="Include/Exclude from PDF">
+                                    <input type="checkbox"
+                                           :checked="!isProgExcluded({{ $prog->id }})"
+                                           @change="toggleProg({{ $prog->id }})"
+                                           class="w-4 h-4 text-brand-orange rounded border-slate-300 focus:ring-brand-orange/30 cursor-pointer">
+                                </label>
+                            </td>
+
+                            <!-- Program id -->
+                            <td class="px-3 py-3 font-mono font-bold text-xs text-slate-900 whitespace-nowrap align-top">
+                                {{ $progId }}
+                            </td>
+
+                            <!-- Program -->
+                            <td class="px-4 py-3 align-top">
+                                <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
+                                    {{ $prog->name }}
+                                </div>
+                                @if($prog->malayalam_name)
+                                    <div class="text-[11px] text-slate-500 font-malayalam mt-0.5 leading-tight">
+                                        {{ $prog->malayalam_name }}
+                                    </div>
+                                @endif
+                            </td>
+
+                            <!-- Type -->
+                            <td class="px-3 py-3 text-center whitespace-nowrap align-top">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $isGroupType ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
+                                    {{ ucfirst($prog->type ?? 'Individual') }}
+                                </span>
+                            </td>
+
+                            <!-- zone -->
+                            <td class="px-3 py-3 text-center font-semibold text-xs text-slate-700 whitespace-nowrap align-top">
+                                {{ $zoneName }}
+                            </td>
+
+                            <!-- Stage/off -->
+                            <td class="px-3 py-3 text-center whitespace-nowrap align-top">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $isStage ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
+                                    {{ $isStage ? 'Stage' : 'Off Stage' }}
+                                </span>
+                            </td>
+
+                            <!-- limit -->
+                            <td class="px-3 py-3 text-center font-mono font-bold text-xs text-slate-900 whitespace-nowrap align-top">
+                                {{ $limit }}
+                            </td>
+
+                            <!-- registerd status -->
+                            <td class="px-3 py-3 text-center whitespace-nowrap align-top">
+                                <div class="space-y-1">
+                                    <div class="font-mono text-xs font-bold text-slate-900">
+                                        registerd {{ $regCount }}/pending{{ $pending }}
+                                    </div>
+                                    @if($regCount >= $limit)
+                                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            Completed
+                                        </span>
+                                    @elseif($regCount > 0)
+                                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                            Partially Filled
+                                        </span>
+                                    @else
+                                        <span class="inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            Not Registered
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+
+                            <!-- Students Name -->
+                            <td class="px-4 py-3 align-top">
+                                @if($prog->entries->isNotEmpty())
+                                    <div class="space-y-1.5 text-xs font-sora">
+                                        @foreach($prog->entries as $entryIdx => $entry)
+                                            @php
+                                                $isGroup = $entry->isGroupEntry();
+                                                $leaderStudent = $isGroup
+                                                    ? ($entry->participants()->wherePivot('role', 'captain')->first() ?? $entry->student ?? $entry->participants()->first())
+                                                    : $entry->student;
+                                                $displayChest = ltrim((string)($entry->chest_number ?: $leaderStudent?->student_id), '#');
+                                                $displayName = $leaderStudent?->name ?: ('Chest ' . ltrim((string)$entry->chest_number, '#'));
+                                                $isVerified = in_array($entry->status, ['verified', 'confirmed'], true);
+                                            @endphp
+                                            <div class="border-b border-slate-100 last:border-0 pb-1 last:pb-0">
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="font-bold text-slate-900">{{ $displayName }}</span>
+                                                    @if($displayChest)
+                                                        <span class="font-mono text-[10px] text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded font-bold">
+                                                            #{{ $displayChest }}
+                                                        </span>
+                                                    @endif
+                                                    @if($isVerified)
+                                                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                            Verified
+                                                        </span>
+                                                    @else
+                                                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                @if($isGroup && $entry->participants->isNotEmpty())
+                                                    <div class="text-[10px] text-slate-500 font-mono mt-0.5 leading-tight">
+                                                        Members ({{ $entry->participants->count() }}): {{ $entry->participants->pluck('name')->implode(', ') }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-xs text-slate-400 italic">No students registered</span>
+                                @endif
+                            </td>
+
+                            <!-- Action (Screen Only) -->
+                            <td class="no-print px-3 py-3 text-center whitespace-nowrap align-top">
+                                <a href="{{ route('leader.registrations', ['zone' => $prog->zone?->name ?? $prog->eligibility, 'program_id' => $prog->id]) }}"
+                                   class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-2xs {{ $regCount > 0 ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-brand-orange hover:bg-orange-600 text-white' }}">
+                                    {{ $regCount > 0 ? 'Edit' : '+ Enroll' }}
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="10" class="px-6 py-12 text-center text-gray-500">
+                                <div class="max-w-md mx-auto space-y-3">
+                                    <p class="text-sm font-medium font-sora">No programs found matching the selected filters.</p>
+                                    <a href="{{ route('leader.programs-wise') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-black transition shadow-xs font-sora">
+                                        Reset Filters
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @endsection

@@ -240,6 +240,7 @@ class LeaderController extends Controller
         $selectedZoneId = $request->query('zone_id');
         $selectedZone = $request->query('zone', $request->query('category'));
         $selectedProgramId = $request->query('program');
+        $statusFilter = $request->query('status', 'all');
 
         // Programs list for dropdown selector
         $programsQuery = Program::query();
@@ -252,6 +253,7 @@ class LeaderController extends Controller
             });
         }
         $programs = $programsQuery->withCount(['entries as my_entries_count' => fn ($q) => $q->where('group_id', $group->id)])
+            ->orderBy('code')
             ->orderBy('name')
             ->get();
 
@@ -289,12 +291,34 @@ class LeaderController extends Controller
         if ($selectedProgramId) {
             $displayQuery->where('id', $selectedProgramId);
         } else {
-            // Default: show all programs where this team has registered entries
-            $displayQuery->whereHas('entries', fn ($q) => $q->where('group_id', $group->id));
+            if ($statusFilter === 'registered') {
+                $displayQuery->whereHas('entries', fn ($q) => $q->where('group_id', $group->id));
+            } elseif (! $selectedZone && ! $selectedZoneId && ! $request->has('status')) {
+                // If neither zone nor explicit status filter is chosen, show programs with entries by default
+                $displayQuery->whereHas('entries', fn ($q) => $q->where('group_id', $group->id));
+            }
         }
 
-        $displayedPrograms = $displayQuery->orderBy('code')->orderBy('name')->get();
-        $totalDisplayedEntries = $displayedPrograms->sum('my_entries_count');
+        $allDisplayedPrograms = $displayQuery->orderBy('code')->orderBy('name')->get();
+
+        if (! $selectedProgramId && in_array($statusFilter, ['pending', 'completed'], true)) {
+            $displayedPrograms = $allDisplayedPrograms->filter(function ($prog) use ($statusFilter) {
+                $regCount = $prog->my_entries_count ?? $prog->entries->count();
+                $limit = $prog->limit ?: 1;
+                if ($statusFilter === 'pending') {
+                    return $regCount < $limit;
+                }
+                if ($statusFilter === 'completed') {
+                    return $regCount >= $limit;
+                }
+
+                return true;
+            })->values();
+        } else {
+            $displayedPrograms = $allDisplayedPrograms;
+        }
+
+        $totalDisplayedEntries = $displayedPrograms->sum(fn ($p) => $p->entries->count());
 
         return view('leader.program-wise', compact(
             'group',
@@ -305,6 +329,7 @@ class LeaderController extends Controller
             'selectedZoneId',
             'selectedProgramId',
             'selectedProgram',
+            'statusFilter',
             'totalDisplayedEntries'
         ));
     }

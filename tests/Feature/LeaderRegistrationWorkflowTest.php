@@ -358,4 +358,36 @@ class LeaderRegistrationWorkflowTest extends TestCase
         $response->assertSee($this->student1->name);
         $response->assertSee('101');
     }
+
+    public function test_leader_program_wise_renders_requested_eight_column_layout_with_registration_and_pending_status(): void
+    {
+        // indProgram has limit 2. Register 1 student so registered is 1 and pending is 1
+        ProgramEntry::create([
+            'program_id' => $this->indProgram->id,
+            'student_id' => $this->student1->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '101',
+            'status' => 'verified',
+        ]);
+
+        $response = $this->actingAs($this->leaderUser)->get(route('leader.programs-wise', ['zone' => 'A Zone']));
+        $response->assertStatus(200);
+
+        // Assert 8 column headers from the user request
+        $response->assertSee('Program id');
+        $response->assertSee('Program');
+        $response->assertSee('Type');
+        $response->assertSee('zone');
+        $response->assertSee('Stage/off');
+        $response->assertSee('limit');
+        $response->assertSee('registerd status');
+        $response->assertSee('Students Name');
+
+        // Assert row contents
+        $response->assertSee($this->indProgram->code ?: $this->indProgram->id);
+        $response->assertSee($this->indProgram->name);
+        $response->assertSee('registerd 1/pending1');
+        $response->assertSee($this->student1->name);
+        $response->assertSee('#101');
+    }
 }
