@@ -400,5 +400,26 @@
             </table>
         </div>
     </div>
+
+    <!-- Official Signatures Block (Print Only) -->
+    <div class="print-only pt-8 mt-8 border-t border-slate-400 avoid-break">
+        <div class="grid grid-cols-3 gap-6 text-center text-xs font-mono">
+            <div>
+                <div class="border-b border-slate-400 mb-1.5 h-8"></div>
+                <div class="font-bold text-slate-900">Desk Officer / Registrar</div>
+                <div class="text-[10px] text-slate-500">Registration Committee</div>
+            </div>
+            <div>
+                <div class="border-b border-slate-400 mb-1.5 h-8"></div>
+                <div class="font-bold text-slate-900">{{ $group->name }} Leader / Captain</div>
+                <div class="text-[10px] text-slate-500">Official Verification</div>
+            </div>
+            <div>
+                <div class="border-b border-slate-400 mb-1.5 h-8"></div>
+                <div class="font-bold text-slate-900">General Convener</div>
+                <div class="text-[10px] text-slate-500">Ashabul Quaf Committee</div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

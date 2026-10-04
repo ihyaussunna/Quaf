@@ -22,8 +22,43 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        @media print {
+            #sidebar, aside, header, nav, .mobile-nav, .no-print, button, form.no-print, .backdrop-blur-xs {
+                display: none !important;
+            }
+            body, html {
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+                height: auto !important;
+                width: 100% !important;
+            }
+            .min-h-screen, .h-full, .overflow-hidden {
+                overflow: visible !important;
+                height: auto !important;
+                min-height: auto !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+        }
+        @media screen {
+            .print-only {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
-<body class="h-full bg-[#f8fafc] text-gray-800 font-sora antialiased flex overflow-hidden max-w-full"
+<body class="h-full bg-[#f8fafc] text-gray-800 font-sora antialiased flex overflow-hidden max-w-full print:bg-white print:overflow-visible print:h-auto"
       x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Backdrop for Sidebar -->
@@ -35,13 +70,13 @@
          x-transition:leave="transition-opacity ease-linear duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden" 
+         class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden print:hidden" 
          style="display: none;"></div>
 
     <!-- Sidebar (Dark Slate / Charcoal matching QUAF Fest) -->
     <aside id="sidebar" 
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-           class="fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#141414] text-white flex-shrink-0 flex flex-col justify-between transition-transform duration-300 select-none shadow-2xl lg:shadow-none">
+           class="fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#141414] text-white flex-shrink-0 flex flex-col justify-between transition-transform duration-300 select-none shadow-2xl lg:shadow-none print:hidden">
         <div>
             <!-- Sidebar Header / Brand -->
             <div class="h-16 sm:h-20 flex items-center justify-between px-4 border-b border-white/10">
@@ -109,9 +144,9 @@
     </aside>
 
     <!-- Main View Container -->
-    <div class="flex-1 flex flex-col h-full min-w-0 max-w-full overflow-hidden">
+    <div class="flex-1 flex flex-col h-full min-w-0 max-w-full overflow-hidden print:overflow-visible print:h-auto print:block">
         <!-- Topbar -->
-        <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-10 shadow-xs">
+        <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-10 shadow-xs print:hidden">
             <div class="flex items-center gap-3 min-w-0">
                 <!-- Hamburger Button for Mobile -->
                 <button @click="sidebarOpen = !sidebarOpen" 
@@ -141,14 +176,14 @@
 
         <!-- Flash alerts -->
         @if(session('success'))
-            <div class="px-4 sm:px-6 pt-4">
+            <div class="px-4 sm:px-6 pt-4 print:hidden">
                 <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between shadow-xs">
                     <span>{{ session('success') }}</span>
                 </div>
             </div>
         @endif
         @if(session('error'))
-            <div class="px-4 sm:px-6 pt-4">
+            <div class="px-4 sm:px-6 pt-4 print:hidden">
                 <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between shadow-xs">
                     <span>{{ session('error') }}</span>
                 </div>
@@ -156,12 +191,12 @@
         @endif
 
         <!-- Dynamic Content (with safe padding for mobile bottom bar) -->
-        <main class="flex-1 overflow-y-auto p-3 sm:p-6 pb-24 lg:pb-6 max-w-full overflow-x-hidden">
+        <main class="flex-1 overflow-y-auto p-3 sm:p-6 pb-24 lg:pb-6 max-w-full overflow-x-hidden print:overflow-visible print:h-auto print:p-0 print:m-0 print:block">
             @yield('content')
         </main>
 
         <!-- Mobile Bottom App Bar for Leader Portal -->
-        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 pt-1 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] flex items-center justify-around select-none">
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 pt-1 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] flex items-center justify-around select-none print:hidden">
             <a href="{{ route('leader.dashboard') }}" class="app-tap flex flex-col items-center py-1 px-3 rounded-2xl text-center {{ request()->routeIs('leader.dashboard') ? 'text-[#be1e2d] font-bold bg-red-50/80' : 'text-slate-500' }}">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 <span class="text-[10px] font-mono">Home</span>

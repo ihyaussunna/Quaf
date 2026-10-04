@@ -1187,7 +1187,7 @@ function quotaStatusTracker() {
     <!-- Program Quota & Entry Tracker -->
     <div id="programs-tracker-section" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm" x-data="quotaStatusTracker()">
         <!-- Official Festival Top Masthead Banner (Print Only) -->
-        <div class="hidden print:block mb-4">
+        <div class="print-only mb-4">
             @include('partials.print-pdf-header')
             <div class="text-center mt-3 pb-2 border-b border-slate-300">
                 <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Program Quota & Entry Status Report</h2>

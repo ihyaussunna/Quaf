@@ -25,7 +25,7 @@
 </style>
 
 <div class="space-y-6" x-data="programListManager()">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold font-sora text-gray-900">Program List</h1>
             <p class="text-xs text-gray-500 mt-1 font-sora">Festival competitions and events for {{ $group->name }}</p>
@@ -103,7 +103,7 @@
     </div>
 
     <!-- Official Festival Top Masthead Banner (Print Only) -->
-    <div class="hidden print:block mb-4">
+    <div class="print-only mb-4">
         @include('partials.print-pdf-header')
         <div class="text-center mt-3 pb-2 border-b border-slate-300">
             <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Competition Program Schedule</h2>

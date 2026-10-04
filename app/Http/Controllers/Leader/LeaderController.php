@@ -428,8 +428,9 @@ class LeaderController extends Controller
             });
         }
         $students = $query->orderBy('name')->paginate(15)->withQueryString();
+        $allStudentsForPrint = (clone $query)->orderBy('name')->get();
 
-        return view('leader.students', compact('group', 'students', 'isEditingOpen', 'search'));
+        return view('leader.students', compact('group', 'students', 'allStudentsForPrint', 'isEditingOpen', 'search'));
     }
 
     public function updateStudent(Request $request, Student $student): JsonResponse|RedirectResponse
