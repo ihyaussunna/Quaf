@@ -242,12 +242,9 @@
 
         <!-- Official Document Header -->
         <div class="flex items-center justify-between pb-4 border-b-2 border-slate-900 gap-4">
-            <div class="flex items-center gap-4">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-14 w-auto object-contain">
-                <div>
-                    <h1 class="text-xl font-black font-sora text-slate-900 uppercase tracking-tight">Master Competition Schedule & Event Manual</h1>
-                    <p class="text-xs font-semibold text-slate-600">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
-                </div>
+            <div>
+                <h1 class="text-xl font-black font-sora text-slate-900 uppercase tracking-tight">Master Competition Schedule & Event Manual</h1>
+                <p class="text-xs font-semibold text-slate-600">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
             </div>
 
             <div class="text-right font-mono text-[11px] text-slate-500 space-y-0.5">
