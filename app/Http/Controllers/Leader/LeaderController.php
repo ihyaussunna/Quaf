@@ -227,10 +227,11 @@ class LeaderController extends Controller
             });
         }
 
-        $programs = $query->orderBy('name')->paginate(15)->withQueryString();
+        $programs = $query->orderBy('code')->orderBy('name')->paginate(15)->withQueryString();
+        $allProgramsForPrint = (clone $query)->orderBy('code')->orderBy('name')->get();
         $zones = Zone::orderBy('display_order')->get();
 
-        return view('leader.programs', compact('group', 'programs', 'zones', 'search', 'selectedZone', 'selectedZoneId', 'selectedType'));
+        return view('leader.programs', compact('group', 'programs', 'allProgramsForPrint', 'zones', 'search', 'selectedZone', 'selectedZoneId', 'selectedType'));
     }
 
     public function programWise(Request $request): View

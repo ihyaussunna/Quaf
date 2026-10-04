@@ -5,32 +5,71 @@
 @section('content')
 <style>
 @media print {
-    .no-print {
+    #sidebar, aside, header, nav, .filter-card, .no-print, button, form, .mobile-nav, .search-card {
         display: none !important;
     }
     .print-hidden-section {
         display: none !important;
     }
-    body {
-        background-color: #ffffff !important;
+    body, html {
+        background: #ffffff !important;
         color: #000000 !important;
+        overflow: visible !important;
+        height: auto !important;
+        font-size: 11px !important;
+    }
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+    .avoid-break, tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
     thead {
-        display: table-header-group;
+        display: table-header-group !important;
     }
-    tr {
-        page-break-inside: avoid !important;
+    .official-print-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
     }
+    .official-print-table th,
+    .official-print-table td {
+        border: 1px solid #64748b !important;
+        padding: 5px 6px !important;
+        color: #0f172a !important;
+    }
+    .official-print-table th {
+        background-color: #f1f5f9 !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+    }
+}
+@media screen {
+    .print-only {
+        display: none !important;
+    }
+}
+@page {
+    size: A4 portrait;
+    margin: 8mm;
 }
 </style>
 
 <div class="space-y-6" x-data="programListManager()">
+    <!-- Header (Screen Only) -->
     <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold font-sora text-gray-900">Program List</h1>
             <p class="text-xs text-gray-500 mt-1 font-sora">Festival competitions and events for {{ $group->name }}</p>
         </div>
-        <div class="no-print flex items-center gap-2">
+        <div class="flex items-center gap-2">
             <a href="{{ route('leader.programs-wise') }}" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-50 transition font-sora">
                 View Program Wise
             </a>
@@ -40,7 +79,7 @@
         </div>
     </div>
 
-    <!-- PDF Selection & Download Action Bar (Hidden on Print) -->
+    <!-- PDF Selection & Download Action Bar (Screen Only) -->
     <div class="no-print bg-slate-900 text-white rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-sm font-mono">
@@ -59,22 +98,22 @@
         </div>
         <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <button type="button" @click="includeAll()" 
-                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition">
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition cursor-pointer">
                 Select All
             </button>
             <button type="button" @click="excludeAll()" 
-                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition">
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition cursor-pointer">
                 Deselect All
             </button>
             <button type="button" @click="printPdf()" 
-                    class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-sora font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2 cursor-pointer ml-auto md:ml-0">
+                    class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2 cursor-pointer ml-auto md:ml-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 <span>Download / Print PDF</span>
             </button>
         </div>
     </div>
 
-    <!-- Search & Filter Bar -->
+    <!-- Search & Filter Bar (Screen Only) -->
     <div class="no-print bg-white rounded-2xl border border-gray-100 p-4 shadow-xs">
         <form method="GET" action="{{ route('leader.programs') }}" class="flex flex-col sm:flex-row gap-3">
             <div class="relative flex-1">
@@ -102,41 +141,32 @@
         </form>
     </div>
 
-    <!-- Official Festival Top Masthead Banner (Print Only) -->
-    <div class="print-only mb-4">
-        @include('partials.print-pdf-header')
-        <div class="text-center mt-3 pb-2 border-b border-slate-300">
-            <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Competition Program Schedule</h2>
-            <p class="text-xs font-sora text-slate-600">{{ $group->name }} • Generated on {{ now()->format('d M Y, h:i A') }}</p>
-        </div>
-    </div>
-
-    <!-- Program Table -->
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+    <!-- Paginated Screen Table (Hidden on Print) -->
+    <div class="no-print bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm font-sora">
                 <thead>
                     <tr class="bg-gray-50/75 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider font-sora">
-                        <th class="no-print px-4 py-3.5 text-center w-14">In PDF</th>
+                        <th class="px-4 py-3.5 text-center w-14">In PDF</th>
                         <th class="px-4 py-3.5 text-center w-12">No</th>
                         <th class="px-4 py-3.5">Code</th>
                         <th class="px-6 py-3.5">Program Name</th>
                         <th class="px-4 py-3.5">Zone</th>
                         <th class="px-4 py-3.5">Type</th>
                         <th class="px-4 py-3.5">Stage</th>
-                        <th class="no-print px-4 py-3.5 text-center">Niyamavali</th>
+                        <th class="px-4 py-3.5 text-center">Niyamavali</th>
                         <th class="px-4 py-3.5 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($programs as $index => $prog)
-                        <tr :class="isProgExcluded({{ $prog->id }}) ? 'opacity-40 border-dashed bg-slate-50/50 print-hidden-section' : ''" class="hover:bg-gray-50/50 transition">
-                            <td class="no-print px-4 py-3.5 text-center whitespace-nowrap">
+                        <tr :class="isProgExcluded({{ $prog->id }}) ? 'opacity-40 border-dashed bg-slate-50/50' : ''" class="hover:bg-gray-50/50 transition">
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 <label class="inline-flex items-center cursor-pointer" title="Include/Exclude from PDF">
                                     <input type="checkbox"
                                            :checked="!isProgExcluded({{ $prog->id }})"
                                            @change="toggleProg({{ $prog->id }})"
-                                           class="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-400">
+                                           class="w-4 h-4 text-brand-orange rounded border-slate-300 focus:ring-brand-orange/30 cursor-pointer">
                                 </label>
                             </td>
                             <td class="px-4 py-3.5 text-center text-gray-500 text-xs font-medium font-mono">{{ $programs->firstItem() + $index }}</td>
@@ -155,7 +185,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $prog->is_stage ? 'Stage' : 'Non-stage' }}</td>
-                            <td class="no-print px-4 py-3.5 text-center">
+                            <td class="px-4 py-3.5 text-center">
                                 @if(!empty($prog->rules))
                                     <button type="button" 
                                             @click="activeModalProg = { name: '{{ addslashes($prog->name) }}', code: '{{ $prog->code }}', rules: `{{ addslashes($prog->rules) }}`, duration: '{{ $prog->duration_minutes }}' }" 
@@ -190,7 +220,87 @@
         </div>
     @endif
 
-    <!-- Niyamavali Modal for Group Leaders -->
+    <!-- ================================================================= -->
+    <!-- REALISTIC, BEAUTIFUL, OFFICIAL PRINTABLE DOCUMENT (Print Only)     -->
+    <!-- ================================================================= -->
+    <div class="print-only w-full bg-white text-slate-900">
+        <!-- Official Festival Top Masthead Banner -->
+        <div class="w-full pb-2 mb-3 text-center">
+            <img src="{{ asset('images/print-pdf-header.svg') }}"
+                 alt="Markaz Cultural Festival"
+                 class="w-1/2 max-w-[50%] h-auto max-h-12 sm:max-h-14 object-contain block mx-auto"
+                 style="max-height: 55px; width: 50%; max-width: 50%;">
+        </div>
+
+        <!-- Official Document Header Block -->
+        <div class="flex items-center justify-between pb-3 border-b-2 border-slate-900 gap-4 mb-4">
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF Logo" class="h-12 w-auto object-contain">
+                <div>
+                    <h1 class="text-lg font-black font-sora text-slate-900 uppercase tracking-tight">Competition Program Schedule & Event Manual</h1>
+                    <p class="text-[11px] font-semibold text-slate-600">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
+                </div>
+            </div>
+
+            <div class="text-right font-mono text-[11px] text-slate-600 space-y-0.5 shrink-0">
+                <div class="font-bold text-slate-900 text-xs font-sora">GROUP: {{ $group->name }} ({{ $group->code }})</div>
+                <div>Date: {{ now()->format('d M Y, h:i A') }}</div>
+                <div>Total Competitions: <span class="font-bold text-slate-900 font-mono">{{ $allProgramsForPrint->count() }}</span></div>
+            </div>
+        </div>
+
+        <!-- Official Programs Registry Table -->
+        <table class="official-print-table w-full text-left text-xs font-sora">
+            <thead>
+                <tr class="bg-slate-100 text-slate-900 border-b-2 border-slate-300 text-[11px] font-bold uppercase">
+                    <th class="py-2 px-1 text-center w-10">#</th>
+                    <th class="py-2 px-2 text-center w-20">Code</th>
+                    <th class="py-2 px-3 text-left">Program Name</th>
+                    <th class="py-2 px-2 text-center w-24">Zone</th>
+                    <th class="py-2 px-2 text-center w-20">Type</th>
+                    <th class="py-2 px-2 text-center w-20">Stage</th>
+                    <th class="py-2 px-2 text-center w-14">Limit</th>
+                    <th class="py-2 px-2 text-center w-24">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($allProgramsForPrint as $index => $prog)
+                    <tr :class="isProgExcluded({{ $prog->id }}) ? 'print-hidden-section' : ''"
+                        class="{{ $index % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
+                        <td class="text-center font-mono font-medium text-slate-600 text-[10px]">
+                            {{ $index + 1 }}
+                        </td>
+                        <td class="text-center font-mono font-bold text-slate-900 text-[11px] whitespace-nowrap">
+                            {{ $prog->code ?: $prog->id }}
+                        </td>
+                        <td class="font-bold text-slate-900">
+                            <div>{{ $prog->name }}</div>
+                            @if($prog->malayalam_name)
+                                <div class="text-[10px] text-slate-500 font-malayalam font-normal leading-tight">{{ $prog->malayalam_name }}</div>
+                            @endif
+                        </td>
+                        <td class="text-center font-semibold text-slate-700 whitespace-nowrap">
+                            {{ $prog->zone?->name ?? ($prog->eligibility ?? 'A Zone') }}
+                        </td>
+                        <td class="text-center font-semibold text-slate-700 whitespace-nowrap capitalize">
+                            {{ $prog->type ?? 'Individual' }}
+                        </td>
+                        <td class="text-center text-slate-700 whitespace-nowrap">
+                            {{ $prog->is_stage ? 'Stage' : 'Off Stage' }}
+                        </td>
+                        <td class="text-center font-mono font-bold text-slate-900">
+                            {{ $prog->limit ?: 1 }}
+                        </td>
+                        <td class="text-center font-semibold text-slate-700 capitalize whitespace-nowrap">
+                            {{ str_replace('_', ' ', $prog->status) }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Niyamavali Modal for Group Leaders (Screen Only) -->
     <div x-show="activeModalProg" 
          class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50"
          style="display: none;"
@@ -227,17 +337,18 @@
 function programListManager() {
     return {
         activeModalProg: null,
-        allProgIds: @json($programs->pluck('id')),
+        allProgIds: @json($allProgramsForPrint->pluck('id')),
         excludedProgIds: [],
         toggleProg(id) {
-            if (this.excludedProgIds.includes(id)) {
-                this.excludedProgIds = this.excludedProgIds.filter(x => x !== id);
+            const numId = Number(id);
+            if (this.excludedProgIds.includes(numId)) {
+                this.excludedProgIds = this.excludedProgIds.filter(x => x !== numId);
             } else {
-                this.excludedProgIds.push(id);
+                this.excludedProgIds.push(numId);
             }
         },
         isProgExcluded(id) {
-            return this.excludedProgIds.includes(id);
+            return this.excludedProgIds.includes(Number(id));
         },
         includeAll() {
             this.excludedProgIds = [];
