@@ -225,6 +225,11 @@
     <!-- Printable Official Document Container -->
     <div class="print-container max-w-7xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xl text-slate-900">
         
+        <!-- Official Festival Top Masthead Banner -->
+        <div class="w-full pb-3 border-b border-slate-300 mb-4 text-center">
+            <img src="{{ asset('images/print-pdf-header.svg') }}" alt="Festival Header" class="w-full h-auto max-h-24 sm:max-h-28 object-contain block mx-auto">
+        </div>
+
         <!-- Official Document Header -->
         <div class="flex items-center justify-between pb-4 border-b-2 border-slate-900 gap-4">
             <div class="flex items-center gap-4">

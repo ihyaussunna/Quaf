@@ -211,6 +211,7 @@ class AdminViewsTest extends TestCase
             $response = $this->actingAs($this->admin)->get($pRoute);
             $response->assertOk();
             $response->assertSee('dashboard-logo.png');
+            $response->assertSee('print-pdf-header.svg');
             $response->assertSee('PRINT & PDF EXPORT', false);
         }
 

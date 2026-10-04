@@ -278,7 +278,58 @@ function studentWisePageManager() {
 </script>
 
 <div class="space-y-6" x-data="studentWisePageManager()">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <style>
+        @media print {
+            #sidebar, aside, header, nav, .filter-card, .no-print, button, form, .mobile-nav, [x-cloak] {
+                display: none !important;
+            }
+            body, html {
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+                height: auto !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                max-width: 100% !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .avoid-break {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+            }
+            thead {
+                display: table-header-group;
+            }
+        }
+        @media screen {
+            .print-only {
+                display: none !important;
+            }
+        }
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+    </style>
+
+    <!-- Official Print Header (Visible only when printing or saving to PDF) -->
+    <div class="print-only mb-6">
+        @include('partials.print-pdf-header', [
+            'title' => 'Student Wise Programs Roster',
+            'subtitle' => 'Ihyaussunna Students Union, Markazu Saquafathi Sunniyya',
+            'group' => $group,
+            'filterText' => $selectedStudent ? 'Student: ' . $selectedStudent->name . ' (' . ltrim((string)($selectedStudent->chest_number ?: $selectedStudent->student_id), '#') . ')' : 'All Students (' . $students->count() . ')'
+        ])
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
             <h1 class="text-2xl font-bold font-sora text-gray-900">Student Wise Programs</h1>
             <p class="text-xs text-gray-500 mt-1 font-sora">Check individual program participation, fast swap, and manage student rosters</p>
@@ -292,7 +343,7 @@ function studentWisePageManager() {
     </div>
 
     <!-- Search / Select Student -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-xs">
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-xs filter-card no-print">
         <form method="GET" action="{{ route('leader.students-wise') }}" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
             <div class="md:col-span-8 relative" x-data="{
                 open: false,
@@ -406,7 +457,7 @@ function studentWisePageManager() {
                         @endforeach
                     ]
                 }
-            }" class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+            }" class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break">
                 <!-- Header -->
                 <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs font-sora items-center">
                     <div>
@@ -441,7 +492,7 @@ function studentWisePageManager() {
 
                     <!-- Add Program Action Button -->
                     <template x-if="isRegistrationOpen">
-                        <div class="col-span-2 sm:col-span-6 flex items-center justify-between pt-2 border-t border-gray-100 sm:border-0 sm:pt-1">
+                        <div class="col-span-2 sm:col-span-6 flex items-center justify-between pt-2 border-t border-gray-100 sm:border-0 sm:pt-1 no-print">
                             <template x-if="student.indCount < 5">
                                 <button type="button"
                                         @click="openAddModal(student)"
@@ -471,7 +522,7 @@ function studentWisePageManager() {
                                 <th class="px-4 py-3">Type</th>
                                 <th class="px-4 py-3">Stage</th>
                                 <template x-if="isRegistrationOpen">
-                                    <th class="px-4 py-3 text-right">Actions</th>
+                                    <th class="px-4 py-3 text-right no-print">Actions</th>
                                 </template>
                             </tr>
                         </thead>
@@ -492,7 +543,7 @@ function studentWisePageManager() {
                                     </td>
                                     <td class="px-4 py-3 text-gray-600 text-xs" x-text="entry.is_stage"></td>
                                     <template x-if="isRegistrationOpen">
-                                        <td class="px-4 py-3 text-right text-xs">
+                                        <td class="px-4 py-3 text-right text-xs no-print">
                                             <template x-if="entry.type !== 'group'">
                                                 <div class="flex items-center justify-end gap-1.5">
                                                     <button type="button"

@@ -92,6 +92,18 @@ class LeaderStudentWiseAndIndividualLimitTest extends TestCase
         $response->assertViewIs('leader.student-wise');
         $response->assertViewHas('isEditingOpen', true);
         $response->assertSee('MUHAMMED ALI');
+        $response->assertSee('images/print-pdf-header.svg');
+        $response->assertSee('Student Wise Programs Roster');
+    }
+
+    public function test_program_wise_page_renders_with_official_print_header(): void
+    {
+        $response = $this->actingAs($this->leaderUser)
+            ->get(route('leader.programs-wise'));
+
+        $response->assertOk();
+        $response->assertSee('images/print-pdf-header.svg');
+        $response->assertSee('Program Wise Students Roster');
     }
 
     public function test_student_can_participate_in_5_individual_programs_across_own_zone_and_mix_zone(): void

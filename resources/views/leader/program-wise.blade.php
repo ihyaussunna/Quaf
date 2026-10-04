@@ -47,21 +47,13 @@
     </style>
 
     <!-- Official Print Header (Visible only when printing or saving to PDF) -->
-    <div class="print-only mb-6 pb-4 border-b-2 border-gray-900">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/dashboard-logo.png') }}" alt="Logo" class="h-12 w-auto object-contain">
-                <div>
-                    <h1 class="text-lg font-black font-sora text-gray-900 uppercase">Program Wise Students Roster</h1>
-                    <p class="text-xs text-gray-600">Ihyaussunna Students Union, Markazu Saquafathi Sunniyya</p>
-                </div>
-            </div>
-            <div class="text-right text-xs font-mono text-gray-600">
-                <div class="font-bold text-gray-900 text-sm">{{ $group->name }} ({{ $group->code }})</div>
-                <div>Date: {{ now()->format('d M Y, h:i A') }}</div>
-                <div>Filter: {{ $selectedZone ? 'Zone: ' . $selectedZone : 'All Zones' }}</div>
-            </div>
-        </div>
+    <div class="print-only mb-6">
+        @include('partials.print-pdf-header', [
+            'title' => 'Program Wise Students Roster',
+            'subtitle' => 'Ihyaussunna Students Union, Markazu Saquafathi Sunniyya',
+            'group' => $group,
+            'filterText' => $selectedZone ? 'Zone: ' . $selectedZone : 'All Zones'
+        ])
     </div>
 
     <!-- Header Section -->
