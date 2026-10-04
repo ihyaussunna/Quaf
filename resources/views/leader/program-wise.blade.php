@@ -249,8 +249,15 @@
                         @php
                             $isGroupType = ($prog->type ?? 'individual') === 'group';
                             $isStage = (bool)($prog->is_stage || ($prog->stage_id && strtolower($prog->stage?->name ?? '') !== 'off stage'));
-                            $regCount = $prog->entries->count();
                             $limit = (int)($prog->limit ?: 1);
+
+                            if ($isGroupType) {
+                                $firstEntry = $prog->entries->first();
+                                $regCount = $firstEntry ? ($firstEntry->participants->isNotEmpty() ? $firstEntry->participants->count() : ($firstEntry->student ? 1 : 1)) : 0;
+                            } else {
+                                $regCount = $prog->entries->count();
+                            }
+
                             $pending = max(0, $limit - $regCount);
                             $zoneName = $prog->zone?->name ?? ($prog->eligibility ?? 'A Zone');
                             $progId = $prog->code ?: (string)$prog->id;
@@ -307,6 +314,9 @@
                             <!-- limit -->
                             <td class="px-3 py-3 text-center font-mono font-bold text-xs text-slate-900 whitespace-nowrap align-top">
                                 {{ $limit }}
+                                @if($isGroupType)
+                                    <span class="block text-[9px] font-sans font-normal text-slate-500">Members</span>
+                                @endif
                             </td>
 
                             <!-- registerd status -->
@@ -334,38 +344,81 @@
                             <!-- Students Name -->
                             <td class="px-4 py-3 align-top">
                                 @if($prog->entries->isNotEmpty())
-                                    <div class="space-y-1.5 text-xs font-sora">
+                                    <div class="space-y-2 text-xs font-sora">
                                         @foreach($prog->entries as $entryIdx => $entry)
                                             @php
                                                 $isGroup = $entry->isGroupEntry();
                                                 $leaderStudent = $isGroup
-                                                    ? ($entry->participants()->wherePivot('role', 'captain')->first() ?? $entry->student ?? $entry->participants()->first())
+                                                    ? ($entry->participants->firstWhere('pivot.role', 'captain') ?? $entry->student ?? $entry->participants->first())
                                                     : $entry->student;
                                                 $displayChest = ltrim((string)($entry->chest_number ?: $leaderStudent?->student_id), '#');
                                                 $displayName = $leaderStudent?->name ?: ('Chest ' . ltrim((string)$entry->chest_number, '#'));
                                                 $isVerified = in_array($entry->status, ['verified', 'confirmed'], true);
                                             @endphp
-                                            <div class="border-b border-slate-100 last:border-0 pb-1 last:pb-0">
-                                                <div class="flex items-center gap-1.5 flex-wrap">
-                                                    <span class="font-bold text-slate-900">{{ $displayName }}</span>
-                                                    @if($displayChest)
-                                                        <span class="font-mono text-[10px] text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded font-bold">
-                                                            #{{ $displayChest }}
-                                                        </span>
+                                            <div class="border-b border-slate-100 last:border-0 pb-1.5 last:pb-0">
+                                                @if($isGroup)
+                                                    <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                                                        <span class="font-bold text-slate-900">{{ $group->name }} Team</span>
+                                                        @if($displayChest)
+                                                            <span class="font-mono text-[10px] text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded font-bold">
+                                                                #{{ $displayChest }}
+                                                            </span>
+                                                        @endif
+                                                        @if($isVerified)
+                                                            <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                                Verified
+                                                            </span>
+                                                        @else
+                                                            <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                                Pending
+                                                            </span>
+                                                        @endif
+                                                    </div>
+
+                                                    @if($entry->participants->isNotEmpty())
+                                                        <div class="text-[11px] text-slate-700 font-sora pl-1">
+                                                            <div class="font-semibold text-slate-800 text-[10px] mb-0.5 uppercase tracking-wide">
+                                                                Members ({{ $entry->participants->count() }}):
+                                                            </div>
+                                                            <ol class="list-decimal list-inside space-y-0.5 text-slate-700">
+                                                                @foreach($entry->participants as $pStudent)
+                                                                    <li>
+                                                                        <span class="font-medium text-slate-900">{{ $pStudent->name }}</span>
+                                                                        @php
+                                                                            $pChest = ltrim((string)($pStudent->chest_number ?: $pStudent->student_id), '#');
+                                                                        @endphp
+                                                                        @if($pChest)
+                                                                            <span class="font-mono text-[10px] text-slate-500 font-semibold">(#{{ $pChest }})</span>
+                                                                        @endif
+                                                                        @if($pStudent->pivot?->role === 'captain' || $pStudent->id === $entry->student_id)
+                                                                            <span class="text-[9px] px-1 py-0.2 bg-amber-100 text-amber-800 rounded font-bold font-sans">Captain</span>
+                                                                        @endif
+                                                                    </li>
+                                                                @endforeach
+                                                            </ol>
+                                                        </div>
+                                                    @elseif($leaderStudent)
+                                                        <div class="text-[11px] text-slate-600 pl-1">
+                                                            Captain: {{ $leaderStudent->name }} (#{{ $displayChest }})
+                                                        </div>
                                                     @endif
-                                                    @if($isVerified)
-                                                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                            Verified
-                                                        </span>
-                                                    @else
-                                                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                                            Pending
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                @if($isGroup && $entry->participants->isNotEmpty())
-                                                    <div class="text-[10px] text-slate-500 font-mono mt-0.5 leading-tight">
-                                                        Members ({{ $entry->participants->count() }}): {{ $entry->participants->pluck('name')->implode(', ') }}
+                                                @else
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="font-bold text-slate-900">{{ $displayName }}</span>
+                                                        @if($displayChest)
+                                                            <span class="font-mono text-[10px] text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded font-bold">
+                                                                #{{ $displayChest }}
+                                                            </span>
+                                                        @endif
+                                                        @if($isVerified)
+                                                            <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                                Verified
+                                                            </span>
+                                                        @else
+                                                            <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                                Pending
+                                                            </span>
+                                                        @endif
                                                     </div>
                                                 @endif
                                             </div>

@@ -303,7 +303,12 @@ class LeaderController extends Controller
 
         if (! $selectedProgramId && in_array($statusFilter, ['pending', 'completed'], true)) {
             $displayedPrograms = $allDisplayedPrograms->filter(function ($prog) use ($statusFilter) {
-                $regCount = $prog->my_entries_count ?? $prog->entries->count();
+                if ($prog->isGroup()) {
+                    $firstEntry = $prog->entries->first();
+                    $regCount = $firstEntry ? ($firstEntry->participants->isNotEmpty() ? $firstEntry->participants->count() : ($firstEntry->student ? 1 : 1)) : 0;
+                } else {
+                    $regCount = $prog->entries->count();
+                }
                 $limit = $prog->limit ?: 1;
                 if ($statusFilter === 'pending') {
                     return $regCount < $limit;
@@ -318,7 +323,15 @@ class LeaderController extends Controller
             $displayedPrograms = $allDisplayedPrograms;
         }
 
-        $totalDisplayedEntries = $displayedPrograms->sum(fn ($p) => $p->entries->count());
+        $totalDisplayedEntries = $displayedPrograms->sum(function ($p) {
+            if ($p->isGroup()) {
+                $firstEntry = $p->entries->first();
+
+                return $firstEntry ? ($firstEntry->participants->isNotEmpty() ? $firstEntry->participants->count() : ($firstEntry->student ? 1 : 1)) : 0;
+            }
+
+            return $p->entries->count();
+        });
 
         return view('leader.program-wise', compact(
             'group',
