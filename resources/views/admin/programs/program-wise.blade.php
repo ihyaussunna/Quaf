@@ -1,7 +1,37 @@
 @extends('layouts.admin', ['title' => 'Program Wise Students | QUAF 09'])
 
 @section('content')
-<div class="space-y-6">
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-hidden-section {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    thead {
+        display: table-header-group;
+    }
+    tr {
+        page-break-inside: avoid !important;
+    }
+}
+</style>
+
+<div class="space-y-6" x-data="adminProgramWiseManager()">
+    <!-- Official Festival Top Masthead Banner (Print Only) -->
+    <div class="hidden print:block mb-4">
+        @include('partials.print-pdf-header')
+        <div class="text-center mt-3 pb-2 border-b border-slate-300">
+            <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Program Wise Registered Students</h2>
+            <p class="text-xs font-sora text-slate-600">Generated on {{ now()->format('d M Y, h:i A') }}</p>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -14,7 +44,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span>Program Wise PDF Hub</span>
             </a>
-            <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5">
+            <button @click="printPdf()" class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 <span>Print / Save PDF</span>
             </button>
@@ -22,7 +52,7 @@
     </div>
 
     <!-- Filter Form (Hide on print) -->
-    <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs print:hidden">
+    <div class="no-print p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs print:hidden">
         <form method="GET" action="{{ route('admin.programs.program-wise') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Select Zone</label>
@@ -143,10 +173,41 @@
             </div>
         </div>
     @elseif(isset($displayedPrograms) && $displayedPrograms->isNotEmpty())
+        <!-- PDF Customization Toolbar (Hidden on Print) -->
+        <div class="no-print bg-slate-900 text-white rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-xs font-mono">PDF</span>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-white">Program PDF Customizer</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400 text-slate-950"
+                              x-text="selectedCount + ' of ' + allProgIds.length + ' programs included'"></span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Check or uncheck programs below to include/omit from the printed PDF report.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button type="button" @click="includeAll()" 
+                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 transition">
+                    Select All
+                </button>
+                <button type="button" @click="excludeAll()" 
+                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 transition">
+                    Deselect All
+                </button>
+                <button type="button" @click="printPdf()" 
+                        class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Download / Print PDF</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Multi-Program List -->
         <div class="space-y-6">
             @foreach($displayedPrograms as $prog)
-                <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-2xs">
+                <div :class="isProgExcluded('{{ $prog->id }}') ? 'opacity-40 border-dashed bg-slate-50/50 print-hidden-section' : ''" 
+                     class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-2xs transition-all">
                     <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs font-sora">
                         <div class="flex items-center gap-3">
                             <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-amber-400 font-mono font-bold text-xs">
@@ -160,6 +221,13 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
+                            <label class="no-print inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-slate-200" title="Include/Exclude from PDF">
+                                <input type="checkbox"
+                                       :checked="!isProgExcluded('{{ $prog->id }}')"
+                                       @change="toggleProg('{{ $prog->id }}')"
+                                       class="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-400">
+                                <span>In PDF</span>
+                            </label>
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ ($prog->type ?? 'individual') === 'group' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200' }}">
                                 {{ ucfirst($prog->type ?? 'individual') }}
                             </span>
@@ -231,4 +299,44 @@
         </div>
     @endif
 </div>
+
+<script>
+function adminProgramWiseManager() {
+    return {
+        allProgIds: [
+            @if($selectedProgram)
+                '{{ $selectedProgram->id }}',
+            @elseif(isset($displayedPrograms))
+                @foreach($displayedPrograms as $prog)
+                    '{{ $prog->id }}',
+                @endforeach
+            @endif
+        ],
+        excludedProgIds: [],
+        toggleProg(id) {
+            id = String(id);
+            if (this.excludedProgIds.includes(id)) {
+                this.excludedProgIds = this.excludedProgIds.filter(x => x !== id);
+            } else {
+                this.excludedProgIds.push(id);
+            }
+        },
+        isProgExcluded(id) {
+            return this.excludedProgIds.includes(String(id));
+        },
+        includeAll() {
+            this.excludedProgIds = [];
+        },
+        excludeAll() {
+            this.excludedProgIds = [...this.allProgIds];
+        },
+        get selectedCount() {
+            return Math.max(0, this.allProgIds.length - this.excludedProgIds.length);
+        },
+        printPdf() {
+            window.print();
+        }
+    };
+}
+</script>
 @endsection

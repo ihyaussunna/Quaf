@@ -1,7 +1,37 @@
 @extends('layouts.admin', ['title' => 'Student Wise Programs | QUAF 09'])
 
 @section('content')
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-hidden-section {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    thead {
+        display: table-header-group;
+    }
+    tr {
+        page-break-inside: avoid !important;
+    }
+}
+</style>
+
 <div class="space-y-6">
+    <!-- Official Festival Top Masthead Banner (Print Only) -->
+    <div class="hidden print:block mb-4">
+        @include('partials.print-pdf-header')
+        <div class="text-center mt-3 pb-2 border-b border-slate-300">
+            <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Student Registered Competitions Sheet</h2>
+            <p class="text-xs font-sora text-slate-600">Generated on {{ now()->format('d M Y, h:i A') }}</p>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -10,7 +40,7 @@
         </div>
         <div class="flex items-center gap-2.5">
             @if($selectedStudent)
-                <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5">
+                <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#a01624] transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     <span>Print Sheet</span>
                 </button>
@@ -19,7 +49,7 @@
     </div>
 
     <!-- Filter Form (Hide on print) -->
-    <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs print:hidden">
+    <div class="no-print p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs print:hidden">
         <form method="GET" action="{{ route('admin.students.student-wise') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Select Group</label>

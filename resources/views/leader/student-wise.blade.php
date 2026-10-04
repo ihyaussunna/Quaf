@@ -3,6 +3,9 @@
 @section('title', 'Student Wise Programs - Leader Panel')
 
 @section('content')
+@php
+    $studentsToDisplay = $selectedStudent ? collect([$selectedStudent]) : $students;
+@endphp
 <script>
 window.quafStudentWiseData = {
     csrf: '{{ csrf_token() }}',
@@ -10,7 +13,8 @@ window.quafStudentWiseData = {
     registerUrl: '{{ route('leader.registrations.store') }}',
     destroyUrlBase: '{{ url('leader/registrations') }}',
     isRegistrationOpen: {{ $isRegistrationOpen ? 'true' : 'false' }},
-    availablePrograms: @json($individualPrograms ?? [])
+    availablePrograms: @json($individualPrograms ?? []),
+    allStudentIds: @json($studentsToDisplay->pluck('id')->values())
 };
 
 function studentWisePageManager() {
@@ -25,6 +29,35 @@ function studentWisePageManager() {
         feedbackError: '',
         isRegistrationOpen: window.quafStudentWiseData ? window.quafStudentWiseData.isRegistrationOpen : true,
         allPrograms: window.quafStudentWiseData ? (window.quafStudentWiseData.availablePrograms || []) : [],
+        allStudentIds: (window.quafStudentWiseData && window.quafStudentWiseData.allStudentIds) ? window.quafStudentWiseData.allStudentIds : [],
+        excludedStudentIds: [],
+        isStudentExcluded(id) {
+            return this.excludedStudentIds.includes(Number(id));
+        },
+        toggleStudent(id) {
+            const numId = Number(id);
+            if (this.excludedStudentIds.includes(numId)) {
+                this.excludedStudentIds = this.excludedStudentIds.filter(x => x !== numId);
+            } else {
+                this.excludedStudentIds.push(numId);
+            }
+        },
+        includeAllStudents() {
+            this.excludedStudentIds = [];
+        },
+        excludeAllStudents() {
+            this.excludedStudentIds = [...this.allStudentIds];
+        },
+        get includedStudentsCount() {
+            return this.allStudentIds.length - this.excludedStudentIds.length;
+        },
+        printPdf() {
+            if (this.includedStudentsCount === 0) {
+                alert('Please include at least one student section to generate the PDF.');
+                return;
+            }
+            window.print();
+        },
         
         openSwapModal(student, entry) {
             this.modalStudent = student;
@@ -283,6 +316,9 @@ function studentWisePageManager() {
             #sidebar, aside, header, nav, .filter-card, .no-print, button, form, .mobile-nav, [x-cloak] {
                 display: none !important;
             }
+            .print-hidden-section {
+                display: none !important;
+            }
             body, html {
                 background: #ffffff !important;
                 color: #000000 !important;
@@ -335,9 +371,9 @@ function studentWisePageManager() {
             <p class="text-xs text-gray-500 mt-1 font-sora">Check individual program participation, fast swap, and manage student rosters</p>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="window.print()" class="px-5 py-2 bg-brand-orange text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition shadow-xs flex items-center gap-1.5 font-sora">
+            <button @click="printPdf()" class="px-5 py-2.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-2 font-sora cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                Print
+                <span>Print / Save PDF</span>
             </button>
         </div>
     </div>
@@ -420,9 +456,32 @@ function studentWisePageManager() {
         </form>
     </div>
 
-    @php
-        $studentsToDisplay = $selectedStudent ? collect([$selectedStudent]) : $students;
-    @endphp
+    <!-- PDF Section Exclusion Toolbar (Visible on screen, hidden on print) -->
+    <div class="no-print bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#be1e2d] text-white">PDF SECTIONS</span>
+                <span class="text-xs font-sora font-semibold text-slate-200">
+                    <strong class="text-amber-400 font-mono" x-text="includedStudentsCount"></strong> of <span class="font-mono text-slate-300" x-text="allStudentIds.length"></span> students selected for PDF
+                </span>
+            </div>
+            <p class="text-[11px] font-sora text-slate-400">
+                Omit / exclude individual students from the generated PDF by unchecking them before downloading or printing.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs font-sora shrink-0">
+            <button type="button" @click="includeAllStudents()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition cursor-pointer">
+                Select All
+            </button>
+            <button type="button" @click="excludeAllStudents()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-medium transition cursor-pointer">
+                Deselect All
+            </button>
+            <button type="button" @click="printPdf()" class="px-4 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Download / Print PDF</span>
+            </button>
+        </div>
+    </div>
 
     <!-- Student Cards -->
     <div class="space-y-6">
@@ -457,7 +516,8 @@ function studentWisePageManager() {
                         @endforeach
                     ]
                 }
-            }" class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break">
+            }" :class="isStudentExcluded(student.id) ? 'opacity-40 border-dashed bg-gray-50/50 print-hidden-section' : ''"
+               class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break transition-all">
                 <!-- Header -->
                 <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs font-sora items-center">
                     <div>
@@ -480,7 +540,7 @@ function studentWisePageManager() {
                         <span class="text-gray-400 font-medium">Class:</span>
                         <span class="font-bold text-gray-800 ml-1" x-text="student.class"></span>
                     </div>
-                    <div class="flex items-center justify-between sm:justify-start gap-2">
+                    <div class="flex items-center justify-between gap-2">
                         <div>
                             <span class="text-gray-400 font-medium">Participation:</span>
                             <span class="font-bold ml-1" :class="student.indCount >= 5 ? 'text-brand-orange' : 'text-emerald-700'" x-text="student.indCount + '/5 Ind'"></span>
@@ -488,6 +548,14 @@ function studentWisePageManager() {
                                 <span class="text-gray-500 font-normal" x-text="'(' + student.groupCount + ' Group)'"></span>
                             </template>
                         </div>
+                        <label class="no-print inline-flex items-center gap-1.5 cursor-pointer bg-white px-2 py-1 rounded-lg border border-gray-200 text-xs font-semibold hover:border-brand-orange transition select-none">
+                            <input type="checkbox"
+                                   :checked="!isStudentExcluded(student.id)"
+                                   @change="toggleStudent(student.id)"
+                                   class="rounded text-brand-orange focus:ring-0">
+                            <span x-text="isStudentExcluded(student.id) ? 'Excluded' : 'In PDF'"
+                                  :class="isStudentExcluded(student.id) ? 'text-gray-400 font-normal italic' : 'text-gray-800 font-bold'"></span>
+                        </label>
                     </div>
 
                     <!-- Add Program Action Button -->

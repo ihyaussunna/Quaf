@@ -15,6 +15,9 @@
             .no-print {
                 display: none !important;
             }
+            .print-hidden-section {
+                display: none !important;
+            }
             body {
                 background-color: #ffffff !important;
                 color: #000000 !important;
@@ -54,7 +57,33 @@
           colClass: true,
           colSign: true,
           showSignatures: true,
+          allSectionIds: [ {{ $groupedData->keys()->map(fn($k) => "'$k'")->implode(',') }} ],
+          excludedSections: [],
+          isSectionExcluded(id) {
+              return this.excludedSections.includes(String(id));
+          },
+          toggleSection(id) {
+              const strId = String(id);
+              if (this.excludedSections.includes(strId)) {
+                  this.excludedSections = this.excludedSections.filter(x => x !== strId);
+              } else {
+                  this.excludedSections.push(strId);
+              }
+          },
+          includeAllSections() {
+              this.excludedSections = [];
+          },
+          excludeAllSections() {
+              this.excludedSections = [...this.allSectionIds];
+          },
+          get includedSectionsCount() {
+              return this.allSectionIds.length - this.excludedSections.length;
+          },
           printReport() {
+              if (this.includedSectionsCount === 0) {
+                  alert('Please include at least one section in the PDF.');
+                  return;
+              }
               window.print();
           }
       }">
@@ -220,6 +249,25 @@
                 <span>Authority Seals</span>
             </label>
         </div>
+
+        <!-- Section Inclusions / Omissions for PDF -->
+        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-400 uppercase text-[11px]">PDF Sections:</span>
+                <span class="text-slate-800 font-bold">
+                    <span class="text-[#be1e2d]" x-text="includedSectionsCount"></span> of {{ $groupedData->count() }} {{ $mode === 'group_wise' ? 'Groups' : 'Programs' }} included
+                </span>
+                <span class="text-slate-400 text-[11px]">(Uncheck any section to omit it from the PDF)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="includeAllSections()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition cursor-pointer">
+                    Include All
+                </button>
+                <button type="button" @click="excludeAllSections()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 font-bold transition cursor-pointer">
+                    Exclude All
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Printable Official Document Container -->
@@ -289,7 +337,8 @@
                     @php
                         $group = $groups->firstWhere('id', $groupId) ?? $groupEntries->first()?->group;
                     @endphp
-                    <div class="entry-group-block avoid-break border border-slate-300 rounded-xl overflow-hidden">
+                    <div :class="isSectionExcluded('{{ $groupId }}') ? 'print-hidden-section opacity-40 border-dashed bg-slate-50' : ''"
+                         class="entry-group-block avoid-break border border-slate-300 rounded-xl overflow-hidden transition-all">
                         <!-- Group Header Banner -->
                         <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
                             <div class="flex items-center gap-3">
@@ -308,8 +357,17 @@
                                     </span>
                                 @endif
                             </div>
-                            <div class="text-xs font-mono text-amber-400 font-bold">
-                                {{ $groupEntries->count() }} Entries
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-mono text-amber-400 font-bold">
+                                    {{ $groupEntries->count() }} Entries
+                                </span>
+                                <label class="no-print flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded-lg text-xs font-mono select-none">
+                                    <input type="checkbox"
+                                           :checked="!isSectionExcluded('{{ $groupId }}')"
+                                           @change="toggleSection('{{ $groupId }}')"
+                                           class="rounded text-[#be1e2d] focus:ring-0">
+                                    <span x-text="isSectionExcluded('{{ $groupId }}') ? 'Excluded' : 'In PDF'"></span>
+                                </label>
                             </div>
                         </div>
 
@@ -419,7 +477,8 @@
                         $prog = $allPrograms->firstWhere('id', $progId) ?? $progEntries->first()?->program;
                         $isGroupProg = ($prog?->type ?? 'individual') === 'group';
                     @endphp
-                    <div class="entry-group-block avoid-break border border-slate-300 rounded-xl overflow-hidden">
+                    <div :class="isSectionExcluded('{{ $progId }}') ? 'print-hidden-section opacity-40 border-dashed bg-slate-50' : ''"
+                         class="entry-group-block avoid-break border border-slate-300 rounded-xl overflow-hidden transition-all">
                         <!-- Program Header Banner -->
                         <div class="bg-slate-900 text-white px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div class="flex items-center gap-3">
@@ -452,6 +511,13 @@
                                 <span class="text-amber-400 font-bold ml-2">
                                     {{ $progEntries->count() }} {{ $isGroupProg ? 'Teams' : 'Candidates' }}
                                 </span>
+                                <label class="no-print flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded-lg text-xs font-mono select-none">
+                                    <input type="checkbox"
+                                           :checked="!isSectionExcluded('{{ $progId }}')"
+                                           @change="toggleSection('{{ $progId }}')"
+                                           class="rounded text-[#be1e2d] focus:ring-0">
+                                    <span x-text="isSectionExcluded('{{ $progId }}') ? 'Excluded' : 'In PDF'"></span>
+                                </label>
                             </div>
                         </div>
 

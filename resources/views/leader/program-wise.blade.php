@@ -3,10 +3,46 @@
 @section('title', 'Program Wise Students - Leader Panel')
 
 @section('content')
-<div class="space-y-6">
+@php
+    $allProgramIdsToDisplay = $selectedProgram ? collect([$selectedProgram->id]) : $displayedPrograms->pluck('id');
+@endphp
+<div class="space-y-6" x-data="{
+    allProgIds: @json($allProgramIdsToDisplay->values()),
+    excludedProgIds: [],
+    isProgExcluded(id) {
+        return this.excludedProgIds.includes(Number(id));
+    },
+    toggleProg(id) {
+        const numId = Number(id);
+        if (this.excludedProgIds.includes(numId)) {
+            this.excludedProgIds = this.excludedProgIds.filter(x => x !== numId);
+        } else {
+            this.excludedProgIds.push(numId);
+        }
+    },
+    includeAllProgs() {
+        this.excludedProgIds = [];
+    },
+    excludeAllProgs() {
+        this.excludedProgIds = [...this.allProgIds];
+    },
+    get includedCount() {
+        return this.allProgIds.length - this.excludedProgIds.length;
+    },
+    printPdf() {
+        if (this.includedCount === 0) {
+            alert('Please include at least one program section to generate the PDF.');
+            return;
+        }
+        window.print();
+    }
+}">
     <style>
         @media print {
             #sidebar, aside, header, nav, .filter-card, .no-print, button, form, .mobile-nav {
+                display: none !important;
+            }
+            .print-hidden-section {
                 display: none !important;
             }
             body, html {
@@ -73,7 +109,7 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="window.print()" class="px-5 py-2.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-xl text-xs font-bold font-sora transition shadow-sm flex items-center gap-2">
+            <button @click="printPdf()" class="px-5 py-2.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-xl text-xs font-bold font-sora transition shadow-sm flex items-center gap-2 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 <span>Print / Save PDF</span>
             </button>
@@ -129,10 +165,38 @@
         </form>
     </div>
 
+    <!-- PDF Section Exclusion Toolbar (Visible on screen, hidden on print) -->
+    <div class="no-print bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#be1e2d] text-white">PDF SECTIONS</span>
+                <span class="text-xs font-sora font-semibold text-slate-200">
+                    <strong class="text-amber-400 font-mono" x-text="includedCount"></strong> of <span class="font-mono text-slate-300" x-text="allProgIds.length"></span> programs selected for PDF
+                </span>
+            </div>
+            <p class="text-[11px] font-sora text-slate-400">
+                Omit / exclude unwanted program sections from the PDF by unchecking them before downloading or printing.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs font-sora shrink-0">
+            <button type="button" @click="includeAllProgs()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition cursor-pointer">
+                Select All
+            </button>
+            <button type="button" @click="excludeAllProgs()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white font-medium transition cursor-pointer">
+                Deselect All
+            </button>
+            <button type="button" @click="printPdf()" class="px-4 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Download / Print PDF</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Main Programs List -->
     @if($selectedProgram)
         <!-- Single Program Focused View -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break">
+        <div :class="isProgExcluded({{ $selectedProgram->id }}) ? 'opacity-40 border-dashed bg-gray-50/50 print-hidden-section' : ''"
+             class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break transition-all">
             <!-- Program Header -->
             <div class="px-6 py-4 bg-gray-50/75 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 text-xs font-sora">
                 <div class="flex items-center gap-3">
@@ -161,6 +225,14 @@
                     <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">
                         {{ $selectedProgram->entries->count() }} Registered
                     </span>
+                    <label class="no-print inline-flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-semibold hover:border-brand-orange transition select-none">
+                        <input type="checkbox"
+                               :checked="!isProgExcluded({{ $selectedProgram->id }})"
+                               @change="toggleProg({{ $selectedProgram->id }})"
+                               class="rounded text-brand-orange focus:ring-0">
+                        <span x-text="isProgExcluded({{ $selectedProgram->id }}) ? 'Excluded from PDF' : 'In PDF'"
+                              :class="isProgExcluded({{ $selectedProgram->id }}) ? 'text-gray-400 font-normal italic' : 'text-gray-800 font-bold'"></span>
+                    </label>
                 </div>
             </div>
 
@@ -238,7 +310,8 @@
         <!-- All Registered Programs List (Default Multi-View) -->
         <div class="space-y-6">
             @foreach($displayedPrograms as $prog)
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break">
+                <div :class="isProgExcluded({{ $prog->id }}) ? 'opacity-40 border-dashed bg-gray-50/50 print-hidden-section' : ''"
+                     class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden avoid-break transition-all">
                     <!-- Program Header -->
                     <div class="px-6 py-4 bg-gray-50/75 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 text-xs font-sora">
                         <div class="flex items-center gap-3">
@@ -267,6 +340,14 @@
                             <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">
                                 {{ $prog->entries->count() }} Registered
                             </span>
+                            <label class="no-print inline-flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-semibold hover:border-brand-orange transition select-none">
+                                <input type="checkbox"
+                                       :checked="!isProgExcluded({{ $prog->id }})"
+                                       @change="toggleProg({{ $prog->id }})"
+                                       class="rounded text-brand-orange focus:ring-0">
+                                <span x-text="isProgExcluded({{ $prog->id }}) ? 'Excluded from PDF' : 'In PDF'"
+                                      :class="isProgExcluded({{ $prog->id }}) ? 'text-gray-400 font-normal italic' : 'text-gray-800 font-bold'"></span>
+                            </label>
                         </div>
                     </div>
 

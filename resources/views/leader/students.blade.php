@@ -1,6 +1,27 @@
 @extends('layouts.leader', ['title' => 'Group Roster: ' . $group->name])
 
 @section('content')
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-hidden-section {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    thead {
+        display: table-header-group;
+    }
+    tr {
+        page-break-inside: avoid !important;
+    }
+}
+</style>
+
 <div class="space-y-6" x-data="studentRosterManager()">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -9,12 +30,12 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
             @if($isEditingOpen)
-                <span class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-sora text-emerald-800 font-bold flex items-center gap-1.5 shadow-2xs">
+                <span class="no-print px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-sora text-emerald-800 font-bold flex items-center gap-1.5 shadow-2xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     Name Editing Open
                 </span>
             @else
-                <span class="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-sora text-rose-800 font-bold flex items-center gap-1.5 shadow-2xs">
+                <span class="no-print px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-sora text-rose-800 font-bold flex items-center gap-1.5 shadow-2xs">
                     <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     Name Editing Locked by Admin
                 </span>
@@ -25,9 +46,43 @@
         </div>
     </div>
 
+    <!-- PDF Selection & Download Action Bar (Hidden on Print) -->
+    <div class="no-print bg-slate-900 text-white rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-sm font-mono">
+                PDF
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-sora font-bold text-white">Student Roster PDF Export</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400 text-slate-950"
+                          x-text="selectedCount + ' of ' + allStudentIds.length + ' students included'"></span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">
+                    Uncheck any student you wish to omit. Only checked students will appear in the generated PDF.
+                </p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <button type="button" @click="includeAllStudents()" 
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition">
+                Select All
+            </button>
+            <button type="button" @click="excludeAllStudents()" 
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition">
+                Deselect All
+            </button>
+            <button type="button" @click="printPdf()" 
+                    class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-sora font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-2 cursor-pointer ml-auto md:ml-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Download / Print PDF</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Status Notice Banner -->
     @if($isEditingOpen)
-        <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-900 text-xs font-sora flex items-start sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="no-print p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-900 text-xs font-sora flex items-start sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2.5">
                 <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>
@@ -36,7 +91,7 @@
             </div>
         </div>
     @else
-        <div class="p-4 rounded-2xl bg-slate-100 border border-slate-300 text-slate-700 text-xs font-sora flex items-start sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="no-print p-4 rounded-2xl bg-slate-100 border border-slate-300 text-slate-700 text-xs font-sora flex items-start sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2.5">
                 <svg class="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 <span>
@@ -47,7 +102,7 @@
     @endif
 
     <!-- Search & Filter Bar -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+    <div class="no-print bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
         <form method="GET" action="{{ route('leader.students') }}" class="flex flex-col sm:flex-row items-center gap-3">
             <div class="relative flex-1 w-full">
                 <input type="text"
@@ -80,17 +135,27 @@
         </div>
     @endif
 
+    <!-- Official Festival Top Masthead Banner (Print Only) -->
+    <div class="hidden print:block mb-4">
+        @include('partials.print-pdf-header')
+        <div class="text-center mt-3 pb-2 border-b border-slate-300">
+            <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Group Students Roster</h2>
+            <p class="text-xs font-sora text-slate-600">{{ $group->name }} • Generated on {{ now()->format('d M Y, h:i A') }}</p>
+        </div>
+    </div>
+
     <!-- Students Table (Light Theme) -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs font-sora">
                 <thead class="bg-slate-50 text-slate-600 uppercase border-b border-slate-200 font-semibold text-[11px] tracking-wider">
                     <tr>
+                        <th class="no-print px-4 py-4 text-center w-14">In PDF</th>
                         <th class="px-6 py-4">Chest Number</th>
                         <th class="px-6 py-4">Full Name</th>
                         <th class="px-6 py-4">Zone</th>
                         <th class="px-6 py-4">Enrolled Programs</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
+                        <th class="no-print px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-800">
@@ -98,7 +163,15 @@
                         @php
                             $chestNo = ltrim((string)($student->chest_number ?: $student->student_id), '#');
                         @endphp
-                        <tr class="hover:bg-slate-50 transition-colors">
+                        <tr :class="isStudentExcluded({{ $student->id }}) ? 'opacity-40 border-dashed bg-slate-50/50 print-hidden-section' : ''" class="hover:bg-slate-50 transition-colors">
+                            <td class="no-print px-4 py-4 text-center whitespace-nowrap">
+                                <label class="inline-flex items-center cursor-pointer" title="Include/Exclude from PDF">
+                                    <input type="checkbox"
+                                           :checked="!isStudentExcluded({{ $student->id }})"
+                                           @change="toggleStudent({{ $student->id }})"
+                                           class="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-400">
+                                </label>
+                            </td>
                             <td class="px-6 py-4 font-bold text-slate-900 font-mono text-sm">{{ $chestNo ?: '---' }}</td>
                             <td class="px-6 py-4 font-bold text-slate-900">
                                 <span :id="'student-name-' + {{ $student->id }}">{{ $student->name }}</span>
@@ -119,7 +192,7 @@
                                     @endforelse
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="no-print px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     @if($isEditingOpen)
                                         <button type="button"
@@ -142,7 +215,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-slate-400">No students found matching your criteria.</td>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">No students found matching your criteria.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -150,19 +223,13 @@
         </div>
     </div>
 
-    <div>
+    <div class="no-print">
         {{ $students->links() }}
     </div>
 
     <!-- Edit Student Name Modal -->
     <div x-show="modalOpen"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+         class="no-print fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
          style="display: none;">
         
         <div @click.outside="if(!isSaving) modalOpen = false"
@@ -236,6 +303,30 @@
 <script>
 function studentRosterManager() {
     return {
+        allStudentIds: @json($students->pluck('id')),
+        excludedStudentIds: [],
+        toggleStudent(id) {
+            if (this.excludedStudentIds.includes(id)) {
+                this.excludedStudentIds = this.excludedStudentIds.filter(x => x !== id);
+            } else {
+                this.excludedStudentIds.push(id);
+            }
+        },
+        isStudentExcluded(id) {
+            return this.excludedStudentIds.includes(id);
+        },
+        includeAllStudents() {
+            this.excludedStudentIds = [];
+        },
+        excludeAllStudents() {
+            this.excludedStudentIds = [...this.allStudentIds];
+        },
+        get selectedCount() {
+            return Math.max(0, this.allStudentIds.length - this.excludedStudentIds.length);
+        },
+        printPdf() {
+            window.print();
+        },
         modalOpen: false,
         studentId: null,
         studentChest: '',

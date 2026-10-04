@@ -15,6 +15,9 @@
             .no-print {
                 display: none !important;
             }
+            .print-hidden-section {
+                display: none !important;
+            }
             body {
                 background-color: #ffffff !important;
                 color: #000000 !important;
@@ -56,6 +59,27 @@
           colEntries: true,
           colRules: true,
           showSignatures: true,
+          allProgIds: @json($programs->pluck('id')),
+          excludedProgIds: [],
+          toggleProg(id) {
+              if (this.excludedProgIds.includes(id)) {
+                  this.excludedProgIds = this.excludedProgIds.filter(x => x !== id);
+              } else {
+                  this.excludedProgIds.push(id);
+              }
+          },
+          isProgExcluded(id) {
+              return this.excludedProgIds.includes(id);
+          },
+          includeAllProgs() {
+              this.excludedProgIds = [];
+          },
+          excludeAllProgs() {
+              this.excludedProgIds = [...this.allProgIds];
+          },
+          get selectedCount() {
+              return Math.max(0, this.allProgIds.length - this.excludedProgIds.length);
+          },
           printReport() {
               window.print();
           }
@@ -186,6 +210,26 @@
                 <span>Rules & Criteria</span>
             </label>
         </div>
+
+        <!-- Row Selection & Omission Strip (Hidden on Print) -->
+        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-slate-700 uppercase">Select Competitions for PDF:</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300"
+                      x-text="selectedCount + ' of ' + allProgIds.length + ' included'"></span>
+                <span class="text-slate-400 text-[11px] hidden sm:inline">(Uncheck competitions below to omit from PDF)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="includeAllProgs()" 
+                        class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] font-bold transition">
+                    Select All
+                </button>
+                <button type="button" @click="excludeAllProgs()" 
+                        class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] font-bold transition">
+                    Deselect All
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Printable Official Document Container -->
@@ -226,6 +270,7 @@
                 <table class="w-full text-left text-xs border border-slate-200">
                     <thead class="bg-slate-100 font-mono font-bold text-slate-700 uppercase border-b border-slate-200">
                         <tr>
+                            <th class="no-print py-2 px-2 text-center w-12">In PDF</th>
                             <th class="py-2 px-2 text-center w-8">#</th>
                             <th x-show="colCode" class="py-2 px-2.5 w-24">Code</th>
                             <th class="py-2 px-3">Competition Name</th>
@@ -243,7 +288,15 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 font-sora">
                         @foreach($programs as $idx => $p)
-                            <tr class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
+                            <tr :class="isProgExcluded({{ $p->id }}) ? 'opacity-40 border-dashed bg-slate-100 print-hidden-section ' : ''" class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
+                                <td class="no-print py-2 px-2 text-center whitespace-nowrap">
+                                    <label class="inline-flex items-center cursor-pointer" title="Include/Exclude from PDF">
+                                        <input type="checkbox"
+                                               :checked="!isProgExcluded({{ $p->id }})"
+                                               @change="toggleProg({{ $p->id }})"
+                                               class="w-3.5 h-3.5 text-[#be1e2d] rounded border-slate-300 focus:ring-0">
+                                    </label>
+                                </td>
                                 <td class="py-2 px-2 text-center font-mono text-slate-500 text-[11px]">
                                     {{ $idx + 1 }}
                                 </td>
