@@ -111,10 +111,39 @@ class ProgramController extends Controller
             ])->find($selectedProgramId);
         }
 
+        // Query programs to display in main view
+        $displayQuery = Program::with([
+            'category',
+            'stage',
+            'zone',
+            'entries.student.group',
+            'entries.participants.group',
+        ])->withCount('entries');
+
+        if ($selectedZoneId) {
+            $displayQuery->where('zone_id', $selectedZoneId);
+        } elseif ($selectedZone) {
+            $displayQuery->where(function ($q) use ($selectedZone) {
+                $q->where('eligibility', $selectedZone)
+                    ->orWhereHas('zone', fn ($zq) => $zq->where('name', $selectedZone));
+            });
+        } elseif ($selectedCategoryId) {
+            $displayQuery->where('category_id', $selectedCategoryId);
+        }
+
+        if ($selectedProgramId) {
+            $displayQuery->where('id', $selectedProgramId);
+        } else {
+            $displayQuery->whereHas('entries');
+        }
+
+        $displayedPrograms = $displayQuery->orderBy('code')->orderBy('name')->get();
+
         return view('admin.programs.program-wise', compact(
             'zones',
             'categories',
             'programs',
+            'displayedPrograms',
             'selectedZone',
             'selectedZoneId',
             'selectedCategoryId',

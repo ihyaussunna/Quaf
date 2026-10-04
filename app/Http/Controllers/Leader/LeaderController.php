@@ -187,6 +187,7 @@ class LeaderController extends Controller
         $selectedZone = $request->query('zone', $request->query('category'));
         $selectedProgramId = $request->query('program');
 
+        // Programs list for dropdown selector
         $programsQuery = Program::query();
         if ($selectedZoneId) {
             $programsQuery->where('zone_id', $selectedZoneId);
@@ -214,14 +215,43 @@ class LeaderController extends Controller
             }
         }
 
+        // Query programs to display in the main content area
+        $displayQuery = Program::with([
+            'category',
+            'stage',
+            'zone',
+            'entries' => fn ($q) => $q->where('group_id', $group->id)->with(['student', 'participants']),
+        ])->withCount(['entries as my_entries_count' => fn ($q) => $q->where('group_id', $group->id)]);
+
+        if ($selectedZoneId) {
+            $displayQuery->where('zone_id', $selectedZoneId);
+        } elseif ($selectedZone) {
+            $displayQuery->where(function ($q) use ($selectedZone) {
+                $q->where('eligibility', $selectedZone)
+                    ->orWhereHas('zone', fn ($zq) => $zq->where('name', $selectedZone));
+            });
+        }
+
+        if ($selectedProgramId) {
+            $displayQuery->where('id', $selectedProgramId);
+        } else {
+            // Default: show all programs where this team has registered entries
+            $displayQuery->whereHas('entries', fn ($q) => $q->where('group_id', $group->id));
+        }
+
+        $displayedPrograms = $displayQuery->orderBy('code')->orderBy('name')->get();
+        $totalDisplayedEntries = $displayedPrograms->sum('my_entries_count');
+
         return view('leader.program-wise', compact(
             'group',
             'zones',
             'programs',
+            'displayedPrograms',
             'selectedZone',
             'selectedZoneId',
             'selectedProgramId',
-            'selectedProgram'
+            'selectedProgram',
+            'totalDisplayedEntries'
         ));
     }
 

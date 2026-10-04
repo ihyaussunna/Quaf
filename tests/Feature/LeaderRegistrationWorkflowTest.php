@@ -340,4 +340,22 @@ class LeaderRegistrationWorkflowTest extends TestCase
         $responseProg->assertSee('No students registered from your team for this program.');
         $responseProg->assertSee('+ Enroll Students in this Program');
     }
+
+    public function test_leader_program_wise_shows_all_registered_programs_and_pdf_button(): void
+    {
+        ProgramEntry::create([
+            'program_id' => $this->indProgram->id,
+            'student_id' => $this->student1->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '101',
+            'status' => 'verified',
+        ]);
+
+        $response = $this->actingAs($this->leaderUser)->get(route('leader.programs-wise'));
+        $response->assertStatus(200);
+        $response->assertSee('Print / Save PDF');
+        $response->assertSee($this->indProgram->name);
+        $response->assertSee($this->student1->name);
+        $response->assertSee('101');
+    }
 }
