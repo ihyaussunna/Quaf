@@ -45,6 +45,10 @@
         }
     </style>
 </head>
+@php
+    $unregisteredIds = $students->filter(fn ($s) => ($s->entries->count() + ($s->participations?->count() ?? 0)) === 0)->pluck('id')->values()->all();
+    $participatingIds = $students->filter(fn ($s) => ($s->entries->count() + ($s->participations?->count() ?? 0)) > 0)->pluck('id')->values()->all();
+@endphp
 <body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen py-6 px-3 sm:px-6"
       x-data="{
           colChestNo: true,
@@ -56,7 +60,10 @@
           colPoints: true,
           colSign: true,
           allStudentIds: @json($students->pluck('id')),
+          unregisteredStudentIds: @json($unregisteredIds),
+          participatingStudentIds: @json($participatingIds),
           excludedStudentIds: [],
+          hideUnregistered: false,
           toggleStudent(id) {
               if (this.excludedStudentIds.includes(id)) {
                   this.excludedStudentIds = this.excludedStudentIds.filter(x => x !== id);
@@ -65,16 +72,24 @@
               }
           },
           isStudentExcluded(id) {
+              if (this.hideUnregistered && this.unregisteredStudentIds.includes(id)) {
+                  return true;
+              }
               return this.excludedStudentIds.includes(id);
           },
           includeAllStudents() {
               this.excludedStudentIds = [];
+              this.hideUnregistered = false;
           },
           excludeAllStudents() {
               this.excludedStudentIds = [...this.allStudentIds];
           },
+          omitUnregisteredStudents() {
+              this.excludedStudentIds = [...new Set([...this.excludedStudentIds, ...this.unregisteredStudentIds])];
+              this.hideUnregistered = true;
+          },
           get selectedCount() {
-              return Math.max(0, this.allStudentIds.length - this.excludedStudentIds.length);
+              return this.allStudentIds.filter(id => !this.isStudentExcluded(id)).length;
           },
           printReport() {
               window.print();
@@ -107,7 +122,7 @@
         </div>
 
         <!-- Filter Selectors -->
-        <form method="GET" action="{{ route('admin.print.students') }}" class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <form method="GET" action="{{ route('admin.print.students') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             <div>
                 <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by Group</label>
                 <select name="group" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
@@ -133,6 +148,19 @@
             </div>
 
             <div>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Participation</label>
+                <select name="participation" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Students</option>
+                    <option value="participating" {{ ($selectedParticipation ?? '') === 'participating' ? 'selected' : '' }}>
+                        Only Participating (Enrolled)
+                    </option>
+                    <option value="not_participating" {{ ($selectedParticipation ?? '') === 'not_participating' ? 'selected' : '' }}>
+                        Only Unregistered (0 Competitions)
+                    </option>
+                </select>
+            </div>
+
+            <div>
                 <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Search Participant</label>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Search name or ID..."
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
@@ -140,7 +168,7 @@
 
             <div class="flex items-end gap-2">
                 <button type="submit" class="px-4 py-2 text-xs font-mono font-bold bg-slate-800 text-white rounded-xl">Apply</button>
-                @if($selectedGroupId || $selectedCategory || $search)
+                @if($selectedGroupId || $selectedCategory || ($selectedParticipation ?? '') || $search)
                     <a href="{{ route('admin.print.students') }}" class="px-3 py-2 text-xs font-mono text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl">
                         Reset
                     </a>
@@ -191,6 +219,11 @@
                 <input type="checkbox" x-model="colSign" class="rounded border-slate-300 text-[#be1e2d] focus:ring-0">
                 <span>Attendance / Sign Box</span>
             </label>
+
+            <label class="flex items-center gap-1.5 cursor-pointer bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-300 text-amber-950 font-bold hover:bg-amber-100 transition select-none">
+                <input type="checkbox" x-model="hideUnregistered" class="rounded border-amber-400 text-[#be1e2d] focus:ring-0">
+                <span>Hide Students with 0 Competitions</span>
+            </label>
         </div>
 
         <!-- Row Selection & Omission Strip (Hidden on Print) -->
@@ -210,6 +243,11 @@
                         class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] font-bold transition">
                     Deselect All
                 </button>
+                <button type="button" @click="omitUnregisteredStudents()" 
+                        class="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 font-mono text-[11px] font-bold border border-amber-300 transition flex items-center gap-1 cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    <span>Omit Unregistered (0 Programs)</span>
+                </button>
             </div>
         </div>
     </div>
@@ -226,12 +264,21 @@
         <div class="flex items-center justify-between pb-4 border-b-2 border-slate-900 gap-4">
             <div>
                 <h1 class="text-xl font-black font-sora text-slate-900 uppercase tracking-tight">Participant Delegate Registry & Roll Sheet</h1>
+                @if(($selectedParticipation ?? '') === 'participating')
+                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        Active Participants Only (0 Competitions Excluded)
+                    </span>
+                @elseif(($selectedParticipation ?? '') === 'not_participating')
+                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                        Unregistered Students Only
+                    </span>
+                @endif
             </div>
 
             <div class="text-right font-mono text-[11px] text-slate-500 space-y-0.5">
                 <div class="font-bold text-slate-900 text-xs">DELEGATE ROSTER</div>
                 <div>Date: {{ now()->format('d M Y, h:i A') }}</div>
-                <div>Total Delegates: <span class="font-bold text-slate-900">{{ $students->count() }}</span></div>
+                <div>Total Delegates: <span class="font-bold text-slate-900" x-text="selectedCount">{{ $students->count() }}</span></div>
                 @if($selectedGroupId)
                     @php $currentGroup = $groups->firstWhere('id', $selectedGroupId); @endphp
                     <div class="font-bold" style="color: {{ $currentGroup?->color_hex ?? '#be1e2d' }}">
@@ -266,7 +313,12 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 font-sora">
                         @foreach($students as $idx => $st)
-                            <tr :class="isStudentExcluded({{ $st->id }}) ? 'opacity-40 border-dashed bg-slate-100 print-hidden-section ' : ''" class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
+                            @php
+                                $allStudentEntries = $st->entries->merge($st->participations ?? collect())->unique('id');
+                            @endphp
+                            <tr x-show="!hideUnregistered || !unregisteredStudentIds.includes({{ $st->id }})"
+                                :class="isStudentExcluded({{ $st->id }}) ? 'opacity-40 border-dashed bg-slate-100 print-hidden-section ' : ''" 
+                                class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }} avoid-break">
                                 <td class="no-print py-2 px-2 text-center whitespace-nowrap">
                                     <label class="inline-flex items-center cursor-pointer" title="Include/Exclude from PDF">
                                         <input type="checkbox"
@@ -307,9 +359,9 @@
                                 </td>
 
                                 <td x-show="colPrograms" class="py-2 px-3">
-                                    @if($st->entries && $st->entries->isNotEmpty())
+                                    @if($allStudentEntries->isNotEmpty())
                                         <div class="flex flex-wrap gap-1">
-                                            @foreach($st->entries as $entry)
+                                            @foreach($allStudentEntries as $entry)
                                                 <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-mono text-slate-700">
                                                     {{ $entry->program?->code }}: {{ Str::limit($entry->program?->name, 18) }}
                                                 </span>

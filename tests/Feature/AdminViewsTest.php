@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\ProgramEntry;
 use App\Models\Stage;
 use App\Models\Student;
 use App\Models\User;
@@ -291,5 +292,53 @@ class AdminViewsTest extends TestCase
         $response->assertSee('Leadership & Management Details', false);
         $response->assertSee('Students Roster');
         $response->assertSee('Program Registrations');
+    }
+
+    public function test_admin_print_students_supports_participation_filtering(): void
+    {
+        $group = Group::first();
+        $studentWithEntry = Student::create([
+            'name' => 'Active Competitor Student',
+            'student_id' => 'QF9901',
+            'group_id' => $group->id,
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+        $studentWithoutEntry = Student::create([
+            'name' => 'Inactive Unregistered Student',
+            'student_id' => 'QF9902',
+            'group_id' => $group->id,
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $program = Program::first();
+        ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $studentWithEntry->id,
+            'group_id' => $group->id,
+            'chest_number' => 'QF9901',
+            'status' => 'confirmed',
+        ]);
+
+        // All students
+        $resAll = $this->actingAs($this->admin)->get(route('admin.print.students'));
+        $resAll->assertOk();
+        $resAll->assertSee('Active Competitor Student');
+        $resAll->assertSee('Inactive Unregistered Student');
+        $resAll->assertSee('Omit Unregistered (0 Programs)', false);
+        $resAll->assertSee('Hide Students with 0 Competitions', false);
+
+        // Only participating
+        $resPart = $this->actingAs($this->admin)->get(route('admin.print.students', ['participation' => 'participating']));
+        $resPart->assertOk();
+        $resPart->assertSee('Active Competitor Student');
+        $resPart->assertDontSee('Inactive Unregistered Student');
+
+        // Only unregistered
+        $resUnreg = $this->actingAs($this->admin)->get(route('admin.print.students', ['participation' => 'not_participating']));
+        $resUnreg->assertOk();
+        $resUnreg->assertDontSee('Active Competitor Student');
+        $resUnreg->assertSee('Inactive Unregistered Student');
     }
 }

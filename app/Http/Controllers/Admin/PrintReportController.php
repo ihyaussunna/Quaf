@@ -69,12 +69,17 @@ class PrintReportController extends Controller
     {
         $selectedGroupId = $request->query('group');
         $selectedCategory = $request->query('category');
+        $selectedParticipation = $request->query('participation');
         $search = $request->query('search');
 
         $groups = Group::orderBy('name')->get();
         $categories = Student::ZONES;
 
-        $query = Student::with(['group', 'entries.program.category']);
+        $query = Student::with([
+            'group',
+            'entries' => fn ($q) => $q->whereIn('status', ProgramEntry::ACTIVE_STATUSES)->with('program.category'),
+            'participations' => fn ($q) => $q->whereIn('status', ProgramEntry::ACTIVE_STATUSES)->with('program.category'),
+        ]);
 
         if ($selectedGroupId) {
             $query->where('group_id', $selectedGroupId);
@@ -82,6 +87,22 @@ class PrintReportController extends Controller
 
         if ($selectedCategory) {
             $query->where('category', $selectedCategory);
+        }
+
+        if ($selectedParticipation === 'participating') {
+            $query->where(function ($q) {
+                $q->whereHas('entries', function ($sq) {
+                    $sq->whereIn('status', ProgramEntry::ACTIVE_STATUSES);
+                })->orWhereHas('participations', function ($sq) {
+                    $sq->whereIn('status', ProgramEntry::ACTIVE_STATUSES);
+                });
+            });
+        } elseif ($selectedParticipation === 'not_participating') {
+            $query->whereDoesntHave('entries', function ($sq) {
+                $sq->whereIn('status', ProgramEntry::ACTIVE_STATUSES);
+            })->whereDoesntHave('participations', function ($sq) {
+                $sq->whereIn('status', ProgramEntry::ACTIVE_STATUSES);
+            });
         }
 
         if ($search) {
@@ -100,6 +121,7 @@ class PrintReportController extends Controller
             'categories',
             'selectedGroupId',
             'selectedCategory',
+            'selectedParticipation',
             'search'
         ));
     }
