@@ -34,7 +34,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
                 <!-- 1. Print Results -->
                 <a href="{{ route('admin.print.results') }}" target="_blank" class="p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 hover:border-[#f3bd2e] transition-all flex flex-col justify-between group">
                     <div>
@@ -79,6 +79,21 @@
                         <span>Print / Save PDF →</span>
                     </div>
                 </a>
+
+                <!-- 4. Print Entries -->
+                <a href="{{ route('admin.print.entries') }}" target="_blank" class="p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 hover:border-[#f3bd2e] transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold text-[#f3bd2e]">ENTRIES & ROSTER</span>
+                            <svg class="w-4 h-4 text-white/50 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-white mb-1">Entries Roster (Group & Program-Wise)</h3>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">Official competition registrations, chest numbers, and team member lists organized group-wise or program-wise.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono font-bold text-[#f3bd2e]">
+                        <span>Print / Save PDF →</span>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
@@ -89,7 +104,7 @@
     </div>
 
     <!-- Quick Export Cards (Section to queue and auto-download report files) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- 1. Participants -->
         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs hover:border-[#be1e2d] transition-all flex flex-col justify-between">
             <div>
@@ -171,6 +186,27 @@
                     class="w-full py-2 px-3 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5 shadow-2xs">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span>Export Results</span>
+            </button>
+        </div>
+
+        <!-- 5. Entries -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs hover:border-[#be1e2d] transition-all flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-400">{{ number_format($counts['entries'] ?? 0) }} Entries</span>
+                </div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">Competition Entries</h3>
+                <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+                    Group registrations, student allocations, chest numbers, and verification status.
+                </p>
+            </div>
+            <button @click="queueExport('entries')"
+                    class="w-full py-2 px-3 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5 shadow-2xs">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Export Entries</span>
             </button>
         </div>
     </div>

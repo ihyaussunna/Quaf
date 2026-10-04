@@ -449,6 +449,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('print/results', [AdminPrintReportController::class, 'results'])->name('print.results');
     Route::get('print/students', [AdminPrintReportController::class, 'students'])->name('print.students');
     Route::get('print/programs', [AdminPrintReportController::class, 'programs'])->name('print.programs');
+    Route::get('print/entries', [AdminPrintReportController::class, 'entries'])->name('print.entries');
 
     // Achievements & Top Scorers
     Route::get('achievements/team-score', [AdminTopScorerController::class, 'teamScore'])->name('achievements.team-score');
@@ -579,6 +580,7 @@ Route::prefix('program-committee')->name('program-committee.')->middleware(['aut
     // Team Entries Data & Quota Tracking
     Route::get('/team-entries', [ProgramCommitteeController::class, 'teamEntries'])->name('team-entries.index');
     Route::get('/team-entries/export', [ProgramCommitteeController::class, 'exportTeamEntries'])->name('team-entries.export');
+    Route::get('/print/entries', [AdminPrintReportController::class, 'entries'])->name('print.entries');
 });
 
 /*

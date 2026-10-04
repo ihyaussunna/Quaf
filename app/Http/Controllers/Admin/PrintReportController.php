@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Stage;
 use App\Models\Student;
@@ -156,6 +157,104 @@ class PrintReportController extends Controller
             'selectedType',
             'selectedZone',
             'search'
+        ));
+    }
+
+    /**
+     * Display printable & exportable Entries Report (Group-wise & Program-wise) with interactive customizer.
+     */
+    public function entries(Request $request): View
+    {
+        $mode = $request->query('mode', 'group_wise');
+        if (! in_array($mode, ['group_wise', 'program_wise'])) {
+            $mode = 'group_wise';
+        }
+
+        $selectedGroupId = $request->query('group');
+        $selectedProgramId = $request->query('program');
+        $selectedZone = $request->query('zone');
+        $selectedType = $request->query('type');
+        $selectedStatus = $request->query('status');
+        $search = $request->query('search');
+
+        $groups = Group::orderBy('name')->get();
+        $allPrograms = Program::orderBy('code')->get();
+        $zones = Program::ZONES;
+
+        $query = ProgramEntry::with([
+            'group',
+            'student',
+            'program.zone',
+            'program.category',
+            'program.stage',
+            'participants',
+        ]);
+
+        if ($selectedGroupId) {
+            $query->where('group_id', $selectedGroupId);
+        }
+
+        if ($selectedProgramId) {
+            $query->where('program_id', $selectedProgramId);
+        }
+
+        if ($selectedZone) {
+            $query->whereHas('program', function ($q) use ($selectedZone) {
+                $q->where('eligibility', $selectedZone);
+            });
+        }
+
+        if ($selectedType) {
+            $query->whereHas('program', function ($q) use ($selectedType) {
+                $q->where('type', $selectedType);
+            });
+        }
+
+        if ($selectedStatus) {
+            $query->where('status', $selectedStatus);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('chest_number', 'like', "%{$search}%")
+                    ->orWhere('code_letter', 'like', "%{$search}%")
+                    ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
+                    ->orWhereHas('program', fn ($pq) => $pq->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%")->orWhere('malayalam_name', 'like', "%{$search}%"))
+                    ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"))
+                    ->orWhereHas('participants', fn ($ptq) => $ptq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"));
+            });
+        }
+
+        $entries = $query->orderBy('id')->get();
+
+        if ($mode === 'program_wise') {
+            $groupedData = $entries->groupBy('program_id');
+        } else {
+            $groupedData = $entries->groupBy('group_id');
+        }
+
+        $totalEntries = $entries->count();
+        $verifiedCount = $entries->whereIn('status', ['verified', 'confirmed'])->count();
+        $pendingCount = $entries->where('status', 'pending')->count();
+        $uniqueStudentsCount = $entries->pluck('student_id')->filter()->unique()->count();
+
+        return view('admin.print.entries', compact(
+            'mode',
+            'entries',
+            'groupedData',
+            'groups',
+            'allPrograms',
+            'zones',
+            'selectedGroupId',
+            'selectedProgramId',
+            'selectedZone',
+            'selectedType',
+            'selectedStatus',
+            'search',
+            'totalEntries',
+            'verifiedCount',
+            'pendingCount',
+            'uniqueStudentsCount'
         ));
     }
 }

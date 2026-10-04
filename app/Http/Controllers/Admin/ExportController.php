@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Judge;
 use App\Models\Program;
+use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Student;
 use Illuminate\View\View;
@@ -21,6 +22,7 @@ class ExportController extends Controller
             'competitions' => Program::count(),
             'results' => Result::where('status', 'published')->count(),
             'teams' => Group::count(),
+            'entries' => ProgramEntry::count(),
         ];
 
         $recentExports = [
@@ -59,6 +61,15 @@ class ExportController extends Controller
                 'duration' => '0.5s',
                 'download_url' => route('admin.exports.download', 'judges'),
                 'created_at' => now()->subDays(1)->diffForHumans(),
+            ],
+            [
+                'id' => 5,
+                'type' => 'Competition Entries CSV',
+                'summary' => 'All group registrations, chest numbers, candidate allocations, and status',
+                'status' => 'Completed',
+                'duration' => '0.7s',
+                'download_url' => route('admin.exports.download', 'entries'),
+                'created_at' => now()->subMinutes(5)->diffForHumans(),
             ],
         ];
 
@@ -167,6 +178,32 @@ class ExportController extends Controller
                         $g->points_cache,
                     ]);
                 }
+            } elseif ($type === 'entries') {
+                fputcsv($handle, ['Entry ID', 'Chest No', 'Team / Group', 'Program Code', 'Program Name', 'Program Type', 'Zone', 'Candidate / Participants', 'Class Level', 'Status', 'Registered At']);
+
+                ProgramEntry::with(['group', 'student', 'program.zone', 'participants'])
+                    ->chunk(200, function ($entries) use ($handle) {
+                        foreach ($entries as $e) {
+                            $candidates = $e->student?->name;
+                            if (! $candidates && $e->participants->isNotEmpty()) {
+                                $candidates = $e->participants->pluck('name')->implode(', ');
+                            }
+
+                            fputcsv($handle, [
+                                $e->id,
+                                $e->chest_number ?? 'N/A',
+                                $e->group?->name ?? 'N/A',
+                                $e->program?->code ?? 'N/A',
+                                $e->program?->name ?? 'N/A',
+                                ucfirst($e->program?->type ?? 'individual'),
+                                $e->program?->zone?->name ?? $e->program?->eligibility ?? 'N/A',
+                                $candidates ?: 'N/A',
+                                $e->student?->class_level ?? 'N/A',
+                                ucfirst($e->status),
+                                $e->created_at?->format('Y-m-d H:i') ?? 'N/A',
+                            ]);
+                        }
+                    });
             }
 
             fclose($handle);

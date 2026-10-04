@@ -203,6 +203,8 @@ class AdminViewsTest extends TestCase
             route('admin.print.results'),
             route('admin.print.students'),
             route('admin.print.programs'),
+            route('admin.print.entries', ['mode' => 'group_wise']),
+            route('admin.print.entries', ['mode' => 'program_wise']),
         ];
 
         foreach ($printRoutes as $pRoute) {
@@ -211,6 +213,11 @@ class AdminViewsTest extends TestCase
             $response->assertSee('dashboard-logo.png');
             $response->assertSee('PRINT & PDF EXPORT', false);
         }
+
+        // Test entries CSV export
+        $csvResponse = $this->actingAs($this->admin)->get(route('admin.exports.download', 'entries'));
+        $csvResponse->assertOk();
+        $this->assertTrue(str_contains($csvResponse->headers->get('Content-Disposition') ?? '', 'festfloww-entries'));
     }
 
     public function test_admin_can_regenerate_tough_pin_for_judge(): void
