@@ -26,6 +26,11 @@
                 <input type="text" name="search" value="{{ $search }}" placeholder="Search program by name or code..." class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
                 <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
+            <select name="type" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
+                <option value="">All Types</option>
+                <option value="individual" {{ ($selectedType ?? '') === 'individual' ? 'selected' : '' }}>Individual</option>
+                <option value="group" {{ ($selectedType ?? '') === 'group' ? 'selected' : '' }}>Group</option>
+            </select>
             <select name="zone" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange font-sora">
                 <option value="">All Zones</option>
                 @foreach($zones as $zKey => $zVal)
@@ -65,14 +70,24 @@
                             <td class="px-4 py-3.5 text-gray-900 font-mono text-xs font-semibold">{{ $prog->code ?: $prog->id }}</td>
                             <td class="px-6 py-3.5 font-bold text-gray-900 capitalize">{{ $prog->name }}</td>
                             <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $prog->eligibility ?? 'A Zone' }}</td>
-                            <td class="px-4 py-3.5 text-gray-600 text-xs">{{ ucfirst($prog->type ?? 'Individual') }}</td>
+                            <td class="px-4 py-3.5 whitespace-nowrap">
+                                @if(($prog->type ?? 'individual') === 'group')
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                        Group
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        Individual
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $prog->is_stage ? 'Stage' : 'Non-stage' }}</td>
                             <td class="px-4 py-3.5 text-center">
                                 @if(!empty($prog->rules))
                                     <button type="button" 
                                             @click="activeModalProg = { name: '{{ addslashes($prog->name) }}', code: '{{ $prog->code }}', rules: `{{ addslashes($prog->rules) }}`, duration: '{{ $prog->duration_minutes }}' }" 
                                             class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-sora font-bold transition">
-                                        Rules ✓
+                                        Rules
                                     </button>
                                 @else
                                     <span class="text-gray-400 text-xs">—</span>

@@ -57,6 +57,11 @@ class ProgramController extends Controller
             $query->where('gender_restriction', $gender);
         }
 
+        $type = $request->query('type');
+        if ($type && in_array($type, ['individual', 'group'])) {
+            $query->where('type', $type);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -70,7 +75,7 @@ class ProgramController extends Controller
         $stages = Stage::all();
         $zones = Zone::orderBy('display_order')->get();
 
-        return view('admin.programs.index', compact('programs', 'categories', 'stages', 'zones', 'zone', 'zoneId', 'categoryId', 'stageId', 'status', 'isStage', 'gender', 'search'));
+        return view('admin.programs.index', compact('programs', 'categories', 'stages', 'zones', 'zone', 'zoneId', 'categoryId', 'stageId', 'status', 'isStage', 'gender', 'type', 'search'));
     }
 
     public function programWise(Request $request): View

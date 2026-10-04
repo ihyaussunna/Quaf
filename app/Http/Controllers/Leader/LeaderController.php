@@ -161,6 +161,11 @@ class LeaderController extends Controller
             });
         }
 
+        $selectedType = $request->query('type');
+        if ($selectedType && in_array($selectedType, ['individual', 'group'])) {
+            $query->where('type', $selectedType);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -171,7 +176,7 @@ class LeaderController extends Controller
         $programs = $query->orderBy('name')->paginate(15)->withQueryString();
         $zones = Zone::orderBy('display_order')->get();
 
-        return view('leader.programs', compact('group', 'programs', 'zones', 'search', 'selectedZone', 'selectedZoneId'));
+        return view('leader.programs', compact('group', 'programs', 'zones', 'search', 'selectedZone', 'selectedZoneId', 'selectedType'));
     }
 
     public function programWise(Request $request): View

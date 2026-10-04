@@ -41,6 +41,12 @@
                     <option value="cancelled" {{ $status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
 
+                <select name="type" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Types</option>
+                    <option value="individual" {{ ($type ?? '') === 'individual' ? 'selected' : '' }}>Individual</option>
+                    <option value="group" {{ ($type ?? '') === 'group' ? 'selected' : '' }}>Group</option>
+                </select>
+
                 <select name="zone" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-[#be1e2d]">
                     <option value="">All Zones</option>
                     @foreach($zones as $zKey => $zVal)
@@ -52,7 +58,7 @@
                     @endforeach
                 </select>
 
-                @if($search || $status || $zone)
+                @if($search || $status || $zone || ($type ?? ''))
                     <a href="{{ route('admin.programs.index') }}" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800 bg-slate-100 rounded-lg">Reset</a>
                 @endif
             </div>
@@ -67,6 +73,7 @@
                     <tr>
                         <th class="px-5 py-3.5">Prog ID</th>
                         <th class="px-5 py-3.5">Programme Name</th>
+                        <th class="px-5 py-3.5">Type</th>
                         <th class="px-5 py-3.5">Stage / Off Stage</th>
                         <th class="px-5 py-3.5">Zone</th>
                         <th class="px-5 py-3.5">Limit</th>
@@ -86,6 +93,17 @@
                                 <span class="font-bold text-slate-900 block text-sm">{{ $p->name }}</span>
                                 @if($p->malayalam_name)
                                     <span class="text-[11px] text-[#005c94] font-medium block mt-0.5 font-ml">{{ $p->malayalam_name }}</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-3.5 whitespace-nowrap">
+                                @if(($p->type ?? 'individual') === 'group')
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                        Group
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        Individual
+                                    </span>
                                 @endif
                             </td>
                             <td class="px-5 py-3.5 whitespace-nowrap">
@@ -129,7 +147,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-12 text-center text-slate-400">
+                            <td colspan="8" class="px-5 py-12 text-center text-slate-400">
                                 No competitions found.
                             </td>
                         </tr>

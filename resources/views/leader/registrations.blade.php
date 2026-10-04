@@ -906,7 +906,17 @@ function registrationManager() {
                                     <span class="text-slate-400">—</span>
                                 @endif
                             </td>
-                            <td class="py-3 px-3 capitalize">{{ $e->program->type }}</td>
+                            <td class="py-3 px-3 whitespace-nowrap">
+                                @if(($e->program->type ?? 'individual') === 'group')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                        Group
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        Individual
+                                    </span>
+                                @endif
+                            </td>
                             <td class="py-3 px-3">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $e->status === 'verified' || $e->status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' : ($e->status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800') }}">
                                     {{ $e->status }}
@@ -994,7 +1004,17 @@ function registrationManager() {
                             <td class="py-2.5 px-3 font-bold text-slate-600 font-mono">{{ $up->code }}</td>
                             <td class="py-2.5 px-3 font-sora font-semibold text-slate-900">{{ $up->name }}</td>
                             <td class="py-2.5 px-3">{{ $upZone }}</td>
-                            <td class="py-2.5 px-3 capitalize">{{ $up->type }}</td>
+                            <td class="py-2.5 px-3 whitespace-nowrap">
+                                @if(($up->type ?? 'individual') === 'group')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                        Group
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        Individual
+                                    </span>
+                                @endif
+                            </td>
                             <td class="py-2.5 px-3">
                                 <span class="font-bold {{ $isPartial ? 'text-amber-800' : 'text-slate-700' }} font-mono">
                                     {{ $enrolled }} / {{ $limit }} Filled

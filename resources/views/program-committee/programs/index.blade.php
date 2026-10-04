@@ -135,7 +135,15 @@
                                 </span>
                             </td>
                             <td class="py-3.5 px-4">
-                                <span class="capitalize font-bold text-slate-900 block">{{ $p->type }}</span>
+                                @if(strtolower($p->type ?? '') === 'group')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200 mb-1">
+                                        Group
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200 mb-1">
+                                        Individual
+                                    </span>
+                                @endif
                                 <span class="text-[10px] text-slate-500 font-mono block">
                                     Limit: <strong class="text-slate-800">{{ $p->limit }}</strong> / group
                                 </span>
