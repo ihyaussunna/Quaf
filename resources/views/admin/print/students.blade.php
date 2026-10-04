@@ -55,7 +55,6 @@
           colPrograms: true,
           colPoints: true,
           colSign: true,
-          showSignatures: true,
           allStudentIds: @json($students->pluck('id')),
           excludedStudentIds: [],
           toggleStudent(id) {
@@ -227,7 +226,6 @@
         <div class="flex items-center justify-between pb-4 border-b-2 border-slate-900 gap-4">
             <div>
                 <h1 class="text-xl font-black font-sora text-slate-900 uppercase tracking-tight">Participant Delegate Registry & Roll Sheet</h1>
-                <p class="text-xs font-semibold text-slate-600">Ihyaussunna Students Union, Jamia Markaz</p>
             </div>
 
             <div class="text-right font-mono text-[11px] text-slate-500 space-y-0.5">
@@ -334,30 +332,6 @@
                     </tbody>
                 </table>
             @endif
-        </div>
-
-        <!-- Official Signatures Block -->
-        <div x-show="showSignatures" class="pt-8 mt-8 border-t border-slate-300 avoid-break">
-            <div class="grid grid-cols-3 gap-6 text-center text-xs font-mono">
-                <div>
-                    <div class="border-b border-slate-400 mb-2 h-8"></div>
-                    <div class="font-bold text-slate-900">Desk Officer / Registrar</div>
-                    <div class="text-[10px] text-slate-500">Registration Committee</div>
-                </div>
-                <div>
-                    <div class="border-b border-slate-400 mb-2 h-8"></div>
-                    <div class="font-bold text-slate-900">Group Leader / Captain</div>
-                    <div class="text-[10px] text-slate-500">Official Verification</div>
-                </div>
-                <div>
-                    <div class="border-b border-slate-400 mb-2 h-8"></div>
-                    <div class="font-bold text-slate-900">General Convener</div>
-                    <div class="text-[10px] text-slate-500">Ashabul Quaf Committee</div>
-                </div>
-            </div>
-            <div class="text-center text-[10px] text-slate-400 font-mono mt-6">
-                Markazu Saquafathi Sunniyya • Ihyaussunna Students Union • Official Participant Enrollment List
-            </div>
         </div>
 
     </div>

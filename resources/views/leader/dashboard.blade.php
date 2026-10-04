@@ -4,6 +4,32 @@
 
 @section('content')
 <div class="space-y-6">
+    <!-- Team Identity Header -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+            <span class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl text-white shadow-sm shrink-0 font-sora" 
+                  style="background-color: {{ $group->color_hex ?? '#be1e2d' }};">
+                {{ substr($group->name ?? 'T', 0, 1) }}
+            </span>
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-xl sm:text-2xl font-black font-sora text-gray-900 truncate">{{ $group->name }}</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold"
+                          style="background-color: {{ $group->color_hex ?? '#be1e2d' }}15; color: {{ $group->color_hex ?? '#be1e2d' }};">
+                        Team Dashboard
+                    </span>
+                </div>
+                <p class="text-xs font-sora text-gray-500 mt-0.5">QUAF Fest 2026 • Official Registration & Performance Portal</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+            <div class="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full" style="background-color: {{ $group->color_hex ?? '#be1e2d' }};"></span>
+                <span>Team: {{ $group->name }}</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Top Row: Stat Cards & Progress Result matching screenshot -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
         <!-- 4 Quick Stat Cards -->

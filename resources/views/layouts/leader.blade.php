@@ -158,13 +158,13 @@
                 </button>
 
                 <h2 class="text-sm sm:text-lg font-bold text-[#be1e2d] truncate">
-                    Welcome to Quaf Manager
+                    Welcome to Quaf Manager — <span class="text-slate-900">{{ Auth::user()->group?->name ?? 'Leader' }}</span>
                 </h2>
             </div>
 
             <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full" style="background-color: {{ Auth::user()->group?->color_hex ?? '#10b981' }};"></span>
                     {{ Auth::user()->group?->name ?? 'Leader' }}
                 </span>
 

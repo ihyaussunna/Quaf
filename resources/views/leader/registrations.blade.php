@@ -1,26 +1,6 @@
 @extends('layouts.leader', ['title' => 'Program Entries & Registrations'])
 
 @section('content')
-<style>
-@media print {
-    .no-print {
-        display: none !important;
-    }
-    .print-hidden-section {
-        display: none !important;
-    }
-    body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-    }
-    thead {
-        display: table-header-group;
-    }
-    tr {
-        page-break-inside: avoid !important;
-    }
-}
-</style>
 @php
     $programsData = $eligiblePrograms->map(function ($p) use ($registeredProgramIds, $entriesByProgram) {
         $limit = $p->limit;
@@ -542,37 +522,10 @@ function quotaStatusTracker() {
         filterZone: '',
         filterType: '',
         programsMap: map,
-        allProgIds: progsList.map(p => p.id),
-        excludedProgIds: [],
-
-        toggleProg(id) {
-            if (this.excludedProgIds.includes(id)) {
-                this.excludedProgIds = this.excludedProgIds.filter(x => x !== id);
-            } else {
-                this.excludedProgIds.push(id);
-            }
+        get programs() {
+            return this.allProgramsArray;
         },
 
-        isProgExcluded(id) {
-            return this.excludedProgIds.includes(id);
-        },
-
-        includeAllProgs() {
-            this.excludedProgIds = [];
-        },
-
-        excludeAllProgs() {
-            this.excludedProgIds = [...this.allProgIds];
-        },
-
-        get selectedProgCount() {
-            return Math.max(0, this.allProgIds.length - this.excludedProgIds.length);
-        },
-
-        printPdf() {
-            window.print();
-        },
-        
         init() {
             window.quafQuotaTrackerInstance = this;
             window.addEventListener('quaf-program-quota-updated', (e) => {
@@ -696,7 +649,7 @@ function quotaStatusTracker() {
     </div>
 
     <!-- Summary Counters (Total, Fully Registered, Partially Registered, Unregistered) -->
-    <div class="no-print grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <button type="button" 
                 onclick="window.quafSetTrackerTab('all')" 
                 class="text-left p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 hover:shadow-md transition-all cursor-pointer">
@@ -748,14 +701,14 @@ function quotaStatusTracker() {
 
     <!-- Registration Window Notice -->
     @if($isRegistrationOpen)
-        <div class="no-print p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sora flex items-center justify-between shadow-2xs">
+        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sora flex items-center justify-between shadow-2xs">
             <span class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 <strong>Registration Window Open:</strong> You can submit individual and group program registrations for your group.
             </span>
         </div>
     @else
-        <div class="no-print p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-sora flex items-center justify-between shadow-2xs">
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-sora flex items-center justify-between shadow-2xs">
             <span class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 <strong>Registration Window Closed:</strong> Program registration is currently closed by the festival administration.
@@ -764,7 +717,7 @@ function quotaStatusTracker() {
     @endif
 
     @if($errors->any())
-        <div class="no-print p-4 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs space-y-1 shadow-2xs">
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs space-y-1 shadow-2xs">
             <p class="font-bold flex items-center gap-2 text-sm text-[#be1e2d]">
                 <svg class="w-4 h-4 text-[#be1e2d] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 Registration Error:
@@ -778,13 +731,13 @@ function quotaStatusTracker() {
     @endif
 
     @if(session('success'))
-        <div class="no-print p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-sora font-medium shadow-2xs">
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-sora font-medium shadow-2xs">
             {{ session('success') }}
         </div>
     @endif
 
     <!-- Registration Submission Card -->
-    <div id="enrollment_card" class="no-print rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm {{ !$isRegistrationOpen ? 'opacity-60 pointer-events-none' : '' }}">
+    <div id="enrollment_card" class="scroll-mt-6 rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm {{ !$isRegistrationOpen ? 'opacity-60 pointer-events-none' : '' }}">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-4">
             <svg class="w-5 h-5 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
             <h2 class="text-lg font-sora font-bold text-slate-900">Enroll Participant for Program</h2>
@@ -1078,7 +1031,7 @@ function quotaStatusTracker() {
     </div>
 
     <!-- Active / Registered Entries Table -->
-    <div id="entries-table-section" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
+    <div id="entries-table-section" class="scroll-mt-6 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
             <div>
                 <h3 class="text-base font-sora font-bold text-slate-900">Registered Program Entries ({{ $entries->total() }})</h3>
@@ -1088,11 +1041,6 @@ function quotaStatusTracker() {
                 <span class="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sora font-bold">
                     {{ $registeredProgramsCount ?? 0 }} Unique Programs Registered ({{ $fullyRegisteredCount ?? 0 }} Full • {{ $partiallyRegisteredCount ?? 0 }} Partial)
                 </span>
-                <a href="{{ route('admin.print.entries', ['group' => $group->id, 'mode' => 'program_wise']) }}" target="_blank"
-                   class="no-print inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-sora font-bold shadow-sm transition">
-                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                    <span>Download / Print Entries PDF</span>
-                </a>
             </div>
         </div>
 
@@ -1185,45 +1133,7 @@ function quotaStatusTracker() {
     </div>
 
     <!-- Program Quota & Entry Tracker -->
-    <div id="programs-tracker-section" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm" x-data="quotaStatusTracker()">
-        <!-- Official Festival Top Masthead Banner (Print Only) -->
-        <div class="print-only mb-4">
-            @include('partials.print-pdf-header')
-            <div class="text-center mt-3 pb-2 border-b border-slate-300">
-                <h2 class="text-base font-bold font-sora text-slate-900 uppercase">Program Quota & Entry Status Report</h2>
-                <p class="text-xs font-sora text-slate-600">{{ $group->name }} • Generated on {{ now()->format('d M Y, h:i A') }}</p>
-            </div>
-        </div>
-
-        <!-- PDF Toolbar & Selection Controls (Hidden on Print) -->
-        <div class="no-print bg-slate-900 text-white rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-            <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-xs font-mono">PDF</span>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-sora font-bold text-white">Quota Status PDF Export</span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400 text-slate-950"
-                              x-text="selectedProgCount + ' of ' + allProgIds.length + ' programs included'"></span>
-                    </div>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Check or uncheck programs below to include/omit from the printed PDF report.</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button type="button" @click="includeAllProgs()" 
-                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition">
-                    Select All
-                </button>
-                <button type="button" @click="excludeAllProgs()" 
-                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-sora text-slate-200 border border-slate-700 transition">
-                    Deselect All
-                </button>
-                <button type="button" @click="printPdf()" 
-                        class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-sora font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                    <span>Download / Print PDF</span>
-                </button>
-            </div>
-        </div>
+    <div id="programs-tracker-section" class="scroll-mt-6 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm" x-data="quotaStatusTracker()">
 
         <!-- Header & Quick KPIs -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
@@ -1245,20 +1155,20 @@ function quotaStatusTracker() {
                 </div>
                 <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-sora font-bold flex items-center gap-1.5 shadow-2xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>Completed: <strong class="font-mono text-emerald-950" x-text="completedCount"></strong> / <span class="font-mono" x-text="programs.length"></span></span>
+                    <span>Completed: <strong class="font-mono text-emerald-950" x-text="completedCount"></strong> / <span class="font-mono" x-text="allProgramsArray.length"></span></span>
                 </div>
             </div>
         </div>
 
         <!-- Filter Tabs (Action Required, Partial, Pending, Completed, All) -->
-        <div class="no-print flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3">
+        <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3">
             <button type="button" 
                     @click="setTab('action_required')" 
-                    :class="trackerTab === 'action_required' ? 'bg-orange-600 text-white shadow-sm' : 'bg-orange-50 text-orange-900 hover:bg-orange-100 border border-orange-200'" 
+                    :class="trackerTab === 'action_required' ? 'bg-[#be1e2d] text-white shadow-sm' : 'bg-red-50 text-red-900 hover:bg-red-100 border border-red-200'" 
                     class="px-3.5 py-2 rounded-xl text-xs font-sora font-bold transition-all flex items-center gap-2 cursor-pointer">
                 <span>Action Required</span>
                 <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
-                      :class="trackerTab === 'action_required' ? 'bg-white text-orange-700' : 'bg-orange-200 text-orange-900'"
+                      :class="trackerTab === 'action_required' ? 'bg-white text-[#be1e2d]' : 'bg-red-200 text-red-900'"
                       x-text="actionRequiredCount"></span>
             </button>
 
@@ -1299,12 +1209,12 @@ function quotaStatusTracker() {
                 <span>All Programs</span>
                 <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
                       :class="trackerTab === 'all' ? 'bg-white text-slate-900' : 'bg-slate-200 text-slate-700'"
-                      x-text="programs.length"></span>
+                      x-text="allProgramsArray.length"></span>
             </button>
         </div>
 
         <!-- Filter and Search Toolbar -->
-        <div class="no-print grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="relative">
                 <input type="text" 
                        x-model="searchQuery" 
@@ -1341,13 +1251,12 @@ function quotaStatusTracker() {
             <table class="w-full text-left text-xs font-sora">
                 <thead class="sticky top-0 bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px] z-10">
                     <tr>
-                        <th class="no-print py-3 px-3 text-center w-14">In PDF</th>
                         <th class="py-3 px-3.5">Code & Program</th>
                         <th class="py-3 px-3">Zone & Type</th>
                         <th class="py-3 px-3">Quota Status</th>
                         <th class="py-3 px-3">Action Needed</th>
                         <th class="py-3 px-3">Enrolled Candidates</th>
-                        <th class="no-print py-3 px-3 text-right">Action</th>
+                        <th class="py-3 px-3 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700 bg-white">
@@ -1362,16 +1271,7 @@ function quotaStatusTracker() {
                         @endphp
                         <tr x-show="isRowVisible({{ $pId }})" 
                             class="hover:bg-amber-50/30 transition-colors"
-                            :class="(isProgExcluded({{ $pId }}) ? 'opacity-40 border-dashed bg-slate-50/50 print-hidden-section ' : '') + (getProg({{ $pId }}).status_key === 'partial' ? 'bg-amber-50/20' : (getProg({{ $pId }}).status_key === 'completed' ? 'bg-emerald-50/10' : ''))">
-                            <!-- PDF Inclusion Checkbox -->
-                            <td class="no-print py-3 px-3 text-center whitespace-nowrap">
-                                <label class="inline-flex items-center cursor-pointer" title="Include/Exclude from PDF">
-                                    <input type="checkbox" 
-                                           :checked="!isProgExcluded({{ $pId }})" 
-                                           @change="toggleProg({{ $pId }})" 
-                                           class="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-400">
-                                </label>
-                            </td>
+                            :class="getProg({{ $pId }}).status_key === 'partial' ? 'bg-amber-50/20' : (getProg({{ $pId }}).status_key === 'completed' ? 'bg-emerald-50/10' : '')">
                             <!-- Code & Program Name -->
                             <td class="py-3 px-3.5">
                                 <div class="flex items-center gap-2">
@@ -1463,7 +1363,7 @@ function quotaStatusTracker() {
                             </td>
 
                             <!-- Action Button -->
-                            <td class="no-print py-3 px-3 text-right whitespace-nowrap">
+                            <td class="py-3 px-3 text-right whitespace-nowrap">
                                 @if($isRegistrationOpen)
                                     <button type="button" 
                                             @click="enrollProgram(getProg({{ $pId }}))" 
@@ -1487,7 +1387,7 @@ function quotaStatusTracker() {
                     @endforeach
 
                     <tr x-show="!hasVisibleRows">
-                        <td colspan="7" class="py-12 text-center text-slate-400 font-sora text-xs">
+                        <td colspan="6" class="py-12 text-center text-slate-400 font-sora text-xs">
                             <span class="block text-slate-500 font-semibold mb-1">No matching programs found.</span>
                             <span>Try adjusting your tab, search query, or zone filter.</span>
                         </td>
