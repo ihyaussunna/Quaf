@@ -139,6 +139,12 @@
                 </div>
             </div>
 
+            @php
+                $allEntries = $selectedStudent->entries
+                    ->merge($selectedStudent->participations ?? collect())
+                    ->unique('id');
+            @endphp
+
             <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs font-sora">
@@ -153,13 +159,24 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
-                        @forelse($selectedStudent->entries as $idx => $entry)
+                        @forelse($allEntries as $idx => $entry)
                             <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="px-6 py-3.5 font-bold text-slate-900">{{ $idx + 1 }}</td>
+                                <td class="px-6 py-3.5 font-bold text-slate-900">{{ $loop->iteration }}</td>
                                 <td class="px-6 py-3.5 font-mono font-medium text-slate-600">{{ $entry->program?->code }}</td>
-                                <td class="px-6 py-3.5 font-semibold text-slate-900">{{ $entry->program?->name }}</td>
-                                <td class="px-6 py-3.5 text-slate-500">{{ $entry->program?->eligibility ?? 'A Zone' }}</td>
-                                <td class="px-6 py-3.5 capitalize">{{ $entry->program?->type }}</td>
+                                <td class="px-6 py-3.5 font-semibold text-slate-900">
+                                    {{ $entry->program?->name }}
+                                    @if($entry->program?->type === 'group')
+                                        <span class="text-[10px] text-amber-700 block font-normal">Team Entry</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-3.5 text-slate-500">{{ $entry->program?->zone?->name ?? ($entry->program?->eligibility ?? 'A Zone') }}</td>
+                                <td class="px-6 py-3.5">
+                                    @if($entry->program?->type === 'group')
+                                        <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-bold uppercase text-[10px]">Group</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold uppercase text-[10px]">Individual</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-3.5 text-slate-500">{{ $entry->program?->stage ? 'Stage' : 'Non-stage' }}</td>
                             </tr>
                         @empty

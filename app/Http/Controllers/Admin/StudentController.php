@@ -560,12 +560,19 @@ class StudentController extends Controller
             'entries.program.stage',
             'entries.program.zone',
             'entries.scoreSheets',
+            'participations.program.category',
+            'participations.program.stage',
+            'participations.program.zone',
             'certificates.program',
         ]);
 
+        $allEntries = $student->entries
+            ->merge($student->participations ?? collect())
+            ->unique('id');
+
         $qrCodeSvg = QrCodeService::svg(route('verify.student', $student->qr_token), 220);
 
-        return view('admin.students.show', compact('student', 'qrCodeSvg'));
+        return view('admin.students.show', compact('student', 'allEntries', 'qrCodeSvg'));
     }
 
     public function edit(Student $student): View

@@ -74,7 +74,17 @@
                     </div>
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <span class="text-[10px] text-slate-500 uppercase block">Registered Programs</span>
-                        <span class="text-slate-900 font-bold">{{ $student->entries->count() }} Entries</span>
+                        @php
+                            $entriesList = $allEntries ?? $student->entries;
+                            $indCount = $student->getIndividualParticipationCount();
+                            $groupCount = $entriesList->where('program.type', 'group')->count();
+                        @endphp
+                        <span class="text-slate-900 font-bold">
+                            {{ $indCount }}/5 Ind
+                            @if($groupCount > 0)
+                                <span class="text-xs font-mono font-normal text-slate-500">(+{{ $groupCount }} Group)</span>
+                            @endif
+                        </span>
                     </div>
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <span class="text-[10px] text-slate-500 uppercase block">Total Points Won</span>
@@ -93,7 +103,7 @@
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <h3 class="font-sora font-bold text-lg text-slate-900">Registered Program Entries</h3>
-            <span class="text-xs font-mono text-slate-500">{{ $student->entries->count() }} Entries</span>
+            <span class="text-xs font-mono text-slate-500">{{ $entriesList->count() }} Entries ({{ $indCount }}/5 Individual • {{ $groupCount }} Group)</span>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs font-mono">
@@ -102,17 +112,30 @@
                         <th class="px-6 py-3 font-semibold">Chest #</th>
                         <th class="px-6 py-3 font-semibold">Program</th>
                         <th class="px-6 py-3 font-semibold">Zone</th>
+                        <th class="px-6 py-3 font-semibold">Type</th>
                         <th class="px-6 py-3 font-semibold">Stage</th>
                         <th class="px-6 py-3 font-semibold">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
-                    @forelse($student->entries as $entry)
+                    @forelse($entriesList as $entry)
                         <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-6 py-3 font-bold text-[#f3bd2e]">{{ $entry->chest_number }}</td>
-                            <td class="px-6 py-3 font-medium text-slate-900">{{ $entry->program->name }}</td>
-                            <td class="px-6 py-3 text-slate-600">{{ $entry->program->eligibility ?? 'A Zone' }}</td>
-                            <td class="px-6 py-3 text-slate-600">{{ $entry->program->stage?->name ?? 'TBD' }}</td>
+                            <td class="px-6 py-3 font-bold text-[#f3bd2e]">{{ $entry->chest_number ?: $student->chest_number }}</td>
+                            <td class="px-6 py-3 font-medium text-slate-900">
+                                {{ $entry->program->name }}
+                                @if($entry->program->type === 'group')
+                                    <span class="text-[10px] text-amber-700 block font-normal">Team Entry</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-3 text-slate-600">{{ $entry->program->zone?->name ?? ($entry->program->eligibility ?? 'A Zone') }}</td>
+                            <td class="px-6 py-3">
+                                @if($entry->program->type === 'group')
+                                    <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-bold uppercase text-[10px]">Group</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold uppercase text-[10px]">Individual</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-3 text-slate-600">{{ $entry->program->stage?->name ?? ($entry->program->is_stage ? 'Stage' : 'Non-stage') }}</td>
                             <td class="px-6 py-3">
                                 @if($entry->status === 'verified')
                                     <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">VERIFIED</span>
@@ -126,7 +149,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-slate-400">No program entries registered for this student yet.</td>
+                            <td colspan="6" class="px-6 py-8 text-center text-slate-400">No program entries registered for this student yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
