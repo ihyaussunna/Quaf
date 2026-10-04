@@ -1,9 +1,9 @@
-<div class="print-official-header w-full mb-4 {{ $class ?? '' }}">
-    <div class="w-full pb-2 text-center">
+<div class="print-official-header w-full mb-3 {{ $class ?? '' }}">
+    <div class="w-full pb-1 text-center">
         <img src="{{ asset('images/print-pdf-header.svg') }}"
              alt="Markaz Cultural Festival"
-             class="w-full h-auto max-h-24 sm:max-h-28 object-contain block mx-auto"
-             style="max-height: 110px;">
+             class="w-1/2 max-w-[50%] h-auto max-h-12 sm:max-h-14 object-contain block mx-auto"
+             style="max-height: 55px; width: 50%; max-width: 50%;">
     </div>
 
     @if(!empty($title) || !empty($group) || !empty($subtitle) || !empty($filterText) || !empty($extraMeta))

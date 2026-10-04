@@ -275,7 +275,7 @@
         
         <!-- Official Festival Top Masthead Banner -->
         <div class="w-full pb-3 border-b border-slate-300 mb-4 text-center">
-            <img src="{{ asset('images/print-pdf-header.svg') }}" alt="Festival Header" class="w-full h-auto max-h-24 sm:max-h-28 object-contain block mx-auto">
+            <img src="{{ asset('images/print-pdf-header.svg') }}" alt="Festival Header" class="w-1/2 max-w-[50%] h-auto max-h-12 sm:max-h-14 object-contain block mx-auto" style="max-height: 55px; width: 50%; max-width: 50%;">
         </div>
 
         <!-- Official Document Header -->
