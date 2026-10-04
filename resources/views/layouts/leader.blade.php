@@ -158,7 +158,7 @@
                 </button>
 
                 <h2 class="text-sm sm:text-lg font-bold text-[#be1e2d] truncate">
-                    Welcome to QUAF 09
+                    Welcome to Quaf Manager
                 </h2>
             </div>
 

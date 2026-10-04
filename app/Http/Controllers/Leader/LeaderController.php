@@ -228,10 +228,9 @@ class LeaderController extends Controller
         }
 
         $programs = $query->orderBy('code')->orderBy('name')->paginate(15)->withQueryString();
-        $allProgramsForPrint = (clone $query)->orderBy('code')->orderBy('name')->get();
         $zones = Zone::orderBy('display_order')->get();
 
-        return view('leader.programs', compact('group', 'programs', 'allProgramsForPrint', 'zones', 'search', 'selectedZone', 'selectedZoneId', 'selectedType'));
+        return view('leader.programs', compact('group', 'programs', 'zones', 'search', 'selectedZone', 'selectedZoneId', 'selectedType'));
     }
 
     public function programWise(Request $request): View
@@ -429,9 +428,8 @@ class LeaderController extends Controller
             });
         }
         $students = $query->orderBy('name')->paginate(15)->withQueryString();
-        $allStudentsForPrint = (clone $query)->orderBy('name')->get();
 
-        return view('leader.students', compact('group', 'students', 'allStudentsForPrint', 'isEditingOpen', 'search'));
+        return view('leader.students', compact('group', 'students', 'isEditingOpen', 'search'));
     }
 
     public function updateStudent(Request $request, Student $student): JsonResponse|RedirectResponse
