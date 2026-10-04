@@ -62,6 +62,77 @@
         </div>
     </div>
 
+    <!-- Registration Quota & Entry Completion Status Card -->
+    @if(isset($registrationStats))
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $group->color_hex }};"></span>
+                        <h3 class="font-sora font-black text-slate-900 text-lg">Team Entry & Quota Completion Status</h3>
+                    </div>
+                    <p class="text-xs font-sora text-slate-500 mt-1">Live tracking of complete and pending program registrations for {{ $group->name }}.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-xl text-xs font-mono font-bold {{ $registrationStats['percent'] >= 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
+                        {{ $registrationStats['percent'] }}% Quota Completed
+                    </span>
+                    <a href="{{ route('leader.registrations') }}?tab=incomplete" class="px-4 py-2 rounded-xl bg-brand-orange hover:bg-orange-600 text-white font-sora text-xs font-bold transition shadow-xs">
+                        Fill Open Slots &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: {{ $registrationStats['percent'] }}%"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Completed Card -->
+                <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[11px] font-sora uppercase font-bold text-emerald-700 block">Completed Entries (Full Quota)</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-2xl font-sora font-black text-emerald-800">{{ $registrationStats['completed'] }}</span>
+                            <span class="text-xs font-sora text-emerald-600">/ {{ $registrationStats['total'] }} Programs</span>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-sora text-emerald-700 mt-2 block font-medium">All candidate slots fully registered</span>
+                </div>
+
+                <!-- Partial Card -->
+                <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-300 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[11px] font-sora uppercase font-bold text-amber-800 block">Partially Filled (Slots Open)</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-2xl font-sora font-black text-amber-900">{{ $registrationStats['partial'] }}</span>
+                            <span class="text-xs font-sora text-amber-700">Programs Incomplete</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs font-sora font-bold text-amber-900 flex items-center justify-between">
+                        <span>{{ $registrationStats['partial_slots_needed'] }} More Candidates Needed</span>
+                        <a href="{{ route('leader.registrations') }}?tab=partial" class="underline text-amber-800 hover:text-amber-950">Add Now &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Pending Card -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[11px] font-sora uppercase font-bold text-slate-500 block">Pending Registration</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-2xl font-sora font-black text-slate-800">{{ $registrationStats['pending'] }}</span>
+                            <span class="text-xs font-sora text-slate-500">Programs (0 Enrolled)</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs font-sora text-slate-600 flex items-center justify-between">
+                        <span>{{ $registrationStats['total_slots_needed'] }} total seats across fest</span>
+                        <a href="{{ route('leader.registrations') }}?tab=pending" class="underline text-slate-700 hover:text-slate-900 font-bold">Enroll &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Main Section: Performance Over Time & Score Board -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
         <!-- Performance Over Time SVG Chart matching screenshot -->

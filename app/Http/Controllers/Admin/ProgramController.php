@@ -10,6 +10,8 @@ use App\Models\Zone;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -264,6 +266,12 @@ class ProgramController extends Controller
 
         AuditLogger::log('create_program', $program, null, $program->toArray());
 
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
         return redirect()->route('admin.programs.index')->with('success', "Program '{$program->name}' created successfully.");
     }
 
@@ -386,6 +394,12 @@ class ProgramController extends Controller
 
         AuditLogger::log('update_program', $program, $old, $program->toArray());
 
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
         return redirect()->route('admin.programs.index')->with('success', "Program '{$program->name}' updated.");
     }
 
@@ -396,6 +410,12 @@ class ProgramController extends Controller
         $program->delete();
 
         AuditLogger::log('delete_program', null, $old, null);
+
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
 
         return redirect()->route('admin.programs.index')->with('success', "Program '{$name}' deleted.");
     }

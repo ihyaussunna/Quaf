@@ -13,6 +13,8 @@ use App\Services\AuditLogger;
 use App\Services\GroupEntryStatsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -289,6 +291,12 @@ class ProgramCommitteeController extends Controller
 
         AuditLogger::log('create_program_by_committee', $program, null, $program->toArray());
 
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
         return redirect()->route('program-committee.programs.show', $program)
             ->with('success', "Program '{$program->name}' has been created successfully with rules.");
     }
@@ -431,6 +439,12 @@ class ProgramCommitteeController extends Controller
 
         AuditLogger::log('update_program_by_committee', $program, $old, $program->toArray());
 
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
         return redirect()->route('program-committee.programs.show', $program)
             ->with('success', "Program '{$program->name}' updated successfully.");
     }
@@ -452,6 +466,12 @@ class ProgramCommitteeController extends Controller
         $program->delete();
 
         AuditLogger::log('delete_program_by_committee', null, $old, null);
+
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
 
         return redirect()->route('program-committee.programs.index')
             ->with('success', "Program '{$name}' has been deleted.");

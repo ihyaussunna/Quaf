@@ -11,7 +11,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-#[Signature('app:sync-official-programs')]
+#[Signature('app:sync-official-programs {--force : Force overwrite existing programs and limits}')]
 #[Description('Sync the 144 official festival programs into database with zones, types, stages, and group participant limits.')]
 class SyncOfficialProgramsCommand extends Command
 {
@@ -130,7 +130,7 @@ class SyncOfficialProgramsCommand extends Command
 
                 // Mix Zone (69 programmes: Q9-176 to Q9-244)
                 ['code' => 'Q9-176', 'name' => 'Global Dars', 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'stage-arts'],
-                ['code' => 'Q9-177', 'name' => "Wa'l", 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'elocution'],
+                ['code' => 'Q9-177', 'name' => "Wa'z", 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'elocution'],
                 ['code' => 'Q9-178', 'name' => 'Mala Aavishkaram', 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'vocal-arts'],
                 ['code' => 'Q9-179', 'name' => 'Live Extempore', 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'elocution'],
                 ['code' => 'Q9-180', 'name' => 'Bilingual Speech', 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'elocution'],
@@ -144,7 +144,7 @@ class SyncOfficialProgramsCommand extends Command
                 ['code' => 'Q9-188', 'name' => 'Tahfeezul Alfiyya (A&B)', 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'vocal-arts'],
                 ['code' => 'Q9-189', 'name' => 'Tahfeezul Burda', 'type' => 'individual', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'vocal-arts'],
                 ['code' => 'Q9-190', 'name' => 'Q Talk', 'type' => 'group', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'stage-arts'],
-                ['code' => 'Q9-191', 'name' => 'Munalara', 'type' => 'group', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 5, 'cat' => 'stage-arts'],
+                ['code' => 'Q9-191', 'name' => 'Munazara', 'type' => 'group', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 5, 'cat' => 'stage-arts'],
                 ['code' => 'Q9-192', 'name' => 'Fiqh Colloquium', 'type' => 'group', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 3, 'cat' => 'stage-arts'],
                 ['code' => 'Q9-193', 'name' => 'Book Discussion', 'type' => 'group', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 4, 'cat' => 'stage-arts'],
                 ['code' => 'Q9-194', 'name' => 'Press Meet', 'type' => 'group', 'is_stage' => true, 'zone' => 'Mix Zone', 'limit' => 4, 'cat' => 'stage-arts'],
@@ -167,7 +167,7 @@ class SyncOfficialProgramsCommand extends Command
                 ['code' => 'Q9-211', 'name' => 'Feature Writing', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'literature'],
                 ['code' => 'Q9-212', 'name' => 'AI Poem', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'literature'],
                 ['code' => 'Q9-213', 'name' => 'Translation Urdu to Arabic', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'literature'],
-                ['code' => 'Q9-214', 'name' => 'Poem Trans Arato Mal', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'literature'],
+                ['code' => 'Q9-214', 'name' => 'Poem Translation Arabic to Malayalam', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'literature'],
                 ['code' => 'Q9-215', 'name' => 'Calligraphy', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-216', 'name' => 'Digital Designing', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-217', 'name' => 'Poster Designing', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
@@ -185,7 +185,7 @@ class SyncOfficialProgramsCommand extends Command
                 ['code' => 'Q9-229', 'name' => 'Content Writing', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'literature'],
                 ['code' => 'Q9-230', 'name' => 'Catalogue Making', 'type' => 'individual', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 1, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-231', 'name' => 'Hadith Musabaka', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 3, 'cat' => 'literature'],
-                ['code' => 'Q9-232', 'name' => 'Taseef', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 5, 'cat' => 'literature'],
+                ['code' => 'Q9-232', 'name' => 'Tasneef', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 5, 'cat' => 'literature'],
                 ['code' => 'Q9-233', 'name' => 'Podcast', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-234', 'name' => 'Book Writing', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 5, 'cat' => 'literature'],
                 ['code' => 'Q9-235', 'name' => 'Wall Writing / Graffiti', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
@@ -237,29 +237,56 @@ class SyncOfficialProgramsCommand extends Command
             }
 
             $count = 0;
+            $force = (bool) $this->option('force');
+
             foreach ($programsList as $p) {
                 $isGroup = ($p['type'] === 'group');
+                $totalMax = $isGroup ? ($p['limit'] * 5) : ($p['limit'] * 5);
 
-                Program::updateOrCreate(
-                    ['code' => $p['code']],
-                    [
-                        'name' => $p['name'],
-                        'type' => $p['type'],
-                        'is_stage' => $p['is_stage'],
-                        'eligibility' => $p['zone'],
-                        'zone_id' => $zones[$p['zone']] ?? 1,
-                        'category_id' => $categories[$p['cat']]->id,
-                        'stage_id' => $p['is_stage'] ? ($mainStage->id ?? 1) : null,
-                        'participant_count' => $p['limit'],
-                        'max_participants_per_group' => $isGroup ? 1 : $p['limit'],
-                        'max_participants' => $isGroup ? $p['limit'] : ($p['limit'] * 5),
-                        'status' => 'upcoming',
-                        'duration_minutes' => 30,
-                        'points_weight' => 1.00,
-                    ]
-                );
+                $existing = Program::where('code', $p['code'])->first();
+                if ($existing) {
+                    if ($force) {
+                        $existing->update([
+                            'name' => $p['name'],
+                            'type' => $p['type'],
+                            'is_stage' => $p['is_stage'],
+                            'eligibility' => $p['zone'],
+                            'zone_id' => $zones[$p['zone']] ?? 1,
+                            'category_id' => $categories[$p['cat']]->id,
+                            'stage_id' => $p['is_stage'] ? ($mainStage->id ?? 1) : null,
+                            'participant_count' => $p['limit'],
+                            'max_participants_per_group' => $isGroup ? 1 : $p['limit'],
+                            'max_participants' => $totalMax,
+                            'status' => 'upcoming',
+                            'duration_minutes' => 30,
+                            'points_weight' => 1.00,
+                        ]);
+                    }
+                    $count++;
+
+                    continue;
+                }
+
+                Program::create([
+                    'code' => $p['code'],
+                    'name' => $p['name'],
+                    'type' => $p['type'],
+                    'is_stage' => $p['is_stage'],
+                    'eligibility' => $p['zone'],
+                    'zone_id' => $zones[$p['zone']] ?? 1,
+                    'category_id' => $categories[$p['cat']]->id,
+                    'stage_id' => $p['is_stage'] ? ($mainStage->id ?? 1) : null,
+                    'participant_count' => $p['limit'],
+                    'max_participants_per_group' => $isGroup ? 1 : $p['limit'],
+                    'max_participants' => $totalMax,
+                    'status' => 'upcoming',
+                    'duration_minutes' => 30,
+                    'points_weight' => 1.00,
+                ]);
                 $count++;
             }
+
+            Cache::flush();
 
             $this->info("Successfully synced all {$count} official programs!");
         });

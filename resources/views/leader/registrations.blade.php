@@ -69,28 +69,34 @@
             $statusLabel = "{$enrolled}/{$limit} • {$remaining} left";
             $statusType = "partial";
         } else {
-            $tag = "[✓ {$enrolled}/{$limit} Full]";
-            $statusLabel = "✓ {$enrolled}/{$limit} Full";
+            $tag = "[Complete {$enrolled}/{$limit}]";
+            $statusLabel = "Complete {$enrolled}/{$limit}";
             $statusType = "full";
         }
+
+        $statusKey = $statusType === 'full' ? 'completed' : ($statusType === 'partial' ? 'partial' : 'pending');
 
         return [
             'id' => $p->id,
             'code' => $p->code,
             'name' => $p->name,
+            'malayalam_name' => $p->malayalam_name ?? '',
             'type' => $p->type,
             'zone_id' => $p->zone_id,
             'zone_name' => $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone'),
             'limit' => $limit,
             'enrolled' => $enrolled,
             'remaining' => $remaining,
+            'needed' => $remaining,
+            'percent' => $limit > 0 ? min(100, round(($enrolled / $limit) * 100)) : 0,
             'is_full' => $isFull,
             'is_registered' => $isRegistered,
             'enrolled_students' => $enrolledStudents,
             'tag' => $tag,
             'status_label' => $statusLabel,
             'status_type' => $statusType,
-            'is_stage' => (bool)$p->is_stage,
+            'status_key' => $statusKey,
+            'is_stage' => (bool) $p->is_stage,
         ];
     });
 
@@ -119,7 +125,19 @@
 window.quafRegistrationData = {
     programs: {!! json_encode($programsData, JSON_UNESCAPED_UNICODE) !!},
     students: {!! json_encode($studentsData, JSON_UNESCAPED_UNICODE) !!},
-    zones: {!! json_encode($zonesData, JSON_UNESCAPED_UNICODE) !!}
+    zones: {!! json_encode($zonesData, JSON_UNESCAPED_UNICODE) !!},
+    programsStatusList: {!! json_encode($programsStatusList, JSON_UNESCAPED_UNICODE) !!},
+    statusSummary: {!! json_encode($statusSummary, JSON_UNESCAPED_UNICODE) !!}
+};
+
+window.quafSetTrackerTab = function(tab) {
+    if (window.quafQuotaTrackerInstance) {
+        window.quafQuotaTrackerInstance.setTab(tab);
+    }
+    const sec = document.getElementById('programs-tracker-section');
+    if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth' });
+    }
 };
 
 function registrationManager() {
@@ -139,6 +157,7 @@ function registrationManager() {
         allZones: window.quafRegistrationData ? (window.quafRegistrationData.zones || []) : [],
         
         init() {
+            window.quafRegistrationManagerInstance = this;
             this.updateProgramDropdown();
             if (this.selectedZone && this.selectedProgramId) {
                 this.onProgramChange(this.selectedProgramId);
@@ -363,6 +382,15 @@ function registrationManager() {
                 this.leaderStudentId = null;
                 this.updateProgramDropdown();
                 this.feedbackSuccess = data.message || `All registrations for "${prog.name}" removed successfully.`;
+
+                window.dispatchEvent(new CustomEvent('quaf-program-quota-updated', {
+                    detail: {
+                        program_id: prog.id,
+                        enrolled: 0,
+                        enrolled_students: [],
+                        limit: prog.limit
+                    }
+                }));
             } catch (err) {
                 this.feedbackError = 'Connection error while removing registration.';
             } finally {
@@ -441,8 +469,8 @@ function registrationManager() {
                         enrolledProg.status_label = `${enrolledProg.enrolled}/${enrolledProg.limit} • ${enrolledProg.remaining} left`;
                         enrolledProg.status_type = 'partial';
                     } else {
-                        enrolledProg.tag = `[✓ ${enrolledProg.enrolled}/${enrolledProg.limit} Full]`;
-                        enrolledProg.status_label = `✓ ${enrolledProg.enrolled}/${enrolledProg.limit} Full`;
+                        enrolledProg.tag = `[Full ${enrolledProg.enrolled}/${enrolledProg.limit}]`;
+                        enrolledProg.status_label = `Full ${enrolledProg.enrolled}/${enrolledProg.limit}`;
                         enrolledProg.status_type = 'full';
                     }
                 }
@@ -462,11 +490,147 @@ function registrationManager() {
                 this.studentSearch = '';
                 this.updateProgramDropdown();
                 
-                this.feedbackSuccess = data.message || `✓ Saved & updated participants for "${enrolledProgName}".`;
+                this.feedbackSuccess = data.message || `Saved and updated participants for "${enrolledProgName}".`;
+
+                window.dispatchEvent(new CustomEvent('quaf-program-quota-updated', {
+                    detail: {
+                        program_id: enrolledProg.id,
+                        enrolled: enrolledProg.enrolled,
+                        enrolled_students: enrolledProg.enrolled_students,
+                        limit: enrolledProg.limit
+                    }
+                }));
             } catch (err) {
                 this.feedbackError = 'Connection error: Could not complete registration. Please check your network.';
             } finally {
                 this.isSubmitting = false;
+            }
+        }
+    };
+}
+
+function quotaStatusTracker() {
+    const progsList = window.quafRegistrationData ? (window.quafRegistrationData.programsStatusList || []) : [];
+    const map = {};
+    progsList.forEach(p => {
+        map[p.id] = { ...p };
+    });
+
+    return {
+        trackerTab: 'action_required', // 'action_required', 'partial', 'pending', 'completed', 'all'
+        searchQuery: '',
+        filterZone: '',
+        filterType: '',
+        programsMap: map,
+        
+        init() {
+            window.quafQuotaTrackerInstance = this;
+            window.addEventListener('quaf-program-quota-updated', (e) => {
+                this.handleProgramQuotaUpdate(e.detail);
+            });
+        },
+
+        getProg(id) {
+            return this.programsMap[id] || {};
+        },
+
+        handleProgramQuotaUpdate(detail) {
+            const prog = this.programsMap[detail.program_id];
+            if (!prog) return;
+
+            prog.enrolled = Number(detail.enrolled || 0);
+            prog.enrolled_students = detail.enrolled_students || [];
+            prog.remaining = Math.max(0, prog.limit - prog.enrolled);
+            prog.needed = prog.remaining;
+            prog.percent = prog.limit > 0 ? Math.min(100, Math.round((prog.enrolled / prog.limit) * 100)) : 0;
+
+            if (prog.enrolled >= prog.limit) {
+                prog.status_key = 'completed';
+                prog.status_label = 'Complete';
+            } else if (prog.enrolled > 0) {
+                prog.status_key = 'partial';
+                prog.status_label = `Partial (${prog.remaining} More Needed)`;
+            } else {
+                prog.status_key = 'pending';
+                prog.status_label = `Pending (${prog.limit} To Fill)`;
+            }
+        },
+
+        setTab(tab) {
+            this.trackerTab = tab;
+        },
+
+        get allProgramsArray() {
+            return Object.values(this.programsMap);
+        },
+
+        get completedCount() {
+            return this.allProgramsArray.filter(p => p.enrolled >= p.limit).length;
+        },
+
+        get partialCount() {
+            return this.allProgramsArray.filter(p => p.enrolled > 0 && p.enrolled < p.limit).length;
+        },
+
+        get pendingCount() {
+            return this.allProgramsArray.filter(p => p.enrolled === 0).length;
+        },
+
+        get actionRequiredCount() {
+            return this.allProgramsArray.filter(p => p.enrolled < p.limit).length;
+        },
+
+        get totalSlotsNeeded() {
+            return this.allProgramsArray.reduce((sum, p) => sum + Math.max(0, p.limit - p.enrolled), 0);
+        },
+
+        isRowVisible(id) {
+            const p = this.programsMap[id];
+            if (!p) return false;
+
+            // Tab filter
+            if (this.trackerTab === 'action_required' && p.status_key === 'completed') return false;
+            if (this.trackerTab === 'partial' && p.status_key !== 'partial') return false;
+            if (this.trackerTab === 'pending' && p.status_key !== 'pending') return false;
+            if (this.trackerTab === 'completed' && p.status_key !== 'completed') return false;
+
+            // Zone filter
+            if (this.filterZone) {
+                const pZone = (p.zone_name || '').toLowerCase();
+                const targetZ = this.filterZone.toLowerCase();
+                if (!pZone.includes(targetZ) && !(targetZ.includes('mix') && p.is_mix_zone)) {
+                    return false;
+                }
+            }
+
+            // Type filter
+            if (this.filterType && p.type !== this.filterType) return false;
+
+            // Search query
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase().trim();
+                const code = (p.code || '').toLowerCase();
+                const name = (p.name || '').toLowerCase();
+                const mal = (p.malayalam_name || '').toLowerCase();
+                if (!code.includes(q) && !name.includes(q) && !mal.includes(q)) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        get hasVisibleRows() {
+            return this.allProgramsArray.some(p => this.isRowVisible(p.id));
+        },
+
+        enrollProgram(p) {
+            if (window.quafRegistrationManagerInstance) {
+                window.quafRegistrationManagerInstance.selectProgram(p.zone_name, p.id);
+            }
+            const el = document.getElementById('enrollment_card');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
             }
         }
     };
@@ -483,7 +647,9 @@ function registrationManager() {
 
     <!-- Summary Counters (Total, Fully Registered, Partially Registered, Unregistered) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+        <button type="button" 
+                onclick="window.quafSetTrackerTab('all')" 
+                class="text-left p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 hover:shadow-md transition-all cursor-pointer">
             <div>
                 <span class="text-[11px] font-sora uppercase text-slate-400 font-bold block">Total Programs</span>
                 <span class="text-2xl font-sora font-black text-slate-900">{{ $totalProgramsCount ?? $eligiblePrograms->count() }}</span>
@@ -491,29 +657,35 @@ function registrationManager() {
             <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
                 <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             </div>
-        </div>
+        </button>
 
-        <a href="#entries-table-section" class="p-5 rounded-3xl bg-white border-2 border-emerald-500/40 shadow-sm flex items-center justify-between hover:border-emerald-500 transition-colors">
+        <button type="button" 
+                onclick="window.quafSetTrackerTab('completed')" 
+                class="text-left p-5 rounded-3xl bg-white border-2 border-emerald-500/40 shadow-sm flex items-center justify-between hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer">
             <div>
                 <span class="text-[11px] font-sora uppercase text-emerald-600 font-bold block">Fully Registered</span>
                 <span class="text-2xl font-sora font-black text-emerald-700">{{ $fullyRegisteredCount ?? 0 }}</span>
             </div>
             <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-sora font-bold">
-                Full Quota ✓
+                Full Quota
             </span>
-        </a>
+        </button>
 
-        <a href="#unregistered-section" class="p-5 rounded-3xl bg-white border-2 border-amber-500/40 shadow-sm flex items-center justify-between hover:border-amber-500 transition-colors">
+        <button type="button" 
+                onclick="window.quafSetTrackerTab('partial')" 
+                class="text-left p-5 rounded-3xl bg-white border-2 border-amber-500/40 shadow-sm flex items-center justify-between hover:border-amber-500 hover:shadow-md transition-all cursor-pointer">
             <div>
                 <span class="text-[11px] font-sora uppercase text-amber-600 font-bold block">Partially Registered</span>
                 <span class="text-2xl font-sora font-black text-amber-700">{{ $partiallyRegisteredCount ?? 0 }}</span>
             </div>
             <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-sora font-bold">
-                Slots Left !
+                {{ $statusSummary['partial_slots_needed'] ?? $partialSlotsNeeded ?? 0 }} Slots Needed
             </span>
-        </a>
+        </button>
 
-        <a href="#unregistered-section" class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 transition-colors">
+        <button type="button" 
+                onclick="window.quafSetTrackerTab('pending')" 
+                class="text-left p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-400 hover:shadow-md transition-all cursor-pointer">
             <div>
                 <span class="text-[11px] font-sora uppercase text-slate-400 font-bold block">Unregistered Programs</span>
                 <span class="text-2xl font-sora font-black text-slate-700">{{ $unregisteredProgramsCount ?? 0 }}</span>
@@ -521,7 +693,7 @@ function registrationManager() {
             <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-sora font-bold">
                 0 Enrolled
             </span>
-        </a>
+        </button>
     </div>
 
     <!-- Registration Window Notice -->
@@ -562,7 +734,7 @@ function registrationManager() {
     @endif
 
     <!-- Registration Submission Card -->
-    <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm {{ !$isRegistrationOpen ? 'opacity-60 pointer-events-none' : '' }}">
+    <div id="enrollment_card" class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm {{ !$isRegistrationOpen ? 'opacity-60 pointer-events-none' : '' }}">
         <div class="flex items-center gap-2 border-b border-slate-100 pb-4">
             <svg class="w-5 h-5 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
             <h2 class="text-lg font-sora font-bold text-slate-900">Enroll Participant for Program</h2>
@@ -659,7 +831,7 @@ function registrationManager() {
                             </template>
                             <template x-if="currentProgram.is_full">
                                 <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
-                                    Quota Full (<span class="font-mono" x-text="currentProgram.enrolled"></span>/<span class="font-mono" x-text="currentProgram.limit"></span> slots filled ✓)
+                                    Quota Full (<span class="font-mono" x-text="currentProgram.enrolled"></span>/<span class="font-mono" x-text="currentProgram.limit"></span> slots filled)
                                 </span>
                             </template>
                         </div>
@@ -955,98 +1127,265 @@ function registrationManager() {
         </div>
     </div>
 
-    <!-- Open Competitions & Quota Slots List -->
-    <div id="unregistered-section" class="bg-white rounded-3xl border border-amber-200 p-6 sm:p-8 space-y-4 shadow-sm" x-data="{ filterZone: '' }">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+    <!-- Program Quota & Entry Tracker -->
+    <div id="programs-tracker-section" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm" x-data="quotaStatusTracker()">
+        <!-- Header & Quick KPIs -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
-                <h3 class="text-base font-sora font-bold text-slate-900">Unregistered Programs & Open Quota Slots ({{ ($unregisteredPrograms ?? collect())->count() }})</h3>
-                <p class="text-[11px] font-sora text-slate-500">Competitions with available or partially enrolled participant slots for {{ $group->name }}.</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-brand-orange"></span>
+                    <h3 class="text-xl font-sora font-black text-slate-900">Program Quota & Entry Tracker</h3>
+                </div>
+                <p class="text-xs font-sora text-slate-500 mt-1">
+                    Live overview of all competitions for {{ $group->name }}. Track complete entries, pending programs, and exactly how many more students need to be enrolled.
+                </p>
             </div>
-            <div class="flex items-center gap-2">
-                <select x-model="filterZone" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-sora text-slate-700 focus:outline-none">
+            
+            <!-- Quick Slot Summary Badges -->
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-sora font-bold flex items-center gap-1.5 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>Slots Needed: <strong class="font-mono text-amber-950" x-text="totalSlotsNeeded"></strong></span>
+                </div>
+                <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-sora font-bold flex items-center gap-1.5 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Completed: <strong class="font-mono text-emerald-950" x-text="completedCount"></strong> / <span class="font-mono" x-text="programs.length"></span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs (Action Required, Partial, Pending, Completed, All) -->
+        <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3">
+            <button type="button" 
+                    @click="setTab('action_required')" 
+                    :class="trackerTab === 'action_required' ? 'bg-orange-600 text-white shadow-sm' : 'bg-orange-50 text-orange-900 hover:bg-orange-100 border border-orange-200'" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-sora font-bold transition-all flex items-center gap-2 cursor-pointer">
+                <span>Action Required</span>
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
+                      :class="trackerTab === 'action_required' ? 'bg-white text-orange-700' : 'bg-orange-200 text-orange-900'"
+                      x-text="actionRequiredCount"></span>
+            </button>
+
+            <button type="button" 
+                    @click="setTab('partial')" 
+                    :class="trackerTab === 'partial' ? 'bg-amber-600 text-white shadow-sm' : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-sora font-bold transition-all flex items-center gap-2 cursor-pointer">
+                <span>Partial (Need More)</span>
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
+                      :class="trackerTab === 'partial' ? 'bg-white text-amber-700' : 'bg-amber-200 text-amber-900'"
+                      x-text="partialCount"></span>
+            </button>
+
+            <button type="button" 
+                    @click="setTab('pending')" 
+                    :class="trackerTab === 'pending' ? 'bg-slate-700 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-sora font-bold transition-all flex items-center gap-2 cursor-pointer">
+                <span>Pending (0 Enrolled)</span>
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
+                      :class="trackerTab === 'pending' ? 'bg-white text-slate-800' : 'bg-slate-200 text-slate-700'"
+                      x-text="pendingCount"></span>
+            </button>
+
+            <button type="button" 
+                    @click="setTab('completed')" 
+                    :class="trackerTab === 'completed' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200'" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-sora font-bold transition-all flex items-center gap-2 cursor-pointer">
+                <span>Completed</span>
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
+                      :class="trackerTab === 'completed' ? 'bg-white text-emerald-700' : 'bg-emerald-200 text-emerald-900'"
+                      x-text="completedCount"></span>
+            </button>
+
+            <button type="button" 
+                    @click="setTab('all')" 
+                    :class="trackerTab === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'" 
+                    class="px-3.5 py-2 rounded-xl text-xs font-sora font-bold transition-all flex items-center gap-2 cursor-pointer">
+                <span>All Programs</span>
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold" 
+                      :class="trackerTab === 'all' ? 'bg-white text-slate-900' : 'bg-slate-200 text-slate-700'"
+                      x-text="programs.length"></span>
+            </button>
+        </div>
+
+        <!-- Filter and Search Toolbar -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="relative">
+                <input type="text" 
+                       x-model="searchQuery" 
+                       placeholder="Search by code, English or Malayalam name..." 
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-sora text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors pr-10">
+                <span class="absolute right-3.5 top-3 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+            </div>
+
+            <div>
+                <select x-model="filterZone" 
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-sora text-slate-700 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                     <option value="">All Zones</option>
                     @foreach($zones as $z)
                         <option value="{{ $z->name }}">{{ $z->name }}</option>
                     @endforeach
+                    <option value="Mix Zone">Mix Zone</option>
+                </select>
+            </div>
+
+            <div>
+                <select x-model="filterType" 
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-sora text-slate-700 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    <option value="">All Competition Types</option>
+                    <option value="individual">Individual Programs</option>
+                    <option value="group">Group Programs</option>
                 </select>
             </div>
         </div>
 
-        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+        <!-- Dynamic Quota Status Table -->
+        <div class="overflow-x-auto max-h-[550px] overflow-y-auto border border-slate-100 rounded-2xl">
             <table class="w-full text-left text-xs font-sora">
-                <thead class="sticky top-0 bg-white border-b border-slate-100 text-slate-400 uppercase">
+                <thead class="sticky top-0 bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px] z-10">
                     <tr>
-                        <th class="py-2.5 px-3">Code</th>
-                        <th class="py-2.5 px-3">Program Name</th>
-                        <th class="py-2.5 px-3">Zone</th>
-                        <th class="py-2.5 px-3">Type</th>
-                        <th class="py-2.5 px-3">Quota Slots</th>
-                        <th class="py-2.5 px-3">Status</th>
-                        <th class="py-2.5 px-3 text-right">Action</th>
+                        <th class="py-3 px-3.5">Code & Program</th>
+                        <th class="py-3 px-3">Zone & Type</th>
+                        <th class="py-3 px-3">Quota Status</th>
+                        <th class="py-3 px-3">Action Needed</th>
+                        <th class="py-3 px-3">Enrolled Candidates</th>
+                        <th class="py-3 px-3 text-right">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-slate-700">
-                    @forelse($unregisteredPrograms ?? [] as $up)
+                <tbody class="divide-y divide-slate-100 text-slate-700 bg-white">
+                    @foreach($programsStatusList as $p)
                         @php
-                            $upZone = $up->zone?->name ?? ($up->eligibility ?? 'Mix Zone');
-                            $limit = $up->limit;
-                            $pEntries = isset($entriesByProgram) ? $entriesByProgram->get($up->id, collect()) : collect();
-                            if ($up->type === 'group') {
-                                $firstEntry = $pEntries->first();
-                                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
-                            } else {
-                                $enrolled = $pEntries->count();
-                            }
-                            $remaining = max(0, $limit - $enrolled);
-                            $isPartial = ($enrolled > 0 && $enrolled < $limit);
+                            $pId = $p['id'];
+                            $pEnrolled = $p['enrolled'];
+                            $pLimit = $p['limit'];
+                            $pRemaining = $p['remaining'];
+                            $pPercent = $p['percent'];
+                            $pKey = $p['status_key'];
                         @endphp
-                        <tr x-show="!filterZone || filterZone === '{{ addslashes($upZone) }}'" class="hover:bg-amber-50/40 transition">
-                            <td class="py-2.5 px-3 font-bold text-slate-600 font-mono">{{ $up->code }}</td>
-                            <td class="py-2.5 px-3 font-sora font-semibold text-slate-900">{{ $up->name }}</td>
-                            <td class="py-2.5 px-3">{{ $upZone }}</td>
-                            <td class="py-2.5 px-3 whitespace-nowrap">
-                                @if(($up->type ?? 'individual') === 'group')
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                                        Group
-                                    </span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                                        Individual
-                                    </span>
+                        <tr x-show="isRowVisible({{ $pId }})" 
+                            class="hover:bg-amber-50/30 transition-colors"
+                            :class="getProg({{ $pId }}).status_key === 'partial' ? 'bg-amber-50/20' : (getProg({{ $pId }}).status_key === 'completed' ? 'bg-emerald-50/10' : '')">
+                            <!-- Code & Program Name -->
+                            <td class="py-3 px-3.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-[11px]">{{ $p['code'] }}</span>
+                                    <span class="font-bold text-slate-900 text-sm">{{ $p['name'] }}</span>
+                                </div>
+                                @if(!empty($p['malayalam_name']))
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $p['malayalam_name'] }}</span>
                                 @endif
                             </td>
-                            <td class="py-2.5 px-3">
-                                <span class="font-bold {{ $isPartial ? 'text-amber-800' : 'text-slate-700' }} font-mono">
-                                    {{ $enrolled }} / {{ $limit }} Filled
-                                </span>
-                                <span class="text-[10px] text-slate-400 block font-normal font-mono">({{ $remaining }} slot{{ $remaining > 1 ? 's' : '' }} remaining)</span>
+
+                            <!-- Zone & Type -->
+                            <td class="py-3 px-3 whitespace-nowrap">
+                                <div class="flex flex-col gap-1">
+                                    <span class="font-semibold text-slate-700 text-xs">{{ $p['zone_name'] }}</span>
+                                    @if($p['type'] === 'group')
+                                        <span class="inline-block w-fit px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                            Group (<span class="font-mono">{{ $pLimit }}</span>)
+                                        </span>
+                                    @else
+                                        <span class="inline-block w-fit px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                            Individual (<span class="font-mono">{{ $pLimit }}</span>)
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
-                            <td class="py-2.5 px-3">
-                                @if($isPartial)
-                                    <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold uppercase">
-                                        Partial ({{ $remaining }} Left)
-                                    </span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold uppercase">
-                                        Unregistered
-                                    </span>
-                                @endif
+
+                            <!-- Quota Progress & Slot Counts (SSR + Reactive) -->
+                            <td class="py-3 px-3">
+                                <div class="w-36">
+                                    <div class="flex items-center justify-between text-[11px] mb-1">
+                                        <span class="font-mono font-bold" 
+                                              :class="getProg({{ $pId }}).status_key === 'completed' ? 'text-emerald-700' : (getProg({{ $pId }}).status_key === 'partial' ? 'text-amber-700' : 'text-slate-500')"
+                                              x-text="getProg({{ $pId }}).enrolled + ' / ' + getProg({{ $pId }}).limit + ' Filled'">{{ $pEnrolled }} / {{ $pLimit }} Filled</span>
+                                        <span class="font-mono text-[10px] text-slate-400" x-text="getProg({{ $pId }}).percent + '%'">{{ $pPercent }}%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                                        <div class="h-2 rounded-full transition-all duration-300"
+                                             :class="getProg({{ $pId }}).status_key === 'completed' ? 'bg-emerald-500' : (getProg({{ $pId }}).status_key === 'partial' ? 'bg-amber-500' : 'bg-slate-300')"
+                                             :style="'width: ' + getProg({{ $pId }}).percent + '%'"
+                                             style="width: {{ $pPercent }}%"></div>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 block font-normal font-mono mt-0.5"
+                                          x-text="'(' + getProg({{ $pId }}).remaining + ' slot' + (getProg({{ $pId }}).remaining === 1 ? '' : 's') + ' remaining)'">({{ $pRemaining }} slot{{ $pRemaining === 1 ? '' : 's' }} remaining)</span>
+                                </div>
                             </td>
-                            <td class="py-2.5 px-3 text-right">
+
+                            <!-- Action Needed (CRITICAL) -->
+                            <td class="py-3 px-3 whitespace-nowrap">
+                                <template x-if="getProg({{ $pId }}).status_key === 'completed'">
+                                    <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold inline-flex items-center gap-1">
+                                        Quota Complete (0 needed)
+                                    </span>
+                                </template>
+
+                                <template x-if="getProg({{ $pId }}).status_key === 'partial'">
+                                    <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-950 border border-amber-400 text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                        <span><strong class="font-mono font-black text-amber-900" x-text="getProg({{ $pId }}).remaining">{{ $pRemaining }}</strong> more needed</span>
+                                    </span>
+                                </template>
+
+                                <template x-if="getProg({{ $pId }}).status_key === 'pending'">
+                                    <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold inline-flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                        <span><strong class="font-mono font-black" x-text="getProg({{ $pId }}).limit">{{ $pLimit }}</strong> needed (Not registered)</span>
+                                    </span>
+                                </template>
+                            </td>
+
+                            <!-- Enrolled Candidates Preview -->
+                            <td class="py-3 px-3">
+                                <template x-if="getProg({{ $pId }}).enrolled_students && getProg({{ $pId }}).enrolled_students.length > 0">
+                                    <div class="flex flex-wrap items-center gap-1.5 max-w-xs">
+                                        <template x-for="st in getProg({{ $pId }}).enrolled_students" :key="st.id">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-sora">
+                                                <span class="font-mono font-bold text-brand-orange" x-text="'#' + st.chest"></span>
+                                                <span class="font-semibold truncate max-w-[100px]" x-text="st.name"></span>
+                                                <template x-if="st.is_leader">
+                                                    <span class="text-[9px] uppercase font-bold text-amber-700 bg-amber-100 px-1 rounded">Ldr</span>
+                                                </template>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template x-if="!getProg({{ $pId }}).enrolled_students || getProg({{ $pId }}).enrolled_students.length === 0">
+                                    <span class="text-slate-400 text-[11px] italic">None enrolled yet</span>
+                                </template>
+                            </td>
+
+                            <!-- Action Button -->
+                            <td class="py-3 px-3 text-right whitespace-nowrap">
                                 @if($isRegistrationOpen)
-                                    <a href="#zone_select" 
-                                       @click.prevent="selectProgram('{{ addslashes($upZone) }}', {{ $up->id }}); document.getElementById('zone_select')?.scrollIntoView({ behavior: 'smooth' });"
-                                       class="inline-block px-2.5 py-1 rounded-lg bg-brand-orange text-white hover:bg-orange-600 text-[11px] font-sora font-bold transition-colors shadow-2xs">
-                                        + Enroll
-                                    </a>
+                                    <button type="button" 
+                                            @click="enrollProgram(getProg({{ $pId }}))" 
+                                            :class="getProg({{ $pId }}).status_key === 'completed' ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-brand-orange hover:bg-orange-600 text-white shadow-2xs'"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-sora font-bold transition-all cursor-pointer">
+                                        <template x-if="getProg({{ $pId }}).status_key === 'completed'">
+                                            <span>Edit Roster</span>
+                                        </template>
+                                        <template x-if="getProg({{ $pId }}).status_key === 'partial'">
+                                            <span>+ Add Students</span>
+                                        </template>
+                                        <template x-if="getProg({{ $pId }}).status_key === 'pending'">
+                                            <span>+ Enroll</span>
+                                        </template>
+                                    </button>
+                                @else
+                                    <span class="text-[11px] text-slate-400">Locked</span>
                                 @endif
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="py-8 text-center text-emerald-600 font-bold">All eligible program quotas have been completely filled by {{ $group->name }}!</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
+
+                    <tr x-show="!hasVisibleRows">
+                        <td colspan="6" class="py-12 text-center text-slate-400 font-sora text-xs">
+                            <span class="block text-slate-500 font-semibold mb-1">No matching programs found.</span>
+                            <span>Try adjusting your tab, search query, or zone filter.</span>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

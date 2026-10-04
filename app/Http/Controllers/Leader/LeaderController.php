@@ -112,6 +112,59 @@ class LeaderController extends Controller
 
         $isRegistrationOpen = $this->isRegistrationOpen();
 
+        // Registration quota and completion statistics for the team
+        $allGroupEntries = ProgramEntry::where('group_id', $group->id)
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->with(['participants'])
+            ->get();
+        $entriesByProgram = $allGroupEntries->groupBy('program_id');
+
+        $eligiblePrograms = Program::where('status', 'upcoming')->get();
+        $totalProgramsCount = $eligiblePrograms->count();
+
+        $fullyRegisteredCount = 0;
+        $partiallyRegisteredCount = 0;
+        $unregisteredCount = 0;
+        $partialSlotsNeeded = 0;
+        $totalSlotsNeeded = 0;
+
+        foreach ($eligiblePrograms as $p) {
+            $limit = $p->limit;
+            $pEntries = $entriesByProgram->get($p->id, collect());
+            if ($p->isGroup()) {
+                $firstEntry = $pEntries->first();
+                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+            } else {
+                $enrolled = $pEntries->count();
+            }
+
+            if ($enrolled >= $limit) {
+                $fullyRegisteredCount++;
+            } elseif ($enrolled > 0) {
+                $partiallyRegisteredCount++;
+                $diff = max(0, $limit - $enrolled);
+                $partialSlotsNeeded += $diff;
+                $totalSlotsNeeded += $diff;
+            } else {
+                $unregisteredCount++;
+                $totalSlotsNeeded += $limit;
+            }
+        }
+
+        $regProgressPercent = $totalProgramsCount > 0
+            ? round(($fullyRegisteredCount / $totalProgramsCount) * 100, 1)
+            : 0;
+
+        $registrationStats = [
+            'total' => $totalProgramsCount,
+            'completed' => $fullyRegisteredCount,
+            'partial' => $partiallyRegisteredCount,
+            'pending' => $unregisteredCount,
+            'partial_slots_needed' => $partialSlotsNeeded,
+            'total_slots_needed' => $totalSlotsNeeded,
+            'percent' => $regProgressPercent,
+        ];
+
         $stats = [
             'students' => $group->students()->count(),
             'programs' => Cache::remember('programs_count_cached', 60, fn () => Program::count()),
@@ -137,6 +190,7 @@ class LeaderController extends Controller
             'announcements',
             'isRegistrationOpen',
             'stats',
+            'registrationStats',
             'leaderboard',
             'chartData'
         ));
@@ -429,37 +483,138 @@ class LeaderController extends Controller
         $entriesByProgram = $allGroupEntries->groupBy('program_id');
         $registeredProgramIds = $allGroupEntries->pluck('program_id')->unique()->toArray();
 
-        $eligiblePrograms = Program::with('zone')->where('status', 'upcoming')->orderBy('name')->get();
+        $eligiblePrograms = Program::with('zone')->where('status', 'upcoming')->orderBy('code')->get();
 
         $totalProgramsCount = $eligiblePrograms->count();
         $registeredProgramsCount = count($registeredProgramIds);
 
         $fullyRegisteredCount = 0;
         $partiallyRegisteredCount = 0;
+        $unregisteredCount = 0;
+        $partialSlotsNeeded = 0;
+        $totalSlotsNeeded = 0;
         $unregisteredPrograms = collect();
 
-        foreach ($eligiblePrograms as $p) {
+        $programsStatusList = $eligiblePrograms->map(function ($p) use (
+            $entriesByProgram,
+            &$fullyRegisteredCount,
+            &$partiallyRegisteredCount,
+            &$unregisteredCount,
+            &$partialSlotsNeeded,
+            &$totalSlotsNeeded,
+            &$unregisteredPrograms
+        ) {
             $limit = $p->limit;
-
             $pEntries = $entriesByProgram->get($p->id, collect());
+
+            $enrolledStudents = [];
             if ($p->type === 'group') {
                 $firstEntry = $pEntries->first();
-                $enrolled = $firstEntry ? max(1, $firstEntry->participants->count()) : 0;
+                if ($firstEntry) {
+                    $leaderStudent = $firstEntry->leaderStudent() ?? $firstEntry->student;
+                    if ($firstEntry->participants && $firstEntry->participants->isNotEmpty()) {
+                        $enrolledStudents = $firstEntry->participants->map(function ($st) use ($firstEntry, $leaderStudent) {
+                            return [
+                                'id' => $st->id,
+                                'chest' => ltrim((string) ($st->chest_number ?: ($st->student_id ?: $st->id)), '#'),
+                                'name' => $st->name,
+                                'class' => $st->class_level ?? '',
+                                'zone_id' => $st->zone_id,
+                                'zone_name' => $st->zone?->name ?? 'N/A',
+                                'is_leader' => ($leaderStudent && $leaderStudent->id === $st->id),
+                                'entry_id' => $firstEntry->id,
+                            ];
+                        })->values()->all();
+                    } elseif ($firstEntry->student) {
+                        $st = $firstEntry->student;
+                        $enrolledStudents = [[
+                            'id' => $st->id,
+                            'chest' => ltrim((string) ($st->chest_number ?: ($st->student_id ?: $st->id)), '#'),
+                            'name' => $st->name,
+                            'class' => $st->class_level ?? '',
+                            'zone_id' => $st->zone_id,
+                            'zone_name' => $st->zone?->name ?? 'N/A',
+                            'is_leader' => true,
+                            'entry_id' => $firstEntry->id,
+                        ]];
+                    }
+                }
             } else {
-                $enrolled = $pEntries->count();
+                $enrolledStudents = $pEntries->map(function ($entry) {
+                    $st = $entry->student;
+                    if (! $st) {
+                        return null;
+                    }
+
+                    return [
+                        'id' => $st->id,
+                        'chest' => ltrim((string) ($st->chest_number ?: ($st->student_id ?: $st->id)), '#'),
+                        'name' => $st->name,
+                        'class' => $st->class_level ?? '',
+                        'zone_id' => $st->zone_id,
+                        'zone_name' => $st->zone?->name ?? 'N/A',
+                        'is_leader' => false,
+                        'entry_id' => $entry->id,
+                    ];
+                })->filter()->values()->all();
             }
+
+            $enrolled = count($enrolledStudents);
+            $remaining = max(0, $limit - $enrolled);
+            $percent = $limit > 0 ? min(100, round(($enrolled / $limit) * 100)) : 0;
+            $zoneName = $p->zone?->name ?? ($p->eligibility ?? 'Mix Zone');
 
             if ($enrolled >= $limit) {
+                $statusKey = 'completed';
+                $statusLabel = 'Complete';
                 $fullyRegisteredCount++;
             } elseif ($enrolled > 0) {
+                $statusKey = 'partial';
+                $statusLabel = "Partial ({$remaining} More Needed)";
                 $partiallyRegisteredCount++;
+                $partialSlotsNeeded += $remaining;
+                $totalSlotsNeeded += $remaining;
                 $unregisteredPrograms->push($p);
             } else {
+                $statusKey = 'pending';
+                $statusLabel = "Pending ({$limit} To Fill)";
+                $unregisteredCount++;
+                $totalSlotsNeeded += $limit;
                 $unregisteredPrograms->push($p);
             }
-        }
 
-        $unregisteredProgramsCount = max(0, $totalProgramsCount - $fullyRegisteredCount - $partiallyRegisteredCount);
+            return [
+                'id' => $p->id,
+                'code' => $p->code,
+                'name' => $p->name,
+                'malayalam_name' => $p->malayalam_name,
+                'type' => $p->type,
+                'zone_id' => $p->zone_id,
+                'zone_name' => $zoneName,
+                'is_mix_zone' => (bool) $p->isMixZone(),
+                'limit' => $limit,
+                'enrolled' => $enrolled,
+                'remaining' => $remaining,
+                'needed' => $remaining,
+                'percent' => $percent,
+                'status_key' => $statusKey,
+                'status_label' => $statusLabel,
+                'enrolled_students' => $enrolledStudents,
+            ];
+        });
+
+        $unregisteredProgramsCount = $unregisteredCount;
+
+        $statusSummary = [
+            'total' => $totalProgramsCount,
+            'completed' => $fullyRegisteredCount,
+            'partial' => $partiallyRegisteredCount,
+            'pending' => $unregisteredCount,
+            'action_required' => $partiallyRegisteredCount + $unregisteredCount,
+            'partial_slots_needed' => $partialSlotsNeeded,
+            'total_slots_needed' => $totalSlotsNeeded,
+            'percent' => $totalProgramsCount > 0 ? round(($fullyRegisteredCount / $totalProgramsCount) * 100, 1) : 0,
+        ];
 
         $students = $group->students()->with('zone')->orderBy('name')->get();
         $zones = Zone::orderBy('display_order')->get();
@@ -489,6 +644,8 @@ class LeaderController extends Controller
             'fullyRegisteredCount',
             'partiallyRegisteredCount',
             'unregisteredProgramsCount',
+            'programsStatusList',
+            'statusSummary',
             'tab',
             'students',
             'zones',
