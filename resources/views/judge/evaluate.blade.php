@@ -1,6 +1,9 @@
 @extends('layouts.judge', ['title' => 'Evaluation: ' . $program->name])
 @section('content')
-<div class="space-y-6" x-data="{ rulesModalOpen: false }">
+<div class="space-y-6" x-data="{
+    rulesModalOpen: false,
+    evaluationMode: localStorage.getItem('quaf_judge_mode_{{ $program->id }}') || '{{ $program->has_criteria && $program->scoringCriteria->isNotEmpty() ? 'criteria' : 'simple' }}'
+}">
     <!-- Top Bar (Light Theme) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
         <div class="flex items-center gap-3">
@@ -31,8 +34,41 @@
             </span>
         </div>
     </div>
+
+    <!-- 2 Evaluation Modes Switcher (Simple 100-Mark Scale vs Criteria Breakdown) -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">Scoring Mode / മാർക്ക് നൽകുന്ന രീതി:</span>
+                <span class="text-[11px] font-mono text-slate-400 font-semibold">(ഇഷ്ടമുള്ള രീതി തിരഞ്ഞെടുക്കാം)</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+                വിധികർത്താവിന് നേരിട്ട് 100-ൽ മാർക്ക് നൽകുകയോ (Simple Mode), അല്ലെങ്കിൽ മാനദണ്ഡങ്ങൾ തിരിച്ച് നൽകുകയോ (Criteria Mode) ചെയ്യാം.
+            </p>
+        </div>
+
+        <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200 gap-1 shrink-0">
+            <button type="button"
+                    @click="evaluationMode = 'simple'; localStorage.setItem('quaf_judge_mode_{{ $program->id }}', 'simple')"
+                    :class="evaluationMode === 'simple' ? 'bg-[#005c94] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <span>1. Simple Mode (100-ൽ മാർക്ക്)</span>
+            </button>
+
+            <button type="button"
+                    @click="evaluationMode = 'criteria'; localStorage.setItem('quaf_judge_mode_{{ $program->id }}', 'criteria')"
+                    :class="evaluationMode === 'criteria' ? 'bg-[#be1e2d] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                    class="px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <span>2. Criteria Mode (മാനദണ്ഡങ്ങൾ)</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Scoring Rules & Criteria Overview Banner (Light Theme) -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono shadow-2xs">
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono shadow-2xs"
+         x-show="evaluationMode === 'criteria'">
         <span class="text-slate-500 font-bold uppercase tracking-wider">Evaluation Rubric:</span>
         @if(!$program->has_criteria || $program->scoringCriteria->isEmpty())
             <span class="px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold">Total Mark Only (100-Point Scale)</span>
@@ -116,7 +152,7 @@
                          } catch (e) {}
                      },
                      get total() {
-                         if (this.hasCriteria) {
+                         if (evaluationMode === 'criteria' && this.hasCriteria) {
                              let sum = 0;
                              for (let key in this.scores) {
                                  sum += parseFloat(this.scores[key]) || 0;
@@ -136,7 +172,7 @@
                      },
                      setGrade(g) {
                          this.selectedGrade = g;
-                         if (!this.hasCriteria && (!this.directScore || this.directScore == 0)) {
+                         if (evaluationMode === 'simple' && (!this.directScore || this.directScore == 0)) {
                              if (g === 'A+') this.directScore = 95;
                              else if (g === 'A') this.directScore = 80;
                              else if (g === 'B') this.directScore = 65;
@@ -231,40 +267,56 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Criteria Score Inputs -->
-                    @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            @foreach($program->scoringCriteria as $criterion)
-                                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-                                    <div class="flex items-center justify-between text-xs font-mono">
-                                        <span class="text-slate-700 font-semibold truncate">{{ $criterion->criterion_name }}</span>
-                                        <span class="text-[#f3bd2e] font-bold">/ {{ $criterion->max_marks }}</span>
-                                    </div>
-                                    <div>
-                                        <input type="number" step="0.5" min="0" max="{{ $criterion->max_marks }}"
-                                               name="scores[{{ $criterion->id }}]"
-                                               x-model="scores['{{ $criterion->id }}']"
-                                               @input="if (scores['{{ $criterion->id }}'] > maxMarks['{{ $criterion->id }}']) scores['{{ $criterion->id }}'] = maxMarks['{{ $criterion->id }}']; saveDraftLocal();"
-                                               required
-                                               class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 text-center font-bold focus:outline-none focus:border-[#f3bd2e]">
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-w-sm space-y-2">
+                    <!-- Scoring Mode Hidden Input -->
+                    <input type="hidden" name="scoring_mode" :value="evaluationMode">
+
+                    <!-- Mode 1: Simple 100-Point Score Input -->
+                    <div x-show="evaluationMode === 'simple'" class="space-y-3">
+                        <div class="bg-blue-50/50 border border-blue-200 rounded-2xl p-4 sm:p-5 max-w-sm space-y-2 shadow-2xs">
                             <div class="flex items-center justify-between text-xs font-mono">
-                                <span class="text-slate-700 font-semibold">Total Score</span>
-                                <span class="text-[#f3bd2e] font-bold">/ 100 max</span>
+                                <span class="text-blue-900 font-bold uppercase tracking-wider">Total Score (നേരിട്ടുള്ള മാർക്ക്)</span>
+                                <span class="text-[#005c94] font-black bg-blue-100 px-2.5 py-0.5 rounded-lg">/ 100 max</span>
                             </div>
                             <input type="number" step="0.5" min="0" max="100"
                                    name="total_score"
                                    x-model="directScore"
-                                   @input="saveDraftLocal()"
-                                   required
-                                   class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 text-center font-bold focus:outline-none focus:border-[#f3bd2e]">
+                                   :required="evaluationMode === 'simple'"
+                                   placeholder="0 - 100"
+                                   @input="if (directScore > 100) directScore = 100; if (directScore < 0) directScore = 0; saveDraftLocal();"
+                                   class="w-full bg-white border border-blue-300 rounded-xl px-4 py-3 text-2xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#005c94] shadow-2xs">
+                            <p class="text-[11px] font-mono text-slate-500 text-center">
+                                100-ൽ എത്ര മാർക്ക് എന്ന് ലളിതമായി നൽകുക (ഉദാ: 85, 92.5).
+                            </p>
                         </div>
-                    @endif
+                    </div>
+
+                    <!-- Mode 2: Criteria Breakdown Inputs -->
+                    <div x-show="evaluationMode === 'criteria'" class="space-y-3">
+                        @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                @foreach($program->scoringCriteria as $criterion)
+                                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+                                        <div class="flex items-center justify-between text-xs font-mono">
+                                            <span class="text-slate-700 font-semibold truncate">{{ $criterion->criterion_name }}</span>
+                                            <span class="text-[#f3bd2e] font-bold">/ {{ $criterion->max_marks }}</span>
+                                        </div>
+                                        <div>
+                                            <input type="number" step="0.5" min="0" max="{{ $criterion->max_marks }}"
+                                                   name="scores[{{ $criterion->id }}]"
+                                                   x-model="scores['{{ $criterion->id }}']"
+                                                   :required="evaluationMode === 'criteria'"
+                                                   @input="if (scores['{{ $criterion->id }}'] > maxMarks['{{ $criterion->id }}']) scores['{{ $criterion->id }}'] = maxMarks['{{ $criterion->id }}']; if (scores['{{ $criterion->id }}'] < 0) scores['{{ $criterion->id }}'] = 0; saveDraftLocal();"
+                                                   class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 text-center font-bold focus:outline-none focus:border-[#f3bd2e]">
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-mono text-amber-900">
+                                ഈ പ്രോഗ്രാമിന് മാനദണ്ഡങ്ങൾ ലഭ്യമല്ല. ദയവായി മുകളിൽ 'Simple Mode (100-ൽ മാർക്ക്)' ഉപയോഗിക്കുക.
+                            </div>
+                        @endif
+                    </div>
                     <!-- Grade Selector Buttons (A+, A, B, C) -->
                     <div class="bg-slate-50/75 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="text-xs font-mono">

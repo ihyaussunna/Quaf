@@ -49,6 +49,7 @@ class Program extends Model
         'points_weight',
         'status',
         'is_call_list_locked',
+        'shuffle_count',
     ];
 
     protected function casts(): array
@@ -61,6 +62,7 @@ class Program extends Model
             'individual_limit_counted' => 'boolean',
             'mix_zone_open_to_all' => 'boolean',
             'is_call_list_locked' => 'boolean',
+            'shuffle_count' => 'integer',
             'eligibility_rules' => 'array',
             'is_stage' => 'boolean',
             'has_time_limit' => 'boolean',
@@ -142,6 +144,11 @@ class Program extends Model
             if (! Schema::hasColumn('programs', 'has_criteria')) {
                 Schema::table('programs', function (Blueprint $table) {
                     $table->boolean('has_criteria')->default(true)->after('has_time_limit');
+                });
+            }
+            if (! Schema::hasColumn('programs', 'shuffle_count')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->unsignedTinyInteger('shuffle_count')->default(0)->after('is_call_list_locked');
                 });
             }
             $checked = true;

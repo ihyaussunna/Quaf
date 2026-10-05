@@ -210,14 +210,21 @@
                     </div>
 
                     <!-- Actions Bar -->
-                    <div class="flex flex-wrap items-center gap-2">
+                        @php
+                            $shuffleCount = (int) ($selectedProgram->shuffle_count ?? 0);
+                            $canShuffle = ($shuffleCount < 2) || $isAdmin;
+                        @endphp
                         <!-- Auto Shuffle Code Letters -->
-                        <form method="POST" action="{{ route('greenroom.generate-codes', $selectedProgram->id) }}" onsubmit="return confirm('ഹാജരായവർക്ക് മാത്രം റാൻഡം ആയി കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകണോ?');">
+                        <form method="POST" action="{{ route('greenroom.generate-codes', $selectedProgram->id) }}" onsubmit="return confirm('ഹാജരായവർക്ക് മാത്രം റാൻഡം ആയി കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകണോ? (അവസരം: {{ min(2, $shuffleCount + 1) }}/2)');">
                             @csrf
-                            <button type="submit" @if(! $isEditable) disabled @endif
-                                    class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer">
+                            <button type="submit" @if(! $isEditable || ! $canShuffle) disabled @endif
+                                    class="px-4 py-2.5 rounded-xl {{ $canShuffle ? 'bg-purple-600 hover:bg-purple-700 cursor-pointer' : 'bg-slate-400 cursor-not-allowed' }} disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>നറുക്കെടുപ്പ് (Shuffle Codes A-Z)</span>
+                                @if($canShuffle)
+                                    <span>നറുക്കെടുപ്പ് (Shuffle Chance {{ $shuffleCount + 1 }}/2)</span>
+                                @else
+                                    <span>Shuffle Limit Reached (2/2 Used)</span>
+                                @endif
                             </button>
                         </form>
 
@@ -308,11 +315,22 @@
                                     <td class="px-4 py-3 text-center font-mono text-slate-400">
                                         {{ $index + 1 }}
                                     </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span id="code-badge-{{ $entry->id }}"
-                                              class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black font-mono {{ $entry->code_letter ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-slate-100 text-slate-400 italic' }}">
-                                            {{ $entry->code_letter ? 'Code ' . $entry->code_letter : '- None -' }}
-                                        </span>
+                                    <td class="px-3 py-2 text-center">
+                                        @if($isEditable)
+                                            <input type="text"
+                                                   maxlength="4"
+                                                   placeholder="-"
+                                                   value="{{ $entry->code_letter }}"
+                                                   title="Click to manually edit Code Letter (A, B, C...)"
+                                                   @change="updateCodeLetter('{{ route('greenroom.update-code-letter', $entry) }}', $event.target.value)"
+                                                   @keydown.enter.prevent="$event.target.blur()"
+                                                   class="w-14 h-8 text-center uppercase font-mono font-black text-xs rounded-xl border border-slate-300 bg-white hover:border-[#005c94] focus:border-[#005c94] focus:ring-1 focus:ring-[#005c94] shadow-2xs transition-all">
+                                        @else
+                                            <span id="code-badge-{{ $entry->id }}"
+                                                  class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black font-mono {{ $entry->code_letter ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-slate-100 text-slate-400 italic' }}">
+                                                {{ $entry->code_letter ? 'Code ' . $entry->code_letter : '- None -' }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3 font-mono font-bold text-slate-900">
                                         #{{ $entry->chest_number }}
@@ -490,6 +508,31 @@
                         this.showToast(data.message || 'Attendance saved.');
                     } catch (err) {
                         this.showToast(err.message || 'Error saving attendance.', true);
+                    }
+                },
+
+                async updateCodeLetter(url, newCode) {
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ code_letter: newCode })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.success) {
+                            this.showToast(data.message || 'കോഡ് ലെറ്റർ രേഖപ്പെടുത്തി.');
+                        } else {
+                            this.showToast(data.message || 'Error updating code letter', true);
+                            setTimeout(() => window.location.reload(), 1500);
+                        }
+                    } catch (e) {
+                        this.showToast('Error: ' + e.message, true);
                     }
                 }
             };

@@ -204,21 +204,31 @@ class JudgeController extends Controller
         $criteria = $program->scoringCriteria;
         $criteriaScores = [];
         $total = 0;
+        $scoringMode = $request->input('scoring_mode', 'criteria'); // 'simple' or 'criteria'
 
-        if ($criteria->isNotEmpty()) {
+        if ($scoringMode === 'simple' || $criteria->isEmpty() || (! $request->has('scores') && $request->has('total_score'))) {
+            $total = (float) $request->input('total_score', $request->input('score', 0));
+            if ($total > 100) {
+                $total = 100;
+            }
+            if ($total < 0) {
+                $total = 0;
+            }
+            $criteriaScores['scoring_mode'] = 'simple_100';
+            $criteriaScores['direct_score'] = $total;
+        } else {
             foreach ($criteria as $criterion) {
                 $score = (float) $request->input("scores.{$criterion->id}", 0);
                 if ($score > $criterion->max_marks) {
                     $score = $criterion->max_marks;
                 }
+                if ($score < 0) {
+                    $score = 0;
+                }
                 $criteriaScores[$criterion->criterion_name] = $score;
                 $total += $score;
             }
-        } else {
-            $total = (float) $request->input('total_score', $request->input('score', 0));
-            if ($total > 100) {
-                $total = 100;
-            }
+            $criteriaScores['scoring_mode'] = 'criteria';
         }
 
         // Judge Grade option (A+, A, B, C) - strictly no B+

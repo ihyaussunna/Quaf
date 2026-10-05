@@ -364,6 +364,11 @@ class GreenRoomController extends Controller
             return back()->with('error', $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.');
         }
 
+        $currentShuffleCount = (int) ($program->shuffle_count ?? 0);
+        if ($currentShuffleCount >= 2 && ! $isAdmin) {
+            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോഡ് ലെറ്റർ നറുക്കെടുപ്പ് പരിധി (2 തവണ) പൂർത്തിയായി. ആവശ്യമെങ്കിൽ താഴെ മാനുവലായി കോഡ് നൽകാവുന്നതാണ് (Maximum 2 shuffle chances reached).');
+        }
+
         // Get all verified entries marked as 'present'
         $entries = $program->entries()
             ->where('status', 'verified')
@@ -392,12 +397,64 @@ class GreenRoomController extends Controller
             ->where('attendance_status', 'absent')
             ->update(['code_letter' => null]);
 
+        $program->increment('shuffle_count');
+        $remainingChances = max(0, 2 - ($currentShuffleCount + 1));
+
         AuditLogger::log('green_room_shuffle_codes', $program, null, [
             'program_id' => $program->id,
             'assigned_count' => $shuffled->count(),
+            'shuffle_count' => $program->shuffle_count,
         ]);
 
-        return back()->with('success', "നറുക്കെടുപ്പ് വിജയകരം! {$shuffled->count()} പേർക്ക് റാൻഡം കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകി.");
+        return back()->with('success', "നറുക്കെടുപ്പ് വിജയകരം! {$shuffled->count()} പേർക്ക് റാൻഡം കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകി. (ബാക്കി അവസരം: {$remainingChances})");
+    }
+
+    public function updateCodeLetter(Request $request, ProgramEntry $entry): JsonResponse|RedirectResponse
+    {
+        $user = auth()->user();
+        $isAdmin = in_array($user?->role, ['admin', 'super_admin']);
+
+        $program = $entry->program;
+        $window = $program?->getCallListWindowState();
+
+        if (! $isAdmin && ! ($window['is_open'] ?? false)) {
+            $msg = $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.';
+            if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        $validated = $request->validate([
+            'code_letter' => ['nullable', 'string', 'max:10'],
+        ]);
+
+        $raw = $validated['code_letter'] ?? null;
+        $codeLetter = ! empty($raw) ? strtoupper(trim($raw)) : null;
+
+        $oldCode = $entry->code_letter;
+        $entry->code_letter = $codeLetter;
+        $entry->save();
+
+        AuditLogger::log('green_room_manual_code_letter', $entry, ['code_letter' => $oldCode], [
+            'entry_id' => $entry->id,
+            'chest_number' => $entry->chest_number,
+            'code_letter' => $codeLetter,
+        ]);
+
+        $message = "ചെസ്റ്റ് #{$entry->chest_number} കോഡ് ലെറ്റർ '{$codeLetter}' ആയി രേഖപ്പെടുത്തി.";
+
+        if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'entry_id' => $entry->id,
+                'code_letter' => $entry->code_letter,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function toggleLockCallList(Program $program): RedirectResponse
