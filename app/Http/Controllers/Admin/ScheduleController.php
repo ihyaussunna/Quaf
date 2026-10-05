@@ -516,59 +516,36 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Automated Clash Resolver: Automatically adjust overlapping slot durations and clear clashes.
+     * Automated Clash Resolver: Smartly resolve all stage double-bookings and student overlaps.
      */
     public function autoResolveClashes(Request $request): RedirectResponse|JsonResponse
     {
         $date = $request->input('date');
+        $targetDate = ($date && $date !== 'all') ? $date : null;
 
-        $query = Schedule::query();
-        if ($date && $date !== 'all') {
-            $query->whereDate('start_time', $date);
-        }
-        $schedules = $query->orderBy('stage_id')->orderBy('start_time')->get();
+        $result = $this->conflictService->smartResolveAllConflicts($targetDate);
 
-        $resolvedCount = 0;
-        // Group by stage and date
-        $byStage = $schedules->groupBy(fn ($s) => $s->stage_id.'_'.$s->start_time->format('Y-m-d'));
+        AuditLogger::log('auto_resolve_schedule_clashes', null, null, [
+            'date' => $targetDate ?: 'all',
+            'resolved' => $result['resolved_count'],
+            'remaining_conflicts' => $result['remaining_conflicts'],
+            'actions' => $result['actions'],
+        ]);
 
-        foreach ($byStage as $group) {
-            $sorted = $group->sortBy('start_time')->values();
-            for ($i = 0; $i < $sorted->count(); $i++) {
-                $current = $sorted[$i];
-                $next = $sorted->get($i + 1);
-
-                if ($next && $current->end_time > $next->start_time) {
-                    // Truncate current item end_time to start of next item
-                    $current->end_time = $next->start_time;
-                    $diffMin = $current->start_time->diffInMinutes($current->end_time);
-                    $current->program?->update(['duration_minutes' => max(15, (int) $diffMin)]);
-                    $resolvedCount++;
-                }
-
-                $current->conflict_notes = null;
-                $current->save();
-            }
-        }
-
-        // Re-scan and clear any resolved conflict notes
-        $conflicts = $this->conflictService->detectAllScheduleConflicts($date && $date !== 'all' ? $date : null);
-        if ($conflicts['total_conflicts'] === 0) {
-            Schedule::when($date && $date !== 'all', fn ($q) => $q->whereDate('start_time', $date))
-                ->update(['conflict_notes' => null]);
-        }
-
-        AuditLogger::log('auto_resolve_schedule_clashes', null, null, ['date' => $date, 'resolved' => $resolvedCount]);
+        $message = $result['remaining_conflicts'] === 0
+            ? "Schedule fully optimized! All clashes resolved ({$result['resolved_count']} adjustments made, 0 clashes remaining)."
+            : "Schedule partially optimized: {$result['resolved_count']} adjustments made ({$result['remaining_conflicts']} clashes remaining).";
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Schedule optimized! All overlapping slot durations were harmonized with zero stage clashes.',
-                'resolved_count' => $resolvedCount,
-                'remaining_conflicts' => $conflicts['total_conflicts'],
+                'message' => $message,
+                'resolved_count' => $result['resolved_count'],
+                'remaining_conflicts' => $result['remaining_conflicts'],
+                'actions' => $result['actions'],
             ]);
         }
 
-        return back()->with('success', 'Schedule optimized! All overlapping slot durations were harmonized with zero stage clashes.');
+        return back()->with($result['remaining_conflicts'] === 0 ? 'success' : 'warning', $message);
     }
 }

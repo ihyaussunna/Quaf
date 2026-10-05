@@ -315,4 +315,273 @@ class ScheduleConflictService
     {
         return $startA->lt($endTimeB) && $endTimeA->gt($startB);
     }
+
+    /**
+     * Smartly resolve all schedule conflicts (both stage double-bookings and multi-competition student overlaps)
+     * using iterative constraint satisfaction, stage-internal swapping, and gap placement.
+     *
+     * @return array{
+     *     resolved_count: int,
+     *     remaining_conflicts: int,
+     *     actions: array<string>
+     * }
+     */
+    public function smartResolveAllConflicts(?string $date = null): array
+    {
+        $dates = [];
+        if ($date && $date !== 'all') {
+            $dates = [$date];
+        } else {
+            $dates = Schedule::selectRaw('date(start_time) as dt')
+                ->distinct()
+                ->pluck('dt')
+                ->filter()
+                ->toArray();
+        }
+
+        $totalResolved = 0;
+        $allActions = [];
+
+        foreach ($dates as $targetDate) {
+            $result = $this->resolveConflictsForDate($targetDate);
+            $totalResolved += $result['resolved_count'];
+            $allActions = array_merge($allActions, $result['actions']);
+        }
+
+        $finalCheck = $this->detectAllScheduleConflicts($date && $date !== 'all' ? $date : null);
+
+        return [
+            'resolved_count' => $totalResolved,
+            'remaining_conflicts' => $finalCheck['total_conflicts'],
+            'actions' => $allActions,
+        ];
+    }
+
+    /**
+     * Resolve stage clashes and student clashes for a specific festival date.
+     *
+     * @return array{resolved_count: int, actions: array<string>}
+     */
+    protected function resolveConflictsForDate(string $targetDate): array
+    {
+        $resolvedCount = 0;
+        $actions = [];
+
+        // Phase 1: Harmonize Stage Clashes (consecutive overlaps on the exact same stage)
+        $schedules = Schedule::whereDate('start_time', $targetDate)
+            ->with(['program', 'stage'])
+            ->orderBy('stage_id')
+            ->orderBy('start_time')
+            ->get();
+
+        $byStage = $schedules->groupBy('stage_id');
+
+        foreach ($byStage as $stageId => $group) {
+            $sorted = $group->sortBy('start_time')->values();
+            for ($i = 0; $i < $sorted->count() - 1; $i++) {
+                $curr = $sorted[$i];
+                $next = $sorted[$i + 1];
+
+                if ($curr->end_time > $next->start_time) {
+                    $curr->end_time = $next->start_time;
+                    $diffMin = $curr->start_time->diffInMinutes($curr->end_time);
+                    $curr->program?->update(['duration_minutes' => max(15, (int) $diffMin)]);
+                    $curr->conflict_notes = null;
+                    $curr->save();
+                    $resolvedCount++;
+                    $actions[] = "Harmonized duration for '{$curr->program?->name}' on Stage {$curr->stage?->name}";
+                }
+            }
+        }
+
+        // Phase 2: Iterative Student Overlap Resolver
+        $maxRounds = 30;
+        for ($round = 0; $round < $maxRounds; $round++) {
+            $conflicts = $this->detectAllScheduleConflicts($targetDate);
+            if (empty($conflicts['student_conflicts'])) {
+                break; // Zero student conflicts remaining
+            }
+
+            $studentConflict = $conflicts['student_conflicts'][0];
+            $progAId = $studentConflict['program_a']['id'];
+            $progBId = $studentConflict['program_b']['id'];
+
+            $schA = Schedule::where('program_id', $progAId)->with(['program.zone', 'stage'])->first();
+            $schB = Schedule::where('program_id', $progBId)->with(['program.zone', 'stage'])->first();
+
+            if (! $schA || ! $schB) {
+                continue;
+            }
+
+            // Decide which schedule to move: prioritize the one on S3 or Mix Zone or whichever is schB
+            $targetSch = $schB;
+            $otherSch = $schA;
+            if ($schA->stage?->location === 'S3' || $schA->program?->zone?->name === 'Mix Zone') {
+                $targetSch = $schA;
+                $otherSch = $schB;
+            }
+
+            $duration = $targetSch->program?->duration_minutes ?: 30;
+
+            // Strategy A: Intra-stage Pairwise Swap with other programs on the same stage
+            $sameStageSchedules = Schedule::whereDate('start_time', $targetDate)
+                ->where('stage_id', $targetSch->stage_id)
+                ->where('id', '!=', $targetSch->id)
+                ->with('program')
+                ->get();
+
+            $swapFound = false;
+            foreach ($sameStageSchedules as $otherOnStage) {
+                $origStartT = $targetSch->start_time->copy();
+                $origEndT = $targetSch->end_time->copy();
+                $origStartO = $otherOnStage->start_time->copy();
+                $origEndO = $otherOnStage->end_time->copy();
+
+                $durT = $targetSch->program?->duration_minutes ?: 30;
+                $durO = $otherOnStage->program?->duration_minutes ?: 30;
+
+                // Tentative swap
+                $targetSch->update([
+                    'start_time' => $origStartO,
+                    'end_time' => $origStartO->copy()->addMinutes($durT),
+                ]);
+                $otherOnStage->update([
+                    'start_time' => $origStartT,
+                    'end_time' => $origStartT->copy()->addMinutes($durO),
+                ]);
+
+                $newConflicts = $this->detectAllScheduleConflicts($targetDate);
+                if ($newConflicts['total_conflicts'] < $conflicts['total_conflicts']) {
+                    $swapFound = true;
+                    $resolvedCount++;
+                    $actions[] = "Swapped times between '{$targetSch->program?->name}' and '{$otherOnStage->program?->name}' on {$targetSch->stage?->location}";
+                    $targetSch->program?->update(['scheduled_time' => $targetSch->start_time]);
+                    $otherOnStage->program?->update(['scheduled_time' => $otherOnStage->start_time]);
+                    break;
+                } else {
+                    // Revert tentative swap
+                    $targetSch->update(['start_time' => $origStartT, 'end_time' => $origEndT]);
+                    $otherOnStage->update(['start_time' => $origStartO, 'end_time' => $origEndO]);
+                }
+            }
+
+            if ($swapFound) {
+                continue;
+            }
+
+            // Strategy B: Intra-stage Free Slot Placement
+            $occupied = Schedule::whereDate('start_time', $targetDate)
+                ->where('stage_id', $targetSch->stage_id)
+                ->where('id', '!=', $targetSch->id)
+                ->orderBy('start_time')
+                ->get();
+
+            $candidateTimes = [
+                Carbon::parse("{$targetDate} 17:40:00"),
+                Carbon::parse("{$targetDate} 18:15:00"),
+                Carbon::parse("{$targetDate} 18:45:00"),
+                Carbon::parse("{$targetDate} 20:30:00"),
+                Carbon::parse("{$targetDate} 21:45:00"),
+                Carbon::parse("{$targetDate} 22:15:00"),
+                Carbon::parse("{$targetDate} 22:45:00"),
+                Carbon::parse("{$targetDate} 16:00:00"),
+            ];
+
+            // 15-minute increments across active hours (16:00 to 23:00)
+            $t = Carbon::parse("{$targetDate} 16:00:00");
+            $tEnd = Carbon::parse("{$targetDate} 23:00:00");
+            while ($t->lte($tEnd)) {
+                $candidateTimes[] = $t->copy();
+                $t->addMinutes(15);
+            }
+
+            $slotFound = false;
+            foreach ($candidateTimes as $candStart) {
+                $candEnd = $candStart->copy()->addMinutes($duration);
+
+                // Check stage overlap
+                $stageBlocked = false;
+                foreach ($occupied as $occ) {
+                    if ($this->isOverlapping($candStart, $candEnd, $occ->start_time, $occ->end_time)) {
+                        $stageBlocked = true;
+                        break;
+                    }
+                }
+                if ($stageBlocked) {
+                    continue;
+                }
+
+                // Check student conflicts
+                $slotCheck = $this->checkProgramSlotConflicts(
+                    $targetSch->program_id,
+                    $candStart,
+                    $candEnd,
+                    $targetSch->stage_id,
+                    $targetSch->id
+                );
+
+                if (! $slotCheck['has_conflicts']) {
+                    $targetSch->update([
+                        'start_time' => $candStart,
+                        'end_time' => $candEnd,
+                        'conflict_notes' => null,
+                    ]);
+                    $targetSch->program?->update([
+                        'scheduled_time' => $candStart,
+                    ]);
+                    $slotFound = true;
+                    $resolvedCount++;
+                    $actions[] = "Shifted '{$targetSch->program?->name}' to {$candStart->format('h:i A')} - {$candEnd->format('h:i A')} on {$targetSch->stage?->location} (0 conflicts)";
+                    break;
+                }
+            }
+
+            if (! $slotFound) {
+                // Strategy C: Cross-Stage Reassignment to Compatible Offstage Venue
+                $offstageStages = Stage::whereIn('location', ['NF3', 'ID3', 'U2', 'S3'])
+                    ->where('id', '!=', $targetSch->stage_id)
+                    ->get();
+
+                foreach ($offstageStages as $altStage) {
+                    foreach ($candidateTimes as $candStart) {
+                        $candEnd = $candStart->copy()->addMinutes($duration);
+                        $slotCheck = $this->checkProgramSlotConflicts(
+                            $targetSch->program_id,
+                            $candStart,
+                            $candEnd,
+                            $altStage->id,
+                            $targetSch->id
+                        );
+
+                        if (! $slotCheck['has_conflicts']) {
+                            $targetSch->update([
+                                'stage_id' => $altStage->id,
+                                'start_time' => $candStart,
+                                'end_time' => $candEnd,
+                                'conflict_notes' => null,
+                            ]);
+                            $targetSch->program?->update([
+                                'stage_id' => $altStage->id,
+                                'scheduled_time' => $candStart,
+                            ]);
+                            $slotFound = true;
+                            $resolvedCount++;
+                            $actions[] = "Reassigned '{$targetSch->program?->name}' to {$altStage->location} at {$candStart->format('h:i A')} (0 conflicts)";
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        $finalConflicts = $this->detectAllScheduleConflicts($targetDate);
+        if ($finalConflicts['total_conflicts'] === 0) {
+            Schedule::whereDate('start_time', $targetDate)->update(['conflict_notes' => null]);
+        }
+
+        return [
+            'resolved_count' => $resolvedCount,
+            'actions' => $actions,
+        ];
+    }
 }

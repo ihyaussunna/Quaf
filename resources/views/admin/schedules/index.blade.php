@@ -187,7 +187,7 @@
                         @csrf
                         <input type="hidden" name="date" value="{{ $date && $date !== 'all' ? $date : 'all' }}">
                         <button type="submit" 
-                                onclick="return confirm('Automatically adjust overlapping slot durations to eliminate all stage clashes?');"
+                                onclick="return confirm('Automatically optimize schedule to eliminate all stage double-bookings and participant clashes?');"
                                 class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center gap-1.5 cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                             <span>Auto-Resolve Clashes</span>

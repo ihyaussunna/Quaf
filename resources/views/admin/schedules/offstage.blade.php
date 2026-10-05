@@ -209,7 +209,7 @@
                         @csrf
                         <input type="hidden" name="date" value="{{ $selectedDate }}">
                         <button type="submit"
-                                onclick="return confirm('Automatically adjust overlapping slot durations to eliminate all stage clashes on this date?');"
+                                onclick="return confirm('Automatically optimize schedule to eliminate all stage double-bookings and participant clashes on this date?');"
                                 class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                             <span>Auto-Resolve Clashes</span>
