@@ -15,18 +15,56 @@ use App\Models\Stage;
 use App\Models\Student;
 use App\Models\VideoItem;
 use App\Models\Zone;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $defaultLaunchStatus = app()->environment('testing') ? 'launched' : 'coming_soon';
         $launchStatus = FestivalSetting::get('launch_status', $defaultLaunchStatus);
-        if ($launchStatus === 'coming_soon' && ! request()->has('portal')) {
+
+        // Keep existing landing page at root URL until website is officially launched, unless previewed
+        if ($launchStatus === 'coming_soon' && ! $request->has('portal') && ! $request->has('preview')) {
             return view('public.coming-soon');
         }
 
+        return $this->renderHomepage();
+    }
+
+    /**
+     * Dedicated /home route to access the full public festival website.
+     */
+    public function homeView(): View
+    {
+        return $this->renderHomepage();
+    }
+
+    public function about(): View
+    {
+        $groups = Group::orderBy('rank_cache')->get();
+        $zones = Zone::orderBy('display_order')->get();
+        $stats = [
+            'programs' => Program::count(),
+            'students' => Student::count(),
+            'groups' => Group::count(),
+            'stages' => Stage::count(),
+            'zones' => Zone::count(),
+        ];
+
+        return view('public.about', compact('groups', 'zones', 'stats'));
+    }
+
+    public function contact(): View
+    {
+        $stages = Stage::orderBy('id')->get();
+
+        return view('public.contact', compact('stages'));
+    }
+
+    protected function renderHomepage(): View
+    {
         $liveFestMode = FestivalSetting::get('live_fest_mode', '1') === '1';
 
         $groups = Group::orderBy('rank_cache', 'asc')
@@ -37,7 +75,12 @@ class HomeController extends Controller
         $stages = Stage::with(['currentProgram.category', 'nextProgram.category'])->get();
 
         $latestResults = Result::where('status', 'published')
-            ->with(['program.category', 'firstEntry.student.group', 'secondEntry.student.group', 'thirdEntry.student.group'])
+            ->with([
+                'program.category',
+                'firstEntry.student.group',
+                'secondEntry.student.group',
+                'thirdEntry.student.group',
+            ])
             ->latest('published_at')
             ->take(6)
             ->get();
@@ -82,6 +125,14 @@ class HomeController extends Controller
             ];
         }
 
+        $stats = [
+            'programs' => Program::count(),
+            'students' => Student::count(),
+            'groups' => $groups->count(),
+            'stages' => $stages->count(),
+            'zones' => count($zones),
+        ];
+
         return view('public.home', compact(
             'liveFestMode',
             'groups',
@@ -93,7 +144,8 @@ class HomeController extends Controller
             'galleryPreview',
             'featuredVideo',
             'categories',
-            'zones'
+            'zones',
+            'stats'
         ));
     }
 }

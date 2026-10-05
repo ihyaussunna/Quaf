@@ -38,10 +38,14 @@ use App\Http\Controllers\Leader\LeaderController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Media\MediaResultController;
 use App\Http\Controllers\ProgramCommittee\ProgramCommitteeController;
+use App\Http\Controllers\Public\BrochureController;
 use App\Http\Controllers\Public\GalleryController;
+use App\Http\Controllers\Public\GroupController as PublicGroupController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
+use App\Http\Controllers\Public\PublicApiController;
 use App\Http\Controllers\Public\ResultController;
+use App\Http\Controllers\Public\ScheduleController;
 use App\Http\Controllers\Public\VerificationController;
 use App\Http\Controllers\Public\VideoController;
 use App\Http\Controllers\Student\StudentController;
@@ -61,18 +65,40 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'homeView'])->name('home.view');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+
 Route::get('/results', [ResultController::class, 'index'])->name('results.index');
 Route::get('/results/{program}', [ResultController::class, 'show'])->name('results.show');
 Route::get('/results/{result}/poster', [MediaResultController::class, 'publicPoster'])->name('media.results.public-poster');
+
+Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+Route::get('/schedule/offstage-pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedule.offstage-pdf');
+Route::get('/groups', [PublicGroupController::class, 'index'])->name('groups.index');
+Route::get('/groups/{group}', [PublicGroupController::class, 'show'])->name('groups.show');
+
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
+
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
+Route::get('/media', [VideoController::class, 'mediaHub'])->name('media.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
+Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.index');
 
 // Public Verifications & Live Displays
+Route::get('/verify', [VerificationController::class, 'index'])->name('verify.index');
 Route::get('/verify/certificate/{certificateNumber}', [VerificationController::class, 'verifyCertificate'])->name('verify.certificate');
 Route::get('/verify/student/{qrToken}', [VerificationController::class, 'verifyStudent'])->name('verify.student');
 Route::get('/stages/{stage}/projector', [AdminStageController::class, 'projector'])->name('stages.projector');
+
+// Public Cached API Endpoints for Live Web Client
+Route::prefix('api/public')->name('api.public.')->group(function () {
+    Route::get('/live-ticker', [PublicApiController::class, 'ticker'])->name('ticker');
+    Route::get('/standings', [PublicApiController::class, 'standings'])->name('standings');
+    Route::get('/stages', [PublicApiController::class, 'stages'])->name('stages');
+    Route::get('/latest-results', [PublicApiController::class, 'latestResults'])->name('latest-results');
+});
 
 // One-time Secure Database Initializer for Hostinger Deployment
 Route::get('/init-database/{token}', function (string $token) {
@@ -389,7 +415,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Dedicated Judge Marks Dashboard
     Route::get('judge-marks', [AdminCallListController::class, 'judgeMarks'])->name('judge-marks.index');
 
-    // Schedule Management
+    // Schedule Management & Offstage Conflict Detector (Supports both /admin/schedules and /admin/schedule)
+    Route::get('schedule', [AdminScheduleController::class, 'index'])->name('schedule');
+    Route::get('schedule/offstage', [AdminScheduleController::class, 'offstage'])->name('schedule.offstage');
+    Route::get('schedule/offstage/pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedule.offstage.pdf');
+    Route::get('schedule/check-conflict', [AdminScheduleController::class, 'checkConflictApi'])->name('schedule.check-conflict');
+    Route::post('schedule/quick-slot', [AdminScheduleController::class, 'quickSlot'])->name('schedule.quick-slot');
+    Route::post('schedule/stages', [AdminScheduleController::class, 'storeStage'])->name('schedule.stages.store');
+
+    Route::get('schedules/offstage', [AdminScheduleController::class, 'offstage'])->name('schedules.offstage');
+    Route::get('schedules/offstage/pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedules.offstage.pdf');
+    Route::get('schedules/check-conflict', [AdminScheduleController::class, 'checkConflictApi'])->name('schedules.check-conflict');
+    Route::post('schedules/quick-slot', [AdminScheduleController::class, 'quickSlot'])->name('schedules.quick-slot');
+    Route::post('schedules/stages', [AdminScheduleController::class, 'storeStage'])->name('schedules.stages.store');
     Route::resource('schedules', AdminScheduleController::class);
 
     // Judges Management
@@ -588,7 +626,7 @@ Route::prefix('program-committee')->name('program-committee.')->middleware(['aut
 | Media Team Portal Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('media')->name('media.')->middleware(['auth', 'role:media_team,media_manager,admin,super_admin'])->group(function () {
+Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_team,media_manager,admin,super_admin'])->group(function () {
     Route::get('/', [MediaController::class, 'dashboard'])->name('dashboard');
 
     // News Articles

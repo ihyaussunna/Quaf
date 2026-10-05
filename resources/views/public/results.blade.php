@@ -31,11 +31,11 @@
 
     <!-- Filters Bar (Light Theme) -->
     <form method="GET" action="{{ route('results.index') }}" class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-10 shadow-xs font-sora">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
             <!-- Search -->
-            <div>
+            <div class="lg:col-span-2">
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Search Program</label>
-                <input type="text" name="search" value="{{ $search }}" placeholder="e.g. Arabic Speech..."
+                <input type="text" name="search" value="{{ $search }}" placeholder="Program name, code (e.g. Q9-101)..."
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white font-sora">
             </div>
 
@@ -54,6 +54,17 @@
                 </select>
             </div>
 
+            <!-- Category Filter -->
+            <div>
+                <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Discipline</label>
+                <select name="category" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white font-sora">
+                    <option value="">All Categories</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ ($categoryId ?? '') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <!-- Group Filter -->
             <div>
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Group</label>
@@ -65,23 +76,12 @@
                 </select>
             </div>
 
-            <!-- Stage Filter -->
-            <div>
-                <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Stage</label>
-                <select name="stage" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white font-sora">
-                    <option value="">All Stages</option>
-                    @foreach($stages as $stg)
-                        <option value="{{ $stg->id }}" {{ $stageId == $stg->id ? 'selected' : '' }}>{{ $stg->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
             <!-- Actions -->
             <div class="flex items-end gap-2 pt-1 sm:pt-0">
                 <button type="submit" class="app-tap flex-1 bg-[#be1e2d] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl hover:bg-[#a01624] transition-all shadow-xs font-sora">
                     Filter
                 </button>
-                <a href="{{ route('results.index') }}" class="app-tap px-4 py-3 bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl text-xs font-mono">
+                <a href="{{ route('results.index') }}" class="app-tap px-3 py-3 bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl text-xs font-mono">
                     Reset
                 </a>
             </div>
@@ -162,12 +162,10 @@
                 <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
                     <span class="text-slate-400 text-[10px] sm:text-xs">{{ $result->published_at?->format('h:i A, M d') }}</span>
                     <div class="flex items-center gap-3">
-                        @if($result->poster_image)
-                            <a href="{{ route('media.results.public-poster', $result) }}" target="_blank" class="text-slate-700 hover:text-[#be1e2d] font-bold flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                <span>Poster</span>
-                            </a>
-                        @endif
+                        <a href="{{ route('media.results.public-poster', $result->id) }}" class="text-slate-600 hover:text-[#be1e2d] font-bold flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span>Poster</span>
+                        </a>
                         <a href="{{ route('results.show', $result->program->id) }}" class="text-[#be1e2d] font-bold hover:underline">
                             Full Breakdown →
                         </a>

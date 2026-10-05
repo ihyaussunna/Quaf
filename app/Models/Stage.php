@@ -41,4 +41,9 @@ class Stage extends Model
     {
         return $this->belongsTo(Program::class, 'next_program_id');
     }
+
+    public function getVenueAttribute(): string
+    {
+        return $this->location ?? $this->code;
+    }
 }
