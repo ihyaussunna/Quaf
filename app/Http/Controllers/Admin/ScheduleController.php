@@ -338,15 +338,19 @@ class ScheduleController extends Controller
             ]);
         }
 
+        $isProgramCommittee = $request->routeIs('program-committee.*') || str_contains(url()->previous(), 'program-committee');
+        $indexRoute = $isProgramCommittee ? 'program-committee.schedules.index' : 'admin.schedules.index';
+        $offstageRoute = $isProgramCommittee ? 'program-committee.schedules.offstage' : 'admin.schedules.offstage';
+
         $redirectTo = $request->input('redirect_to');
         if ($redirectTo === 'index') {
-            return redirect()->route('admin.schedules.index', [
+            return redirect()->route($indexRoute, [
                 'stage' => $validated['stage_id'],
                 'date' => $validated['date'],
             ])->with($hasConflicts ? 'warning' : 'success', $msg);
         }
 
-        return redirect()->route('admin.schedules.offstage', ['date' => $validated['date']])
+        return redirect()->route($offstageRoute, ['date' => $validated['date']])
             ->with($hasConflicts ? 'warning' : 'success', $msg);
     }
 
@@ -432,9 +436,12 @@ class ScheduleController extends Controller
 
         $schedule = Schedule::create($validated);
 
+        $duration = max(5, (int) round($end->diffInMinutes($start)));
+
         $schedule->program->update([
             'stage_id' => $validated['stage_id'],
             'scheduled_time' => $validated['start_time'],
+            'duration_minutes' => $duration,
         ]);
 
         AuditLogger::log('create_schedule', $schedule, null, $schedule->toArray());
@@ -444,7 +451,10 @@ class ScheduleController extends Controller
             $msg .= ' WARNING: Clashes were detected and recorded in schedule notes!';
         }
 
-        return redirect()->route('admin.schedules.index')->with('success', $msg);
+        $isProgramCommittee = $request->routeIs('program-committee.*') || str_contains(url()->previous(), 'program-committee');
+        $indexRoute = $isProgramCommittee ? 'program-committee.schedules.index' : 'admin.schedules.index';
+
+        return redirect()->route($indexRoute)->with('success', $msg);
     }
 
     public function edit(Schedule $schedule): View
@@ -488,14 +498,20 @@ class ScheduleController extends Controller
         $old = $schedule->toArray();
         $schedule->update($validated);
 
+        $duration = max(5, (int) round($end->diffInMinutes($start)));
+
         $schedule->program->update([
             'stage_id' => $validated['stage_id'],
             'scheduled_time' => $validated['start_time'],
+            'duration_minutes' => $duration,
         ]);
 
         AuditLogger::log('update_schedule', $schedule, $old, $schedule->toArray());
 
-        return redirect()->route('admin.schedules.index')->with('success', "Schedule for '{$schedule->program->name}' updated.");
+        $isProgramCommittee = $request->routeIs('program-committee.*') || str_contains(url()->previous(), 'program-committee');
+        $indexRoute = $isProgramCommittee ? 'program-committee.schedules.index' : 'admin.schedules.index';
+
+        return redirect()->route($indexRoute)->with('success', "Schedule for '{$schedule->program->name}' updated.");
     }
 
     public function destroy(Schedule $schedule): RedirectResponse

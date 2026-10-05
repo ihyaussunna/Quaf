@@ -330,19 +330,33 @@
                                     @endif
                                 </td>
 
-                                <!-- Call List Lock Status -->
+                                <!-- Call List Lock & Timing Status -->
                                 <td class="px-4 py-3.5 text-center">
-                                    @if($prog->is_call_list_locked)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-red-100 text-red-800 border border-red-200">
-                                            <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                            Locked
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                            Open
-                                        </span>
-                                    @endif
+                                    @php $wState = $prog->getCallListWindowState(); @endphp
+                                    <div class="space-y-1">
+                                        @if($prog->is_call_list_locked)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-red-100 text-red-800 border border-red-200">
+                                                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                Locked
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                Unlocked
+                                            </span>
+                                        @endif
+                                        <div class="text-[9px] font-mono font-semibold">
+                                            @if($wState['state'] === 'auto_locked_ended')
+                                                <span class="text-red-600">Ended (Auto-Locked)</span>
+                                            @elseif($wState['state'] === 'upcoming_window')
+                                                <span class="text-amber-600">Opens in {{ $wState['minutes_until_open'] }}m</span>
+                                            @elseif($wState['state'] === 'not_scheduled')
+                                                <span class="text-slate-400">Unscheduled</span>
+                                            @elseif($wState['state'] === 'open')
+                                                <span class="text-emerald-600 font-bold">● Live Window</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <!-- Actions -->
@@ -419,22 +433,33 @@
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                 <div>
-                    <div class="flex items-center gap-2 mb-1.5">
+                    <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-900 text-white">
                             {{ $selectedProgram->code ?: '#'.$selectedProgram->id }}
                         </span>
                         <span class="text-xs text-slate-500 font-mono">
                             {{ $selectedProgram->category->name ?? $selectedProgram->eligibility ?? 'General' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
                         </span>
+                        @php $progWindow = $selectedProgram->getCallListWindowState(); @endphp
                         @if($selectedProgram->is_call_list_locked)
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
                                 <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                LOCKED
+                                LOCKED BY ADMIN
+                            </span>
+                        @elseif($progWindow['state'] === 'auto_locked_ended')
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
+                                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                AUTO-LOCKED (TIME ENDED)
+                            </span>
+                        @elseif($progWindow['state'] === 'upcoming_window')
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 font-mono">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                OPENS 10M BEFORE ({{ $progWindow['opens_at']?->format('h:i A') }})
                             </span>
                         @else
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 font-mono">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                OPEN / EDITABLE
+                                OPEN / ATTENDANCE ACTIVE
                             </span>
                         @endif
                     </div>

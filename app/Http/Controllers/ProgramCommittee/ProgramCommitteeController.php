@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
+use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\Zone;
 use App\Services\AuditLogger;
@@ -58,6 +59,9 @@ class ProgramCommitteeController extends Controller
         $totalEntriesCount = ProgramEntry::count();
         $statsData = $this->groupStatsService->buildGroupStats();
 
+        $scheduledCount = Schedule::count();
+        $stagesCount = Stage::count();
+
         return view('program-committee.dashboard', compact(
             'totalPrograms',
             'withRulesCount',
@@ -70,7 +74,9 @@ class ProgramCommitteeController extends Controller
             'recentPrograms',
             'pendingRulesPrograms',
             'totalEntriesCount',
-            'statsData'
+            'statsData',
+            'scheduledCount',
+            'stagesCount'
         ));
     }
 

@@ -12,7 +12,7 @@
     modalStageId: '{{ $stageId && is_numeric($stageId) ? $stageId : ($stages->first()?->id ?? '') }}',
     modalDate: '{{ $date && $date !== 'all' ? $date : '2026-10-31' }}',
     modalTime: '09:00',
-    modalDuration: 30,
+    modalDuration: {{ ($programsWithoutSchedule->first() ?? $allPrograms->first())?->duration_minutes ?: 30 }},
     isCheckingClash: false,
     clashWarning: null,
 
@@ -27,7 +27,7 @@
         'zone_name' => $p->zone?->name ?? 'Mix',
         'is_stage' => (bool) $p->is_stage,
         'is_scheduled' => (bool) $p->schedule,
-        'duration' => $p->duration_minutes ?: 30,
+        'duration' => (int) ($p->duration_minutes ?: 30),
     ])) }},
 
     get filteredPrograms() {
@@ -43,12 +43,17 @@
         });
     },
 
-    selectProgram(prog) {
-        this.modalProgramId = prog.id;
-        if (prog.duration) {
+    onProgramChange(id) {
+        this.modalProgramId = id;
+        const prog = this.programsList.find(p => String(p.id) === String(id));
+        if (prog && prog.duration) {
             this.modalDuration = prog.duration;
         }
         this.checkClash();
+    },
+
+    selectProgram(prog) {
+        this.onProgramChange(prog.id);
     },
 
     setStage(id) {
@@ -628,22 +633,22 @@
                                 class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
                             All Zones
                         </button>
-                        <button type="button" @click="selectedZoneFilter = '1'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                        <button type="button" @click="selectedZoneFilter = '1'; if (filteredPrograms.length) onProgramChange(filteredPrograms[0].id); else checkClash()"
                                 :class="selectedZoneFilter === '1' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                 class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
                             A Zone
                         </button>
-                        <button type="button" @click="selectedZoneFilter = '2'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                        <button type="button" @click="selectedZoneFilter = '2'; if (filteredPrograms.length) onProgramChange(filteredPrograms[0].id); else checkClash()"
                                 :class="selectedZoneFilter === '2' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                 class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
                             B Zone
                         </button>
-                        <button type="button" @click="selectedZoneFilter = '3'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                        <button type="button" @click="selectedZoneFilter = '3'; if (filteredPrograms.length) onProgramChange(filteredPrograms[0].id); else checkClash()"
                                 :class="selectedZoneFilter === '3' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                 class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
                             C Zone
                         </button>
-                        <button type="button" @click="selectedZoneFilter = '4'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                        <button type="button" @click="selectedZoneFilter = '4'; if (filteredPrograms.length) onProgramChange(filteredPrograms[0].id); else checkClash()"
                                 :class="selectedZoneFilter === '4' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                 class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
                             Mix Zone
@@ -652,7 +657,7 @@
 
                     <!-- Instant Program Search Box -->
                     <div class="relative">
-                        <input type="text" x-model="programSearch" @input="if (filteredPrograms.length) { modalProgramId = filteredPrograms[0].id; } checkClash()"
+                        <input type="text" x-model="programSearch" @input="if (filteredPrograms.length) { onProgramChange(filteredPrograms[0].id); } else { checkClash(); }"
                                placeholder="Quick search program name or code (e.g. 112, Story, Poem, Speech)..."
                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-sora">
                         <button type="button" x-show="programSearch" @click="programSearch = ''; checkClash()" 
@@ -660,11 +665,11 @@
                     </div>
 
                     <!-- Filtered Programs Dropdown -->
-                    <select name="program_id" x-model="modalProgramId" @change="checkClash()" required
+                    <select name="program_id" x-model="modalProgramId" @change="onProgramChange($event.target.value)" required
                             class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-sora">
                         <template x-for="prog in filteredPrograms" :key="prog.id">
                             <option :value="prog.id" 
-                                    x-text="`[${prog.code}] ${prog.name} (${prog.zone_name}) ${prog.is_scheduled ? '— Scheduled' : ''}`">
+                                    x-text="`[${prog.code}] ${prog.name} (${prog.duration}m, ${prog.zone_name}) ${prog.is_scheduled ? '— Scheduled' : ''}`">
                             </option>
                         </template>
                     </select>

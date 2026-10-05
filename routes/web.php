@@ -622,6 +622,21 @@ Route::prefix('program-committee')->name('program-committee.')->middleware(['aut
     Route::get('/team-entries', [ProgramCommitteeController::class, 'teamEntries'])->name('team-entries.index');
     Route::get('/team-entries/export', [ProgramCommitteeController::class, 'exportTeamEntries'])->name('team-entries.export');
     Route::get('/print/entries', [AdminPrintReportController::class, 'entries'])->name('print.entries');
+
+    // Festival Schedule Management for Program Samithi
+    Route::get('/schedule', [AdminScheduleController::class, 'index'])->name('schedule');
+    Route::get('/schedules', [AdminScheduleController::class, 'index'])->name('schedules.index');
+    Route::get('/schedules/offstage', [AdminScheduleController::class, 'offstage'])->name('schedules.offstage');
+    Route::get('/schedules/offstage/pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedules.offstage.pdf');
+    Route::get('/schedules/check-conflict', [AdminScheduleController::class, 'checkConflictApi'])->name('schedules.check-conflict');
+    Route::post('/schedules/quick-slot', [AdminScheduleController::class, 'quickSlot'])->name('schedules.quick-slot');
+    Route::post('/schedules/stages', [AdminScheduleController::class, 'storeStage'])->name('schedules.stages.store');
+    Route::post('/schedules/auto-resolve', [AdminScheduleController::class, 'autoResolveClashes'])->name('schedules.auto-resolve');
+    Route::get('/schedules/create', [AdminScheduleController::class, 'create'])->name('schedules.create');
+    Route::post('/schedules', [AdminScheduleController::class, 'store'])->name('schedules.store');
+    Route::get('/schedules/{schedule}/edit', [AdminScheduleController::class, 'edit'])->name('schedules.edit');
+    Route::put('/schedules/{schedule}', [AdminScheduleController::class, 'update'])->name('schedules.update');
+    Route::delete('/schedules/{schedule}', [AdminScheduleController::class, 'destroy'])->name('schedules.destroy');
 });
 
 /*

@@ -12,6 +12,11 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('program-committee.schedules.index') }}" 
+               class="px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-mono font-bold flex items-center gap-2 shadow-sm transition">
+                <svg class="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Festival Schedule</span>
+            </a>
             <a href="{{ route('program-committee.team-entries.index') }}" 
                class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold flex items-center gap-2 shadow-sm transition">
                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -156,6 +161,66 @@
                     </div>
                 </a>
             @endforeach
+        </div>
+    </div>
+
+    <!-- Festival Schedule & Stage Management Quick Hub -->
+    <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+                <h3 class="text-base font-sora font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>Festival Schedule & Stage Management</span>
+                </h3>
+                <p class="text-[11px] font-mono text-slate-500">Timetable slots, stage venues, automated durations, and conflict detection</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('program-committee.schedules.offstage.pdf') }}" target="_blank"
+                   class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono font-bold flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Print PDF (Rockwell)</span>
+                </a>
+                <a href="{{ route('program-committee.schedules.index') }}" class="text-xs font-mono font-bold text-brand-burgundy hover:underline flex items-center gap-1">
+                    <span>Manage All Schedules →</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href="{{ route('program-committee.schedules.index') }}" 
+               class="p-5 rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 transition-all flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-mono uppercase text-slate-500 font-bold block">Scheduled Events</span>
+                    <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ $scheduledCount }} / {{ $totalPrograms }}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">All Main & Offstage Slots</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </a>
+
+            <a href="{{ route('program-committee.schedules.offstage') }}" 
+               class="p-5 rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 transition-all flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-mono uppercase text-slate-500 font-bold block">Offstage & Clash Detector</span>
+                    <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">Live Matrix</span>
+                    <span class="text-[10px] text-emerald-600 font-mono font-bold">Instant Slot Optimizer</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+            </a>
+
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-mono uppercase text-slate-500 font-bold block">Active Stages / Venues</span>
+                    <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ $stagesCount }} Stages</span>
+                    <span class="text-[10px] text-slate-500 font-mono">Main Stages + Offstage Venues</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </div>
+            </div>
         </div>
     </div>
 

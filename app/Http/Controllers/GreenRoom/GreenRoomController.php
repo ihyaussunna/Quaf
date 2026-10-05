@@ -118,8 +118,14 @@ class GreenRoomController extends Controller
 
     public function markAttendance(Request $request, ProgramEntry $entry): JsonResponse|RedirectResponse
     {
-        if ($entry->program?->is_call_list_locked) {
-            $msg = 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു. ഗ്രീൻ റൂം എഡിറ്റിംഗ് ആക്സസ് ഒഴിവാക്കി.';
+        $user = auth()->user();
+        $isAdmin = in_array($user?->role, ['admin', 'super_admin']);
+
+        $program = $entry->program;
+        $window = $program?->getCallListWindowState();
+
+        if (! $isAdmin && ! ($window['is_open'] ?? false)) {
+            $msg = $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.';
             if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
@@ -206,8 +212,12 @@ class GreenRoomController extends Controller
 
     public function generateCodeLetters(Program $program): RedirectResponse
     {
-        if ($program->is_call_list_locked) {
-            return back()->with('error', 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു. ഗ്രീൻ റൂം എഡിറ്റിംഗ് ആക്സസ് ഒഴിവാക്കി.');
+        $user = auth()->user();
+        $isAdmin = in_array($user?->role, ['admin', 'super_admin']);
+
+        $window = $program->getCallListWindowState();
+        if (! $isAdmin && ! ($window['is_open'] ?? false)) {
+            return back()->with('error', $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.');
         }
 
         // Get all verified entries marked as 'present'
@@ -360,6 +370,8 @@ class GreenRoomController extends Controller
             }
         }
 
+        $windowState = $selectedProgram ? $selectedProgram->getCallListWindowState() : null;
+
         return view('greenroom.call-list', compact(
             'zones',
             'stages',
@@ -372,7 +384,8 @@ class GreenRoomController extends Controller
             'stats',
             'search',
             'attendanceFilter',
-            'evalFilter'
+            'evalFilter',
+            'windowState'
         ));
     }
 

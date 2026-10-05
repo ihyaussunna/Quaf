@@ -113,6 +113,26 @@
                     </div>
                 </a>
 
+                <!-- Festival Schedule Section -->
+                <div x-data="{ open: {{ request()->routeIs('program-committee.schedules.*') || request()->routeIs('program-committee.schedule') || request()->routeIs('admin.schedules.*') ? 'true' : 'false' }} }" class="space-y-0.5">
+                    <button @click="open = !open" 
+                            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('program-committee.schedules.*') || request()->routeIs('program-committee.schedule') ? 'bg-[#be1e2d] text-white font-semibold shadow-sm' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div class="text-left">
+                                <span>Festival Schedule</span>
+                                <span class="block text-[10px] opacity-75">Stages & Timing Slots</span>
+                            </div>
+                        </div>
+                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-xs" style="display: none;">
+                        <a href="{{ route('program-committee.schedules.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('program-committee.schedules.index') ? 'bg-[#be1e2d]/20 text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">All Stages Schedule</a>
+                        <a href="{{ route('program-committee.schedules.offstage') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('program-committee.schedules.offstage') ? 'bg-[#be1e2d]/20 text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">Offstage & Clashes</a>
+                        <a href="{{ route('program-committee.schedules.offstage.pdf') }}" target="_blank" class="block px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5">Print PDF (Rockwell)</a>
+                    </div>
+                </div>
+
                 <!-- Add New Program -->
                 <a href="{{ route('program-committee.programs.create') }}" 
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition {{ request()->routeIs('program-committee.programs.create') ? 'bg-[#be1e2d] text-white font-semibold shadow-sm' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">

@@ -42,16 +42,29 @@
         });
     },
 
-    openCreateSlot(presetTime = '16:40', presetStageId = null) {
+    onProgramSelect(id) {
+        this.formProgramId = id;
+        const prog = this.programsList.find(p => String(p.id) === String(id));
+        if (prog && prog.duration) {
+            this.formDuration = prog.duration;
+        }
+        this.checkLiveConflict();
+    },
+
+    openCreateSlot(presetTime = '16:40', presetStageId = null, presetProgramId = null) {
         this.isEditing = false;
         this.formScheduleId = null;
-        this.formProgramId = '';
+        this.formProgramId = presetProgramId || '';
         this.formStageId = presetStageId || '{{ $stages->firstWhere('code', 'STG-05')?->id ?? $stages->first()?->id }}';
         this.formDate = '{{ $selectedDate }}';
         this.formTime = presetTime;
-        this.formDuration = 30;
+        const initProg = presetProgramId ? this.programsList.find(x => String(x.id) === String(presetProgramId)) : null;
+        this.formDuration = initProg && initProg.duration ? initProg.duration : 30;
         this.slotConflictResult = null;
         this.slotModal = true;
+        if (presetProgramId) {
+            this.checkLiveConflict();
+        }
     },
 
     openEditSlot(sch) {
@@ -431,22 +444,22 @@
                                     class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
                                 All
                             </button>
-                            <button type="button" @click="selectedZoneFilter = '1'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                            <button type="button" @click="selectedZoneFilter = '1'; if (filteredPrograms.length) onProgramSelect(filteredPrograms[0].id); else checkLiveConflict()"
                                     :class="selectedZoneFilter === '1' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                     class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
                                 A Zone
                             </button>
-                            <button type="button" @click="selectedZoneFilter = '2'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                            <button type="button" @click="selectedZoneFilter = '2'; if (filteredPrograms.length) onProgramSelect(filteredPrograms[0].id); else checkLiveConflict()"
                                     :class="selectedZoneFilter === '2' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                     class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
                                 B Zone
                             </button>
-                            <button type="button" @click="selectedZoneFilter = '3'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                            <button type="button" @click="selectedZoneFilter = '3'; if (filteredPrograms.length) onProgramSelect(filteredPrograms[0].id); else checkLiveConflict()"
                                     :class="selectedZoneFilter === '3' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                     class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
                                 C Zone
                             </button>
-                            <button type="button" @click="selectedZoneFilter = '4'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                            <button type="button" @click="selectedZoneFilter = '4'; if (filteredPrograms.length) onProgramSelect(filteredPrograms[0].id); else checkLiveConflict()"
                                     :class="selectedZoneFilter === '4' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                     class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
                                 Mix Zone
@@ -455,7 +468,7 @@
 
                         <!-- Instant Search Input -->
                         <div class="relative">
-                            <input type="text" x-model="programSearch" @input="if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                            <input type="text" x-model="programSearch" @input="if (filteredPrograms.length) { onProgramSelect(filteredPrograms[0].id); } else { checkLiveConflict(); }"
                                    placeholder="Type to filter programs (e.g. Story, 112, Essay, Malayalam)..."
                                    class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] bg-white">
                             <button type="button" x-show="programSearch" @click="programSearch = ''; checkLiveConflict()" 
@@ -463,12 +476,12 @@
                         </div>
 
                         <!-- Filtered Select Dropdown -->
-                        <select name="program_id" x-model="formProgramId" @change="checkLiveConflict()" required
+                        <select name="program_id" x-model="formProgramId" @change="onProgramSelect($event.target.value)" required
                                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] focus:border-[#be1e2d] bg-white">
                             <option value="">-- Choose Program / Item --</option>
                             <template x-for="p in filteredPrograms" :key="p.id">
                                 <option :value="p.id" 
-                                        x-text="`[${p.code}] ${p.name} (${p.zone_name}) ${p.is_scheduled ? '— Scheduled' : ''}`">
+                                        x-text="`[${p.code}] ${p.name} (${p.duration}m, ${p.zone_name}) ${p.is_scheduled ? '— Scheduled' : ''}`">
                                 </option>
                             </template>
                         </select>

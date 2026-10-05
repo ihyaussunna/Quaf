@@ -170,26 +170,45 @@
         </div>
 
         @if($selectedProgram)
+            @php
+                $windowState = $windowState ?? $selectedProgram->getCallListWindowState();
+                $isAdmin = in_array(Auth::user()->role, ['admin', 'super_admin']);
+                $isEditable = $windowState['is_open'] || $isAdmin;
+            @endphp
             <!-- Program Header & Live Summary Cards -->
             <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs space-y-5">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                     <div>
-                        <div class="flex items-center gap-2 mb-1.5">
+                        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-900 text-white">
                                 ID: {{ $selectedProgram->code ?: '#'.$selectedProgram->id }}
                             </span>
                             <span class="text-xs text-slate-500 font-mono">
                                 {{ $selectedProgram->category->name ?? $selectedProgram->eligibility ?? 'General' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
                             </span>
-                            @if($selectedProgram->is_call_list_locked)
+                            @if($windowState['state'] === 'locked_by_admin')
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
                                     <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    LOCKED BY ADMIN (ഗ്രീൻ റൂം ആക്സസ് ഒഴിവാക്കി)
+                                    {{ $windowState['badge_ml'] }} (LOCKED BY ADMIN)
+                                </span>
+                            @elseif($windowState['state'] === 'auto_locked_ended')
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
+                                    <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $windowState['badge_ml'] }} (SCHEDULE ENDED)
+                                </span>
+                            @elseif($windowState['state'] === 'upcoming_window')
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 font-mono">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    {{ $windowState['badge_ml'] }} (OPENS AT {{ $windowState['opens_at']?->format('h:i A') }})
+                                </span>
+                            @elseif($windowState['state'] === 'not_scheduled')
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1 font-mono">
+                                    {{ $windowState['badge_ml'] }} (NOT SCHEDULED)
                                 </span>
                             @else
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 font-mono">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    OPEN / EDITABLE (തുറന്നിരിക്കുന്നു)
+                                    {{ $windowState['badge_ml'] }} (ATTENDANCE ACTIVE)
                                 </span>
                             @endif
                         </div>
@@ -206,18 +225,28 @@
                         <!-- Auto Shuffle Code Letters -->
                         <form method="POST" action="{{ route('greenroom.generate-codes', $selectedProgram->id) }}" onsubmit="return confirm('ഹാജരായവർക്ക് മാത്രം റാൻഡം ആയി കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകണോ?');">
                             @csrf
-                            <button type="submit" @if($selectedProgram->is_call_list_locked) disabled @endif
-                                    class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
+                            <button type="submit" @if(! $isEditable) disabled @endif
+                                    class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 <span>നറുക്കെടുപ്പ് (Shuffle Codes A-Z)</span>
                             </button>
                         </form>
 
-                        @if($selectedProgram->is_call_list_locked)
-                            <div class="px-4 py-2.5 rounded-xl bg-red-50 text-red-700 border border-red-200 font-bold text-xs flex items-center gap-1.5 shadow-2xs">
-                                <svg class="w-3.5 h-3.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                <span>അഡ്മിൻ ലോക്ക് ചെയ്തു (Access Removed)</span>
-                            </div>
+                        @if($isAdmin)
+                            <!-- Admin Quick Lock/Unlock Toggle -->
+                            <form method="POST" action="{{ route('greenroom.toggle-lock', $selectedProgram->id) }}">
+                                @csrf
+                                <button type="submit"
+                                        class="px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer {{ $selectedProgram->is_call_list_locked ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200' }}">
+                                    @if($selectedProgram->is_call_list_locked)
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                        <span>Unlock (Admin)</span>
+                                    @else
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                        <span>Lock Call List (Admin)</span>
+                                    @endif
+                                </button>
+                            </form>
                         @endif
 
                         <!-- Print Call Sheet -->
@@ -263,12 +292,21 @@
                     </div>
                 </div>
 
-                @if($selectedProgram->is_call_list_locked)
-                    <div class="p-4 rounded-2xl bg-red-50 border-2 border-red-200 text-red-900 text-xs font-mono flex items-start gap-3">
-                        <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                @if(! $isEditable)
+                    <div class="p-4 rounded-2xl border-2 text-xs font-mono flex items-start gap-3 {{ $windowState['badge_color'] === 'amber' ? 'bg-amber-50 border-amber-300 text-amber-900' : ($windowState['badge_color'] === 'slate' ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-red-50 border-red-300 text-red-900') }}">
+                        <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         <div>
-                            <span class="font-bold uppercase tracking-wider block text-red-800">കോൾ ലിസ്റ്റ് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു — ഗ്രീൻ റൂം എഡിറ്റിംഗ് ആക്സസ് ഒഴിവാക്കി</span>
-                            <p class="text-red-700 mt-1 leading-relaxed">പ്രോഗ്രാം ആരംഭിക്കുന്നതിന് മുന്നോടിയായി അഡ്മിൻ ഗ്രീൻ റൂം എഡിറ്റിംഗ് അനുമതി റദ്ദാക്കി. ഇനി ഹാജർ നിലയോ കോഡുകളോ മാറ്റാൻ കഴിയില്ല. ഹാജരായ (PRESENT) മത്സരാർത്ഥികൾ മാത്രമേ ജഡ്ജ് മൂല്യനിർണ്ണയ പാനലിൽ ലഭ്യമാകൂ.</p>
+                            <span class="font-bold uppercase tracking-wider block">
+                                {{ $windowState['badge_ml'] }} &bull; {{ $windowState['badge'] }}
+                            </span>
+                            <p class="mt-1 leading-relaxed">{{ $windowState['message'] }}</p>
+                            @if($windowState['opens_at'])
+                                <div class="mt-2 pt-2 border-t border-slate-200/60 flex flex-wrap items-center gap-4 text-[11px] opacity-90">
+                                    <span>ഷെഡ്യൂൾ ചെയ്ത തുടക്ക സമയം: <strong>{{ $windowState['scheduled_start']?->format('h:i A') }}</strong></span>
+                                    <span>ഹാജർ തുറക്കുന്ന സമയം: <strong>{{ $windowState['opens_at']->format('h:i A') }}</strong> (10 മിനിറ്റ് മുമ്പ്)</span>
+                                    <span>അവസാനിക്കുന്ന സമയം: <strong>{{ $windowState['closes_at']?->format('h:i A') }}</strong></span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -327,7 +365,7 @@
                                         {{ $entry->student?->group?->name ?? $entry->group?->name ?? '-' }}
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        @if($selectedProgram->is_call_list_locked)
+                                        @if(! $isEditable)
                                             <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold font-mono {{ $entry->attendance_status === 'present' ? 'bg-emerald-100 text-emerald-800' : ($entry->attendance_status === 'absent' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-700') }}">
                                                 {{ strtoupper($entry->attendance_status ?? 'waiting') }}
                                             </span>

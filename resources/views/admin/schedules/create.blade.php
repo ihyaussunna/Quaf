@@ -16,8 +16,8 @@
             <select name="program_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
                 <option value="">-- Choose Unscheduled Event --</option>
                 @foreach($programs as $p)
-                    <option value="{{ $p->id }}" {{ old('program_id') == $p->id ? 'selected' : '' }}>
-                        [{{ $p->code }}] {{ $p->name }} ({{ $p->duration_minutes }}m)
+                    <option value="{{ $p->id }}" data-duration="{{ $p->duration_minutes ?: 30 }}" {{ old('program_id') == $p->id ? 'selected' : '' }}>
+                        [{{ $p->code }}] {{ $p->name }} ({{ $p->duration_minutes ?: 30 }}m)
                     </option>
                 @endforeach
             </select>
@@ -42,7 +42,7 @@
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
             </div>
             <div>
-                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">End Time</label>
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">End Time (Auto-calculated from duration)</label>
                 <input type="datetime-local" name="end_time" value="{{ old('end_time') }}" required
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
             </div>
@@ -66,4 +66,31 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const progSelect = document.querySelector('select[name="program_id"]');
+    const startInput = document.querySelector('input[name="start_time"]');
+    const endInput = document.querySelector('input[name="end_time"]');
+
+    function updateEndTime() {
+        if (!progSelect || !startInput || !endInput) return;
+        const selectedOpt = progSelect.options[progSelect.selectedIndex];
+        if (!selectedOpt) return;
+        const duration = parseInt(selectedOpt.dataset.duration || 30, 10);
+        if (startInput.value) {
+            const startDate = new Date(startInput.value);
+            if (!isNaN(startDate.getTime())) {
+                const endDate = new Date(startDate.getTime() + duration * 60000);
+                const pad = n => String(n).padStart(2, '0');
+                const formatted = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
+                endInput.value = formatted;
+            }
+        }
+    }
+
+    if (progSelect) progSelect.addEventListener('change', updateEndTime);
+    if (startInput) startInput.addEventListener('change', updateEndTime);
+});
+</script>
 @endsection
