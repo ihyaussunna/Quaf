@@ -9,6 +9,7 @@ use App\Models\Zone;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 #[Signature('app:sync-official-programs {--force : Force overwrite existing programs and limits}')]

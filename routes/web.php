@@ -121,6 +121,7 @@ Route::get('/init-database/{token}', function (string $token) {
         $studentsOutput = Artisan::output();
 
         Artisan::call('db:seed', ['--class' => 'PanelPasswordsSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'OffstageScheduleSeeder', '--force' => true]);
 
         Artisan::call('optimize:clear');
         Cache::flush();
