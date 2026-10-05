@@ -24,9 +24,9 @@
         body {
             font-family: 'Sora', sans-serif;
             background-color: #020617;
-            touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: pan-y;
         }
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
@@ -46,7 +46,7 @@
         }
     </style>
 </head>
-<body class="h-full w-full bg-slate-950 text-white relative overflow-hidden flex flex-col justify-between"
+<body class="h-[100dvh] w-full bg-slate-950 text-white relative overflow-hidden flex flex-col justify-between"
       x-data="brochureFlipViewer({
           totalPages: {{ count($brochure['pages']) }}
       })"
@@ -57,28 +57,28 @@
       @keydown.window.right="nextPage()">
 
     <!-- Subtle Minimal Header Bar (No outside links, satisfies test assertions) -->
-    <header class="w-full px-4 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-none"
+    <header class="w-full px-4 sm:px-8 py-2 sm:py-3 flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-none shrink-0"
             :class="controlsVisible ? 'opacity-90' : 'opacity-0'">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5">
             <img src="{{ asset('images/quaf-logo-white.png') }}" 
                  alt="QUAF 9.0" 
-                 class="h-6 sm:h-7 w-auto object-contain opacity-80"
+                 class="h-5 sm:h-7 w-auto object-contain opacity-80"
                  onerror="this.style.display='none'">
             <div>
                 <span class="text-[9px] sm:text-[10px] font-mono tracking-widest text-amber-400 uppercase font-bold block">OFFICIAL PUBLICATION</span>
-                <h1 class="text-xs sm:text-sm font-semibold tracking-tight text-slate-200">Digital Brochure Experience</h1>
+                <h1 class="text-[11px] sm:text-sm font-semibold tracking-tight text-slate-200">Digital Brochure Experience</h1>
             </div>
         </div>
 
         <div class="flex items-center gap-2">
-            <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] sm:text-[11px] font-mono tracking-wider">
-                {{ count($brochure['pages']) }} Pages • Theme Note
+            <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/10 text-slate-300 text-[10px] sm:text-[11px] font-mono tracking-wider">
+                {{ count($brochure['pages']) }} Pages
             </span>
         </div>
     </header>
 
     <!-- Center Stage: Digital Flipbook Magazine Viewer with Double-Tap Zoom & Pan -->
-    <main class="flex-1 flex items-center justify-center relative px-2 sm:px-10 py-1 sm:py-2 overflow-hidden touch-none" 
+    <main class="flex-1 flex items-center justify-center relative px-2 sm:px-10 py-1 sm:py-2 overflow-hidden w-full" 
           id="book-stage">
         
         <!-- Loading Spinner -->
@@ -87,17 +87,17 @@
             <p class="font-sora font-semibold text-xs text-slate-300">Loading Theme Note Booklet...</p>
         </div>
 
-        <!-- Floating Left Navigation Arrow (Desktop) -->
+        <!-- Floating Left Navigation Arrow (Visible on Mobile & Desktop) -->
         <button @click="prevPage()"
                 type="button"
                 x-show="!loading && hasPrev && zoomLevel === 1.0"
-                class="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl hover:scale-110 focus:outline-none cursor-pointer"
+                class="flex absolute left-2 sm:left-4 lg:left-8 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl active:scale-95 focus:outline-none cursor-pointer"
                 :class="controlsVisible ? 'opacity-90' : 'opacity-20 hover:opacity-100'"
                 aria-label="Previous Page">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
         </button>
 
-        <!-- Book Viewport Container (Supports Double Tap / Double Touch Pinch & Pan) -->
+        <!-- Book Viewport Container (Double Tap / Double Touch Pinch & Pan) -->
         <div id="book-wrapper" 
              class="relative z-10 max-w-full flex items-center justify-center transition-transform duration-150 origin-center"
              :style="`transform: translate3d(${panX}px, ${panY}px, 0) scale(${zoomLevel})`"
@@ -120,51 +120,51 @@
             </div>
         </div>
 
-        <!-- Floating Right Navigation Arrow (Desktop) -->
+        <!-- Floating Right Navigation Arrow (Visible on Mobile & Desktop) -->
         <button @click="nextPage()"
                 type="button"
                 x-show="!loading && hasNext && zoomLevel === 1.0"
-                class="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl hover:scale-110 focus:outline-none cursor-pointer"
+                class="flex absolute right-2 sm:right-4 lg:right-8 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl active:scale-95 focus:outline-none cursor-pointer"
                 :class="controlsVisible ? 'opacity-90' : 'opacity-20 hover:opacity-100'"
                 aria-label="Next Page">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
     </main>
 
     <!-- Floating Bottom Glass Controls Toolbar -->
-    <footer class="w-full px-4 py-3 sm:py-4 flex flex-col items-center gap-2 z-30 transition-opacity duration-300 pointer-events-none"
+    <footer class="w-full px-2 sm:px-4 py-2 sm:py-3.5 flex flex-col items-center gap-1.5 sm:gap-2 z-30 transition-opacity duration-300 pointer-events-none shrink-0"
             :class="controlsVisible ? 'opacity-100' : 'opacity-0'">
         
-        <div class="bg-slate-900/90 backdrop-blur-md pointer-events-auto rounded-2xl px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 shadow-2xl border border-white/10 text-xs font-mono">
+        <div class="bg-slate-900/95 backdrop-blur-md pointer-events-auto rounded-2xl px-3 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-center gap-2 sm:gap-4 shadow-2xl border border-white/10 text-xs font-mono max-w-[95vw]">
             
             <!-- Previous Button -->
             <button @click="prevPage()"
                     :disabled="!hasPrev"
-                    class="flex items-center gap-1.5 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-1.5 py-1">
+                    class="flex items-center gap-1 text-slate-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-2 py-1.5 rounded-lg active:bg-white/10">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 <span class="hidden sm:inline">Prev</span>
             </button>
 
             <!-- Page Counter Display -->
-            <div class="px-3 py-1 rounded-xl bg-white/10 text-white font-bold tracking-wider text-[11px] sm:text-xs">
+            <div class="px-2.5 sm:px-3.5 py-1 rounded-xl bg-white/10 text-white font-bold tracking-wider text-[11px] sm:text-xs shrink-0">
                 <span x-text="pageIndicator">1 / {{ count($brochure['pages']) }}</span>
             </div>
 
             <!-- Next Button -->
             <button @click="nextPage()"
                     :disabled="!hasNext"
-                    class="flex items-center gap-1.5 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-1.5 py-1">
+                    class="flex items-center gap-1 text-slate-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-2 py-1.5 rounded-lg active:bg-white/10">
                 <span class="hidden sm:inline">Next</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
 
-            <!-- Download Button (Right next to Page Number & Page Turn Options) -->
+            <!-- Download PDF Button -->
             <a href="{{ $brochure['pdf_url'] }}" 
                download="QUAF_9.0_Official_Theme_Note.pdf"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#be1e2d] hover:bg-[#991522] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:scale-105 transition-all cursor-pointer"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#be1e2d] hover:bg-[#991522] text-white font-bold text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer shrink-0"
                title="Download Theme Note PDF">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span class="font-sora text-[11px] font-semibold">Download</span>
+                <span class="font-sora text-[11px] font-semibold">PDF</span>
             </a>
 
             <span class="w-px h-4 bg-white/20 hidden sm:inline-block"></span>
@@ -181,8 +181,8 @@
                 </template>
             </button>
 
-            <!-- Zoom Controls & Double Tap Hint -->
-            <div class="flex items-center gap-1.5">
+            <!-- Zoom Controls -->
+            <div class="hidden sm:flex items-center gap-1.5">
                 <button @click="zoomOut()" 
                         class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" 
                         title="Zoom Out (−)">
@@ -190,7 +190,7 @@
                 </button>
                 <button @click="toggleZoom()" 
                         class="text-[11px] text-slate-300 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 cursor-pointer text-center" 
-                        title="Double-tap or click to toggle zoom">
+                        title="Toggle Zoom">
                     <span x-text="Math.round(zoomLevel * 100) + '%'">100%</span>
                 </button>
                 <button @click="zoomIn()" 
@@ -214,6 +214,7 @@
             return {
                 pageFlip: null,
                 loading: true,
+                isFlipping: false,
                 currentPage: 0,
                 totalPages: config.totalPages || 20,
                 pageIndicator: '1 / ' + (config.totalPages || 20),
@@ -229,6 +230,8 @@
                 lastTapTime: 0,
                 lastTapX: 0,
                 lastTapY: 0,
+                touchStartX: 0,
+                touchStartY: 0,
                 controlsVisible: true,
                 soundEnabled: true,
                 idleTimer: null,
@@ -284,9 +287,9 @@
                     const isSmall = window.innerWidth < 768;
 
                     // Perfect square dimension calculation for 1:1 booklet format
-                    const maxH = Math.max(300, window.innerHeight - (isSmall ? 110 : 96));
+                    const maxH = Math.max(280, window.innerHeight - (isSmall ? 130 : 96));
                     const maxW = isSmall
-                        ? Math.min(window.innerWidth - 24, 520)
+                        ? Math.min(window.innerWidth - 20, 520)
                         : Math.min((window.innerWidth - 120) / 2, 600);
                     const pageDim = Math.floor(Math.min(maxH, maxW));
 
@@ -307,11 +310,11 @@
                             showCover: !isSmall,
                             usePortrait: isSmall,
                             startPage: 0,
-                            flippingTime: 600,
+                            flippingTime: 500,
                             useMouseEvents: true,
-                            swipeDistance: 30,
+                            swipeDistance: 99999,      // Prevent duplicate internal swipe triggers on mobile
                             clickEventForward: false,
-                            disableFlipByClick: true,  // Tap/click will NEVER flip the page! Only dragging/swiping flips
+                            disableFlipByClick: true,  // Tap/click will NEVER flip the page!
                             showPageCorners: false    // No corner flip on simple touch
                         });
 
@@ -319,6 +322,7 @@
 
                         this.pageFlip.on('flip', (e) => {
                             this.currentPage = e.data;
+                            this.isFlipping = false;
                             this.playFlipSound();
                             this.updatePageIndicator();
                         });
@@ -332,7 +336,7 @@
                     }
                 },
 
-                // Double tap, swipe, and multi-touch gesture handlers
+                // Double tap, single swipe, and multi-touch gesture handlers
                 handleTouchStart(e) {
                     this.handleActivity();
 
@@ -355,7 +359,7 @@
                     const distDelta = Math.hypot(touch.clientX - this.lastTapX, touch.clientY - this.lastTapY);
 
                     if (timeDelta < 320 && distDelta < 40) {
-                        // Double Tap Detected: Zoom in/out without flipping!
+                        // Double Tap: Toggle Zoom in/out without flipping!
                         e.preventDefault();
                         e.stopPropagation();
                         this.toggleZoom();
@@ -419,6 +423,7 @@
                         this.isPinching = false;
                     }
                     if (e.touches.length === 0) {
+                        // Single-step clean horizontal swipe when not zoomed in
                         if (!this.isPanning && this.zoomLevel === 1.0 && this.touchStartX && e.changedTouches && e.changedTouches.length > 0) {
                             const touch = e.changedTouches[0];
                             const deltaX = touch.clientX - this.touchStartX;
@@ -467,32 +472,38 @@
                 },
 
                 prevPage() {
+                    if (this.isFlipping) return;
                     if (this.pageFlip && this.hasPrev) {
                         if (this.zoomLevel > 1.0) {
                             this.zoomLevel = 1.0;
                             this.panX = 0;
                             this.panY = 0;
                         }
+                        this.isFlipping = true;
                         try {
                             this.pageFlip.flipPrev();
                         } catch (e) {
                             this.pageFlip.turnToPrevPage();
                         }
+                        setTimeout(() => { this.isFlipping = false; }, 550);
                     }
                 },
 
                 nextPage() {
+                    if (this.isFlipping) return;
                     if (this.pageFlip && this.hasNext) {
                         if (this.zoomLevel > 1.0) {
                             this.zoomLevel = 1.0;
                             this.panX = 0;
                             this.panY = 0;
                         }
+                        this.isFlipping = true;
                         try {
                             this.pageFlip.flipNext();
                         } catch (e) {
                             this.pageFlip.turnToNextPage();
                         }
+                        setTimeout(() => { this.isFlipping = false; }, 550);
                     }
                 },
 

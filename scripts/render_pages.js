@@ -43,7 +43,12 @@ async function renderPdfPages() {
                 for (let i = 0; i < pdfData.length; i++) {
                     uint8Array[i] = pdfData.charCodeAt(i);
                 }
-                pdfDoc = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+                pdfDoc = await pdfjsLib.getDocument({ 
+                    data: uint8Array,
+                    cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                    cMapPacked: true,
+                    standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/',
+                }).promise;
                 return pdfDoc.numPages;
             }
 
@@ -57,6 +62,8 @@ async function renderPdfPages() {
                 canvas.width = scaledViewport.width;
                 canvas.height = scaledViewport.height;
                 const context = canvas.getContext('2d');
+
+                await document.fonts.ready;
 
                 await page.render({
                     canvasContext: context,
