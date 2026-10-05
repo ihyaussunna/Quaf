@@ -235,10 +235,12 @@
                 isMobile: window.innerWidth < 768,
 
                 get hasPrev() {
-                    return this.currentPage > 0;
+                    const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
+                    return cur > 0;
                 },
                 get hasNext() {
-                    return this.currentPage < this.totalPages - 1;
+                    const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
+                    return cur < this.totalPages - 1;
                 },
 
                 handleActivity() {
@@ -307,7 +309,7 @@
                             startPage: 0,
                             flippingTime: 600,
                             useMouseEvents: true,
-                            swipeDistance: 35,
+                            swipeDistance: 30,
                             clickEventForward: false,
                             disableFlipByClick: true,  // Tap/click will NEVER flip the page! Only dragging/swiping flips
                             showPageCorners: false    // No corner flip on simple touch
@@ -330,7 +332,7 @@
                     }
                 },
 
-                // Double tap and multi-touch gesture handlers
+                // Double tap, swipe, and multi-touch gesture handlers
                 handleTouchStart(e) {
                     this.handleActivity();
 
@@ -364,6 +366,8 @@
                     this.lastTapTime = now;
                     this.lastTapX = touch.clientX;
                     this.lastTapY = touch.clientY;
+                    this.touchStartX = touch.clientX;
+                    this.touchStartY = touch.clientY;
 
                     // If already zoomed in, drag pans the view instead of flipping
                     if (this.zoomLevel > 1.0) {
@@ -415,7 +419,22 @@
                         this.isPinching = false;
                     }
                     if (e.touches.length === 0) {
+                        if (!this.isPanning && this.zoomLevel === 1.0 && this.touchStartX && e.changedTouches && e.changedTouches.length > 0) {
+                            const touch = e.changedTouches[0];
+                            const deltaX = touch.clientX - this.touchStartX;
+                            const deltaY = touch.clientY - this.touchStartY;
+                            // Deliberate horizontal swipe (> 30px, predominantly horizontal)
+                            if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
+                                if (deltaX < 0) {
+                                    this.nextPage();
+                                } else {
+                                    this.prevPage();
+                                }
+                            }
+                        }
                         this.isPanning = false;
+                        this.touchStartX = 0;
+                        this.touchStartY = 0;
                     }
                 },
 
@@ -430,16 +449,18 @@
                 },
 
                 updatePageIndicator() {
+                    const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
+                    this.currentPage = cur;
                     if (this.isMobile) {
-                        this.pageIndicator = `${this.currentPage + 1} / ${this.totalPages}`;
+                        this.pageIndicator = `${cur + 1} / ${this.totalPages}`;
                     } else {
-                        if (this.currentPage === 0) {
+                        if (cur === 0) {
                             this.pageIndicator = `Cover (1 / ${this.totalPages})`;
-                        } else if (this.currentPage >= this.totalPages - 1) {
+                        } else if (cur >= this.totalPages - 1) {
                             this.pageIndicator = `Back Cover (${this.totalPages} / ${this.totalPages})`;
                         } else {
-                            const left = this.currentPage + 1;
-                            const right = Math.min(this.currentPage + 2, this.totalPages);
+                            const left = cur + 1;
+                            const right = Math.min(cur + 2, this.totalPages);
                             this.pageIndicator = `Pages ${left}–${right} of ${this.totalPages}`;
                         }
                     }
@@ -452,7 +473,11 @@
                             this.panX = 0;
                             this.panY = 0;
                         }
-                        this.pageFlip.flipPrev();
+                        try {
+                            this.pageFlip.flipPrev();
+                        } catch (e) {
+                            this.pageFlip.turnToPrevPage();
+                        }
                     }
                 },
 
@@ -463,7 +488,11 @@
                             this.panX = 0;
                             this.panY = 0;
                         }
-                        this.pageFlip.flipNext();
+                        try {
+                            this.pageFlip.flipNext();
+                        } catch (e) {
+                            this.pageFlip.turnToNextPage();
+                        }
                     }
                 },
 
