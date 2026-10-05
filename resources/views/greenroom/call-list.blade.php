@@ -43,14 +43,6 @@
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-            @if(in_array(Auth::user()->role, ['admin', 'super_admin']))
-                <a href="{{ route('admin.call-list.index') }}" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xl text-xs font-mono font-semibold whitespace-nowrap">
-                    Admin Call Center &rarr;
-                </a>
-                <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-semibold whitespace-nowrap">
-                    Admin Panel
-                </a>
-            @endif
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="px-3 sm:px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all whitespace-nowrap">
@@ -245,13 +237,6 @@
                                 </button>
                             </form>
                         @endif
-
-                        <!-- Print Call Sheet -->
-                        <a href="{{ route('admin.forms.call-list', ['program' => $selectedProgram->id, 'print' => 1]) }}" target="_blank"
-                           class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 transition-colors">
-                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span>Print Sheet</span>
-                        </a>
                     </div>
                 </div>
 
