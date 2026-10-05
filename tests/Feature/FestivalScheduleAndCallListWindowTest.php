@@ -111,7 +111,7 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_green_room_is_blocked_until_10_minutes_before_scheduled_time(): void
+    public function test_call_list_remains_open_until_program_completion(): void
     {
         $startTime = Carbon::parse('2026-10-15 10:00:00');
         $endTime = Carbon::parse('2026-10-15 10:30:00');
@@ -123,45 +123,8 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
             'end_time' => $endTime,
         ]);
 
-        // 30 minutes before schedule: 09:30 AM
-        Carbon::setTestNow(Carbon::parse('2026-10-15 09:30:00'));
-
-        $response = $this->actingAs($this->greenRoomUser)
-            ->postJson(route('greenroom.mark-attendance', $this->entry), [
-                'status' => 'present',
-            ]);
-
-        $response->assertStatus(422);
-        $response->assertJson([
-            'success' => false,
-        ]);
-        $this->assertStringContainsString('10 മിനിറ്റ്', $response->json('message'));
-
-        // Admin override is allowed even outside window
-        $adminResponse = $this->actingAs($this->admin)
-            ->postJson(route('greenroom.mark-attendance', $this->entry), [
-                'status' => 'present',
-            ]);
-
-        $adminResponse->assertOk();
-        $this->entry->refresh();
-        $this->assertEquals('present', $this->entry->attendance_status);
-    }
-
-    public function test_green_room_can_mark_attendance_within_10_minutes_window(): void
-    {
-        $startTime = Carbon::parse('2026-10-15 10:00:00');
-        $endTime = Carbon::parse('2026-10-15 10:30:00');
-
-        Schedule::create([
-            'program_id' => $this->program->id,
-            'stage_id' => $this->stage->id,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-        ]);
-
-        // 5 minutes before scheduled start time: 09:55 AM
-        Carbon::setTestNow(Carbon::parse('2026-10-15 09:55:00'));
+        // Program is active/ongoing
+        Carbon::setTestNow(Carbon::parse('2026-10-15 10:15:00'));
 
         $response = $this->actingAs($this->greenRoomUser)
             ->postJson(route('greenroom.mark-attendance', $this->entry), [
@@ -180,7 +143,7 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
         $this->assertEquals('A', $this->entry->code_letter);
     }
 
-    public function test_call_list_automatically_locks_after_scheduled_end_time(): void
+    public function test_green_room_can_mark_attendance_for_upcoming_program(): void
     {
         $startTime = Carbon::parse('2026-10-15 10:00:00');
         $endTime = Carbon::parse('2026-10-15 10:30:00');
@@ -192,7 +155,39 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
             'end_time' => $endTime,
         ]);
 
-        // 5 minutes after scheduled end time: 10:35 AM
+        // 30 minutes before scheduled start time
+        Carbon::setTestNow(Carbon::parse('2026-10-15 09:30:00'));
+
+        $response = $this->actingAs($this->greenRoomUser)
+            ->postJson(route('greenroom.mark-attendance', $this->entry), [
+                'status' => 'present',
+            ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'attendance_status' => 'present',
+        ]);
+
+        $this->entry->refresh();
+        $this->assertEquals('present', $this->entry->attendance_status);
+    }
+
+    public function test_call_list_automatically_locks_when_program_is_completed(): void
+    {
+        $startTime = Carbon::parse('2026-10-15 10:00:00');
+        $endTime = Carbon::parse('2026-10-15 10:30:00');
+
+        Schedule::create([
+            'program_id' => $this->program->id,
+            'stage_id' => $this->stage->id,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+        ]);
+
+        // Mark program as completed
+        $this->program->update(['status' => 'completed']);
+
         Carbon::setTestNow(Carbon::parse('2026-10-15 10:35:00'));
 
         $response = $this->actingAs($this->greenRoomUser)
@@ -204,7 +199,7 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
         $response->assertJson([
             'success' => false,
         ]);
-        $this->assertStringContainsString('ഓട്ടോമാറ്റിക്കായി ലോക്ക് ചെയ്യപ്പെട്ടു', $response->json('message'));
+        $this->assertStringContainsString('പൂർത്തിയായതിനാൽ', $response->json('message'));
     }
 
     public function test_admin_manual_lock_blocks_green_room_even_inside_window(): void

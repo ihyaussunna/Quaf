@@ -300,7 +300,7 @@ class Program extends Model
                 'badge' => 'Completed (Locked)',
                 'badge_ml' => 'പ്രോഗ്രാം പൂർത്തിയായി (ലോക്ക് ചെയ്തു)',
                 'badge_color' => 'red',
-                'message' => 'പ്രോഗ്രാം പൂർത്തിയായതിനാൽ കോൾ ലിസ്റ്റ് ഓട്ടോമാറ്റിക്കായി ലോക്ക് ചെയ്യപ്പെട്ടു.',
+                'message' => 'പ്രോഗ്രാം പൂർത്തിയായതിനാൽ കോൾ ലിസ്റ്റ് പൂർണ്ണമായി ലോക്ക് ചെയ്യപ്പെട്ടു.',
                 'opens_at' => null,
                 'closes_at' => null,
                 'scheduled_start' => null,
@@ -308,65 +308,16 @@ class Program extends Model
             ];
         }
 
-        if (! $startTime) {
-            return [
-                'is_open' => true,
-                'state' => 'open_unscheduled',
-                'badge' => 'Unscheduled (Open)',
-                'badge_ml' => 'ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല (തുറന്നത്)',
-                'badge_color' => 'slate',
-                'message' => 'പ്രോഗ്രാം നിർദ്ദിഷ്ട സമയത്തിൽ ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല. ഏതുസമയത്തും ഹാജർ രേഖപ്പെടുത്താം.',
-                'opens_at' => null,
-                'closes_at' => null,
-                'scheduled_start' => null,
-                'minutes_until_open' => null,
-            ];
-        }
+        // Program is active/upcoming - keep call list open until completed
+        $opensAt = $startTime ? (clone $startTime)->subMinutes(10) : null;
 
-        $opensAt = (clone $startTime)->subMinutes(10);
-
-        // 1. Has the scheduled time passed or status is completed? Auto-lock!
-        if ($this->status === 'completed' || ($endTime && $now->greaterThan($endTime))) {
-            return [
-                'is_open' => false,
-                'state' => 'auto_locked_ended',
-                'badge' => 'Auto-Locked (Ended)',
-                'badge_ml' => 'ഷെഡ്യൂൾ സമയം കഴിഞ്ഞു (Auto-Locked)',
-                'badge_color' => 'red',
-                'message' => 'ഷെഡ്യൂൾ ചെയ്ത സമയം ('.($endTime ? $endTime->format('h:i A') : '').') പൂർത്തിയായതിനാൽ കോൾ ലിസ്റ്റ് ഓട്ടോമാറ്റിക്കായി ലോക്ക് ചെയ്യപ്പെട്ടു.',
-                'opens_at' => $opensAt,
-                'closes_at' => $endTime,
-                'scheduled_start' => $startTime,
-                'minutes_until_open' => null,
-            ];
-        }
-
-        // 2. Is it too early? (More than 10 mins before start)
-        if ($now->lessThan($opensAt)) {
-            $minutesLeft = max(1, (int) round($now->diffInMinutes($opensAt, false)));
-
-            return [
-                'is_open' => false,
-                'state' => 'upcoming_window',
-                'badge' => 'Opens 10m Before',
-                'badge_ml' => '10 മിനിറ്റ് മുമ്പ് തുറക്കും',
-                'badge_color' => 'amber',
-                'message' => 'ഹാജർ രേഖപ്പെടുത്തൽ ഷെഡ്യൂൾ ചെയ്ത സമയത്തിന് 10 മിനിറ്റ് മുമ്പ് ('.$opensAt->format('h:i A').') മാത്രമേ ആരംഭിക്കൂ.',
-                'opens_at' => $opensAt,
-                'closes_at' => $endTime,
-                'scheduled_start' => $startTime,
-                'minutes_until_open' => $minutesLeft,
-            ];
-        }
-
-        // 3. Active live window!
         return [
             'is_open' => true,
             'state' => 'open',
             'badge' => 'Open (Live)',
             'badge_ml' => 'തുറന്നിരിക്കുന്നു (Live)',
             'badge_color' => 'emerald',
-            'message' => 'ഹാജർ പട്ടിക തുറന്നിരിക്കുന്നു (Attendance Window Active). മത്സരാർത്ഥികളുടെ സാന്നിധ്യം രേഖപ്പെടുത്താം.',
+            'message' => 'ഹാജർ പട്ടിക തുറന്നിരിക്കുന്നു (Attendance Open). പ്രോഗ്രാം പൂർത്തിയാകുന്നതുവരെ മത്സരാർത്ഥികളുടെ സാന്നിധ്യം രേഖപ്പെടുത്താം.',
             'opens_at' => $opensAt,
             'closes_at' => $endTime,
             'scheduled_start' => $startTime,

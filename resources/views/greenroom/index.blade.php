@@ -70,9 +70,11 @@
 
     <!-- Unified Green Room Topbar -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-40 shadow-xs gap-4">
-        <div class="flex items-center gap-3.5 sm:gap-4 shrink-0">
-            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 9.0" class="h-9 sm:h-10 w-auto shrink-0 object-contain">
-            <div>
+        <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+            <a href="{{ route('greenroom.index') }}" class="flex items-center shrink-0">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 9.0" class="h-9 sm:h-10 w-auto object-contain max-h-10" style="height: 38px; width: auto; max-width: 125px; object-fit: contain;">
+            </a>
+            <div class="border-l border-slate-200 pl-3 sm:pl-4">
                 <div class="flex items-center gap-2">
                     <h1 class="font-sora font-black tracking-tight text-base sm:text-lg text-slate-900 leading-none">
                         Welcome to Green Room Desk
@@ -80,7 +82,7 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
                 </div>
                 <span class="text-[10px] font-mono tracking-wider text-[#005c94] block uppercase font-bold mt-1">
-                    Backstage Lineup, Live Dispatch & Digital Attendance &bull; QUAF 9.0
+                    Backstage Lineup & Digital Attendance &bull; QUAF 9.0
                 </span>
             </div>
         </div>
@@ -162,11 +164,18 @@
                             $isCurrentSlot = ($currentProgram && $sch->program_id === $currentProgram->id);
                             $isSelectedSlot = ($activeProgram && $sch->program_id === $activeProgram->id);
                             $schStart = \Carbon\Carbon::parse($sch->getRawOriginal('start_time') ?? $sch->start_time, 'Asia/Kolkata');
+                            $schZoneName = $sch->program?->zone?->name ?? $sch->program?->eligibility;
+                            $schZoneColor = $sch->program?->zone?->color_hex ?? '#005c94';
                         @endphp
                         <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $sch->program_id]) }}"
-                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-1.5 border {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200' }}">
+                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 border {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200' }}">
                             <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('h:i A') }}</span>
                             <span>{{ Str::limit($sch->program?->name, 22) }}</span>
+                            @if($schZoneName)
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="background-color: {{ $schZoneColor }}20; color: {{ $isSelectedSlot ? '#f8fafc' : $schZoneColor }};">
+                                    {{ $schZoneName }}
+                                </span>
+                            @endif
                             @if($isCurrentSlot)
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                             @endif
@@ -185,7 +194,7 @@
                         @if($currentProgram)
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>LIVE WINDOW</span>
+                                <span>LIVE NOW</span>
                             </span>
                         @else
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200">
@@ -196,6 +205,15 @@
 
                     @if($currentProgram)
                         <div>
+                            <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
+                                      style="background-color: {{ $currentProgram->zone?->color_hex ?? '#be1e2d' }};">
+                                    {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'General' }}
+                                </span>
+                                @if($currentProgram->zone?->sub_text)
+                                    <span class="text-[10px] font-mono text-slate-500">({{ $currentProgram->zone->sub_text }})</span>
+                                @endif
+                            </div>
                             <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 tracking-tight">
                                 {{ $currentProgram->name }}
                             </h3>
@@ -207,7 +225,9 @@
                         <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-600">
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-800">ID: {{ $currentProgram->code }}</span>
                             <span>&bull;</span>
-                            <span>{{ $currentProgram->category->name ?? $currentProgram->eligibility ?? 'General' }}</span>
+                            <span class="font-bold text-slate-700">Zone: {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'All' }}</span>
+                            <span>&bull;</span>
+                            <span>{{ $currentProgram->category->name ?? 'Category' }}</span>
                             <span>&bull;</span>
                             <span class="text-emerald-700 font-bold">
                                 {{ $activeSchedule?->start_time?->format('h:i A') ?? $currentProgram->scheduled_time?->format('h:i A') }}
@@ -259,6 +279,15 @@
 
                     @if($nextProgram)
                         <div>
+                            <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
+                                      style="background-color: {{ $nextProgram->zone?->color_hex ?? '#005c94' }};">
+                                    {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'General' }}
+                                </span>
+                                @if($nextProgram->zone?->sub_text)
+                                    <span class="text-[10px] font-mono text-slate-500">({{ $nextProgram->zone->sub_text }})</span>
+                                @endif
+                            </div>
                             <h3 class="text-xl sm:text-2xl font-sora font-bold text-slate-900 tracking-tight">
                                 {{ $nextProgram->name }}
                             </h3>
@@ -270,7 +299,9 @@
                         <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-600">
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-800">ID: {{ $nextProgram->code }}</span>
                             <span>&bull;</span>
-                            <span>{{ $nextProgram->category->name ?? $nextProgram->eligibility ?? 'General' }}</span>
+                            <span class="font-bold text-slate-700">Zone: {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'All' }}</span>
+                            <span>&bull;</span>
+                            <span>{{ $nextProgram->category->name ?? 'Category' }}</span>
                             <span>&bull;</span>
                             <span class="text-blue-800 font-bold">
                                 {{ $nextSchedule?->start_time?->format('h:i A') ?? $nextProgram->scheduled_time?->format('h:i A') ?? 'TBA' }}
@@ -304,7 +335,7 @@
                     @endif
                 </div>
 
-                <!-- 3. Stage Green Room Dispatch Actions -->
+                <!-- 3. Stage Controls -->
                 <div class="space-y-3 lg:border-l lg:border-slate-200 lg:pl-6 flex flex-col justify-between">
                     <div>
                         <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Stage Controls</span>
@@ -325,16 +356,9 @@
                                     <span>Shuffle Code Letters (A-Z)</span>
                                 </button>
                             </form>
-
-                            <!-- Call Next -->
-                            <form method="POST" action="{{ route('greenroom.call-next', $activeProgram->id) }}">
-                                @csrf
-                                <button type="submit" @if(! $isEditable) disabled @endif
-                                        class="w-full px-4 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                    <span>Call Next Participant</span>
-                                </button>
-                            </form>
+                            <p class="text-[11px] font-mono text-slate-400">
+                                ഹാജരായ മത്സരാർത്ഥികൾക്ക് റാൻഡം കോഡ് ലെറ്ററുകൾ നൽകാൻ ഈ ബട്ടൺ ഉപയോഗിക്കുക.
+                            </p>
                         </div>
                     @else
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-500 text-center">
@@ -355,43 +379,25 @@
                                 <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                                 <div>
                                     <strong class="font-bold">ഹാജർ പട്ടിക തുറന്നിരിക്കുന്നു (ATTENDANCE OPEN):</strong>
-                                    <span>{{ $windowState['message'] }}</span>
+                                    <span>പ്രോഗ്രാം കഴിയുന്നത് വരെ ഹാജർ രേഖപ്പെടുത്താം.</span>
                                 </div>
                             </div>
-                            <div class="shrink-0 flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
-                                    {{ $windowState['scheduled_start']?->format('h:i A') }} – {{ $windowState['closes_at']?->format('h:i A') }}
-                                </span>
-                            </div>
-                        </div>
-                    @elseif($windowState['state'] === 'upcoming_window')
-                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                            <div class="flex items-center gap-2.5">
-                                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                <div>
-                                    <strong class="font-bold">10 മിനിറ്റ് മുമ്പ് മാത്രമേ ഹാജർ രേഖപ്പെടുത്താൻ സാധിക്കൂ:</strong>
-                                    <span>{{ $windowState['message'] }}</span>
+                            @if($windowState['scheduled_start'])
+                                <div class="shrink-0 flex items-center gap-2">
+                                    <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                                        ഷെഡ്യൂൾ: {{ $windowState['scheduled_start']?->format('h:i A') }} @if($windowState['closes_at']) – {{ $windowState['closes_at']->format('h:i A') }} @endif
+                                    </span>
                                 </div>
-                            </div>
-                            <div class="shrink-0 flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold border border-amber-300">
-                                    OPENS AT {{ $windowState['opens_at']?->format('h:i A') }}
-                                </span>
-                            </div>
+                            @endif
                         </div>
                     @elseif($windowState['state'] === 'auto_locked_ended')
                         <div class="p-4 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                             <div class="flex items-center gap-2.5">
                                 <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 <div>
-                                    <strong class="font-bold">ഷെഡ്യൂൾ സമയം കഴിഞ്ഞു (AUTO-LOCKED):</strong>
-                                    <span>{{ $windowState['message'] }}</span>
+                                    <strong class="font-bold">പ്രോഗ്രാം പൂർത്തിയായി (PROGRAM COMPLETED):</strong>
+                                    <span>പ്രോഗ്രാം പൂർത്തിയായതിനാൽ കോൾ ലിസ്റ്റ് പൂർണ്ണമായി ലോക്ക് ചെയ്യപ്പെട്ടു.</span>
                                 </div>
-                            </div>
-                            <div class="shrink-0 flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-lg bg-red-100 text-red-800 font-bold border border-red-300">
-                                    ENDED AT {{ $windowState['closes_at']?->format('h:i A') }}
-                                </span>
                             </div>
                         </div>
                     @elseif($windowState['state'] === 'locked_by_admin')
@@ -418,11 +424,17 @@
                     <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                             <div>
-                                <h2 class="text-xl font-sora font-black text-slate-900">
-                                    Digital Call List & Attendance: {{ $activeProgram->name }}
-                                </h2>
-                                <p class="text-xs font-mono text-slate-500 mt-0.5">
-                                    Code: {{ $activeProgram->code }} &bull; Stage: {{ $stage->name }} &bull; Total Registered: {{ $stats['total'] }} Students
+                                <div class="flex items-center gap-2.5 flex-wrap">
+                                    <h2 class="text-xl font-sora font-black text-slate-900">
+                                        Digital Call List & Attendance: {{ $activeProgram->name }}
+                                    </h2>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
+                                          style="background-color: {{ $activeProgram->zone?->color_hex ?? '#005c94' }};">
+                                        {{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'General' }}
+                                    </span>
+                                </div>
+                                <p class="text-xs font-mono text-slate-500 mt-1">
+                                    Code: <strong>{{ $activeProgram->code }}</strong> &bull; Zone: <strong>{{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All' }}</strong> &bull; Stage: <strong>{{ $stage->name }}</strong> &bull; Total Registered: <strong>{{ $stats['total'] }} Students</strong>
                                 </p>
                             </div>
 
@@ -448,8 +460,8 @@
                             </div>
                         </div>
 
-                        <!-- 6 Quick Summary Counters -->
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+                        <!-- 4 Summary Counters (On Stage & Called Removed) -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                             <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                                 <span class="text-slate-500 font-mono block text-[11px]">Total Call List</span>
                                 <span class="text-xl font-black text-slate-900 mt-1 block font-mono">{{ $stats['total'] }}</span>
@@ -465,14 +477,6 @@
                             <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
                                 <span class="font-mono block text-amber-700 text-[11px]">Waiting (കാത്തിരിപ്പ്)</span>
                                 <span class="text-xl font-black mt-1 block font-mono">{{ $stats['waiting'] }}</span>
-                            </div>
-                            <div class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-[#005c94]">
-                                <span class="font-mono block text-[#005c94] text-[11px]">On Stage</span>
-                                <span class="text-xl font-black mt-1 block font-mono">{{ $stats['on_stage'] }}</span>
-                            </div>
-                            <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900">
-                                <span class="font-mono block text-purple-700 text-[11px]">Called</span>
-                                <span class="text-xl font-black mt-1 block font-mono">{{ $stats['called'] }}</span>
                             </div>
                         </div>
 
@@ -521,15 +525,10 @@
                                         <th class="py-3 px-4">Student Name</th>
                                         <th class="py-3 px-4">Group / Team</th>
                                         <th class="py-3 px-4 text-center">Attendance Action</th>
-                                        <th class="py-3 px-4 text-center">Stage Dispatch</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     @forelse($entries as $index => $entry)
-                                        @php
-                                            $call = $calls->firstWhere('entry_id', $entry->id);
-                                            $callStatus = $call?->status ?? 'waiting';
-                                        @endphp
                                         <tr class="hover:bg-slate-50/70 transition-colors"
                                             x-show="(attendanceFilter === 'all' || attendanceFilter === '{{ $entry->attendance_status ?? 'waiting' }}') && (!searchQuery || '{{ strtolower($entry->chest_number . ' ' . ($entry->student?->name ?? '') . ' ' . ($entry->group?->name ?? '') . ' ' . ($entry->code_letter ?? '')) }}'.includes(searchQuery.toLowerCase()))">
                                             
@@ -602,44 +601,10 @@
                                                     </div>
                                                 @endif
                                             </td>
-
-                                            <!-- Stage Dispatch Controls -->
-                                            <td class="py-3.5 px-4 text-center">
-                                                @if($call)
-                                                    <div class="inline-flex items-center gap-1.5">
-                                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase
-                                                            {{ $callStatus === 'on_stage' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
-                                                               ($callStatus === 'called' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                                                               ($callStatus === 'ready' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600')) }}">
-                                                            {{ strtoupper($callStatus) }}
-                                                        </span>
-
-                                                        @if($callStatus !== 'on_stage' && $isEditable)
-                                                            <form method="POST" action="{{ route('greenroom.update-status', $call) }}">
-                                                                @csrf
-                                                                <input type="hidden" name="status" value="called">
-                                                                <button type="submit" title="Call to backstage" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-[10px] font-mono font-bold">
-                                                                    Call
-                                                                </button>
-                                                            </form>
-
-                                                            <form method="POST" action="{{ route('greenroom.update-status', $call) }}">
-                                                                @csrf
-                                                                <input type="hidden" name="status" value="on_stage">
-                                                                <button type="submit" title="Send to stage" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-mono font-bold">
-                                                                    Stage Now
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                @else
-                                                    <span class="text-slate-400 font-mono text-[10px]">&mdash;</span>
-                                                @endif
-                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="py-12 text-center text-slate-500 font-mono text-xs">
+                                            <td colspan="6" class="py-12 text-center text-slate-500 font-mono text-xs">
                                                 ഈ പ്രോഗ്രാമിൽ ഇതുവരെ എൻട്രികൾ ലഭ്യമായിട്ടില്ല. (No registered entries found).
                                             </td>
                                         </tr>
