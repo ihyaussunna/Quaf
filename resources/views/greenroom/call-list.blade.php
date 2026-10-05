@@ -40,9 +40,6 @@
             <a href="{{ route('greenroom.call-list') }}" class="px-3.5 py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs font-bold font-sora">
                 Digital Call List
             </a>
-            <a href="{{ route('announcer.stage') }}" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all font-sora">
-                Announcer Tab
-            </a>
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -254,12 +251,6 @@
                            class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 transition-colors">
                             <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                             <span>Print Sheet</span>
-                        </a>
-
-                        <!-- Go to Announcer Tab -->
-                        <a href="{{ route('announcer.stage', ['stage_id' => $selectedProgram->stage_id]) }}" target="_blank"
-                           class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors">
-                            <span>അനൗൺസർ ടാബ് &rarr;</span>
                         </a>
                     </div>
                 </div>

@@ -248,4 +248,37 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
         $responseOffstage->assertOk();
         $responseOffstage->assertSee('Offstage');
     }
+
+    public function test_green_room_desk_shows_scheduled_program_and_participants_dynamically(): void
+    {
+        $startTime = Carbon::parse('2026-10-15 10:00:00');
+        $endTime = Carbon::parse('2026-10-15 10:30:00');
+
+        Schedule::create([
+            'program_id' => $this->program->id,
+            'stage_id' => $this->stage->id,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+        ]);
+
+        Carbon::setTestNow(Carbon::parse('2026-10-15 09:55:00'));
+
+        $response = $this->actingAs($this->greenRoomUser)
+            ->get(route('greenroom.index', ['stage_id' => $this->stage->id]));
+
+        $response->assertOk();
+        $response->assertSee($this->program->name);
+        $response->assertSee($this->student->name);
+        $response->assertDontSee('Announcer Tab');
+    }
+
+    public function test_announcer_tab_button_is_removed_from_call_list(): void
+    {
+        $response = $this->actingAs($this->greenRoomUser)
+            ->get(route('greenroom.call-list', ['program_id' => $this->program->id]));
+
+        $response->assertOk();
+        $response->assertDontSee('Announcer Tab');
+        $response->assertDontSee('അനൗൺസർ ടാബ്');
+    }
 }

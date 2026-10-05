@@ -283,10 +283,15 @@ class Program extends Model
             ];
         }
 
+        $tz = config('app.timezone', 'Asia/Kolkata') ?: 'Asia/Kolkata';
+        $now = Carbon::now($tz);
+
         $schedule = $this->schedule;
-        $startTime = $schedule?->start_time ?? ($this->scheduled_time ? Carbon::parse($this->scheduled_time) : null);
+        $rawStart = $schedule?->getRawOriginal('start_time') ?? $schedule?->start_time ?? $this->scheduled_time;
+        $startTime = $rawStart ? Carbon::parse($rawStart, $tz)->timezone($tz) : null;
         $duration = (int) ($this->duration_minutes ?: 30);
-        $endTime = $schedule?->end_time ?? ($startTime ? (clone $startTime)->addMinutes($duration) : null);
+        $rawEnd = $schedule?->getRawOriginal('end_time') ?? $schedule?->end_time;
+        $endTime = $rawEnd ? Carbon::parse($rawEnd, $tz)->timezone($tz) : ($startTime ? (clone $startTime)->addMinutes($duration) : null);
 
         if ($this->status === 'completed' || $this->status === 'published') {
             return [
@@ -319,7 +324,6 @@ class Program extends Model
         }
 
         $opensAt = (clone $startTime)->subMinutes(10);
-        $now = Carbon::now();
 
         // 1. Has the scheduled time passed or status is completed? Auto-lock!
         if ($this->status === 'completed' || ($endTime && $now->greaterThan($endTime))) {

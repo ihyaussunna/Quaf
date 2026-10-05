@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\GreenRoomCall;
 use App\Models\Program;
 use App\Models\ProgramEntry;
+use App\Models\Schedule;
 use App\Models\Stage;
 use App\Services\AuditLogger;
 use Carbon\Carbon;
@@ -20,12 +21,75 @@ class GreenRoomController extends Controller
 {
     public function index(Request $request): View
     {
-        $stages = Stage::all();
+        $tz = config('app.timezone', 'Asia/Kolkata') ?: 'Asia/Kolkata';
+        $now = Carbon::now($tz);
+
+        $stages = Stage::orderBy('name')->get();
         $selectedStageId = $request->query('stage_id', $stages->first()?->id);
         $stage = Stage::with(['currentProgram.category', 'nextProgram.category'])->find($selectedStageId);
 
-        $currentProgram = $stage?->currentProgram;
-        $nextProgram = $stage?->nextProgram;
+        $currentProgram = null;
+        $nextProgram = null;
+
+        if ($stage) {
+            // Priority 1: explicitly configured current program on stage
+            $currentProgram = $stage->currentProgram;
+
+            // Priority 2: program marked in_progress on this stage
+            if (! $currentProgram) {
+                $currentProgram = Program::where('stage_id', $stage->id)
+                    ->where('status', 'in_progress')
+                    ->first();
+            }
+
+            // Priority 3: program scheduled in the active window (start_time - 10m <= now <= end_time)
+            if (! $currentProgram) {
+                $ongoingSchedule = Schedule::where('stage_id', $stage->id)
+                    ->where('start_time', '<=', $now->copy()->addMinutes(10))
+                    ->where('end_time', '>=', $now)
+                    ->orderBy('start_time')
+                    ->first();
+                $currentProgram = $ongoingSchedule?->program;
+            }
+
+            // Priority 4: nearest upcoming schedule for this stage
+            if (! $currentProgram) {
+                $upcomingSchedule = Schedule::where('stage_id', $stage->id)
+                    ->where('end_time', '>=', $now)
+                    ->orderBy('start_time')
+                    ->first();
+                $currentProgram = $upcomingSchedule?->program;
+            }
+
+            // Priority 5: any upcoming program assigned to this stage
+            if (! $currentProgram) {
+                $currentProgram = Program::where('stage_id', $stage->id)
+                    ->where('status', 'upcoming')
+                    ->orderBy('scheduled_time')
+                    ->first()
+                    ?? Program::where('stage_id', $stage->id)->first();
+            }
+
+            // Resolve next program
+            $nextProgram = $stage->nextProgram;
+            if (! $nextProgram && $currentProgram) {
+                $currentStart = $currentProgram->schedule?->start_time ?? $currentProgram->scheduled_time;
+                $nextSchedule = Schedule::where('stage_id', $stage->id)
+                    ->where('program_id', '!=', $currentProgram->id)
+                    ->when($currentStart, fn ($q) => $q->where('start_time', '>', $currentStart))
+                    ->orderBy('start_time')
+                    ->first();
+                $nextProgram = $nextSchedule?->program;
+
+                if (! $nextProgram) {
+                    $nextProgram = Program::where('stage_id', $stage->id)
+                        ->where('id', '!=', $currentProgram->id)
+                        ->where('status', 'upcoming')
+                        ->orderBy('scheduled_time')
+                        ->first();
+                }
+            }
+        }
 
         // Upcoming programs for this stage
         $upcomingPrograms = [];
@@ -35,18 +99,30 @@ class GreenRoomController extends Controller
                 ->where('id', '!=', $currentProgram?->id)
                 ->where('id', '!=', $nextProgram?->id)
                 ->orderBy('scheduled_time')
-                ->take(3)
+                ->take(5)
                 ->get();
         }
 
-        // Participants in green room queue for current program (or next program if current finished)
-        $activeProgram = $currentProgram ?? $nextProgram;
+        // Active program for the call board: allow coordinator to pick a program or default to current / next / upcoming
+        $selectedProgId = $request->query('program_id');
+        $activeProgram = ($selectedProgId ? Program::find($selectedProgId) : null)
+            ?? $currentProgram
+            ?? $nextProgram
+            ?? ($upcomingPrograms->first() ?? null)
+            ?? $stage?->programs()->first();
+
         $calls = collect();
 
         if ($activeProgram) {
-            // Ensure all verified entries have a green room call record
-            $verifiedEntries = $activeProgram->entries()->where('status', 'verified')->get();
-            foreach ($verifiedEntries as $index => $entry) {
+            // Ensure all entries (non-rejected) have a green room call record, in sync with Call List
+            $entries = $activeProgram->entries()
+                ->where(function ($q) {
+                    $q->whereNull('status')
+                        ->orWhere('status', '!=', 'rejected');
+                })
+                ->get();
+
+            foreach ($entries as $index => $entry) {
                 GreenRoomCall::firstOrCreate(
                     [
                         'program_id' => $activeProgram->id,
@@ -54,7 +130,11 @@ class GreenRoomController extends Controller
                     ],
                     [
                         'order_num' => $index + 1,
-                        'status' => 'waiting',
+                        'status' => match ($entry->attendance_status) {
+                            'present' => 'ready',
+                            'absent' => 'absent',
+                            default => 'waiting',
+                        },
                     ]
                 );
             }
@@ -163,16 +243,23 @@ class GreenRoomController extends Controller
 
         $entry->save();
 
-        // Sync with GreenRoomCall if exists
-        $call = GreenRoomCall::where('entry_id', $entry->id)->first();
-        if ($call) {
-            $callStatus = match ($newStatus) {
-                'present' => 'ready',
-                'absent' => 'absent',
-                default => 'waiting',
-            };
-            $call->update(['status' => $callStatus]);
-        }
+        // Sync with GreenRoomCall (ensure record exists and status is synced)
+        $callStatus = match ($newStatus) {
+            'present' => 'ready',
+            'absent' => 'absent',
+            default => 'waiting',
+        };
+        $call = GreenRoomCall::firstOrCreate(
+            [
+                'program_id' => $entry->program_id,
+                'entry_id' => $entry->id,
+            ],
+            [
+                'order_num' => GreenRoomCall::where('program_id', $entry->program_id)->count() + 1,
+                'status' => $callStatus,
+            ]
+        );
+        $call->update(['status' => $callStatus]);
 
         AuditLogger::log('green_room_attendance', $entry, ['attendance_status' => $oldStatus], [
             'entry_id' => $entry->id,

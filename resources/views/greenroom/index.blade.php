@@ -31,16 +31,12 @@
             </div>
         </div>
 
-        <!-- Fest Navigation Triad: Green Room -> Announcer -> Call List -->
         <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
             <a href="{{ route('greenroom.index') }}" class="px-3.5 py-1.5 rounded-lg bg-white text-slate-900 shadow-2xs font-bold font-sora">
                 Green Room Desk
             </a>
             <a href="{{ route('greenroom.call-list') }}" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all font-sora">
                 Digital Call List
-            </a>
-            <a href="{{ route('announcer.stage') }}" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all font-sora">
-                Announcer Tab
             </a>
         </nav>
 
@@ -126,7 +122,7 @@
                             @csrf
                             <button type="submit" class="px-5 py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-lg shadow-amber-600/20 flex items-center justify-center gap-2 transition-all transform active:scale-95">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>🎲 Shuffle Code Letters</span>
+                                <span>Shuffle Code Letters (A-Z)</span>
                             </button>
                         </form>
 
@@ -143,12 +139,39 @@
 
             <!-- Participant Dispatch Queue (Light Theme) -->
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
+                @if($stage && $upcomingPrograms->isNotEmpty())
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-mono scrollbar-none">
+                        <span class="text-slate-500 font-bold uppercase text-[10px] shrink-0">Stage Lineup:</span>
+                        @if($currentProgram)
+                            <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $currentProgram->id]) }}"
+                               class="px-2.5 py-1 rounded-lg shrink-0 transition {{ $activeProgram?->id == $currentProgram->id ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
+                                Now: {{ Str::limit($currentProgram->name, 22) }}
+                            </a>
+                        @endif
+                        @foreach($upcomingPrograms as $up)
+                            @if($up->id !== $currentProgram?->id)
+                                <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $up->id]) }}"
+                                   class="px-2.5 py-1 rounded-lg shrink-0 transition {{ $activeProgram?->id == $up->id ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
+                                    {{ Str::limit($up->name, 22) }}
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h2 class="text-xl font-sora font-bold text-slate-900">Backstage Lineup & Call Board</h2>
                         <p class="text-xs font-mono text-slate-500 mt-0.5">Program: {{ $activeProgram?->name ?? 'None' }} ({{ $calls->count() }} Participants)</p>
                     </div>
-                    <div class="flex items-center gap-2 text-xs font-mono">
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+                        @if($activeProgram)
+                            <a href="{{ route('greenroom.call-list', ['program_id' => $activeProgram->id, 'stage_id' => $stage->id]) }}"
+                               class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center gap-1.5 transition shadow-xs">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                <span>Digital Call List &rarr;</span>
+                            </a>
+                        @endif
                         <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
                             {{ $calls->where('entry.attendance_status', 'present')->count() }} Present
                         </span>
