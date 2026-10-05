@@ -285,12 +285,11 @@
                     const container = document.getElementById('flipbook');
                     const isSmall = window.innerWidth < 768;
 
-                    // Perfect square dimension calculation for 1:1 booklet format
-                    const maxH = Math.max(280, window.innerHeight - (isSmall ? 130 : 96));
-                    const maxW = isSmall
-                        ? Math.min(window.innerWidth - 20, 520)
-                        : Math.min((window.innerWidth - 120) / 2, 600);
-                    const pageDim = Math.floor(Math.min(maxH, maxW));
+                    // Available width for the two-page spread (both pages side-by-side on mobile and laptop)
+                    const availableWidth = window.innerWidth - (isSmall ? 16 : 80);
+                    const maxSinglePageWidth = Math.floor(availableWidth / 2);
+                    const maxSinglePageHeight = Math.max(160, Math.floor(window.innerHeight - (isSmall ? 130 : 100)));
+                    const pageDim = Math.min(maxSinglePageWidth, maxSinglePageHeight);
 
                     try {
                         const PageFlipClass = window.St?.PageFlip || window.PageFlip;
@@ -300,14 +299,14 @@
                             width: pageDim,
                             height: pageDim,
                             size: 'fixed',
-                            minWidth: 200,
+                            minWidth: 140,
                             maxWidth: 900,
-                            minHeight: 200,
+                            minHeight: 140,
                             maxHeight: 900,
                             drawShadow: true,
                             maxShadowOpacity: 0.45,
-                            showCover: !isSmall,
-                            usePortrait: isSmall,
+                            showCover: true,           // Always show cover on the right, then 2-page spreads!
+                            usePortrait: false,        // Always two-page spread, exactly like on laptop!
                             startPage: 0,
                             flippingTime: 500,
                             useMouseEvents: true,
@@ -455,18 +454,16 @@
                 updatePageIndicator() {
                     const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
                     this.currentPage = cur;
-                    if (this.isMobile) {
-                        this.pageIndicator = `${cur + 1} / ${this.totalPages}`;
+                    if (cur === 0) {
+                        this.pageIndicator = `Cover (1 / ${this.totalPages})`;
+                    } else if (cur >= this.totalPages - 1) {
+                        this.pageIndicator = `Back Cover (${this.totalPages} / ${this.totalPages})`;
                     } else {
-                        if (cur === 0) {
-                            this.pageIndicator = `Cover (1 / ${this.totalPages})`;
-                        } else if (cur >= this.totalPages - 1) {
-                            this.pageIndicator = `Back Cover (${this.totalPages} / ${this.totalPages})`;
-                        } else {
-                            const left = cur + 1;
-                            const right = Math.min(cur + 2, this.totalPages);
-                            this.pageIndicator = `Pages ${left}–${right} of ${this.totalPages}`;
-                        }
+                        const left = cur + 1;
+                        const right = Math.min(cur + 2, this.totalPages);
+                        this.pageIndicator = this.isMobile 
+                            ? `${left}–${right} / ${this.totalPages}` 
+                            : `Pages ${left}–${right} of ${this.totalPages}`;
                     }
                 },
 
