@@ -21,108 +21,121 @@ class GreenRoomController extends Controller
 {
     public function index(Request $request): View
     {
+        Program::ensureSchema();
+
         $tz = config('app.timezone', 'Asia/Kolkata') ?: 'Asia/Kolkata';
         $now = Carbon::now($tz);
 
-        $stages = Stage::orderBy('name')->get();
-        $selectedStageId = $request->query('stage_id', $stages->first()?->id);
-        $stage = Stage::with(['currentProgram.category', 'nextProgram.category'])->find($selectedStageId);
+        // Stages ordered by ID (Stages 01 to 08)
+        $stages = Stage::orderBy('id')->get();
+        $selectedStageId = (int) ($request->query('stage_id') ?: ($stages->first()?->id ?? 1));
+        $stage = Stage::with(['currentProgram.category', 'nextProgram.category'])->find($selectedStageId) ?? $stages->first();
 
-        $currentProgram = null;
-        $nextProgram = null;
+        // All schedules for this selected stage
+        $stageSchedules = Schedule::where('stage_id', $stage->id)
+            ->with(['program.category', 'program.zone', 'program.scoringCriteria'])
+            ->orderBy('start_time')
+            ->get();
 
-        if ($stage) {
-            // Priority 1: explicitly configured current program on stage
+        // 1. Now On Stage Program:
+        // ONLY a program that has an active window right now:
+        // (start_time - 10 minutes <= now <= end_time) OR program status is 'in_progress'
+        $activeSchedule = $stageSchedules->first(function ($sch) use ($now, $tz) {
+            if ($sch->program?->status === 'in_progress') {
+                return true;
+            }
+            $rawStart = $sch->getRawOriginal('start_time') ?? $sch->start_time;
+            $rawEnd = $sch->getRawOriginal('end_time') ?? $sch->end_time;
+            if (! $rawStart || ! $rawEnd) {
+                return false;
+            }
+            $start = Carbon::parse($rawStart, $tz)->timezone($tz);
+            $end = Carbon::parse($rawEnd, $tz)->timezone($tz);
+            $opensAt = $start->copy()->subMinutes(10);
+
+            return $now->between($opensAt, $end);
+        });
+
+        $currentProgram = $activeSchedule?->program;
+        if (! $currentProgram && $stage->current_program_id) {
             $currentProgram = $stage->currentProgram;
-
-            // Priority 2: program marked in_progress on this stage
-            if (! $currentProgram) {
-                $currentProgram = Program::where('stage_id', $stage->id)
-                    ->where('status', 'in_progress')
-                    ->first();
-            }
-
-            // Priority 3: program scheduled in the active window (start_time - 10m <= now <= end_time)
-            if (! $currentProgram) {
-                $ongoingSchedule = Schedule::where('stage_id', $stage->id)
-                    ->where('start_time', '<=', $now->copy()->addMinutes(10))
-                    ->where('end_time', '>=', $now)
-                    ->orderBy('start_time')
-                    ->first();
-                $currentProgram = $ongoingSchedule?->program;
-            }
-
-            // Priority 4: nearest upcoming schedule for this stage
-            if (! $currentProgram) {
-                $upcomingSchedule = Schedule::where('stage_id', $stage->id)
-                    ->where('end_time', '>=', $now)
-                    ->orderBy('start_time')
-                    ->first();
-                $currentProgram = $upcomingSchedule?->program;
-            }
-
-            // Priority 5: any upcoming program assigned to this stage
-            if (! $currentProgram) {
-                $currentProgram = Program::where('stage_id', $stage->id)
-                    ->where('status', 'upcoming')
-                    ->orderBy('scheduled_time')
-                    ->first()
-                    ?? Program::where('stage_id', $stage->id)->first();
-            }
-
-            // Resolve next program
-            $nextProgram = $stage->nextProgram;
-            if (! $nextProgram && $currentProgram) {
-                $currentStart = $currentProgram->schedule?->start_time ?? $currentProgram->scheduled_time;
-                $nextSchedule = Schedule::where('stage_id', $stage->id)
-                    ->where('program_id', '!=', $currentProgram->id)
-                    ->when($currentStart, fn ($q) => $q->where('start_time', '>', $currentStart))
-                    ->orderBy('start_time')
-                    ->first();
-                $nextProgram = $nextSchedule?->program;
-
-                if (! $nextProgram) {
-                    $nextProgram = Program::where('stage_id', $stage->id)
-                        ->where('id', '!=', $currentProgram->id)
-                        ->where('status', 'upcoming')
-                        ->orderBy('scheduled_time')
-                        ->first();
-                }
-            }
         }
 
-        // Upcoming programs for this stage
-        $upcomingPrograms = [];
-        if ($stage) {
-            $upcomingPrograms = Program::where('stage_id', $stage->id)
-                ->where('status', 'upcoming')
-                ->where('id', '!=', $currentProgram?->id)
-                ->where('id', '!=', $nextProgram?->id)
-                ->orderBy('scheduled_time')
-                ->take(5)
-                ->get();
-        }
+        // 2. Up Next Program:
+        // The first schedule on this stage whose start_time is in the future (after now)
+        $nextSchedule = $stageSchedules->first(function ($sch) use ($now, $tz, $currentProgram) {
+            if ($currentProgram && $sch->program_id === $currentProgram->id) {
+                return false;
+            }
+            $rawStart = $sch->getRawOriginal('start_time') ?? $sch->start_time;
+            if (! $rawStart) {
+                return false;
+            }
+            $start = Carbon::parse($rawStart, $tz)->timezone($tz);
 
-        // Active program for the call board: allow coordinator to pick a program or default to current / next / upcoming
-        $selectedProgId = $request->query('program_id');
-        $activeProgram = ($selectedProgId ? Program::find($selectedProgId) : null)
+            return $start->isAfter($now);
+        });
+
+        $nextProgram = $nextSchedule?->program ?? ($stage->next_program_id ? $stage->nextProgram : null);
+
+        // 3. Which program's call list should be displayed?
+        // - If coordinator explicitly clicked a scheduled program from stage timeline: load that program
+        // - Else if there is a program currently active right now: load current program
+        // - Else if there is an upcoming program on this stage: load next program (in preview mode, locked)
+        // - Else null (no scheduled program)
+        $selectedProgId = $request->query('program') ?: $request->query('program_id');
+        $activeProgram = ($selectedProgId ? Program::with(['category', 'zone', 'scoringCriteria', 'schedule'])->find($selectedProgId) : null)
             ?? $currentProgram
-            ?? $nextProgram
-            ?? ($upcomingPrograms->first() ?? null)
-            ?? $stage?->programs()->first();
+            ?? $nextProgram;
 
+        // Eager load scoring criteria
+        if ($currentProgram && ! $currentProgram->relationLoaded('scoringCriteria')) {
+            $currentProgram->load('scoringCriteria');
+        }
+        if ($nextProgram && ! $nextProgram->relationLoaded('scoringCriteria')) {
+            $nextProgram->load('scoringCriteria');
+        }
+        if ($activeProgram && ! $activeProgram->relationLoaded('scoringCriteria')) {
+            $activeProgram->load('scoringCriteria');
+        }
+
+        $windowState = $activeProgram ? $activeProgram->getCallListWindowState() : null;
+        $isAdmin = in_array(auth()->user()?->role, ['admin', 'super_admin']);
+        $isEditable = ($windowState['is_open'] ?? false) || $isAdmin;
+
+        $search = $request->query('search');
+        $attendanceFilter = $request->query('attendance');
+        $entries = collect();
         $calls = collect();
 
-        if ($activeProgram) {
-            // Ensure all entries (non-rejected) have a green room call record, in sync with Call List
-            $entries = $activeProgram->entries()
-                ->where(function ($q) {
-                    $q->whereNull('status')
-                        ->orWhere('status', '!=', 'rejected');
-                })
-                ->get();
+        $stats = [
+            'total' => 0,
+            'present' => 0,
+            'absent' => 0,
+            'waiting' => 0,
+            'evaluated' => 0,
+            'pending_evaluation' => 0,
+            'on_stage' => 0,
+            'called' => 0,
+        ];
 
-            foreach ($entries as $index => $entry) {
+        if ($activeProgram) {
+            $query = ProgramEntry::where('program_id', $activeProgram->id)
+                ->where(function ($q) {
+                    $q->whereNull('status')->orWhere('status', '!=', 'rejected');
+                })
+                ->with(['student.group', 'group', 'scoreSheets']);
+
+            $allEntries = (clone $query)->get();
+            $stats['total'] = $allEntries->count();
+            $stats['present'] = $allEntries->where('attendance_status', 'present')->count();
+            $stats['absent'] = $allEntries->where('attendance_status', 'absent')->count();
+            $stats['waiting'] = $allEntries->where('attendance_status', '!=', 'present')->where('attendance_status', '!=', 'absent')->count();
+            $stats['evaluated'] = $allEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATED')->count();
+            $stats['pending_evaluation'] = $allEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATION_PENDING')->count();
+
+            // Ensure GreenRoomCall records exist
+            foreach ($allEntries as $index => $entry) {
                 GreenRoomCall::firstOrCreate(
                     [
                         'program_id' => $activeProgram->id,
@@ -139,13 +152,57 @@ class GreenRoomController extends Controller
                 );
             }
 
+            // Apply search & filter
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('chest_number', 'like', "%{$search}%")
+                        ->orWhere('code_letter', 'like', "%{$search}%")
+                        ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
+                        ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%"));
+                });
+            }
+
+            if ($attendanceFilter === 'present') {
+                $query->where('attendance_status', 'present');
+            } elseif ($attendanceFilter === 'absent') {
+                $query->where('attendance_status', 'absent');
+            } elseif ($attendanceFilter === 'waiting') {
+                $query->where(function ($q) {
+                    $q->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
+                });
+            }
+
+            $entries = $query->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
+                ->get();
+
             $calls = GreenRoomCall::where('program_id', $activeProgram->id)
-                ->with(['entry.student.group', 'entry.group'])
+                ->with(['entry.student.group', 'entry.group', 'entry.scoreSheets'])
                 ->orderBy('order_num')
                 ->get();
+
+            $stats['on_stage'] = $calls->where('status', 'on_stage')->count();
+            $stats['called'] = $calls->where('status', 'called')->count();
         }
 
-        return view('greenroom.index', compact('stages', 'stage', 'selectedStageId', 'currentProgram', 'nextProgram', 'upcomingPrograms', 'activeProgram', 'calls'));
+        return view('greenroom.index', compact(
+            'stages',
+            'stage',
+            'selectedStageId',
+            'stageSchedules',
+            'activeSchedule',
+            'nextSchedule',
+            'currentProgram',
+            'nextProgram',
+            'activeProgram',
+            'windowState',
+            'isEditable',
+            'isAdmin',
+            'entries',
+            'calls',
+            'stats',
+            'search',
+            'attendanceFilter'
+        ));
     }
 
     public function updateStatus(Request $request, GreenRoomCall $call): RedirectResponse
@@ -378,102 +435,7 @@ class GreenRoomController extends Controller
 
     public function callList(Request $request): View
     {
-        Program::ensureSchema();
-
-        $zones = Program::ZONES;
-        $stages = Stage::orderBy('name')->get();
-
-        $selectedZone = $request->query('zone', $request->query('category'));
-        $selectedStageId = $request->query('stage_id');
-        $selectedProgramId = $request->query('program') ?: $request->query('program_id');
-        $search = $request->query('search');
-        $attendanceFilter = $request->query('attendance');
-        $evalFilter = $request->query('eval_status');
-
-        $programsQuery = Program::query();
-        if ($selectedZone) {
-            $programsQuery->where('eligibility', $selectedZone);
-        }
-        if ($selectedStageId) {
-            $programsQuery->where('stage_id', $selectedStageId);
-        }
-        $programs = $programsQuery->orderBy('name')->get();
-
-        $selectedProgram = null;
-        $entries = collect();
-        $stats = [
-            'total' => 0,
-            'present' => 0,
-            'absent' => 0,
-            'waiting' => 0,
-            'evaluated' => 0,
-            'pending_evaluation' => 0,
-        ];
-
-        if ($selectedProgramId) {
-            $selectedProgram = Program::with(['category', 'stage', 'schedule'])->find($selectedProgramId);
-            if ($selectedProgram) {
-                $query = ProgramEntry::where('program_id', $selectedProgram->id)
-                    ->with(['student.group', 'group', 'scoreSheets']);
-
-                // Calculate summary counters across all verified entries of the selected program
-                $allEntries = (clone $query)->get();
-                $stats['total'] = $allEntries->count();
-                $stats['present'] = $allEntries->where('attendance_status', 'present')->count();
-                $stats['absent'] = $allEntries->where('attendance_status', 'absent')->count();
-                $stats['waiting'] = $allEntries->where('attendance_status', '!=', 'present')->where('attendance_status', '!=', 'absent')->count();
-                $stats['evaluated'] = $allEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATED')->count();
-                $stats['pending_evaluation'] = $allEntries->filter(fn ($e) => $e->evaluation_status === 'EVALUATION_PENDING')->count();
-
-                // Apply Search & Filters
-                if ($search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where('chest_number', 'like', "%{$search}%")
-                            ->orWhere('code_letter', 'like', "%{$search}%")
-                            ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
-                            ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%"));
-                    });
-                }
-
-                if ($attendanceFilter === 'present') {
-                    $query->where('attendance_status', 'present');
-                } elseif ($attendanceFilter === 'absent') {
-                    $query->where('attendance_status', 'absent');
-                } elseif ($attendanceFilter === 'waiting') {
-                    $query->where(function ($q) {
-                        $q->whereNull('attendance_status')->orWhere('attendance_status', 'waiting');
-                    });
-                }
-
-                if ($evalFilter === 'evaluated') {
-                    $query->whereHas('scoreSheets', fn ($q) => $q->where('is_submitted', true));
-                } elseif ($evalFilter === 'pending') {
-                    $query->where('attendance_status', 'present')
-                        ->whereDoesntHave('scoreSheets', fn ($q) => $q->where('is_submitted', true));
-                }
-
-                $entries = $query->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
-                    ->get();
-            }
-        }
-
-        $windowState = $selectedProgram ? $selectedProgram->getCallListWindowState() : null;
-
-        return view('greenroom.call-list', compact(
-            'zones',
-            'stages',
-            'programs',
-            'selectedZone',
-            'selectedStageId',
-            'selectedProgramId',
-            'selectedProgram',
-            'entries',
-            'stats',
-            'search',
-            'attendanceFilter',
-            'evalFilter',
-            'windowState'
-        ));
+        return $this->index($request);
     }
 
     public function codeLetters(Request $request): View
