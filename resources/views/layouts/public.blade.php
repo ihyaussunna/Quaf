@@ -149,11 +149,15 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <!-- Brand Logo & Identity -->
-                <a href="{{ route('home.view') }}" class="flex items-center gap-3 group py-2">
-                    <img src="{{ asset('images/quaf-title-logo.png') }}" alt="QUAF 9.0" class="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]">
-                    <div class="hidden sm:block border-l border-slate-200 pl-3 leading-none">
+                <a href="{{ route('home.view') }}" class="flex items-center gap-3 group py-2 shrink-0">
+                    <img src="{{ asset('images/dashboard-logo-dark.svg') }}" 
+                         alt="QUAF 9.0" 
+                         height="40"
+                         style="height: 40px; max-height: 40px; width: auto; object-fit: contain;"
+                         class="h-9 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]">
+                    <div class="hidden sm:block border-l border-slate-200 pl-3 leading-tight">
                         <span class="font-mono text-[9px] uppercase tracking-widest text-[#be1e2d] font-bold block">SEASON 09</span>
-                        <span class="font-sora text-[11px] font-semibold text-slate-600 block mt-0.5">Markaz Cultural Fest</span>
+                        <span class="font-sora text-[11px] font-semibold text-slate-500 block">2026</span>
                     </div>
                 </a>
 
@@ -297,7 +301,11 @@
                 <!-- Col 1: Festival Identity (2 cols on large) -->
                 <div class="lg:col-span-2 space-y-4">
                     <a href="{{ route('home.view') }}" class="inline-block">
-                        <img src="{{ asset('images/quaf-title-logo.png') }}" alt="QUAF 9.0" class="h-14 sm:h-16 w-auto object-contain brightness-0 invert opacity-95">
+                        <img src="{{ asset('images/dashboard-logo.svg') }}" 
+                             alt="QUAF 9.0" 
+                             height="44" 
+                             style="height: 44px; max-height: 44px; width: auto; object-fit: contain;" 
+                             class="h-11 sm:h-12 w-auto object-contain drop-shadow-xs">
                     </a>
                     <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
                         QUAF 9.0 — Markaz Cultural Festival 2026. The grand confluence of eloquence, arts, and intellectual heritage uniting premier collegiate groups across 120+ cultural and literary disciplines.

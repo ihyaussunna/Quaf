@@ -114,7 +114,8 @@
 
                         <img src="{{ asset('images/quaf-title-logo.png') }}" 
                              alt="QUAF 9.0" 
-                             class="w-full max-w-[280px] xs:max-w-[340px] sm:max-w-md h-auto object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105">
+                             style="max-height: 260px; object-fit: contain;"
+                             class="w-full max-w-[260px] xs:max-w-[300px] sm:max-w-md h-auto object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105">
 
                         <!-- Badge Pills inside Hero Card -->
                         <div class="grid grid-cols-3 gap-2.5 w-full mt-6 pt-6 border-t border-slate-200/80">
