@@ -81,12 +81,12 @@
                 <div class="inline-flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 sm:gap-4 text-xs font-mono text-slate-700 px-4 py-3 rounded-2xl bg-white border border-slate-200 shadow-2xs">
                     <div class="flex items-center gap-2 font-semibold">
                         <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span>24 — 28 OCTOBER 2026</span>
+                        <span>06 OCT — 01 NOV 2026</span>
                     </div>
                     <span class="text-slate-300 hidden sm:inline">|</span>
                     <div class="flex items-center gap-2 font-semibold">
                         <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span>CENTRAL FESTIVAL ARENA, MARKAZ</span>
+                        <span>CENTRAL ARENA & OFFSTAGE VENUES, MARKAZ</span>
                     </div>
                 </div>
 
@@ -127,8 +127,8 @@
                                 <span class="text-[10px] font-mono text-slate-500 uppercase tracking-tight">Groups</span>
                             </div>
                             <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 text-center">
-                                <span class="font-sora font-black text-[#009444] text-base sm:text-lg block">{{ $stats['stages'] ?? 4 }}</span>
-                                <span class="text-[10px] font-mono text-slate-500 uppercase tracking-tight">Live Stages</span>
+                                <span class="font-sora font-black text-[#009444] text-base sm:text-lg block">{{ $stats['stages'] ?? 8 }}</span>
+                                <span class="text-[10px] font-mono text-slate-500 uppercase tracking-tight">Venues & Stages</span>
                             </div>
                         </div>
                     </div>
@@ -142,8 +142,8 @@
 <!-- Festival Countdown & Status Banner (Section 13) -->
 <section class="py-6 sm:py-8 bg-white border-b border-slate-200 relative overflow-hidden"
          x-data="{
-             eventDate: new Date('2026-10-24T09:00:00+05:30').getTime(),
-             endDate: new Date('2026-10-28T22:00:00+05:30').getTime(),
+             eventDate: new Date('2026-10-06T09:00:00+05:30').getTime(),
+             endDate: new Date('2026-11-01T23:59:59+05:30').getTime(),
              now: new Date().getTime(),
              days: 0,
              hours: 0,
@@ -174,7 +174,7 @@
                 <template x-if="status === 'upcoming'">
                     <div>
                         <span class="text-[11px] font-mono uppercase tracking-widest text-[#be1e2d] font-bold block">OFFICIAL FESTIVAL COUNTDOWN</span>
-                        <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900">Grand Opening on 24 October 2026</h3>
+                        <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900">Offstage: 06 Oct &bull; Main Stage: 31 Oct — 01 Nov</h3>
                     </div>
                 </template>
                 <template x-if="status === 'live'">
@@ -407,9 +407,33 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            @foreach($stages as $stage)
-                <div class="rounded-2xl bg-white border border-slate-200/90 p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-2xs hover:shadow-md transition-shadow">
+        <!-- Venue Filter Tabs -->
+        <div x-data="{ stageFilter: 'all' }" class="space-y-6">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+                <button type="button" @click="stageFilter = 'all'"
+                        :class="stageFilter === 'all' ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap">
+                    All Stages ({{ count($stages) }})
+                </button>
+                <button type="button" @click="stageFilter = 'main'"
+                        :class="stageFilter === 'main' ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap">
+                    Main Arenas (01–04)
+                </button>
+                <button type="button" @click="stageFilter = 'offstage'"
+                        :class="stageFilter === 'offstage' ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap">
+                    Offstage Venues (NF3, ID3, U2, S3)
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                @foreach($stages as $stage)
+                    @php
+                        $isOffstage = in_array($stage->code, ['STG-05', 'STG-06', 'STG-07', 'STG-08']);
+                    @endphp
+                    <div x-show="stageFilter === 'all' || (stageFilter === 'main' && !{{ $isOffstage ? 'true' : 'false' }}) || (stageFilter === 'offstage' && {{ $isOffstage ? 'true' : 'false' }})"
+                         class="rounded-2xl bg-white border border-slate-200/90 p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-2xs hover:shadow-md transition-shadow">
                     <div>
                         <!-- Stage Header -->
                         <div class="flex items-center justify-between mb-3">
@@ -458,6 +482,7 @@
                     </div>
                 </div>
             @endforeach
+            </div>
         </div>
     </div>
 </section>

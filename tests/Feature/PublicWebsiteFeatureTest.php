@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\News;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\Result;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\VideoItem;
@@ -332,5 +333,34 @@ class PublicWebsiteFeatureTest extends TestCase
         $pluralResponse = $this->actingAs($user)->get('/admin/schedules');
         $pluralResponse->assertStatus(200);
         $pluralResponse->assertSee('All Stages Schedule');
+    }
+
+    public function test_public_website_has_mobile_bottom_navigation_and_updated_festival_dates(): void
+    {
+        $response = $this->get(route('home.view'));
+
+        $response->assertStatus(200);
+        $response->assertSee('06 OCT — 01 NOV 2026');
+        $response->assertSee('Mobile Fixed Bottom Navigation Bar');
+        $response->assertSee(route('results.index'));
+        $response->assertSee(route('schedule.index'));
+        $response->assertSee(route('groups.index'));
+    }
+
+    public function test_poster_view_renders_dynamic_festival_poster_when_image_is_null(): void
+    {
+        $result = Result::create([
+            'program_id' => $this->program->id,
+            'status' => 'published',
+            'is_published' => true,
+            'is_media_published' => true,
+            'poster_image' => null,
+        ]);
+
+        $response = $this->get(route('media.results.public-poster', $result));
+
+        $response->assertStatus(200);
+        $response->assertSee('High-Fidelity Dynamic Festival Poster');
+        $response->assertSee('Print / Save Poster');
     }
 }

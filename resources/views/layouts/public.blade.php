@@ -121,6 +121,7 @@
             animation-play-state: paused;
         }
     </style>
+    @stack('styles')
 </head>
 <body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
       x-data="{ scrolled: false, mobileOpen: false }"
@@ -280,7 +281,7 @@
     </header>
 
     <!-- Main Content Slot -->
-    <main class="flex-1 w-full">
+    <main class="flex-1 w-full pb-16 lg:pb-0">
         @yield('content')
     </main>
 
@@ -302,7 +303,7 @@
                         QUAF 9.0 — Markaz Cultural Festival 2026. The grand confluence of eloquence, arts, and intellectual heritage uniting premier collegiate groups across 120+ cultural and literary disciplines.
                     </p>
                     <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-400 pt-1">
-                        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-amber-400 font-semibold">OCTOBER 24 – 28, 2026</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-amber-400 font-semibold">06 OCT — 01 NOV 2026</span>
                         <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">CENTRAL FESTIVAL ARENA</span>
                     </div>
                 </div>
@@ -368,6 +369,64 @@
             </div>
         </div>
     </footer>
+
+    <!-- Mobile Fixed Bottom Navigation Bar (Apple / App Native Style) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 py-1.5 transition-transform duration-300">
+        <div class="grid grid-cols-5 items-center justify-around text-center max-w-lg mx-auto">
+            
+            <!-- Home -->
+            <a href="{{ route('home.view') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span class="text-[10px] tracking-tight font-sans">Home</span>
+            </a>
+
+            <!-- Results -->
+            <a href="{{ route('results.index') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors relative {{ request()->routeIs('results.*') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+                <span class="absolute top-1 right-3 flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <span class="text-[10px] tracking-tight font-sans">Results</span>
+            </a>
+
+            <!-- Schedule -->
+            <a href="{{ route('schedule.index') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors {{ request()->routeIs('schedule.*') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span class="text-[10px] tracking-tight font-sans">Schedule</span>
+            </a>
+
+            <!-- Groups -->
+            <a href="{{ route('groups.index') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors {{ request()->routeIs('groups.*') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <span class="text-[10px] tracking-tight font-sans">Groups</span>
+            </a>
+
+            <!-- Menu Drawer Button -->
+            <button @click="mobileOpen = !mobileOpen" 
+                    type="button"
+                    class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors"
+                    :class="mobileOpen ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800'">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+                <span class="text-[10px] tracking-tight font-sans">Menu</span>
+            </button>
+
+        </div>
+    </nav>
 
 </body>
 </html>

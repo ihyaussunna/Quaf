@@ -32,11 +32,11 @@
 <section class="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 py-3 shadow-2xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Day Tabs (24 OCT to 28 OCT) -->
+        <!-- Day Tabs (06 OCT to 01 NOV) -->
         <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none mb-3">
             <a href="{{ route('schedule.index', array_merge(request()->except('day', 'page'))) }}"
                class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all {{ empty($selectedDay) ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                All Days (24–28 Oct)
+                All Days (06 Oct — 01 Nov)
             </a>
             @foreach($festivalDays as $dateKey => $label)
                 <a href="{{ route('schedule.index', array_merge(request()->except('page'), ['day' => $dateKey])) }}"

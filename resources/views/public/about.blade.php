@@ -34,7 +34,7 @@
                         QUAF Season 09 embodies the grand tradition of artistic refinement, Islamic aesthetics, and classical literary eloquence. Under the overarching motif of <em>Ādabīc Inheritance</em>, the festival serves as a fertile ground for cultivating oratory mastery, calligraphic finesse, choral harmonies, and analytical thought.
                     </p>
                     <p>
-                        Spanning five vibrant days from October 24 to 28, 2026, the central festival arena at Jamia Markaz hosts more than 600 verified delegates representing five academic houses, competing harmoniously across 120+ codified disciplines.
+                        Beginning with intensive Offstage disciplines from October 06, 2026, leading to the grand Main Stage confluence from October 31 to November 01, 2026, the festival arena at Jamia Markaz hosts verified delegates representing five academic houses, competing harmoniously across 120+ codified disciplines.
                     </p>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     </div>
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                         <span class="text-slate-500 uppercase">Official Dates</span>
-                        <strong class="text-[#be1e2d] font-bold">October 24 – 28, 2026</strong>
+                        <strong class="text-[#be1e2d] font-bold">06 Oct – 01 Nov, 2026</strong>
                     </div>
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                         <span class="text-slate-500 uppercase">Program Spectrum</span>

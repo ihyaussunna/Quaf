@@ -2,6 +2,36 @@
 
 @section('title', $result->program->name . ' - Result Poster')
 
+@push('styles')
+<style>
+@media print {
+    body {
+        background: #0f172a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    header, footer, nav, .no-print, #shareBar, .breadcrumb-bar {
+        display: none !important;
+    }
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    #posterCardWrapper {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+    #posterPrintArea {
+        box-shadow: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+}
+</style>
+@endpush
+
 @section('content')
 <section class="py-10 sm:py-16 bg-slate-50 min-h-screen">
     <div class="max-w-4xl mx-auto px-4 sm:px-6">
@@ -50,12 +80,127 @@
             <!-- Poster Image Container -->
             <div class="p-4 sm:p-8 bg-slate-950 flex flex-col items-center justify-center">
                 @if($result->poster_image)
-                    <div class="max-w-[700px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-black">
+                    <div id="posterPrintArea" class="max-w-[700px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-black">
                         <img src="{{ $result->poster_image }}" alt="{{ $result->program->name }} Poster" class="w-full h-auto object-contain">
                     </div>
                 @else
-                    <div class="p-12 text-center text-slate-400">
-                        <p class="text-sm font-medium">Poster image not available yet.</p>
+                    <!-- High-Fidelity Dynamic Festival Poster (Rendered when static graphic is pending) -->
+                    <div id="posterPrintArea" class="w-full max-w-[640px] aspect-[4/5] bg-gradient-to-br from-[#120204] via-[#1f0508] to-[#0a0203] rounded-3xl p-6 sm:p-10 border-2 border-amber-500/30 shadow-2xl relative overflow-hidden flex flex-col justify-between text-white font-sora">
+                        
+                        <!-- Background Decorative Glow & Watermark -->
+                        <div class="absolute -top-24 -right-24 w-72 h-72 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-[radial-gradient(#be1e2d_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
+
+                        <!-- Top Header: QUAF 9.0 Identity -->
+                        <div class="relative z-10 flex flex-col items-center text-center border-b border-amber-500/20 pb-5">
+                            <img src="{{ asset('images/quaf-title-logo.png') }}" alt="QUAF 9.0" class="h-14 sm:h-16 w-auto object-contain drop-shadow-md brightness-0 invert">
+                            <div class="mt-2 flex items-center gap-2 text-[10px] sm:text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
+                                <span>Ādabīc Inheritance</span>
+                                <span>&bull;</span>
+                                <span>Markaz Cultural Fest 2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Center: Program Details & Category -->
+                        <div class="relative z-10 text-center my-auto py-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-700/50 text-[#f3bd2e] text-[11px] font-mono font-bold uppercase tracking-wider mb-3">
+                                <span>{{ $result->program->code }}</span>
+                                <span>&bull;</span>
+                                <span>{{ $result->program->category->name ?? 'General' }}</span>
+                            </div>
+
+                            <h2 class="text-xl sm:text-3xl font-black font-rockwell tracking-tight text-white leading-tight">
+                                {{ $result->program->name }}
+                            </h2>
+
+                            @if($result->program->malayalam_name)
+                                <div class="text-sm sm:text-base font-ml text-amber-200/90 font-medium mt-1">
+                                    {{ $result->program->malayalam_name }}
+                                </div>
+                            @endif
+
+                            <div class="mt-3 text-xs font-mono text-slate-400 uppercase tracking-widest flex items-center justify-center gap-3">
+                                <span>Stage: {{ $result->program->stage->name ?? 'Central Arena' }}</span>
+                                @if($result->program->zone)
+                                    <span>&bull;</span>
+                                    <span>Zone: {{ $result->program->zone->name }}</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Podium Winners Grid -->
+                        <div class="relative z-10 space-y-2.5 my-2">
+                            <!-- 1st Prize Winner -->
+                            <div class="p-3 sm:p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 backdrop-blur-sm flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="{{ asset('images/medals/first.png') }}" alt="1st" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0">
+                                    <div class="min-w-0 text-left">
+                                        <div class="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-400">First Prize</div>
+                                        <div class="text-xs sm:text-sm font-black text-white truncate">
+                                            {{ !empty($winners['first']) ? $winners['first'][0]['name'] : 'Declared' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 uppercase">
+                                        {{ !empty($winners['first']) ? $winners['first'][0]['unit'] : 'House' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 2nd Prize Winner -->
+                            <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-800/40 border border-slate-700/60 backdrop-blur-sm flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="{{ asset('images/medals/second.png') }}" alt="2nd" class="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0">
+                                    <div class="min-w-0 text-left">
+                                        <div class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-300">Second Prize</div>
+                                        <div class="text-xs sm:text-sm font-black text-white truncate">
+                                            {{ !empty($winners['second']) ? $winners['second'][0]['name'] : 'Declared' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-700/50 text-slate-300 border border-slate-600/50 uppercase">
+                                        {{ !empty($winners['second']) ? $winners['second'][0]['unit'] : 'House' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 3rd Prize Winner -->
+                            <div class="p-3 sm:p-3.5 rounded-2xl bg-amber-950/20 border border-amber-900/40 backdrop-blur-sm flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <img src="{{ asset('images/medals/third.png') }}" alt="3rd" class="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0">
+                                    <div class="min-w-0 text-left">
+                                        <div class="text-[9px] font-mono font-bold uppercase tracking-wider text-amber-600">Third Prize</div>
+                                        <div class="text-xs sm:text-sm font-black text-white truncate">
+                                            {{ !empty($winners['third']) ? $winners['third'][0]['name'] : 'Declared' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-900/40 text-amber-400 border border-amber-800/40 uppercase">
+                                        {{ !empty($winners['third']) ? $winners['third'][0]['unit'] : 'House' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Seal & Verification Tag -->
+                        <div class="relative z-10 pt-4 border-t border-amber-500/20 flex items-center justify-between text-[9px] sm:text-[10px] font-mono text-slate-400">
+                            <div>
+                                <span class="font-bold text-amber-400 block uppercase">Ihyaussunna Students Union</span>
+                                <span>Markazu Saquafathi Sunniyya</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-emerald-400 font-bold block uppercase flex items-center justify-end gap-1">
+                                    <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>Verified Verdict</span>
+                                </span>
+                                <span>Ref: Q9-RES-{{ str_pad($result->id, 5, '0', STR_PAD_LEFT) }}</span>
+                            </div>
+                        </div>
+
                     </div>
                 @endif
             </div>
@@ -130,9 +275,15 @@
                         <span>WhatsApp Share</span>
                     </a>
 
+                    <button onclick="window.print()" 
+                            class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span>Print / Save Poster</span>
+                    </button>
+
                     @if($result->poster_image)
                         <a href="{{ $result->poster_image }}" download="QUAF09_Result_{{ $result->program->code }}.png"
-                           class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs">
+                           class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             <span>Download Poster</span>
                         </a>
