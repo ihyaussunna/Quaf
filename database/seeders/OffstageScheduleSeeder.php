@@ -31,25 +31,25 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-117', // Malayalam Poem Writing (A Zone)
                 'stage_code' => 'STG-05',
                 'start' => '2026-10-06 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-144', // Malayalam Poem Writing (B Zone)
                 'stage_code' => 'STG-06',
                 'start' => '2026-10-06 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-165', // Malayalam Poem Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-06 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-220', // E-Poster (Mix Zone)
                 'stage_code' => 'STG-08',
                 'start' => '2026-10-06 16:40:00',
-                'duration' => 60,
+                'duration' => 30,
             ],
 
             // 05:10 PM
@@ -57,25 +57,25 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-116', // English Poem Writing (A Zone)
                 'stage_code' => 'STG-05',
                 'start' => '2026-10-06 17:10:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-143', // English Poem Writing (B Zone)
                 'stage_code' => 'STG-06',
                 'start' => '2026-10-06 17:10:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-166', // English Poem Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-06 17:10:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-229', // Content Writing (Mix Zone)
                 'stage_code' => 'STG-08',
                 'start' => '2026-10-06 17:10:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
 
             // 09:15 PM
@@ -115,19 +115,19 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-142', // Arabic Poem Writing (B Zone)
                 'stage_code' => 'STG-06',
                 'start' => '2026-10-06 21:45:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-164', // Arabic Poem Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-06 21:45:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-211', // Feature Writing (Mix Zone)
                 'stage_code' => 'STG-08',
                 'start' => '2026-10-06 21:45:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
 
             // 10:25 PM
@@ -135,7 +135,7 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-115', // Arabic Haiku (A Zone)
                 'stage_code' => 'STG-05',
                 'start' => '2026-10-06 22:25:00',
-                'duration' => 15,
+                'duration' => 20,
             ],
 
             // ==========================================
@@ -146,25 +146,25 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-113', // Malayalam Story Writing (A Zone)
                 'stage_code' => 'STG-05',
                 'start' => '2026-10-07 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-148', // Revolutionary Song Writing (B Zone)
                 'stage_code' => 'STG-06',
                 'start' => '2026-10-07 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-163', // Malayalam Story Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-07 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-205', // Urdu Story Writing (Mix Zone)
                 'stage_code' => 'STG-08',
                 'start' => '2026-10-07 16:40:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
 
             // 05:10 PM
@@ -184,13 +184,13 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-173', // Social Text Malayalam (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-07 17:10:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-206', // Urdu Essay Writing (Mix Zone)
                 'stage_code' => 'STG-08',
                 'start' => '2026-10-07 17:10:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
 
             // 09:15 PM
@@ -198,7 +198,7 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-114', // English Story Writing (A Zone)
                 'stage_code' => 'STG-05',
                 'start' => '2026-10-07 21:15:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-140', // English Story Writing (B Zone)
@@ -210,13 +210,13 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-162', // English Story Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-07 21:15:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-209', // Theme Song Writing (Mix Zone)
                 'stage_code' => 'STG-08',
                 'start' => '2026-10-07 21:15:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
 
             // 09:45 PM
@@ -224,19 +224,19 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-112', // Arabic Story Writing (A Zone)
                 'stage_code' => 'STG-05',
                 'start' => '2026-10-07 21:45:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-139', // Arabic Story Writing (B Zone)
                 'stage_code' => 'STG-06',
                 'start' => '2026-10-07 21:45:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-161', // Arabic Story Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-07 21:45:00',
-                'duration' => 40,
+                'duration' => 30,
             ],
             [
                 'program_code' => 'Q9-212', // AI Poem (Mix Zone)
@@ -256,7 +256,7 @@ class OffstageScheduleSeeder extends Seeder
                 'program_code' => 'Q9-170', // Slogan Writing (C Zone)
                 'stage_code' => 'STG-07',
                 'start' => '2026-10-07 22:25:00',
-                'duration' => 30,
+                'duration' => 20,
             ],
             [
                 'program_code' => 'Q9-208', // Social Text English (Mix Zone)
@@ -283,6 +283,7 @@ class OffstageScheduleSeeder extends Seeder
                         'start_time' => $start,
                         'end_time' => $end,
                         'status' => 'scheduled',
+                        'conflict_notes' => null,
                     ]
                 );
 

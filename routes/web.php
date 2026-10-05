@@ -423,12 +423,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('schedule/check-conflict', [AdminScheduleController::class, 'checkConflictApi'])->name('schedule.check-conflict');
     Route::post('schedule/quick-slot', [AdminScheduleController::class, 'quickSlot'])->name('schedule.quick-slot');
     Route::post('schedule/stages', [AdminScheduleController::class, 'storeStage'])->name('schedule.stages.store');
+    Route::post('schedule/auto-resolve', [AdminScheduleController::class, 'autoResolveClashes'])->name('schedule.auto-resolve');
 
     Route::get('schedules/offstage', [AdminScheduleController::class, 'offstage'])->name('schedules.offstage');
     Route::get('schedules/offstage/pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedules.offstage.pdf');
     Route::get('schedules/check-conflict', [AdminScheduleController::class, 'checkConflictApi'])->name('schedules.check-conflict');
     Route::post('schedules/quick-slot', [AdminScheduleController::class, 'quickSlot'])->name('schedules.quick-slot');
     Route::post('schedules/stages', [AdminScheduleController::class, 'storeStage'])->name('schedules.stages.store');
+    Route::post('schedules/auto-resolve', [AdminScheduleController::class, 'autoResolveClashes'])->name('schedules.auto-resolve');
     Route::resource('schedules', AdminScheduleController::class);
 
     // Judges Management

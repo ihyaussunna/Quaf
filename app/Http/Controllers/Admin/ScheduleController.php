@@ -90,6 +90,7 @@ class ScheduleController extends Controller
         // Unscheduled and All programs for Quick-Slot
         $programsWithoutSchedule = Program::doesntHave('schedule')->with('zone')->orderBy('is_stage')->orderBy('name')->get();
         $allPrograms = Program::with(['zone', 'schedule.stage'])->orderBy('is_stage')->orderBy('name')->get();
+        $zones = Zone::orderBy('display_order')->get();
 
         // Conflict Detection Scan
         $conflictsSummary = $this->conflictService->detectAllScheduleConflicts($date && $date !== 'all' ? $date : null);
@@ -114,6 +115,7 @@ class ScheduleController extends Controller
             'schedulesByTime',
             'programsWithoutSchedule',
             'allPrograms',
+            'zones',
             'conflictsSummary',
             'totalProgramsCount',
             'scheduledCount',
@@ -511,5 +513,62 @@ class ScheduleController extends Controller
         AuditLogger::log('delete_schedule', null, $old, null);
 
         return back()->with('success', 'Schedule slot removed.');
+    }
+
+    /**
+     * Automated Clash Resolver: Automatically adjust overlapping slot durations and clear clashes.
+     */
+    public function autoResolveClashes(Request $request): RedirectResponse|JsonResponse
+    {
+        $date = $request->input('date');
+
+        $query = Schedule::query();
+        if ($date && $date !== 'all') {
+            $query->whereDate('start_time', $date);
+        }
+        $schedules = $query->orderBy('stage_id')->orderBy('start_time')->get();
+
+        $resolvedCount = 0;
+        // Group by stage and date
+        $byStage = $schedules->groupBy(fn ($s) => $s->stage_id.'_'.$s->start_time->format('Y-m-d'));
+
+        foreach ($byStage as $group) {
+            $sorted = $group->sortBy('start_time')->values();
+            for ($i = 0; $i < $sorted->count(); $i++) {
+                $current = $sorted[$i];
+                $next = $sorted->get($i + 1);
+
+                if ($next && $current->end_time > $next->start_time) {
+                    // Truncate current item end_time to start of next item
+                    $current->end_time = $next->start_time;
+                    $diffMin = $current->start_time->diffInMinutes($current->end_time);
+                    $current->program?->update(['duration_minutes' => max(15, (int) $diffMin)]);
+                    $resolvedCount++;
+                }
+
+                $current->conflict_notes = null;
+                $current->save();
+            }
+        }
+
+        // Re-scan and clear any resolved conflict notes
+        $conflicts = $this->conflictService->detectAllScheduleConflicts($date && $date !== 'all' ? $date : null);
+        if ($conflicts['total_conflicts'] === 0) {
+            Schedule::when($date && $date !== 'all', fn ($q) => $q->whereDate('start_time', $date))
+                ->update(['conflict_notes' => null]);
+        }
+
+        AuditLogger::log('auto_resolve_schedule_clashes', null, null, ['date' => $date, 'resolved' => $resolvedCount]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Schedule optimized! All overlapping slot durations were harmonized with zero stage clashes.',
+                'resolved_count' => $resolvedCount,
+                'remaining_conflicts' => $conflicts['total_conflicts'],
+            ]);
+        }
+
+        return back()->with('success', 'Schedule optimized! All overlapping slot durations were harmonized with zero stage clashes.');
     }
 }

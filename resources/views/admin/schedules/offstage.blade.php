@@ -11,9 +11,36 @@
     formStageId: '{{ $stages->firstWhere('code', 'STG-05')?->id ?? $stages->first()?->id }}',
     formDate: '{{ $selectedDate }}',
     formTime: '16:40',
-    formDuration: 40,
+    formDuration: 30,
     conflictCheckLoading: false,
     slotConflictResult: null,
+
+    // Zone & Search Filters
+    selectedZoneFilter: 'all',
+    programSearch: '',
+    programsList: {{ Js::from($programs->map(fn($p) => [
+        'id' => (string) $p->id,
+        'code' => $p->code,
+        'name' => $p->name,
+        'zone_id' => (string) ($p->zone_id ?? ''),
+        'zone_name' => $p->zone?->name ?? 'Mix',
+        'is_stage' => (bool) $p->is_stage,
+        'is_scheduled' => (bool) $p->schedule,
+        'duration' => $p->duration_minutes ?: 30,
+    ])) }},
+
+    get filteredPrograms() {
+        return this.programsList.filter(p => {
+            const matchZone = this.selectedZoneFilter === 'all' || 
+                (this.selectedZoneFilter === 'mix' && (!p.zone_id || p.zone_name.toLowerCase().includes('mix'))) ||
+                p.zone_id === this.selectedZoneFilter;
+            
+            const q = this.programSearch.trim().toLowerCase();
+            const matchSearch = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.zone_name.toLowerCase().includes(q);
+
+            return matchZone && matchSearch;
+        });
+    },
 
     openCreateSlot(presetTime = '16:40', presetStageId = null) {
         this.isEditing = false;
@@ -22,7 +49,7 @@
         this.formStageId = presetStageId || '{{ $stages->firstWhere('code', 'STG-05')?->id ?? $stages->first()?->id }}';
         this.formDate = '{{ $selectedDate }}';
         this.formTime = presetTime;
-        this.formDuration = 40;
+        this.formDuration = 30;
         this.slotConflictResult = null;
         this.slotModal = true;
     },
@@ -49,9 +76,9 @@
             const startD = new Date(sch.start_time);
             const endD = new Date(sch.end_time);
             const diffMin = Math.round((endD - startD) / 60000);
-            this.formDuration = diffMin > 0 ? diffMin : (sch.program?.duration_minutes || 40);
+            this.formDuration = diffMin > 0 ? diffMin : (sch.program?.duration_minutes || 30);
         } else {
-            this.formDuration = sch.program?.duration_minutes || 40;
+            this.formDuration = sch.program?.duration_minutes || 30;
         }
 
         this.slotConflictResult = null;
@@ -177,11 +204,24 @@
                     </div>
                 </div>
 
-                <button @click="showConflictsDrawer = !showConflictsDrawer"
-                        class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
-                    <span x-text="showConflictsDrawer ? 'Hide Clashes' : 'Inspect & Resolve Clashes'"></span>
-                    <svg class="w-4 h-4 transition-transform duration-200" :class="showConflictsDrawer ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <form method="POST" action="{{ route('admin.schedules.auto-resolve') }}">
+                        @csrf
+                        <input type="hidden" name="date" value="{{ $selectedDate }}">
+                        <button type="submit"
+                                onclick="return confirm('Automatically adjust overlapping slot durations to eliminate all stage clashes on this date?');"
+                                class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span>Auto-Resolve Clashes</span>
+                        </button>
+                    </form>
+
+                    <button @click="showConflictsDrawer = !showConflictsDrawer"
+                            class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
+                        <span x-text="showConflictsDrawer ? 'Hide Clashes' : 'Inspect Clashes'"></span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="showConflictsDrawer ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Expanded Conflict Details List -->
@@ -377,17 +417,60 @@
                     @csrf
                     <input type="hidden" name="schedule_id" :value="formScheduleId">
 
-                    <!-- Program Selector -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 font-sora mb-1">Competition / Item <span class="text-red-500">*</span></label>
+                    <!-- Program Selector with Zone Filter & Search -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold text-slate-700 font-sora">Competition / Item <span class="text-red-500">*</span></label>
+                            <span class="text-[10px] text-slate-500 font-mono" x-text="`${filteredPrograms.length} items`"></span>
+                        </div>
+
+                        <!-- Zone Filter Chips -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" @click="selectedZoneFilter = 'all'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                                    :class="selectedZoneFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
+                                All
+                            </button>
+                            <button type="button" @click="selectedZoneFilter = '1'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                                    :class="selectedZoneFilter === '1' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
+                                A Zone
+                            </button>
+                            <button type="button" @click="selectedZoneFilter = '2'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                                    :class="selectedZoneFilter === '2' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
+                                B Zone
+                            </button>
+                            <button type="button" @click="selectedZoneFilter = '3'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                                    :class="selectedZoneFilter === '3' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
+                                C Zone
+                            </button>
+                            <button type="button" @click="selectedZoneFilter = '4'; if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                                    :class="selectedZoneFilter === '4' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">
+                                Mix Zone
+                            </button>
+                        </div>
+
+                        <!-- Instant Search Input -->
+                        <div class="relative">
+                            <input type="text" x-model="programSearch" @input="if (filteredPrograms.length) formProgramId = filteredPrograms[0].id; checkLiveConflict()"
+                                   placeholder="Type to filter programs (e.g. Story, 112, Essay, Malayalam)..."
+                                   class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] bg-white">
+                            <button type="button" x-show="programSearch" @click="programSearch = ''; checkLiveConflict()" 
+                                    class="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-700">✕</button>
+                        </div>
+
+                        <!-- Filtered Select Dropdown -->
                         <select name="program_id" x-model="formProgramId" @change="checkLiveConflict()" required
                                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] focus:border-[#be1e2d] bg-white">
                             <option value="">-- Choose Program / Item --</option>
-                            @foreach($programs as $p)
-                                <option value="{{ $p->id }}" {{ $p->is_stage ? 'class=text-slate-400' : '' }}>
-                                    [{{ $p->code }}] {{ $p->name }} {{ $p->zone ? '('.$p->zone->name.')' : '' }} {{ $p->is_stage ? '(Mainstage)' : '' }}
+                            <template x-for="p in filteredPrograms" :key="p.id">
+                                <option :value="p.id" 
+                                        x-text="`[${p.code}] ${p.name} (${p.zone_name}) ${p.is_scheduled ? '— Scheduled' : ''}`">
                                 </option>
-                            @endforeach
+                            </template>
                         </select>
                     </div>
 
@@ -448,11 +531,11 @@
                         </div>
                         <input type="hidden" name="duration" :value="formDuration">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            @foreach([15, 20, 30, 40, 60] as $dur)
+                            @foreach([15, 20, 30, 45, 60] as $dur)
                                 <button type="button" @click="formDuration = {{ $dur }}; checkLiveConflict()"
                                         :class="formDuration == {{ $dur }} ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                         class="px-3 py-1.5 rounded-lg text-xs font-mono transition cursor-pointer">
-                                    {{ $dur >= 60 ? '1 hr' : "{$dur}m" }}
+                                    {{ $dur == 30 ? '30m (Std)' : ($dur >= 60 ? '1 hr' : "{$dur}m") }}
                                 </button>
                             @endforeach
                             <input type="number" x-model="formDuration" @input="checkLiveConflict()" placeholder="Custom" min="5" max="360"

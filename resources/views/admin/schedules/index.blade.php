@@ -16,6 +16,56 @@
     isCheckingClash: false,
     clashWarning: null,
 
+    // Zone & Search Filters for Easy Scheduling
+    selectedZoneFilter: 'all',
+    programSearch: '',
+    programsList: {{ Js::from($allPrograms->map(fn($p) => [
+        'id' => (string) $p->id,
+        'code' => $p->code,
+        'name' => $p->name,
+        'zone_id' => (string) ($p->zone_id ?? ''),
+        'zone_name' => $p->zone?->name ?? 'Mix',
+        'is_stage' => (bool) $p->is_stage,
+        'is_scheduled' => (bool) $p->schedule,
+        'duration' => $p->duration_minutes ?: 30,
+    ])) }},
+
+    get filteredPrograms() {
+        return this.programsList.filter(p => {
+            const matchZone = this.selectedZoneFilter === 'all' || 
+                (this.selectedZoneFilter === 'mix' && (!p.zone_id || p.zone_name.toLowerCase().includes('mix'))) ||
+                p.zone_id === this.selectedZoneFilter;
+            
+            const q = this.programSearch.trim().toLowerCase();
+            const matchSearch = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.zone_name.toLowerCase().includes(q);
+
+            return matchZone && matchSearch;
+        });
+    },
+
+    selectProgram(prog) {
+        this.modalProgramId = prog.id;
+        if (prog.duration) {
+            this.modalDuration = prog.duration;
+        }
+        this.checkClash();
+    },
+
+    setStage(id) {
+        this.modalStageId = id;
+        this.checkClash();
+    },
+
+    setTime(val) {
+        this.modalTime = val;
+        this.checkClash();
+    },
+
+    setDuration(val) {
+        this.modalDuration = val;
+        this.checkClash();
+    },
+
     checkClash() {
         if (!this.modalProgramId || !this.modalStageId || !this.modalDate || !this.modalTime) {
             return;
@@ -132,7 +182,18 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <form method="POST" action="{{ route('admin.schedules.auto-resolve') }}">
+                        @csrf
+                        <input type="hidden" name="date" value="{{ $date && $date !== 'all' ? $date : 'all' }}">
+                        <button type="submit" 
+                                onclick="return confirm('Automatically adjust overlapping slot durations to eliminate all stage clashes?');"
+                                class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span>Auto-Resolve Clashes</span>
+                        </button>
+                    </form>
+
                     <button @click="showClashDrawer = !showClashDrawer" 
                             class="px-3.5 py-1.5 rounded-xl bg-white border border-red-300 text-red-900 font-bold text-xs hover:bg-red-50 transition cursor-pointer">
                         <span x-text="showClashDrawer ? 'Hide Clash Breakdown' : 'View Clash Breakdown'"></span>
@@ -520,11 +581,26 @@
 
                 <!-- 1. Select Stage / Venue -->
                 <div>
-                    <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5">
-                        Select Stage / Venue *
+                    <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5 flex items-center justify-between">
+                        <span>Select Stage / Venue *</span>
+                        <span class="text-[10px] font-normal text-slate-400">Tap to select or choose from dropdown</span>
                     </label>
+
+                    <!-- Quick Stage Chips -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2">
+                        @foreach($stages->take(8) as $stg)
+                            <button type="button" 
+                                    @click="setStage('{{ $stg->id }}')"
+                                    :class="modalStageId == '{{ $stg->id }}' ? 'bg-[#be1e2d] text-white font-bold border-[#be1e2d] shadow-2xs' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
+                                    class="px-2 py-1.5 rounded-xl border text-center text-xs transition-all cursor-pointer">
+                                <div class="font-bold leading-tight">{{ $stg->name }}</div>
+                                <div class="text-[10px] font-mono opacity-80">{{ $stg->location ?? $stg->venue ?? $stg->code }}</div>
+                            </button>
+                        @endforeach
+                    </div>
+
                     <select name="stage_id" x-model="modalStageId" @change="checkClash()" required
-                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-sora">
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-sora">
                         <optgroup label="Main Stages (Festival Arena)">
                             @foreach($mainStages as $stg)
                                 <option value="{{ $stg->id }}">{{ $stg->name }} ({{ $stg->location ?? $stg->code }})</option>
@@ -538,18 +614,59 @@
                     </select>
                 </div>
 
-                <!-- 2. Select Program -->
-                <div>
-                    <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5">
-                        Select Program (from 145 Events) *
+                <!-- 2. Select Program with Zone Filter & Search -->
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold flex items-center justify-between">
+                        <span>Select Competition / Program *</span>
+                        <span class="text-[10px] text-slate-500 font-mono" x-text="`${filteredPrograms.length} programs available`"></span>
                     </label>
+
+                    <!-- Zone Filter Chips -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <button type="button" @click="selectedZoneFilter = 'all'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                                :class="selectedZoneFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            All Zones
+                        </button>
+                        <button type="button" @click="selectedZoneFilter = '1'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                                :class="selectedZoneFilter === '1' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            A Zone
+                        </button>
+                        <button type="button" @click="selectedZoneFilter = '2'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                                :class="selectedZoneFilter === '2' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            B Zone
+                        </button>
+                        <button type="button" @click="selectedZoneFilter = '3'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                                :class="selectedZoneFilter === '3' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            C Zone
+                        </button>
+                        <button type="button" @click="selectedZoneFilter = '4'; if (filteredPrograms.length) modalProgramId = filteredPrograms[0].id; checkClash()"
+                                :class="selectedZoneFilter === '4' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            Mix Zone
+                        </button>
+                    </div>
+
+                    <!-- Instant Program Search Box -->
+                    <div class="relative">
+                        <input type="text" x-model="programSearch" @input="if (filteredPrograms.length) { modalProgramId = filteredPrograms[0].id; } checkClash()"
+                               placeholder="Quick search program name or code (e.g. 112, Story, Poem, Speech)..."
+                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-sora">
+                        <button type="button" x-show="programSearch" @click="programSearch = ''; checkClash()" 
+                                class="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-700">✕</button>
+                    </div>
+
+                    <!-- Filtered Programs Dropdown -->
                     <select name="program_id" x-model="modalProgramId" @change="checkClash()" required
                             class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-sora">
-                        @foreach($allPrograms as $prog)
-                            <option value="{{ $prog->id }}">
-                                [{{ $prog->code }}] {{ $prog->name }} ({{ $prog->eligibility ?? 'All' }}) {{ $prog->schedule ? '— Already Scheduled' : '' }}
+                        <template x-for="prog in filteredPrograms" :key="prog.id">
+                            <option :value="prog.id" 
+                                    x-text="`[${prog.code}] ${prog.name} (${prog.zone_name}) ${prog.is_scheduled ? '— Scheduled' : ''}`">
                             </option>
-                        @endforeach
+                        </template>
                     </select>
                 </div>
 
@@ -559,13 +676,21 @@
                         Date *
                     </label>
                     <div class="flex items-center gap-2 mb-2 flex-wrap">
-                        <button type="button" @click="modalDate = '2026-10-06'; checkClash()" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">Oct 06 (Offstage)</button>
-                        <button type="button" @click="modalDate = '2026-10-07'; checkClash()" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">Oct 07 (Offstage)</button>
-                        <button type="button" @click="modalDate = '2026-10-31'; checkClash()" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-100 hover:bg-red-200 text-red-900">Oct 31 (Main Stage 1)</button>
-                        <button type="button" @click="modalDate = '2026-11-01'; checkClash()" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-red-100 hover:bg-red-200 text-red-900">Nov 01 (Main Stage 2)</button>
+                        <button type="button" @click="modalDate = '2026-10-06'; modalTime = '16:40'; checkClash()" 
+                                :class="modalDate === '2026-10-06' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Oct 06 (Offstage)</button>
+                        <button type="button" @click="modalDate = '2026-10-07'; modalTime = '16:40'; checkClash()" 
+                                :class="modalDate === '2026-10-07' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Oct 07 (Offstage)</button>
+                        <button type="button" @click="modalDate = '2026-10-31'; modalTime = '09:00'; checkClash()" 
+                                :class="modalDate === '2026-10-31' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-red-50 text-red-900 hover:bg-red-100'"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Oct 31 (Main Stage 1)</button>
+                        <button type="button" @click="modalDate = '2026-11-01'; modalTime = '09:00'; checkClash()" 
+                                :class="modalDate === '2026-11-01' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-red-50 text-red-900 hover:bg-red-100'"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Nov 01 (Main Stage 2)</button>
                     </div>
                     <input type="date" name="date" x-model="modalDate" @change="checkClash()" required
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-mono">
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono">
                 </div>
 
                 <!-- 4. Time Slot & Duration Presets -->
@@ -574,19 +699,45 @@
                         <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5">
                             Start Time *
                         </label>
+
+                        <!-- Context-Aware Time Presets -->
+                        <div class="flex items-center gap-1 mb-1.5 flex-wrap">
+                            <template x-if="modalDate === '2026-10-06' || modalDate === '2026-10-07'">
+                                <div class="flex items-center gap-1 flex-wrap">
+                                    <button type="button" @click="setTime('16:40')" :class="modalTime === '16:40' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">04:40 PM</button>
+                                    <button type="button" @click="setTime('17:10')" :class="modalTime === '17:10' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">05:10 PM</button>
+                                    <button type="button" @click="setTime('21:15')" :class="modalTime === '21:15' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">09:15 PM</button>
+                                    <button type="button" @click="setTime('21:45')" :class="modalTime === '21:45' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">09:45 PM</button>
+                                    <button type="button" @click="setTime('22:25')" :class="modalTime === '22:25' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">10:25 PM</button>
+                                </div>
+                            </template>
+                            <template x-if="modalDate !== '2026-10-06' && modalDate !== '2026-10-07'">
+                                <div class="flex items-center gap-1 flex-wrap">
+                                    <button type="button" @click="setTime('09:00')" :class="modalTime === '09:00' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">09:00 AM</button>
+                                    <button type="button" @click="setTime('10:30')" :class="modalTime === '10:30' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">10:30 AM</button>
+                                    <button type="button" @click="setTime('14:00')" :class="modalTime === '14:00' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">02:00 PM</button>
+                                    <button type="button" @click="setTime('16:00')" :class="modalTime === '16:00' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">04:00 PM</button>
+                                    <button type="button" @click="setTime('19:30')" :class="modalTime === '19:30' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">07:30 PM</button>
+                                    <button type="button" @click="setTime('21:00')" :class="modalTime === '21:00' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'" class="px-1.5 py-0.5 rounded text-[10px] font-mono">09:00 PM</button>
+                                </div>
+                            </template>
+                        </div>
+
                         <input type="time" name="time" x-model="modalTime" @change="checkClash()" required
-                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-mono">
+                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono">
                     </div>
+
                     <div>
-                        <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5">
-                            Duration (Minutes) *
+                        <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5 flex items-center justify-between">
+                            <span>Duration *</span>
+                            <span class="text-[10px] text-slate-700 font-mono font-bold" x-text="`${modalDuration} min`"></span>
                         </label>
-                        <div class="flex items-center gap-1 mb-1.5">
-                            <button type="button" @click="modalDuration = 15; checkClash()" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 hover:bg-slate-200">15m</button>
-                            <button type="button" @click="modalDuration = 30; checkClash()" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 hover:bg-slate-200">30m</button>
-                            <button type="button" @click="modalDuration = 45; checkClash()" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 hover:bg-slate-200">45m</button>
-                            <button type="button" @click="modalDuration = 60; checkClash()" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 hover:bg-slate-200">60m</button>
-                            <button type="button" @click="modalDuration = 90; checkClash()" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 hover:bg-slate-200">90m</button>
+                        <div class="flex items-center gap-1 mb-1.5 flex-wrap">
+                            <button type="button" @click="setDuration(15)" :class="modalDuration == 15 ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700'" class="px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer">15m</button>
+                            <button type="button" @click="setDuration(20)" :class="modalDuration == 20 ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700'" class="px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer">20m</button>
+                            <button type="button" @click="setDuration(30)" :class="modalDuration == 30 ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700'" class="px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer">30m (Std)</button>
+                            <button type="button" @click="setDuration(45)" :class="modalDuration == 45 ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700'" class="px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer">45m</button>
+                            <button type="button" @click="setDuration(60)" :class="modalDuration == 60 ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700'" class="px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer">60m</button>
                         </div>
                         <input type="number" name="duration" x-model="modalDuration" @change="checkClash()" min="5" max="360" required
                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono">
