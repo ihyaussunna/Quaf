@@ -65,8 +65,7 @@
                  class="h-5 sm:h-7 w-auto object-contain opacity-80"
                  onerror="this.style.display='none'">
             <div>
-                <span class="text-[9px] sm:text-[10px] font-mono tracking-widest text-amber-400 uppercase font-bold block">OFFICIAL PUBLICATION</span>
-                <h1 class="text-[11px] sm:text-sm font-semibold tracking-tight text-slate-200">Digital Brochure Experience</h1>
+                <h1 class="text-xs sm:text-sm font-bold tracking-wider text-amber-400 uppercase font-sora">Theme Note</h1>
             </div>
         </div>
 

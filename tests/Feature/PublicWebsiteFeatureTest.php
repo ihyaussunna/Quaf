@@ -224,8 +224,7 @@ class PublicWebsiteFeatureTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('public.brochure');
-        $response->assertSee('OFFICIAL PUBLICATION');
-        $response->assertSee('Digital Brochure Experience');
+        $response->assertSee('Theme Note');
     }
 
     public function test_verification_hub_and_detail_routes_render(): void
