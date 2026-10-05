@@ -417,6 +417,8 @@ class CallListAndEvaluationWorkflowTest extends TestCase
             'is_call_list_locked' => true,
         ]);
 
+        $this->entry1->update(['attendance_status' => 'present', 'code_letter' => 'A']);
+
         $response = $this->actingAs($this->admin)
             ->post(route('admin.call-list.reset-program', $this->program));
 
@@ -424,6 +426,11 @@ class CallListAndEvaluationWorkflowTest extends TestCase
         $this->program->refresh();
         $this->assertEquals('upcoming', $this->program->status);
         $this->assertFalse((bool) $this->program->is_call_list_locked);
+        $this->assertDatabaseHas('program_entries', [
+            'id' => $this->entry1->id,
+            'attendance_status' => 'waiting',
+            'code_letter' => null,
+        ]);
     }
 
     public function test_admin_can_reset_all_programs_and_locks(): void
@@ -432,6 +439,7 @@ class CallListAndEvaluationWorkflowTest extends TestCase
             'status' => 'completed',
             'is_call_list_locked' => true,
         ]);
+        $this->entry1->update(['attendance_status' => 'present', 'code_letter' => 'A']);
 
         $response = $this->actingAs($this->admin)
             ->post(route('admin.call-list.reset-all'));
@@ -440,5 +448,10 @@ class CallListAndEvaluationWorkflowTest extends TestCase
         $this->program->refresh();
         $this->assertEquals('upcoming', $this->program->status);
         $this->assertFalse((bool) $this->program->is_call_list_locked);
+        $this->assertDatabaseHas('program_entries', [
+            'id' => $this->entry1->id,
+            'attendance_status' => 'waiting',
+            'code_letter' => null,
+        ]);
     }
 }

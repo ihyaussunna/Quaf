@@ -41,13 +41,13 @@
                class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <span>Judge Marks &rarr;</span>
             </a>
-            <form method="POST" action="{{ route('admin.call-list.reset-all') }}" onsubmit="return confirm('Are you sure you want to reset all completed programs and locked call lists back to upcoming? This will reset the festival to starting stage.');" class="inline">
+            <form method="POST" action="{{ route('admin.call-list.reset-all') }}" onsubmit="return confirm('Are you sure you want to reset attendance statuses and stage calls back to waiting? Note: Student registrations will NOT be deleted.');" class="inline">
                 @csrf
                 <button type="submit"
-                        class="px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-xs uppercase hover:bg-red-700 transition-colors shadow-2xs flex items-center gap-1.5 font-sora"
-                        title="Reset All Completed Programs & Call List Locks">
+                        class="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs uppercase hover:bg-amber-700 transition-colors shadow-2xs flex items-center gap-1.5 font-sora cursor-pointer"
+                        title="Reset Call List Attendance Statuses & Unlocks">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span>Reset All Programs</span>
+                    <span>Reset Attendance & Status</span>
                 </button>
             </form>
         </div>

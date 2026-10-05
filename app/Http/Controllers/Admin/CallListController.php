@@ -260,7 +260,8 @@ class CallListController extends Controller
     }
 
     /**
-     * Reset all programs to 'upcoming' and unlock all call lists.
+     * Reset all programs to 'upcoming', unlock call lists, and reset attendance/calls back to waiting.
+     * Preserves student registrations and group entries.
      */
     public function resetAll(): RedirectResponse
     {
@@ -275,22 +276,26 @@ class CallListController extends Controller
             DB::table('results')->delete();
             DB::table('score_sheets')->delete();
             DB::table('green_room_calls')->delete();
-            DB::table('program_entry_participants')->delete();
-            DB::table('program_entries')->delete();
             DB::table('points_transactions')->delete();
             DB::table('groups')->update(['points_cache' => 0, 'rank_cache' => 1]);
             DB::table('students')->update(['points_cache' => 0]);
+
+            // Reset attendance status and code letter on all existing entries WITHOUT deleting student registrations
+            ProgramEntry::query()->update([
+                'attendance_status' => 'waiting',
+                'code_letter' => null,
+            ]);
         });
 
         AuditLogger::log('admin_reset_festival_call_lists_and_status', null, null, [
-            'action' => 'Reset all completed programs, call list locks, evaluations, and results',
+            'action' => 'Reset attendance statuses, call list locks, evaluations, and results while preserving candidate registrations',
         ]);
 
-        return back()->with('success', 'All completed programs, locked call lists, evaluations, and results have been successfully reset.');
+        return back()->with('success', 'All call lists and programs have been reset to starting state. Student registrations were preserved.');
     }
 
     /**
-     * Reset a single program to upcoming and unlock call list.
+     * Reset a single program to upcoming and reset its attendance/calls without deleting entries.
      */
     public function resetProgram(Program $program): RedirectResponse
     {
@@ -305,9 +310,12 @@ class CallListController extends Controller
             DB::table('results')->where('program_id', $program->id)->delete();
             DB::table('score_sheets')->where('program_id', $program->id)->delete();
             DB::table('green_room_calls')->where('program_id', $program->id)->delete();
-            $entryIds = ProgramEntry::where('program_id', $program->id)->pluck('id');
-            DB::table('program_entry_participants')->whereIn('entry_id', $entryIds)->delete();
-            DB::table('program_entries')->where('program_id', $program->id)->delete();
+
+            // Reset attendance and code letters on entries of this program WITHOUT deleting them
+            ProgramEntry::where('program_id', $program->id)->update([
+                'attendance_status' => 'waiting',
+                'code_letter' => null,
+            ]);
         });
 
         AuditLogger::log('admin_reset_program_call_list', $program, null, [
@@ -315,7 +323,7 @@ class CallListController extends Controller
             'name' => $program->name,
         ]);
 
-        return back()->with('success', "Program '{$program->name}' has been reset to Upcoming with call list unlocked.");
+        return back()->with('success', "Program '{$program->name}' attendance and call status have been reset. Student registrations were preserved.");
     }
 
     /**
