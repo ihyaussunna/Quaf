@@ -278,10 +278,14 @@ class PublicWebsiteFeatureTest extends TestCase
     {
         $user = User::factory()->create(['role' => 'admin']);
 
-        // 1. Offstage scheduler view
+        // 1. Offstage scheduler view (test both Oct 06 and Oct 07 with conflicts)
         $response = $this->actingAs($user)->get(route('admin.schedules.offstage', ['date' => '2026-10-06']));
         $response->assertStatus(200);
         $response->assertSee('Offstage Schedule Manager');
+
+        $responseOct7 = $this->actingAs($user)->get(route('admin.schedules.offstage', ['date' => '2026-10-07']));
+        $responseOct7->assertStatus(200);
+        $responseOct7->assertSee('Offstage Schedule Manager');
 
         // 2. Offstage Rockwell PDF print view (Admin)
         $pdfResponse = $this->actingAs($user)->get(route('admin.schedules.offstage.pdf', ['date' => '2026-10-07']));

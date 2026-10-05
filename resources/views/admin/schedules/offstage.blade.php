@@ -204,7 +204,7 @@
                                             <strong>{{ $sc['program_a']['name'] }}</strong> ({{ $sc['program_a']['time'] }}) overlaps with <strong>{{ $sc['program_b']['name'] }}</strong> ({{ $sc['program_b']['time'] }}).
                                         </p>
                                     </div>
-                                    <button @click="openCreateSlot('{{ \Carbon\Carbon::parse($sc['program_b']['time'])->format('H:i') }}', {{ $sc['stage_id'] }})"
+                                    <button @click="openCreateSlot('{{ $sc['program_b']['start_time'] ?? '16:40' }}', {{ $sc['stage_id'] }})"
                                             class="text-[11px] font-bold text-[#be1e2d] hover:underline whitespace-nowrap cursor-pointer">
                                         Fix
                                     </button>
@@ -266,7 +266,7 @@
                     </div>
 
                     <!-- Add program to this exact time slot -->
-                    <button type="button" @click="openCreateSlot('{{ \Carbon\Carbon::parse($timeSlot)->format('H:i') }}')"
+                    <button type="button" @click="openCreateSlot('{{ $slotItems->first()?->start_time?->format('H:i') ?? '16:40' }}')"
                             class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition flex items-center gap-1 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         <span>+ Add to {{ $timeSlot }}</span>
