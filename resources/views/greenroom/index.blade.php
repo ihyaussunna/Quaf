@@ -403,14 +403,6 @@
                                     <span>{{ $windowState['message'] }}</span>
                                 </div>
                             </div>
-                            @if($isAdmin)
-                                <form method="POST" action="{{ route('greenroom.toggle-lock', $activeProgram->id) }}">
-                                    @csrf
-                                    <button type="submit" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer">
-                                        Unlock (Admin)
-                                    </button>
-                                </form>
-                            @endif
                         </div>
                     @endif
 
@@ -430,21 +422,6 @@
                                 <p class="text-xs font-mono text-slate-500 mt-1">
                                     Code: <strong>{{ $activeProgram->code }}</strong> &bull; Zone: <strong>{{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All' }}</strong> &bull; Stage: <strong>{{ $stage->name }}</strong> &bull; Total Registered: <strong>{{ $stats['total'] }} Students</strong>
                                 </p>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                @if($isAdmin)
-                                    <form method="POST" action="{{ route('greenroom.toggle-lock', $activeProgram->id) }}">
-                                        @csrf
-                                        <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer {{ $activeProgram->is_call_list_locked ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200' }}">
-                                            @if($activeProgram->is_call_list_locked)
-                                                <span>Unlock (Admin)</span>
-                                            @else
-                                                <span>Lock Call List (Admin)</span>
-                                            @endif
-                                        </button>
-                                    </form>
-                                @endif
                             </div>
                         </div>
 

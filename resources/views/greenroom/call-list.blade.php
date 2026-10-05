@@ -221,22 +221,6 @@
                             </button>
                         </form>
 
-                        @if($isAdmin)
-                            <!-- Admin Quick Lock/Unlock Toggle -->
-                            <form method="POST" action="{{ route('greenroom.toggle-lock', $selectedProgram->id) }}">
-                                @csrf
-                                <button type="submit"
-                                        class="px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer {{ $selectedProgram->is_call_list_locked ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200' }}">
-                                    @if($selectedProgram->is_call_list_locked)
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                                        <span>Unlock (Admin)</span>
-                                    @else
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                        <span>Lock Call List (Admin)</span>
-                                    @endif
-                                </button>
-                            </form>
-                        @endif
                     </div>
                 </div>
 
