@@ -5,8 +5,9 @@
     <!-- Judge Hero Profile (Light Theme) -->
     <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm">
         <div class="space-y-2">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-[#f3bd2e] text-xs font-mono font-bold">
-                <span>⚖️ OFFICIAL JURY DESK</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-[#005c94] text-xs font-mono font-bold">
+                <svg class="w-3.5 h-3.5 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+                <span>OFFICIAL JURY DESK</span>
             </div>
             <h1 class="text-3xl font-sora font-bold text-slate-900">Welcome, {{ $judge->name }}</h1>
             <p class="text-xs font-mono text-slate-500">
@@ -98,8 +99,8 @@
 
                     <!-- Evaluation Action -->
                     <div>
-                        <a href="{{ route('judge.evaluate', $prog) }}" class="w-full py-3 px-4 bg-[#f3bd2e] hover:brightness-105 text-white font-mono font-bold text-xs uppercase rounded-xl flex items-center justify-center gap-2 shadow-md shadow-[#f3bd2e]/20 transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <a href="{{ route('judge.evaluate', $prog) }}" class="w-full py-3.5 px-4 min-h-[48px] bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs sm:text-sm uppercase rounded-xl flex items-center justify-center gap-2 shadow-md shadow-[#005c94]/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             <span>{{ $eval['is_complete'] ? 'Review / Edit Scores' : 'Evaluate Participants Now' }}</span>
                         </a>
                     </div>

@@ -353,19 +353,19 @@
                                                 <button type="button"
                                                         @click="markAttendance({{ $entry->id }}, 'present', '{{ route('greenroom.mark-attendance', $entry->id) }}')"
                                                         id="btn-present-{{ $entry->id }}"
-                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white font-black' : 'bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-200' }}">
+                                                        class="px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white font-black' : 'bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-200' }}">
                                                     PRESENT
                                                 </button>
                                                 <button type="button"
                                                         @click="markAttendance({{ $entry->id }}, 'absent', '{{ route('greenroom.mark-attendance', $entry->id) }}')"
                                                         id="btn-absent-{{ $entry->id }}"
-                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white font-black' : 'bg-slate-100 hover:bg-red-50 text-slate-700 border border-slate-200' }}">
+                                                        class="px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white font-black' : 'bg-slate-100 hover:bg-red-50 text-slate-700 border border-slate-200' }}">
                                                     ABSENT
                                                 </button>
                                                 <button type="button"
                                                         @click="markAttendance({{ $entry->id }}, 'waiting', '{{ route('greenroom.mark-attendance', $entry->id) }}')"
                                                         id="btn-waiting-{{ $entry->id }}"
-                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs {{ $entry->attendance_status === 'waiting' || empty($entry->attendance_status) ? 'bg-amber-500 text-white font-black' : 'bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-200' }}">
+                                                        class="px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer {{ $entry->attendance_status === 'waiting' || empty($entry->attendance_status) ? 'bg-amber-500 text-white font-black' : 'bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-200' }}">
                                                     WAITING
                                                 </button>
                                             </div>

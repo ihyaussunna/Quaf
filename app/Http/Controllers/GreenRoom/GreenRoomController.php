@@ -261,7 +261,7 @@ class GreenRoomController extends Controller
         $program = $entry->program;
         $window = $program?->getCallListWindowState();
 
-        if (! $isAdmin && ! ($window['is_open'] ?? false)) {
+        if ((bool) ($program?->is_call_list_locked ?? false) || (! $isAdmin && ! ($window['is_open'] ?? false))) {
             $msg = $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.';
             if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
@@ -360,7 +360,7 @@ class GreenRoomController extends Controller
         $isAdmin = in_array($user?->role, ['admin', 'super_admin']);
 
         $window = $program->getCallListWindowState();
-        if (! $isAdmin && ! ($window['is_open'] ?? false)) {
+        if ((bool) ($program->is_call_list_locked ?? false) || (! $isAdmin && ! ($window['is_open'] ?? false))) {
             return back()->with('error', $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.');
         }
 
@@ -417,7 +417,7 @@ class GreenRoomController extends Controller
         $program = $entry->program;
         $window = $program?->getCallListWindowState();
 
-        if (! $isAdmin && ! ($window['is_open'] ?? false)) {
+        if ((bool) ($program?->is_call_list_locked ?? false) || (! $isAdmin && ! ($window['is_open'] ?? false))) {
             $msg = $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.';
             if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);

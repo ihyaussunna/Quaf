@@ -47,20 +47,20 @@
             </p>
         </div>
 
-        <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200 gap-1 shrink-0">
+        <div class="flex flex-col sm:flex-row p-1.5 bg-slate-100 rounded-2xl border border-slate-200 gap-1.5 shrink-0">
             <button type="button"
                     @click="evaluationMode = 'simple'; localStorage.setItem('quaf_judge_mode_{{ $program->id }}', 'simple')"
                     :class="evaluationMode === 'simple' ? 'bg-[#005c94] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                    class="px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-mono transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                 <span>1. Simple Mode (100-ൽ മാർക്ക്)</span>
             </button>
 
             <button type="button"
                     @click="evaluationMode = 'criteria'; localStorage.setItem('quaf_judge_mode_{{ $program->id }}', 'criteria')"
                     :class="evaluationMode === 'criteria' ? 'bg-[#be1e2d] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                    class="px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-mono transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 <span>2. Criteria Mode (മാനദണ്ഡങ്ങൾ)</span>
             </button>
         </div>
@@ -270,46 +270,92 @@
                     <!-- Scoring Mode Hidden Input -->
                     <input type="hidden" name="scoring_mode" :value="evaluationMode">
 
-                    <!-- Mode 1: Simple 100-Point Score Input -->
+                    <!-- Mode 1: Simple 100-Point Score Input (Tablet & Mobile Optimized) -->
                     <div x-show="evaluationMode === 'simple'" class="space-y-3">
-                        <div class="bg-blue-50/50 border border-blue-200 rounded-2xl p-4 sm:p-5 max-w-sm space-y-2 shadow-2xs">
+                        <div class="bg-blue-50/50 border-2 border-blue-200 rounded-2xl p-5 sm:p-6 max-w-md space-y-3 shadow-2xs">
                             <div class="flex items-center justify-between text-xs font-mono">
-                                <span class="text-blue-900 font-bold uppercase tracking-wider">Total Score (നേരിട്ടുള്ള മാർക്ക്)</span>
-                                <span class="text-[#005c94] font-black bg-blue-100 px-2.5 py-0.5 rounded-lg">/ 100 max</span>
+                                <span class="text-blue-950 font-bold uppercase tracking-wider">Total Score (നേരിട്ടുള്ള മാർക്ക്)</span>
+                                <span class="text-[#005c94] font-black bg-blue-100 border border-blue-200 px-3 py-1 rounded-xl">/ 100 max</span>
                             </div>
-                            <input type="number" step="0.5" min="0" max="100"
-                                   name="total_score"
-                                   x-model="directScore"
-                                   :required="evaluationMode === 'simple'"
-                                   placeholder="0 - 100"
-                                   @input="if (directScore > 100) directScore = 100; if (directScore < 0) directScore = 0; saveDraftLocal();"
-                                   class="w-full bg-white border border-blue-300 rounded-xl px-4 py-3 text-2xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#005c94] shadow-2xs">
-                            <p class="text-[11px] font-mono text-slate-500 text-center">
-                                100-ൽ എത്ര മാർക്ക് എന്ന് ലളിതമായി നൽകുക (ഉദാ: 85, 92.5).
-                            </p>
+                            <div class="flex items-center gap-3">
+                                <input type="number" step="0.5" min="0" max="100"
+                                       inputmode="decimal"
+                                       name="total_score"
+                                       x-model="directScore"
+                                       :required="evaluationMode === 'simple'"
+                                       placeholder="0 - 100"
+                                       @input="if (directScore > 100) directScore = 100; if (directScore < 0) directScore = 0; saveDraftLocal();"
+                                       class="w-36 sm:w-44 h-14 sm:h-16 bg-white border-2 border-blue-300 rounded-xl px-4 text-3xl sm:text-4xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-xs transition-all">
+                                <div class="text-xs font-mono text-slate-500 space-y-1">
+                                    <p class="font-bold text-slate-800">100-ൽ എത്ര മാർക്ക് എന്ന് നൽകുക</p>
+                                    <p class="text-[11px] text-slate-400">ഉദാഹരണത്തിന്: 85, 92.5, 78</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Mode 2: Criteria Breakdown Inputs -->
+                    <!-- Mode 2: Criteria Breakdown Inputs (Tablet & Mobile Friendly Vertical List) -->
                     <div x-show="evaluationMode === 'criteria'" class="space-y-3">
                         @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                @foreach($program->scoringCriteria as $criterion)
-                                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-                                        <div class="flex items-center justify-between text-xs font-mono">
-                                            <span class="text-slate-700 font-semibold truncate">{{ $criterion->criterion_name }}</span>
-                                            <span class="text-[#f3bd2e] font-bold">/ {{ $criterion->max_marks }}</span>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between px-1 text-xs font-mono">
+                                    <span class="font-bold uppercase tracking-wider text-slate-700">
+                                        Criteria Breakdown / മാനദണ്ഡങ്ങളുടെ പട്ടിക ({{ $program->scoringCriteria->count() }} ഇനങ്ങൾ):
+                                    </span>
+                                    <span class="text-slate-500 font-semibold">
+                                        ആകെ പരമാവധി: <strong class="text-slate-900">{{ $program->scoringCriteria->sum('max_marks') }}</strong> മാർക്ക്
+                                    </span>
+                                </div>
+
+                                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100 shadow-2xs">
+                                    @foreach($program->scoringCriteria as $critIndex => $criterion)
+                                        <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
+                                             :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-amber-50/20' : 'hover:bg-slate-50/70'">
+                                            <!-- Criterion Title, Index & Max Marks -->
+                                            <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-mono font-black text-sm shrink-0 shadow-2xs transition-colors"
+                                                     :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-[#be1e2d] text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'">
+                                                    {{ $critIndex + 1 }}
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex flex-wrap items-center gap-2">
+                                                        <h4 class="text-base font-sora font-bold text-slate-900 leading-snug">
+                                                            {{ $criterion->criterion_name }}
+                                                        </h4>
+                                                        <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-[#be1e2d] font-mono text-xs font-bold shrink-0">
+                                                            Max: {{ $criterion->max_marks }} Pts
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-xs font-mono text-slate-500 mt-1">
+                                                        മാർക്ക് പരിധി: 0 മുതൽ {{ $criterion->max_marks }} വരെ
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Touch-Friendly Score Input (Tablet & Mobile Optimized) -->
+                                            <div class="flex items-center justify-end gap-2 shrink-0 self-end sm:self-center">
+                                                <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-2xs">
+                                                    <input type="number"
+                                                           step="0.5"
+                                                           min="0"
+                                                           max="{{ $criterion->max_marks }}"
+                                                           inputmode="decimal"
+                                                           name="scores[{{ $criterion->id }}]"
+                                                           x-model="scores['{{ $criterion->id }}']"
+                                                           :required="evaluationMode === 'criteria'"
+                                                           placeholder="0"
+                                                           @input="if (scores['{{ $criterion->id }}'] > maxMarks['{{ $criterion->id }}']) scores['{{ $criterion->id }}'] = maxMarks['{{ $criterion->id }}']; if (scores['{{ $criterion->id }}'] < 0) scores['{{ $criterion->id }}'] = 0; saveDraftLocal();"
+                                                           class="w-24 sm:w-28 h-12 sm:h-13 bg-white border-2 border-slate-300 rounded-xl px-2 text-xl sm:text-2xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/20 shadow-xs transition-all">
+
+                                                    <div class="px-2.5 py-1 text-center font-mono">
+                                                        <span class="text-[10px] text-slate-400 block uppercase font-bold leading-none">Max</span>
+                                                        <span class="text-sm font-bold text-slate-700 font-mono leading-tight">/ {{ $criterion->max_marks }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <input type="number" step="0.5" min="0" max="{{ $criterion->max_marks }}"
-                                                   name="scores[{{ $criterion->id }}]"
-                                                   x-model="scores['{{ $criterion->id }}']"
-                                                   :required="evaluationMode === 'criteria'"
-                                                   @input="if (scores['{{ $criterion->id }}'] > maxMarks['{{ $criterion->id }}']) scores['{{ $criterion->id }}'] = maxMarks['{{ $criterion->id }}']; if (scores['{{ $criterion->id }}'] < 0) scores['{{ $criterion->id }}'] = 0; saveDraftLocal();"
-                                                   class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 text-center font-bold focus:outline-none focus:border-[#f3bd2e]">
-                                        </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
                         @else
                             <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-mono text-amber-900">
@@ -317,11 +363,11 @@
                             </div>
                         @endif
                     </div>
-                    <!-- Grade Selector Buttons (A+, A, B, C) -->
-                    <div class="bg-slate-50/75 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <!-- Grade Selector Buttons (A+, A, B, C) - Touch Friendly for Tablets -->
+                    <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="text-xs font-mono">
-                            <span class="font-bold text-slate-700 uppercase tracking-wider">Grade Option:</span>
-                            <span class="text-slate-400 ml-1.5">(Select or confirm grade for this candidate)</span>
+                            <span class="font-bold text-slate-800 uppercase tracking-wider">Grade Option / ഗ്രേഡ്:</span>
+                            <span class="text-slate-400 block sm:inline mt-0.5 sm:mt-0 sm:ml-1.5">(Score അനുസരിച്ച് ഓട്ടോമാറ്റിക് ആയി കണക്കാക്കും)</span>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <input type="hidden" name="grade" :value="selectedGrade || (computedGrade !== '-' ? computedGrade : '')">
@@ -329,15 +375,15 @@
                                 <button type="button" 
                                         @click="setGrade(g)"
                                         :class="(selectedGrade === g || (!selectedGrade && computedGrade === g))
-                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600' : (g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600' : 'bg-amber-600 text-white shadow-xs border-amber-600'))
-                                            : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
-                                        class="px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shadow-2xs">
+                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600 scale-102 font-black' : (g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600 scale-102 font-black' : 'bg-amber-600 text-white shadow-xs border-amber-600 scale-102 font-black'))
+                                            : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 font-bold'"
+                                        class="h-11 sm:h-12 min-w-12 sm:min-w-14 px-3 sm:px-4 rounded-xl border text-sm sm:text-base font-mono transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95">
                                     <span x-text="g"></span>
                                 </button>
                             </template>
                             <button type="button" x-show="selectedGrade" @click="selectedGrade = ''; saveDraftLocal();" 
-                                    class="px-2 py-1 text-[11px] font-mono text-slate-400 hover:text-slate-600 underline">
-                                Reset
+                                    class="px-3 py-2 text-xs font-mono text-slate-400 hover:text-slate-700 underline cursor-pointer">
+                                Reset Auto
                             </button>
                         </div>
                     </div>
@@ -345,10 +391,10 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                         <div class="flex-1">
                             <input type="text" name="remarks" x-model="remarks" @input="saveDraftLocal()" placeholder="Confidential remarks for this performance..."
-                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white font-sora">
+                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 h-12 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#005c94] focus:bg-white font-sora shadow-2xs transition-all">
                             <div x-show="errorMessage" class="text-xs font-mono font-bold text-red-600 mt-1" x-text="errorMessage"></div>
                             <div x-show="saveSuccess" class="text-xs font-mono font-bold text-emerald-600 mt-1 flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 <span>Scores saved successfully (Total: <span x-text="submittedScore"></span>)</span>
                             </div>
                         </div>
@@ -356,7 +402,7 @@
                             <button type="submit" 
                                     :disabled="isSaving"
                                     :class="isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:brightness-105 active:scale-95'"
-                                    class="px-6 py-2.5 bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase rounded-xl shadow-md shadow-[#f3bd2e]/20 flex items-center gap-2 transition-all">
+                                    class="w-full sm:w-auto h-12 sm:h-13 px-6 sm:px-8 bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs sm:text-sm uppercase rounded-xl shadow-md shadow-[#005c94]/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
                                 <template x-if="isSaving">
                                     <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                 </template>

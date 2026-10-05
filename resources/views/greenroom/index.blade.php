@@ -592,7 +592,7 @@
                                                         <button type="button"
                                                                 @click="submitAttendance('{{ route('greenroom.mark-attendance', $entry) }}', {{ $entry->id }}, 'present')"
                                                                 :disabled="loadingEntryId === {{ $entry->id }}"
-                                                                class="px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200' }}">
+                                                                class="px-3.5 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200' }}">
                                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                             <span>PRESENT</span>
                                                         </button>
@@ -600,13 +600,13 @@
                                                         <button type="button"
                                                                 @click="submitAttendance('{{ route('greenroom.mark-attendance', $entry) }}', {{ $entry->id }}, 'absent')"
                                                                 :disabled="loadingEntryId === {{ $entry->id }}"
-                                                                class="px-2.5 py-1.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white shadow-xs' : 'bg-red-50 hover:bg-red-100 text-red-800 border border-red-200' }}">
+                                                                class="px-3 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white shadow-xs' : 'bg-red-50 hover:bg-red-100 text-red-800 border border-red-200' }}">
                                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                             <span>ABSENT</span>
                                                         </button>
                                                     </div>
                                                 @else
-                                                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 font-mono text-xs font-bold">
+                                                    <div class="inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl bg-slate-100 text-slate-500 font-mono text-xs font-bold">
                                                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                                         <span>{{ strtoupper($entry->attendance_status ?: 'WAITING') }}</span>
                                                     </div>
