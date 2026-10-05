@@ -195,7 +195,6 @@ class SyncOfficialProgramsCommand extends Command
                 ['code' => 'Q9-238', 'name' => 'Project', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 5, 'cat' => 'stage-arts'],
                 ['code' => 'Q9-239', 'name' => 'Master Plan', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 3, 'cat' => 'stage-arts'],
                 ['code' => 'Q9-240', 'name' => 'Interview Making', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 3, 'cat' => 'fine-arts'],
-                ['code' => 'Q9-241', 'name' => 'Centenary Footprint', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 1, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-242', 'name' => 'Visual Story', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-243', 'name' => 'Photo Feature', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'fine-arts'],
                 ['code' => 'Q9-244', 'name' => 'Capture the Flag', 'type' => 'group', 'is_stage' => false, 'zone' => 'Mix Zone', 'limit' => 2, 'cat' => 'stage-arts'],

@@ -79,7 +79,7 @@
             </div>
             <div class="text-center">
                 <p class="text-sm font-extrabold text-gray-900">
-                    Declared {{ $stats['declared_results'] ?? '145' }} of {{ $stats['total_results'] ?? '146' }} Results
+                    Declared {{ $stats['declared_results'] ?? '0' }} of {{ $stats['total_results'] ?? '144' }} Results
                 </p>
                 <p class="text-xs font-bold text-brand-orange mt-0.5">
                     Progress {{ $stats['progress_percent'] ?? '99.32' }}%

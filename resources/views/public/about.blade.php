@@ -56,7 +56,7 @@
                     </div>
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                         <span class="text-slate-500 uppercase">Program Spectrum</span>
-                        <strong class="text-slate-900">145 Codified Disciplines</strong>
+                        <strong class="text-slate-900">144 Codified Disciplines</strong>
                     </div>
                 </div>
             </div>

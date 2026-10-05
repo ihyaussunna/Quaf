@@ -120,7 +120,7 @@
                         <!-- Badge Pills inside Hero Card -->
                         <div class="grid grid-cols-3 gap-2.5 w-full mt-6 pt-6 border-t border-slate-200/80">
                             <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 text-center">
-                                <span class="font-sora font-black text-slate-900 text-base sm:text-lg block">{{ $stats['programs'] ?? 145 }}</span>
+                                <span class="font-sora font-black text-slate-900 text-base sm:text-lg block">{{ $stats['programs'] ?? 144 }}</span>
                                 <span class="text-[10px] font-mono text-slate-500 uppercase tracking-tight">Programs</span>
                             </div>
                             <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 text-center">
@@ -237,7 +237,7 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div class="glass-panel p-4 rounded-2xl text-center shadow-2xs">
                 <span class="text-[10px] font-mono uppercase text-slate-500 tracking-wider font-semibold block mb-0.5">Competitions</span>
-                <span class="text-2xl sm:text-3xl font-rockwell font-bold text-slate-900">{{ number_format($stats['programs'] ?? 145) }}</span>
+                <span class="text-2xl sm:text-3xl font-rockwell font-bold text-slate-900">{{ number_format($stats['programs'] ?? 144) }}</span>
                 <span class="text-[11px] text-slate-500 block mt-0.5">120+ Official Events</span>
             </div>
             <div class="glass-panel p-4 rounded-2xl text-center shadow-2xs">
