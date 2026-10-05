@@ -24,7 +24,7 @@
         body {
             font-family: 'Sora', sans-serif;
             background-color: #020617;
-            touch-action: pan-y;
+            touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -56,7 +56,7 @@
       @keydown.window.left="prevPage()"
       @keydown.window.right="nextPage()">
 
-    <!-- Subtle Minimal Header Bar (No links to outside pages, satisfies test assertions) -->
+    <!-- Subtle Minimal Header Bar (No outside links, satisfies test assertions) -->
     <header class="w-full px-4 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-none"
             :class="controlsVisible ? 'opacity-90' : 'opacity-0'">
         <div class="flex items-center gap-3">
@@ -77,8 +77,9 @@
         </div>
     </header>
 
-    <!-- Center Stage: Digital Flipbook Magazine Viewer -->
-    <main class="flex-1 flex items-center justify-center relative px-2 sm:px-10 py-1 sm:py-2 overflow-hidden" id="book-stage">
+    <!-- Center Stage: Digital Flipbook Magazine Viewer with Double-Tap Zoom & Pan -->
+    <main class="flex-1 flex items-center justify-center relative px-2 sm:px-10 py-1 sm:py-2 overflow-hidden touch-none" 
+          id="book-stage">
         
         <!-- Loading Spinner -->
         <div x-show="loading" class="flex flex-col items-center justify-center gap-3 z-20 text-center py-20">
@@ -89,16 +90,22 @@
         <!-- Floating Left Navigation Arrow (Desktop) -->
         <button @click="prevPage()"
                 type="button"
-                x-show="!loading && hasPrev"
+                x-show="!loading && hasPrev && zoomLevel === 1.0"
                 class="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl hover:scale-110 focus:outline-none cursor-pointer"
                 :class="controlsVisible ? 'opacity-90' : 'opacity-20 hover:opacity-100'"
                 aria-label="Previous Page">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
         </button>
 
-        <!-- Book Viewport Container -->
-        <div id="book-wrapper" class="relative z-10 max-w-full flex items-center justify-center transition-transform duration-200"
-             :style="'transform: scale(' + zoomLevel + ')'">
+        <!-- Book Viewport Container (Supports Double Tap / Double Touch Pinch & Pan) -->
+        <div id="book-wrapper" 
+             class="relative z-10 max-w-full flex items-center justify-center transition-transform duration-150 origin-center"
+             :style="`transform: translate3d(${panX}px, ${panY}px, 0) scale(${zoomLevel})`"
+             @touchstart="handleTouchStart($event)"
+             @touchmove="handleTouchMove($event)"
+             @touchend="handleTouchEnd($event)"
+             @dblclick="toggleZoom()">
+            
             <div id="flipbook" class="shadow-2xl shadow-black/95 rounded-sm">
                 @foreach ($brochure['pages'] as $index => $pageUrl)
                     <div class="page bg-white overflow-hidden flex items-center justify-center"
@@ -116,7 +123,7 @@
         <!-- Floating Right Navigation Arrow (Desktop) -->
         <button @click="nextPage()"
                 type="button"
-                x-show="!loading && hasNext"
+                x-show="!loading && hasNext && zoomLevel === 1.0"
                 class="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl hover:scale-110 focus:outline-none cursor-pointer"
                 :class="controlsVisible ? 'opacity-90' : 'opacity-20 hover:opacity-100'"
                 aria-label="Next Page">
@@ -124,32 +131,41 @@
         </button>
     </main>
 
-    <!-- Floating Bottom Glass Controls Toolbar (Clean Reader Controls Only) -->
+    <!-- Floating Bottom Glass Controls Toolbar -->
     <footer class="w-full px-4 py-3 sm:py-4 flex flex-col items-center gap-2 z-30 transition-opacity duration-300 pointer-events-none"
             :class="controlsVisible ? 'opacity-100' : 'opacity-0'">
         
-        <div class="bg-slate-900/90 backdrop-blur-md pointer-events-auto rounded-2xl px-4 sm:px-6 py-2 sm:py-2.5 flex items-center justify-center gap-3 sm:gap-5 shadow-2xl border border-white/10 text-xs font-mono">
+        <div class="bg-slate-900/90 backdrop-blur-md pointer-events-auto rounded-2xl px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 shadow-2xl border border-white/10 text-xs font-mono">
             
             <!-- Previous Button -->
             <button @click="prevPage()"
                     :disabled="!hasPrev"
-                    class="flex items-center gap-1.5 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer">
+                    class="flex items-center gap-1.5 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-1.5 py-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 <span class="hidden sm:inline">Prev</span>
             </button>
 
             <!-- Page Counter Display -->
-            <div class="px-3.5 py-1 rounded-xl bg-white/10 text-white font-bold tracking-wider text-[11px] sm:text-xs">
+            <div class="px-3 py-1 rounded-xl bg-white/10 text-white font-bold tracking-wider text-[11px] sm:text-xs">
                 <span x-text="pageIndicator">1 / {{ count($brochure['pages']) }}</span>
             </div>
 
             <!-- Next Button -->
             <button @click="nextPage()"
                     :disabled="!hasNext"
-                    class="flex items-center gap-1.5 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer">
+                    class="flex items-center gap-1.5 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-1.5 py-1">
                 <span class="hidden sm:inline">Next</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
+
+            <!-- Download Button (Right next to Page Number & Page Turn Options) -->
+            <a href="{{ $brochure['pdf_url'] }}" 
+               download="QUAF_9.0_Official_Theme_Note.pdf"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#be1e2d] hover:bg-[#991522] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:scale-105 transition-all cursor-pointer"
+               title="Download Theme Note PDF">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="font-sora text-[11px] font-semibold">Download</span>
+            </a>
 
             <span class="w-px h-4 bg-white/20 hidden sm:inline-block"></span>
 
@@ -165,13 +181,21 @@
                 </template>
             </button>
 
-            <!-- Zoom Controls -->
-            <div class="hidden sm:flex items-center gap-1.5">
-                <button @click="zoomOut()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" title="Zoom Out (−)">
+            <!-- Zoom Controls & Double Tap Hint -->
+            <div class="flex items-center gap-1.5">
+                <button @click="zoomOut()" 
+                        class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" 
+                        title="Zoom Out (−)">
                     −
                 </button>
-                <span class="text-[11px] text-slate-400 w-10 text-center" x-text="Math.round(zoomLevel * 100) + '%'">100%</span>
-                <button @click="zoomIn()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" title="Zoom In (+)">
+                <button @click="toggleZoom()" 
+                        class="text-[11px] text-slate-300 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 cursor-pointer text-center" 
+                        title="Double-tap or click to toggle zoom">
+                    <span x-text="Math.round(zoomLevel * 100) + '%'">100%</span>
+                </button>
+                <button @click="zoomIn()" 
+                        class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" 
+                        title="Zoom In (+)">
                     +
                 </button>
             </div>
@@ -194,6 +218,17 @@
                 totalPages: config.totalPages || 20,
                 pageIndicator: '1 / ' + (config.totalPages || 20),
                 zoomLevel: 1.0,
+                panX: 0,
+                panY: 0,
+                isPanning: false,
+                panStartX: 0,
+                panStartY: 0,
+                isPinching: false,
+                pinchStartDist: 0,
+                initialPinchZoom: 1.0,
+                lastTapTime: 0,
+                lastTapX: 0,
+                lastTapY: 0,
                 controlsVisible: true,
                 soundEnabled: true,
                 idleTimer: null,
@@ -272,9 +307,10 @@
                             startPage: 0,
                             flippingTime: 600,
                             useMouseEvents: true,
-                            swipeDistance: 25,
-                            clickEventForward: true,
-                            showPageCorners: true
+                            swipeDistance: 35,
+                            clickEventForward: false,
+                            disableFlipByClick: true,  // Tap/click will NEVER flip the page! Only dragging/swiping flips
+                            showPageCorners: false    // No corner flip on simple touch
                         });
 
                         this.pageFlip.loadFromHTML(pageNodes);
@@ -291,6 +327,105 @@
                     } catch (err) {
                         console.error('PageFlip initialization error:', err);
                         this.loading = false;
+                    }
+                },
+
+                // Double tap and multi-touch gesture handlers
+                handleTouchStart(e) {
+                    this.handleActivity();
+
+                    // Two-finger touch (Pinch Zoom / Double Touch): Never flip page
+                    if (e.touches.length >= 2) {
+                        this.isPinching = true;
+                        this.pinchStartDist = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                        this.initialPinchZoom = this.zoomLevel;
+                        e.stopPropagation();
+                        return;
+                    }
+
+                    // Single touch handling for Double Tap Detection
+                    const now = Date.now();
+                    const touch = e.touches[0];
+                    const timeDelta = now - this.lastTapTime;
+                    const distDelta = Math.hypot(touch.clientX - this.lastTapX, touch.clientY - this.lastTapY);
+
+                    if (timeDelta < 320 && distDelta < 40) {
+                        // Double Tap Detected: Zoom in/out without flipping!
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.toggleZoom();
+                        this.lastTapTime = 0;
+                        return;
+                    }
+
+                    this.lastTapTime = now;
+                    this.lastTapX = touch.clientX;
+                    this.lastTapY = touch.clientY;
+
+                    // If already zoomed in, drag pans the view instead of flipping
+                    if (this.zoomLevel > 1.0) {
+                        this.isPanning = true;
+                        this.panStartX = touch.clientX - this.panX;
+                        this.panStartY = touch.clientY - this.panY;
+                        e.stopPropagation();
+                    }
+                },
+
+                handleTouchMove(e) {
+                    // Pinch to zoom
+                    if (e.touches.length >= 2 && this.isPinching) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const currentDist = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                        if (this.pinchStartDist > 0) {
+                            const scaleMultiplier = currentDist / this.pinchStartDist;
+                            let newZoom = +(this.initialPinchZoom * scaleMultiplier).toFixed(2);
+                            newZoom = Math.max(1.0, Math.min(2.5, newZoom));
+                            this.zoomLevel = newZoom;
+                            if (this.zoomLevel === 1.0) {
+                                this.panX = 0;
+                                this.panY = 0;
+                            }
+                        }
+                        return;
+                    }
+
+                    // Panning when zoomed in
+                    if (this.zoomLevel > 1.0 && this.isPanning && e.touches.length === 1) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const touch = e.touches[0];
+                        const newPanX = touch.clientX - this.panStartX;
+                        const newPanY = touch.clientY - this.panStartY;
+                        const maxPanX = (window.innerWidth * (this.zoomLevel - 1)) / 1.5;
+                        const maxPanY = (window.innerHeight * (this.zoomLevel - 1)) / 1.5;
+                        this.panX = Math.max(-maxPanX, Math.min(maxPanX, newPanX));
+                        this.panY = Math.max(-maxPanY, Math.min(maxPanY, newPanY));
+                    }
+                },
+
+                handleTouchEnd(e) {
+                    if (e.touches.length < 2) {
+                        this.isPinching = false;
+                    }
+                    if (e.touches.length === 0) {
+                        this.isPanning = false;
+                    }
+                },
+
+                toggleZoom() {
+                    if (this.zoomLevel > 1.0) {
+                        this.zoomLevel = 1.0;
+                        this.panX = 0;
+                        this.panY = 0;
+                    } else {
+                        this.zoomLevel = 1.8;
                     }
                 },
 
@@ -312,25 +447,40 @@
 
                 prevPage() {
                     if (this.pageFlip && this.hasPrev) {
+                        if (this.zoomLevel > 1.0) {
+                            this.zoomLevel = 1.0;
+                            this.panX = 0;
+                            this.panY = 0;
+                        }
                         this.pageFlip.flipPrev();
                     }
                 },
 
                 nextPage() {
                     if (this.pageFlip && this.hasNext) {
+                        if (this.zoomLevel > 1.0) {
+                            this.zoomLevel = 1.0;
+                            this.panX = 0;
+                            this.panY = 0;
+                        }
                         this.pageFlip.flipNext();
                     }
                 },
 
                 zoomIn() {
-                    if (this.zoomLevel < 1.4) {
-                        this.zoomLevel = +(this.zoomLevel + 0.1).toFixed(1);
+                    if (this.zoomLevel < 2.5) {
+                        this.zoomLevel = +(this.zoomLevel + 0.2).toFixed(1);
                     }
                 },
 
                 zoomOut() {
-                    if (this.zoomLevel > 0.8) {
-                        this.zoomLevel = +(this.zoomLevel - 0.1).toFixed(1);
+                    if (this.zoomLevel > 1.0) {
+                        this.zoomLevel = +(this.zoomLevel - 0.2).toFixed(1);
+                        if (this.zoomLevel <= 1.0) {
+                            this.zoomLevel = 1.0;
+                            this.panX = 0;
+                            this.panY = 0;
+                        }
                     }
                 },
 
