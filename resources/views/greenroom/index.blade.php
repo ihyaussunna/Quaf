@@ -102,9 +102,6 @@
                     </h1>
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
                 </div>
-                <span class="text-[10px] font-mono tracking-wider text-[#005c94] block uppercase font-bold mt-1">
-                    Backstage Lineup & Digital Attendance &bull; QUAF 9.0
-                </span>
             </div>
         </div>
 
