@@ -209,6 +209,71 @@ class GreenRoomShuffleAndJudgeTwoModesTest extends TestCase
         $this->assertEquals('Y', $this->entry2->code_letter);
     }
 
+    public function test_green_room_can_attend_and_shuffle_next_program_while_previous_program_is_active(): void
+    {
+        // Program 1 is active on stage
+        $this->program->update(['status' => 'in_progress']);
+
+        // Create Program 2 (Up Next)
+        $nextProgram = Program::create([
+            'name' => 'Song Malayalam',
+            'code' => 'SM01',
+            'category_id' => $this->program->category_id,
+            'stage_id' => $this->program->stage_id,
+            'duration_minutes' => 15,
+            'type' => 'individual',
+            'status' => 'upcoming',
+            'shuffle_count' => 0,
+        ]);
+
+        Schedule::create([
+            'program_id' => $nextProgram->id,
+            'stage_id' => $nextProgram->stage_id,
+            'start_time' => Carbon::parse('2026-10-15 10:30:00'),
+            'end_time' => Carbon::parse('2026-10-15 10:45:00'),
+        ]);
+
+        $nextEntry = ProgramEntry::create([
+            'program_id' => $nextProgram->id,
+            'group_id' => $this->entry1->group_id,
+            'student_id' => $this->entry1->student_id,
+            'chest_number' => '201',
+            'status' => 'verified',
+            'attendance_status' => 'waiting',
+            'code_letter' => null,
+        ]);
+
+        // Green room desk index loads next program with program_id param
+        $indexResponse = $this->actingAs($this->greenRoomUser)
+            ->get(route('greenroom.index', [
+                'stage_id' => $this->program->stage_id,
+                'program_id' => $nextProgram->id,
+            ]));
+
+        $indexResponse->assertOk();
+        $indexResponse->assertSee('Song Malayalam');
+
+        // Mark attendance for next program's participant
+        $attResponse = $this->actingAs($this->greenRoomUser)
+            ->postJson(route('greenroom.mark-attendance', $nextEntry), [
+                'status' => 'present',
+            ]);
+
+        $attResponse->assertOk();
+        $nextEntry->refresh();
+        $this->assertEquals('present', $nextEntry->attendance_status);
+
+        // Update code letter for next program
+        $codeResponse = $this->actingAs($this->greenRoomUser)
+            ->postJson(route('greenroom.update-code-letter', $nextEntry), [
+                'code_letter' => 'M',
+            ]);
+
+        $codeResponse->assertOk();
+        $nextEntry->refresh();
+        $this->assertEquals('M', $nextEntry->code_letter);
+    }
+
     public function test_judge_can_submit_score_in_simple_100_mode(): void
     {
         $response = $this->actingAs($this->judgeUser)

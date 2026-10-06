@@ -252,13 +252,14 @@
                     @foreach($stageSchedules as $sch)
                         @php
                             $isCurrentSlot = ($currentProgram && $sch->program_id === $currentProgram->id);
+                            $isNextSlot = ($nextProgram && $sch->program_id === $nextProgram->id);
                             $isSelectedSlot = ($activeProgram && $sch->program_id === $activeProgram->id);
                             $schStart = \Carbon\Carbon::parse($sch->getRawOriginal('start_time') ?? $sch->start_time, 'Asia/Kolkata');
                             $schZoneName = $sch->program?->zone?->name ?? $sch->program?->eligibility;
                             $schZoneColor = $sch->program?->zone?->color_hex ?? '#005c94';
                         @endphp
                         <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $sch->program_id]) }}"
-                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 border {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200' }}">
+                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 border {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-xs ring-2 ring-slate-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200' }}">
                             <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('h:i A') }}</span>
                             <span>{{ Str::limit($sch->program?->name, 22) }}</span>
                             @if($schZoneName)
@@ -267,7 +268,15 @@
                                 </span>
                             @endif
                             @if($isCurrentSlot)
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                                <span class="px-1.5 py-0.5 rounded text-[9px] bg-red-100 text-red-800 font-bold uppercase flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                    <span>LIVE</span>
+                                </span>
+                            @elseif($isNextSlot)
+                                <span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold uppercase flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                    <span>NEXT</span>
+                                </span>
                             @endif
                         </a>
                     @endforeach
@@ -278,7 +287,7 @@
             <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 grid grid-cols-1 lg:grid-cols-3 gap-6 shadow-xs">
                 
                 <!-- 1. Now On Stage Card -->
-                <div class="space-y-3">
+                <div class="space-y-3 p-4 sm:p-5 rounded-2xl border transition-all {{ ($activeProgram && $currentProgram && $activeProgram->id === $currentProgram->id) ? 'bg-red-50/20 border-[#be1e2d] ring-2 ring-[#be1e2d]/30' : 'bg-slate-50/40 border-slate-200' }}">
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Now On Stage</span>
                         @if($currentProgram)
@@ -329,7 +338,7 @@
                         </div>
 
                         <!-- Niyamavali & Criteria Modals Buttons -->
-                        <div class="flex items-center gap-2 pt-1">
+                        <div class="flex items-center gap-2 pt-1 flex-wrap">
                             <button type="button"
                                     @click="openRules('{{ addslashes($currentProgram->name) }}', '{{ $currentProgram->code }}', '{{ addslashes($currentProgram->rules ?? '') }}')"
                                     class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
@@ -344,6 +353,22 @@
                                 <span>മാനദണ്ഡങ്ങൾ (Criteria)</span>
                             </button>
                         </div>
+
+                        <!-- Attend / View Call List Action -->
+                        <div class="pt-2">
+                            @if($activeProgram && $activeProgram->id === $currentProgram->id)
+                                <div class="w-full py-2.5 px-3.5 rounded-xl bg-[#be1e2d] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-xs">
+                                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                                    <span>ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് തുറന്നിരിക്കുന്നു (Active Call List)</span>
+                                </div>
+                            @else
+                                <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $currentProgram->id]) }}"
+                                   class="w-full py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-mono font-bold text-xs flex items-center justify-center gap-2 border border-slate-300 shadow-2xs transition-all cursor-pointer active:scale-98">
+                                    <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>ഇപ്പോഴത്തെ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് (View Now On Stage)</span>
+                                </a>
+                            @endif
+                        </div>
                     @else
                         <div class="py-4">
                             <h3 class="text-lg font-sora font-semibold text-slate-500">Stage on Intermission</h3>
@@ -353,7 +378,7 @@
                 </div>
 
                 <!-- 2. Up Next In Line Card -->
-                <div class="space-y-3 lg:border-l lg:border-slate-200 lg:pl-6">
+                <div class="space-y-3 lg:border-l lg:border-slate-200 lg:pl-6 p-4 sm:p-5 rounded-2xl border transition-all {{ ($activeProgram && $nextProgram && $activeProgram->id === $nextProgram->id) ? 'bg-blue-50/20 border-[#005c94] ring-2 ring-[#005c94]/30' : 'bg-slate-50/40 border-slate-200' }}">
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Up Next in Line</span>
                         @if($nextProgram)
@@ -402,7 +427,7 @@
                         </div>
 
                         <!-- Niyamavali & Criteria Modals Buttons -->
-                        <div class="flex items-center gap-2 pt-1">
+                        <div class="flex items-center gap-2 pt-1 flex-wrap">
                             <button type="button"
                                     @click="openRules('{{ addslashes($nextProgram->name) }}', '{{ $nextProgram->code }}', '{{ addslashes($nextProgram->rules ?? '') }}')"
                                     class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
@@ -416,6 +441,22 @@
                                 <svg class="w-3.5 h-3.5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                                 <span>മാനദണ്ഡങ്ങൾ (Criteria)</span>
                             </button>
+                        </div>
+
+                        <!-- Attend Next Program Call List Action Button -->
+                        <div class="pt-2">
+                            @if($activeProgram && $activeProgram->id === $nextProgram->id)
+                                <div class="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-xs">
+                                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                                    <span>അടുത്ത പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് തുറന്നിരിക്കുന്നു (Active Call List)</span>
+                                </div>
+                            @else
+                                <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $nextProgram->id]) }}"
+                                   class="w-full py-2.5 px-3.5 rounded-xl bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer active:scale-98">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                    <span>അടുത്ത പ്രോഗ്രാം ഹാജർ രേഖപ്പെടുത്തുക (Attend Next Program Call List)</span>
+                                </a>
+                            @endif
                         </div>
                     @else
                         <div class="py-4">
@@ -431,6 +472,11 @@
                         <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Stage Controls</span>
                         <div class="text-xs font-mono text-slate-600 mt-1">
                             Current Stage: <strong class="text-slate-900">{{ $stage->name }}</strong>
+                            @if($activeProgram)
+                                <div class="mt-1 text-[11px] font-mono font-bold text-[#005c94]">
+                                    Managing: {{ $activeProgram->name }} ({{ $activeProgram->code }})
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -543,10 +589,39 @@
                                           style="background-color: {{ $activeProgram->zone?->color_hex ?? '#005c94' }};">
                                         {{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'General' }}
                                     </span>
+                                    @if($currentProgram && $activeProgram->id === $currentProgram->id)
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <span>NOW ON STAGE</span>
+                                        </span>
+                                    @elseif($nextProgram && $activeProgram->id === $nextProgram->id)
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-100 text-blue-900 border border-blue-300 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                            <span>UP NEXT (മുൻകൂട്ടി തയ്യാറാക്കുന്നു)</span>
+                                        </span>
+                                    @endif
                                 </div>
                                 <p class="text-xs font-mono text-slate-500 mt-1">
                                     Code: <strong>{{ $activeProgram->code }}</strong> &bull; Zone: <strong>{{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All' }}</strong> &bull; Stage: <strong>{{ $stage->name }}</strong> &bull; Total Registered: <strong>{{ $stats['total'] }} Students</strong>
                                 </p>
+                            </div>
+
+                            <!-- Quick Program Switcher Bar (Switch between Now On Stage & Up Next) -->
+                            <div class="flex items-center gap-2 flex-wrap shrink-0">
+                                @if($currentProgram)
+                                    <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $currentProgram->id]) }}"
+                                       class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border {{ $activeProgram->id === $currentProgram->id ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200' }}">
+                                        <span class="w-2 h-2 rounded-full {{ $activeProgram->id === $currentProgram->id ? 'bg-white' : 'bg-red-500' }}"></span>
+                                        <span>Now On Stage: {{ Str::limit($currentProgram->name, 16) }}</span>
+                                    </a>
+                                @endif
+                                @if($nextProgram)
+                                    <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $nextProgram->id]) }}"
+                                       class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border {{ $activeProgram->id === $nextProgram->id ? 'bg-[#005c94] text-white border-[#005c94] shadow-sm' : 'bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-200' }}">
+                                        <span class="w-2 h-2 rounded-full {{ $activeProgram->id === $nextProgram->id ? 'bg-white' : 'bg-blue-600 animate-pulse' }}"></span>
+                                        <span>Up Next: {{ Str::limit($nextProgram->name, 16) }}</span>
+                                    </a>
+                                @endif
                             </div>
                         </div>
 
