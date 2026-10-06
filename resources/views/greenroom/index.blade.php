@@ -67,6 +67,18 @@
               }
           },
 
+          toastMessage: '',
+          showToast: false,
+          toastTimeout: null,
+          savingAllCodes: false,
+
+          triggerToast(msg) {
+              this.toastMessage = msg;
+              this.showToast = true;
+              if (this.toastTimeout) clearTimeout(this.toastTimeout);
+              this.toastTimeout = setTimeout(() => { this.showToast = false; }, 3500);
+          },
+
           async updateCodeLetter(url, newCode, entryId) {
               try {
                   const res = await fetch(url, {
@@ -81,13 +93,65 @@
                   const data = await res.json();
                   if (!res.ok || !data.success) {
                       alert(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
-                      window.location.reload();
+                      return false;
                   }
+                  this.triggerToast(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്തു.');
+                  return true;
               } catch (err) {
                   alert('Error updating code letter: ' + err.message);
+                  return false;
+              }
+          },
+
+          async saveAllCodeLetters(url) {
+              if (this.savingAllCodes) return;
+              this.savingAllCodes = true;
+              try {
+                  const inputs = document.querySelectorAll('.code-letter-input');
+                  const codes = {};
+                  inputs.forEach(input => {
+                      const id = input.getAttribute('data-entry-id');
+                      if (id) {
+                          codes[id] = input.value;
+                      }
+                  });
+
+                  const res = await fetch(url, {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'Accept': 'application/json',
+                          'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                      },
+                      body: JSON.stringify({ codes: codes })
+                  });
+                  const data = await res.json();
+                  if (!res.ok || !data.success) {
+                      alert(data.message || 'കോഡുകൾ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
+                  } else {
+                      this.triggerToast(data.message || 'എല്ലാ കോഡ് ലെറ്ററുകളും സേവ് ചെയ്തു.');
+                  }
+              } catch (err) {
+                  alert('Error saving codes: ' + err.message);
+              } finally {
+                  this.savingAllCodes = false;
               }
           }
       }">
+
+    <!-- Floating Live Toast Notification -->
+    <div x-show="showToast"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl px-4 py-3 shadow-xl font-mono text-xs flex items-center gap-3 border bg-slate-900 text-emerald-300 border-slate-700"
+         style="display: none;">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span x-text="toastMessage"></span>
+    </div>
 
     <!-- Unified Green Room Topbar -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-40 shadow-xs gap-4">
@@ -105,11 +169,25 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-3 shrink-0">
-            <!-- IST Live Clock Badge -->
-            <div class="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>{{ \Carbon\Carbon::now(config('app.timezone', 'Asia/Kolkata'))->format('h:i A') }} IST</span>
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <!-- IST Live Clock Badge (Auto-updates every second without refresh) -->
+            <div class="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 shadow-2xs"
+                 x-data="{
+                     currentTime: '',
+                     updateClock() {
+                         const now = new Date();
+                         this.currentTime = now.toLocaleTimeString('en-US', {
+                             timeZone: 'Asia/Kolkata',
+                             hour: '2-digit',
+                             minute: '2-digit',
+                             second: '2-digit',
+                             hour12: true
+                         }) + ' IST';
+                     }
+                 }"
+                 x-init="updateClock(); setInterval(() => updateClock(), 1000)">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span x-text="currentTime">{{ \Carbon\Carbon::now(config('app.timezone', 'Asia/Kolkata'))->format('h:i:s A') }} IST</span>
             </div>
 
             <form method="POST" action="{{ route('logout') }}">
@@ -376,6 +454,23 @@
                                     @endif
                                 </button>
                             </form>
+
+                            @if($isEditable)
+                                <!-- Batch Save All Codes Button -->
+                                <button type="button"
+                                        @click="saveAllCodeLetters('{{ route('greenroom.batch-update-code-letters', $activeProgram->id) }}')"
+                                        :disabled="savingAllCodes"
+                                        class="w-full px-4 py-2.5 bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
+                                    <template x-if="savingAllCodes">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                    </template>
+                                    <template x-if="!savingAllCodes">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                    </template>
+                                    <span x-text="savingAllCodes ? 'Saving Codes...' : 'Save All Codes (കോഡുകൾ സേവ് ചെയ്യുക)'"></span>
+                                </button>
+                            @endif
+
                             <p class="text-[11px] font-mono text-slate-500">
                                 @if($canShuffle)
                                     പരമാവധി 2 തവണ മാത്രമേ നറുക്കെടുപ്പ് അനുവദിക്കൂ (ഇതുവരെ ഉപയോഗിച്ചത്: {{ $shuffleCount }}/2). ആവശ്യമെങ്കിൽ താഴെ ടേബിളിൽ മാനുവലായും കോഡ് നൽകാം.
@@ -515,7 +610,7 @@
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono text-[11px] uppercase tracking-wider">
                                         <th class="py-3 px-4 w-12 text-center">#</th>
-                                        <th class="py-3 px-4 w-28 text-center">Code Letter</th>
+                                        <th class="py-3 px-4 w-36 sm:w-44 text-center">Code Letter</th>
                                         <th class="py-3 px-4 w-24">Chest #</th>
                                         <th class="py-3 px-4">Student Name</th>
                                         <th class="py-3 px-4">Group / Team</th>
@@ -535,15 +630,50 @@
                                             <!-- Code Letter (Manual Input / View) -->
                                             <td class="py-2.5 px-3 text-center">
                                                 @if($isEditable)
-                                                    <div class="inline-flex items-center justify-center gap-1">
+                                                    <div class="inline-flex items-center justify-center gap-1.5" x-data="{
+                                                        codeVal: '{{ $entry->code_letter }}',
+                                                        isSaving: false,
+                                                        isSaved: false,
+                                                        async saveCode() {
+                                                            if (this.isSaving) return;
+                                                            this.isSaving = true;
+                                                            try {
+                                                                const ok = await updateCodeLetter('{{ route('greenroom.update-code-letter', $entry) }}', this.codeVal, {{ $entry->id }});
+                                                                if (ok) {
+                                                                    this.isSaved = true;
+                                                                    setTimeout(() => { this.isSaved = false; }, 2500);
+                                                                }
+                                                            } finally {
+                                                                this.isSaving = false;
+                                                            }
+                                                        }
+                                                    }">
                                                         <input type="text"
                                                                maxlength="4"
                                                                placeholder="-"
-                                                               value="{{ $entry->code_letter }}"
-                                                               title="Click to manually enter or edit Code Letter (A, B, C...)"
-                                                               @change="updateCodeLetter('{{ route('greenroom.update-code-letter', $entry) }}', $event.target.value, {{ $entry->id }})"
-                                                               @keydown.enter.prevent="$event.target.blur()"
-                                                               class="w-14 h-8 text-center uppercase font-mono font-black text-xs rounded-xl border border-slate-300 bg-white hover:border-[#005c94] focus:border-[#005c94] focus:ring-1 focus:ring-[#005c94] shadow-2xs transition-all">
+                                                               x-model="codeVal"
+                                                               data-entry-id="{{ $entry->id }}"
+                                                               @keydown.enter.prevent="saveCode()"
+                                                               title="Enter Code Letter (A, B, C...) and click Save"
+                                                               class="code-letter-input w-12 sm:w-14 h-9 text-center uppercase font-mono font-black text-xs sm:text-sm rounded-xl border border-slate-300 bg-white hover:border-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-2xs transition-all">
+
+                                                        <button type="button"
+                                                                @click="saveCode()"
+                                                                :disabled="isSaving"
+                                                                :class="isSaved ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-100 hover:bg-[#005c94] hover:text-white text-slate-700 border-slate-300'"
+                                                                title="Save this code letter"
+                                                                class="h-9 px-2 sm:px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95">
+                                                            <template x-if="isSaving">
+                                                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                            </template>
+                                                            <template x-if="!isSaving && isSaved">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                            </template>
+                                                            <template x-if="!isSaving && !isSaved">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                                            </template>
+                                                            <span class="text-[10px] uppercase font-bold" x-text="isSaving ? '...' : (isSaved ? 'Saved' : 'Save')"></span>
+                                                        </button>
                                                     </div>
                                                 @else
                                                     @if($entry->code_letter)

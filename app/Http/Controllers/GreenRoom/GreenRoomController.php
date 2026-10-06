@@ -457,6 +457,61 @@ class GreenRoomController extends Controller
         return back()->with('success', $message);
     }
 
+    public function batchUpdateCodeLetters(Request $request, Program $program): JsonResponse|RedirectResponse
+    {
+        $user = auth()->user();
+        $isAdmin = in_array($user?->role, ['admin', 'super_admin']);
+
+        $window = $program->getCallListWindowState();
+        if ((bool) ($program->is_call_list_locked ?? false) || (! $isAdmin && ! ($window['is_open'] ?? false))) {
+            $msg = $window['message'] ?? 'ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് ഇപ്പോൾ എഡിറ്റ് ചെയ്യാൻ അനുവാദമില്ല.';
+            if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        $validated = $request->validate([
+            'codes' => ['required', 'array'],
+            'codes.*' => ['nullable', 'string', 'max:10'],
+        ]);
+
+        $updatedCount = 0;
+        foreach ($validated['codes'] as $entryId => $rawCode) {
+            $entry = ProgramEntry::where('program_id', $program->id)->find($entryId);
+            if (! $entry) {
+                continue;
+            }
+
+            $codeLetter = ! empty($rawCode) ? strtoupper(trim($rawCode)) : null;
+            if ($entry->code_letter !== $codeLetter) {
+                $oldCode = $entry->code_letter;
+                $entry->code_letter = $codeLetter;
+                $entry->save();
+                $updatedCount++;
+
+                AuditLogger::log('green_room_manual_code_letter', $entry, ['code_letter' => $oldCode], [
+                    'entry_id' => $entry->id,
+                    'chest_number' => $entry->chest_number,
+                    'code_letter' => $codeLetter,
+                ]);
+            }
+        }
+
+        $message = "കോഡ് ലെറ്ററുകൾ വിജയകരമായി സേവ് ചെയ്തു ({$updatedCount} updated).";
+
+        if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'updated_count' => $updatedCount,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
     public function toggleLockCallList(Program $program): RedirectResponse
     {
         if (! in_array(auth()->user()?->role, ['admin', 'super_admin'])) {

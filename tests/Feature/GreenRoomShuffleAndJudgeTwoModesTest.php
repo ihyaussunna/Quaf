@@ -187,6 +187,28 @@ class GreenRoomShuffleAndJudgeTwoModesTest extends TestCase
         $this->assertEquals('K', $this->entry1->code_letter);
     }
 
+    public function test_green_room_can_batch_update_code_letters(): void
+    {
+        $response = $this->actingAs($this->greenRoomUser)
+            ->postJson(route('greenroom.batch-update-code-letters', $this->program), [
+                'codes' => [
+                    $this->entry1->id => 'X',
+                    $this->entry2->id => 'Y',
+                ],
+            ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'updated_count' => 2,
+        ]);
+
+        $this->entry1->refresh();
+        $this->entry2->refresh();
+        $this->assertEquals('X', $this->entry1->code_letter);
+        $this->assertEquals('Y', $this->entry2->code_letter);
+    }
+
     public function test_judge_can_submit_score_in_simple_100_mode(): void
     {
         $response = $this->actingAs($this->judgeUser)

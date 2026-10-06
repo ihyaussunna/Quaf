@@ -546,6 +546,7 @@ Route::prefix('greenroom')->name('greenroom.')->middleware(['auth', 'role:green_
     Route::post('/call-next/{program}', [GreenRoomController::class, 'callNext'])->name('call-next');
     Route::post('/attendance/{entry}', [GreenRoomController::class, 'markAttendance'])->name('mark-attendance');
     Route::post('/entry/{entry}/code-letter', [GreenRoomController::class, 'updateCodeLetter'])->name('update-code-letter');
+    Route::post('/batch-code-letters/{program}', [GreenRoomController::class, 'batchUpdateCodeLetters'])->name('batch-update-code-letters');
     Route::post('/generate-codes/{program}', [GreenRoomController::class, 'generateCodeLetters'])->name('generate-codes');
 });
 
