@@ -632,14 +632,19 @@
                                                 @if($isEditable)
                                                     <div class="inline-flex items-center justify-center gap-1.5" x-data="{
                                                         codeVal: '{{ $entry->code_letter }}',
+                                                        lastSavedVal: '{{ $entry->code_letter }}',
                                                         isSaving: false,
                                                         isSaved: false,
                                                         async saveCode() {
                                                             if (this.isSaving) return;
+                                                            const cleanVal = (this.codeVal || '').trim().toUpperCase();
+                                                            this.codeVal = cleanVal;
+                                                            if (cleanVal === (this.lastSavedVal || '')) return;
                                                             this.isSaving = true;
                                                             try {
-                                                                const ok = await updateCodeLetter('{{ route('greenroom.update-code-letter', $entry) }}', this.codeVal, {{ $entry->id }});
+                                                                const ok = await updateCodeLetter('{{ route('greenroom.update-code-letter', $entry) }}', cleanVal, {{ $entry->id }});
                                                                 if (ok) {
+                                                                    this.lastSavedVal = cleanVal;
                                                                     this.isSaved = true;
                                                                     setTimeout(() => { this.isSaved = false; }, 2500);
                                                                 }
@@ -653,8 +658,10 @@
                                                                placeholder="-"
                                                                x-model="codeVal"
                                                                data-entry-id="{{ $entry->id }}"
-                                                               @keydown.enter.prevent="saveCode()"
-                                                               title="Enter Code Letter (A, B, C...) and click Save"
+                                                               @change="saveCode()"
+                                                               @blur="saveCode()"
+                                                               @keydown.enter.prevent="saveCode(); $event.target.blur()"
+                                                               title="Enter Code Letter (A, B, C...) - Automatically saves on change or click Save"
                                                                class="code-letter-input w-12 sm:w-14 h-9 text-center uppercase font-mono font-black text-xs sm:text-sm rounded-xl border border-slate-300 bg-white hover:border-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-2xs transition-all">
 
                                                         <button type="button"
