@@ -33,8 +33,12 @@ class LeaderController extends Controller
         protected PointCalculationService $pointCalculationService
     ) {}
 
-    public function isRegistrationOpen(): bool
+    public function isRegistrationOpen(?Program $program = null): bool
     {
+        if ($program) {
+            return $program->isRegistrationOpen();
+        }
+
         $open = FestivalSetting::get('registration_open', '1');
         if ($open === '0' || $open === false || $open === 'false') {
             return false;
@@ -412,6 +416,9 @@ class LeaderController extends Controller
                     'remaining' => max(0, $p->limit - $enrolled),
                     'is_full' => ($enrolled >= $p->limit),
                     'is_stage' => (bool) $p->is_stage,
+                    'is_registration_open' => (bool) $p->isRegistrationOpen(),
+                    'closure_reason' => $p->getRegistrationClosureReason(),
+                    'closure_reason_ml' => $p->getRegistrationClosureReasonMl(),
                 ];
             });
 
@@ -638,6 +645,10 @@ class LeaderController extends Controller
                 'status_key' => $statusKey,
                 'status_label' => $statusLabel,
                 'enrolled_students' => $enrolledStudents,
+                'is_stage' => (bool) $p->is_stage,
+                'is_registration_open' => (bool) $p->isRegistrationOpen(),
+                'closure_reason' => $p->getRegistrationClosureReason(),
+                'closure_reason_ml' => $p->getRegistrationClosureReasonMl(),
             ];
         });
 
@@ -695,8 +706,10 @@ class LeaderController extends Controller
     {
         $isAjax = $request->expectsJson() || $request->ajax();
 
-        if (! $this->isRegistrationOpen()) {
-            $msg = 'Registration window is currently closed. New registrations are not permitted.';
+        $program = Program::with(['schedule', 'zone'])->findOrFail($request->input('program_id'));
+
+        if (! $this->isRegistrationOpen($program)) {
+            $msg = $program->getRegistrationClosureReasonMl() ?: 'Registration window is currently closed. New registrations are not permitted.';
             if ($isAjax) {
                 return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
             }
@@ -705,8 +718,6 @@ class LeaderController extends Controller
                 'registration' => $msg,
             ]);
         }
-
-        $program = Program::with(['schedule', 'zone'])->findOrFail($request->input('program_id'));
 
         // If program is a group program, route to storeGroupRegistration
         if ($program->isGroup()) {
@@ -938,17 +949,6 @@ class LeaderController extends Controller
     {
         $isAjax = $request->expectsJson() || $request->ajax();
 
-        if (! $this->isRegistrationOpen()) {
-            $msg = 'Registration window is currently closed. New registrations are not permitted.';
-            if ($isAjax) {
-                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
-            }
-
-            return back()->withInput()->withErrors([
-                'registration' => $msg,
-            ]);
-        }
-
         $group = $this->getGroup();
 
         $validated = $request->validate([
@@ -960,6 +960,17 @@ class LeaderController extends Controller
         ]);
 
         $program = Program::with(['schedule', 'zone'])->findOrFail($validated['program_id']);
+
+        if (! $this->isRegistrationOpen($program)) {
+            $msg = $program->getRegistrationClosureReasonMl() ?: 'Registration window is currently closed. New registrations are not permitted.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors([
+                'registration' => $msg,
+            ]);
+        }
         $studentIds = array_values(array_unique(array_filter((array) $validated['student_ids'])));
         $leaderId = $validated['leader_id'] ?? ($studentIds[0] ?? null);
 
@@ -1076,14 +1087,17 @@ class LeaderController extends Controller
             abort(403, 'Unauthorized access to group entry.');
         }
 
-        if (! $this->isRegistrationOpen()) {
+        $entry->load(['program.zone', 'student', 'participants']);
+        $program = $entry->program;
+
+        if (! $this->isRegistrationOpen($program)) {
+            $msg = $program?->getRegistrationClosureReasonMl() ?: 'Registration window is currently closed. Edits are not permitted.';
+
             return redirect()->route('leader.registrations')->withErrors([
-                'registration' => 'Registration window is currently closed. Edits are not permitted.',
+                'registration' => $msg,
             ]);
         }
 
-        $entry->load(['program.zone', 'student', 'participants']);
-        $program = $entry->program;
         $students = $group->students()->with('zone')->orderBy('name')->get();
 
         return view('leader.registrations-edit', compact('group', 'entry', 'program', 'students'));
@@ -1096,13 +1110,15 @@ class LeaderController extends Controller
             abort(403, 'Unauthorized access to group entry.');
         }
 
-        if (! $this->isRegistrationOpen()) {
+        $program = $entry->program;
+
+        if (! $this->isRegistrationOpen($program)) {
+            $msg = $program?->getRegistrationClosureReasonMl() ?: 'Registration window is currently closed. Edits are not permitted.';
+
             return back()->withInput()->withErrors([
-                'registration' => 'Registration window is currently closed. Edits are not permitted.',
+                'registration' => $msg,
             ]);
         }
-
-        $program = $entry->program;
 
         if ($program->isGroup()) {
             $validated = $request->validate([
@@ -1165,8 +1181,10 @@ class LeaderController extends Controller
             abort(403, 'Unauthorized access to group entry.');
         }
 
-        if (! $this->isRegistrationOpen()) {
-            $msg = 'Registration window is currently closed. Cancellations are not permitted.';
+        $program = $entry->program;
+
+        if (! $this->isRegistrationOpen($program)) {
+            $msg = $program?->getRegistrationClosureReasonMl() ?: 'Registration window is currently closed. Cancellations are not permitted.';
             if (request()->expectsJson() || request()->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
@@ -1176,7 +1194,6 @@ class LeaderController extends Controller
             ]);
         }
 
-        $program = $entry->program;
         $programName = $program?->name ?? 'Program';
         $studentId = $entry->student_id;
         $participantIds = $entry->participants()->pluck('students.id')->all();
@@ -1202,8 +1219,8 @@ class LeaderController extends Controller
     public function destroyByProgram(Program $program): JsonResponse|RedirectResponse
     {
         $group = $this->getGroup();
-        if (! $this->isRegistrationOpen()) {
-            $msg = 'Registration window is currently closed. Cancellations are not permitted.';
+        if (! $this->isRegistrationOpen($program)) {
+            $msg = $program->getRegistrationClosureReasonMl() ?: 'Registration window is currently closed. Cancellations are not permitted.';
             if (request()->expectsJson() || request()->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
@@ -1248,15 +1265,6 @@ class LeaderController extends Controller
     {
         $isAjax = $request->expectsJson() || $request->ajax();
 
-        if (! $this->isRegistrationOpen()) {
-            $msg = 'Registration window is currently closed. Program swaps are not permitted.';
-            if ($isAjax) {
-                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
-            }
-
-            return back()->withInput()->withErrors(['registration' => $msg]);
-        }
-
         $validated = $request->validate([
             'student_id' => ['required', 'exists:students,id'],
             'from_entry_id' => ['required', 'exists:program_entries,id'],
@@ -1270,6 +1278,15 @@ class LeaderController extends Controller
         $fromProgram = $fromEntry->program;
 
         $toProgram = Program::with(['zone', 'schedule'])->findOrFail($validated['to_program_id']);
+
+        if (! $this->isRegistrationOpen($fromProgram) || ! $this->isRegistrationOpen($toProgram)) {
+            $msg = 'Registration window is closed for one or both of the selected programs. Program swaps are not permitted.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => $msg, 'errors' => [$msg]], 422);
+            }
+
+            return back()->withInput()->withErrors(['registration' => $msg]);
+        }
 
         if ($fromProgram->id === $toProgram->id) {
             $msg = 'Source and destination programs cannot be the same.';

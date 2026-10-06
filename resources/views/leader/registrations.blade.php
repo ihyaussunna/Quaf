@@ -97,6 +97,9 @@
             'status_type' => $statusType,
             'status_key' => $statusKey,
             'is_stage' => (bool) $p->is_stage,
+            'is_registration_open' => (bool) $p->isRegistrationOpen(),
+            'closure_reason' => $p->getRegistrationClosureReason(),
+            'closure_reason_ml' => $p->getRegistrationClosureReasonMl(),
         ];
     });
 
@@ -248,7 +251,8 @@ function registrationManager() {
             this.filteredPrograms.forEach((p, idx) => {
                 const isSelected = String(p.id) === currentProgId;
                 if (isSelected) matched = true;
-                select.options[idx + 1] = new Option(`${p.name} ${p.tag}`, String(p.id), false, isSelected);
+                const closedLabel = !p.is_registration_open ? ' [Closed / ക്ലോസ് ചെയ്തു]' : '';
+                select.options[idx + 1] = new Option(`${p.name} ${p.tag}${closedLabel}`, String(p.id), false, isSelected);
             });
             
             if (matched && currentProgId) {
@@ -837,10 +841,26 @@ function quotaStatusTracker() {
                                     Quota Full (<span class="font-mono" x-text="currentProgram.enrolled"></span>/<span class="font-mono" x-text="currentProgram.limit"></span> slots filled)
                                 </span>
                             </template>
+                            <template x-if="!currentProgram.is_registration_open">
+                                <span class="px-2.5 py-1 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 font-bold font-mono">
+                                    REGISTRATION CLOSED
+                                </span>
+                            </template>
                         </div>
                     </div>
                 </template>
             </div>
+
+            <!-- Closed Warning Banner if Registration is closed for this program -->
+            <template x-if="currentProgram && !currentProgram.is_registration_open">
+                <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-sora space-y-1">
+                    <div class="flex items-center gap-2 font-bold text-rose-800">
+                        <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span x-text="currentProgram.closure_reason_ml || 'ഈ മത്സരത്തിന്റെ രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു (Registration Closed).'"></span>
+                    </div>
+                    <p class="text-[11px] text-rose-600 font-mono pl-6" x-text="currentProgram.closure_reason || 'Registration for this competition is closed. New submissions or modifications are blocked.'"></p>
+                </div>
+            </template>
 
             <!-- STEP 3: PARTICIPANTS ENROLLMENT & ROSTER MANAGEMENT -->
             <template x-if="currentProgram">
@@ -1007,8 +1027,9 @@ function quotaStatusTracker() {
                     <template x-if="currentProgram && currentProgram.is_registered">
                         <button type="button" 
                                 @click="deleteCurrentProgramRegistration()" 
-                                :disabled="isSubmitting"
-                                class="px-4 py-2.5 rounded-xl text-xs font-sora font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center gap-1.5">
+                                :disabled="isSubmitting || (currentProgram && !currentProgram.is_registration_open)"
+                                :class="(currentProgram && !currentProgram.is_registration_open) ? 'opacity-50 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' : 'text-red-600 bg-red-50 hover:bg-red-100 border-red-200'"
+                                class="px-4 py-2.5 rounded-xl text-xs font-sora font-bold border transition-colors flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             <span>Remove All Registrations for this Program</span>
                         </button>
@@ -1017,8 +1038,8 @@ function quotaStatusTracker() {
 
                 <div class="flex items-center gap-3 ml-auto">
                     <button type="submit" 
-                            :disabled="isSubmitting || !selectedProgramId || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit"
-                            :class="isSubmitting || !selectedProgramId || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
+                            :disabled="isSubmitting || !selectedProgramId || (currentProgram && !currentProgram.is_registration_open) || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit"
+                            :class="isSubmitting || !selectedProgramId || (currentProgram && !currentProgram.is_registration_open) || (selectedStudents.length === 0 && (!currentProgram || !currentProgram.is_registered)) || selectedStudents.length > participantLimit ? 'opacity-60 cursor-not-allowed' : 'hover:bg-orange-600 active:scale-95 shadow-md shadow-orange-500/20'"
                             class="px-6 py-3 rounded-xl text-xs font-sora font-bold uppercase tracking-wider bg-brand-orange text-white transition-all flex items-center gap-2">
                         <template x-if="isSubmitting">
                             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
@@ -1100,7 +1121,7 @@ function quotaStatusTracker() {
                                 </span>
                             </td>
                             <td class="py-3 px-3 text-right">
-                                @if($isRegistrationOpen)
+                                @if($isRegistrationOpen && $e->program->isRegistrationOpen())
                                     <div class="inline-flex items-center gap-1.5">
                                         <a href="{{ route('leader.registrations.edit', $e) }}" 
                                            class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white text-slate-700 font-sora text-[11px] font-bold transition-colors">
@@ -1115,7 +1136,7 @@ function quotaStatusTracker() {
                                         </form>
                                     </div>
                                 @else
-                                    <span class="text-[10px] text-slate-400">Locked</span>
+                                    <span class="text-[10px] font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Locked</span>
                                 @endif
                             </td>
                         </tr>
@@ -1365,20 +1386,28 @@ function quotaStatusTracker() {
                             <!-- Action Button -->
                             <td class="py-3 px-3 text-right whitespace-nowrap">
                                 @if($isRegistrationOpen)
-                                    <button type="button" 
-                                            @click="enrollProgram(getProg({{ $pId }}))" 
-                                            :class="getProg({{ $pId }}).status_key === 'completed' ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-brand-orange hover:bg-orange-600 text-white shadow-2xs'"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-sora font-bold transition-all cursor-pointer">
-                                        <template x-if="getProg({{ $pId }}).status_key === 'completed'">
-                                            <span>Edit Roster</span>
-                                        </template>
-                                        <template x-if="getProg({{ $pId }}).status_key === 'partial'">
-                                            <span>+ Add Students</span>
-                                        </template>
-                                        <template x-if="getProg({{ $pId }}).status_key === 'pending'">
-                                            <span>+ Enroll</span>
-                                        </template>
-                                    </button>
+                                    <template x-if="getProg({{ $pId }}).is_registration_open">
+                                        <button type="button" 
+                                                @click="enrollProgram(getProg({{ $pId }}))" 
+                                                :class="getProg({{ $pId }}).status_key === 'completed' ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-brand-orange hover:bg-orange-600 text-white shadow-2xs'"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-sora font-bold transition-all cursor-pointer">
+                                            <template x-if="getProg({{ $pId }}).status_key === 'completed'">
+                                                <span>Edit Roster</span>
+                                            </template>
+                                            <template x-if="getProg({{ $pId }}).status_key === 'partial'">
+                                                <span>+ Add Students</span>
+                                            </template>
+                                            <template x-if="getProg({{ $pId }}).status_key === 'pending'">
+                                                <span>+ Enroll</span>
+                                            </template>
+                                        </button>
+                                    </template>
+                                    <template x-if="!getProg({{ $pId }}).is_registration_open">
+                                        <span class="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-mono font-bold inline-block" 
+                                              :title="getProg({{ $pId }}).closure_reason || 'Registration closed for this competition'">
+                                            Reg: Closed
+                                        </span>
+                                    </template>
                                 @else
                                     <span class="text-[11px] text-slate-400">Locked</span>
                                 @endif

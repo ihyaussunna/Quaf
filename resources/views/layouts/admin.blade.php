@@ -672,21 +672,61 @@
                         </div>
                         @php
                             $drawerRegOpen = (\App\Models\FestivalSetting::get('registration_open', '1') == '1');
+                            $drawerStageOpen = (\App\Models\FestivalSetting::get('stage_registration_open', '1') == '1');
+                            $drawerOffStageOpen = (\App\Models\FestivalSetting::get('off_stage_registration_open', '1') == '1');
                         @endphp
                         <div class="p-5 rounded-2xl {{ $drawerRegOpen ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200' : 'bg-rose-950/60 border border-rose-500/40 text-rose-200' }} text-xs space-y-4">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold flex items-center gap-2">
                                     <span class="w-2.5 h-2.5 rounded-full {{ $drawerRegOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
-                                    Status: {{ $drawerRegOpen ? 'REGISTRATION OPEN' : 'REGISTRATION CLOSED' }}
+                                    Global Status: {{ $drawerRegOpen ? 'REGISTRATION OPEN' : 'REGISTRATION CLOSED' }}
                                 </span>
                             </div>
                             <p class="text-slate-300 text-[11px] leading-relaxed">
-                                {{ $drawerRegOpen ? 'Group leaders can currently submit participant registrations. Click the button below to close registration.' : 'Registration is currently closed. Leaders cannot submit new entries until reopened.' }}
+                                {{ $drawerRegOpen ? 'Group leaders can currently submit participant registrations. Click the button below to close global registration.' : 'Global registration is currently closed. Leaders cannot submit new entries until reopened.' }}
                             </p>
                             <form method="POST" action="{{ route('admin.settings.toggle-registration') }}">
                                 @csrf
                                 <button type="submit" class="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerRegOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $drawerRegOpen ? 'Close Registration Now' : 'Open Registration Now' }}
+                                    {{ $drawerRegOpen ? 'Close Global Registration Now' : 'Open Global Registration Now' }}
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Stage Programs Card in Drawer -->
+                        <div class="p-4 rounded-2xl {{ $drawerStageOpen ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/40 border border-rose-500/30 text-rose-200' }} text-xs space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerStageOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
+                                    Stage Competitions: {{ $drawerStageOpen ? 'OPEN' : 'CLOSED' }}
+                                </span>
+                            </div>
+                            <p class="text-slate-300 text-[11px] leading-relaxed">
+                                {{ $drawerStageOpen ? 'Stage competitions registration is open for group leaders.' : 'Stage competitions registration is closed.' }}
+                            </p>
+                            <form method="POST" action="{{ route('admin.settings.toggle-stage-registration') }}">
+                                @csrf
+                                <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                                    {{ $drawerStageOpen ? 'Close Stage Registration' : 'Open Stage Registration' }}
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Off-Stage Programs Card in Drawer -->
+                        <div class="p-4 rounded-2xl {{ $drawerOffStageOpen ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/40 border border-rose-500/30 text-rose-200' }} text-xs space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerOffStageOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
+                                    Off-Stage Competitions: {{ $drawerOffStageOpen ? 'OPEN' : 'CLOSED' }}
+                                </span>
+                            </div>
+                            <p class="text-slate-300 text-[11px] leading-relaxed">
+                                {{ $drawerOffStageOpen ? 'Off-stage competitions registration is open for group leaders.' : 'Off-stage competitions registration is closed.' }}
+                            </p>
+                            <form method="POST" action="{{ route('admin.settings.toggle-off-stage-registration') }}">
+                                @csrf
+                                <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerOffStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                                    {{ $drawerOffStageOpen ? 'Close Off-Stage Registration' : 'Open Off-Stage Registration' }}
                                 </button>
                             </form>
                         </div>

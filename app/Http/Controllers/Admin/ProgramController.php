@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FestivalSetting;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\Stage;
 use App\Models\Zone;
 use App\Services\AuditLogger;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -64,6 +66,13 @@ class ProgramController extends Controller
             $query->where('type', $type);
         }
 
+        $regStatus = $request->query('reg_status');
+        if ($regStatus === 'open') {
+            $query->where('is_registration_open', true);
+        } elseif ($regStatus === 'closed') {
+            $query->where('is_registration_open', false);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -77,7 +86,11 @@ class ProgramController extends Controller
         $stages = Stage::all();
         $zones = Zone::orderBy('display_order')->get();
 
-        return view('admin.programs.index', compact('programs', 'categories', 'stages', 'zones', 'zone', 'zoneId', 'categoryId', 'stageId', 'status', 'isStage', 'gender', 'type', 'search'));
+        $isStageRegOpen = (FestivalSetting::get('stage_registration_open', '1') == '1');
+        $isOffStageRegOpen = (FestivalSetting::get('off_stage_registration_open', '1') == '1');
+        $isGlobalRegOpen = (FestivalSetting::get('registration_open', '1') == '1');
+
+        return view('admin.programs.index', compact('programs', 'categories', 'stages', 'zones', 'zone', 'zoneId', 'categoryId', 'stageId', 'status', 'isStage', 'gender', 'type', 'search', 'regStatus', 'isStageRegOpen', 'isOffStageRegOpen', 'isGlobalRegOpen'));
     }
 
     public function programWise(Request $request): View
@@ -438,5 +451,110 @@ class ProgramController extends Controller
         }
 
         return back()->with('success', 'Scoring criteria updated successfully.');
+    }
+
+    public function toggleRegistration(Program $program): JsonResponse|RedirectResponse
+    {
+        Program::ensureSchema();
+
+        $current = (bool) ($program->is_registration_open ?? true);
+        $new = ! $current;
+
+        $old = ['is_registration_open' => $current];
+        $program->update(['is_registration_open' => $new]);
+
+        AuditLogger::log('toggle_program_registration', $program, $old, ['is_registration_open' => $new]);
+
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
+        $statusText = $new ? 'opened (തുറന്നു)' : 'closed (ക്ലോസ് ചെയ്തു)';
+        $message = "Registration for '{$program->name}' has been {$statusText}.";
+
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'program_id' => $program->id,
+                'is_registration_open' => $new,
+                'is_effective_open' => $program->isRegistrationOpen(),
+                'closure_reason' => $program->getRegistrationClosureReason(),
+                'closure_reason_ml' => $program->getRegistrationClosureReasonMl(),
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function bulkToggleRegistration(Request $request): JsonResponse|RedirectResponse
+    {
+        Program::ensureSchema();
+
+        $validated = $request->validate([
+            'action' => ['required', 'in:open,close'],
+            'target' => ['nullable', 'in:selected,stage,off_stage,all'],
+            'program_ids' => ['nullable', 'array'],
+            'program_ids.*' => ['integer', 'exists:programs,id'],
+        ]);
+
+        $action = $validated['action'];
+        $isOpen = ($action === 'open');
+        $target = $validated['target'] ?? (empty($validated['program_ids']) ? 'all' : 'selected');
+
+        $query = Program::query();
+        $targetDesc = 'Competitions';
+
+        if ($target === 'stage') {
+            $query->where('is_stage', true);
+            $targetDesc = 'Stage competitions (സ്റ്റേജ് മത്സരങ്ങൾ)';
+            FestivalSetting::set('stage_registration_open', $isOpen ? '1' : '0');
+        } elseif ($target === 'off_stage') {
+            $query->where('is_stage', false);
+            $targetDesc = 'Off-stage competitions (ഓഫ്-സ്റ്റേജ് മത്സരങ്ങൾ)';
+            FestivalSetting::set('off_stage_registration_open', $isOpen ? '1' : '0');
+        } elseif ($target === 'selected' || ! empty($validated['program_ids'])) {
+            $programIds = array_filter(array_map('intval', (array) ($validated['program_ids'] ?? [])));
+            if (empty($programIds)) {
+                $msg = 'Please select at least one competition to update registration.';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+
+                return back()->with('error', $msg);
+            }
+            $query->whereIn('id', $programIds);
+            $targetDesc = count($programIds).' selected competitions';
+        }
+
+        $affectedCount = $query->update(['is_registration_open' => $isOpen]);
+
+        AuditLogger::log('bulk_toggle_program_registration', null, null, [
+            'action' => $action,
+            'target' => $target,
+            'affected_count' => $affectedCount,
+        ]);
+
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
+        $actionWord = $isOpen ? 'opened (തുറന്നു)' : 'closed (ക്ലോസ് ചെയ്തു)';
+        $message = "Registration {$actionWord} for {$affectedCount} {$targetDesc}.";
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'affected_count' => $affectedCount,
+                'is_registration_open' => $isOpen,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

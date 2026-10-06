@@ -127,6 +127,9 @@ function studentWisePageManager() {
                 
                 // Group quota check: must have remaining slot
                 if (p.remaining <= 0) return false;
+
+                // Registration window check: must be open
+                if (p.is_registration_open === false) return false;
                 
                 // Text search
                 if (q) {
@@ -511,7 +514,8 @@ function studentWisePageManager() {
                                 program_name: '{{ addslashes($entry->program?->name ?? '') }}',
                                 zone_name: '{{ addslashes($entry->program?->eligibility ?? ($entry->program?->zone?->name ?? 'A Zone')) }}',
                                 type: '{{ $entry->program?->type }}',
-                                is_stage: '{{ $entry->program?->is_stage ? 'Stage' : 'Non-stage' }}'
+                                is_stage: '{{ $entry->program?->is_stage ? 'Stage' : 'Non-stage' }}',
+                                is_registration_open: {{ ($entry->program && $entry->program->isRegistrationOpen()) ? 'true' : 'false' }}
                             },
                         @endforeach
                     ]
@@ -612,7 +616,7 @@ function studentWisePageManager() {
                                     <td class="px-4 py-3 text-gray-600 text-xs" x-text="entry.is_stage"></td>
                                     <template x-if="isRegistrationOpen">
                                         <td class="px-4 py-3 text-right text-xs no-print">
-                                            <template x-if="entry.type !== 'group'">
+                                            <template x-if="entry.type !== 'group' && entry.is_registration_open">
                                                 <div class="flex items-center justify-end gap-1.5">
                                                     <button type="button"
                                                             @click="openSwapModal(student, entry)"
@@ -630,12 +634,20 @@ function studentWisePageManager() {
                                                     </button>
                                                 </div>
                                             </template>
+                                            <template x-if="entry.type !== 'group' && !entry.is_registration_open">
+                                                <span class="text-[10px] font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Locked</span>
+                                            </template>
                                             <template x-if="entry.type === 'group'">
                                                 <div class="flex items-center justify-end">
-                                                    <a :href="'{{ url('leader/registrations') }}/' + entry.id + '/edit'"
-                                                       class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold text-xs transition font-sora">
-                                                        Edit Team
-                                                    </a>
+                                                    <template x-if="entry.is_registration_open">
+                                                        <a :href="'{{ url('leader/registrations') }}/' + entry.id + '/edit'"
+                                                           class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold text-xs transition font-sora">
+                                                            Edit Team
+                                                        </a>
+                                                    </template>
+                                                    <template x-if="!entry.is_registration_open">
+                                                        <span class="text-[10px] font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Locked</span>
+                                                    </template>
                                                 </div>
                                             </template>
                                         </td>

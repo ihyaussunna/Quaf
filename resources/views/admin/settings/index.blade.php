@@ -85,6 +85,68 @@
             </div>
         </div>
 
+        <!-- Stage Programs Registration Toggle -->
+        @php
+            $isStageOpen = ($settings['stage_registration_open'] ?? '1') == '1';
+        @endphp
+        <div class="rounded-3xl bg-white border-2 {{ $isStageOpen ? 'border-emerald-500/40' : 'border-rose-500/40' }} p-6 sm:p-8 space-y-4 shadow-sm relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full {{ $isStageOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <h2 class="text-lg font-sora font-bold text-slate-900">Stage Programs Registration</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase {{ $isStageOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                            {{ $isStageOpen ? 'OPEN / ALLOWED' : 'BLOCKED / CLOSED' }}
+                        </span>
+                    </div>
+                    <p class="text-xs font-sora text-slate-500 max-w-xl">
+                        Allow or block Group Leaders from enrolling participants specifically for Stage competitions.
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="relative inline-flex items-center cursor-pointer" title="Toggle Stage Registration">
+                        <input type="hidden" name="stage_registration_open" value="0">
+                        <input type="checkbox" name="stage_registration_open" value="1" {{ $isStageOpen ? 'checked' : '' }} class="sr-only peer">
+                        <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                    <button type="submit" form="toggle-stage-registration-form" class="px-4 py-2 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-sm {{ $isStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                        {{ $isStageOpen ? 'Block Stage Registration' : 'Open Stage Registration' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Off-Stage Programs Registration Toggle -->
+        @php
+            $isOffStageOpen = ($settings['off_stage_registration_open'] ?? '1') == '1';
+        @endphp
+        <div class="rounded-3xl bg-white border-2 {{ $isOffStageOpen ? 'border-emerald-500/40' : 'border-rose-500/40' }} p-6 sm:p-8 space-y-4 shadow-sm relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full {{ $isOffStageOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                        <h2 class="text-lg font-sora font-bold text-slate-900">Off-Stage Programs Registration</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase {{ $isOffStageOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                            {{ $isOffStageOpen ? 'OPEN / ALLOWED' : 'BLOCKED / CLOSED' }}
+                        </span>
+                    </div>
+                    <p class="text-xs font-sora text-slate-500 max-w-xl">
+                        Allow or block Group Leaders from enrolling participants specifically for Off-Stage competitions.
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="relative inline-flex items-center cursor-pointer" title="Toggle Off-Stage Registration">
+                        <input type="hidden" name="off_stage_registration_open" value="0">
+                        <input type="checkbox" name="off_stage_registration_open" value="1" {{ $isOffStageOpen ? 'checked' : '' }} class="sr-only peer">
+                        <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                    <button type="submit" form="toggle-off-stage-registration-form" class="px-4 py-2 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-sm {{ $isOffStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                        {{ $isOffStageOpen ? 'Block Off-Stage Registration' : 'Open Off-Stage Registration' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- 2. Leader Student Name / Spelling Editing Toggle -->
         @php
             $isEditingOpen = ($settings['student_editing_open'] ?? '1') == '1';
@@ -153,6 +215,12 @@
 
     <!-- Standalone Quick Action Forms (HTML5 Valid, Not Nested) -->
     <form id="toggle-registration-form" method="POST" action="{{ route('admin.settings.toggle-registration') }}" class="hidden">
+        @csrf
+    </form>
+    <form id="toggle-stage-registration-form" method="POST" action="{{ route('admin.settings.toggle-stage-registration') }}" class="hidden">
+        @csrf
+    </form>
+    <form id="toggle-off-stage-registration-form" method="POST" action="{{ route('admin.settings.toggle-off-stage-registration') }}" class="hidden">
         @csrf
     </form>
     <form id="toggle-student-editing-form" method="POST" action="{{ route('admin.settings.toggle-student-editing') }}" class="hidden">

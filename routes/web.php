@@ -376,6 +376,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Programs & Categories
     Route::get('programs-wise', [AdminProgramController::class, 'programWise'])->name('programs.program-wise');
+    Route::post('programs/bulk-toggle-registration', [AdminProgramController::class, 'bulkToggleRegistration'])->name('programs.bulk-toggle-registration');
+    Route::post('programs/{program}/toggle-registration', [AdminProgramController::class, 'toggleRegistration'])->name('programs.toggle-registration');
     Route::post('programs/{program}/criteria', [AdminProgramController::class, 'updateCriteria'])->name('programs.criteria.update');
     Route::resource('programs', AdminProgramController::class);
 
@@ -512,6 +514,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [AdminSettingController::class, 'update'])->name('settings.update');
     Route::post('settings/toggle-registration', [AdminSettingController::class, 'toggleRegistration'])->name('settings.toggle-registration');
+    Route::post('settings/toggle-stage-registration', [AdminSettingController::class, 'toggleStageRegistration'])->name('settings.toggle-stage-registration');
+    Route::post('settings/toggle-off-stage-registration', [AdminSettingController::class, 'toggleOffStageRegistration'])->name('settings.toggle-off-stage-registration');
     Route::post('settings/toggle-student-editing', [AdminSettingController::class, 'toggleStudentEditing'])->name('settings.toggle-student-editing');
     Route::get('audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
 

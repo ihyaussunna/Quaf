@@ -38,6 +38,7 @@ class Program extends Model
         'mix_zone_open_to_all',
         'eligibility_rules',
         'is_stage',
+        'is_registration_open',
         'gender_restriction',
         'eligibility',
         'rules',
@@ -65,6 +66,7 @@ class Program extends Model
             'shuffle_count' => 'integer',
             'eligibility_rules' => 'array',
             'is_stage' => 'boolean',
+            'is_registration_open' => 'boolean',
             'has_time_limit' => 'boolean',
             'has_criteria' => 'boolean',
         ];
@@ -84,6 +86,9 @@ class Program extends Model
             }
             if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
                 unset($program->attributes['is_call_list_locked']);
+            }
+            if (! Schema::hasColumn('programs', 'is_registration_open')) {
+                unset($program->attributes['is_registration_open']);
             }
 
             // Keep participant limits synchronized across all columns
@@ -149,6 +154,11 @@ class Program extends Model
             if (! Schema::hasColumn('programs', 'shuffle_count')) {
                 Schema::table('programs', function (Blueprint $table) {
                     $table->unsignedTinyInteger('shuffle_count')->default(0)->after('is_call_list_locked');
+                });
+            }
+            if (! Schema::hasColumn('programs', 'is_registration_open')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->boolean('is_registration_open')->default(true)->after('is_stage');
                 });
             }
             $checked = true;
@@ -335,5 +345,122 @@ class Program extends Model
     public function isCallListOpen(): bool
     {
         return (bool) ($this->getCallListWindowState()['is_open'] ?? false);
+    }
+
+    public function isRegistrationOpen(): bool
+    {
+        // 1. Global festival registration check
+        $globalOpen = FestivalSetting::get('registration_open', '1');
+        if ($globalOpen === '0' || $globalOpen === false || $globalOpen === 'false') {
+            return false;
+        }
+
+        $start = FestivalSetting::get('registration_start');
+        $end = FestivalSetting::get('registration_end');
+        $now = Carbon::now();
+
+        if ($start && $now->lt(Carbon::parse($start))) {
+            return false;
+        }
+
+        if ($end && $now->gt(Carbon::parse($end))) {
+            return false;
+        }
+
+        // 2. Stage vs Off-Stage category toggle check
+        if ($this->is_stage) {
+            $stageOpen = FestivalSetting::get('stage_registration_open', '1');
+            if ($stageOpen === '0' || $stageOpen === false || $stageOpen === 'false') {
+                return false;
+            }
+        } else {
+            $offStageOpen = FestivalSetting::get('off_stage_registration_open', '1');
+            if ($offStageOpen === '0' || $offStageOpen === false || $offStageOpen === 'false') {
+                return false;
+            }
+        }
+
+        // 3. Program-specific override check
+        if (isset($this->is_registration_open) && ! (bool) $this->is_registration_open) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getRegistrationClosureReason(): ?string
+    {
+        if ($this->isRegistrationOpen()) {
+            return null;
+        }
+
+        $globalOpen = FestivalSetting::get('registration_open', '1');
+        if ($globalOpen === '0' || $globalOpen === false || $globalOpen === 'false') {
+            return 'Global festival registration is closed.';
+        }
+
+        $start = FestivalSetting::get('registration_start');
+        $end = FestivalSetting::get('registration_end');
+        $now = Carbon::now();
+
+        if ($start && $now->lt(Carbon::parse($start))) {
+            return 'Registration window has not opened yet.';
+        }
+
+        if ($end && $now->gt(Carbon::parse($end))) {
+            return 'Registration deadline has passed.';
+        }
+
+        if ($this->is_stage && in_array(FestivalSetting::get('stage_registration_open', '1'), ['0', false, 'false'], true)) {
+            return 'Stage programs registration is currently closed.';
+        }
+
+        if (! $this->is_stage && in_array(FestivalSetting::get('off_stage_registration_open', '1'), ['0', false, 'false'], true)) {
+            return 'Off-stage programs registration is currently closed.';
+        }
+
+        if (! (bool) ($this->is_registration_open ?? true)) {
+            return 'Registration for this competition has been closed.';
+        }
+
+        return 'Registration is closed.';
+    }
+
+    public function getRegistrationClosureReasonMl(): ?string
+    {
+        if ($this->isRegistrationOpen()) {
+            return null;
+        }
+
+        $globalOpen = FestivalSetting::get('registration_open', '1');
+        if ($globalOpen === '0' || $globalOpen === false || $globalOpen === 'false') {
+            return 'രജിസ്ട്രേഷൻ പോർട്ടൽ ക്ലോസ് ചെയ്തിരിക്കുന്നു (Registration Closed).';
+        }
+
+        $start = FestivalSetting::get('registration_start');
+        $end = FestivalSetting::get('registration_end');
+        $now = Carbon::now();
+
+        if ($start && $now->lt(Carbon::parse($start))) {
+            return 'രജിസ്ട്രേഷൻ ആരംഭിച്ചിട്ടില്ല.';
+        }
+
+        if ($end && $now->gt(Carbon::parse($end))) {
+            return 'രജിസ്ട്രേഷൻ സമയപരിധി അവസാനിച്ചു.';
+        }
+
+        if ($this->is_stage && in_array(FestivalSetting::get('stage_registration_open', '1'), ['0', false, 'false'], true)) {
+            return 'സ്റ്റേജ് മത്സരങ്ങളുടെ രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു (Stage Registration Closed).';
+        }
+
+        if (! $this->is_stage && in_array(FestivalSetting::get('off_stage_registration_open', '1'), ['0', false, 'false'], true)) {
+            return 'ഓഫ്-സ്റ്റേജ് മത്സരങ്ങളുടെ രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു (Off-Stage Registration Closed).';
+        }
+
+        if (! (bool) ($this->is_registration_open ?? true)) {
+            return 'ഈ മത്സരത്തിന്റെ രജിസ്ട്രേഷൻ പ്രത്യേകമായി ക്ലോസ് ചെയ്തിരിക്കുന്നു (Registration Closed for this program).';
+        }
+
+        return 'രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു.';
     }
 }
