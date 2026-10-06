@@ -166,7 +166,6 @@
                     <a href="{{ route('home.view') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">Home</a>
                     <a href="{{ route('results.index') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('results.*') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">Results</a>
                     <a href="{{ route('schedule.index') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('schedule.*') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">Schedule</a>
-                    <a href="{{ route('groups.index') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('groups.*') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">Groups</a>
                     <a href="{{ route('gallery.index') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('gallery.*') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">Gallery</a>
                     <a href="{{ route('news.index') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('news.*') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">News</a>
                     <a href="{{ route('media.index') }}" class="transition-colors hover:text-[#be1e2d] {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'text-[#be1e2d] font-bold border-b-2 border-[#be1e2d] pb-1' : 'text-slate-600' }}">Media</a>
@@ -245,13 +244,6 @@
             <a href="{{ route('schedule.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('schedule.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
                 <span>Festival Schedule</span>
             </a>
-            <a href="{{ route('groups.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('groups.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Academic Groups & Points</span>
-            </a>
-            <a href="{{ route('brochure.index') }}" class="flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('brochure.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Official Brochure</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 text-amber-800 font-bold">14 Pages</span>
-            </a>
             <a href="{{ route('gallery.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('gallery.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
                 <span>Photo Gallery</span>
             </a>
@@ -261,8 +253,9 @@
             <a href="{{ route('media.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
                 <span>Media & Videos</span>
             </a>
-            <a href="{{ route('verify.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('verify.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>QR Verification Hub</span>
+            <a href="{{ route('brochure.index') }}" class="flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('brochure.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
+                <span>Official Brochure</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 text-amber-800 font-bold">14 Pages</span>
             </a>
 
             <div class="pt-3 border-t border-slate-100 mt-2">

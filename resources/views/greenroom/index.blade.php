@@ -20,6 +20,8 @@
       x-data="{
           showRulesModal: false,
           showCriteriaModal: false,
+          showSubmitLockModal: false,
+          isSubmittingLock: false,
           modalProgramName: '',
           modalProgramCode: '',
           modalRules: '',
@@ -27,6 +29,10 @@
           searchQuery: '',
           attendanceFilter: 'all',
           loadingEntryId: null,
+
+          openSubmitLockModal() {
+              this.showSubmitLockModal = true;
+          },
 
           openRules(name, code, rules) {
               this.modalProgramName = name;
@@ -482,25 +488,54 @@
 
                     @if($activeProgram)
                         <div class="flex flex-col gap-2.5">
-                            @if($isEditable)
+                            @if(!($activeProgram->is_call_list_locked ?? false) && $isEditable)
+                                <!-- Submit & Lock Call List Button -->
+                                <button type="button"
+                                        @click="openSubmitLockModal()"
+                                        class="w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Submit & Lock (സമർപ്പിച്ച് ലോക്ക് ചെയ്യുക)</span>
+                                </button>
+
                                 <!-- Batch Save All Codes Button -->
                                 <button type="button"
                                         @click="saveAllCodeLetters('{{ route('greenroom.batch-update-code-letters', $activeProgram->id) }}')"
                                         :disabled="savingAllCodes"
-                                        class="w-full px-4 py-3 bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
+                                        class="w-full px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold text-xs uppercase rounded-2xl border border-slate-300 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
                                     <template x-if="savingAllCodes">
                                         <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                     </template>
                                     <template x-if="!savingAllCodes">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                                     </template>
-                                    <span x-text="savingAllCodes ? 'Saving Codes...' : 'Save All Codes (കോഡുകൾ സേവ് ചെയ്യുക)'"></span>
+                                    <span x-text="savingAllCodes ? 'Saving Codes...' : 'Save Codes (കോഡുകൾ സേവ് ചെയ്യുക)'"></span>
                                 </button>
-                            @endif
 
-                            <p class="text-[11px] font-mono text-slate-500">
-                                മത്സരാർത്ഥികളുടെ കോഡ് ലെറ്ററുകൾ (A, B, C...) താഴെ ടേബിളിൽ നൽകിയ ശേഷം തനിയെ സേവ് ആകുന്നതാണ്. ഒന്നിച്ച് സേവ് ചെയ്യാൻ മുകളിലെ ബട്ടണും ഉപയോഗിക്കാം.
-                            </p>
+                                <p class="text-[11px] font-mono text-slate-500">
+                                    മത്സരാർത്ഥികൾക്ക് കോഡ് നൽകിയ ശേഷം "Submit & Lock" ബട്ടൺ അമർത്തി സമർപ്പിക്കുക. സമർപ്പിച്ചാൽ കോൾ ലിസ്റ്റ് ലോക്ക് ആകുന്നതാണ്.
+                                </p>
+                            @elseif($activeProgram->is_call_list_locked ?? false)
+                                <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-mono text-xs flex flex-col gap-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            <span class="font-bold">കോൾ ലിസ്റ്റ് ലോക്ക് ചെയ്തു</span>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded-lg bg-amber-200 text-amber-900 text-[10px] font-bold">LOCKED</span>
+                                    </div>
+                                    <p class="text-[11px] text-amber-800 leading-normal">
+                                        കോഡ് ലെറ്ററുകൾ സമർപ്പിച്ച് പൂർത്തിയായി. ഗ്രീൻ റൂം കോർഡിനേറ്റർമാർക്ക് ഇനി ഇതിൽ മാറ്റങ്ങൾ വരുത്താൻ സാധിക്കില്ല.
+                                    </p>
+                                    @if($isAdmin)
+                                        <form action="{{ route('greenroom.toggle-lock', $activeProgram) }}" method="POST" class="pt-1">
+                                            @csrf
+                                            <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold uppercase transition cursor-pointer">
+                                                Unlock Call List (Admin)
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     @else
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-500 text-center">
@@ -930,6 +965,110 @@
             </div>
         </div>
     </div>
+
+    @if($activeProgram)
+    <!-- Submit & Lock Call List Confirmation Modal Popup -->
+    <div x-show="showSubmitLockModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+         style="display: none;"
+         @click.self="showSubmitLockModal = false">
+        
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 relative transform transition-all"
+             @click.stop>
+            
+            <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-sora font-black text-slate-900">
+                            കോൾ ലിസ്റ്റ് സമർപ്പിക്കുക (Submit & Lock)
+                        </h3>
+                        <p class="text-xs font-mono text-slate-500">{{ $activeProgram->name }} ({{ $activeProgram->code }})</p>
+                    </div>
+                </div>
+                <button type="button" @click="showSubmitLockModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Warning Notice Box -->
+            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 space-y-2 text-xs font-mono">
+                <div class="flex items-center gap-2 font-bold text-amber-900 uppercase">
+                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>ശ്രദ്ധിക്കുക (Important Notice)</span>
+                </div>
+                <p class="leading-relaxed">
+                    കോഡ് ലെറ്ററുകൾ സമർപ്പിച്ചു കഴിഞ്ഞാൽ ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് പൂർണ്ണമായി <strong>ലോക്ക് (Lock)</strong> ചെയ്യപ്പെടും. അതിനുശേഷം ഗ്രീൻ റൂം കോർഡിനേറ്റർമാർക്ക് കോഡുകൾ മാറ്റാനോ ഹാജർ തിരുത്താനോ സാധിക്കില്ല.
+                </p>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-3 gap-2.5 text-center font-mono text-xs">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-slate-500 text-[10px] uppercase block">Total</span>
+                    <span class="text-base font-black text-slate-900 block mt-0.5">{{ $stats['total'] }}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                    <span class="text-emerald-700 text-[10px] uppercase block">Present</span>
+                    <span class="text-base font-black text-emerald-900 block mt-0.5">{{ $stats['present'] }}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-red-50 border border-red-200">
+                    <span class="text-red-700 text-[10px] uppercase block">Absent</span>
+                    <span class="text-base font-black text-red-900 block mt-0.5">{{ $stats['absent'] }}</span>
+                </div>
+            </div>
+
+            <!-- Submission Form -->
+            <form id="submit-lock-form"
+                  action="{{ route('greenroom.submit-and-lock', $activeProgram) }}"
+                  method="POST">
+                @csrf
+                <div id="submit-lock-codes-container"></div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button"
+                            @click="showSubmitLockModal = false"
+                            class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs font-bold transition cursor-pointer">
+                        റദ്ദാക്കുക (Cancel)
+                    </button>
+                    <button type="button"
+                            @click="
+                                const inputs = document.querySelectorAll('.code-letter-input');
+                                const container = document.getElementById('submit-lock-codes-container');
+                                container.innerHTML = '';
+                                inputs.forEach(input => {
+                                    const id = input.getAttribute('data-entry-id');
+                                    if (id) {
+                                        const h = document.createElement('input');
+                                        h.type = 'hidden';
+                                        h.name = 'codes[' + id + ']';
+                                        h.value = input.value;
+                                        container.appendChild(h);
+                                    }
+                                });
+                                isSubmittingLock = true;
+                                document.getElementById('submit-lock-form').submit();
+                            "
+                            :disabled="isSubmittingLock"
+                            class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold transition cursor-pointer shadow-md flex items-center gap-2">
+                        <template x-if="isSubmittingLock">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        </template>
+                        <span x-text="isSubmittingLock ? 'ലോക്ക് ചെയ്യുന്നു...' : 'സ്ഥിരീകരിച്ച് ലോക്ക് ചെയ്യുക (Confirm & Lock)'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
 
 </body>
 </html>

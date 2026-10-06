@@ -544,6 +544,7 @@ Route::prefix('judge')->name('judge.')->middleware(['auth', 'role:judge'])->grou
 Route::prefix('greenroom')->name('greenroom.')->middleware(['auth', 'role:green_room_coordinator,admin,super_admin'])->group(function () {
     Route::get('/', [GreenRoomController::class, 'index'])->name('index');
     Route::get('/call-list', [GreenRoomController::class, 'callList'])->name('call-list');
+    Route::post('/call-list/{program}/submit-and-lock', [GreenRoomController::class, 'submitAndLock'])->name('submit-and-lock');
     Route::post('/call-list/{program}/toggle-lock', [GreenRoomController::class, 'toggleLockCallList'])->name('toggle-lock');
     Route::get('/code-letters', [GreenRoomController::class, 'codeLetters'])->name('code-letters');
     Route::post('/status/{call}', [GreenRoomController::class, 'updateStatus'])->name('update-status');

@@ -512,6 +512,57 @@ class GreenRoomController extends Controller
         return back()->with('success', $message);
     }
 
+    public function submitAndLock(Request $request, Program $program): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! in_array($user?->role, ['green_room_coordinator', 'admin', 'super_admin'])) {
+            return back()->with('error', 'കോൾ ലിസ്റ്റ് സമർപ്പിക്കാൻ ഗ്രീൻ റൂം കോർഡിനേറ്റർക്കോ അഡ്മിനോ മാത്രമേ അനുവാദമുള്ളൂ.');
+        }
+
+        Program::ensureSchema();
+
+        // 1. Optionally save any batch codes submitted alongside
+        if ($request->has('codes') && is_array($request->input('codes'))) {
+            foreach ($request->input('codes') as $entryId => $rawCode) {
+                $entry = ProgramEntry::where('program_id', $program->id)->find($entryId);
+                if ($entry) {
+                    $codeLetter = ! empty($rawCode) ? strtoupper(trim($rawCode)) : null;
+                    if ($entry->code_letter !== $codeLetter) {
+                        $oldCode = $entry->code_letter;
+                        $entry->code_letter = $codeLetter;
+                        $entry->save();
+
+                        AuditLogger::log('green_room_manual_code_letter', $entry, ['code_letter' => $oldCode], [
+                            'entry_id' => $entry->id,
+                            'chest_number' => $entry->chest_number,
+                            'code_letter' => $codeLetter,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        try {
+            if (! Schema::hasColumn('programs', 'is_call_list_locked')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->boolean('is_call_list_locked')->default(false)->after('status');
+                });
+            }
+            $program->is_call_list_locked = true;
+            $program->save();
+        } catch (\Throwable) {
+            return back()->with('error', 'ഡാറ്റാബേസിൽ ലോക്ക് സ്റ്റാറ്റസ് രേഖപ്പെടുത്താൻ സാധിച്ചില്ല.');
+        }
+
+        AuditLogger::log('green_room_submit_and_lock', $program, null, [
+            'program_id' => $program->id,
+            'user_id' => $user?->id,
+            'role' => $user?->role,
+        ]);
+
+        return back()->with('success', "പ്രോഗ്രാം '{$program->name}' കോഡ് ലെറ്ററുകൾ സമർപ്പിച്ച് കോൾ ലിസ്റ്റ് വിജയകരമായി ലോക്ക് ചെയ്തു (Call list finalized & locked).");
+    }
+
     public function toggleLockCallList(Program $program): RedirectResponse
     {
         if (! in_array(auth()->user()?->role, ['admin', 'super_admin'])) {

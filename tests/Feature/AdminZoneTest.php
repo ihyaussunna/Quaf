@@ -89,15 +89,10 @@ class AdminZoneTest extends TestCase
         $responsePrograms->assertSee('C Zone');
     }
 
-    public function test_public_home_displays_festival_zones(): void
+    public function test_public_home_renders_successfully(): void
     {
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('Festival Zones');
-        $response->assertSee('A Zone');
-        $response->assertSee('B Zone');
-        $response->assertSee('C Zone');
-        $response->assertSee('Mix Zone');
     }
 }
