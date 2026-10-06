@@ -481,32 +481,13 @@
                     </div>
 
                     @if($activeProgram)
-                        @php
-                            $shuffleCount = (int) ($activeProgram->shuffle_count ?? 0);
-                            $canShuffle = ($shuffleCount < 2) || $isAdmin;
-                        @endphp
                         <div class="flex flex-col gap-2.5">
-                            <!-- Shuffle Code Letters -->
-                            <form method="POST" action="{{ route('greenroom.generate-codes', $activeProgram->id) }}"
-                                  onsubmit="return confirm('ഹാജരായവർക്ക് മാത്രം റാൻഡം ആയി രഹസ്യ കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകണോ? (അവസരം: {{ min(2, $shuffleCount + 1) }}/2)');">
-                                @csrf
-                                <button type="submit" @if(! $isEditable || ! $canShuffle) disabled @endif
-                                        class="w-full px-4 py-3 {{ $canShuffle ? 'bg-[#be1e2d] hover:bg-[#a01825] cursor-pointer' : 'bg-slate-400 cursor-not-allowed' }} disabled:opacity-50 text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    @if($canShuffle)
-                                        <span>Shuffle Code Letters (Chance {{ $shuffleCount + 1 }}/2)</span>
-                                    @else
-                                        <span>Shuffle Limit Reached (2/2 Used)</span>
-                                    @endif
-                                </button>
-                            </form>
-
                             @if($isEditable)
                                 <!-- Batch Save All Codes Button -->
                                 <button type="button"
                                         @click="saveAllCodeLetters('{{ route('greenroom.batch-update-code-letters', $activeProgram->id) }}')"
                                         :disabled="savingAllCodes"
-                                        class="w-full px-4 py-2.5 bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
+                                        class="w-full px-4 py-3 bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
                                     <template x-if="savingAllCodes">
                                         <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                     </template>
@@ -518,11 +499,7 @@
                             @endif
 
                             <p class="text-[11px] font-mono text-slate-500">
-                                @if($canShuffle)
-                                    പരമാവധി 2 തവണ മാത്രമേ നറുക്കെടുപ്പ് അനുവദിക്കൂ (ഇതുവരെ ഉപയോഗിച്ചത്: {{ $shuffleCount }}/2). ആവശ്യമെങ്കിൽ താഴെ ടേബിളിൽ മാനുവലായും കോഡ് നൽകാം.
-                                @else
-                                    പരമാവധി 2 നറുക്കെടുപ്പ് അവസരങ്ങളും പൂർത്തിയായി. ആവശ്യമെങ്കിൽ താഴെ ടേബിളിൽ മാനുവലായി കോഡ് നൽകാവുന്നതാണ്.
-                                @endif
+                                മത്സരാർത്ഥികളുടെ കോഡ് ലെറ്ററുകൾ (A, B, C...) താഴെ ടേബിളിൽ നൽകിയ ശേഷം തനിയെ സേവ് ആകുന്നതാണ്. ഒന്നിച്ച് സേവ് ചെയ്യാൻ മുകളിലെ ബട്ടണും ഉപയോഗിക്കാം.
                             </p>
                         </div>
                     @else

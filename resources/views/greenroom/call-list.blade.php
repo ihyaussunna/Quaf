@@ -230,24 +230,6 @@
                     </div>
 
                     <!-- Actions Bar -->
-                        @php
-                            $shuffleCount = (int) ($selectedProgram->shuffle_count ?? 0);
-                            $canShuffle = ($shuffleCount < 2) || $isAdmin;
-                        @endphp
-                        <!-- Auto Shuffle Code Letters -->
-                        <form method="POST" action="{{ route('greenroom.generate-codes', $selectedProgram->id) }}" onsubmit="return confirm('ഹാജരായവർക്ക് മാത്രം റാൻഡം ആയി കോഡ് ലെറ്ററുകൾ (A, B, C...) നൽകണോ? (അവസരം: {{ min(2, $shuffleCount + 1) }}/2)');">
-                            @csrf
-                            <button type="submit" @if(! $isEditable || ! $canShuffle) disabled @endif
-                                    class="px-4 py-2.5 rounded-xl {{ $canShuffle ? 'bg-purple-600 hover:bg-purple-700 cursor-pointer' : 'bg-slate-400 cursor-not-allowed' }} disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                @if($canShuffle)
-                                    <span>നറുക്കെടുപ്പ് (Shuffle Chance {{ $shuffleCount + 1 }}/2)</span>
-                                @else
-                                    <span>Shuffle Limit Reached (2/2 Used)</span>
-                                @endif
-                            </button>
-                        </form>
-
                         @if($isEditable)
                             <button type="button"
                                     @click="saveAllCodeLetters('{{ route('greenroom.batch-update-code-letters', $selectedProgram->id) }}')"
