@@ -417,3 +417,20 @@ input, textarea, select, button {
     animation: blurIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Seamless Infinite Ribbon Marquee Scroll */
+@keyframes ribbonScrollLeft {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.animate-ribbon-loop {
+    display: flex;
+    width: max-content;
+    animation: ribbonScrollLeft 32s linear infinite;
+    will-change: transform;
+}
+

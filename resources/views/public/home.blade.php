@@ -70,6 +70,44 @@
 </section>
 
 <!-- =====================================================================
+     JUNCTION: INFINITE ANIMATED GIF RIBBON (BLACK TO WHITE TRANSITION)
+     Loops continuously to the left with active GIF animation
+     ===================================================================== -->
+<div class="relative w-full overflow-hidden bg-[#07070a] border-y border-white/10 select-none py-2.5 sm:py-3.5 z-20 shadow-md">
+    <style>
+        @keyframes ribbonScrollLeft {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+            100% {
+                transform: translate3d(-50%, 0, 0);
+            }
+        }
+        .animate-ribbon-loop {
+            display: flex;
+            width: max-content;
+            animation: ribbonScrollLeft 32s linear infinite;
+            will-change: transform;
+        }
+    </style>
+
+    <div class="flex w-max animate-ribbon-loop pointer-events-none">
+        <!-- Sequence 1 -->
+        <div class="flex shrink-0 items-center">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+        </div>
+        <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
+        <div class="flex shrink-0 items-center">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================================
      SECTION 2: FESTIVAL THEME PHILOSOPHY (WHITE THEME)
      ===================================================================== -->
 <section class="py-16 sm:py-24 bg-white text-slate-900 border-b border-slate-200/90 relative overflow-hidden">
