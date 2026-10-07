@@ -399,3 +399,21 @@ input, textarea, select, button {
     background: #be1e2d;
 }
 
+/* Apple-style Blur-In Animation */
+@keyframes blurIn {
+    0% {
+        opacity: 0;
+        filter: blur(20px);
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        filter: blur(0px);
+        transform: scale(1);
+    }
+}
+
+.animate-blur-in {
+    animation: blurIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+

@@ -167,24 +167,12 @@
                     <a href="{{ route('brochure.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('brochure.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Brochure</a>
                 </nav>
 
-                <!-- Right Action CTAs -->
+                <!-- Right Action CTAs: Student Portal Button -->
                 <div class="hidden sm:flex items-center gap-3">
-                    <!-- Portal Login / Profile -->
-                    @auth
-                        @php
-                            $user = Auth::user();
-                            $targetRoute = $user->isAdmin() ? route('admin.dashboard') : ($user->isJudge() ? route('judge.dashboard') : ($user->role === 'green_room_coordinator' ? route('greenroom.index') : ($user->isLeader() ? route('leader.dashboard') : route('student.dashboard'))));
-                        @endphp
-                        <a href="{{ $targetRoute }}" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all flex items-center gap-2 shadow-2xs">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                            <span class="truncate max-w-[120px]">{{ $user->name }}</span>
-                        </a>
-                    @else
-                        <button @click="showStudentModal = true" type="button" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white hover:brightness-110 shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            <span>Student Portal</span>
-                        </button>
-                    @endauth
+                    <button @click="showStudentModal = true" type="button" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white hover:brightness-110 shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <span>Student Portal</span>
+                    </button>
                 </div>
 
                 <!-- Mobile Menu Button: Profile / Student Portal Icon -->
@@ -280,7 +268,7 @@
                     </p>
                     <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-400 pt-1">
                         <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-amber-400 font-semibold">31 OCT — 01 NOV 2026</span>
-                        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">CENTRAL FESTIVAL ARENA</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">JAMIA MARKAZ KARANTHUR</span>
                     </div>
                 </div>
 

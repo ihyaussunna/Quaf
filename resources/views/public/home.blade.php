@@ -14,26 +14,38 @@
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
         
-        <!-- Apple Glassy Center Artwork Card -->
-        <div class="relative group max-w-xl w-full mb-8">
-            <div class="rounded-3xl p-6 sm:p-10 bg-white/[0.04] backdrop-blur-2xl border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative overflow-hidden flex flex-col items-center text-center transition-all duration-500 hover:border-white/25">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#be1e2d]/25 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-[#f3bd2e]/20 rounded-full blur-3xl"></div>
+        <!-- Hero Center: Official Theme Logo without background shape, with Apple-style blur-in animation -->
+        <div class="relative w-full max-w-2xl mb-10 flex flex-col items-center text-center">
+            <style>
+                @keyframes heroBlurIn {
+                    0% {
+                        opacity: 0;
+                        filter: blur(22px);
+                        transform: scale(0.94);
+                    }
+                    100% {
+                        opacity: 1;
+                        filter: blur(0px);
+                        transform: scale(1);
+                    }
+                }
+                .hero-logo-blur {
+                    animation: heroBlurIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+                }
+            </style>
 
-                <img src="{{ asset('images/quaf-title-logo.png') }}" 
-                     alt="QUAF" 
-                     style="max-height: 270px; object-fit: contain;" 
-                     class="w-full max-w-[270px] xs:max-w-[320px] sm:max-w-md h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:scale-105">
+            <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
+                 alt="Ādabīc Inheritance — QUAF" 
+                 class="w-full max-w-[340px] xs:max-w-[420px] sm:max-w-xl md:max-w-2xl h-auto object-contain hero-logo-blur drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]">
 
-                <!-- Subtle Edition Pill -->
-                <div class="mt-6 pt-5 border-t border-white/10 w-full flex items-center justify-center gap-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-white/10 text-white/90 border border-white/15">
-                        Markazu Saquafathi Sunniyya
-                    </span>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-[#f3bd2e]/20 text-[#f3bd2e] border border-[#f3bd2e]/30 font-bold">
-                        9th Edition
-                    </span>
-                </div>
+            <!-- Festival Info Pills -->
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-white/10 text-white/90 border border-white/15 backdrop-blur-md">
+                    Markazu Saquafathi Sunniyya
+                </span>
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-[#f3bd2e]/20 text-[#f3bd2e] border border-[#f3bd2e]/30 font-bold backdrop-blur-md">
+                    31 OCT — 01 NOV 2026
+                </span>
             </div>
         </div>
 
