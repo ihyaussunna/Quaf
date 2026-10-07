@@ -315,9 +315,6 @@
                                       style="background-color: {{ $currentProgram->zone?->color_hex ?? '#be1e2d' }};">
                                     {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'General' }}
                                 </span>
-                                @if($currentProgram->zone?->sub_text)
-                                    <span class="text-[10px] font-mono text-slate-500">({{ $currentProgram->zone->sub_text }})</span>
-                                @endif
                             </div>
                             <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 tracking-tight">
                                 {{ $currentProgram->name }}
@@ -405,9 +402,6 @@
                                       style="background-color: {{ $nextProgram->zone?->color_hex ?? '#005c94' }};">
                                     {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'General' }}
                                 </span>
-                                @if($nextProgram->zone?->sub_text)
-                                    <span class="text-[10px] font-mono text-slate-500">({{ $nextProgram->zone->sub_text }})</span>
-                                @endif
                             </div>
                             <h3 class="text-xl sm:text-2xl font-sora font-bold text-slate-900 tracking-tight">
                                 {{ $nextProgram->name }}

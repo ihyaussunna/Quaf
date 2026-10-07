@@ -18,10 +18,10 @@ class Program extends Model
     use HasFactory;
 
     public const ZONES = [
-        'A Zone' => 'A Zone (റാബിഅ, തഖസ്സുസ്)',
-        'B Zone' => 'B Zone (സാലിസ)',
-        'C Zone' => 'C Zone (ഊല, സാനി)',
-        'Mix Zone' => 'Mix Zone (എല്ലാ സോണുകൾക്കും)',
+        'A Zone' => 'A Zone',
+        'B Zone' => 'B Zone',
+        'C Zone' => 'C Zone',
+        'Mix Zone' => 'Mix Zone',
     ];
 
     protected $fillable = [

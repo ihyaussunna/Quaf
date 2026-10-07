@@ -15,10 +15,10 @@ class Student extends Model
     public const MAX_INDIVIDUAL_PROGRAMS = 5;
 
     public const ZONES = [
-        'A Zone' => 'A Zone (റാബിഅ, തഖസ്സുസ് — Class 4: NF4, UH4, S4, ID4, UT4, L4, TQS)',
-        'B Zone' => 'B Zone (സാലിസ് — Class 3: NF3, ID3, UH3, UT3, S3, L3)',
-        'C Zone' => 'C Zone (ഊല, സാനി — Class 1 & 2: U1, U2, L2, S1, S2)',
-        'Mix Zone' => 'Mix Zone (ജനറൽ — എല്ലാ ക്ലാസുകൾക്കും Open Category)',
+        'A Zone' => 'A Zone (Class 4: NF4, UH4, S4, ID4, UT4, L4, TQS)',
+        'B Zone' => 'B Zone (Class 3: NF3, ID3, UH3, UT3, S3, L3)',
+        'C Zone' => 'C Zone (Class 1 & 2: U1, U2, L2, S1, S2)',
+        'Mix Zone' => 'Mix Zone (Open Category)',
     ];
 
     protected $fillable = [
