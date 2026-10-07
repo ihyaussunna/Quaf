@@ -151,10 +151,10 @@
     <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-[#f3bd2e]/20 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-2 lg:grid-cols-4 divide-y divide-white/20 lg:divide-y-0 lg:divide-x divide-white/25">
+        <div class="grid grid-cols-2 lg:grid-cols-4 items-center">
             
             <!-- Metric 1: Students -->
-            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
+            <div class="relative py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Students
                 </span>
@@ -165,10 +165,12 @@
                 <span class="text-[11px] font-mono text-white/70 block mt-2">
                     Verified Competitors
                 </span>
+                <!-- Vertical Divider (between Students and Groups) -->
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 h-14 sm:h-16 w-px bg-white/30 pointer-events-none"></div>
             </div>
 
             <!-- Metric 2: Groups -->
-            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
+            <div class="relative py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Groups
                 </span>
@@ -179,10 +181,12 @@
                 <span class="text-[11px] font-mono text-white/70 block mt-2">
                     Academic Houses
                 </span>
+                <!-- Vertical Divider (between Groups and Zones on desktop) -->
+                <div class="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-14 sm:h-16 w-px bg-white/30 pointer-events-none"></div>
             </div>
 
             <!-- Metric 3: Zones -->
-            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
+            <div class="relative py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Zones
                 </span>
@@ -193,10 +197,12 @@
                 <span class="text-[11px] font-mono text-white/70 block mt-2">
                     Academic Divisions
                 </span>
+                <!-- Vertical Divider (between Zones and Programs) -->
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 h-14 sm:h-16 w-px bg-white/30 pointer-events-none"></div>
             </div>
 
-            <!-- Metric 4: Programs -->
-            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
+            <!-- Metric 4: Programs (Last item - no right divider) -->
+            <div class="relative py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Programs
                 </span>
