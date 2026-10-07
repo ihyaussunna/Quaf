@@ -124,7 +124,7 @@
     @stack('styles')
 </head>
 <body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
-      x-data="{ scrolled: false, mobileOpen: false }"
+      x-data="{ scrolled: false, mobileOpen: false, showStudentModal: false }"
       @scroll.window="scrolled = (window.pageYOffset > 20)">
 
     <!-- Top Announcement Bar / Live Alert -->
@@ -194,79 +194,74 @@
                             <span class="truncate max-w-[120px]">{{ $user->name }}</span>
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white hover:brightness-110 shadow-sm transition-all">
-                            Portal Login
-                        </a>
+                        <button @click="showStudentModal = true" type="button" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white hover:brightness-110 shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span>Student Portal</span>
+                        </button>
                     @endauth
                 </div>
 
-                <!-- Mobile Menu Button (Comfortable 44px+ touch target) -->
+                <!-- Mobile Menu Button: Profile / Student Portal Icon -->
                 <div class="flex lg:hidden items-center gap-2">
-                    <button @click="mobileOpen = !mobileOpen" type="button" class="w-11 h-11 flex items-center justify-center text-slate-700 hover:text-slate-900 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors" aria-label="Toggle Navigation">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                            <path x-show="mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <button @click="showStudentModal = true" type="button" class="w-11 h-11 flex items-center justify-center text-slate-700 hover:text-[#be1e2d] rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer" aria-label="Student Portal">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile Drawer Navigation -->
-        <div x-show="mobileOpen" @click="mobileOpen = false" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden" style="display: none;" x-transition.opacity></div>
-
+        <!-- Apple Glassy Fullscreen Navigation Overlay -->
         <div x-show="mobileOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="-translate-y-4 opacity-0"
-             x-transition:enter-end="translate-y-0 opacity-100"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="translate-y-0 opacity-100"
-             x-transition:leave-end="-translate-y-4 opacity-0"
-             class="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-1 shadow-lg relative z-50"
-             style="display: none;">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
-                <span class="font-mono text-xs text-slate-500 uppercase font-bold tracking-wider">Festival Navigation</span>
-                <button @click="mobileOpen = false" class="text-xs font-semibold text-slate-500 hover:text-slate-800">Close ✕</button>
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 flex flex-col justify-between p-6 sm:p-10 text-white lg:hidden overflow-y-auto"
+             style="display: none;"
+             @click.self="mobileOpen = false">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/quaf-title-logo.png') }}" alt="QUAF" class="h-8 w-auto object-contain brightness-0 invert">
+                    <span class="font-mono text-xs uppercase tracking-widest text-[#f3bd2e] font-bold">Navigation</span>
+                </div>
+                <button type="button" @click="mobileOpen = false" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white cursor-pointer transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <a href="{{ route('home.view') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Home Page</span>
+            <nav class="space-y-4 my-auto py-6">
+            <a href="{{ route('home.view') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#f3bd2e]' : '' }}">
+                Home Page
             </a>
-            <a href="{{ route('results.index') }}" class="flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('results.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Live Results</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-red-100 text-red-700 font-bold uppercase">Live</span>
+            <a href="{{ route('results.index') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('results.*') ? 'text-[#f3bd2e]' : '' }}">
+                Festival Results
             </a>
-            <a href="{{ route('schedule.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('schedule.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Festival Schedule</span>
+            <a href="{{ route('schedule.index') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('schedule.*') ? 'text-[#f3bd2e]' : '' }}">
+                Festival Schedule
             </a>
-            <a href="{{ route('gallery.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('gallery.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Photo Gallery</span>
+            <a href="{{ route('gallery.index') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('gallery.*') ? 'text-[#f3bd2e]' : '' }}">
+                Photo Gallery
             </a>
-            <a href="{{ route('news.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('news.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Festival News & Dispatches</span>
+            <a href="{{ route('news.index') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('news.*') ? 'text-[#f3bd2e]' : '' }}">
+                Festival News & Dispatches
             </a>
-            <a href="{{ route('media.index') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Media & Videos</span>
+            <a href="{{ route('media.index') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'text-[#f3bd2e]' : '' }}">
+                Media & Videos
             </a>
-            <a href="{{ route('brochure.index') }}" class="flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-semibold {{ request()->routeIs('brochure.*') ? 'bg-red-50 text-[#be1e2d]' : 'text-slate-700 hover:bg-slate-50' }}">
-                <span>Official Brochure</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 text-amber-800 font-bold">14 Pages</span>
+            <a href="{{ route('brochure.index') }}" @click="mobileOpen = false" class="block font-sora text-2xl font-black text-white hover:text-[#f3bd2e] transition-colors py-2 {{ request()->routeIs('brochure.*') ? 'text-[#f3bd2e]' : '' }}">
+                Official Brochure
             </a>
+            </nav>
 
-            <div class="pt-3 border-t border-slate-100 mt-2">
-                @auth
-                    @php
-                        $user = Auth::user();
-                        $targetRoute = $user->isAdmin() ? route('admin.dashboard') : ($user->isJudge() ? route('judge.dashboard') : ($user->role === 'green_room_coordinator' ? route('greenroom.index') : ($user->isLeader() ? route('leader.dashboard') : route('student.dashboard'))));
-                    @endphp
-                    <a href="{{ $targetRoute }}" class="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>Dashboard: {{ $user->name }}</span>
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white flex items-center justify-center">
-                        Portal Login
-                    </a>
-                @endauth
+            <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-slate-400">
+                <button type="button" @click="mobileOpen = false; showStudentModal = true" class="flex items-center gap-2 text-white hover:text-[#f3bd2e] font-bold cursor-pointer">
+                    <svg class="w-4 h-4 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span>Student Portal (Chest Number)</span>
+                </button>
+                <span>QUAF 9.0</span>
             </div>
         </div>
     </header>
@@ -366,10 +361,10 @@
     </footer>
 
     <!-- Mobile Fixed Bottom Navigation Bar (Apple / App Native Style) -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 py-1.5 transition-transform duration-300">
-        <div class="grid grid-cols-4 items-center justify-around text-center max-w-lg mx-auto">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 py-1.5 transition-all">
+        <div class="grid grid-cols-5 items-center justify-around text-center max-w-lg mx-auto">
             
-            <!-- Home -->
+            <!-- 1. Home -->
             <a href="{{ route('home.view') }}" 
                class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,7 +373,7 @@
                 <span class="text-[10px] tracking-tight font-sans">Home</span>
             </a>
 
-            <!-- Results -->
+            <!-- 2. Results -->
             <a href="{{ route('results.index') }}" 
                class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors relative {{ request()->routeIs('results.*') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,7 +382,20 @@
                 <span class="text-[10px] tracking-tight font-sans">Results</span>
             </a>
 
-            <!-- Schedule -->
+            <!-- 3. Center Navigation Menu (Elevated Apple Glassy 3-Lines Hamburger) -->
+            <button @click="mobileOpen = !mobileOpen" 
+                    type="button"
+                    class="flex flex-col items-center justify-center -mt-4 group cursor-pointer"
+                    aria-label="Navigation Menu">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#be1e2d] via-red-600 to-[#f3bd2e] text-white flex items-center justify-center shadow-lg shadow-red-600/30 ring-4 ring-white transition-all transform active:scale-95 group-hover:scale-105">
+                    <svg class="w-6 h-6 transition-transform duration-300" :class="mobileOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </div>
+                <span class="text-[10px] font-bold tracking-tight text-slate-700 mt-1">Menu</span>
+            </button>
+
+            <!-- 4. Schedule -->
             <a href="{{ route('schedule.index') }}" 
                class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors {{ request()->routeIs('schedule.*') ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800' }}">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,19 +404,96 @@
                 <span class="text-[10px] tracking-tight font-sans">Schedule</span>
             </a>
 
-            <!-- Menu Drawer Button -->
-            <button @click="mobileOpen = !mobileOpen" 
+            <!-- 5. Student Portal Profile -->
+            <button @click="showStudentModal = true" 
                     type="button"
-                    class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors"
-                    :class="mobileOpen ? 'text-[#be1e2d] font-bold' : 'text-slate-500 hover:text-slate-800'">
+                    class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors text-slate-500 hover:text-[#be1e2d] cursor-pointer">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
-                <span class="text-[10px] tracking-tight font-sans">Menu</span>
+                <span class="text-[10px] tracking-tight font-sans">Portal</span>
             </button>
 
         </div>
     </nav>
+
+    <!-- Student Portal Chest Number Lookup Modal (Apple Glassy Dialog) -->
+    <div x-show="showStudentModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md"
+         style="display: none;"
+         @keydown.escape.window="showStudentModal = false">
+        
+        <!-- Backdrop click to close -->
+        <div class="fixed inset-0" @click="showStudentModal = false"></div>
+
+        <!-- Glassy Modal Box -->
+        <div x-show="showStudentModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+             class="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 z-10">
+            
+            <button @click="showStudentModal = false" 
+                    type="button" 
+                    class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#be1e2d] to-red-500 flex items-center justify-center text-white shadow-md shadow-red-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-sora text-xl font-bold text-slate-900">Student Portal</h3>
+                    <p class="text-xs text-slate-500">Access your registered programs, schedule and pass</p>
+                </div>
+            </div>
+
+            <form action="{{ route('student.login.submit') }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="student_identifier_modal" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                        Chest Number / Student ID
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="identifier" 
+                               id="student_identifier_modal" 
+                               required 
+                               placeholder="e.g. 101, A204 or STU-102" 
+                               class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-mono text-base placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#be1e2d] focus:border-transparent transition">
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">
+                        Enter your assigned festival chest number or registered student ID to view your profile directly.
+                    </p>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" 
+                            class="w-full py-3.5 px-6 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-sm tracking-wide shadow-lg shadow-red-600/25 transition duration-150 flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Open My Portal</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Looking for staff login?</span>
+                <a href="{{ route('login') }}" class="font-bold text-[#be1e2d] hover:underline">Official Login &rarr;</a>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

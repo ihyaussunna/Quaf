@@ -109,6 +109,7 @@ class HomeController extends Controller
 
         $featuredVideo = VideoItem::where('is_live', true)
             ->first() ?? VideoItem::latest()->first();
+        $highlightVideos = VideoItem::latest()->take(4)->get();
 
         $categories = ProgramCategory::withCount('programs')->get();
 
@@ -143,6 +144,7 @@ class HomeController extends Controller
             'latestNews',
             'galleryPreview',
             'featuredVideo',
+            'highlightVideos',
             'categories',
             'zones',
             'stats'
