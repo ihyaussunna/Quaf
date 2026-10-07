@@ -4,6 +4,7 @@ namespace App\Http\Controllers\GreenRoom;
 
 use App\Http\Controllers\Controller;
 use App\Models\GreenRoomCall;
+use App\Models\OnlineSubmissionForm;
 use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Models\Schedule;
@@ -22,6 +23,7 @@ class GreenRoomController extends Controller
     public function index(Request $request): View
     {
         Program::ensureSchema();
+        OnlineSubmissionForm::ensureSchema();
 
         $tz = config('app.timezone', 'Asia/Kolkata') ?: 'Asia/Kolkata';
         $now = Carbon::now($tz);
@@ -99,12 +101,24 @@ class GreenRoomController extends Controller
             $activeProgram->load('scoringCriteria');
         }
 
-        // Eager load online submission form if configured
-        if ($activeProgram && ! $activeProgram->relationLoaded('onlineSubmissionForm')) {
-            $activeProgram->load('onlineSubmissionForm');
+        // Eager load online submission form safely if table exists
+        $onlineForm = null;
+        $onlineSubmissionsCount = 0;
+        try {
+            OnlineSubmissionForm::ensureSchema();
+            if (Schema::hasTable('online_submission_forms') && $activeProgram) {
+                if (! $activeProgram->relationLoaded('onlineSubmissionForm')) {
+                    $activeProgram->load('onlineSubmissionForm');
+                }
+                $onlineForm = $activeProgram->onlineSubmissionForm;
+                $onlineSubmissionsCount = ($onlineForm && Schema::hasTable('online_submissions'))
+                    ? $onlineForm->submissions()->count()
+                    : 0;
+            }
+        } catch (\Throwable) {
+            $onlineForm = null;
+            $onlineSubmissionsCount = 0;
         }
-        $onlineForm = $activeProgram?->onlineSubmissionForm;
-        $onlineSubmissionsCount = $onlineForm ? $onlineForm->submissions()->count() : 0;
 
         $windowState = $activeProgram ? $activeProgram->getCallListWindowState() : null;
         $isAdmin = in_array(auth()->user()?->role, ['admin', 'super_admin']);

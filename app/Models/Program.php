@@ -161,6 +161,7 @@ class Program extends Model
                     $table->boolean('is_registration_open')->default(true)->after('is_stage');
                 });
             }
+            OnlineSubmissionForm::ensureSchema();
             $checked = true;
         } catch (\Throwable) {
             try {
