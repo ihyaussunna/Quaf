@@ -7,6 +7,7 @@ use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
+use App\Models\ScoreSheet;
 use App\Models\Stage;
 use App\Models\Student;
 use App\Models\User;
@@ -340,5 +341,161 @@ class AdminViewsTest extends TestCase
         $resUnreg->assertOk();
         $resUnreg->assertDontSee('Active Competitor Student');
         $resUnreg->assertSee('Inactive Unregistered Student');
+    }
+
+    public function test_view_marks_page_displays_programs_alphabetically_with_podiums_without_dropdown_selection(): void
+    {
+        $judge = Judge::create([
+            'name' => 'Expert Evaluator',
+            'phone' => '9898989898',
+            'specialization' => 'Arts',
+        ]);
+
+        $cat = ProgramCategory::first();
+        $group = Group::first();
+
+        // Create programs with alphabetical names: Beta Contest, Alpha Contest, Gamma Contest
+        $progAlpha = Program::create([
+            'name' => 'Alpha Elocution',
+            'code' => 'ALP01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'upcoming',
+            'is_stage' => 1,
+        ]);
+
+        $progBeta = Program::create([
+            'name' => 'Beta Debate',
+            'code' => 'BET01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'upcoming',
+            'is_stage' => 1,
+        ]);
+
+        $student1 = Student::create([
+            'name' => 'Winner One',
+            'student_id' => 'STU-WIN-01',
+            'group_id' => $group->id,
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry1 = ProgramEntry::create([
+            'program_id' => $progAlpha->id,
+            'student_id' => $student1->id,
+            'group_id' => $group->id,
+            'chest_number' => '101',
+            'code_letter' => 'A',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $progAlpha->id,
+            'entry_id' => $entry1->id,
+            'total_score' => 95.0,
+            'is_submitted' => true,
+        ]);
+
+        // Access without selecting any program in dropdown
+        $response = $this->actingAs($this->admin)->get(route('admin.mark-entry.view-marks'));
+        $response->assertOk();
+        $response->assertSee('View Program Marks');
+        $response->assertSee('A to Z Directory');
+        $response->assertSee('Alpha Elocution');
+        $response->assertSee('Beta Debate');
+        $response->assertSee('1st Place (Gold)');
+        $response->assertSee('Winner One');
+        $response->assertSee('95.0 pts');
+        $response->assertSee('Evaluation Pending');
+
+        // Check search filter works
+        $searchRes = $this->actingAs($this->admin)->get(route('admin.mark-entry.view-marks', ['search' => 'Alpha']));
+        $searchRes->assertOk();
+        $this->assertTrue($searchRes->viewData('programsList')->contains('name', 'Alpha Elocution'));
+        $this->assertFalse($searchRes->viewData('programsList')->contains('name', 'Beta Debate'));
+    }
+
+    public function test_view_marks_page_displays_selected_program_with_code_letter_sorted_entries_and_ranks(): void
+    {
+        $judge = Judge::first() ?? Judge::create([
+            'name' => 'Judge Master',
+            'phone' => '9999888877',
+        ]);
+        $cat = ProgramCategory::first();
+        $group = Group::first();
+
+        $prog = Program::create([
+            'name' => 'Calligraphy Master',
+            'code' => 'CAL01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'upcoming',
+            'is_stage' => 0,
+        ]);
+
+        $stuB = Student::create([
+            'name' => 'Candidate B',
+            'student_id' => 'STU-B',
+            'group_id' => $group->id,
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+        $entryB = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $stuB->id,
+            'group_id' => $group->id,
+            'chest_number' => '102',
+            'code_letter' => 'B',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        $stuA = Student::create([
+            'name' => 'Candidate A',
+            'student_id' => 'STU-A',
+            'group_id' => $group->id,
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+        $entryA = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $stuA->id,
+            'group_id' => $group->id,
+            'chest_number' => '101',
+            'code_letter' => 'A',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $prog->id,
+            'entry_id' => $entryA->id,
+            'total_score' => 92.0,
+            'is_submitted' => true,
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $prog->id,
+            'entry_id' => $entryB->id,
+            'total_score' => 84.0,
+            'is_submitted' => true,
+        ]);
+
+        // Select program
+        $response = $this->actingAs($this->admin)->get(route('admin.mark-entry.view-marks', ['program' => $prog->id]));
+        $response->assertOk();
+        $response->assertSee('Calligraphy Master');
+        $response->assertSee('Participants by Code Letter (A to Z)', false);
+        $response->assertSee('Candidate A');
+        $response->assertSee('Candidate B');
+        $response->assertSee('1st Place (Gold)');
+        $response->assertSee('2nd Place (Silver)');
+        $response->assertSee('92.0');
+        $response->assertSee('84.0');
     }
 }

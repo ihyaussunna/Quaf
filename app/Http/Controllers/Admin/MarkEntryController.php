@@ -190,30 +190,175 @@ class MarkEntryController extends Controller
 
     public function viewMarks(Request $request): View
     {
+        Program::ensureSchema();
+
         $zones = Program::ZONES;
         $selectedZone = $request->query('zone', $request->query('category'));
         $selectedProgramId = $request->query('program');
+        $search = $request->query('search');
 
-        $programsQuery = Program::query();
+        $programsQuery = Program::query()
+            ->with([
+                'category',
+                'zone',
+                'stage',
+                'result.firstEntry.student.group',
+                'result.firstEntry.group',
+                'result.firstEntry.scoreSheets',
+                'result.secondEntry.student.group',
+                'result.secondEntry.group',
+                'result.secondEntry.scoreSheets',
+                'result.thirdEntry.student.group',
+                'result.thirdEntry.group',
+                'result.thirdEntry.scoreSheets',
+            ])
+            ->withCount('entries');
+
         if ($selectedZone) {
             $programsQuery->where('eligibility', $selectedZone);
         }
-        $programs = $programsQuery->orderBy('name')->get();
+
+        if ($search) {
+            $programsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('malayalam_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Alphabetical A to Z ordering by name
+        $allPrograms = $programsQuery->orderBy('name', 'asc')->get();
+        $programs = $allPrograms;
+
+        // Fetch scores for programs that don't have a published result yet
+        $programsWithoutResultIds = $allPrograms->filter(fn ($p) => ! $p->result)->pluck('id');
+        $evaluatedEntriesByProg = collect();
+
+        if ($programsWithoutResultIds->isNotEmpty()) {
+            $evaluatedEntries = ProgramEntry::whereIn('program_id', $programsWithoutResultIds)
+                ->where('status', 'verified')
+                ->where('attendance_status', 'present')
+                ->whereHas('scoreSheets', fn ($sq) => $sq->where('is_submitted', true))
+                ->with(['student.group', 'group', 'scoreSheets'])
+                ->get()
+                ->map(function ($entry) {
+                    $submitted = $entry->scoreSheets->where('is_submitted', true);
+                    $entry->computed_avg_score = $submitted->isNotEmpty() ? (float) $submitted->avg('total_score') : 0.0;
+                    $entry->total_score = $entry->computed_avg_score;
+                    $grade = PointCalculationService::getGradeFromScore($entry->computed_avg_score);
+                    $entry->computed_grade = $grade['grade'] ?? '-';
+
+                    return $entry;
+                })
+                ->filter(fn ($entry) => $entry->computed_avg_score > 0);
+
+            $evaluatedEntriesByProg = $evaluatedEntries->groupBy('program_id');
+        }
+
+        // Map podium winners (1st, 2nd, 3rd) for each program
+        $programsList = $allPrograms->map(function ($prog) use ($evaluatedEntriesByProg) {
+            $first = null;
+            $second = null;
+            $third = null;
+
+            if ($prog->result) {
+                $first = $prog->result->firstEntry;
+                $second = $prog->result->secondEntry;
+                $third = $prog->result->thirdEntry;
+
+                if ($first) {
+                    $first->computed_avg_score = (float) ($first->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0);
+                    $first->total_score = $first->computed_avg_score;
+                    $grade = PointCalculationService::getGradeFromScore($first->computed_avg_score);
+                    $first->computed_grade = $grade['grade'] ?? '-';
+                }
+                if ($second) {
+                    $second->computed_avg_score = (float) ($second->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0);
+                    $second->total_score = $second->computed_avg_score;
+                    $grade = PointCalculationService::getGradeFromScore($second->computed_avg_score);
+                    $second->computed_grade = $grade['grade'] ?? '-';
+                }
+                if ($third) {
+                    $third->computed_avg_score = (float) ($third->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0);
+                    $third->total_score = $third->computed_avg_score;
+                    $grade = PointCalculationService::getGradeFromScore($third->computed_avg_score);
+                    $third->computed_grade = $grade['grade'] ?? '-';
+                }
+            }
+
+            // Fallback to evaluated entries if result not set
+            if (! $first && ! $second && ! $third && $evaluatedEntriesByProg->has($prog->id)) {
+                $sorted = $evaluatedEntriesByProg[$prog->id]->sortByDesc('computed_avg_score')->values();
+                $first = $sorted->get(0);
+                $second = $sorted->get(1);
+                $third = $sorted->get(2);
+            }
+
+            $prog->podium = [
+                'first' => $first,
+                'second' => $second,
+                'third' => $third,
+            ];
+            $prog->has_marks = (bool) (($first && $first->total_score > 0) || ($second && $second->total_score > 0) || ($third && $third->total_score > 0));
+
+            return $prog;
+        });
 
         $selectedProgram = null;
         $entries = collect();
 
         if ($selectedProgramId) {
-            $selectedProgram = Program::with(['category'])->find($selectedProgramId);
+            $selectedProgram = Program::with(['category', 'stage', 'zone', 'result'])->find($selectedProgramId);
             if ($selectedProgram) {
                 $entries = ProgramEntry::where('program_id', $selectedProgram->id)
-                    ->with(['student.group', 'group', 'scores'])
+                    ->where('status', 'verified')
+                    ->with(['student.group', 'group', 'scoreSheets.judge'])
+                    ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
                     ->get()
-                    ->map(function ($entry) {
-                        $entry->total_score = $entry->scores->sum('total_score');
+                    ->map(function ($entry) use ($selectedProgram) {
+                        $submitted = $entry->scoreSheets->where('is_submitted', true);
+                        $avgScore = $submitted->isNotEmpty() ? (float) $submitted->avg('total_score') : 0.0;
+                        $entry->total_score = $avgScore;
+                        $grade = PointCalculationService::getGradeFromScore($avgScore);
+                        $entry->computed_grade = $grade['grade'] ?? '-';
+
+                        // Check podium rank from result or scores
+                        $entry->rank = null;
+                        if ($selectedProgram->result) {
+                            if ($selectedProgram->result->first_entry_id === $entry->id) {
+                                $entry->rank = 1;
+                            } elseif ($selectedProgram->result->second_entry_id === $entry->id) {
+                                $entry->rank = 2;
+                            } elseif ($selectedProgram->result->third_entry_id === $entry->id) {
+                                $entry->rank = 3;
+                            }
+                        }
 
                         return $entry;
                     });
+
+                // Fallback rank calculation if no published result
+                if (! $selectedProgram->result && $entries->where('total_score', '>', 0)->isNotEmpty()) {
+                    $ranked = $entries->where('total_score', '>', 0)->sortByDesc('total_score')->values();
+                    if ($first = $ranked->get(0)) {
+                        $match = $entries->firstWhere('id', $first->id);
+                        if ($match) {
+                            $match->rank = 1;
+                        }
+                    }
+                    if ($second = $ranked->get(1)) {
+                        $match = $entries->firstWhere('id', $second->id);
+                        if ($match) {
+                            $match->rank = 2;
+                        }
+                    }
+                    if ($third = $ranked->get(2)) {
+                        $match = $entries->firstWhere('id', $third->id);
+                        if ($match) {
+                            $match->rank = 3;
+                        }
+                    }
+                }
             }
         }
 
@@ -223,10 +368,12 @@ class MarkEntryController extends Controller
             'zones',
             'categories',
             'programs',
+            'programsList',
             'selectedZone',
             'selectedProgramId',
             'selectedProgram',
-            'entries'
+            'entries',
+            'search'
         ));
     }
 
