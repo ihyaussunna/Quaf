@@ -159,6 +159,10 @@ class OnlineSubmissionController extends Controller
             ]);
         }
 
+        if ($entry && $entry->attendance_status !== 'present') {
+            $entry->update(['attendance_status' => 'present']);
+        }
+
         AuditLogger::log('online_submission_received', $submission);
 
         return view('public.online-submission.success', compact('form', 'submission'));

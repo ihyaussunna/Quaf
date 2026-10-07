@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Judge;
 
 use App\Http\Controllers\Controller;
 use App\Models\Judge;
+use App\Models\OnlineSubmission;
+use App\Models\OnlineSubmissionForm;
 use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Models\ScoreSheet;
@@ -18,6 +20,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -149,12 +152,63 @@ class JudgeController extends Controller
             abort(403, 'Unauthorized. You are not assigned to evaluate this program.');
         }
 
+        Program::ensureSchema();
+        OnlineSubmissionForm::ensureSchema();
+
         $program->load([
             'category',
             'stage',
             'schedule',
             'scoringCriteria',
+            'onlineSubmissionForm',
         ]);
+
+        // Auto-link any online submissions and mark candidates who submitted as present
+        $onlineSubmissions = collect();
+        if (Schema::hasTable('online_submissions')) {
+            try {
+                $unlinked = OnlineSubmission::where('program_id', $program->id)
+                    ->whereNull('program_entry_id')
+                    ->get();
+
+                foreach ($unlinked as $unSub) {
+                    $matchedEntry = ProgramEntry::where('program_id', $program->id)
+                        ->whereRaw('UPPER(TRIM(code_letter)) = ?', [strtoupper(trim($unSub->code_letter))])
+                        ->first();
+
+                    if ($matchedEntry) {
+                        $unSub->update([
+                            'program_entry_id' => $matchedEntry->id,
+                            'chest_number' => $matchedEntry->chest_number,
+                            'student_name' => $matchedEntry->student?->name,
+                            'student_id' => $matchedEntry->student?->student_id,
+                            'group_id' => $matchedEntry->group_id,
+                        ]);
+                        if ($matchedEntry->attendance_status !== 'present') {
+                            $matchedEntry->update(['attendance_status' => 'present']);
+                        }
+                    }
+                }
+
+                // If candidate has submitted work, ensure their attendance is marked present
+                $submittedEntryIds = OnlineSubmission::where('program_id', $program->id)
+                    ->whereNotNull('program_entry_id')
+                    ->pluck('program_entry_id');
+
+                if ($submittedEntryIds->isNotEmpty()) {
+                    ProgramEntry::whereIn('id', $submittedEntryIds)
+                        ->where('status', 'verified')
+                        ->where('attendance_status', '!=', 'present')
+                        ->update(['attendance_status' => 'present']);
+                }
+
+                $onlineSubmissions = OnlineSubmission::where('program_id', $program->id)
+                    ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC')
+                    ->get();
+            } catch (\Throwable) {
+                $onlineSubmissions = collect();
+            }
+        }
 
         // STRICT ANONYMITY & ATTENDANCE FILTER:
         // Do NOT load student names, photos, or groups to preserve total anonymity.
@@ -166,13 +220,27 @@ class JudgeController extends Controller
             ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
             ->get();
 
+        // Index online submissions by program_entry_id and code_letter
+        $submissionsByEntryId = $onlineSubmissions->whereNotNull('program_entry_id')->keyBy('program_entry_id');
+        $submissionsByCodeLetter = $onlineSubmissions->keyBy(fn ($s) => strtoupper(trim($s->code_letter)));
+        $hasOnlineSubmissions = $onlineSubmissions->isNotEmpty();
+
         // Load judge's existing score sheets for these entries
         $scoreSheets = ScoreSheet::where('judge_id', $judge->id)
             ->where('program_id', $program->id)
             ->get()
             ->keyBy('entry_id');
 
-        return view('judge.evaluate', compact('judge', 'program', 'entries', 'scoreSheets'));
+        return view('judge.evaluate', compact(
+            'judge',
+            'program',
+            'entries',
+            'scoreSheets',
+            'onlineSubmissions',
+            'submissionsByEntryId',
+            'submissionsByCodeLetter',
+            'hasOnlineSubmissions'
+        ));
     }
 
     public function saveScore(Request $request, Program $program, ProgramEntry $entry): JsonResponse|RedirectResponse
@@ -298,5 +366,30 @@ class JudgeController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    public function submissionsPdf(Program $program): View
+    {
+        $judge = $this->getJudge();
+
+        if (! $judge->programs()->where('programs.id', $program->id)->exists() && ! in_array(Auth::user()?->role, ['admin', 'super_admin'])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        Program::ensureSchema();
+        OnlineSubmissionForm::ensureSchema();
+
+        $program->load(['category', 'stage', 'onlineSubmissionForm']);
+        $form = $program->onlineSubmissionForm;
+
+        $submissions = Schema::hasTable('online_submissions')
+            ? OnlineSubmission::where('program_id', $program->id)
+                ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC')
+                ->get()
+            : collect();
+
+        $isJudgeView = true;
+
+        return view('admin.online-forms.pdf', compact('form', 'program', 'submissions', 'isJudgeView', 'judge'));
     }
 }

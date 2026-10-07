@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Group;
+use App\Models\Judge;
+use App\Models\OnlineSubmission;
 use App\Models\OnlineSubmissionForm;
 use App\Models\Program;
 use App\Models\ProgramCategory;
@@ -206,5 +208,124 @@ class OnlineSubmissionFeatureTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('ONLINE SUBMISSION ACTIVE');
         $response->assertSee('Project QR');
+    }
+
+    public function test_admin_and_judge_can_view_submissions_pdf_dossier(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $program = Program::create([
+            'name' => 'Calligraphy Painting',
+            'code' => 'CP01',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'single',
+        ]);
+
+        $form = OnlineSubmissionForm::create([
+            'program_id' => $program->id,
+            'slug' => 'cp01-pdf-test',
+            'title' => 'Calligraphy Painting Submissions',
+            'allow_text' => true,
+            'allow_image' => true,
+            'is_open' => true,
+        ]);
+
+        $submission = OnlineSubmission::create([
+            'online_submission_form_id' => $form->id,
+            'program_id' => $program->id,
+            'code_letter' => 'A',
+            'text_content' => 'Calligraphy concept explanation by candidate.',
+            'status' => 'submitted',
+        ]);
+
+        // Admin PDF route
+        $adminPdfResponse = $this->actingAs($admin)->get(route('admin.online-forms.pdf', $form->id));
+        $adminPdfResponse->assertStatus(200);
+        $adminPdfResponse->assertSee('Calligraphy Painting');
+        $adminPdfResponse->assertSee('Code A');
+        $adminPdfResponse->assertSee('Calligraphy concept explanation by candidate.');
+
+        // Single submission PDF route
+        $singlePdfResponse = $this->actingAs($admin)->get(route('admin.online-forms.submissions.pdf', $submission->id));
+        $singlePdfResponse->assertStatus(200);
+        $singlePdfResponse->assertSee('Code A');
+
+        // Judge PDF route
+        $judgeUser = User::factory()->create(['role' => 'judge']);
+        $judge = Judge::create([
+            'name' => 'Dr. Kareem',
+            'user_id' => $judgeUser->id,
+            'access_code' => '9988',
+        ]);
+        $judge->programs()->attach($program->id);
+
+        $judgePdfResponse = $this->actingAs($judgeUser)->get(route('judge.evaluate.submissions-pdf', $program->id));
+        $judgePdfResponse->assertStatus(200);
+        $judgePdfResponse->assertSee('Calligraphy Painting');
+        $judgePdfResponse->assertSee('Code A');
+    }
+
+    public function test_judge_evaluation_screen_displays_candidate_submissions_and_answers(): void
+    {
+        $judgeUser = User::factory()->create(['role' => 'judge']);
+        $judge = Judge::create([
+            'name' => 'Prof. Usman',
+            'user_id' => $judgeUser->id,
+            'access_code' => '4455',
+        ]);
+
+        $program = Program::create([
+            'name' => 'English Creative Writing',
+            'code' => 'ECW01',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'single',
+        ]);
+        $judge->programs()->attach($program->id);
+
+        $student = Student::create([
+            'student_id' => 'STU-9901',
+            'name' => 'Fathima Zahra',
+            'chest_number' => '888',
+            'group_id' => $this->group->id,
+            'category_id' => $this->category->id,
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $student->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '888',
+            'code_letter' => 'K',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        $form = OnlineSubmissionForm::create([
+            'program_id' => $program->id,
+            'slug' => 'ecw01-eval-test',
+            'title' => 'English Creative Writing Form',
+            'allow_text' => true,
+            'is_open' => true,
+        ]);
+
+        OnlineSubmission::create([
+            'online_submission_form_id' => $form->id,
+            'program_id' => $program->id,
+            'program_entry_id' => $entry->id,
+            'code_letter' => 'K',
+            'chest_number' => '888',
+            'text_content' => 'Once upon a time in Cordoba, the libraries sparkled with wisdom.',
+            'status' => 'submitted',
+        ]);
+
+        $response = $this->actingAs($judgeUser)->get(route('judge.evaluate', $program->id));
+        $response->assertStatus(200);
+        $response->assertSee('Candidate Submission');
+        $response->assertSee('Code K');
+        $response->assertSee('Once upon a time in Cordoba, the libraries sparkled with wisdom.');
+        $response->assertSee('Print / Download Answers (PDF)');
     }
 }

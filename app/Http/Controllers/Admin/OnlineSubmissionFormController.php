@@ -199,4 +199,33 @@ class OnlineSubmissionFormController extends Controller
 
         return view('admin.online-forms.qr', compact('form', 'publicUrl', 'qrCodeSvg'));
     }
+
+    public function pdf(OnlineSubmissionForm $form): View
+    {
+        OnlineSubmissionForm::ensureSchema();
+
+        $form->load(['program.category', 'program.zone', 'program.stage']);
+        $program = $form->program;
+        $submissions = $form->submissions()
+            ->with(['group', 'programEntry.student'])
+            ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC')
+            ->get();
+
+        $isJudgeView = false;
+
+        return view('admin.online-forms.pdf', compact('form', 'program', 'submissions', 'isJudgeView'));
+    }
+
+    public function singleSubmissionPdf(OnlineSubmission $submission): View
+    {
+        OnlineSubmissionForm::ensureSchema();
+
+        $submission->load(['form.program.category', 'form.program.zone', 'group', 'programEntry.student']);
+        $form = $submission->form;
+        $program = $submission->program ?: $form?->program;
+        $submissions = collect([$submission]);
+        $isJudgeView = false;
+
+        return view('admin.online-forms.pdf', compact('form', 'program', 'submissions', 'isJudgeView'));
+    }
 }

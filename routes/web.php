@@ -407,7 +407,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
         Route::delete('/{form}', [AdminOnlineSubmissionFormController::class, 'destroy'])->name('destroy');
         Route::post('/{form}/toggle', [AdminOnlineSubmissionFormController::class, 'toggleStatus'])->name('toggle');
         Route::get('/{form}/submissions', [AdminOnlineSubmissionFormController::class, 'submissions'])->name('submissions');
+        Route::get('/{form}/pdf', [AdminOnlineSubmissionFormController::class, 'pdf'])->name('pdf');
         Route::get('/{form}/qr', [AdminOnlineSubmissionFormController::class, 'qr'])->name('qr');
+        Route::get('/submissions/{submission}/pdf', [AdminOnlineSubmissionFormController::class, 'singleSubmissionPdf'])->name('submissions.pdf');
         Route::delete('/submissions/{submission}', [AdminOnlineSubmissionFormController::class, 'destroySubmission'])->name('submissions.destroy');
     });
 
@@ -554,6 +556,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 Route::prefix('judge')->name('judge.')->middleware(['auth', 'role:judge'])->group(function () {
     Route::get('/', [JudgeController::class, 'dashboard'])->name('dashboard');
     Route::get('/evaluate/{program}', [JudgeController::class, 'showProgram'])->name('evaluate');
+    Route::get('/evaluate/{program}/submissions-pdf', [JudgeController::class, 'submissionsPdf'])->name('evaluate.submissions-pdf');
     Route::post('/evaluate/{program}/{entry}', [JudgeController::class, 'saveScore'])->name('evaluate.save');
 });
 

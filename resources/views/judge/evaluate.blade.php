@@ -2,7 +2,23 @@
 @section('content')
 <div class="space-y-6" x-data="{
     rulesModalOpen: false,
-    evaluationMode: localStorage.getItem('quaf_judge_mode_{{ $program->id }}') || '{{ $program->has_criteria && $program->scoringCriteria->isNotEmpty() ? 'criteria' : 'simple' }}'
+    textReaderOpen: false,
+    textReaderCode: '',
+    textReaderContent: '',
+    lightboxOpen: false,
+    lightboxSrc: '',
+    lightboxCode: '',
+    evaluationMode: localStorage.getItem('quaf_judge_mode_{{ $program->id }}') || '{{ $program->has_criteria && $program->scoringCriteria->isNotEmpty() ? 'criteria' : 'simple' }}',
+    openTextReader(code, text) {
+        this.textReaderCode = code;
+        this.textReaderContent = text;
+        this.textReaderOpen = true;
+    },
+    openLightbox(code, src) {
+        this.lightboxCode = code;
+        this.lightboxSrc = src;
+        this.lightboxOpen = true;
+    }
 }">
     <!-- Top Bar (Light Theme) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
@@ -22,7 +38,16 @@
                 </p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+            @if(!empty($hasOnlineSubmissions))
+                <a href="{{ route('judge.evaluate.submissions-pdf', $program) }}" 
+                   target="_blank" 
+                   class="px-3.5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white border border-[#be1e2d] text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Print / Download Answers (PDF)</span>
+                </a>
+            @endif
+
             <!-- Rules Button -->
             <button type="button" @click="rulesModalOpen = true"
                     class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#f3bd2e] border border-amber-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs">
@@ -267,6 +292,188 @@
                             </div>
                         </div>
                     </div>
+
+                    @php
+                        $entrySubmission = ($submissionsByEntryId ?? collect())->get($entry->id) 
+                            ?? ($submissionsByCodeLetter ?? collect())->get(strtoupper(trim($entry->code_letter ?? '')));
+                    @endphp
+
+                    @if($entrySubmission)
+                        @php
+                            $subFileType = strtolower($entrySubmission->file_type ?? pathinfo($entrySubmission->file_path ?? '', PATHINFO_EXTENSION));
+                            $isImageFile = in_array($subFileType, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+                            $subWordCount = $entrySubmission->text_content ? str_word_count(strip_tags($entrySubmission->text_content)) : 0;
+                        @endphp
+                        <div class="rounded-2xl border-2 border-indigo-200/90 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 p-4 sm:p-5 shadow-xs space-y-4"
+                             x-data="{ submissionExpanded: true }">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white font-mono font-bold text-sm shadow-2xs">
+                                        {{ $entry->code_letter ?? chr(65 + $index) }}
+                                    </span>
+                                    <div>
+                                        <h4 class="font-sora font-bold text-sm text-slate-900 flex items-center gap-2">
+                                            <span>Candidate Submission (ഉത്തരങ്ങൾ)</span>
+                                            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-semibold">
+                                                Submitted
+                                            </span>
+                                        </h4>
+                                        <p class="text-[11px] font-mono text-slate-500">
+                                            Received: {{ $entrySubmission->submitted_at?->format('d M, h:i A') ?? $entrySubmission->created_at->format('d M, h:i A') }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <a href="{{ route('admin.online-forms.submissions.pdf', $entrySubmission->id) }}" 
+                                       target="_blank"
+                                       class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-2xs"
+                                       title="Print this candidate's sheet">
+                                        <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>PDF</span>
+                                    </a>
+
+                                    @if($entrySubmission->file_path)
+                                        <a href="{{ $entrySubmission->file_url }}" target="_blank"
+                                           class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-2xs">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                            <span>Open File</span>
+                                        </a>
+                                    @endif
+
+                                    <button type="button" 
+                                            @click="submissionExpanded = !submissionExpanded"
+                                            class="px-3 py-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer">
+                                        <span x-text="submissionExpanded ? 'Minimize' : 'View Content'"></span>
+                                        <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': !submissionExpanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div x-show="submissionExpanded" class="space-y-4">
+                                <!-- 1. Text Submission Content -->
+                                @if($entrySubmission->text_content)
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-xs font-mono">
+                                            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                <span>Written Content / രചന</span>
+                                            </span>
+                                            <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                                                <span>{{ $subWordCount }} words</span>
+                                                <span>•</span>
+                                                <button type="button" 
+                                                        @click="openTextReader('Code {{ $entry->code_letter }}', {{ json_encode($entrySubmission->text_content) }})"
+                                                        class="text-indigo-600 hover:text-indigo-800 font-bold hover:underline cursor-pointer">
+                                                    Read Fullscreen
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-white border border-slate-200 rounded-xl p-4 max-h-72 overflow-y-auto text-sm leading-relaxed text-slate-800 whitespace-pre-wrap font-serif shadow-2xs">
+                                            {{ $entrySubmission->text_content }}
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- 2. Image / Artwork / Document Upload -->
+                                @if($entrySubmission->file_path && $isImageFile)
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-xs font-mono">
+                                            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span>Artwork / Drawing (ചിത്രം)</span>
+                                            </span>
+                                            <span class="text-[11px] text-slate-500 font-mono">
+                                                {{ $entrySubmission->file_name ?? 'Image' }} ({{ $entrySubmission->formatted_file_size }})
+                                            </span>
+                                        </div>
+
+                                        <div class="relative group rounded-2xl border border-slate-200 overflow-hidden bg-slate-900/5 flex items-center justify-center p-2">
+                                            <img src="{{ $entrySubmission->file_url }}" 
+                                                 alt="Submission Code {{ $entry->code_letter }}" 
+                                                 class="max-h-80 w-auto rounded-xl object-contain shadow-xs">
+                                            <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                                <button type="button" 
+                                                        @click="openLightbox('Code {{ $entry->code_letter }}', '{{ $entrySubmission->file_url }}')"
+                                                        class="px-4 py-2 rounded-xl bg-white text-slate-900 font-mono font-bold text-xs shadow-lg hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                                                    <span>Zoom / വലുതായി കാണുക</span>
+                                                </button>
+                                                <a href="{{ $entrySubmission->file_url }}" target="_blank" 
+                                                   class="px-4 py-2 rounded-xl bg-slate-900 text-white font-mono font-bold text-xs shadow-lg hover:bg-slate-800 flex items-center gap-2">
+                                                    <span>Download</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @elseif($entrySubmission->file_path)
+                                    <!-- PDF / Document file -->
+                                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-mono font-black text-xs">
+                                                PDF
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-sm text-slate-900">{{ $entrySubmission->file_name ?? 'Document' }}</div>
+                                                <div class="text-[11px] font-mono text-slate-500">{{ $entrySubmission->formatted_file_size }} • Attached Document</div>
+                                            </div>
+                                        </div>
+                                        <a href="{{ $entrySubmission->file_url }}" target="_blank"
+                                           class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-mono font-bold text-xs flex items-center gap-1.5 shadow-2xs transition">
+                                            <span>Open & Read PDF</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </a>
+                                    </div>
+                                @endif
+
+                                <!-- 3. Video Submission -->
+                                @if($entrySubmission->video_url)
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-xs font-mono">
+                                            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                <span>Video Submission (വീഡിയോ)</span>
+                                            </span>
+                                        </div>
+
+                                        @php
+                                            $isVideoFile = Str::contains($entrySubmission->video_url, ['.mp4', '.webm', '.ogg', '/storage/submissions']);
+                                        @endphp
+
+                                        @if($isVideoFile)
+                                            <div class="rounded-2xl overflow-hidden bg-black aspect-video max-h-96">
+                                                <video controls class="w-full h-full object-contain">
+                                                    <source src="{{ $entrySubmission->video_url }}">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            </div>
+                                        @else
+                                            <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div class="space-y-1">
+                                                    <div class="font-bold text-sm text-slate-900">External Video Performance Link</div>
+                                                    <div class="text-xs font-mono text-indigo-600 truncate max-w-md">{{ $entrySubmission->video_url }}</div>
+                                                </div>
+                                                <a href="{{ $entrySubmission->video_url }}" target="_blank"
+                                                   class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-mono font-bold text-xs inline-flex items-center gap-1.5 shadow-2xs transition self-start sm:self-auto">
+                                                    <span>Watch Video Submission</span>
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @elseif(!empty($hasOnlineSubmissions))
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-500 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span>ഈ കോഡ് ലെറ്ററിൽ ഓൺലൈൻ സബ്മിഷൻ ഇതുവരെ ലഭിച്ചിട്ടില്ല (No online submission received yet for Code {{ $entry->code_letter }}).</span>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Scoring Mode Hidden Input -->
                     <input type="hidden" name="scoring_mode" :value="evaluationMode">
 
@@ -494,6 +701,57 @@
                         class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-all">
                     Close
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Text Reader Modal -->
+    <div x-show="textReaderOpen" 
+         x-transition.opacity
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+         style="display: none;"
+         @keydown.escape.window="textReaderOpen = false">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden"
+             @click.away="textReaderOpen = false">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-mono font-bold text-xs flex items-center justify-center" x-text="textReaderCode"></span>
+                    <h3 class="font-sora font-bold text-sm text-slate-900">Written Submission Reader</h3>
+                </div>
+                <button type="button" @click="textReaderOpen = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 sm:p-8 overflow-y-auto font-serif text-base leading-relaxed text-slate-800 whitespace-pre-wrap selection:bg-indigo-100 max-h-[70vh]">
+                <div x-text="textReaderContent"></div>
+            </div>
+            <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button type="button" @click="textReaderOpen = false" class="px-5 py-2 rounded-xl bg-slate-900 text-white text-xs font-mono font-bold hover:bg-slate-800 transition">
+                    Close Reader
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div x-show="lightboxOpen" 
+         x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+         style="display: none;"
+         @keydown.escape.window="lightboxOpen = false">
+        <div class="relative max-w-5xl max-h-[92vh] flex flex-col items-center justify-center"
+             @click.away="lightboxOpen = false">
+            <div class="absolute -top-12 right-0 flex items-center gap-2">
+                <a :href="lightboxSrc" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-mono text-xs font-bold transition flex items-center gap-1.5">
+                    <span>Open Original</span>
+                </a>
+                <button type="button" @click="lightboxOpen = false" class="p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <img :src="lightboxSrc" alt="Enlarged Submission" class="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl border border-white/10">
+            <div class="mt-3 text-center text-xs font-mono text-white/70">
+                <span x-text="lightboxCode"></span> • Full High-Resolution View
             </div>
         </div>
     </div>
