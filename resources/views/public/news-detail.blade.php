@@ -13,12 +13,12 @@
             <span>{{ $article->published_at?->format('F d, Y — h:i A') ?? 'Official Dispatch' }}</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 leading-tight mb-6 font-sora">
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 leading-tight mb-6 font-anek">
             {{ $article->title }}
         </h1>
 
         @if($article->excerpt)
-            <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed border-l-4 border-[#be1e2d] pl-4 italic bg-slate-50 py-3 rounded-r-xl">
+            <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed border-l-4 border-[#be1e2d] pl-4 italic bg-slate-50 py-3 rounded-r-xl font-anek">
                 {{ $article->excerpt }}
             </p>
         @endif
@@ -31,7 +31,7 @@
     @endif
 
     <!-- Content Body -->
-    <div class="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed space-y-6 font-normal">
+    <div class="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed space-y-6 font-normal font-anek">
         {!! nl2br(e($article->content)) !!}
     </div>
 
@@ -62,7 +62,7 @@
                 @foreach($related as $rel)
                     <a href="{{ route('news.show', $rel->slug) }}" class="group block rounded-2xl bg-white border border-slate-200 p-5 hover:border-slate-300 transition-all shadow-2xs hover:shadow-md">
                         <span class="text-[10px] font-mono text-[#be1e2d] uppercase font-bold block mb-1">{{ $rel->category }}</span>
-                        <h4 class="font-bold text-slate-900 text-base group-hover:text-[#be1e2d] transition-colors leading-snug">
+                        <h4 class="font-bold text-slate-900 text-base group-hover:text-[#be1e2d] transition-colors leading-snug font-anek">
                             {{ $rel->title }}
                         </h4>
                     </a>

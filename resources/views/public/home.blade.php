@@ -5,7 +5,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative overflow-hidden bg-[#07070a] text-white pt-24 sm:pt-32 pb-8 sm:pb-10">
+<section class="relative overflow-hidden bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -19,17 +19,17 @@
              x-data="{ activeLogo: 0 }"
              x-init="setInterval(() => { activeLogo = 1 - activeLogo; }, 4200)">
             
-            <div class="relative w-full h-[150px] xs:h-[180px] sm:h-[220px] flex items-center justify-center">
+            <div class="relative w-full h-[112px] xs:h-[135px] sm:h-[165px] flex items-center justify-center">
                 <!-- 1. Adabic Inheritance Logo -->
                 <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
                      alt="Ādabīc Inheritance — QUAF" 
-                     class="max-w-[280px] xs:max-w-[340px] sm:max-w-md lg:max-w-lg max-h-[140px] xs:max-h-[170px] sm:max-h-[210px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
+                     class="max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
                      :class="activeLogo === 0 ? 'opacity-100 scale-100 blur-none relative z-10' : 'opacity-0 scale-95 blur-md absolute pointer-events-none z-0'">
 
                 <!-- 2. QUAF Festival Logo -->
                 <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
                      alt="QUAF — Markaz Cultural Festival" 
-                     class="max-w-[260px] xs:max-w-[320px] sm:max-w-md lg:max-w-lg max-h-[140px] xs:max-h-[170px] sm:max-h-[210px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
+                     class="max-w-[195px] xs:max-w-[240px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
                      :class="activeLogo === 1 ? 'opacity-100 scale-100 blur-none relative z-10' : 'opacity-0 scale-95 blur-md absolute pointer-events-none z-0'">
             </div>
 
@@ -110,32 +110,32 @@
     <div class="absolute top-0 right-1/4 w-96 h-96 bg-red-50/60 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/60 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <!-- Side Shape touching right screen edge and touching bottom / next section (Compact size) -->
+    <!-- Side Shape touching right screen edge and touching bottom / next section (Hidden on mobile) -->
     <img src="{{ asset('images/side-shape-theme.svg') }}?v=2" 
          alt="" 
          aria-hidden="true"
-         class="absolute right-0 bottom-0 max-h-[48%] sm:max-h-[58%] lg:max-h-[66%] max-w-[200px] sm:max-w-[280px] lg:max-w-[340px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-80 lg:opacity-100">
+         class="hidden md:block absolute right-0 bottom-0 max-h-[48%] sm:max-h-[58%] lg:max-h-[66%] max-w-[200px] sm:max-w-[280px] lg:max-w-[340px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-80 lg:opacity-100">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-3xl flex flex-col items-center lg:items-start text-center lg:text-left">
             <!-- Elegant Category Pill -->
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono uppercase tracking-widest font-semibold mb-5 sm:mb-6 animate-subheading">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono uppercase tracking-widest font-semibold mb-4 sm:mb-5 animate-subheading">
                 <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
                 <span>Festival Theme & Philosophy</span>
             </div>
 
             <!-- Main Heading Requested by User -->
-            <h2 class="font-sora text-2xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight uppercase leading-tight mb-6 sm:mb-8 text-center lg:text-left animate-heading">
+            <h2 class="font-sora text-2xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight uppercase leading-tight mb-4 sm:mb-6 text-center lg:text-left animate-heading">
                 KNOWLEDGE IS INHERITED, NOT MERELY TRANSMITTED.
             </h2>
 
             <!-- Exact Philosophical Text Body (Tightened line-height & paragraph spacing) -->
-            <div class="space-y-3.5 sm:space-y-4 text-slate-700 text-base sm:text-lg leading-normal sm:leading-relaxed text-center lg:text-left">
-                <p class="font-medium text-slate-900 text-lg sm:text-xl">
+            <div class="space-y-2.5 sm:space-y-3 text-slate-700 text-sm sm:text-base leading-snug sm:leading-normal text-center lg:text-left">
+                <p class="font-medium text-slate-900 text-base sm:text-lg">
                     What makes knowledge worthy of being inherited? And what ensures that, as it passes from one generation to another, it remains true to its source?
                 </p>
 
-                <div class="w-16 h-0.5 bg-gradient-to-r from-[#be1e2d] to-[#f3bd2e] mx-auto lg:mx-0 my-3 opacity-70"></div>
+                <div class="w-16 h-0.5 bg-gradient-to-r from-[#be1e2d] to-[#f3bd2e] mx-auto lg:mx-0 my-2.5 opacity-70"></div>
 
                 <p>
                     In the Islamic tradition, the answer begins with <span class="font-bold text-slate-950">Adab</span>.
@@ -636,10 +636,10 @@
                             <span class="text-xs font-mono text-slate-400 block mb-2 font-medium">
                                 {{ $article->published_at?->format('M d, Y') ?? 'Recent' }}
                             </span>
-                            <h3 class="text-lg font-sora font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors leading-snug mb-2">
+                            <h3 class="text-lg font-anek font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors leading-snug mb-2">
                                 {{ $article->title }}
                             </h3>
-                            <p class="text-xs sm:text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                            <p class="text-xs sm:text-sm font-anek text-slate-600 line-clamp-2 leading-relaxed">
                                 {{ $article->excerpt }}
                             </p>
                         </div>
