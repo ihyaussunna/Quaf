@@ -5,7 +5,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative min-h-[60vh] lg:min-h-[72vh] flex items-center justify-center overflow-hidden bg-[#07070a] text-white pt-12 sm:pt-20 pb-16 sm:pb-24 border-b border-white/10">
+<section class="relative overflow-hidden bg-[#07070a] text-white pt-8 sm:pt-14 pb-8 sm:pb-10">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -15,13 +15,13 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
         
         <!-- Hero Center: Official Theme Logo without background shape, with Apple-style blur-in animation -->
-        <div class="relative w-full max-w-2xl mb-10 flex flex-col items-center text-center">
+        <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center">
             <style>
                 @keyframes heroBlurIn {
                     0% {
                         opacity: 0;
-                        filter: blur(22px);
-                        transform: scale(0.94);
+                        filter: blur(20px);
+                        transform: scale(0.95);
                     }
                     100% {
                         opacity: 1;
@@ -30,20 +30,20 @@
                     }
                 }
                 .hero-logo-blur {
-                    animation: heroBlurIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+                    animation: heroBlurIn 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
                 }
             </style>
 
             <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
                  alt="Ādabīc Inheritance — QUAF" 
-                 class="w-full max-w-[340px] xs:max-w-[420px] sm:max-w-xl md:max-w-2xl h-auto object-contain hero-logo-blur drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]">
+                 class="w-full max-w-[280px] xs:max-w-[340px] sm:max-w-md lg:max-w-lg h-auto object-contain hero-logo-blur drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]">
 
             <!-- Festival Info Pills -->
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-white/10 text-white/90 border border-white/15 backdrop-blur-md">
+            <div class="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+                <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-white/10 text-white/90 border border-white/15 backdrop-blur-md">
                     Markazu Saquafathi Sunniyya
                 </span>
-                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-[#f3bd2e]/20 text-[#f3bd2e] border border-[#f3bd2e]/30 font-bold backdrop-blur-md">
+                <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-[#f3bd2e]/20 text-[#f3bd2e] border border-[#f3bd2e]/30 font-bold backdrop-blur-md">
                     31 OCT — 01 NOV 2026
                 </span>
             </div>
@@ -52,16 +52,16 @@
         <!-- Primary Action CTAs (Apple Glassy Buttons) -->
         <div class="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 max-w-lg">
             <a href="{{ route('results.index') }}" 
-               class="px-7 py-3.5 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#be1e2d] text-white hover:brightness-110 shadow-lg shadow-red-600/30 border border-red-500/30 transition-all transform hover:-translate-y-0.5 text-center">
+               class="px-7 py-3 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#be1e2d] text-white hover:brightness-110 shadow-lg shadow-red-600/30 border border-red-500/30 transition-all transform hover:-translate-y-0.5 text-center">
                 Festival Results
             </a>
             <a href="{{ route('schedule.index') }}" 
-               class="px-7 py-3.5 rounded-2xl font-semibold text-xs sm:text-sm tracking-wider bg-white/10 hover:bg-white/15 text-white border border-white/20 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center">
+               class="px-7 py-3 rounded-2xl font-semibold text-xs sm:text-sm tracking-wider bg-white/10 hover:bg-white/15 text-white border border-white/20 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center">
                 Festival Schedule
             </a>
             <button type="button" 
                     @click="showStudentModal = true" 
-                    class="px-6 py-3.5 rounded-2xl font-semibold text-xs sm:text-sm tracking-wider bg-white/5 hover:bg-white/10 text-[#f3bd2e] border border-[#f3bd2e]/30 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center cursor-pointer">
+                    class="px-6 py-3 rounded-2xl font-semibold text-xs sm:text-sm tracking-wider bg-white/5 hover:bg-white/10 text-[#f3bd2e] border border-[#f3bd2e]/30 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center cursor-pointer">
                 Student Portal
             </button>
         </div>
@@ -71,9 +71,9 @@
 
 <!-- =====================================================================
      JUNCTION: INFINITE ANIMATED GIF RIBBON (BLACK TO WHITE TRANSITION)
-     Loops continuously to the left with active GIF animation
+     Loops continuously to the left with active GIF animation, attached to shape
      ===================================================================== -->
-<div class="relative w-full overflow-hidden bg-[#07070a] border-y border-white/10 select-none py-2.5 sm:py-3.5 z-20 shadow-md">
+<div class="relative w-full overflow-hidden bg-[#07070a] border-t border-white/10 select-none py-2 sm:py-2.5 z-20">
     <style>
         @keyframes ribbonScrollLeft {
             0% {
@@ -94,15 +94,15 @@
     <div class="flex w-max animate-ribbon-loop pointer-events-none">
         <!-- Sequence 1 -->
         <div class="flex shrink-0 items-center">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
         </div>
         <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
         <div class="flex shrink-0 items-center">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-10 sm:h-12 md:h-14 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
         </div>
     </div>
 </div>
