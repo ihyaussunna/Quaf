@@ -151,10 +151,10 @@
     <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-[#f3bd2e]/20 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 divide-y divide-white/20 lg:divide-y-0 lg:divide-x divide-white/25">
             
             <!-- Metric 1: Students -->
-            <div class="rounded-3xl p-6 sm:p-8 bg-white/10 backdrop-blur-xl border border-white/20 text-center shadow-lg transition-transform hover:-translate-y-1">
+            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Students
                 </span>
@@ -168,7 +168,7 @@
             </div>
 
             <!-- Metric 2: Groups -->
-            <div class="rounded-3xl p-6 sm:p-8 bg-white/10 backdrop-blur-xl border border-white/20 text-center shadow-lg transition-transform hover:-translate-y-1">
+            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Groups
                 </span>
@@ -182,7 +182,7 @@
             </div>
 
             <!-- Metric 3: Zones -->
-            <div class="rounded-3xl p-6 sm:p-8 bg-white/10 backdrop-blur-xl border border-white/20 text-center shadow-lg transition-transform hover:-translate-y-1">
+            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Zones
                 </span>
@@ -196,7 +196,7 @@
             </div>
 
             <!-- Metric 4: Programs -->
-            <div class="rounded-3xl p-6 sm:p-8 bg-white/10 backdrop-blur-xl border border-white/20 text-center shadow-lg transition-transform hover:-translate-y-1">
+            <div class="py-6 sm:py-8 px-4 sm:px-6 text-center">
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Programs
                 </span>
@@ -379,7 +379,7 @@
 
                 <div class="mt-6 pt-4 border-t border-slate-100">
                     <a href="{{ route('results.index') }}" 
-                       class="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-[#be1e2d] to-red-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-red-600/20 hover:brightness-110 transition">
+                       class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#f3bd2e] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-600/25 hover:brightness-110 transition">
                         <span>All Results Archive</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>

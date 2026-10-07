@@ -32,7 +32,7 @@ class ScheduleController extends Controller
         $festivalDays = self::FESTIVAL_DAYS;
 
         // Fetch explicitly scheduled events if any exist
-        $scheduleQuery = Schedule::with(['program.category', 'program.zone', 'program.stage', 'stage']);
+        $scheduleQuery = Schedule::with(['program.category', 'program.zone', 'program.stage', 'program.result', 'stage']);
 
         if ($selectedDay) {
             $scheduleQuery->whereDate('start_time', $selectedDay);
@@ -53,7 +53,7 @@ class ScheduleController extends Controller
         $schedules = $scheduleQuery->orderBy('start_time')->get();
 
         // If specific Schedule records are empty, provide stage programs as festival schedule lineup
-        $stageProgramsQuery = Program::with(['category', 'stage'])
+        $stageProgramsQuery = Program::with(['category', 'stage', 'result'])
             ->where('is_stage', true);
 
         if ($selectedStage) {

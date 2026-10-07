@@ -468,7 +468,7 @@
                                 </div>
                             </div>
                             @if($sub->file_url)
-                                <img src="{{ \App\Services\QrCodeService::svg($sub->file_url, 100) }}" alt="Document QR" class="qr-stamp">
+                                <img src="{{ \App\Services\QrCodeService::url($sub->file_url, 100) }}" alt="Document QR" class="qr-stamp">
                             @endif
                         </div>
                     </div>
@@ -492,7 +492,7 @@
                                     {{ $sub->video_url }}
                                 </div>
                             </div>
-                            <img src="{{ \App\Services\QrCodeService::svg($sub->video_url, 100) }}" alt="Video QR" class="qr-stamp">
+                            <img src="{{ \App\Services\QrCodeService::url($sub->video_url, 100) }}" alt="Video QR" class="qr-stamp">
                         </div>
                     </div>
                 @endif

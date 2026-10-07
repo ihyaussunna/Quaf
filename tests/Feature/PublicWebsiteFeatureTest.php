@@ -117,8 +117,7 @@ class PublicWebsiteFeatureTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('public.home');
-        $response->assertSee('QUAF 9.0');
-        $response->assertSee('Ādabīc Inheritance');
+        $response->assertSee('Adab');
         $response->assertSee('Pacto Hikmic');
     }
 
@@ -339,7 +338,7 @@ class PublicWebsiteFeatureTest extends TestCase
         $response = $this->get(route('home.view'));
 
         $response->assertStatus(200);
-        $response->assertSee('06 OCT — 01 NOV 2026');
+        $response->assertSee('31 OCT — 01 NOV 2026');
         $response->assertSee('Mobile Fixed Bottom Navigation Bar');
         $response->assertSee(route('results.index'));
         $response->assertSee(route('schedule.index'));

@@ -30,7 +30,7 @@
                     <p><strong>Campus:</strong> Markazu Saquafathi Sunniyya</p>
                     <p><strong>Location:</strong> Karanthur, Kozhikode District, Kerala 673573, India</p>
                     <p><strong>Event Dates:</strong> 06 Oct — 01 Nov, 2026 (Offstage: Oct 06 | Main Stage: Oct 31 – Nov 01)</p>
-                    <p><strong>Organized by:</strong> Ihyaussunna Students Union (ISU)</p>
+                    <p><strong>Organized by:</strong> Ihyaussunna-Markaz Students' Union</p>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 space-y-3">

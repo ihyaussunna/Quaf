@@ -11,7 +11,7 @@
                 About QUAF 9.0
             </h1>
             <p class="text-base sm:text-lg text-slate-600 mt-3 font-normal leading-relaxed">
-                The premier collegiate arts and cultural confluence organized by the Ihyaussunna Students Union (ISU), Markazu Saquafathi Sunniyya.
+                The premier collegiate arts and cultural confluence organized by the Ihyaussunna-Markaz Students' Union, Markazu Saquafathi Sunniyya.
             </p>
         </div>
     </div>

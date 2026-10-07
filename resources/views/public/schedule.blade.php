@@ -141,16 +141,19 @@
 
                         <!-- Status Badge & Action -->
                         <div class="flex items-center justify-between md:flex-col md:items-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                            @if($item->status === 'live' || $item->status === 'in_progress')
+                            @php
+                                $status = $item->computed_status;
+                            @endphp
+                            @if($status === 'live' || $status === 'in_progress')
                                 <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 animate-pulse">
                                     <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
                                     <span>LIVE NOW</span>
                                 </span>
-                            @elseif($item->status === 'completed')
+                            @elseif($status === 'completed')
                                 <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                     COMPLETED
                                 </span>
-                            @elseif($item->status === 'cancelled')
+                            @elseif($status === 'cancelled')
                                 <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-red-100 text-red-800 border border-red-200">
                                     CANCELLED
                                 </span>
@@ -181,12 +184,15 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach($stagePrograms as $prog)
+                    @php
+                        $progStatus = ($prog->status === 'completed' || $prog->result) ? 'completed' : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
+                    @endphp
                     <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-xs font-mono mb-2">
                                 <span class="font-bold text-[#be1e2d]">{{ $prog->code }}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $prog->status === 'completed' ? 'bg-slate-100 text-slate-600' : ($prog->status === 'in_progress' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-blue-700') }}">
-                                    {{ $prog->status === 'in_progress' ? 'LIVE NOW' : ($prog->status === 'completed' ? 'COMPLETED' : 'UPCOMING') }}
+                                <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $progStatus === 'completed' ? 'bg-slate-100 text-slate-600' : ($progStatus === 'in_progress' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-blue-700') }}">
+                                    {{ $progStatus === 'in_progress' ? 'LIVE NOW' : ($progStatus === 'completed' ? 'COMPLETED' : 'UPCOMING') }}
                                 </span>
                             </div>
 

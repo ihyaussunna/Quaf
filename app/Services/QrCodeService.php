@@ -5,23 +5,40 @@ namespace App\Services;
 class QrCodeService
 {
     /**
-     * Generate an SVG QR code or URL for verification.
+     * Generate a QR Code URL (black on white standard high-contrast matrix).
      */
-    public static function svg(string $data, int $size = 200, string $color = '10b981', string $bgColor = '0a0b0e'): string
+    public static function url(string $data, int $size = 200, string $color = '000000', string $bgColor = 'ffffff'): string
     {
         $encoded = urlencode($data);
 
-        // High quality SVG QR code via standard fast vector generator URL with fallback
-        return "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&data={$encoded}&color=d4af37&bgcolor=0a0b0e&format=svg";
+        return "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&data={$encoded}&color={$color}&bgcolor={$bgColor}&margin=0";
     }
 
     /**
-     * Generate an HTML image element for a QR code.
+     * Generate an HTML/SVG image element for rendering a QR code in views and badges.
+     */
+    public static function svg(string $data, int $size = 200, string $color = '000000', string $bgColor = 'ffffff'): string
+    {
+        return self::render($data, $size, $color, $bgColor);
+    }
+
+    /**
+     * Render an image tag for a QR code.
+     */
+    public static function render(string $data, int $size = 200, string $color = '000000', string $bgColor = 'ffffff'): string
+    {
+        $url = self::url($data, $size, $color, $bgColor);
+
+        return "<img src=\"{$url}\" alt=\"QR Code\" width=\"{$size}\" height=\"{$size}\" class=\"w-full h-full object-contain\" loading=\"eager\" />";
+    }
+
+    /**
+     * Generate an HTML image element for a QR code with custom styling.
      */
     public static function image(string $data, int $size = 180, string $alt = 'QR Code'): string
     {
-        $url = self::svg($data, $size);
+        $url = self::url($data, $size);
 
-        return "<img src=\"{$url}\" alt=\"{$alt}\" width=\"{$size}\" height=\"{$size}\" class=\"rounded-lg border border-gold-500/20 shadow-xl bg-midnight-950 p-2\" loading=\"lazy\" />";
+        return "<img src=\"{$url}\" alt=\"{$alt}\" width=\"{$size}\" height=\"{$size}\" class=\"rounded-lg border border-slate-200 shadow-sm bg-white p-2\" loading=\"lazy\" />";
     }
 }
