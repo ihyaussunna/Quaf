@@ -50,7 +50,18 @@ class ScheduleController extends Controller
             });
         }
 
-        $schedules = $scheduleQuery->orderBy('start_time')->get();
+        $schedules = $scheduleQuery->get()->sortBy(function ($item) {
+            $status = $item->computed_status;
+            $priority = match ($status) {
+                'live', 'in_progress' => 0,
+                'upcoming' => 1,
+                'completed' => 2,
+                default => 3,
+            };
+            $timestamp = $item->start_time ? $item->start_time->timestamp : PHP_INT_MAX;
+
+            return sprintf('%d_%012d', $priority, $timestamp);
+        })->values();
 
         // If specific Schedule records are empty, provide stage programs as festival schedule lineup
         $stageProgramsQuery = Program::with(['category', 'stage', 'result'])
@@ -72,7 +83,16 @@ class ScheduleController extends Controller
             });
         }
 
-        $stagePrograms = $stageProgramsQuery->orderBy('stage_id')->orderBy('code')->get();
+        $stagePrograms = $stageProgramsQuery->get()->sortBy(function ($prog) {
+            $status = ($prog->status === 'completed' || $prog->result) ? 'completed' : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
+            $priority = match ($status) {
+                'in_progress' => 0,
+                'upcoming' => 1,
+                default => 2,
+            };
+
+            return sprintf('%d_%s', $priority, $prog->code);
+        })->values();
 
         return view('public.schedule', compact(
             'schedules',

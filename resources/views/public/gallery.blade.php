@@ -40,11 +40,8 @@
 
     <!-- Header -->
     <div class="mb-6 sm:mb-10">
-        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">MOMENTS OF SPLENDOR</span>
-        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1">Festival Photo Gallery</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-            Capturing the spirit, eloquence, and artistic triumph across all 4 stages of QUAF.
-        </p>
+        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">MOMENTS OF SPLENDOR</span>
+        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1 animate-heading">Festival Photo Gallery</h1>
     </div>
 
     <!-- Filter Tabs -->

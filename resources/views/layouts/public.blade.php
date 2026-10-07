@@ -120,12 +120,31 @@
         .animate-marquee:hover {
             animation-play-state: paused;
         }
+        /* Heading In-Animations */
+        @keyframes headingReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(16px);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0px);
+            }
+        }
+        .animate-heading {
+            animation: headingReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .animate-subheading {
+            animation: headingReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+        }
     </style>
     @stack('styles')
 </head>
 <body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
       x-data="{ scrolled: false, mobileOpen: false, showStudentModal: false }"
-      @scroll.window="scrolled = (window.pageYOffset > 20)">
+      @scroll.window="scrolled = (window.pageYOffset > 280)">
 
     <!-- Top Announcement Bar / Live Alert -->
     @php
@@ -143,40 +162,34 @@
         </div>
     @endif
 
-    <!-- Global Header (Apple-inspired Sticky Navigation with Black Glassmorphism) -->
-    <header class="sticky top-0 z-40 transition-all duration-300 bg-slate-950/95 backdrop-blur-md border-b border-white/10 text-white shadow-sm">
+    <!-- Global Header (Apple-inspired Sticky Navigation with Dynamic Glassmorphism) -->
+    <header class="sticky top-0 z-40 transition-all duration-300 text-white"
+            :class="(scrolled || {{ !request()->routeIs('home.view') && !request()->routeIs('home') ? 'true' : 'false' }}) 
+                ? 'bg-slate-950/95 backdrop-blur-md border-b border-white/10 shadow-sm' 
+                : 'bg-transparent border-b border-transparent'">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Brand Logo & Identity -->
-                <a href="{{ route('home.view') }}" class="flex items-center gap-3 group py-2 shrink-0">
-                    <img src="{{ asset('images/dashboard-logo.svg') }}" 
-                         alt="QUAF" 
-                         height="40"
-                         style="height: 40px; max-height: 40px; width: auto; object-fit: contain;"
-                         class="h-9 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]">
-                </a>
-
-                <!-- Desktop Center Navigation Links -->
-                <nav class="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-semibold uppercase tracking-wider">
-                    <a href="{{ route('home.view') }}" class="transition-colors hover:text-white {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Home</a>
-                    <a href="{{ route('results.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('results.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Results</a>
-                    <a href="{{ route('schedule.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('schedule.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Schedule</a>
-                    <a href="{{ route('gallery.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('gallery.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Gallery</a>
-                    <a href="{{ route('news.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('news.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">News</a>
-                    <a href="{{ route('media.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Media</a>
-                    <a href="{{ route('brochure.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('brochure.*') ? 'text-[#f3bd2e] font-bold border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300' }}">Brochure</a>
+                <!-- Desktop Navigation Links (Light font weight) -->
+                <nav class="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-light uppercase tracking-wider">
+                    <a href="{{ route('home.view') }}" class="transition-colors hover:text-white {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Home</a>
+                    <a href="{{ route('results.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('results.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Results</a>
+                    <a href="{{ route('schedule.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('schedule.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Schedule</a>
+                    <a href="{{ route('gallery.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('gallery.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Gallery</a>
+                    <a href="{{ route('news.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('news.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">News</a>
+                    <a href="{{ route('media.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Media</a>
+                    <a href="{{ route('brochure.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('brochure.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Brochure</a>
                 </nav>
 
                 <!-- Right Action CTAs: Student Portal Button -->
                 <div class="hidden sm:flex items-center gap-3">
-                    <button @click="showStudentModal = true" type="button" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white hover:brightness-110 shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                    <button @click="showStudentModal = true" type="button" class="px-4 py-2 rounded-xl text-xs font-medium uppercase tracking-wider bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white hover:brightness-110 shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         <span>Student Portal</span>
                     </button>
                 </div>
 
-                <!-- Mobile Menu Button: Profile / Student Portal Icon -->
-                <div class="flex lg:hidden items-center gap-2">
+                <!-- Mobile Menu Button: Student Portal Icon -->
+                <div class="flex lg:hidden items-center justify-end w-full">
                     <button @click="showStudentModal = true" type="button" class="w-11 h-11 flex items-center justify-center text-slate-200 hover:text-[#f3bd2e] rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 transition-colors cursor-pointer" aria-label="Student Portal">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>

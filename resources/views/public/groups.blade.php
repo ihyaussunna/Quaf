@@ -7,8 +7,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">FESTIVAL HOUSES & TEAMS</span>
-                <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1">Academic Groups</h1>
+                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL HOUSES & TEAMS</span>
+                <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1 animate-heading">Academic Groups</h1>
                 <p class="text-sm text-slate-600 mt-2 max-w-xl">
                     Official standings and point tallies of competing collegiate groups in QUAF.
                 </p>

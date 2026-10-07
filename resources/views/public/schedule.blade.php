@@ -7,20 +7,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">FESTIVAL LINEUP & TIMINGS</span>
-                <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1">Official Schedule</h1>
-                <p class="text-sm text-slate-600 mt-2 max-w-xl">
-                    Offstage programs start October 06 • Main Stage competitions October 31 – November 01, 2026 • Central Festival Arena & Offstage Venues (NF3, ID3, U2, S3).
-                </p>
+                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL LINEUP & TIMINGS</span>
+                <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1 animate-heading">Official Schedule</h1>
             </div>
             
-            <!-- Quick Actions & Stats -->
+            <!-- Quick Stats -->
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('schedule.offstage-pdf', ['date' => $selectedDay ?: '2026-10-07']) }}" target="_blank"
-                   class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    <span>Download Offstage PDF</span>
-                </a>
                 <span class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 font-mono font-bold text-xs text-slate-800">8 Stages / Venues</span>
                 <span class="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-[#be1e2d] font-mono font-bold text-xs">144 Events</span>
             </div>
@@ -108,7 +100,12 @@
         @if($schedules->isNotEmpty())
             <div class="space-y-4">
                 @foreach($schedules as $item)
-                    <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-2xs hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    @php
+                        $status = $item->computed_status;
+                        $isCompleted = ($status === 'completed');
+                        $isLive = ($status === 'live' || $status === 'in_progress');
+                    @endphp
+                    <div class="rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md') }}">
                         <div class="flex items-start gap-4">
                             <!-- Time Badge -->
                             <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-center font-mono shrink-0 w-24">
@@ -141,9 +138,6 @@
 
                         <!-- Status Badge & Action -->
                         <div class="flex items-center justify-between md:flex-col md:items-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                            @php
-                                $status = $item->computed_status;
-                            @endphp
                             @if($status === 'live' || $status === 'in_progress')
                                 <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 animate-pulse">
                                     <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
@@ -186,8 +180,10 @@
                 @foreach($stagePrograms as $prog)
                     @php
                         $progStatus = ($prog->status === 'completed' || $prog->result) ? 'completed' : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
+                        $isCompleted = ($progStatus === 'completed');
+                        $isLive = ($progStatus === 'in_progress');
                     @endphp
-                    <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between">
+                    <div class="rounded-2xl border p-5 transition-all flex flex-col justify-between {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md') }}">
                         <div>
                             <div class="flex items-center justify-between text-xs font-mono mb-2">
                                 <span class="font-bold text-[#be1e2d]">{{ $prog->code }}</span>

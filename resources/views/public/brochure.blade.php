@@ -258,25 +258,64 @@
                     try {
                         const AudioContext = window.AudioContext || window.webkitAudioContext;
                         if (!AudioContext) return;
-                        const audioCtx = new AudioContext();
-                        const duration = 0.08;
-                        const bufferSize = Math.floor(audioCtx.sampleRate * duration);
-                        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                        const output = buffer.getChannelData(0);
-                        for (let i = 0; i < bufferSize; i++) {
-                            output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+                        if (!this.audioCtx) {
+                            this.audioCtx = new AudioContext();
                         }
-                        const whiteNoise = audioCtx.createBufferSource();
-                        whiteNoise.buffer = buffer;
-                        const filter = audioCtx.createBiquadFilter();
-                        filter.type = 'lowpass';
-                        filter.frequency.value = 1400;
-                        const gain = audioCtx.createGain();
-                        gain.gain.value = 0.2;
-                        whiteNoise.connect(filter);
-                        filter.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        whiteNoise.start();
+                        const ctx = this.audioCtx;
+                        if (ctx.state === 'suspended') {
+                            ctx.resume();
+                        }
+
+                        const now = ctx.currentTime;
+                        const duration = 0.22;
+                        const sampleRate = ctx.sampleRate;
+                        const bufferSize = Math.floor(sampleRate * duration);
+                        const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+                        const data = buffer.getChannelData(0);
+
+                        // High-fidelity natural paper fiber friction synthesis (pink/brown texture)
+                        let b0 = 0, b1 = 0, b2 = 0;
+                        for (let i = 0; i < bufferSize; i++) {
+                            const white = (Math.random() * 2 - 1);
+                            b0 = 0.99886 * b0 + white * 0.0555179;
+                            b1 = 0.99332 * b1 + white * 0.0750759;
+                            b2 = 0.96900 * b2 + white * 0.1538520;
+                            const pink = (b0 + b1 + b2 + white * 0.5362) * 0.11;
+
+                            // Dynamic paper envelope: gentle rustle attack, full air sweep, soft landing decay
+                            const progress = i / bufferSize;
+                            const envelope = Math.sin(progress * Math.PI) * Math.pow(1 - progress, 0.45);
+                            data[i] = pink * envelope;
+                        }
+
+                        const source = ctx.createBufferSource();
+                        source.buffer = buffer;
+
+                        // Dynamic bandpass simulating resonant air cavity & paper curve
+                        const filter = ctx.createBiquadFilter();
+                        filter.type = 'bandpass';
+                        filter.frequency.setValueAtTime(1100, now);
+                        filter.frequency.exponentialRampToValueAtTime(2600, now + 0.07);
+                        filter.frequency.exponentialRampToValueAtTime(950, now + duration);
+                        filter.Q.setValueAtTime(1.4, now);
+
+                        // High-shelf filter to soften harsh treble, ensuring organic papery warmth
+                        const shelf = ctx.createBiquadFilter();
+                        shelf.type = 'highshelf';
+                        shelf.frequency.setValueAtTime(3600, now);
+                        shelf.gain.setValueAtTime(-5, now);
+
+                        const gain = ctx.createGain();
+                        gain.gain.setValueAtTime(0.01, now);
+                        gain.gain.linearRampToValueAtTime(0.32, now + 0.04);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                        source.connect(filter);
+                        filter.connect(shelf);
+                        shelf.connect(gain);
+                        gain.connect(ctx.destination);
+
+                        source.start(now);
                     } catch (e) {}
                 },
 

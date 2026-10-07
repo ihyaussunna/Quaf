@@ -14,29 +14,24 @@
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
         
-        <!-- Hero Center: Official Theme Logo without background shape, with Apple-style blur-in animation -->
-        <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center">
-            <style>
-                @keyframes heroBlurIn {
-                    0% {
-                        opacity: 0;
-                        filter: blur(20px);
-                        transform: scale(0.95);
-                    }
-                    100% {
-                        opacity: 1;
-                        filter: blur(0px);
-                        transform: scale(1);
-                    }
-                }
-                .hero-logo-blur {
-                    animation: heroBlurIn 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
-                }
-            </style>
+        <!-- Hero Center: Alternating Official Theme Logo & QUAF Festival Logo with Apple-style blur crossfade -->
+        <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center"
+             x-data="{ activeLogo: 0 }"
+             x-init="setInterval(() => { activeLogo = 1 - activeLogo; }, 4200)">
+            
+            <div class="relative w-full h-[150px] xs:h-[180px] sm:h-[220px] flex items-center justify-center">
+                <!-- 1. Adabic Inheritance Logo -->
+                <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
+                     alt="Ādabīc Inheritance — QUAF" 
+                     class="max-w-[280px] xs:max-w-[340px] sm:max-w-md lg:max-w-lg max-h-[140px] xs:max-h-[170px] sm:max-h-[210px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
+                     :class="activeLogo === 0 ? 'opacity-100 scale-100 blur-none relative z-10' : 'opacity-0 scale-95 blur-md absolute pointer-events-none z-0'">
 
-            <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
-                 alt="Ādabīc Inheritance — QUAF" 
-                 class="w-full max-w-[280px] xs:max-w-[340px] sm:max-w-md lg:max-w-lg h-auto object-contain hero-logo-blur drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]">
+                <!-- 2. QUAF Festival Logo -->
+                <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
+                     alt="QUAF — Markaz Cultural Festival" 
+                     class="max-w-[260px] xs:max-w-[320px] sm:max-w-md lg:max-w-lg max-h-[140px] xs:max-h-[170px] sm:max-h-[210px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
+                     :class="activeLogo === 1 ? 'opacity-100 scale-100 blur-none relative z-10' : 'opacity-0 scale-95 blur-md absolute pointer-events-none z-0'">
+            </div>
 
             <!-- Festival Info Pills -->
             <div class="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
@@ -94,15 +89,15 @@
     <div class="flex w-max animate-ribbon-loop pointer-events-none">
         <!-- Sequence 1 -->
         <div class="flex shrink-0 items-center">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
         </div>
         <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
         <div class="flex shrink-0 items-center">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
         </div>
     </div>
 </div>
@@ -115,44 +110,50 @@
     <div class="absolute top-0 right-1/4 w-96 h-96 bg-red-50/60 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/60 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        
-        <!-- Elegant Category Pill -->
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono uppercase tracking-widest font-semibold mb-6">
-            <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
-            <span>Festival Theme & Philosophy</span>
+    <!-- Side Shape touching right screen edge and touching bottom / next section -->
+    <img src="{{ asset('images/side-shape-theme.svg') }}" 
+         alt="" 
+         aria-hidden="true"
+         class="absolute right-0 bottom-0 max-h-[75%] sm:max-h-[85%] lg:max-h-[92%] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-75 lg:opacity-100">
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-3xl flex flex-col items-center lg:items-start text-center lg:text-left">
+            <!-- Elegant Category Pill -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono uppercase tracking-widest font-semibold mb-6 animate-subheading">
+                <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
+                <span>Festival Theme & Philosophy</span>
+            </div>
+
+            <!-- Main Heading Requested by User -->
+            <h2 class="font-sora text-2xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight uppercase leading-tight mb-8 sm:mb-10 text-center lg:text-left animate-heading">
+                KNOWLEDGE IS INHERITED, NOT MERELY TRANSMITTED.
+            </h2>
+
+            <!-- Exact Philosophical Text Body -->
+            <div class="space-y-6 text-slate-700 text-base sm:text-lg leading-relaxed sm:leading-loose text-center lg:text-left">
+                <p class="font-medium text-slate-900 text-lg sm:text-xl">
+                    What makes knowledge worthy of being inherited? And what ensures that, as it passes from one generation to another, it remains true to its source?
+                </p>
+
+                <div class="w-16 h-0.5 bg-gradient-to-r from-[#be1e2d] to-[#f3bd2e] mx-auto lg:mx-0 my-4 opacity-70"></div>
+
+                <p>
+                    In the Islamic tradition, the answer begins with <span class="font-bold text-slate-950">Adab</span>.
+                </p>
+
+                <p>
+                    Adab is far more than a code of conduct. It is an intellectual, ethical, and spiritual foundation that gives knowledge its rightful place — honouring its sources, safeguarding its transmission, and shaping the relationship between teacher and student.
+                </p>
+
+                <p>
+                    The Islamic scholarly tradition developed a remarkably rigorous system of principles and disciplines to ensure that knowledge was transmitted with authenticity, integrity, and trust. This intricate architecture of transmission stands among the defining strengths of the Islamic intellectual tradition.
+                </p>
+
+                <p class="font-medium text-slate-900">
+                    QUAF seeks to explore this architecture — the structures, disciplines, and ethos that preserved knowledge across generations, while preserving its meaning, authority, and spirit.
+                </p>
+            </div>
         </div>
-
-        <!-- Main Heading Requested by User -->
-        <h2 class="font-sora text-2xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight uppercase leading-tight mb-8 sm:mb-12">
-            KNOWLEDGE IS INHERITED, NOT MERELY TRANSMITTED.
-        </h2>
-
-        <!-- Exact Philosophical Text Body -->
-        <div class="space-y-6 text-slate-700 text-base sm:text-lg leading-relaxed sm:leading-loose text-justify sm:text-center max-w-3xl mx-auto">
-            <p class="font-medium text-slate-900 text-lg sm:text-xl">
-                What makes knowledge worthy of being inherited? And what ensures that, as it passes from one generation to another, it remains true to its source?
-            </p>
-
-            <div class="w-16 h-0.5 bg-gradient-to-r from-[#be1e2d] to-[#f3bd2e] mx-auto my-4 opacity-70"></div>
-
-            <p>
-                In the Islamic tradition, the answer begins with <span class="font-bold text-slate-950">Adab</span>.
-            </p>
-
-            <p>
-                Adab is far more than a code of conduct. It is an intellectual, ethical, and spiritual foundation that gives knowledge its rightful place — honouring its sources, safeguarding its transmission, and shaping the relationship between teacher and student.
-            </p>
-
-            <p>
-                The Islamic scholarly tradition developed a remarkably rigorous system of principles and disciplines to ensure that knowledge was transmitted with authenticity, integrity, and trust. This intricate architecture of transmission stands among the defining strengths of the Islamic intellectual tradition.
-            </p>
-
-            <p class="font-medium text-slate-900">
-                QUAF seeks to explore this architecture — the structures, disciplines, and ethos that preserved knowledge across generations, while preserving its meaning, authority, and spirit.
-            </p>
-        </div>
-
     </div>
 </section>
 
@@ -279,7 +280,7 @@
         
         <!-- Clean Section Header -->
         <div class="mb-12">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight animate-heading">
                 Festival Standings
             </h2>
         </div>
@@ -460,10 +461,10 @@
         
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
-                <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase block mb-1">
+                <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase block mb-1 animate-subheading">
                     AUDIOVISUAL BROADCASTS
                 </span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-white tracking-tight">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-white tracking-tight animate-heading">
                     Festival Highlights
                 </h2>
             </div>
@@ -550,10 +551,10 @@
         
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
-                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1">
+                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1 animate-subheading">
                     CAPTURED MOMENTS
                 </span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight animate-heading">
                     Festival Gallery
                 </h2>
             </div>
@@ -594,10 +595,10 @@
         
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
-                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1">
+                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1 animate-subheading">
                     JOURNAL & BULLETINS
                 </span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight animate-heading">
                     Festival News
                 </h2>
             </div>
@@ -662,10 +663,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto mb-12">
-            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1">
+            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1 animate-subheading">
                 PUBLIC RESOURCES
             </span>
-            <h2 class="text-3xl sm:text-4xl font-sora font-black text-slate-900 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl font-sora font-black text-slate-900 tracking-tight animate-heading">
                 Festival Access & Documents
             </h2>
         </div>

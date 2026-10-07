@@ -7,11 +7,8 @@
 }">
     <!-- Header -->
     <div class="mb-6 sm:mb-10">
-        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">CINEMATIC ARCHIVES & BROADCASTS</span>
-        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1">Festival Media Hub</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-            Watch live streams, stage highlights, choral renditions, and official verdicts from QUAF.
-        </p>
+        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">CINEMATIC ARCHIVES & BROADCASTS</span>
+        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1 animate-heading">Festival Media Hub</h1>
     </div>
 
     <!-- Category Filter Bar & Search -->

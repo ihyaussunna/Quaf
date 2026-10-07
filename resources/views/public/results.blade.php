@@ -4,11 +4,8 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-16">
     <!-- Header -->
     <div class="mb-5 sm:mb-8 text-center sm:text-left">
-        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">OFFICIAL CONCLAVE VERDICTS</span>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Results</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1.5 sm:mt-3 max-w-2xl font-sora">
-            Explore verified verdicts across all programs. Filter by zone, group, or stage to discover champions and point tallies.
-        </p>
+        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">OFFICIAL CONCLAVE VERDICTS</span>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2 animate-heading">Festival Results</h1>
     </div>
 
     <!-- Quick Zone Chips (App-Style One-Tap Mobile Scroller) -->
@@ -31,7 +28,7 @@
 
     <!-- Filters Bar (Light Theme) -->
     <form method="GET" action="{{ route('results.index') }}" class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-10 shadow-xs font-sora">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             <!-- Search -->
             <div class="lg:col-span-2">
                 <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Search Program</label>
@@ -50,17 +47,6 @@
                             $zoneValue = is_object($zVal) ? $zVal->name : (is_string($zKey) && !is_numeric($zKey) ? $zKey : $zVal);
                         @endphp
                         <option value="{{ $zoneValue }}" {{ ($zone ?? '') == $zoneValue ? 'selected' : '' }}>{{ $zoneName }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Category Filter -->
-            <div>
-                <label class="block text-[11px] font-mono uppercase text-slate-600 mb-1 font-bold">Discipline</label>
-                <select name="category" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white font-sora">
-                    <option value="">All Categories</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}" {{ ($categoryId ?? '') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                     @endforeach
                 </select>
             </div>
