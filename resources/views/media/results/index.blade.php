@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Results & Poster Studio | QUAF 09 Media')
+@section('title', 'Results & Poster Studio | QUAF Media')
 
 @section('content')
 <div class="space-y-6">
@@ -231,7 +231,7 @@
                         @endif
 
                         @if($res->poster_image)
-                            <a href="{{ $res->poster_image }}" download="QUAF09_Result_{{ $prog->code }}.png" class="p-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="Download Poster Image">
+                            <a href="{{ $res->poster_image }}" download="QUAF_Result_{{ $prog->code }}.png" class="p-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="Download Poster Image">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             </a>
                             <a href="{{ route('media.results.public-poster', $res) }}" target="_blank" class="p-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="View Public Poster">

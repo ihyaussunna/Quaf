@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'QUAF 09 - Announcer Console')
+@section('title', 'QUAF - Announcer Console')
 
 @section('content')
 <div class="min-h-screen bg-[#edf3f8] py-8 px-4 sm:px-6 lg:px-8">

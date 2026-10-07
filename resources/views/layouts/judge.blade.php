@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Judges Portal' }} | QUAF 09</title>
+    <title>{{ $title ?? 'Judges Portal' }} | QUAF</title>
 
     <!-- Google Fonts (Multilingual: Anek Malayalam, JetBrains Mono, Sora, Amiri, Noto Nastaliq Urdu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,7 +85,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-200 py-4 px-4 text-center text-slate-500 text-[11px] font-mono bg-white safe-bottom-padding">
-        QUAF '09 Adjudication Engine • Ihyaussunna Students Union • Strictly Confidential Scoring System
+        QUAF Adjudication Engine • Ihyaussunna Students Union • Strictly Confidential Scoring System
     </footer>
 
 </body>

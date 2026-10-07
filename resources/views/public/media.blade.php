@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Festival Media & Video Hub — QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Festival Media & Video Hub — QUAF'])
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16" x-data="{
@@ -10,7 +10,7 @@
         <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">CINEMATIC ARCHIVES & BROADCASTS</span>
         <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1">Festival Media Hub</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-            Watch live streams, stage highlights, choral renditions, and official verdicts from QUAF 9.0.
+            Watch live streams, stage highlights, choral renditions, and official verdicts from QUAF.
         </p>
     </div>
 

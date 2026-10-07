@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'QUAF 9.0 — Markaz Cultural Festival 2026'])
+@extends('layouts.public', ['title' => 'QUAF — Markaz Cultural Festival 2026'])
 
 @section('content')
 
@@ -21,7 +21,7 @@
                 <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-[#f3bd2e]/20 rounded-full blur-3xl"></div>
 
                 <img src="{{ asset('images/quaf-title-logo.png') }}" 
-                     alt="QUAF 9.0" 
+                     alt="QUAF" 
                      style="max-height: 270px; object-fit: contain;" 
                      class="w-full max-w-[270px] xs:max-w-[320px] sm:max-w-md h-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:scale-105">
 
@@ -457,7 +457,7 @@
                             {{ $featuredVideo->title }}
                         </h3>
                         <p class="text-sm text-slate-300 leading-relaxed line-clamp-4">
-                            {{ $featuredVideo->description ?: 'Watch exclusive highlights, performances, and speeches from QUAF 9.0 on the official media channel.' }}
+                            {{ $featuredVideo->description ?: 'Watch exclusive highlights, performances, and speeches from QUAF on the official media channel.' }}
                         </p>
                     </div>
 

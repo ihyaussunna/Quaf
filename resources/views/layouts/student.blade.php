@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Student Portal' }} | QUAF 09</title>
+    <title>{{ $title ?? 'Student Portal' }} | QUAF</title>
 
     <!-- Google Fonts (Multilingual: Anek Malayalam, JetBrains Mono, Sora, Amiri, Noto Nastaliq Urdu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +88,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-200 py-6 text-center text-slate-500 text-xs font-mono bg-white hidden md:block">
-        QUAF '09 Student Portal • Ihyaussunna Students Union, Markaz
+        QUAF Student Portal • Ihyaussunna Students Union, Markaz
     </footer>
 
 </body>

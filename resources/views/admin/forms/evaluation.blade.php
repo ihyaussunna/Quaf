@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Judge Evaluation Sheet | QUAF 09'])
+@extends('layouts.admin', ['title' => 'Judge Evaluation Sheet | QUAF'])
 
 @section('content')
 <div class="space-y-6">

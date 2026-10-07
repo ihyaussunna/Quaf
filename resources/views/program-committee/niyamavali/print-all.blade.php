@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>QUAF 09 - Official Competition Rules Booklet</title>
+    <title>QUAF - Official Competition Rules Booklet</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,7 +52,7 @@
                 Official Booklet
             </span>
             <span class="text-xs font-mono text-slate-300">
-                QUAF 09 Festival Rules Booklet • Total {{ $programs->count() }} Competitions
+                QUAF Festival Rules Booklet • Total {{ $programs->count() }} Competitions
             </span>
         </div>
         <div class="flex items-center gap-2">
@@ -92,7 +92,7 @@
         </div>
 
         <div class="border-t border-slate-300 pt-6 flex items-center justify-between text-xs font-mono text-slate-400">
-            <span>QUAF Fest 09</span>
+            <span>QUAF Fest</span>
             <span>Published: {{ now()->format('F Y') }}</span>
         </div>
     </div>

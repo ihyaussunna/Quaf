@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Media Dashboard | QUAF 09')
+@section('title', 'Media Dashboard | QUAF')
 
 @section('content')
 <div class="space-y-8">
@@ -11,7 +11,7 @@
                 Live Media Desk
             </span>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
-                QUAF Fest 09 — Media & Publicity Wing
+                QUAF Fest — Media & Publicity Wing
             </h1>
             <p class="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
                 Publish festival news bulletins, high-resolution media gallery photos, and manage YouTube live streams in real time.

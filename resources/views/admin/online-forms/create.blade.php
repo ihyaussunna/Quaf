@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Create Online Submission Form | QUAF 9.0'])
+@extends('layouts.admin', ['title' => 'Create Online Submission Form | QUAF'])
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">

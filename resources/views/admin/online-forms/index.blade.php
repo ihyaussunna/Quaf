@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Online Submission Forms | QUAF 9.0'])
+@extends('layouts.admin', ['title' => 'Online Submission Forms | QUAF'])
 
 @section('content')
 <div class="space-y-6 max-w-7xl mx-auto">
@@ -10,7 +10,7 @@
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-widest bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
                     PROGRAM FORMS
                 </span>
-                <span class="text-xs font-mono text-slate-400">QUAF 9.0 Digital Desk</span>
+                <span class="text-xs font-mono text-slate-400">QUAF Digital Desk</span>
             </div>
             <h1 class="font-sora text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Online Submission Forms (ഓൺലൈൻ സബ്മിഷൻ ഫോമുകൾ)

@@ -25,7 +25,7 @@
         @if($type === 'merit-certificate')
             <!-- Merit Certificate Preview -->
             <div class="w-[800px] h-[560px] bg-white border-8 border-double border-[#f3bd2e] p-10 flex flex-col justify-between shadow-2xl relative">
-                <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-400">CERT NO: QUAF09-MC-9082</div>
+                <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-400">CERT NO: QUAF-MC-9082</div>
                 <div class="absolute top-4 right-4 text-[10px] font-mono text-[#f3bd2e] font-bold">★ MERIT CERTIFICATE ★</div>
 
                 <!-- Header -->
@@ -53,7 +53,7 @@
                 <div class="flex items-end justify-between border-t border-slate-200 pt-6 text-center text-xs font-mono">
                     <div class="w-40 border-t border-slate-400 pt-1">
                         <span class="text-slate-800 font-bold block">General Convener</span>
-                        <span class="text-[9px] text-slate-400">QUAF 09 Committee</span>
+                        <span class="text-[9px] text-slate-400">QUAF Committee</span>
                     </div>
                     <div class="w-20 h-20 rounded-full border-2 border-dashed border-[#f3bd2e] flex flex-col items-center justify-center p-1 text-[8px] font-mono text-[#f3bd2e]">
                         <span class="font-bold text-xs">OFFICIAL</span>
@@ -69,7 +69,7 @@
         @elseif($type === 'participation-certificate')
             <!-- Participation Certificate Preview -->
             <div class="w-[800px] h-[560px] bg-white border-8 border-double border-slate-400 p-10 flex flex-col justify-between shadow-2xl relative">
-                <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-400">CERT NO: QUAF09-PC-4120</div>
+                <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-400">CERT NO: QUAF-PC-4120</div>
                 <div class="absolute top-4 right-4 text-[10px] font-mono text-blue-700 font-bold">CERTIFICATE OF PARTICIPATION</div>
 
                 <div class="text-center space-y-1">

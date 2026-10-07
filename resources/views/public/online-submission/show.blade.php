@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Submit Entry: ' . ($form->program?->name ?? $form->title) . ' | QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Submit Entry: ' . ($form->program?->name ?? $form->title) . ' | QUAF'])
 
 @section('content')
 <section class="min-h-[85vh] py-10 sm:py-16 bg-slate-50 flex items-center justify-center relative overflow-hidden">
@@ -12,7 +12,7 @@
         <div class="text-center mb-8">
             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[11px] font-mono uppercase tracking-widest text-slate-600 mb-3">
                 <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
-                <span>QUAF 9.0 Digital Submission Desk</span>
+                <span>QUAF Digital Submission Desk</span>
             </div>
 
             <h1 class="font-sora text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">

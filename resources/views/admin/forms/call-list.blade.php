@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Stage Call List | QUAF 09'])
+@extends('layouts.admin', ['title' => 'Stage Call List | QUAF'])
 
 @section('content')
 <div class="space-y-6">

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => $program->name . ' — Results | QUAF 9.0'])
+@extends('layouts.public', ['title' => $program->name . ' — Results | QUAF'])
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
@@ -180,11 +180,11 @@
 
             <div class="flex items-center gap-2">
                 <span class="text-slate-400">Share:</span>
-                <a href="https://api.whatsapp.com/send?text={{ urlencode('QUAF 9.0 Result: ' . $program->code . ' ' . $program->name . ' - ' . url()->current()) }}"
+                <a href="https://api.whatsapp.com/send?text={{ urlencode('QUAF Result: ' . $program->code . ' ' . $program->name . ' - ' . url()->current()) }}"
                    target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold hover:bg-emerald-100 transition-colors">
                     WhatsApp
                 </a>
-                <a href="https://twitter.com/intent/tweet?text={{ urlencode('QUAF 9.0 Result: ' . $program->code . ' ' . $program->name) }}&url={{ urlencode(url()->current()) }}"
+                <a href="https://twitter.com/intent/tweet?text={{ urlencode('QUAF Result: ' . $program->code . ' ' . $program->name) }}&url={{ urlencode(url()->current()) }}"
                    target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
                     X / Twitter
                 </a>

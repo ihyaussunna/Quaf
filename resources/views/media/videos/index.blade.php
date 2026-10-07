@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Manage Videos & Live Streams | QUAF 09')
+@section('title', 'Manage Videos & Live Streams | QUAF')
 
 @section('content')
 <div class="space-y-6">

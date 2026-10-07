@@ -393,7 +393,7 @@
                         <img src="{{ asset('images/forms-header-logo.svg') }}" alt="QUAF Logo">
                     </div>
                     <div class="header-meta">
-                        <div class="fest-title">QUAF 9.0 • Islamic Educational Board of India</div>
+                        <div class="fest-title">QUAF • Islamic Educational Board of India</div>
                         <div class="fest-sub">Official Festival Evaluation Record • Confidential Evaluation</div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Participant Verification — QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Participant Verification — QUAF'])
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Panel Access & Credentials Hub | QUAF 09')
+@section('title', 'Panel Access & Credentials Hub | QUAF')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" x-data="{ 

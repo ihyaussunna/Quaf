@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'QR Code: ' . ($form->program?->name ?? $form->title) . ' | QUAF 9.0'])
+@extends('layouts.admin', ['title' => 'QR Code: ' . ($form->program?->name ?? $form->title) . ' | QUAF'])
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6 text-center">
@@ -28,7 +28,7 @@
         
         <div class="flex items-center gap-2 mb-3">
             <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#be1e2d] text-white uppercase tracking-wider">
-                QUAF 9.0 DIGITAL SUBMISSION
+                QUAF DIGITAL SUBMISSION
             </span>
         </div>
 

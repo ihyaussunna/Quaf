@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Student Portal Access | QUAF 09</title>
+    <title>Student Portal Access | QUAF</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +23,7 @@
                 <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-sora font-black text-sm text-[#f3bd2e]">Q9</div>
             </div>
             <div>
-                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF 09</span>
+                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF</span>
                 <span class="text-[10px] font-mono tracking-widest text-[#f3bd2e] block uppercase font-bold">Student Portal</span>
             </div>
         </a>

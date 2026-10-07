@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Official QR Verification Hub — QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Official QR Verification Hub — QUAF'])
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
@@ -8,7 +8,7 @@
         <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">SECURITY & ACCREDITATION</span>
         <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2">QR Verification Hub</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 max-w-xl mx-auto leading-relaxed">
-            Verify official credentials issued by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya for QUAF 9.0.
+            Verify official credentials issued by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya for QUAF.
         </p>
     </div>
 

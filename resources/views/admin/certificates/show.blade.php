@@ -50,7 +50,7 @@
                         IHYAUSSUNNA STUDENTS UNION • MARKAZU SAQUAFATHI SUNNIYYA
                     </p>
                     <h2 class="text-4xl sm:text-5xl font-sora font-black tracking-widest text-[#f3bd2e] uppercase">
-                        QUAF '09
+                        QUAF
                     </h2>
                     <p class="text-xs font-mono tracking-widest text-slate-500 uppercase">
                         The Grand Cultural Conclave of Talents

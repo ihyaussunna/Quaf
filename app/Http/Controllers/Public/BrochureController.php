@@ -15,9 +15,9 @@ class BrochureController extends Controller
         }
 
         $brochure = [
-            'title' => 'QUAF 9.0 Official Theme Note & Brochure',
+            'title' => 'QUAF Official Theme Note & Brochure',
             'subtitle' => 'Ādabīc Inheritance — Samastha Centenary Edition',
-            'edition' => 'Season 09 — 2026',
+            'edition' => '2026',
             'pdf_url' => asset('documents/quaf-brochure.pdf'),
             'total_pages' => 20,
             'pages' => $pages,

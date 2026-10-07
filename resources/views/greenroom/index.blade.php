@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Welcome to Green Room Desk | QUAF 9.0</title>
+    <title>Welcome to Green Room Desk | QUAF</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -164,7 +164,7 @@
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-40 shadow-xs gap-4">
         <div class="flex items-center gap-3 sm:gap-4 shrink-0">
             <a href="{{ route('greenroom.index') }}" class="flex items-center shrink-0">
-                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 9.0" class="h-9 sm:h-10 w-auto object-contain max-h-10" style="height: 38px; width: auto; max-width: 125px; object-fit: contain;">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-9 sm:h-10 w-auto object-contain max-h-10" style="height: 38px; width: auto; max-width: 125px; object-fit: contain;">
             </a>
             <div class="border-l border-slate-200 pl-3 sm:pl-4">
                 <div class="flex items-center gap-2">
@@ -954,7 +954,7 @@
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-[11px] font-mono text-slate-400">QUAF 9.0 Official Niyamavali</span>
+                <span class="text-[11px] font-mono text-slate-400">QUAF Official Niyamavali</span>
                 <button type="button" @click="showRulesModal = false" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-mono text-xs font-bold hover:bg-slate-800 transition cursor-pointer">
                     Close (അടയ്ക്കുക)
                 </button>

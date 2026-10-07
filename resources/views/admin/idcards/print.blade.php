@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batch ID Cards Print | QUAF 09</title>
+    <title>Batch ID Cards Print | QUAF</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     <style>
@@ -58,7 +58,7 @@
                             Q9
                         </div>
                         <div>
-                            <h4 class="font-sora font-black text-xs uppercase tracking-wider text-slate-900">QUAF '09</h4>
+                            <h4 class="font-sora font-black text-xs uppercase tracking-wider text-slate-900">QUAF</h4>
                             <p class="text-[7px] font-mono text-slate-500 uppercase">Ihyaussunna • Markaz</p>
                         </div>
                     </div>

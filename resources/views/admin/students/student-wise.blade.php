@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Student Wise Programs | QUAF 09'])
+@extends('layouts.admin', ['title' => 'Student Wise Programs | QUAF'])
 
 @section('content')
 <style>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offstage Program Schedule - QUAF 9.0</title>
+    <title>Offstage Program Schedule - QUAF</title>
     @vite(['resources/css/app.css'])
     <style>
         @font-face {
@@ -96,7 +96,7 @@
             <div class="day-section">
                 <!-- Header Banner Image (Exact official vector/PNG) -->
                 <div class="w-full flex justify-center mb-2">
-                    <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF 9.0" class="w-full max-h-24 sm:max-h-28 object-contain">
+                    <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-24 sm:max-h-28 object-contain">
                 </div>
 
                 <!-- Top Horizontal Divider -->
@@ -178,7 +178,7 @@
                 <div class="day-section mb-12">
                     <!-- Header Banner Image -->
                     <div class="w-full flex justify-center mb-2">
-                        <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF 9.0" class="w-full max-h-24 sm:max-h-28 object-contain">
+                        <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-24 sm:max-h-28 object-contain">
                     </div>
 
                     <hr class="border-t-2 border-black my-2.5">

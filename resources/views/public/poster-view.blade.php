@@ -59,7 +59,7 @@
             <div class="p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <div class="text-xs font-mono text-amber-400 font-bold uppercase tracking-widest">
-                        QUAF 09 &bull; {{ $result->program->category->name ?? 'General' }}
+                        QUAF &bull; {{ $result->program->category->name ?? 'General' }}
                     </div>
                     <h1 class="text-xl sm:text-3xl font-black mt-1 font-sora tracking-tight">
                         {{ $result->program->name }}
@@ -92,9 +92,9 @@
                         <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
                         <div class="absolute inset-0 bg-[radial-gradient(#be1e2d_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
 
-                        <!-- Top Header: QUAF 9.0 Identity -->
+                        <!-- Top Header: QUAF Identity -->
                         <div class="relative z-10 flex flex-col items-center text-center border-b border-amber-500/20 pb-5">
-                            <img src="{{ asset('images/quaf-title-logo.png') }}" alt="QUAF 9.0" class="h-14 sm:h-16 w-auto object-contain drop-shadow-md brightness-0 invert">
+                            <img src="{{ asset('images/quaf-title-logo.png') }}" alt="QUAF" class="h-14 sm:h-16 w-auto object-contain drop-shadow-md brightness-0 invert">
                             <div class="mt-2 flex items-center gap-2 text-[10px] sm:text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
                                 <span>Ādabīc Inheritance</span>
                                 <span>&bull;</span>
@@ -267,7 +267,7 @@
 
                 <div class="flex items-center gap-3">
                     @php
-                        $shareText = rawurlencode("QUAF 09 - " . $result->program->name . " Official Result Announced! View poster: " . url()->current());
+                        $shareText = rawurlencode("QUAF - " . $result->program->name . " Official Result Announced! View poster: " . url()->current());
                     @endphp
                     <a href="https://api.whatsapp.com/send?text={{ $shareText }}" target="_blank"
                        class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs">
@@ -282,7 +282,7 @@
                     </button>
 
                     @if($result->poster_image)
-                        <a href="{{ $result->poster_image }}" download="QUAF09_Result_{{ $result->program->code }}.png"
+                        <a href="{{ $result->poster_image }}" download="QUAF_Result_{{ $result->program->code }}.png"
                            class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             <span>Download Poster</span>

@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Submissions: ' . ($form->program?->name ?? $form->title) . ' | QUAF 9.0'])
+@extends('layouts.admin', ['title' => 'Submissions: ' . ($form->program?->name ?? $form->title) . ' | QUAF'])
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6"

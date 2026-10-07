@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Academic Groups & Standings — QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Academic Groups & Standings — QUAF'])
 
 @section('content')
 
@@ -10,7 +10,7 @@
                 <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">FESTIVAL HOUSES & TEAMS</span>
                 <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1">Academic Groups</h1>
                 <p class="text-sm text-slate-600 mt-2 max-w-xl">
-                    Official standings and point tallies of competing collegiate groups in QUAF 9.0.
+                    Official standings and point tallies of competing collegiate groups in QUAF.
                 </p>
             </div>
             

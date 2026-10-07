@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Poster Studio: ' . $result->program->name . ' | QUAF 09 Media')
+@section('title', 'Poster Studio: ' . $result->program->name . ' | QUAF Media')
 
 @section('content')
 <div class="space-y-6" x-data="posterStudio()">
@@ -729,7 +729,7 @@ function posterStudio() {
             this.render();
             const canvas = document.getElementById('posterCanvas');
             const link = document.createElement('a');
-            link.download = `QUAF09_Result_${this.data.result_no}.png`;
+            link.download = `QUAF_Result_${this.data.result_no}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         },

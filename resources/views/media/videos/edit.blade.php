@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Edit YouTube Video | QUAF 09')
+@section('title', 'Edit YouTube Video | QUAF')
 
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">

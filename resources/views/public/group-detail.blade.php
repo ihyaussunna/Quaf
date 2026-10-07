@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => $group->name . ' — QUAF 9.0 Academic House'])
+@extends('layouts.public', ['title' => $group->name . ' — QUAF Academic House'])
 
 @section('content')
 

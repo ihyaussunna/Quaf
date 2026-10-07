@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Judge Access PIN | QUAF 09</title>
+    <title>Judge Access PIN | QUAF</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +23,7 @@
                 <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-sora font-black text-sm text-[#f3bd2e]">Q9</div>
             </div>
             <div>
-                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF 09</span>
+                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF</span>
                 <span class="text-[10px] font-mono tracking-widest text-slate-500 block uppercase">Judges Portal</span>
             </div>
         </a>
@@ -121,7 +121,7 @@
 
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
                 <span class="text-[11px] font-mono text-slate-400 block">
-                    QUAF 09 • Confidential Evaluation Engine
+                    QUAF • Confidential Evaluation Engine
                 </span>
             </div>
         </div>

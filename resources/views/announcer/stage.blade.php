@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Stage Calling Console | QUAF 09 Announcer')
+@section('title', 'Stage Calling Console | QUAF Announcer')
 
 @section('content')
 <div class="min-h-screen bg-[#edf3f8] py-8 px-4 sm:px-6 lg:px-8">

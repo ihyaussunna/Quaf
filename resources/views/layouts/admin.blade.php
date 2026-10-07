@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Admin Control' }} | QUAF 09</title>
+    <title>{{ $title ?? 'Admin Control' }} | QUAF</title>
 
     <!-- Google Fonts (Multilingual: Anek Malayalam, JetBrains Mono, Sora, Amiri, Noto Nastaliq Urdu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -854,7 +854,7 @@
                     </div>
 
                     <div class="text-[10px] text-slate-500 text-center font-mono">
-                        QUAF Fest 09 Settings
+                        QUAF Fest Settings
                     </div>
                 </div>
             </div>

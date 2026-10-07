@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Customize Template: ' . $template->name . ' | QUAF 09 Media')
+@section('title', 'Customize Template: ' . $template->name . ' | QUAF Media')
 
 @section('content')
 <div class="space-y-6" x-data="templateCustomizer()">

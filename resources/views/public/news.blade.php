@@ -6,7 +6,7 @@
         <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">THE OFFICIAL CONCLAVE CHRONICLE</span>
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Journal</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
-            In-depth reporting, official communiques, and artistic reviews from the halls and stages of QUAF 09.
+            In-depth reporting, official communiques, and artistic reviews from the halls and stages of QUAF.
         </p>
     </div>
 

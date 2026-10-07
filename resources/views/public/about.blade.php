@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'About QUAF 9.0 — Markaz Cultural Festival 2026'])
+@extends('layouts.public', ['title' => 'About QUAF — Markaz Cultural Festival 2026'])
 
 @section('content')
 
@@ -8,7 +8,7 @@
         <div class="max-w-3xl">
             <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">FESTIVAL HERITAGE & PHILOSOPHY</span>
             <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2 tracking-tight">
-                About QUAF 9.0
+                About QUAF
             </h1>
             <p class="text-base sm:text-lg text-slate-600 mt-3 font-normal leading-relaxed">
                 The premier collegiate arts and cultural confluence organized by the Ihyaussunna-Markaz Students' Union, Markazu Saquafathi Sunniyya.
@@ -31,7 +31,7 @@
                 </h2>
                 <div class="prose prose-slate text-slate-700 space-y-4 text-sm sm:text-base leading-relaxed">
                     <p>
-                        QUAF Season 09 embodies the grand tradition of artistic refinement, Islamic aesthetics, and classical literary eloquence. Under the overarching motif of <em>Ādabīc Inheritance</em>, the festival serves as a fertile ground for cultivating oratory mastery, calligraphic finesse, choral harmonies, and analytical thought.
+                        QUAF embodies the grand tradition of artistic refinement, Islamic aesthetics, and classical literary eloquence. Under the overarching motif of <em>Ādabīc Inheritance</em>, the festival serves as a fertile ground for cultivating oratory mastery, calligraphic finesse, choral harmonies, and analytical thought.
                     </p>
                     <p>
                         Beginning with intensive Offstage disciplines from October 06, 2026, leading to the grand Main Stage confluence from October 31 to November 01, 2026, the festival arena at Jamia Markaz hosts verified delegates representing five academic houses, competing harmoniously across 120+ codified disciplines.

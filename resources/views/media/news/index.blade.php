@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Manage News Articles | QUAF 09')
+@section('title', 'Manage News Articles | QUAF')
 
 @section('content')
 <div class="space-y-6">

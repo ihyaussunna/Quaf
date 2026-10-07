@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Venue & Contact — QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Venue & Contact — QUAF'])
 
 @section('content')
 

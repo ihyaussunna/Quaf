@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Offstage Schedule & Conflict Detector | Quaf 9.0'])
+@extends('layouts.admin', ['title' => 'Offstage Schedule & Conflict Detector | QUAF'])
 
 @section('content')
 <div class="space-y-6" x-data="{

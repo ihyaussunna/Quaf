@@ -14,12 +14,12 @@ class WebsiteBuilderController extends Controller
     public function index(): View
     {
         $settings = [
-            'hero_title' => FestivalSetting::get('hero_title', 'QUAF — Season 09'),
+            'hero_title' => FestivalSetting::get('hero_title', 'QUAF'),
             'hero_subtitle' => FestivalSetting::get('hero_subtitle', 'The Grand Cultural Conclave of Talents'),
             'hero_tagline' => FestivalSetting::get('hero_tagline', 'Ihyaussunna Students Union • Markazu Saquafathi Sunniyya'),
-            'announcement_ticker' => FestivalSetting::get('announcement_ticker', 'Welcome to QUAF 09 — Live Results and Stage Updates Streaming Now!'),
+            'announcement_ticker' => FestivalSetting::get('announcement_ticker', 'Welcome to QUAF — Live Results and Stage Updates Streaming Now!'),
             'live_stream_url' => FestivalSetting::get('live_stream_url', 'https://www.youtube.com/embed/live_stream?channel=markaz'),
-            'about_heading' => FestivalSetting::get('about_heading', 'About QUAF Season 09'),
+            'about_heading' => FestivalSetting::get('about_heading', 'About QUAF'),
             'about_text' => FestivalSetting::get('about_text', 'QUAF is the premier cultural and literary festival organized by Ihyaussunna Students Union, celebrating creativity, arts, and intellectual excellence across multiple competitive categories.'),
             'contact_phone' => FestivalSetting::get('contact_phone', '+91 98470 12345'),
             'contact_email' => FestivalSetting::get('contact_email', 'festival@markaz.in'),

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Digital Call List & Attendance Desk | QUAF 09</title>
+    <title>Digital Call List & Attendance Desk | QUAF</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -22,7 +22,7 @@
     <!-- Topbar -->
     <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-40 shadow-xs gap-4 flex-nowrap">
         <div class="flex items-center gap-3 sm:gap-4 shrink-0">
-            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF 09" class="h-9 sm:h-10 w-auto shrink-0 object-contain">
+            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-9 sm:h-10 w-auto shrink-0 object-contain">
             <div class="hidden xs:block shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="font-rockwell font-bold tracking-wider text-sm sm:text-base text-slate-900 whitespace-nowrap">DIGITAL CALL LIST</span>

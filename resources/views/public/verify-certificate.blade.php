@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Certificate Verification — QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Certificate Verification — QUAF'])
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
@@ -63,7 +63,7 @@
                 </div>
                 <div class="w-16 h-16 rounded-full border-2 border-amber-300 flex items-center justify-center p-1 bg-amber-50 shadow-2xs">
                     <div class="w-full h-full rounded-full border border-dashed border-amber-400 flex items-center justify-center text-[8px] font-mono font-bold text-amber-800 text-center uppercase tracking-tighter">
-                        QUAF 9.0<br>VERIFIED
+                        QUAF<br>VERIFIED
                     </div>
                 </div>
                 <div class="text-center sm:text-right">

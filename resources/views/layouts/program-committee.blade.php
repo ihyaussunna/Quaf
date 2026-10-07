@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Program Samithi Portal' }} | QUAF Fest 09</title>
+    <title>{{ $title ?? 'Program Samithi Portal' }} | QUAF Fest</title>
 
     <!-- Google Fonts (Anek Malayalam, JetBrains Mono, Sora, Amiri) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

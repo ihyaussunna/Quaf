@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#020617">
-    <title>QUAF 9.0 Official Theme Note & Brochure — Digital Book Experience</title>
-    <meta name="description" content="QUAF 9.0 OFFICIAL PUBLICATION Digital Brochure Experience. Official Theme Note and Digital Brochure for QUAF 9.0 Markaz Cultural Festival 2026.">
+    <title>QUAF Official Theme Note & Brochure — Digital Book Experience</title>
+    <meta name="description" content="QUAF OFFICIAL PUBLICATION Digital Brochure Experience. Official Theme Note and Digital Brochure for QUAF Markaz Cultural Festival 2026.">
 
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
@@ -61,7 +61,7 @@
             :class="controlsVisible ? 'opacity-90' : 'opacity-0'">
         <div class="flex items-center gap-2.5">
             <img src="{{ asset('images/quaf-logo-white.png') }}" 
-                 alt="QUAF 9.0" 
+                 alt="QUAF" 
                  class="h-5 sm:h-7 w-auto object-contain opacity-80"
                  onerror="this.style.display='none'">
             <div>

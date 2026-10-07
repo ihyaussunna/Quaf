@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'Submission Recorded Successfully | QUAF 9.0'])
+@extends('layouts.public', ['title' => 'Submission Recorded Successfully | QUAF'])
 
 @section('content')
 <section class="min-h-[80vh] py-14 sm:py-20 bg-slate-50 flex items-center justify-center relative overflow-hidden">
