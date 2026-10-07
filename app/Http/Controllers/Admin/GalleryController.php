@@ -7,6 +7,7 @@ use App\Models\GalleryItem;
 use App\Models\Group;
 use App\Models\Stage;
 use App\Services\AuditLogger;
+use App\Services\FileStorageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -33,7 +34,7 @@ class GalleryController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'image_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'category' => ['required', 'string'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
@@ -42,8 +43,7 @@ class GalleryController extends Controller
         ]);
 
         if ($request->hasFile('image_file')) {
-            $path = $request->file('image_file')->store('media/gallery', 'public');
-            $validated['image_path'] = '/storage/'.$path;
+            $validated['image_path'] = FileStorageService::storePublicFile($request->file('image_file'), 'media/gallery');
         }
 
         if (empty($validated['image_path'])) {

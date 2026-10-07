@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Services\AuditLogger;
+use App\Services\FileStorageService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,15 +34,14 @@ class NewsController extends Controller
             'content' => ['required', 'string'],
             'category' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
-            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'cover_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'is_featured' => ['boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
         ]);
 
         if ($request->hasFile('cover_file')) {
-            $path = $request->file('cover_file')->store('media/news', 'public');
-            $validated['cover_image'] = '/storage/'.$path;
+            $validated['cover_image'] = FileStorageService::storePublicFile($request->file('cover_file'), 'media/news');
         }
 
         $validated['slug'] = Str::slug($validated['title']).'-'.Str::random(5);
@@ -69,15 +69,14 @@ class NewsController extends Controller
             'content' => ['required', 'string'],
             'category' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
-            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'cover_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'is_featured' => ['boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
         ]);
 
         if ($request->hasFile('cover_file')) {
-            $path = $request->file('cover_file')->store('media/news', 'public');
-            $validated['cover_image'] = '/storage/'.$path;
+            $validated['cover_image'] = FileStorageService::storePublicFile($request->file('cover_file'), 'media/news');
         } elseif (empty($validated['cover_image'])) {
             $validated['cover_image'] = $news->getRawOriginal('cover_image');
         }

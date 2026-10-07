@@ -68,7 +68,7 @@
      JUNCTION: INFINITE ANIMATED GIF RIBBON (BLACK TO WHITE TRANSITION)
      Loops continuously to the left with active GIF animation, attached to shape
      ===================================================================== -->
-<div class="relative w-full overflow-hidden bg-[#07070a] border-t border-white/10 select-none py-2 sm:py-2.5 z-20">
+<div class="relative w-full overflow-hidden bg-[#07070a] select-none p-0 m-0 leading-none z-20">
     <style>
         @keyframes ribbonScrollLeft {
             0% {
@@ -86,18 +86,18 @@
         }
     </style>
 
-    <div class="flex w-max animate-ribbon-loop pointer-events-none">
+    <div class="flex w-max animate-ribbon-loop pointer-events-none p-0 m-0 leading-none">
         <!-- Sequence 1 -->
-        <div class="flex shrink-0 items-center">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+        <div class="flex shrink-0 items-center p-0 m-0 leading-none">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
         </div>
         <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
-        <div class="flex shrink-0 items-center">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0">
+        <div class="flex shrink-0 items-center p-0 m-0 leading-none">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
+            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
         </div>
     </div>
 </div>
@@ -111,10 +111,10 @@
     <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/60 rounded-full blur-[140px] pointer-events-none"></div>
 
     <!-- Side Shape touching right screen edge and touching bottom / next section (Compact size) -->
-    <img src="{{ asset('images/side-shape-theme.svg') }}" 
+    <img src="{{ asset('images/side-shape-theme.svg') }}?v=2" 
          alt="" 
          aria-hidden="true"
-         class="absolute right-0 bottom-0 max-h-[48%] sm:max-h-[58%] lg:max-h-[66%] max-w-[200px] sm:max-w-[280px] lg:max-w-[340px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-75 lg:opacity-95">
+         class="absolute right-0 bottom-0 max-h-[48%] sm:max-h-[58%] lg:max-h-[66%] max-w-[200px] sm:max-w-[280px] lg:max-w-[340px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-80 lg:opacity-100">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-3xl flex flex-col items-center lg:items-start text-center lg:text-left">

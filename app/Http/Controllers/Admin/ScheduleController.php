@@ -69,9 +69,17 @@ class ScheduleController extends Controller
 
         $schedules = $query->get();
 
-        // Key Festival Dates
-        $festivalDates = [
-            'all' => 'All Days',
+        // Dynamically queried distinct scheduled dates from DB merged with milestone dates
+        $distinctDates = Schedule::whereNotNull('start_time')
+            ->selectRaw('DATE(start_time) as schedule_date')
+            ->distinct()
+            ->orderBy('schedule_date')
+            ->pluck('schedule_date')
+            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->filter()
+            ->values();
+
+        $milestoneLabels = [
             '2026-10-06' => 'Oct 06 (Offstage)',
             '2026-10-07' => 'Oct 07 (Offstage)',
             '2026-10-08' => 'Oct 08 (Offstage)',
@@ -80,6 +88,23 @@ class ScheduleController extends Controller
             '2026-10-31' => 'Oct 31 (Main Stage Day 1)',
             '2026-11-01' => 'Nov 01 (Main Stage Day 2)',
         ];
+
+        $allUniqueDates = $distinctDates->merge(array_keys($milestoneLabels))->unique()->sort()->values();
+
+        $festivalDates = ['all' => 'All Days'];
+        foreach ($allUniqueDates as $dt) {
+            if (isset($milestoneLabels[$dt])) {
+                $festivalDates[$dt] = $milestoneLabels[$dt];
+            } else {
+                $carbon = Carbon::parse($dt);
+                $festivalDates[$dt] = $carbon->format('M d').' ('.$carbon->format('D').')';
+            }
+        }
+
+        if ($date && $date !== 'all' && ! isset($festivalDates[$date])) {
+            $carbon = Carbon::parse($date);
+            $festivalDates[$date] = $carbon->format('M d').' ('.$carbon->format('D').')';
+        }
 
         // Grouping for Board / Timeline
         $schedulesByStage = $schedules->groupBy('stage_id');

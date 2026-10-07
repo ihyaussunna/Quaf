@@ -680,19 +680,14 @@
                     <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1.5">
                         Date *
                     </label>
-                    <div class="flex items-center gap-2 mb-2 flex-wrap">
-                        <button type="button" @click="modalDate = '2026-10-06'; modalTime = '16:40'; checkClash()" 
-                                :class="modalDate === '2026-10-06' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Oct 06 (Offstage)</button>
-                        <button type="button" @click="modalDate = '2026-10-07'; modalTime = '16:40'; checkClash()" 
-                                :class="modalDate === '2026-10-07' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Oct 07 (Offstage)</button>
-                        <button type="button" @click="modalDate = '2026-10-31'; modalTime = '09:00'; checkClash()" 
-                                :class="modalDate === '2026-10-31' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-red-50 text-red-900 hover:bg-red-100'"
-                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Oct 31 (Main Stage 1)</button>
-                        <button type="button" @click="modalDate = '2026-11-01'; modalTime = '09:00'; checkClash()" 
-                                :class="modalDate === '2026-11-01' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-red-50 text-red-900 hover:bg-red-100'"
-                                class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">Nov 01 (Main Stage 2)</button>
+                    <div class="flex items-center gap-1.5 mb-2 flex-wrap max-h-28 overflow-y-auto">
+                        @foreach($festivalDates as $fDate => $fLabel)
+                            @if($fDate !== 'all')
+                                <button type="button" @click="modalDate = '{{ $fDate }}'; checkClash()" 
+                                        :class="modalDate === '{{ $fDate }}' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">{{ $fLabel }}</button>
+                            @endif
+                        @endforeach
                     </div>
                     <input type="date" name="date" x-model="modalDate" @change="checkClash()" required
                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono">

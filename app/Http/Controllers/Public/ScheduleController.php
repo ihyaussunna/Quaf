@@ -7,6 +7,7 @@ use App\Models\Program;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\Zone;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -29,7 +30,26 @@ class ScheduleController extends Controller
 
         $stages = Stage::orderBy('code')->get();
         $zones = Zone::orderBy('display_order')->get();
-        $festivalDays = self::FESTIVAL_DAYS;
+        $distinctDates = Schedule::whereNotNull('start_time')
+            ->selectRaw('DATE(start_time) as schedule_date')
+            ->distinct()
+            ->orderBy('schedule_date')
+            ->pluck('schedule_date')
+            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->filter()
+            ->values();
+
+        $allUniqueDays = $distinctDates->merge(array_keys(self::FESTIVAL_DAYS))->unique()->sort()->values();
+
+        $festivalDays = [];
+        foreach ($allUniqueDays as $dt) {
+            if (isset(self::FESTIVAL_DAYS[$dt])) {
+                $festivalDays[$dt] = self::FESTIVAL_DAYS[$dt];
+            } else {
+                $carbon = Carbon::parse($dt);
+                $festivalDays[$dt] = $carbon->format('d M').' — Festival Day ('.$carbon->format('D').')';
+            }
+        }
 
         // Fetch explicitly scheduled events if any exist
         $scheduleQuery = Schedule::with(['program.category', 'program.zone', 'program.stage', 'program.result', 'stage']);

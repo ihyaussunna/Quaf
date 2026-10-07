@@ -70,10 +70,16 @@ use Illuminate\Support\Facades\Route;
 Route::get('/storage/{path}', function (string $path) {
     $fullPath = storage_path('app/public/'.$path);
     if (! file_exists($fullPath) || ! is_file($fullPath)) {
+        $fullPath = public_path('storage/'.$path);
+    }
+    if (! file_exists($fullPath) || ! is_file($fullPath)) {
         abort(404);
     }
 
-    return response()->file($fullPath);
+    return response()->file($fullPath, [
+        'Cache-Control' => 'public, max-age=86400',
+        'Access-Control-Allow-Origin' => '*',
+    ]);
 })->where('path', '.*')->name('storage.fallback');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');

@@ -10,6 +10,14 @@
     <form method="POST" action="{{ route('admin.news.store') }}" enctype="multipart/form-data" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
         @csrf
 
+        @if($errors->any())
+            <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-mono space-y-1">
+                @foreach($errors->all() as $error)
+                    <div>• {{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
+
         <div>
             <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Article Title</label>
             <input type="text" name="title" value="{{ old('title') }}" required placeholder="e.g. Inaugural Lamp Lighting Ceremony Opens QUAF"

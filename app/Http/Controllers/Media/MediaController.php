@@ -9,10 +9,10 @@ use App\Models\News;
 use App\Models\Stage;
 use App\Models\VideoItem;
 use App\Services\AuditLogger;
+use App\Services\FileStorageService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -81,7 +81,7 @@ class MediaController extends Controller
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
-            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'cover_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
@@ -89,8 +89,7 @@ class MediaController extends Controller
 
         $coverImagePath = $validated['cover_image'] ?? null;
         if ($request->hasFile('cover_file')) {
-            $path = $request->file('cover_file')->store('media/news', 'public');
-            $coverImagePath = '/storage/'.$path;
+            $coverImagePath = FileStorageService::storePublicFile($request->file('cover_file'), 'media/news');
         }
 
         $slug = Str::slug($validated['title']).'-'.Str::random(5);
@@ -129,7 +128,7 @@ class MediaController extends Controller
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
-            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'cover_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
@@ -137,8 +136,7 @@ class MediaController extends Controller
 
         $coverImagePath = $validated['cover_image'] ?? $news->getRawOriginal('cover_image');
         if ($request->hasFile('cover_file')) {
-            $path = $request->file('cover_file')->store('media/news', 'public');
-            $coverImagePath = '/storage/'.$path;
+            $coverImagePath = FileStorageService::storePublicFile($request->file('cover_file'), 'media/news');
         }
 
         $publishedAt = $validated['published_at'] ?? $news->published_at;
@@ -222,7 +220,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'image_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'category' => ['required', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
@@ -232,8 +230,7 @@ class MediaController extends Controller
 
         $imagePath = $validated['image_path'] ?? null;
         if ($request->hasFile('image_file')) {
-            $path = $request->file('image_file')->store('media/gallery', 'public');
-            $imagePath = '/storage/'.$path;
+            $imagePath = FileStorageService::storePublicFile($request->file('image_file'), 'media/gallery');
         }
 
         if (empty($imagePath)) {
@@ -268,7 +265,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
+            'image_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'category' => ['required', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
@@ -278,8 +275,7 @@ class MediaController extends Controller
 
         $imagePath = $validated['image_path'] ?? $gallery->getRawOriginal('image_path');
         if ($request->hasFile('image_file')) {
-            $path = $request->file('image_file')->store('media/gallery', 'public');
-            $imagePath = '/storage/'.$path;
+            $imagePath = FileStorageService::storePublicFile($request->file('image_file'), 'media/gallery');
         }
 
         $old = $gallery->toArray();
@@ -351,8 +347,7 @@ class MediaController extends Controller
 
         $thumbnailPath = $validated['thumbnail_path'] ?? null;
         if ($request->hasFile('thumbnail_file')) {
-            $path = $request->file('thumbnail_file')->store('media/videos', 'public');
-            $thumbnailPath = Storage::url($path);
+            $thumbnailPath = FileStorageService::storePublicFile($request->file('thumbnail_file'), 'media/videos');
         } elseif (empty($thumbnailPath)) {
             $thumbnailPath = "https://img.youtube.com/vi/{$youtubeId}/hqdefault.jpg";
         }
@@ -382,7 +377,7 @@ class MediaController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'youtube_url' => ['required', 'string'],
             'thumbnail_path' => ['nullable', 'string'],
-            'thumbnail_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'thumbnail_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'category' => ['required', 'string', 'max:100'],
             'is_live' => ['nullable', 'boolean'],
             'display_order' => ['nullable', 'integer'],
@@ -392,8 +387,7 @@ class MediaController extends Controller
 
         $thumbnailPath = $validated['thumbnail_path'] ?? $video->thumbnail_path;
         if ($request->hasFile('thumbnail_file')) {
-            $path = $request->file('thumbnail_file')->store('media/videos', 'public');
-            $thumbnailPath = Storage::url($path);
+            $thumbnailPath = FileStorageService::storePublicFile($request->file('thumbnail_file'), 'media/videos');
         }
 
         $old = $video->toArray();
