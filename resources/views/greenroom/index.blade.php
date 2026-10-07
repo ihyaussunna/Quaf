@@ -21,6 +21,7 @@
           showRulesModal: false,
           showCriteriaModal: false,
           showSubmitLockModal: false,
+          showQrModal: false,
           isSubmittingLock: false,
           modalProgramName: '',
           modalProgramCode: '',
@@ -543,6 +544,70 @@
             <div class="space-y-4">
                 
                 @if($activeProgram)
+
+                    <!-- Online Submission Form QR Code Card (Automatic when form configured by Admin) -->
+                    @if($onlineForm)
+                        <div class="rounded-3xl bg-slate-900 text-white p-5 sm:p-6 border border-slate-800 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-5">
+                            <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                            <div class="flex items-start gap-4 z-10 w-full md:w-auto">
+                                <!-- Clickable QR Code -->
+                                <button type="button" 
+                                        @click="showQrModal = true" 
+                                        class="shrink-0 p-2.5 bg-white rounded-2xl shadow-lg border-2 border-emerald-400 group cursor-pointer hover:scale-105 transition"
+                                        title="ക്യുആർ കോഡ് വലുതായി കാണിക്കാൻ ക്ലിക്ക് ചെയ്യുക">
+                                    <img src="{{ $onlineForm->qr_code_url }}" alt="Submission QR Code" class="w-20 h-20 sm:w-24 sm:h-24 object-contain">
+                                    <span class="block text-[9px] font-mono font-bold text-slate-800 text-center mt-1 group-hover:text-[#be1e2d]">
+                                        Fullscreen &rarr;
+                                    </span>
+                                </button>
+
+                                <div class="space-y-1.5 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold uppercase border border-emerald-500/30 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span>ONLINE SUBMISSION ACTIVE</span>
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px] font-mono">
+                                            {{ $onlineSubmissionsCount }} Submissions Received
+                                        </span>
+                                    </div>
+
+                                    <h3 class="font-sora text-base sm:text-lg font-bold text-white tracking-tight">
+                                        ഓൺലൈൻ സമർപ്പണ ഫോം (Online Submission QR Code)
+                                    </h3>
+
+                                    <p class="text-xs text-slate-300 max-w-xl leading-relaxed">
+                                        വിദ്യാർത്ഥികൾക്ക് ഈ മത്സരത്തിൽ രചനകൾ, ഫോട്ടോകൾ അല്ലെങ്കിൽ വീഡിയോകൾ ഓൺലൈനായി സമർപ്പിക്കാം. മുകളിലെ ക്യുആർ കോഡ് സ്കാൻ ചെയ്ത് <strong class="text-amber-300">കോഡ് ലെറ്റർ</strong> നൽകി രചന സമർപ്പിക്കാൻ അറിയിക്കുക.
+                                    </p>
+
+                                    <!-- Quick Actions -->
+                                    <div class="pt-2 flex flex-wrap items-center gap-2 text-xs font-mono">
+                                        <button type="button" 
+                                                @click="showQrModal = true" 
+                                                class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 transition cursor-pointer">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                            <span>Project QR (ക്യുആർ വലുതായി കാണിക്കുക)</span>
+                                        </button>
+
+                                        <a href="{{ route('admin.online-forms.submissions', $onlineForm->id) }}" 
+                                           target="_blank" 
+                                           class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 border border-white/15 transition">
+                                            <span>Submissions ({{ $onlineSubmissionsCount }})</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </a>
+
+                                        <button type="button" 
+                                                @click="navigator.clipboard.writeText('{{ $onlineForm->public_url }}'); triggerToast('സബ്മിഷൻ ലിങ്ക് കോപ്പി ചെയ്തു!')"
+                                                class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold border border-white/10 transition cursor-pointer">
+                                            <span>Copy Link</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Timing Window & Lock Alert Banner -->
                     @if($windowState['state'] === 'open')
                         <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
@@ -1060,6 +1125,68 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+    @endif
+
+    <!-- Fullscreen / Projector Online Submission QR Modal -->
+    @if(isset($onlineForm) && $onlineForm)
+    <div x-show="showQrModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+         style="display: none;"
+         @click.self="showQrModal = false"
+         @keydown.escape.window="showQrModal = false">
+        
+        <div class="bg-white rounded-3xl max-w-xl w-full p-8 sm:p-10 shadow-2xl border border-slate-200 relative text-center flex flex-col items-center">
+            
+            <button type="button" 
+                    @click="showQrModal = false" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <span class="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-[#be1e2d] text-white uppercase tracking-wider mb-2">
+                ONLINE SUBMISSION QR CODE
+            </span>
+
+            <h2 class="font-sora text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {{ $onlineForm->program?->name ?? $onlineForm->title }}
+            </h2>
+
+            <p class="text-xs font-mono text-slate-500 mt-1 mb-6">
+                Program Code: <strong class="text-slate-800">{{ $onlineForm->program?->code }}</strong> • Category: <strong class="text-slate-800">{{ $onlineForm->program?->category?->name ?? 'General' }}</strong>
+            </p>
+
+            <!-- Large Projector QR Code -->
+            <div class="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 shadow-inner mb-6">
+                <img src="{{ $onlineForm->qr_code_url }}" 
+                     alt="Submission QR Code" 
+                     class="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-2xl mx-auto shadow-sm">
+            </div>
+
+            <p class="text-xs text-slate-600 max-w-md leading-relaxed mb-6">
+                മത്സരാർത്ഥികൾ മൊബൈൽ ക്യാമറ ഉപയോഗിച്ച് മുകളിലെ ക്യുആർ കോഡ് സ്കാൻ ചെയ്ത് അവരുടെ <strong class="text-[#be1e2d]">കോഡ് ലെറ്റർ (Code Letter)</strong> നൽകി രചന/ഫോട്ടോ/വീഡിയോ സമർപ്പിക്കുക.
+            </p>
+
+            <div class="flex items-center gap-3 w-full max-w-md justify-center">
+                <button type="button" 
+                        @click="navigator.clipboard.writeText('{{ $onlineForm->public_url }}'); triggerToast('സബ്മിഷൻ ലിങ്ക് കോപ്പി ചെയ്തു!')"
+                        class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-mono text-xs font-bold transition cursor-pointer">
+                    Copy Link
+                </button>
+                <a href="{{ $onlineForm->public_url }}" 
+                   target="_blank" 
+                   class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-mono text-xs font-bold transition">
+                    Open Submission Page &rarr;
+                </a>
+            </div>
+
         </div>
     </div>
     @endif

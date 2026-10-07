@@ -232,8 +232,8 @@
             </a>
 
             <!-- 7. Forms (Dropdown) -->
-            <div x-data="{ open: {{ request()->routeIs('admin.forms.*') || request()->routeIs('admin.idcards.*') ? 'true' : 'false' }} }" class="space-y-0.5">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('admin.forms.*') ? 'text-white font-semibold' : '' }}">
+            <div x-data="{ open: {{ request()->routeIs('admin.forms.*') || request()->routeIs('admin.idcards.*') || request()->routeIs('admin.online-forms.*') ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('admin.forms.*') || request()->routeIs('admin.online-forms.*') ? 'text-white font-semibold' : '' }}">
                     <div class="flex items-center gap-3">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span>Forms</span>
@@ -241,6 +241,10 @@
                     <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-[11px]" style="display: none;">
+                    <a href="{{ route('admin.online-forms.index') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.online-forms.*') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                        <span>Online Submission Forms</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-mono">NEW</span>
+                    </a>
                     <a href="{{ route('admin.forms.call-list') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.forms.call-list') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Call list</a>
                     <a href="{{ route('admin.forms.evaluation') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.forms.evaluation') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Evaluation Form</a>
                     <a href="{{ route('admin.idcards.chest-slips') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.idcards.chest-slips') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Chest Slips</a>

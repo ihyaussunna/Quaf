@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\IdCardController as AdminIdCardController;
 use App\Http\Controllers\Admin\JudgeController as AdminJudgeController;
 use App\Http\Controllers\Admin\MarkEntryController as AdminMarkEntryController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\OnlineSubmissionFormController as AdminOnlineSubmissionFormController;
 use App\Http\Controllers\Admin\PanelAccessController as AdminPanelAccessController;
 use App\Http\Controllers\Admin\PointController as AdminPointController;
 use App\Http\Controllers\Admin\PrintReportController as AdminPrintReportController;
@@ -43,6 +44,7 @@ use App\Http\Controllers\Public\GalleryController;
 use App\Http\Controllers\Public\GroupController as PublicGroupController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
+use App\Http\Controllers\Public\OnlineSubmissionController as PublicOnlineSubmissionController;
 use App\Http\Controllers\Public\PublicApiController;
 use App\Http\Controllers\Public\ResultController;
 use App\Http\Controllers\Public\ScheduleController;
@@ -85,6 +87,11 @@ Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index
 Route::get('/media', [VideoController::class, 'mediaHub'])->name('media.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.index');
+
+// Public Student Online Submissions
+Route::get('/submit/{slug}', [PublicOnlineSubmissionController::class, 'show'])->name('online-submission.show');
+Route::post('/submit/{slug}', [PublicOnlineSubmissionController::class, 'submit'])->name('online-submission.submit');
+Route::get('/submit/program/{program}', [PublicOnlineSubmissionController::class, 'showByProgram'])->name('online-submission.by-program');
 
 // Public Verifications & Live Displays
 Route::get('/verify', [VerificationController::class, 'index'])->name('verify.index');
@@ -389,6 +396,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Printable Forms
     Route::get('forms/call-list', [AdminFormController::class, 'callList'])->name('forms.call-list');
     Route::get('forms/evaluation', [AdminFormController::class, 'evaluation'])->name('forms.evaluation');
+
+    // Online Submission Forms Management
+    Route::prefix('online-forms')->name('online-forms.')->group(function () {
+        Route::get('/', [AdminOnlineSubmissionFormController::class, 'index'])->name('index');
+        Route::get('/create', [AdminOnlineSubmissionFormController::class, 'create'])->name('create');
+        Route::post('/', [AdminOnlineSubmissionFormController::class, 'store'])->name('store');
+        Route::get('/{form}/edit', [AdminOnlineSubmissionFormController::class, 'edit'])->name('edit');
+        Route::put('/{form}', [AdminOnlineSubmissionFormController::class, 'update'])->name('update');
+        Route::delete('/{form}', [AdminOnlineSubmissionFormController::class, 'destroy'])->name('destroy');
+        Route::post('/{form}/toggle', [AdminOnlineSubmissionFormController::class, 'toggleStatus'])->name('toggle');
+        Route::get('/{form}/submissions', [AdminOnlineSubmissionFormController::class, 'submissions'])->name('submissions');
+        Route::get('/{form}/qr', [AdminOnlineSubmissionFormController::class, 'qr'])->name('qr');
+        Route::delete('/submissions/{submission}', [AdminOnlineSubmissionFormController::class, 'destroySubmission'])->name('submissions.destroy');
+    });
 
     // Stages & Live Status
     Route::post('stages/{stage}/live-status', [AdminStageController::class, 'updateLiveStatus'])->name('stages.live-status');

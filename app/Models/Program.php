@@ -221,6 +221,16 @@ class Program extends Model
         return $this->hasMany(JudgeAssignment::class);
     }
 
+    public function onlineSubmissionForm(): HasOne
+    {
+        return $this->hasOne(OnlineSubmissionForm::class);
+    }
+
+    public function onlineSubmissions(): HasMany
+    {
+        return $this->hasMany(OnlineSubmission::class);
+    }
+
     public function judges(): BelongsToMany
     {
         return $this->belongsToMany(Judge::class, 'judge_assignments');

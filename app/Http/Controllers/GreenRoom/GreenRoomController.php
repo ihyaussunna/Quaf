@@ -99,6 +99,13 @@ class GreenRoomController extends Controller
             $activeProgram->load('scoringCriteria');
         }
 
+        // Eager load online submission form if configured
+        if ($activeProgram && ! $activeProgram->relationLoaded('onlineSubmissionForm')) {
+            $activeProgram->load('onlineSubmissionForm');
+        }
+        $onlineForm = $activeProgram?->onlineSubmissionForm;
+        $onlineSubmissionsCount = $onlineForm ? $onlineForm->submissions()->count() : 0;
+
         $windowState = $activeProgram ? $activeProgram->getCallListWindowState() : null;
         $isAdmin = in_array(auth()->user()?->role, ['admin', 'super_admin']);
         $isEditable = ($windowState['is_open'] ?? false) || $isAdmin;
@@ -201,7 +208,9 @@ class GreenRoomController extends Controller
             'calls',
             'stats',
             'search',
-            'attendanceFilter'
+            'attendanceFilter',
+            'onlineForm',
+            'onlineSubmissionsCount'
         ));
     }
 
