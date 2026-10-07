@@ -18,6 +18,17 @@
         this.lightboxCode = code;
         this.lightboxSrc = src;
         this.lightboxOpen = true;
+    },
+    clearAllLocalDrafts() {
+        if (confirm('ബ്രൗസറിൽ താൽക്കാലികമായി സേവ് ചെയ്തിട്ടുള്ള ഡ്രാഫ്റ്റ് മാർക്കുകൾ ക്ലിയർ ചെയ്യണോ? (Clear all local draft scores?)')) {
+            const prefix = 'quaf_draft_{{ $program->id }}_';
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith(prefix)) {
+                    localStorage.removeItem(key);
+                }
+            });
+            window.location.reload();
+        }
     }
 }">
     <!-- Top Bar (Light Theme) -->
@@ -54,6 +65,15 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>View Rules & Guidelines</span>
             </button>
+
+            <!-- Reset Drafts Button -->
+            <button type="button" @click="clearAllLocalDrafts()"
+                    class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 border border-slate-200 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                    title="Clear local draft scores stored in this browser">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span>Reset Drafts</span>
+            </button>
+
             <span class="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-bold">
                 {{ $entries->count() }} Candidates
             </span>
