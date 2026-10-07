@@ -33,10 +33,16 @@ class NewsController extends Controller
             'content' => ['required', 'string'],
             'category' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
+            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
             'is_featured' => ['boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
         ]);
+
+        if ($request->hasFile('cover_file')) {
+            $path = $request->file('cover_file')->store('media/news', 'public');
+            $validated['cover_image'] = '/storage/'.$path;
+        }
 
         $validated['slug'] = Str::slug($validated['title']).'-'.Str::random(5);
         if ($validated['status'] === 'published' && empty($validated['published_at'])) {
@@ -63,10 +69,18 @@ class NewsController extends Controller
             'content' => ['required', 'string'],
             'category' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
+            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
             'is_featured' => ['boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
         ]);
+
+        if ($request->hasFile('cover_file')) {
+            $path = $request->file('cover_file')->store('media/news', 'public');
+            $validated['cover_image'] = '/storage/'.$path;
+        } elseif (empty($validated['cover_image'])) {
+            $validated['cover_image'] = $news->getRawOriginal('cover_image');
+        }
 
         $old = $news->toArray();
         $news->update($validated);

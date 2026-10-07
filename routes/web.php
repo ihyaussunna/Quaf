@@ -66,6 +66,16 @@ use Illuminate\Support\Facades\Route;
 | Public Portal Routes
 |--------------------------------------------------------------------------
 */
+// Storage asset delivery fallback
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/'.$path);
+    if (! file_exists($fullPath) || ! is_file($fullPath)) {
+        abort(404);
+    }
+
+    return response()->file($fullPath);
+})->where('path', '.*')->name('storage.fallback');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/home', [HomeController::class, 'homeView'])->name('home.view');
 Route::get('/about', [HomeController::class, 'about'])->name('about');

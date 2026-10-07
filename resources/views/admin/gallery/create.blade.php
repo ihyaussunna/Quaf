@@ -7,8 +7,16 @@
         <h1 class="text-3xl font-sora font-black text-slate-900">Add Photo</h1>
     </div>
 
-    <form method="POST" action="{{ route('admin.gallery.store') }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
+    <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
         @csrf
+
+        @if($errors->any())
+            <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-mono space-y-1">
+                @foreach($errors->all() as $error)
+                    <div>• {{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
 
         <div>
             <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Photo Title / Caption</label>
@@ -16,10 +24,19 @@
                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
         </div>
 
-        <div>
-            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Image URL</label>
-            <input type="url" name="image_path" value="{{ old('image_path') }}" required placeholder="https://images.unsplash.com/..."
-                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <label class="block text-xs font-mono uppercase text-slate-700 font-bold">Photo Source</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <span class="text-[11px] font-mono text-slate-500 block mb-1">Option 1: Upload from Device (JPG, PNG, WebP)</span>
+                    <input type="file" name="image_file" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800">
+                </div>
+                <div>
+                    <span class="text-[11px] font-mono text-slate-500 block mb-1">Option 2: Direct Image URL</span>
+                    <input type="url" name="image_path" value="{{ old('image_path') }}" placeholder="https://images.unsplash.com/..."
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] transition-colors">
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-3 gap-4">

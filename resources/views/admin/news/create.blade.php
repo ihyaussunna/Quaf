@@ -7,7 +7,7 @@
         <h1 class="text-3xl font-sora font-black text-slate-900">Create Article</h1>
     </div>
 
-    <form method="POST" action="{{ route('admin.news.store') }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
+    <form method="POST" action="{{ route('admin.news.store') }}" enctype="multipart/form-data" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
         @csrf
 
         <div>
@@ -32,10 +32,19 @@
             </div>
         </div>
 
-        <div>
-            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Cover Image URL</label>
-            <input type="url" name="cover_image" value="{{ old('cover_image') }}" placeholder="https://images.unsplash.com/..."
-                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <label class="block text-xs font-mono uppercase text-slate-700 font-bold">Cover Photo</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <span class="text-[11px] font-mono text-slate-500 block mb-1">Option 1: Upload from Device (JPG, PNG, WebP)</span>
+                    <input type="file" name="cover_file" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800">
+                </div>
+                <div>
+                    <span class="text-[11px] font-mono text-slate-500 block mb-1">Option 2: Direct Image URL</span>
+                    <input type="url" name="cover_image" value="{{ old('cover_image') }}" placeholder="https://images.unsplash.com/..."
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#f3bd2e] transition-colors">
+                </div>
+            </div>
         </div>
 
         <div>

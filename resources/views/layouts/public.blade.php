@@ -142,9 +142,9 @@
     </style>
     @stack('styles')
 </head>
-<body class="bg-slate-50 text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
+<body class="{{ (request()->routeIs('home.view') || request()->routeIs('home')) ? 'bg-[#07070a]' : 'bg-slate-50' }} text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
       x-data="{ scrolled: false, mobileOpen: false, showStudentModal: false }"
-      @scroll.window="scrolled = (window.pageYOffset > 280)">
+      @scroll.window="scrolled = (window.pageYOffset > 440)">
 
     <!-- Top Announcement Bar / Live Alert -->
     @php
@@ -254,7 +254,7 @@
     </header>
 
     <!-- Main Content Slot -->
-    <main class="flex-1 w-full pb-16 lg:pb-0">
+    <main class="flex-1 w-full pb-16 lg:pb-0 {{ (request()->routeIs('home.view') || request()->routeIs('home')) ? '-mt-16 sm:-mt-20' : '' }}">
         @yield('content')
     </main>
 

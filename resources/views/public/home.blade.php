@@ -5,7 +5,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative overflow-hidden bg-[#07070a] text-white pt-8 sm:pt-14 pb-8 sm:pb-10">
+<section class="relative overflow-hidden bg-[#07070a] text-white pt-24 sm:pt-32 pb-8 sm:pb-10">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -110,32 +110,32 @@
     <div class="absolute top-0 right-1/4 w-96 h-96 bg-red-50/60 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/60 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <!-- Side Shape touching right screen edge and touching bottom / next section -->
+    <!-- Side Shape touching right screen edge and touching bottom / next section (Compact size) -->
     <img src="{{ asset('images/side-shape-theme.svg') }}" 
          alt="" 
          aria-hidden="true"
-         class="absolute right-0 bottom-0 max-h-[75%] sm:max-h-[85%] lg:max-h-[92%] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-75 lg:opacity-100">
+         class="absolute right-0 bottom-0 max-h-[48%] sm:max-h-[58%] lg:max-h-[66%] max-w-[200px] sm:max-w-[280px] lg:max-w-[340px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-75 lg:opacity-95">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-3xl flex flex-col items-center lg:items-start text-center lg:text-left">
             <!-- Elegant Category Pill -->
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono uppercase tracking-widest font-semibold mb-6 animate-subheading">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-mono uppercase tracking-widest font-semibold mb-5 sm:mb-6 animate-subheading">
                 <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
                 <span>Festival Theme & Philosophy</span>
             </div>
 
             <!-- Main Heading Requested by User -->
-            <h2 class="font-sora text-2xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight uppercase leading-tight mb-8 sm:mb-10 text-center lg:text-left animate-heading">
+            <h2 class="font-sora text-2xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight uppercase leading-tight mb-6 sm:mb-8 text-center lg:text-left animate-heading">
                 KNOWLEDGE IS INHERITED, NOT MERELY TRANSMITTED.
             </h2>
 
-            <!-- Exact Philosophical Text Body -->
-            <div class="space-y-6 text-slate-700 text-base sm:text-lg leading-relaxed sm:leading-loose text-center lg:text-left">
+            <!-- Exact Philosophical Text Body (Tightened line-height & paragraph spacing) -->
+            <div class="space-y-3.5 sm:space-y-4 text-slate-700 text-base sm:text-lg leading-normal sm:leading-relaxed text-center lg:text-left">
                 <p class="font-medium text-slate-900 text-lg sm:text-xl">
                     What makes knowledge worthy of being inherited? And what ensures that, as it passes from one generation to another, it remains true to its source?
                 </p>
 
-                <div class="w-16 h-0.5 bg-gradient-to-r from-[#be1e2d] to-[#f3bd2e] mx-auto lg:mx-0 my-4 opacity-70"></div>
+                <div class="w-16 h-0.5 bg-gradient-to-r from-[#be1e2d] to-[#f3bd2e] mx-auto lg:mx-0 my-3 opacity-70"></div>
 
                 <p>
                     In the Islamic tradition, the answer begins with <span class="font-bold text-slate-950">Adab</span>.

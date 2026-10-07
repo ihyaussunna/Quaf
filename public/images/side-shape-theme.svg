@@ -3,16 +3,12 @@
   <defs>
     <style>
       .cls-1 {
-        fill: #be1e2d;
-      }
-
-      .cls-2 {
-        fill: #f3bd2e;
+        fill: #005c94;
       }
     </style>
   </defs>
   <g id="Layer_1-2" data-name="Layer 1">
     <polygon class="cls-1" points="415.8 0 415.8 592.6 0 592.6 197.53 0 415.8 0"/>
-    <polygon class="cls-2" points="415.8 115.06 415.8 592.6 197.53 592.6 312.58 115.06 415.8 115.06"/>
+    <polygon points="415.8 115.06 415.8 592.6 197.53 592.6 312.58 115.06 415.8 115.06"/>
   </g>
 </svg>

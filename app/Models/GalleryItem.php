@@ -37,4 +37,30 @@ class GalleryItem extends Model
     {
         return $this->belongsTo(Stage::class);
     }
+
+    /**
+     * Resolve gallery image to complete browser-loadable URL.
+     */
+    public function getImagePathAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            $parsed = parse_url($value);
+            if (isset($parsed['path']) && str_starts_with($parsed['path'], '/storage/')) {
+                return asset(ltrim($parsed['path'], '/'));
+            }
+
+            return $value;
+        }
+
+        $clean = ltrim($value, '/');
+        if (str_starts_with($clean, 'storage/')) {
+            return asset($clean);
+        }
+
+        return asset('storage/'.$clean);
+    }
 }

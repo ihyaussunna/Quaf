@@ -81,7 +81,7 @@ class MediaController extends Controller
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
-            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
@@ -90,7 +90,7 @@ class MediaController extends Controller
         $coverImagePath = $validated['cover_image'] ?? null;
         if ($request->hasFile('cover_file')) {
             $path = $request->file('cover_file')->store('media/news', 'public');
-            $coverImagePath = Storage::url($path);
+            $coverImagePath = '/storage/'.$path;
         }
 
         $slug = Str::slug($validated['title']).'-'.Str::random(5);
@@ -129,16 +129,16 @@ class MediaController extends Controller
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'cover_image' => ['nullable', 'string'],
-            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'cover_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,published,scheduled'],
             'published_at' => ['nullable', 'date'],
         ]);
 
-        $coverImagePath = $validated['cover_image'] ?? $news->cover_image;
+        $coverImagePath = $validated['cover_image'] ?? $news->getRawOriginal('cover_image');
         if ($request->hasFile('cover_file')) {
             $path = $request->file('cover_file')->store('media/news', 'public');
-            $coverImagePath = Storage::url($path);
+            $coverImagePath = '/storage/'.$path;
         }
 
         $publishedAt = $validated['published_at'] ?? $news->published_at;
@@ -222,7 +222,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:6144'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
             'category' => ['required', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
@@ -233,7 +233,7 @@ class MediaController extends Controller
         $imagePath = $validated['image_path'] ?? null;
         if ($request->hasFile('image_file')) {
             $path = $request->file('image_file')->store('media/gallery', 'public');
-            $imagePath = Storage::url($path);
+            $imagePath = '/storage/'.$path;
         }
 
         if (empty($imagePath)) {
@@ -268,7 +268,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:6144'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,gif', 'max:12288'],
             'category' => ['required', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
@@ -276,10 +276,10 @@ class MediaController extends Controller
             'display_order' => ['nullable', 'integer'],
         ]);
 
-        $imagePath = $validated['image_path'] ?? $gallery->image_path;
+        $imagePath = $validated['image_path'] ?? $gallery->getRawOriginal('image_path');
         if ($request->hasFile('image_file')) {
             $path = $request->file('image_file')->store('media/gallery', 'public');
-            $imagePath = Storage::url($path);
+            $imagePath = '/storage/'.$path;
         }
 
         $old = $gallery->toArray();
