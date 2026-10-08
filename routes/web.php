@@ -84,6 +84,7 @@ Route::get('/storage/{path}', function (string $path) {
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/home', [HomeController::class, 'homeView'])->name('home.view');
+Route::get('/launch', [HomeController::class, 'launch'])->name('launch');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 

@@ -41,6 +41,14 @@ class HomeController extends Controller
         return $this->renderHomepage();
     }
 
+    /**
+     * Dedicated /launch route for official website launch ceremonies.
+     */
+    public function launch(): View
+    {
+        return view('public.launch');
+    }
+
     public function about(): View
     {
         $groups = Group::orderBy('rank_cache')->get();
