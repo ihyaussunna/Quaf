@@ -29,10 +29,6 @@
                     <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
                     <span>സ്റ്റേജ് കോളിംഗ് (Stage Calling Console) &rarr;</span>
                 </a>
-                <a href="{{ route('media.results.index') }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sora">
-                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-                    <span>മീഡിയ ഡെസ്ക് (Media Desk)</span>
-                </a>
                 <button type="button" onclick="window.location.reload()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     <span>Refresh Now</span>
@@ -284,11 +280,7 @@
                         @else
                             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-ml">
                                 <span>ഈ ഫലം മീഡിയ ടീം പരിശോധിക്കുകയും സോഷ്യൽ മീഡിയ പോസ്റ്റർ തയ്യാറാക്കുകയും ചെയ്യും.</span>
-                                @if($res->poster_image)
-                                    <a href="{{ route('media.results.public-poster', $res) }}" target="_blank" class="text-[#be1e2d] font-bold hover:underline">
-                                        പബ്ലിക് പോസ്റ്റർ കാണുക
-                                    </a>
-                                @endif
+                                <span class="font-mono text-emerald-600 font-semibold">Announced</span>
                             </div>
                         @endif
 

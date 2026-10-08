@@ -84,7 +84,7 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['super_admin', 'admin', 'program_coordinator', 'stage_coordinator', 'program_committee']);
+        return in_array($this->role, ['super_admin', 'admin']);
     }
 
     public function isProgramCommittee(): bool

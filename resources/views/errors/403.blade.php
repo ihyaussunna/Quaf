@@ -74,6 +74,7 @@
                         'program_committee', 'program_coordinator' => route('program-committee.dashboard'),
                         'judge' => route('judge.dashboard'),
                         'green_room_coordinator' => route('greenroom.index'),
+                        'announcer' => route('announcer.index'),
                         'student' => route('student.dashboard'),
                         'admin', 'super_admin' => route('admin.dashboard'),
                         default => route('home'),
@@ -84,6 +85,7 @@
                         'program_committee', 'program_coordinator' => 'Program Samithi',
                         'judge' => 'Judge Panel',
                         'green_room_coordinator' => 'Green Room',
+                        'announcer' => 'Announcer Desk',
                         'student' => 'Student Dashboard',
                         default => 'My Dashboard',
                     };

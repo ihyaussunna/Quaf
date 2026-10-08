@@ -33,9 +33,6 @@
             <a href="{{ route('media.results.templates') }}" class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors">
                 Templates
             </a>
-            <a href="{{ route('announcer.index') }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors">
-                Announcer Desk
-            </a>
         </div>
     </div>
 

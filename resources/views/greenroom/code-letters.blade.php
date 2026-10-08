@@ -11,11 +11,6 @@
                 <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">View Code Letters</h1>
                 <p class="text-sm text-gray-500 mt-1">View assigned code letters for students in a selected program</p>
             </div>
-            <div>
-                <a href="{{ route('admin.code-letters.index') }}" class="inline-flex items-center px-5 py-2.5 bg-[#f95724] text-white rounded-xl text-sm font-bold shadow-sm hover:bg-[#e04818] transition">
-                    Add CodeLetter
-                </a>
-            </div>
         </div>
 
         <!-- Filter Card matching screenshot -->

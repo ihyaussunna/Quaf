@@ -77,10 +77,6 @@
                                 <a href="{{ route('stages.projector', $stage) }}" target="_blank" class="text-xs font-mono text-[#005c94] hover:underline font-semibold flex items-center gap-1">
                                     <span>Auditorium Projector</span> ↗
                                 </a>
-                                <span class="text-slate-300">|</span>
-                                <a href="{{ route('greenroom.index', ['stage_id' => $stage->id]) }}" class="text-xs font-mono text-[#f3bd2e] hover:underline font-semibold flex items-center gap-1">
-                                    <span>Green Room</span> →
-                                </a>
                             </div>
                             <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase hover:brightness-110 shadow-sm">
                                 Update Live Status

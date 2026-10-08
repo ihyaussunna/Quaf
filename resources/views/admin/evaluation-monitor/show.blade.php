@@ -18,10 +18,6 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('greenroom.call-list', ['program' => $program->id]) }}" target="_blank"
-               class="px-4 py-2 rounded-xl bg-[#005c94] text-white font-bold text-xs uppercase hover:bg-[#004b78] transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
-                <span>Green Room Call Desk</span>
-            </a>
             <a href="{{ route('admin.mark-entry.show', $program->id) }}"
                class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase hover:bg-[#a01624] transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <span>Mark Entry / Declare Result &rarr;</span>

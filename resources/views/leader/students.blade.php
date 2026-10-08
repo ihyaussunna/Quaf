@@ -128,7 +128,7 @@
                                         </span>
                                     @endif
 
-                                    <a href="{{ route('admin.idcards.show', $student->id) }}"
+                                    <a href="{{ route('verify.student', $student->qr_token ?? $student->student_id) }}"
                                        target="_blank"
                                        class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold font-sora transition shadow-2xs flex items-center gap-1">
                                         <span>Pass</span>

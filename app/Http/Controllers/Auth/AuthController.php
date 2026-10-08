@@ -163,6 +163,14 @@ class AuthController extends Controller
 
     protected function redirectBasedOnRole($user): RedirectResponse
     {
+        // Never redirect a non-admin to an admin intended URL
+        if (! $user->isAdmin()) {
+            $intended = session()->get('url.intended');
+            if ($intended && str_contains($intended, '/admin')) {
+                session()->forget('url.intended');
+            }
+        }
+
         if ($user->role === 'announcer') {
             return redirect()->intended(route('announcer.index'));
         }
@@ -177,12 +185,6 @@ class AuthController extends Controller
 
         if ($user->isAdmin()) {
             return redirect()->intended(route('admin.dashboard'));
-        }
-
-        // Never redirect a non-admin to an admin intended URL
-        $intended = session()->get('url.intended');
-        if ($intended && str_contains($intended, '/admin')) {
-            session()->forget('url.intended');
         }
 
         if ($user->isJudge()) {

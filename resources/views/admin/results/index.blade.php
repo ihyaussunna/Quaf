@@ -184,11 +184,6 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        @if($res->status === 'announced' || $res->status === 'published')
-                                            <a href="{{ route('media.results.studio', $res) }}" class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-semibold text-[11px] hover:bg-purple-700 transition-colors shadow-2xs">
-                                                Media Poster
-                                            </a>
-                                        @endif
                                         @if($res->status !== 'published')
                                             <form method="POST" action="{{ route('admin.results.publish', $res) }}" class="inline">
                                                 @csrf

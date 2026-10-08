@@ -27,11 +27,6 @@
                     <span>&larr; All Programs (Call Lists)</span>
                 </a>
             @endif
-            <a href="{{ route('greenroom.call-list', $selectedProgram ? ['program' => $selectedProgram->id] : []) }}" target="_blank"
-               class="px-4 py-2 rounded-xl bg-[#005c94] text-white font-bold text-xs uppercase hover:bg-[#004b78] transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                <span>Green Room View</span>
-            </a>
             <a href="{{ route('admin.evaluation-monitor.index') }}"
                class="px-4 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs uppercase hover:bg-purple-700 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>

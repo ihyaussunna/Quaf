@@ -10,10 +10,6 @@
         </div>
         <div class="flex items-center gap-2.5">
             @if($selectedProgram)
-                <a href="{{ route('greenroom.call-list', ['program' => $selectedProgram->id]) }}" class="px-4 py-2 rounded-xl bg-[#005c94] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#004b78] transition-colors shadow-sm flex items-center gap-1.5 font-sora">
-                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span>ഡിജിറ്റൽ കോൾ ലിസ്റ്റ് (Interactive)</span>
-                </a>
                 <a href="{{ route('admin.forms.call-list', ['program' => $selectedProgram->id, 'print' => 1]) }}" target="_blank" class="px-4 py-2 rounded-xl bg-slate-800 text-white font-bold text-xs uppercase tracking-wider hover:bg-slate-700 transition-colors shadow-sm flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     <span>Open Print View</span>

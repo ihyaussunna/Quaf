@@ -89,12 +89,9 @@
                 </button>
             </form>
 
-            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-mono">
                 <a href="{{ route('results.index') }}" class="text-[#f3bd2e] hover:underline">
                     &larr; Live Festival Results
-                </a>
-                <a href="{{ route('judge.login') }}" class="text-slate-500 hover:text-slate-800">
-                    Judge PIN &rarr;
                 </a>
             </div>
         </div>

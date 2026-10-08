@@ -590,13 +590,6 @@
                                             <span>Project QR (ക്യുആർ വലുതായി കാണിക്കുക)</span>
                                         </button>
 
-                                        <a href="{{ route('admin.online-forms.submissions', $onlineForm->id) }}" 
-                                           target="_blank" 
-                                           class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 border border-white/15 transition">
-                                            <span>Submissions ({{ $onlineSubmissionsCount }})</span>
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                        </a>
-
                                         <button type="button" 
                                                 @click="navigator.clipboard.writeText('{{ $onlineForm->public_url }}'); triggerToast('സബ്മിഷൻ ലിങ്ക് കോപ്പി ചെയ്തു!')"
                                                 class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold border border-white/10 transition cursor-pointer">

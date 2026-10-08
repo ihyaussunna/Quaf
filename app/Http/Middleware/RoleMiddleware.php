@@ -37,22 +37,12 @@ class RoleMiddleware
 
         // Check if user's role matches any allowed role
         if (! in_array($user->role, $roles)) {
-            // If user is admin and route allows 'admin', let's allow sub-admin roles if appropriate
-            if (in_array('admin', $roles) && in_array($user->role, ['admin', 'program_coordinator', 'stage_coordinator', 'program_committee'])) {
-                return $this->addNoCacheHeaders($next($request));
-            }
-
-            if (in_array('media_team', $roles) && in_array($user->role, ['media_team', 'media_manager', 'admin'])) {
-                return $this->addNoCacheHeaders($next($request));
-            }
-
             // For JSON or API calls, return 403 response
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json(['message' => 'Unauthorized access.'], 403);
             }
 
-            // Web requests: Never show a jarring 403 error page!
-            // If a non-admin is trying to access the Admin Panel (/admin*):
+            // Web requests: Never allow non-admins into the Admin Panel or routes requiring admin!
             if ($request->is('admin*') || in_array('admin', $roles) || in_array('super_admin', $roles)) {
                 Auth::logout();
                 $request->session()->invalidate();
@@ -61,13 +51,14 @@ class RoleMiddleware
                 return redirect()->route('login')->with('info', 'Admin പാനലിൽ പ്രവേശിക്കാൻ Admin വിവരങ്ങൾ നൽകി ലോഗിൻ ചെയ്യുക (Please login with Admin credentials).');
             }
 
-            // For other sections, smoothly redirect to user's authorized dashboard
+            // For other sections, redirect to user's authorized dashboard
             $dashUrl = match ($user->role) {
                 'super_admin', 'admin' => route('admin.dashboard'),
                 'group_leader' => route('leader.dashboard'),
                 'judge' => route('judge.dashboard'),
                 'media_team', 'media_manager' => route('media.dashboard'),
                 'green_room_coordinator' => route('greenroom.index'),
+                'announcer' => route('announcer.index'),
                 'program_committee', 'program_coordinator' => route('program-committee.dashboard'),
                 'student' => route('student.dashboard'),
                 default => route('home'),

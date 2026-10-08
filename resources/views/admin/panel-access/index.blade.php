@@ -35,9 +35,6 @@
             <a href="{{ route('admin.dashboard') }}" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors">
                 Back to Dashboard
             </a>
-            <a href="{{ route('media.dashboard') }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs transition-colors shadow-md shadow-[#be1e2d]/20">
-                Go to Media Panel
-            </a>
         </div>
     </div>
 

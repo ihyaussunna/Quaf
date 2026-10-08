@@ -162,15 +162,6 @@
                         <span class="block text-[10px] opacity-75">Official Print Manual</span>
                     </div>
                 </a>
-
-                @if(auth()->user()?->isAdmin() || auth()->user()?->isSuperAdmin())
-                    <div class="pt-3 border-t border-white/10 mt-3">
-                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Central Admin</span>
-                        </a>
-                    </div>
-                @endif
             </nav>
         </div>
 
