@@ -6,8 +6,8 @@
 <section class="py-14 sm:py-20 bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">FESTIVAL HERITAGE & PHILOSOPHY</span>
-            <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2 tracking-tight">
+            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL HERITAGE & PHILOSOPHY</span>
+            <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2 tracking-tight animate-heading">
                 About QUAF
             </h1>
             <p class="text-base sm:text-lg text-slate-600 mt-3 font-normal leading-relaxed">

@@ -279,7 +279,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Clean Section Header -->
-        <div class="mb-12">
+        <div class="mb-10 sm:mb-12">
+            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1 animate-subheading">
+                STANDINGS & TALLIES
+            </span>
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight animate-heading">
                 Festival Standings
             </h2>

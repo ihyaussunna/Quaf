@@ -6,8 +6,8 @@
 <section class="py-14 sm:py-20 bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
-            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">FESTIVAL INFORMATION & LOCATION</span>
-            <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2">
+            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL INFORMATION & LOCATION</span>
+            <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2 animate-heading">
                 Venue & Contact
             </h1>
             <p class="text-base text-slate-600 mt-2 leading-relaxed">
