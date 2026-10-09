@@ -107,10 +107,10 @@
 
     <!-- Ambient Multi-Color Glow Mesh (Official QUAF Festival Palette) -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[650px] h-[340px] sm:h-[650px] bg-[#be1e2d] rounded-full blur-[160px] animate-ambient-1 pointer-events-none"></div>
-        <div class="absolute top-12 left-10 w-72 sm:w-[450px] h-72 sm:h-[450px] bg-[#f3bd2e] rounded-full blur-[150px] animate-ambient-2 pointer-events-none"></div>
-        <div class="absolute bottom-12 right-10 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-[#005c94] rounded-full blur-[160px] animate-ambient-3 pointer-events-none"></div>
-        <div class="absolute bottom-1/4 left-1/4 w-60 sm:w-[380px] h-60 sm:h-[380px] bg-[#009444]/15 rounded-full blur-[130px] pointer-events-none"></div>
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[650px] h-[340px] sm:h-[650px] rounded-full animate-ambient-1 pointer-events-none" style="background: rgba(190, 30, 45, 0.20); filter: blur(140px); -webkit-filter: blur(140px);"></div>
+        <div class="absolute top-12 left-10 w-72 sm:w-[450px] h-72 sm:h-[450px] rounded-full animate-ambient-2 pointer-events-none" style="background: rgba(243, 189, 46, 0.16); filter: blur(140px); -webkit-filter: blur(140px);"></div>
+        <div class="absolute bottom-12 right-10 w-72 sm:w-[500px] h-72 sm:h-[500px] rounded-full animate-ambient-3 pointer-events-none" style="background: rgba(0, 92, 148, 0.20); filter: blur(140px); -webkit-filter: blur(140px);"></div>
+        <div class="absolute bottom-1/4 left-1/4 w-60 sm:w-[380px] h-60 sm:h-[380px] rounded-full pointer-events-none" style="background: rgba(0, 148, 68, 0.10); filter: blur(120px); -webkit-filter: blur(120px);"></div>
     </div>
 
     <!-- Subtle Grid Overlay -->
@@ -133,16 +133,19 @@
     <!-- Main Center Stage -->
     <main class="w-full max-w-3xl mx-auto flex flex-col items-center text-center my-auto py-8 sm:py-12 z-10 relative">
         
-        <!-- QUAF Official Brand Mark with Ethereal Floating Glow -->
+        <!-- QUAF Official Brand Marks with Ethereal Floating Glow -->
         <div class="relative mb-6 sm:mb-8 animate-float">
             <!-- Pulsing Radar Glow Rings behind Logo -->
-            <div class="absolute inset-0 rounded-full bg-[#be1e2d]/30 blur-xl animate-ring"></div>
-            <div class="absolute -inset-4 rounded-full bg-[#f3bd2e]/20 blur-2xl animate-ring" style="animation-delay: 1.2s;"></div>
+            <div class="absolute -inset-6 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(190,30,45,0.3) 0%, rgba(243,189,46,0.15) 50%, transparent 70%); filter: blur(35px);"></div>
 
-            <div class="relative z-10 flex items-center justify-center p-3 sm:p-5 rounded-3xl bg-slate-900/60 backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
+            <div class="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 px-5 sm:px-8 py-3.5 sm:py-4 rounded-3xl bg-white/[0.05] backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10">
+                <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
+                     alt="Ādabīc Inheritance — QUAF" 
+                     class="h-10 xs:h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_8px_24px_rgba(255,255,255,0.12)]">
+                <span class="hidden sm:block w-px h-10 bg-white/15"></span>
                 <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
-                     alt="QUAF — Markaz Cultural Festival" 
-                     class="h-16 xs:h-20 sm:h-24 md:h-28 w-auto object-contain drop-shadow-[0_12px_32px_rgba(255,255,255,0.15)]">
+                     alt="QUAF 2026" 
+                     class="h-9 xs:h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_8px_24px_rgba(255,255,255,0.12)]">
             </div>
         </div>
 
