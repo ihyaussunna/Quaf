@@ -359,6 +359,9 @@
                 box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
                 will-change: transform;
             }
+            .quaf-tape-row-no-shadow {
+                box-shadow: none !important;
+            }
             .quaf-tape-track {
                 display: flex;
                 width: max-content;
@@ -429,8 +432,8 @@
                 </div>
             </div>
 
-            <!-- Bar 3: Blue (Bottom bar, moves LEFT, tilted -0.7deg, overlaps Yellow) -->
-            <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 10; transform: rotate(-0.7deg);">
+            <!-- Bar 3: Blue (Bottom bar, moves LEFT, tilted -0.7deg, overlaps Yellow, shadow removed) -->
+            <div class="quaf-tape-row quaf-tape-overlap quaf-tape-row-no-shadow" style="position: relative; z-index: 10; transform: rotate(-0.7deg); box-shadow: none;">
                 <div class="quaf-tape-track" style="animation: quafBarScrollLeft 38s linear infinite;">
                     <!-- Sequence 1 -->
                     <div style="display: flex; flex-shrink: 0; align-items: center;">
