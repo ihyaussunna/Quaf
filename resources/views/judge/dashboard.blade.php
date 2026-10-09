@@ -21,11 +21,11 @@
                 <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">Assigned</div>
             </div>
             <div class="text-center px-4 border-r border-slate-200">
-                <div class="text-2xl font-sora font-bold text-amber-600">{{ $inProgress->count() }}</div>
-                <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">In Progress</div>
+                <div class="text-2xl font-sora font-bold text-amber-600">{{ $pendingEvaluationCount + $inProgressCount }}</div>
+                <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">Pending Evaluation</div>
             </div>
             <div class="text-center px-4">
-                <div class="text-2xl font-sora font-bold text-emerald-600">{{ $completed->count() }}</div>
+                <div class="text-2xl font-sora font-bold text-emerald-600">{{ $completedCount }}</div>
                 <div class="text-[10px] font-mono text-slate-500 uppercase font-semibold">Completed</div>
             </div>
         </div>
@@ -43,6 +43,12 @@
                 @php
                     $eval = $evaluationStatus[$prog->id] ?? ['total' => 0, 'submitted' => 0, 'is_complete' => false, 'present' => 0, 'pending' => 0];
                     $percent = $eval['total'] > 0 ? round(($eval['submitted'] / $eval['total']) * 100) : 0;
+                    $isComplete = $eval['is_complete'] || $prog->status === 'completed' || $prog->result !== null;
+                    $isLive = ($prog->status === 'in_progress');
+                    $isPartial = (!$isComplete && $eval['submitted'] > 0);
+                    $scheduledTime = $prog->scheduled_time ?? $prog->schedule?->start_time;
+                    $isPast = $scheduledTime ? $scheduledTime->isPast() : false;
+                    $isFuture = $scheduledTime ? $scheduledTime->isFuture() : false;
                 @endphp
                 <div class="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                     
@@ -62,17 +68,31 @@
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-500 bg-slate-50 border border-slate-200">
                                 {{ ucfirst($prog->type) }}
                             </span>
-                            @if($prog->status === 'in_progress')
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-mono font-bold animate-pulse">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Live On Stage
+                            @if($isComplete)
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-mono font-bold flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Completed</span>
                                 </span>
-                            @elseif($prog->status === 'completed')
-                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-mono font-bold">
-                                    Completed
+                            @elseif($isLive)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-[#be1e2d] border border-red-200 text-[10px] font-mono font-bold animate-pulse">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#be1e2d]"></span> Live On Stage
+                                </span>
+                            @elseif($isPartial)
+                                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-mono font-bold">
+                                    Scoring in Progress ({{ $eval['submitted'] }}/{{ $eval['present'] }})
+                                </span>
+                            @elseif($eval['present'] > 0 || $isPast)
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 text-[10px] font-mono font-bold flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span>Evaluation Pending</span>
+                                </span>
+                            @elseif($isFuture)
+                                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-semibold">
+                                    Upcoming
                                 </span>
                             @else
                                 <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-semibold">
-                                    Upcoming
+                                    Scheduled
                                 </span>
                             @endif
                         </div>

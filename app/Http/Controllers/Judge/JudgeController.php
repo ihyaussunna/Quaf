@@ -126,21 +126,42 @@ class JudgeController extends Controller
             ->pluck('total', 'program_id');
 
         $evaluationStatus = [];
+        $completedCount = 0;
+        $inProgressCount = 0;
+        $pendingEvaluationCount = 0;
+        $upcomingCount = 0;
+
         foreach ($assignedPrograms as $prog) {
             $present = (int) ($presentCounts[$prog->id] ?? 0);
             $submittedScores = (int) ($submittedCounts[$prog->id] ?? 0);
             $pending = max(0, $present - $submittedScores);
+            $isComplete = ($present > 0 && $submittedScores >= $present) || $prog->status === 'completed' || $prog->result !== null;
 
             $evaluationStatus[$prog->id] = [
                 'total' => $present,
                 'present' => $present,
                 'submitted' => $submittedScores,
                 'pending' => $pending,
-                'is_complete' => ($present > 0 && $submittedScores >= $present),
+                'is_complete' => $isComplete,
             ];
+
+            $scheduledTime = $prog->scheduled_time ?? $prog->schedule?->start_time;
+            $isPast = $scheduledTime ? $scheduledTime->isPast() : false;
+            $isLive = ($prog->status === 'in_progress');
+            $isPartial = (! $isComplete && $submittedScores > 0);
+
+            if ($isComplete) {
+                $completedCount++;
+            } elseif ($isLive || $isPartial) {
+                $inProgressCount++;
+            } elseif ($isPast || $present > 0) {
+                $pendingEvaluationCount++;
+            } else {
+                $upcomingCount++;
+            }
         }
 
-        return view('judge.dashboard', compact('judge', 'assignedPrograms', 'upcoming', 'inProgress', 'completed', 'evaluationStatus'));
+        return view('judge.dashboard', compact('judge', 'assignedPrograms', 'upcoming', 'inProgress', 'completed', 'evaluationStatus', 'completedCount', 'inProgressCount', 'pendingEvaluationCount', 'upcomingCount'));
     }
 
     public function showProgram(Program $program): View
