@@ -247,9 +247,9 @@
 
 <!-- =====================================================================
      SECTION 3: FESTIVAL METRICS STRIP (#BE1E2D CRIMSON RED THEME)
-     Count-up Animation (0 to Target)
+     Seamless transition to Section 4 with 3 Moving Tape Bars at the bottom
      ===================================================================== -->
-<section class="pt-14 sm:pt-20 pb-0 bg-[#be1e2d] text-white relative shadow-inner z-20"
+<section class="pt-14 sm:pt-20 pb-0 bg-[#be1e2d] text-white relative z-20 overflow-hidden"
          x-data="{
              animated: false,
              animateValue(el, target, duration = 1400) {
@@ -283,11 +283,6 @@
                  observer.observe(this.$el);
              }
          }">
-    
-    <!-- Background Gradient Accents -->
-    <div class="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 pointer-events-none"></div>
-    <div class="absolute -top-32 -right-32 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-[#f3bd2e]/20 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="grid grid-cols-2 lg:grid-cols-4 items-center">
@@ -344,125 +339,119 @@
 
         </div>
     </div>
+
+    <!-- JUNCTION: 3 INTERLOCKING MOVING BARS (SEAMLESS IN SECTION 3) -->
+    <div class="relative w-full select-none pointer-events-none mt-4 sm:mt-6">
+        <style>
+            @keyframes quafBarScrollLeft {
+                0% { transform: translate3d(0, 0, 0); }
+                100% { transform: translate3d(-50%, 0, 0); }
+            }
+            @keyframes quafBarScrollRight {
+                0% { transform: translate3d(-50%, 0, 0); }
+                100% { transform: translate3d(0, 0, 0); }
+            }
+            .quaf-tape-row {
+                width: 120%;
+                margin-left: -10%;
+                display: flex;
+                overflow: hidden;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+                will-change: transform;
+            }
+            .quaf-tape-track {
+                display: flex;
+                width: max-content;
+                align-items: center;
+                will-change: transform;
+            }
+            .quaf-tape-img {
+                height: 32px;
+                width: auto;
+                flex-shrink: 0;
+                display: block;
+            }
+            .quaf-tape-overlap {
+                margin-top: -10px;
+            }
+            @media (min-width: 640px) {
+                .quaf-tape-img {
+                    height: 38px;
+                }
+                .quaf-tape-overlap {
+                    margin-top: -13px;
+                }
+            }
+            @media (min-width: 1024px) {
+                .quaf-tape-img {
+                    height: 44px;
+                }
+                .quaf-tape-overlap {
+                    margin-top: -16px;
+                }
+            }
+        </style>
+
+        <div class="relative z-10 pt-2 pb-3 sm:pb-4">
+            <!-- Bar 1: Green (Top bar, moves LEFT, tilted -1.3deg) -->
+            <div class="quaf-tape-row" style="position: relative; z-index: 30; transform: rotate(-1.3deg);">
+                <div class="quaf-tape-track" style="animation: quafBarScrollLeft 34s linear infinite;">
+                    <!-- Sequence 1 -->
+                    <div style="display: flex; flex-shrink: 0; align-items: center;">
+                        @for ($i = 0; $i < 20; $i++)
+                            <img src="{{ asset('images/moving-quaf-bar-green.svg') }}" alt="QUAF" class="quaf-tape-img" loading="eager">
+                        @endfor
+                    </div>
+                    <!-- Sequence 2 (Identical Clone for infinite loop) -->
+                    <div style="display: flex; flex-shrink: 0; align-items: center;" aria-hidden="true">
+                        @for ($i = 0; $i < 20; $i++)
+                            <img src="{{ asset('images/moving-quaf-bar-green.svg') }}" alt="" class="quaf-tape-img" loading="eager">
+                        @endfor
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar 2: Yellow (Middle bar, moves RIGHT, tilted +0.8deg, overlaps Green) -->
+            <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 20; transform: rotate(0.8deg);">
+                <div class="quaf-tape-track" style="animation: quafBarScrollRight 28s linear infinite;">
+                    <!-- Sequence 1 -->
+                    <div style="display: flex; flex-shrink: 0; align-items: center;">
+                        @for ($i = 0; $i < 20; $i++)
+                            <img src="{{ asset('images/moving-quaf-bar-yellow.svg') }}" alt="QUAF" class="quaf-tape-img" loading="eager">
+                        @endfor
+                    </div>
+                    <!-- Sequence 2 (Identical Clone for infinite loop) -->
+                    <div style="display: flex; flex-shrink: 0; align-items: center;" aria-hidden="true">
+                        @for ($i = 0; $i < 20; $i++)
+                            <img src="{{ asset('images/moving-quaf-bar-yellow.svg') }}" alt="" class="quaf-tape-img" loading="eager">
+                        @endfor
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar 3: Blue (Bottom bar, moves LEFT, tilted -0.7deg, overlaps Yellow) -->
+            <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 10; transform: rotate(-0.7deg);">
+                <div class="quaf-tape-track" style="animation: quafBarScrollLeft 38s linear infinite;">
+                    <!-- Sequence 1 -->
+                    <div style="display: flex; flex-shrink: 0; align-items: center;">
+                        @for ($i = 0; $i < 20; $i++)
+                            <img src="{{ asset('images/moving-quaf-bar-blue.svg') }}" alt="QUAF" class="quaf-tape-img" loading="eager">
+                        @endfor
+                    </div>
+                    <!-- Sequence 2 (Identical Clone for infinite loop) -->
+                    <div style="display: flex; flex-shrink: 0; align-items: center;" aria-hidden="true">
+                        @for ($i = 0; $i < 20; $i++)
+                            <img src="{{ asset('images/moving-quaf-bar-blue.svg') }}" alt="" class="quaf-tape-img" loading="eager">
+                        @endfor
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- White section start: seamlessly at the bottom under the blue bar -->
+        <div class="absolute inset-x-0 bottom-0 h-6 sm:h-7 lg:h-8 bg-white pointer-events-none" style="z-index: 5;"></div>
+    </div>
 </section>
-
-<!-- =====================================================================
-     JUNCTION: 3 INTERLOCKING MOVING BARS (RED TO WHITE TRANSITION)
-     Top background: Crimson Red (#be1e2d) down to the middle of the Blue bar.
-     Bottom background: Pure White (#ffffff) from the middle of the Blue bar down.
-     ===================================================================== -->
-<div class="relative w-full overflow-hidden select-none pointer-events-none z-20">
-    <!-- Split Background: Top 50% Red (#be1e2d), Bottom 50% White (#ffffff) -->
-    <div class="absolute inset-0 flex flex-col pointer-events-none -z-10">
-        <div class="h-1/2 w-full bg-[#be1e2d]"></div>
-        <div class="h-1/2 w-full bg-white"></div>
-    </div>
-    <style>
-        @keyframes quafBarScrollLeft {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-50%, 0, 0); }
-        }
-        @keyframes quafBarScrollRight {
-            0% { transform: translate3d(-50%, 0, 0); }
-            100% { transform: translate3d(0, 0, 0); }
-        }
-        .quaf-tape-row {
-            width: 120%;
-            margin-left: -10%;
-            display: flex;
-            overflow: hidden;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
-            will-change: transform;
-        }
-        .quaf-tape-track {
-            display: flex;
-            width: max-content;
-            align-items: center;
-            will-change: transform;
-        }
-        .quaf-tape-img {
-            height: 32px;
-            width: auto;
-            flex-shrink: 0;
-            display: block;
-        }
-        .quaf-tape-overlap {
-            margin-top: -10px;
-        }
-        @media (min-width: 640px) {
-            .quaf-tape-img {
-                height: 38px;
-            }
-            .quaf-tape-overlap {
-                margin-top: -13px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .quaf-tape-img {
-                height: 44px;
-            }
-            .quaf-tape-overlap {
-                margin-top: -16px;
-            }
-        }
-    </style>
-
-    <div class="relative z-10 pt-2 sm:pt-3 pb-3 sm:pb-4">
-        <!-- Bar 1: Green (Top bar, moves LEFT, tilted -1.3deg) -->
-        <div class="quaf-tape-row" style="position: relative; z-index: 30; transform: rotate(-1.3deg);">
-            <div class="quaf-tape-track" style="animation: quafBarScrollLeft 34s linear infinite;">
-                <!-- Sequence 1 -->
-                <div style="display: flex; flex-shrink: 0; align-items: center;">
-                    @for ($i = 0; $i < 20; $i++)
-                        <img src="{{ asset('images/moving-quaf-bar-green.svg') }}" alt="QUAF" class="quaf-tape-img" loading="eager">
-                    @endfor
-                </div>
-                <!-- Sequence 2 (Identical Clone for infinite loop) -->
-                <div style="display: flex; flex-shrink: 0; align-items: center;" aria-hidden="true">
-                    @for ($i = 0; $i < 20; $i++)
-                        <img src="{{ asset('images/moving-quaf-bar-green.svg') }}" alt="" class="quaf-tape-img" loading="eager">
-                    @endfor
-                </div>
-            </div>
-        </div>
-
-        <!-- Bar 2: Yellow (Middle bar, moves RIGHT, tilted +0.8deg, overlaps Green) -->
-        <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 20; transform: rotate(0.8deg);">
-            <div class="quaf-tape-track" style="animation: quafBarScrollRight 28s linear infinite;">
-                <!-- Sequence 1 -->
-                <div style="display: flex; flex-shrink: 0; align-items: center;">
-                    @for ($i = 0; $i < 20; $i++)
-                        <img src="{{ asset('images/moving-quaf-bar-yellow.svg') }}" alt="QUAF" class="quaf-tape-img" loading="eager">
-                    @endfor
-                </div>
-                <!-- Sequence 2 (Identical Clone for infinite loop) -->
-                <div style="display: flex; flex-shrink: 0; align-items: center;" aria-hidden="true">
-                    @for ($i = 0; $i < 20; $i++)
-                        <img src="{{ asset('images/moving-quaf-bar-yellow.svg') }}" alt="" class="quaf-tape-img" loading="eager">
-                    @endfor
-                </div>
-            </div>
-        </div>
-
-        <!-- Bar 3: Blue (Bottom bar, moves LEFT, tilted -0.7deg, overlaps Yellow) -->
-        <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 10; transform: rotate(-0.7deg);">
-            <div class="quaf-tape-track" style="animation: quafBarScrollLeft 38s linear infinite;">
-                <!-- Sequence 1 -->
-                <div style="display: flex; flex-shrink: 0; align-items: center;">
-                    @for ($i = 0; $i < 20; $i++)
-                        <img src="{{ asset('images/moving-quaf-bar-blue.svg') }}" alt="QUAF" class="quaf-tape-img" loading="eager">
-                    @endfor
-                </div>
-                <!-- Sequence 2 (Identical Clone for infinite loop) -->
-                <div style="display: flex; flex-shrink: 0; align-items: center;" aria-hidden="true">
-                    @for ($i = 0; $i < 20; $i++)
-                        <img src="{{ asset('images/moving-quaf-bar-blue.svg') }}" alt="" class="quaf-tape-img" loading="eager">
-                    @endfor
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- =====================================================================
      SECTION 4: STANDINGS & RESULTS (WHITE THEME)
