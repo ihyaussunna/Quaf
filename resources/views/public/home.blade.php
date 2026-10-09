@@ -806,7 +806,7 @@
          trackX: 0,
          ticking: false,
          update() {
-             const sy = window.pageYOffset || document.documentElement.scrollTop;
+             const sy = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
              // Downward scroll increases sy => rotates left (negative degrees)
              // Upward scroll decreases sy   => rotates right (positive relative movement)
              this.rotDeg = -((sy * 0.45) % 360);
@@ -820,17 +820,50 @@
              }
          }
      }"
-     x-init="window.addEventListener('scroll', () => onScroll(), { passive: true }); update();">
+     @scroll.window.passive="onScroll()"
+     x-init="update();">
+
+    <!-- Shared SVG definition for high performance & instant browser paint -->
+    <svg class="hidden" aria-hidden="true" style="display:none;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <g id="greenbar-sun-pattern" fill="#ffffff">
+                <g>
+                    <polygon points="231.23 195.32 226.89 0 237.03 0 232.69 195.32 231.23 195.32 231.23 195.32"/>
+                    <polygon points="219.94 197.34 155.46 12.92 165.1 9.79 221.33 196.89 219.94 197.34 219.94 197.34"/>
+                    <polygon points="209.83 202.75 91.52 47.28 99.72 41.32 211.02 201.89 209.83 202.75 209.83 202.75"/>
+                    <polygon points="201.89 211.02 41.32 99.72 47.28 91.52 202.75 209.83 201.89 211.02 201.89 211.02"/>
+                    <polygon points="196.89 221.33 9.79 165.1 12.92 155.46 197.34 219.94 196.89 221.33 196.89 221.33"/>
+                    <polygon points="195.32 232.69 0 237.03 0 226.89 195.32 231.23 195.32 232.69 195.32 232.69"/>
+                    <polygon points="197.34 243.98 12.92 308.46 9.79 298.82 196.89 242.59 197.34 243.98 197.34 243.98"/>
+                    <polygon points="202.75 254.09 47.28 372.4 41.32 364.2 201.89 252.9 202.75 254.09 202.75 254.09"/>
+                    <polygon points="211.02 262.03 99.72 422.6 91.52 416.64 209.83 261.17 211.02 262.03 211.02 262.03"/>
+                    <polygon points="221.33 267.03 165.1 454.13 155.46 451 219.94 266.58 221.33 267.03 221.33 267.03"/>
+                    <polygon points="232.69 268.6 237.03 463.92 226.89 463.92 231.23 268.6 232.69 268.6 232.69 268.6"/>
+                    <polygon points="243.98 266.58 308.46 451 298.82 454.13 242.59 267.03 243.98 266.58 243.98 266.58"/>
+                    <polygon points="254.09 261.17 372.4 416.64 364.2 422.6 252.9 262.03 254.09 261.17 254.09 261.17"/>
+                    <polygon points="262.03 252.9 422.6 364.2 416.64 372.4 261.17 254.09 262.03 252.9 262.03 252.9"/>
+                    <polygon points="267.03 242.59 454.13 298.82 451 308.46 266.58 243.98 267.03 242.59 267.03 242.59"/>
+                    <polygon points="268.6 231.23 463.92 226.89 463.92 237.03 268.6 232.69 268.6 231.23 268.6 231.23"/>
+                    <polygon points="266.58 219.94 451 155.46 454.13 165.1 267.03 221.33 266.58 219.94 266.58 219.94"/>
+                    <polygon points="261.17 209.83 416.64 91.52 422.6 99.72 262.03 211.02 261.17 209.83 261.17 209.83"/>
+                    <polygon points="252.9 201.89 364.2 41.32 372.4 47.28 254.09 202.75 252.9 201.89 252.9 201.89"/>
+                    <polygon points="242.59 196.89 298.82 9.79 308.46 12.92 243.98 197.34 242.59 196.89 242.59 196.89"/>
+                </g>
+                <circle cx="231.56" cy="233.03" r="38.19"/>
+            </g>
+        </defs>
+    </svg>
 
     <div class="flex w-max items-center will-change-transform py-0.5"
          :style="'transform: translate3d(' + trackX + 'px, 0, 0)'">
         @for ($i = 0; $i < 30; $i++)
             <div class="shrink-0 px-3 sm:px-5 md:px-6 flex items-center justify-center">
-                <img src="{{ asset('images/rotating-round-sun-vector-pattern.svg') }}"
-                     alt="" 
-                     aria-hidden="true"
-                     class="h-7 sm:h-8 md:h-9 w-auto shrink-0 will-change-transform pointer-events-none select-none"
+                <div class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 shrink-0 will-change-transform origin-center pointer-events-none select-none flex items-center justify-center"
                      :style="'transform: rotate(' + rotDeg + 'deg)'">
+                    <svg viewBox="0 0 463.92 463.92" class="w-full h-full block" fill="#ffffff">
+                        <use href="#greenbar-sun-pattern" xlink:href="#greenbar-sun-pattern"></use>
+                    </svg>
+                </div>
             </div>
         @endfor
     </div>
