@@ -358,7 +358,7 @@
     </div>
 
     <!-- 3 Interlocking Moving QUAF Bars attached to the bottom of Section 3 -->
-    <div class="relative w-full overflow-hidden select-none pointer-events-none mt-8 sm:mt-12 -mb-6 sm:-mb-8 lg:-mb-10 pb-1 sm:pb-2 z-20"
+    <div class="relative w-full overflow-hidden select-none pointer-events-none mt-2 sm:mt-4 pt-10 sm:pt-14 pb-8 sm:pb-10 -mb-10 sm:-mb-14 lg:-mb-16 z-20"
          style="will-change: transform;">
         <style>
             @keyframes quafBarScrollLeft {
@@ -410,8 +410,8 @@
             }
         </style>
 
-        <!-- Bar 1: Green (Top bar, moves LEFT, tilted -1.5deg) -->
-        <div class="quaf-tape-row" style="position: relative; z-index: 30; transform: rotate(-1.5deg);">
+        <!-- Bar 1: Green (Top bar, moves LEFT, tilted -1.3deg) -->
+        <div class="quaf-tape-row" style="position: relative; z-index: 30; transform: rotate(-1.3deg);">
             <div class="quaf-tape-track" style="animation: quafBarScrollLeft 34s linear infinite;">
                 <!-- Sequence 1 -->
                 <div style="display: flex; flex-shrink: 0; align-items: center;">
@@ -428,8 +428,8 @@
             </div>
         </div>
 
-        <!-- Bar 2: Yellow (Middle bar, moves RIGHT, tilted +0.9deg, overlaps Green) -->
-        <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 20; transform: rotate(0.9deg);">
+        <!-- Bar 2: Yellow (Middle bar, moves RIGHT, tilted +0.8deg, overlaps Green) -->
+        <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 20; transform: rotate(0.8deg);">
             <div class="quaf-tape-track" style="animation: quafBarScrollRight 28s linear infinite;">
                 <!-- Sequence 1 -->
                 <div style="display: flex; flex-shrink: 0; align-items: center;">
@@ -446,8 +446,8 @@
             </div>
         </div>
 
-        <!-- Bar 3: Blue (Bottom bar, moves LEFT, tilted -0.8deg, overlaps Yellow) -->
-        <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 10; transform: rotate(-0.8deg);">
+        <!-- Bar 3: Blue (Bottom bar, moves LEFT, tilted -0.7deg, overlaps Yellow) -->
+        <div class="quaf-tape-row quaf-tape-overlap" style="position: relative; z-index: 10; transform: rotate(-0.7deg);">
             <div class="quaf-tape-track" style="animation: quafBarScrollLeft 38s linear infinite;">
                 <!-- Sequence 1 -->
                 <div style="display: flex; flex-shrink: 0; align-items: center;">
