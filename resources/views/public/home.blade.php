@@ -20,7 +20,7 @@
                 opacity: 0;
             }
             100% {
-                transform: translate3d(25%, 0, 0);
+                transform: translate3d(36%, 0, 0);
                 opacity: 0.95;
             }
         }
@@ -35,9 +35,9 @@
         .hero-pattern-wrapper {
             position: absolute;
             right: 0;
-            bottom: -90px;
-            width: 320px;
-            height: 320px;
+            bottom: -120px;
+            width: 260px;
+            height: 260px;
             pointer-events: none;
             user-select: none;
             z-index: 1;
@@ -46,16 +46,16 @@
         }
         @media (min-width: 640px) {
             .hero-pattern-wrapper {
-                bottom: -120px;
-                width: 440px;
-                height: 440px;
+                bottom: -150px;
+                width: 360px;
+                height: 360px;
             }
         }
         @media (min-width: 1024px) {
             .hero-pattern-wrapper {
-                bottom: -150px;
-                width: 580px;
-                height: 580px;
+                bottom: -190px;
+                width: 440px;
+                height: 440px;
             }
         }
         .hero-pattern-svg {
@@ -301,9 +301,6 @@
                       data-target="{{ $stats['students'] ?? 640 }}">
                     0
                 </span>
-                <span class="text-[11px] font-mono text-white/70 block mt-2">
-                    Verified Competitors
-                </span>
                 <!-- Vertical Divider (between Students and Groups) -->
                 <div class="absolute right-0 top-1/2 -translate-y-1/2 h-14 sm:h-16 w-px bg-white/30 pointer-events-none"></div>
             </div>
@@ -313,12 +310,9 @@
                 <span class="text-xs font-mono uppercase tracking-widest text-white/80 block mb-2 font-semibold">
                     Groups
                 </span>
-                <span class="font-sora text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight block text-[#f3bd2e]" 
+                <span class="font-sora text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight block text-white" 
                       data-target="{{ $stats['groups'] ?? 5 }}">
                     0
-                </span>
-                <span class="text-[11px] font-mono text-white/70 block mt-2">
-                    Academic Houses
                 </span>
                 <!-- Vertical Divider (between Groups and Zones on desktop) -->
                 <div class="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-14 sm:h-16 w-px bg-white/30 pointer-events-none"></div>
@@ -333,9 +327,6 @@
                       data-target="{{ $stats['zones'] ?? 4 }}">
                     0
                 </span>
-                <span class="text-[11px] font-mono text-white/70 block mt-2">
-                    Academic Divisions
-                </span>
                 <!-- Vertical Divider (between Zones and Programs) -->
                 <div class="absolute right-0 top-1/2 -translate-y-1/2 h-14 sm:h-16 w-px bg-white/30 pointer-events-none"></div>
             </div>
@@ -349,67 +340,75 @@
                       data-target="{{ $stats['programs'] ?? 144 }}">
                     0
                 </span>
-                <span class="text-[11px] font-mono text-white/70 block mt-2">
-                    Stage & Offstage Events
-                </span>
             </div>
 
         </div>
     </div>
+</section>
 
-    <!-- 3 Interlocking Moving QUAF Bars attached to the bottom of Section 3 -->
-    <div class="relative w-full overflow-hidden select-none pointer-events-none mt-2 sm:mt-4 pt-10 sm:pt-14 pb-8 sm:pb-10 -mb-10 sm:-mb-14 lg:-mb-16 z-20"
-         style="will-change: transform;">
-        <style>
-            @keyframes quafBarScrollLeft {
-                0% { transform: translate3d(0, 0, 0); }
-                100% { transform: translate3d(-50%, 0, 0); }
-            }
-            @keyframes quafBarScrollRight {
-                0% { transform: translate3d(-50%, 0, 0); }
-                100% { transform: translate3d(0, 0, 0); }
-            }
-            .quaf-tape-row {
-                width: 120%;
-                margin-left: -10%;
-                display: flex;
-                overflow: hidden;
-                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
-                will-change: transform;
-            }
-            .quaf-tape-track {
-                display: flex;
-                width: max-content;
-                align-items: center;
-                will-change: transform;
-            }
+<!-- =====================================================================
+     JUNCTION: 3 INTERLOCKING MOVING BARS (RED TO WHITE TRANSITION)
+     Top background: Crimson Red (#be1e2d) down to the middle of the Blue bar.
+     Bottom background: Pure White (#ffffff) from the middle of the Blue bar down.
+     ===================================================================== -->
+<div class="relative w-full overflow-hidden select-none pointer-events-none z-20">
+    <!-- Crimson Red background on top (covers Green, Yellow, and top half of Blue bar) -->
+    <div class="absolute inset-x-0 top-0 bottom-[16px] sm:bottom-[19px] lg:bottom-[22px] bg-[#be1e2d]"></div>
+    
+    <!-- Pure White background at bottom (covers bottom half of Blue bar and seamlessly merges into Section 4) -->
+    <div class="absolute inset-x-0 bottom-0 h-[16px] sm:h-[19px] lg:h-[22px] bg-white"></div>
+
+    <style>
+        @keyframes quafBarScrollLeft {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+        @keyframes quafBarScrollRight {
+            0% { transform: translate3d(-50%, 0, 0); }
+            100% { transform: translate3d(0, 0, 0); }
+        }
+        .quaf-tape-row {
+            width: 120%;
+            margin-left: -10%;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+            will-change: transform;
+        }
+        .quaf-tape-track {
+            display: flex;
+            width: max-content;
+            align-items: center;
+            will-change: transform;
+        }
+        .quaf-tape-img {
+            height: 32px;
+            width: auto;
+            flex-shrink: 0;
+            display: block;
+        }
+        .quaf-tape-overlap {
+            margin-top: -10px;
+        }
+        @media (min-width: 640px) {
             .quaf-tape-img {
-                height: 32px;
-                width: auto;
-                flex-shrink: 0;
-                display: block;
+                height: 38px;
             }
             .quaf-tape-overlap {
-                margin-top: -10px;
+                margin-top: -13px;
             }
-            @media (min-width: 640px) {
-                .quaf-tape-img {
-                    height: 38px;
-                }
-                .quaf-tape-overlap {
-                    margin-top: -13px;
-                }
+        }
+        @media (min-width: 1024px) {
+            .quaf-tape-img {
+                height: 44px;
             }
-            @media (min-width: 1024px) {
-                .quaf-tape-img {
-                    height: 44px;
-                }
-                .quaf-tape-overlap {
-                    margin-top: -16px;
-                }
+            .quaf-tape-overlap {
+                margin-top: -16px;
             }
-        </style>
+        }
+    </style>
 
+    <div class="relative z-10 pt-4 sm:pt-6">
         <!-- Bar 1: Green (Top bar, moves LEFT, tilted -1.3deg) -->
         <div class="quaf-tape-row" style="position: relative; z-index: 30; transform: rotate(-1.3deg);">
             <div class="quaf-tape-track" style="animation: quafBarScrollLeft 34s linear infinite;">
@@ -464,14 +463,14 @@
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- =====================================================================
      SECTION 4: STANDINGS & RESULTS (WHITE THEME)
      Matching user screenshot: Left Team Standings, Right Latest Results
      Title: Festival Standings (no "Academic Groups", no descriptions)
      ===================================================================== -->
-<section id="standings" class="py-16 sm:py-24 bg-white border-b border-slate-200/90 relative">
+<section id="standings" class="pt-6 sm:pt-8 pb-16 sm:pb-24 bg-white border-b border-slate-200/90 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Clean Section Header -->
@@ -661,7 +660,7 @@
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
                 <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase block mb-1 animate-subheading">
-                    AUDIOVISUAL BROADCASTS
+                    Official Media Broadcasts
                 </span>
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-white tracking-tight animate-heading">
                     Festival Highlights
@@ -764,18 +763,36 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             @foreach($galleryPreview as $photo)
                 <a href="{{ route('gallery.index') }}" 
-                   class="group relative rounded-3xl overflow-hidden aspect-[4/3] bg-slate-100 shadow-2xs hover:shadow-xl transition-all duration-500">
+                   class="group relative rounded-2xl sm:rounded-3xl overflow-hidden aspect-[3/4] sm:aspect-[4/5] bg-slate-950 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-out ring-1 ring-black/5 hover:ring-[#be1e2d]/40 cursor-pointer block">
+                    <!-- Photo with smooth cinematic slow zoom -->
                     <img src="{{ $photo->image_path }}" 
                          alt="{{ $photo->title }}" 
-                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                         class="w-full h-full object-cover group-hover:scale-110 group-hover:brightness-105 transition-all duration-1000 ease-out will-change-transform" 
                          loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5">
-                        <span class="text-xs sm:text-sm font-semibold text-white truncate drop-shadow-sm">
-                            {{ $photo->title }}
+                    
+                    <!-- Cinematic Film Vignette Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-black/20 opacity-70 group-hover:opacity-90 transition-opacity duration-500 pointer-events-none"></div>
+                    <div class="absolute inset-0 ring-1 ring-inset ring-white/10 group-hover:ring-[#f3bd2e]/30 rounded-2xl sm:rounded-3xl transition-all duration-500 pointer-events-none"></div>
+
+                    <!-- Category / Moment Pill -->
+                    <div class="absolute top-3 left-3 z-10">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#f3bd2e] border border-white/10 font-bold opacity-90 group-hover:opacity-100 transition-opacity">
+                            {{ $photo->category ?? 'Moment' }}
                         </span>
+                    </div>
+
+                    <!-- Slide-up Cinematic Caption -->
+                    <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex flex-col justify-end transform translate-y-1 group-hover:translate-y-0 transition-transform duration-500 z-10">
+                        <span class="text-[10px] font-mono text-[#f3bd2e] uppercase tracking-wider mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-semibold flex items-center gap-1">
+                            <span>Open In Gallery</span>
+                            <span>&rarr;</span>
+                        </span>
+                        <h3 class="text-xs sm:text-sm font-sora font-bold text-white line-clamp-2 leading-snug drop-shadow-md group-hover:text-amber-100 transition-colors">
+                            {{ $photo->title }}
+                        </h3>
                     </div>
                 </a>
             @endforeach
@@ -878,9 +895,9 @@
                     <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mb-5 font-bold">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
-                    <h3 class="font-sora text-xl font-bold text-slate-900 mb-2">Digital Brochure</h3>
+                    <h3 class="font-sora text-xl font-bold text-slate-900 mb-2">Official Theme Brochure</h3>
                     <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
-                        Explore the complete 14-page festival guidebook featuring rules, categories, timelines, and messages.
+                        Explore the complete 20-page festival theme brochure exploring Ādabīc Inheritance, philosophy, and creative ethos.
                     </p>
                 </div>
                 <div class="space-y-2.5">

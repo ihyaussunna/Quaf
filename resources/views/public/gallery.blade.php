@@ -62,17 +62,17 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         @forelse($items as $index => $item)
             <div @click="openLightbox({{ $index }})"
-                 class="group relative rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100 cursor-pointer border border-slate-200 hover:border-slate-300 transition-all duration-300 shadow-2xs hover:shadow-md">
-                <img src="{{ $item->image_path }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                 class="group relative rounded-2xl overflow-hidden aspect-[3/4] sm:aspect-[4/5] bg-slate-950 cursor-pointer border border-slate-200 hover:border-slate-400 transition-all duration-500 shadow-2xs hover:shadow-xl hover:-translate-y-1">
+                <img src="{{ $item->image_path }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 group-hover:brightness-105 transition-all duration-700 ease-out will-change-transform" loading="lazy">
                 
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3.5 sm:p-4">
-                    <span class="self-start px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-white/90 text-[#be1e2d] font-bold">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-black/10 opacity-70 group-hover:opacity-95 transition-opacity flex flex-col justify-between p-3.5 sm:p-4">
+                    <span class="self-start px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#f3bd2e] border border-white/10 font-bold">
                         {{ $item->category }}
                     </span>
                     <div>
-                        <h4 class="text-xs sm:text-sm font-sora font-bold text-white leading-tight truncate">{{ $item->title }}</h4>
+                        <h4 class="text-xs sm:text-sm font-sora font-bold text-white leading-tight truncate group-hover:text-amber-100 transition-colors">{{ $item->title }}</h4>
                         @if($item->group)
-                            <span class="text-[10px] sm:text-[11px] text-slate-300 block mt-0.5 truncate font-mono">House: {{ $item->group->name }}</span>
+                            <span class="text-[10px] sm:text-[11px] text-slate-300 block mt-0.5 truncate font-mono">Group: {{ $item->group->name }}</span>
                         @endif
                     </div>
                 </div>

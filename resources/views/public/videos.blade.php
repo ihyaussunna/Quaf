@@ -6,7 +6,7 @@
     activeTitle: '{{ addslashes($featured?->title ?? '') }}'
 }">
     <div class="mb-6 sm:mb-10">
-        <span class="text-xs font-mono font-bold tracking-widest text-[#f3bd2e] uppercase">CINEMATIC ARCHIVES</span>
+        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">Official Media Broadcasts</span>
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2">Festival Theater</h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 max-w-2xl">
             Watch live broadcasts, event highlights, and grand choral performances.

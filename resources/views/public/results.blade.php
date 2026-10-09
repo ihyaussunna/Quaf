@@ -57,7 +57,7 @@
                 <select name="group" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white font-sora">
                     <option value="">All Groups</option>
                     @foreach($groups as $grp)
-                        <option value="{{ $grp->id }}" {{ $groupId == $grp->id ? 'selected' : '' }}>{{ $grp->name }} ({{ $grp->code }})</option>
+                        <option value="{{ $grp->id }}" {{ $groupId == $grp->id ? 'selected' : '' }}>{{ $grp->name }}</option>
                     @endforeach
                 </select>
             </div>

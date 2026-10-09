@@ -20,7 +20,7 @@
                     {{ $group->name }}
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 font-mono">
-                    House Captain / Manager: <strong class="text-slate-800">{{ $group->manager_name ?: ($group->leader?->name ?? 'House Leadership') }}</strong>
+                    Group Captain / Manager: <strong class="text-slate-800">{{ $group->manager_name ?: ($group->leader?->name ?? 'Group Leadership') }}</strong>
                 </p>
             </div>
 
