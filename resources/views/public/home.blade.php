@@ -35,18 +35,18 @@
         .hero-pattern-wrapper {
             position: absolute;
             right: 0;
-            bottom: -120px;
+            bottom: -60px;
             width: 260px;
             height: 260px;
             pointer-events: none;
             user-select: none;
-            z-index: 1;
+            z-index: 5;
             animation: heroPatternSlideIn 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             will-change: transform, opacity;
         }
         @media (max-width: 639px) {
             .hero-pattern-wrapper {
-                bottom: -90px;
+                bottom: -35px;
                 width: 230px;
                 height: 230px;
             }
@@ -56,14 +56,14 @@
         }
         @media (min-width: 640px) {
             .hero-pattern-wrapper {
-                bottom: -150px;
+                bottom: -75px;
                 width: 360px;
                 height: 360px;
             }
         }
         @media (min-width: 1024px) {
             .hero-pattern-wrapper {
-                bottom: -190px;
+                bottom: -95px;
                 width: 440px;
                 height: 440px;
             }
@@ -188,15 +188,15 @@
         <div class="flex w-max animate-ribbon-loop pointer-events-none p-0 m-0 leading-none">
             <!-- Sequence 1 -->
             <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[27px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[27px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[27px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
             </div>
             <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
             <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[27px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[27px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[27px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
             </div>
         </div>
     </div>
@@ -793,6 +793,77 @@
     </div>
 </section>
 @endif
+
+<!-- =====================================================================
+     JUNCTION: SCROLL-DRIVEN INTERACTIVE GREEN BAR (GALLERY TO NEWS)
+     Sunburst elements rotate clockwise on downward scroll, and reverse
+     counter-clockwise on upward scroll in real-time sync with screen scroll.
+     ===================================================================== -->
+<div class="relative w-full overflow-hidden bg-[#009444] py-3 sm:py-3.5 select-none z-10 border-y border-[#007a37] shadow-inner"
+     x-data="{
+         rotDeg: 0,
+         trackX: 0,
+         ticking: false,
+         update() {
+             const sy = window.pageYOffset || document.documentElement.scrollTop;
+             this.rotDeg = (sy * 0.45) % 360;
+             this.trackX = -((sy * 0.3) % 480);
+             this.ticking = false;
+         },
+         onScroll() {
+             if (!this.ticking) {
+                 window.requestAnimationFrame(() => this.update());
+                 this.ticking = true;
+             }
+         }
+     }"
+     x-init="window.addEventListener('scroll', () => onScroll(), { passive: true }); update();">
+
+    <div class="flex w-max items-center will-change-transform"
+         :style="'transform: translate3d(' + trackX + 'px, 0, 0)'">
+        @for ($i = 0; $i < 16; $i++)
+            <div class="flex items-center gap-4 sm:gap-6 px-4 shrink-0">
+                <!-- Spinning Yellow Sunburst Emblem (Scroll-driven: rotates forward down, reverse up) -->
+                <div class="w-6 h-6 sm:w-7 sm:h-7 shrink-0 flex items-center justify-center will-change-transform"
+                     :style="'transform: rotate(' + rotDeg + 'deg)'">
+                    <svg class="w-full h-full text-[#f3bd2e]" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="14" cy="14" r="2.4" fill="currentColor"/>
+                        <g fill="currentColor">
+                            <polygon points="14 11.8 13.7 0.2 14.3 0.2 14.1 11.8"/>
+                            <polygon points="13.3 11.9 9.5 0.9 10.1 0.7 13.4 11.9"/>
+                            <polygon points="12.7 12.2 5.6 2.9 6.1 2.6 12.8 12.2"/>
+                            <polygon points="12.2 12.7 2.6 6.1 2.9 5.6 12.3 12.6"/>
+                            <polygon points="11.9 13.3 0.7 10.1 0.9 9.5 11.9 13.2"/>
+                            <polygon points="11.8 14 0.2 14.3 0.2 13.7 11.8 13.9"/>
+                            <polygon points="11.9 14.7 0.9 18.5 0.7 17.9 11.9 14.6"/>
+                            <polygon points="12.2 15.3 2.9 22.4 2.6 21.9 12.2 15.2"/>
+                            <polygon points="12.7 15.8 6.1 25.4 5.6 25.1 12.7 15.7"/>
+                            <polygon points="13.3 16.1 10.1 27.3 9.5 27.1 13.3 16.1"/>
+                            <polygon points="14 16.2 14.3 27.8 13.7 27.8 13.9 16.2"/>
+                            <polygon points="14.7 16.1 18.5 27.1 17.9 27.3 14.6 16.1"/>
+                            <polygon points="15.3 15.8 22.4 25.1 21.9 25.4 15.2 15.7"/>
+                            <polygon points="15.8 15.3 25.4 21.9 25.1 22.4 15.7 15.2"/>
+                            <polygon points="16.1 14.7 27.3 17.9 27.1 18.5 16.1 14.6"/>
+                            <polygon points="16.2 14 27.8 13.7 27.8 14.3 16.2 14.1"/>
+                            <polygon points="16.1 13.3 27.1 9.5 27.3 10.1 16.1 13.4"/>
+                            <polygon points="15.8 12.7 25.1 5.6 25.4 6.1 15.7 12.8"/>
+                            <polygon points="15.3 12.2 21.9 2.6 22.4 2.9 15.2 12.3"/>
+                            <polygon points="14.7 11.9 17.9 0.7 18.5 0.9 14.6 11.9"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Branding Typography -->
+                <span class="font-rockwell font-black text-white text-xs sm:text-sm tracking-wider uppercase">QUAF 2026</span>
+                <span class="text-emerald-200/50 text-xs font-mono">•</span>
+                <span class="font-rockwell font-bold text-amber-300 text-[11px] sm:text-xs tracking-widest uppercase">ĀDABĪC INHERITANCE</span>
+                <span class="text-emerald-200/50 text-xs font-mono">•</span>
+                <span class="font-rockwell font-light text-white text-[11px] sm:text-xs tracking-wider uppercase">MARKAZ CULTURAL FESTIVAL</span>
+                <span class="text-emerald-200/50 text-xs font-mono">•</span>
+            </div>
+        @endfor
+    </div>
+</div>
 
 <!-- =====================================================================
      SECTION 7: FESTIVAL NEWS & DISPATCHES
