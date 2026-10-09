@@ -5,7 +5,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10 z-20">
+<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10 z-10">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -40,7 +40,7 @@
             height: 320px;
             pointer-events: none;
             user-select: none;
-            z-index: 15;
+            z-index: 1;
             animation: heroPatternSlideIn 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             will-change: transform, opacity;
         }
@@ -65,14 +65,10 @@
             transform-origin: center center;
             animation: heroPatternSpin 48s linear infinite;
             will-change: transform;
-            filter: drop-shadow(0 0 25px rgba(243, 189, 46, 0.45));
         }
     </style>
 
     <div class="hero-pattern-wrapper" aria-hidden="true">
-        <!-- Soft golden radial glow backdrop -->
-        <div style="position: absolute; inset: 0; border-radius: 9999px; background: rgba(243, 189, 46, 0.22); filter: blur(75px); pointer-events: none;"></div>
-
         <!-- Inline SVG burst pattern with zero-dependency rendering -->
         <svg class="hero-pattern-svg" viewBox="0 0 27.7 27.7" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -160,7 +156,7 @@
      JUNCTION: INFINITE ANIMATED GIF RIBBON (BLACK TO WHITE TRANSITION)
      Loops continuously to the left with active GIF animation, attached to shape
      ===================================================================== -->
-<div class="relative w-full overflow-hidden bg-[#07070a] select-none p-0 m-0 leading-none z-10">
+<div class="relative w-full overflow-hidden bg-[#07070a] select-none p-0 m-0 leading-none z-20">
     <style>
         @keyframes ribbonScrollLeft {
             0% {
@@ -197,7 +193,7 @@
 <!-- =====================================================================
      SECTION 2: FESTIVAL THEME PHILOSOPHY (WHITE THEME)
      ===================================================================== -->
-<section class="py-16 sm:py-24 bg-white text-slate-900 border-b border-slate-200/90 relative overflow-hidden">
+<section class="py-16 sm:py-24 bg-white text-slate-900 border-b border-slate-200/90 relative overflow-hidden z-20">
     <!-- Subtle Ambient Glow -->
     <div class="absolute top-0 right-1/4 w-96 h-96 bg-red-50/60 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/60 rounded-full blur-[140px] pointer-events-none"></div>
@@ -369,6 +365,9 @@
      ===================================================================== -->
 <div class="relative w-full overflow-hidden select-none pointer-events-none -my-7 sm:-my-10 lg:-my-12 py-6 sm:py-8 z-30"
      style="will-change: transform;">
+    <!-- Background fill: Seamless transition from Red (#be1e2d) of Section 3 to White (#ffffff) of Section 4 -->
+    <div class="absolute inset-0 pointer-events-none" 
+         style="background: linear-gradient(to bottom, #be1e2d 0%, #be1e2d 62%, #ffffff 62%, #ffffff 100%); z-index: 0;"></div>
     <style>
         @keyframes quafBarScrollLeft {
             0% { transform: translate3d(0, 0, 0); }
