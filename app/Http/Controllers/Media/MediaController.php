@@ -349,7 +349,7 @@ class MediaController extends Controller
         if ($request->hasFile('thumbnail_file')) {
             $thumbnailPath = FileStorageService::storePublicFile($request->file('thumbnail_file'), 'media/videos');
         } elseif (empty($thumbnailPath)) {
-            $thumbnailPath = "https://img.youtube.com/vi/{$youtubeId}/hqdefault.jpg";
+            $thumbnailPath = "https://img.youtube.com/vi/{$youtubeId}/maxresdefault.jpg";
         }
 
         $video = VideoItem::create([

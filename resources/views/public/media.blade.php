@@ -67,8 +67,21 @@
         @forelse($videos as $video)
             <div @click="activeVideo = '{{ $video->youtube_id }}'; activeTitle = '{{ addslashes($video->title) }}'; window.scrollTo({ top: 180, behavior: 'smooth' })"
                  class="group rounded-2xl bg-white border border-slate-200 hover:border-slate-300 p-4 cursor-pointer transition-all duration-300 shadow-2xs hover:shadow-md">
-                <div class="aspect-video w-full rounded-xl overflow-hidden bg-slate-950 relative mb-4">
-                    <img src="{{ $video->thumbnail_path ?? ($video->youtube_id ? 'https://img.youtube.com/vi/' . $video->youtube_id . '/mqdefault.jpg' : '') }}"
+                @php
+                    $thumbUrl = $video->thumbnail_path;
+                    if ($thumbUrl && str_contains($thumbUrl, 'hqdefault.jpg')) {
+                        $thumbUrl = str_replace('hqdefault.jpg', 'maxresdefault.jpg', $thumbUrl);
+                    }
+                    if (empty($thumbUrl) && $video->youtube_id) {
+                        $thumbUrl = "https://img.youtube.com/vi/{$video->youtube_id}/maxresdefault.jpg";
+                    }
+                    $mqFallback = $video->youtube_id ? "https://img.youtube.com/vi/{$video->youtube_id}/mqdefault.jpg" : '';
+                @endphp
+                <div class="aspect-video w-full rounded-xl overflow-hidden bg-slate-900 relative mb-4">
+                    <img src="{{ $thumbUrl }}"
+                         @if($mqFallback)
+                             onerror="if(!this.dataset.fallback){ this.dataset.fallback='1'; this.src='{{ $mqFallback }}'; }"
+                         @endif
                          alt="{{ $video->title }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     <div class="absolute inset-0 bg-black/25 flex items-center justify-center group-hover:bg-black/10 transition-colors">

@@ -5,7 +5,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10 z-10">
+<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-0 z-10">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -44,6 +44,16 @@
             animation: heroPatternSlideIn 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             will-change: transform, opacity;
         }
+        @media (max-width: 639px) {
+            .hero-pattern-wrapper {
+                bottom: -90px;
+                width: 230px;
+                height: 230px;
+            }
+            .hero-pattern-svg {
+                animation: heroPatternSpin 72s linear infinite;
+            }
+        }
         @media (min-width: 640px) {
             .hero-pattern-wrapper {
                 bottom: -150px;
@@ -63,12 +73,12 @@
             height: 100%;
             display: block;
             transform-origin: center center;
-            animation: heroPatternSpin 48s linear infinite;
+            animation: heroPatternSpin 52s linear infinite;
             will-change: transform;
         }
     </style>
 
-    <div class="hero-pattern-wrapper" aria-hidden="true">
+    <div class="hero-pattern-wrapper" style="z-index: 5;" aria-hidden="true">
         <!-- Inline SVG burst pattern with zero-dependency rendering -->
         <svg class="hero-pattern-svg" viewBox="0 0 27.7 27.7" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -133,7 +143,7 @@
         </div>
 
         <!-- Primary Action CTAs (Apple Glassy Buttons) -->
-        <div class="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 max-w-lg">
+        <div class="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 max-w-lg mb-6 sm:mb-8">
             <a href="{{ route('results.index') }}" 
                class="px-7 py-3 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#be1e2d] text-white hover:brightness-110 shadow-lg shadow-red-600/30 border border-red-500/30 transition-all transform hover:-translate-y-0.5 text-center">
                 Festival Results
@@ -150,45 +160,47 @@
         </div>
 
     </div>
-</section>
 
-<!-- =====================================================================
-     JUNCTION: INFINITE ANIMATED GIF RIBBON (BLACK TO WHITE TRANSITION)
-     Loops continuously to the left with active GIF animation, attached to shape
-     ===================================================================== -->
-<div class="relative w-full overflow-hidden bg-[#07070a] select-none p-0 m-0 leading-none z-20">
-    <style>
-        @keyframes ribbonScrollLeft {
-            0% {
-                transform: translate3d(0, 0, 0);
+    <!-- JUNCTION: INFINITE ANIMATED GIF RIBBON (TRANSPARENT BACKGROUND, SITS ABOVE SPINNING PATTERN) -->
+    <div class="relative w-full overflow-hidden bg-transparent select-none p-0 m-0 leading-none" style="z-index: 10;">
+        <style>
+            @keyframes ribbonScrollLeft {
+                0% {
+                    transform: translate3d(0, 0, 0);
+                }
+                100% {
+                    transform: translate3d(-50%, 0, 0);
+                }
             }
-            100% {
-                transform: translate3d(-50%, 0, 0);
+            .animate-ribbon-loop {
+                display: flex;
+                width: max-content;
+                animation: ribbonScrollLeft 44s linear infinite;
+                will-change: transform;
             }
-        }
-        .animate-ribbon-loop {
-            display: flex;
-            width: max-content;
-            animation: ribbonScrollLeft 32s linear infinite;
-            will-change: transform;
-        }
-    </style>
+            @media (min-width: 640px) {
+                .animate-ribbon-loop {
+                    animation: ribbonScrollLeft 32s linear infinite;
+                }
+            }
+        </style>
 
-    <div class="flex w-max animate-ribbon-loop pointer-events-none p-0 m-0 leading-none">
-        <!-- Sequence 1 -->
-        <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
-        </div>
-        <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
-        <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
-            <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-9 sm:h-11 md:h-12 w-auto object-contain block shrink-0 m-0 p-0">
+        <div class="flex w-max animate-ribbon-loop pointer-events-none p-0 m-0 leading-none">
+            <!-- Sequence 1 -->
+            <div class="flex shrink-0 items-center p-0 m-0 leading-none">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+            </div>
+            <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
+            <div class="flex shrink-0 items-center p-0 m-0 leading-none">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[30px] sm:h-[37px] md:h-[41px] w-auto object-contain block shrink-0 m-0 p-0">
+            </div>
         </div>
     </div>
-</div>
+</section>
 
 <!-- =====================================================================
      SECTION 2: FESTIVAL THEME PHILOSOPHY (WHITE THEME)
@@ -199,10 +211,10 @@
     <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/60 rounded-full blur-[140px] pointer-events-none"></div>
 
     <!-- Side Shape touching right screen edge and touching bottom / next section (Hidden on mobile) -->
-    <img src="{{ asset('images/side-shape-theme.svg') }}?v=2" 
+    <img src="{{ asset('images/side-shape-theme.svg') }}?v=3" 
          alt="" 
          aria-hidden="true"
-         class="hidden md:block absolute right-0 bottom-0 max-h-[48%] sm:max-h-[58%] lg:max-h-[66%] max-w-[200px] sm:max-w-[280px] lg:max-w-[340px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0 opacity-80 lg:opacity-100">
+         class="hidden md:block absolute right-0 bottom-0 max-h-[55%] sm:max-h-[68%] lg:max-h-[78%] max-w-[180px] sm:max-w-[240px] lg:max-w-[300px] w-auto object-contain object-right-bottom pointer-events-none select-none z-0">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-3xl flex flex-col items-center lg:items-start text-center lg:text-left">

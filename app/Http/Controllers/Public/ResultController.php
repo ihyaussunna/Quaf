@@ -18,6 +18,7 @@ class ResultController extends Controller
     {
         $zone = $request->query('zone');
         $groupId = $request->query('group');
+        $programId = $request->query('program');
         $stageId = $request->query('stage');
         $categoryId = $request->query('category');
         $status = $request->query('status');
@@ -31,6 +32,10 @@ class ResultController extends Controller
                 'secondEntry.student.group',
                 'thirdEntry.student.group',
             ]);
+
+        if ($programId) {
+            $query->where('program_id', $programId);
+        }
 
         if ($zone) {
             $query->whereHas('program', fn ($q) => $q->where('eligibility', $zone));
@@ -69,6 +74,7 @@ class ResultController extends Controller
         $zones = Program::ZONES;
         $categories = ProgramCategory::orderBy('name')->get();
         $groups = Group::orderBy('rank_cache')->get();
+        $programs = Program::orderBy('code')->get(['id', 'code', 'name', 'eligibility']);
         $stages = Stage::all();
 
         return view('public.results', compact(
@@ -76,9 +82,11 @@ class ResultController extends Controller
             'zones',
             'categories',
             'groups',
+            'programs',
             'stages',
             'zone',
             'groupId',
+            'programId',
             'stageId',
             'categoryId',
             'status',
