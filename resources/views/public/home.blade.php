@@ -352,12 +352,11 @@
      Bottom background: Pure White (#ffffff) from the middle of the Blue bar down.
      ===================================================================== -->
 <div class="relative w-full overflow-hidden select-none pointer-events-none z-20">
-    <!-- Crimson Red background on top (covers Green, Yellow, and top half of Blue bar) -->
-    <div class="absolute inset-x-0 top-0 bottom-[16px] sm:bottom-[19px] lg:bottom-[22px] bg-[#be1e2d]"></div>
-    
-    <!-- Pure White background at bottom (covers bottom half of Blue bar and seamlessly merges into Section 4) -->
-    <div class="absolute inset-x-0 bottom-0 h-[16px] sm:h-[19px] lg:h-[22px] bg-white"></div>
-
+    <!-- Split Background: Top 50% Red (#be1e2d), Bottom 50% White (#ffffff) -->
+    <div class="absolute inset-0 flex flex-col pointer-events-none -z-10">
+        <div class="h-1/2 w-full bg-[#be1e2d]"></div>
+        <div class="h-1/2 w-full bg-white"></div>
+    </div>
     <style>
         @keyframes quafBarScrollLeft {
             0% { transform: translate3d(0, 0, 0); }
@@ -408,7 +407,7 @@
         }
     </style>
 
-    <div class="relative z-10 pt-4 sm:pt-6">
+    <div class="relative z-10 pt-2 sm:pt-3 pb-3 sm:pb-4">
         <!-- Bar 1: Green (Top bar, moves LEFT, tilted -1.3deg) -->
         <div class="quaf-tape-row" style="position: relative; z-index: 30; transform: rotate(-1.3deg);">
             <div class="quaf-tape-track" style="animation: quafBarScrollLeft 34s linear infinite;">
@@ -470,7 +469,7 @@
      Matching user screenshot: Left Team Standings, Right Latest Results
      Title: Festival Standings (no "Academic Groups", no descriptions)
      ===================================================================== -->
-<section id="standings" class="pt-6 sm:pt-8 pb-16 sm:pb-24 bg-white border-b border-slate-200/90 relative">
+<section id="standings" class="pt-3 sm:pt-4 pb-16 sm:pb-24 bg-white border-b border-slate-200/90 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Clean Section Header -->
@@ -587,9 +586,11 @@
                                                 <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#be1e2d]/10 text-[#be1e2d] border border-[#be1e2d]/20 uppercase">
                                                     {{ $result->program?->code ?? 'PRG' }}
                                                 </span>
-                                                <span class="text-xs font-mono text-slate-500 uppercase">
-                                                    {{ $result->program?->category?->name ?? 'General' }}
-                                                </span>
+                                                @if($result->program?->eligibility)
+                                                    <span class="text-xs font-mono text-slate-500 uppercase">
+                                                        {{ $result->program->eligibility }}
+                                                    </span>
+                                                @endif
                                                 @if($result->program?->stage)
                                                     <span class="text-[11px] font-mono text-slate-400">
                                                         • {{ $result->program->stage->name }}
@@ -763,36 +764,23 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="columns-2 sm:columns-3 lg:columns-4 gap-4 sm:gap-6 space-y-4 sm:space-y-6">
             @foreach($galleryPreview as $photo)
                 <a href="{{ route('gallery.index') }}" 
-                   class="group relative rounded-2xl sm:rounded-3xl overflow-hidden aspect-[3/4] sm:aspect-[4/5] bg-slate-950 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-out ring-1 ring-black/5 hover:ring-[#be1e2d]/40 cursor-pointer block">
-                    <!-- Photo with smooth cinematic slow zoom -->
+                   class="break-inside-avoid group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-slate-200/80 hover:border-slate-300 cursor-pointer block">
+                    <!-- Photo in original aspect ratio (16:9, 9:16 vertical, square) -->
                     <img src="{{ $photo->image_path }}" 
-                         alt="{{ $photo->title }}" 
-                         class="w-full h-full object-cover group-hover:scale-110 group-hover:brightness-105 transition-all duration-1000 ease-out will-change-transform" 
+                         alt="QUAF Gallery" 
+                         class="w-full h-auto block rounded-2xl sm:rounded-3xl object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
                          loading="lazy">
                     
-                    <!-- Cinematic Film Vignette Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-black/20 opacity-70 group-hover:opacity-90 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute inset-0 ring-1 ring-inset ring-white/10 group-hover:ring-[#f3bd2e]/30 rounded-2xl sm:rounded-3xl transition-all duration-500 pointer-events-none"></div>
-
-                    <!-- Category / Moment Pill -->
-                    <div class="absolute top-3 left-3 z-10">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#f3bd2e] border border-white/10 font-bold opacity-90 group-hover:opacity-100 transition-opacity">
-                            {{ $photo->category ?? 'Moment' }}
-                        </span>
-                    </div>
-
-                    <!-- Slide-up Cinematic Caption -->
-                    <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 flex flex-col justify-end transform translate-y-1 group-hover:translate-y-0 transition-transform duration-500 z-10">
-                        <span class="text-[10px] font-mono text-[#f3bd2e] uppercase tracking-wider mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-semibold flex items-center gap-1">
-                            <span>Open In Gallery</span>
-                            <span>&rarr;</span>
-                        </span>
-                        <h3 class="text-xs sm:text-sm font-sora font-bold text-white line-clamp-2 leading-snug drop-shadow-md group-hover:text-amber-100 transition-colors">
-                            {{ $photo->title }}
-                        </h3>
+                    <!-- Clean Hover Overlay with Glassy Action Icon -->
+                    <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 z-10">
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                            </svg>
+                        </div>
                     </div>
                 </a>
             @endforeach

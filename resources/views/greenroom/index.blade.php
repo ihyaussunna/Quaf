@@ -267,7 +267,7 @@
                         @endphp
                         <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $sch->program_id]) }}"
                            class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 border {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-xs ring-2 ring-slate-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200' }}">
-                            <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('h:i A') }}</span>
+                            <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('d M, h:i A') }}</span>
                             <span>{{ Str::limit($sch->program?->name, 22) }}</span>
                             @if($schZoneName)
                                 <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="background-color: {{ $schZoneColor }}20; color: {{ $isSelectedSlot ? '#f8fafc' : $schZoneColor }};">
@@ -330,10 +330,8 @@
                             <span>&bull;</span>
                             <span class="font-bold text-slate-700">Zone: {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'All' }}</span>
                             <span>&bull;</span>
-                            <span>{{ $currentProgram->category->name ?? 'Category' }}</span>
-                            <span>&bull;</span>
                             <span class="text-emerald-700 font-bold">
-                                {{ $activeSchedule?->start_time?->format('h:i A') ?? $currentProgram->scheduled_time?->format('h:i A') }}
+                                {{ $activeSchedule?->start_time?->format('d M, h:i A') ?? $currentProgram->scheduled_time?->format('d M, h:i A') }}
                                 @if($activeSchedule?->end_time) – {{ $activeSchedule->end_time->format('h:i A') }} @endif
                             </span>
                             <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px]">
@@ -417,10 +415,8 @@
                             <span>&bull;</span>
                             <span class="font-bold text-slate-700">Zone: {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'All' }}</span>
                             <span>&bull;</span>
-                            <span>{{ $nextProgram->category->name ?? 'Category' }}</span>
-                            <span>&bull;</span>
                             <span class="text-blue-800 font-bold">
-                                {{ $nextSchedule?->start_time?->format('h:i A') ?? $nextProgram->scheduled_time?->format('h:i A') ?? 'TBA' }}
+                                {{ $nextSchedule?->start_time?->format('d M, h:i A') ?? $nextProgram->scheduled_time?->format('d M, h:i A') ?? 'TBA' }}
                             </span>
                             <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px]">
                                 {{ $nextProgram->duration_minutes ?: 30 }} Mins
@@ -1153,7 +1149,7 @@
             </h2>
 
             <p class="text-xs font-mono text-slate-500 mt-1 mb-6">
-                Program Code: <strong class="text-slate-800">{{ $onlineForm->program?->code }}</strong> • Category: <strong class="text-slate-800">{{ $onlineForm->program?->category?->name ?? 'General' }}</strong>
+                Program Code: <strong class="text-slate-800">{{ $onlineForm->program?->code }}</strong>
             </p>
 
             <!-- Large Projector QR Code -->

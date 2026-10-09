@@ -59,7 +59,7 @@
             <div class="p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <div class="text-xs font-mono text-amber-400 font-bold uppercase tracking-widest">
-                        QUAF &bull; {{ $result->program->category->name ?? 'General' }}
+                        QUAF &bull; {{ $result->program->zone?->name ?? $result->program->eligibility ?? 'Official Event' }}
                     </div>
                     <h1 class="text-xl sm:text-3xl font-black mt-1 font-sora tracking-tight">
                         {{ $result->program->name }}
@@ -107,7 +107,7 @@
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-700/50 text-[#f3bd2e] text-[11px] font-mono font-bold uppercase tracking-wider mb-3">
                                 <span>{{ $result->program->code }}</span>
                                 <span>&bull;</span>
-                                <span>{{ $result->program->category->name ?? 'General' }}</span>
+                                <span>{{ $result->program->zone?->name ?? $result->program->eligibility ?? 'Official Event' }}</span>
                             </div>
 
                             <h2 class="text-xl sm:text-3xl font-black font-rockwell tracking-tight text-white leading-tight">

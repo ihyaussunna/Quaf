@@ -115,9 +115,9 @@
                     <div class="rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md') }}">
                         <div class="flex items-start gap-4">
                             <!-- Time Badge -->
-                            <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-center font-mono shrink-0 w-24">
+                            <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-center font-mono shrink-0 min-w-24">
                                 <div class="text-xs font-bold text-slate-900">{{ $item->start_time?->format('h:i A') ?? 'TBD' }}</div>
-                                <div class="text-[10px] text-slate-500">{{ $item->start_time?->format('M d') ?? 'Oct 2026' }}</div>
+                                <div class="text-[10px] font-bold text-[#be1e2d]">{{ $item->start_time?->format('d M Y') ?? 'Oct 2026' }}</div>
                             </div>
 
                             <!-- Program Info -->
@@ -164,11 +164,7 @@
                                 </span>
                             @endif
 
-                            @if($item->program)
-                                <a href="{{ route('results.show', $item->program->id) }}" class="text-xs font-bold text-[#be1e2d] hover:underline">
-                                    Program Details →
-                                </a>
-                            @endif
+
                         </div>
                     </div>
                 @endforeach
@@ -208,16 +204,14 @@
 
                             <div class="space-y-1 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-100 font-mono">
                                 <div>Zone: <strong class="text-slate-800">{{ $prog->eligibility ?? 'All Zones' }}</strong></div>
-                                <div>Category: <span class="text-slate-700">{{ $prog->category?->name ?? 'Arts & Literature' }}</span></div>
+
                                 <div>Venue: <span class="text-slate-700">{{ $prog->stage?->name ?? 'Designated Stage' }}</span></div>
                             </div>
                         </div>
 
                         <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                             <span class="text-slate-400 font-mono">{{ $prog->type === 'group' ? 'Group Event' : 'Individual' }}</span>
-                            <a href="{{ route('results.show', $prog->id) }}" class="font-bold text-[#be1e2d] hover:underline">
-                                View Event →
-                            </a>
+
                         </div>
                     </div>
                 @endforeach

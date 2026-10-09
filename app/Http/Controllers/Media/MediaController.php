@@ -218,10 +218,10 @@ class MediaController extends Controller
     public function galleryStore(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
             'image_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
-            'category' => ['required', 'string', 'max:100'],
+            'category' => ['nullable', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
             'is_featured' => ['nullable', 'boolean'],
@@ -238,9 +238,9 @@ class MediaController extends Controller
         }
 
         $item = GalleryItem::create([
-            'title' => $validated['title'],
+            'title' => ! empty($validated['title']) ? $validated['title'] : 'Festival Moment',
             'image_path' => $imagePath,
-            'category' => $validated['category'],
+            'category' => ! empty($validated['category']) ? $validated['category'] : 'Moments',
             'group_id' => $validated['group_id'] ?? null,
             'stage_id' => $validated['stage_id'] ?? null,
             'is_featured' => $request->boolean('is_featured'),
@@ -263,10 +263,10 @@ class MediaController extends Controller
     public function galleryUpdate(Request $request, GalleryItem $gallery): RedirectResponse
     {
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
             'image_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
-            'category' => ['required', 'string', 'max:100'],
+            'category' => ['nullable', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
             'is_featured' => ['nullable', 'boolean'],
@@ -280,9 +280,9 @@ class MediaController extends Controller
 
         $old = $gallery->toArray();
         $gallery->update([
-            'title' => $validated['title'],
+            'title' => ! empty($validated['title']) ? $validated['title'] : ($gallery->title ?: 'Festival Moment'),
             'image_path' => $imagePath,
-            'category' => $validated['category'],
+            'category' => ! empty($validated['category']) ? $validated['category'] : ($gallery->category ?: 'Moments'),
             'group_id' => $validated['group_id'] ?? null,
             'stage_id' => $validated['stage_id'] ?? null,
             'is_featured' => $request->boolean('is_featured'),

@@ -67,12 +67,12 @@
         @forelse($videos as $video)
             <div @click="activeVideo = '{{ $video->youtube_id }}'; activeTitle = '{{ addslashes($video->title) }}'; window.scrollTo({ top: 180, behavior: 'smooth' })"
                  class="group rounded-2xl bg-white border border-slate-200 hover:border-slate-300 p-4 cursor-pointer transition-all duration-300 shadow-2xs hover:shadow-md">
-                <div class="aspect-video w-full rounded-xl overflow-hidden bg-slate-100 relative mb-4">
-                    <img src="{{ $video->thumbnail_path ?? 'https://img.youtube.com/vi/' . $video->youtube_id . '/hqdefault.jpg' }}"
+                <div class="aspect-video w-full rounded-xl overflow-hidden bg-slate-950 relative mb-4">
+                    <img src="{{ $video->thumbnail_path ?? ($video->youtube_id ? 'https://img.youtube.com/vi/' . $video->youtube_id . '/mqdefault.jpg' : '') }}"
                          alt="{{ $video->title }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/10 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-[#be1e2d] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <div class="absolute inset-0 bg-black/25 flex items-center justify-center group-hover:bg-black/10 transition-colors">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/25 hover:bg-white/40 text-white flex items-center justify-center backdrop-blur-md border border-white/40 shadow-xl group-hover:scale-110 transition-all">
                             <svg class="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </div>
                     </div>

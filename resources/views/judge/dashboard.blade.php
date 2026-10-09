@@ -48,8 +48,8 @@
                     <div>
                         <!-- Program Header -->
                         <div class="flex items-start justify-between gap-3">
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-amber-200 uppercase">
-                                {{ $prog->category->name ?? 'General' }}
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                                {{ $prog->code }} &bull; {{ $prog->zone?->name ?? $prog->eligibility ?? 'All' }}
                             </span>
                             @if($prog->status === 'in_progress')
                                 <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-mono font-bold animate-pulse">

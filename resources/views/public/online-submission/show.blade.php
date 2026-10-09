@@ -23,8 +23,7 @@
                 <span class="px-2.5 py-0.5 rounded-md bg-[#be1e2d]/10 text-[#be1e2d] font-bold">
                     {{ $form->program?->code ?? 'ONLINE' }}
                 </span>
-                <span>•</span>
-                <span>Category: {{ $form->program?->category?->name ?? 'General' }}</span>
+                
                 <span>•</span>
                 <span style="color: {{ $form->program?->zone?->color_hex ?? '#005c94' }};" class="font-bold">
                     {{ $form->program?->zone?->name ?? $form->program?->eligibility ?? 'All' }}

@@ -14,12 +14,12 @@ use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
-    public const FESTIVAL_DAYS = [
+    public const FESTIVAL_TITLES = [
         '2026-10-06' => '06 Oct — Offstage Day 01',
         '2026-10-07' => '07 Oct — Offstage Day 02',
         '2026-10-08' => '08 Oct — Offstage Day 03',
-        '2026-10-31' => '31 Oct — Main Stage Day 01',
-        '2026-11-01' => '01 Nov — Main Stage Day 02',
+        '2026-10-31' => '31 Oct — Festival Day 01',
+        '2026-11-01' => '01 Nov — Festival Day 02',
     ];
 
     public function index(Request $request): View
@@ -34,6 +34,8 @@ class ScheduleController extends Controller
 
         $stages = Stage::orderBy('code')->get();
         $zones = Zone::orderBy('display_order')->get();
+
+        // Only include dates that actually have scheduled competitions
         $distinctDates = Schedule::whereNotNull('start_time')
             ->selectRaw('DATE(start_time) as schedule_date')
             ->distinct()
@@ -41,18 +43,26 @@ class ScheduleController extends Controller
             ->pluck('schedule_date')
             ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
             ->filter()
+            ->unique()
+            ->sort()
             ->values();
 
-        $allUniqueDays = $distinctDates->merge(array_keys(self::FESTIVAL_DAYS))->unique()->sort()->values();
-
         $festivalDays = [];
-        foreach ($allUniqueDays as $dt) {
-            if (isset(self::FESTIVAL_DAYS[$dt])) {
-                $festivalDays[$dt] = self::FESTIVAL_DAYS[$dt];
+        foreach ($distinctDates as $dt) {
+            if (isset(self::FESTIVAL_TITLES[$dt])) {
+                $festivalDays[$dt] = self::FESTIVAL_TITLES[$dt];
             } else {
                 $carbon = Carbon::parse($dt);
-                $festivalDays[$dt] = $carbon->format('d M').' — Festival Day ('.$carbon->format('D').')';
+                if ($carbon->greaterThanOrEqualTo(Carbon::parse('2026-10-31'))) {
+                    $festivalDays[$dt] = $carbon->format('d M').' — Festival Day';
+                } else {
+                    $festivalDays[$dt] = $carbon->format('d M').' — Offstage Day';
+                }
             }
+        }
+
+        if ($selectedDay && ! isset($festivalDays[$selectedDay])) {
+            $selectedDay = array_key_first($festivalDays);
         }
 
         // Fetch explicitly scheduled events if any exist

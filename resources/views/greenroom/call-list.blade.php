@@ -193,7 +193,7 @@
                                 ID: {{ $selectedProgram->code ?: '#'.$selectedProgram->id }}
                             </span>
                             <span class="text-xs text-slate-500 font-mono">
-                                {{ $selectedProgram->category->name ?? $selectedProgram->eligibility ?? 'General' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
+                                Zone: {{ $selectedProgram->zone?->name ?? $selectedProgram->eligibility ?? 'All' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
                             </span>
                             @if($windowState['state'] === 'locked_by_admin')
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">

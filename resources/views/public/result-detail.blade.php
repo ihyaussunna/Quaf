@@ -11,8 +11,7 @@
         <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="px-2.5 py-1 rounded bg-red-50 border border-red-200 text-[#be1e2d] font-mono text-xs font-bold">{{ $program->code }}</span>
             <span class="text-slate-500 text-xs font-mono">{{ $program->eligibility ?? 'All Zones' }}</span>
-            <span class="text-slate-300">•</span>
-            <span class="text-slate-500 text-xs font-mono">{{ $program->category?->name ?? 'Cultural Arts' }}</span>
+            
             <span class="text-slate-300">•</span>
             <span class="text-slate-500 text-xs font-mono">Stage: {{ $program->stage?->name ?? 'Designated Arena' }}</span>
         </div>

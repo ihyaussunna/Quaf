@@ -5,6 +5,7 @@
      x-data="{
          lightboxOpen: false,
          currentIndex: 0,
+         toastMessage: '',
          images: [
              @foreach($items as $idx => $item)
                  {
@@ -18,6 +19,20 @@
          openLightbox(idx) {
              this.currentIndex = idx;
              this.lightboxOpen = true;
+         },
+         sharePhoto(url) {
+             const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+             if (navigator.share) {
+                 navigator.share({
+                     title: 'QUAF Festival Photo',
+                     url: fullUrl
+                 }).catch(() => {});
+             } else {
+                 navigator.clipboard.writeText(fullUrl).then(() => {
+                     this.toastMessage = 'Link copied to clipboard!';
+                     setTimeout(() => { this.toastMessage = ''; }, 2500);
+                 }).catch(() => {});
+             }
          },
          next() {
              if (this.currentIndex < this.images.length - 1) {
@@ -58,23 +73,64 @@
         @endforeach
     </div>
 
-    <!-- Photos Grid (4:3 aspect ratio) -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+    <!-- Toast Notification for Share -->
+    <div x-show="toastMessage" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="fixed bottom-6 right-6 z-50 bg-slate-900/90 text-white text-xs font-mono px-4 py-2.5 rounded-2xl backdrop-blur-md border border-white/20 shadow-xl flex items-center gap-2"
+         style="display: none;">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span x-text="toastMessage"></span>
+    </div>
+
+    <!-- Photos Masonry Grid (Supports 16:9 horizontal, 9:16 vertical, and all dimensions) -->
+    <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 sm:gap-6 space-y-4 sm:space-y-6">
         @forelse($items as $index => $item)
             <div @click="openLightbox({{ $index }})"
-                 class="group relative rounded-2xl overflow-hidden aspect-[3/4] sm:aspect-[4/5] bg-slate-950 cursor-pointer border border-slate-200 hover:border-slate-400 transition-all duration-500 shadow-2xs hover:shadow-xl hover:-translate-y-1">
-                <img src="{{ $item->image_path }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 group-hover:brightness-105 transition-all duration-700 ease-out will-change-transform" loading="lazy">
+                 class="break-inside-avoid group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 cursor-pointer border border-slate-200/80 hover:border-slate-300 transition-all duration-500 shadow-2xs hover:shadow-2xl hover:-translate-y-1">
+                <!-- Clean Photo (No overlaid text) -->
+                <img src="{{ $item->image_path }}" 
+                     alt="QUAF Festival" 
+                     class="w-full h-auto block rounded-2xl sm:rounded-3xl object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                     loading="lazy">
                 
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-black/10 opacity-70 group-hover:opacity-95 transition-opacity flex flex-col justify-between p-3.5 sm:p-4">
-                    <span class="self-start px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#f3bd2e] border border-white/10 font-bold">
-                        {{ $item->category }}
-                    </span>
-                    <div>
-                        <h4 class="text-xs sm:text-sm font-sora font-bold text-white leading-tight truncate group-hover:text-amber-100 transition-colors">{{ $item->title }}</h4>
-                        @if($item->group)
-                            <span class="text-[10px] sm:text-[11px] text-slate-300 block mt-0.5 truncate font-mono">Group: {{ $item->group->name }}</span>
-                        @endif
-                    </div>
+                <!-- Hover Overlay with Glassy Action Buttons (Matching Sahityotsav model screenshot) -->
+                <div class="absolute inset-0 bg-black/45 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 p-4 z-10">
+                    <!-- 1. Download Button -->
+                    <a href="{{ $item->image_path }}" 
+                       download="QUAF-Photo-{{ $item->id }}" 
+                       target="_blank"
+                       @click.stop
+                       class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center transition-all transform hover:scale-110 shadow-lg cursor-pointer"
+                       title="Download Photo">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </a>
+
+                    <!-- 2. Share Button -->
+                    <button type="button" 
+                            @click.stop="sharePhoto('{{ $item->image_path }}')"
+                            class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center transition-all transform hover:scale-110 shadow-lg cursor-pointer"
+                            title="Share Photo">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                    </button>
+
+                    <!-- 3. Full View / Expand Button -->
+                    <button type="button" 
+                            @click.stop="openLightbox({{ $index }})"
+                            class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center transition-all transform hover:scale-110 shadow-lg cursor-pointer"
+                            title="Full View">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         @empty
@@ -88,7 +144,7 @@
         {{ $items->links() }}
     </div>
 
-    <!-- Lightbox Modal with Next/Prev and Full Controls -->
+    <!-- Lightbox Modal with Full View Controls -->
     <div x-show="lightboxOpen"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -99,10 +155,21 @@
          class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-between p-4 sm:p-8"
          style="display: none;">
 
-        <!-- Close Button -->
-        <button @click="lightboxOpen = false" class="absolute top-6 right-6 text-slate-300 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
+        <!-- Top Right Actions: Download & Close -->
+        <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
+            <a :href="images[currentIndex]?.src" 
+               download 
+               target="_blank"
+               class="text-slate-300 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+               title="Download Full Resolution">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+            </a>
+            <button @click="lightboxOpen = false" class="text-slate-300 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
 
         <!-- Previous Button -->
         <button @click="prev()" class="hidden sm:flex text-white p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-40">
@@ -110,13 +177,10 @@
         </button>
 
         <!-- Center Image Stage -->
-        <div class="max-w-5xl w-full max-h-[85vh] flex flex-col items-center mx-auto" x-show="images.length > 0">
-            <img :src="images[currentIndex]?.src" :alt="images[currentIndex]?.title" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/10 mb-4">
-            <div class="text-center">
-                <span class="text-xs font-mono uppercase text-amber-400 block mb-1 font-bold" x-text="images[currentIndex]?.category"></span>
-                <h3 class="text-lg sm:text-xl font-sora font-bold text-white" x-text="images[currentIndex]?.title"></h3>
-                <span class="text-xs font-mono text-slate-400 mt-1 block" x-show="images[currentIndex]?.group" x-text="'House: ' + images[currentIndex]?.group"></span>
-            </div>
+        <div class="max-w-6xl w-full max-h-[90vh] flex flex-col items-center justify-center mx-auto p-2" x-show="images.length > 0">
+            <img :src="images[currentIndex]?.src" 
+                 alt="QUAF Gallery Photo" 
+                 class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/10">
         </div>
 
         <!-- Next Button -->

@@ -45,7 +45,7 @@
                     @endif
                 </div>
                 <p class="text-[11px] font-mono text-slate-500">
-                    Code: {{ $program->code }} • Category: {{ $program->category->name ?? 'General' }} • Stage: {{ $program->stage->name ?? 'TBA' }} • Duration: {{ $program->duration_minutes }} Mins
+                    Code: {{ $program->code }} • Stage: {{ $program->stage->name ?? 'TBA' }} • Duration: {{ $program->duration_minutes }} Mins
                 </p>
             </div>
         </div>
@@ -677,8 +677,8 @@
             <!-- Program Meta Badges -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                    <span class="text-[10px] text-slate-400 block uppercase">Category</span>
-                    <span class="text-slate-800 font-bold">{{ $program->category->name ?? 'General' }}</span>
+                    <span class="text-[10px] text-slate-400 block uppercase">Zone</span>
+                    <span class="text-slate-800 font-bold">{{ $program->zone?->name ?? $program->eligibility ?? 'All' }}</span>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Type</span>

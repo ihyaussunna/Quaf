@@ -34,8 +34,8 @@
 
         <!-- Title -->
         <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Photo Caption / Title *</label>
-            <input type="text" name="title" value="{{ old('title') }}" required placeholder="e.g. Stage 1 Mappilappattu Finals, Crowd moments..."
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Photo Caption / Title (Optional)</label>
+            <input type="text" name="title" value="{{ old('title') }}" placeholder="e.g. Stage 1 Mappilappattu Finals, Crowd moments... (Optional)"
                    class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:border-[#be1e2d]">
         </div>
 
@@ -58,8 +58,8 @@
         <!-- Category & Group & Stage -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category *</label>
-                <input type="text" name="category" value="{{ old('category', 'Stage Event') }}" required list="galleryCategories"
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category (Optional)</label>
+                <input type="text" name="category" value="{{ old('category', 'Stage Event') }}" list="galleryCategories"
                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#be1e2d]">
                 <datalist id="galleryCategories">
                     <option value="Stage Event">
