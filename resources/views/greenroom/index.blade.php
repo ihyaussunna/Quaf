@@ -31,6 +31,27 @@
           attendanceFilter: 'all',
           loadingEntryId: null,
 
+          entriesStatus: {
+              @if(isset($entries))
+                  @foreach($entries as $e)
+                      {{ $e->id }}: '{{ $e->attendance_status ?? 'waiting' }}',
+                  @endforeach
+              @endif
+          },
+          entriesCode: {
+              @if(isset($entries))
+                  @foreach($entries as $e)
+                      {{ $e->id }}: '{{ $e->code_letter ?? '' }}',
+                  @endforeach
+              @endif
+          },
+          stats: {
+              total: {{ $stats['total'] ?? 0 }},
+              present: {{ $stats['present'] ?? 0 }},
+              absent: {{ $stats['absent'] ?? 0 }},
+              waiting: {{ $stats['waiting'] ?? 0 }}
+          },
+
           openSubmitLockModal() {
               this.showSubmitLockModal = true;
           },
@@ -63,7 +84,19 @@
                   });
                   const data = await res.json();
                   if (res.ok && data.success) {
-                      window.location.reload();
+                      this.entriesStatus[entryId] = data.attendance_status || newStatus;
+                      if (data.code_letter !== undefined && data.code_letter !== null) {
+                          this.entriesCode[entryId] = data.code_letter;
+                      } else if (newStatus === 'absent') {
+                          this.entriesCode[entryId] = '';
+                      }
+                      if (data.stats) {
+                          this.stats.total = data.stats.total;
+                          this.stats.present = data.stats.present;
+                          this.stats.absent = data.stats.absent;
+                          this.stats.waiting = data.stats.waiting;
+                      }
+                      this.triggerToast(data.message || 'ഹാജർ രേഖപ്പെടുത്തി.');
                   } else {
                       alert(data.message || 'ഹാജർ രേഖപ്പെടുത്താൻ സാധിച്ചില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.');
                   }
@@ -102,6 +135,7 @@
                       alert(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
                       return false;
                   }
+                  this.entriesCode[entryId] = newCode;
                   this.triggerToast(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്തു.');
                   return true;
               } catch (err) {
@@ -120,6 +154,7 @@
                       const id = input.getAttribute('data-entry-id');
                       if (id) {
                           codes[id] = input.value;
+                          this.entriesCode[id] = input.value;
                       }
                   });
 
@@ -685,23 +720,23 @@
                             </div>
                         </div>
 
-                        <!-- 4 Summary Counters (On Stage & Called Removed) -->
+                        <!-- 4 Summary Counters (Reactive Real-time Counters) -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                             <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                                 <span class="text-slate-500 font-mono block text-[11px]">Total Call List</span>
-                                <span class="text-xl font-black text-slate-900 mt-1 block font-mono">{{ $stats['total'] }}</span>
+                                <span class="text-xl font-black text-slate-900 mt-1 block font-mono" x-text="stats.total">{{ $stats['total'] }}</span>
                             </div>
                             <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
                                 <span class="font-mono block text-emerald-700 text-[11px]">Present (ഹാജർ)</span>
-                                <span class="text-xl font-black mt-1 block font-mono">{{ $stats['present'] }}</span>
+                                <span class="text-xl font-black mt-1 block font-mono" x-text="stats.present">{{ $stats['present'] }}</span>
                             </div>
                             <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900">
                                 <span class="font-mono block text-red-700 text-[11px]">Absent (ഹാജരില്ല)</span>
-                                <span class="text-xl font-black mt-1 block font-mono">{{ $stats['absent'] }}</span>
+                                <span class="text-xl font-black mt-1 block font-mono" x-text="stats.absent">{{ $stats['absent'] }}</span>
                             </div>
                             <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
                                 <span class="font-mono block text-amber-700 text-[11px]">Waiting (കാത്തിരിപ്പ്)</span>
-                                <span class="text-xl font-black mt-1 block font-mono">{{ $stats['waiting'] }}</span>
+                                <span class="text-xl font-black mt-1 block font-mono" x-text="stats.waiting">{{ $stats['waiting'] }}</span>
                             </div>
                         </div>
 
@@ -719,22 +754,22 @@
                                 <button type="button" @click="attendanceFilter = 'all'"
                                         :class="attendanceFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                                         class="px-3 py-1.5 rounded-lg transition cursor-pointer">
-                                    All ({{ $stats['total'] }})
+                                    All (<span x-text="stats.total">{{ $stats['total'] }}</span>)
                                 </button>
                                 <button type="button" @click="attendanceFilter = 'present'"
                                         :class="attendanceFilter === 'present' ? 'bg-emerald-600 text-white font-bold' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'"
                                         class="px-3 py-1.5 rounded-lg transition cursor-pointer">
-                                    Present ({{ $stats['present'] }})
+                                    Present (<span x-text="stats.present">{{ $stats['present'] }}</span>)
                                 </button>
                                 <button type="button" @click="attendanceFilter = 'absent'"
                                         :class="attendanceFilter === 'absent' ? 'bg-red-600 text-white font-bold' : 'bg-red-50 text-red-800 hover:bg-red-100'"
                                         class="px-3 py-1.5 rounded-lg transition cursor-pointer">
-                                    Absent ({{ $stats['absent'] }})
+                                    Absent (<span x-text="stats.absent">{{ $stats['absent'] }}</span>)
                                 </button>
                                 <button type="button" @click="attendanceFilter = 'waiting'"
                                         :class="attendanceFilter === 'waiting' ? 'bg-amber-600 text-white font-bold' : 'bg-amber-50 text-amber-800 hover:bg-amber-100'"
                                         class="px-3 py-1.5 rounded-lg transition cursor-pointer">
-                                    Waiting ({{ $stats['waiting'] }})
+                                    Waiting (<span x-text="stats.waiting">{{ $stats['waiting'] }}</span>)
                                 </button>
                             </div>
                         </div>
@@ -755,7 +790,8 @@
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     @forelse($entries as $index => $entry)
                                         <tr class="hover:bg-slate-50/70 transition-colors"
-                                            x-show="(attendanceFilter === 'all' || attendanceFilter === '{{ $entry->attendance_status ?? 'waiting' }}') && (!searchQuery || '{{ strtolower($entry->chest_number . ' ' . ($entry->student?->name ?? '') . ' ' . ($entry->group?->name ?? '') . ' ' . ($entry->code_letter ?? '')) }}'.includes(searchQuery.toLowerCase()))">
+                                            :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-50/40' : (entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-red-50/30' : '')"
+                                            x-show="(attendanceFilter === 'all' || attendanceFilter === entriesStatus[{{ $entry->id }}]) && (!searchQuery || ('{{ strtolower($entry->chest_number . ' ' . ($entry->student?->name ?? '') . ' ' . ($entry->group?->name ?? '')) }} ' + (entriesCode[{{ $entry->id }}] || '')).toLowerCase().includes(searchQuery.toLowerCase()))">
                                             
                                             <!-- Index -->
                                             <td class="py-3.5 px-4 text-center font-mono text-slate-400 font-bold">
@@ -766,14 +802,13 @@
                                             <td class="py-2.5 px-3 text-center">
                                                 @if($isEditable)
                                                     <div class="inline-flex items-center justify-center gap-1.5" x-data="{
-                                                        codeVal: '{{ $entry->code_letter }}',
                                                         lastSavedVal: '{{ $entry->code_letter }}',
                                                         isSaving: false,
                                                         isSaved: false,
                                                         async saveCode() {
                                                             if (this.isSaving) return;
-                                                            const cleanVal = (this.codeVal || '').trim().toUpperCase();
-                                                            this.codeVal = cleanVal;
+                                                            const cleanVal = (entriesCode[{{ $entry->id }}] || '').trim().toUpperCase();
+                                                            entriesCode[{{ $entry->id }}] = cleanVal;
                                                             if (cleanVal === (this.lastSavedVal || '')) return;
                                                             this.isSaving = true;
                                                             try {
@@ -791,7 +826,7 @@
                                                         <input type="text"
                                                                maxlength="4"
                                                                placeholder="-"
-                                                               x-model="codeVal"
+                                                               x-model="entriesCode[{{ $entry->id }}]"
                                                                data-entry-id="{{ $entry->id }}"
                                                                @change="saveCode()"
                                                                @blur="saveCode()"
@@ -818,13 +853,14 @@
                                                         </button>
                                                     </div>
                                                 @else
-                                                    @if($entry->code_letter)
-                                                        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-purple-100 text-purple-900 border border-purple-200 font-mono font-black text-xs shadow-2xs">
-                                                            {{ $entry->code_letter }}
+                                                    <template x-if="entriesCode[{{ $entry->id }}]">
+                                                        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-purple-100 text-purple-900 border border-purple-200 font-mono font-black text-xs shadow-2xs"
+                                                              x-text="entriesCode[{{ $entry->id }}]">
                                                         </span>
-                                                    @else
+                                                    </template>
+                                                    <template x-if="!entriesCode[{{ $entry->id }}]">
                                                         <span class="text-slate-400 font-mono text-xs">&mdash;</span>
-                                                    @endif
+                                                    </template>
                                                 @endif
                                             </td>
 
@@ -861,23 +897,36 @@
                                                         <button type="button"
                                                                 @click="submitAttendance('{{ route('greenroom.mark-attendance', $entry) }}', {{ $entry->id }}, 'present')"
                                                                 :disabled="loadingEntryId === {{ $entry->id }}"
-                                                                class="px-3.5 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 {{ $entry->attendance_status === 'present' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200' }}">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                                :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-600/30' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'"
+                                                                class="px-3.5 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 disabled:opacity-50">
+                                                            <template x-if="loadingEntryId === {{ $entry->id }}">
+                                                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                            </template>
+                                                            <template x-if="loadingEntryId !== {{ $entry->id }}">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                            </template>
                                                             <span>PRESENT</span>
                                                         </button>
 
                                                         <button type="button"
                                                                 @click="submitAttendance('{{ route('greenroom.mark-attendance', $entry) }}', {{ $entry->id }}, 'absent')"
                                                                 :disabled="loadingEntryId === {{ $entry->id }}"
-                                                                class="px-3 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 {{ $entry->attendance_status === 'absent' ? 'bg-red-600 text-white shadow-xs' : 'bg-red-50 hover:bg-red-100 text-red-800 border border-red-200' }}">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                :class="entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-red-600 text-white shadow-sm ring-2 ring-red-600/30' : 'bg-red-50 hover:bg-red-100 text-red-800 border border-red-200'"
+                                                                class="px-3 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 disabled:opacity-50">
+                                                            <template x-if="loadingEntryId === {{ $entry->id }}">
+                                                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                            </template>
+                                                            <template x-if="loadingEntryId !== {{ $entry->id }}">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </template>
                                                             <span>ABSENT</span>
                                                         </button>
                                                     </div>
                                                 @else
-                                                    <div class="inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl bg-slate-100 text-slate-500 font-mono text-xs font-bold">
-                                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                                        <span>{{ strtoupper($entry->attendance_status ?: 'WAITING') }}</span>
+                                                    <div class="inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold"
+                                                         :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-100 text-emerald-800' : (entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-500')">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                        <span x-text="(entriesStatus[{{ $entry->id }}] || 'WAITING').toUpperCase()"></span>
                                                     </div>
                                                 @endif
                                             </td>
