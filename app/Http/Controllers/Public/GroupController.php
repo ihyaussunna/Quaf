@@ -5,16 +5,20 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Result;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class GroupController extends Controller
 {
     public function index(): View
     {
-        $groups = Group::orderBy('rank_cache', 'asc')
-            ->orderByDesc('points_cache')
-            ->withCount(['students', 'entries'])
-            ->get();
+        $ttl = app()->environment('testing') ? 0 : 30;
+        $groups = Cache::remember('public_groups_list', $ttl, function () {
+            return Group::orderBy('rank_cache', 'asc')
+                ->orderByDesc('points_cache')
+                ->withCount(['students', 'entries'])
+                ->get();
+        });
 
         return view('public.groups', compact('groups'));
     }

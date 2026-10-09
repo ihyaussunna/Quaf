@@ -9,6 +9,7 @@ use App\Models\Stage;
 use App\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ScheduleController extends Controller
@@ -28,8 +29,8 @@ class ScheduleController extends Controller
         $selectedZone = $request->query('zone');
         $search = $request->query('search');
 
-        $stages = Stage::orderBy('code')->get();
-        $zones = Zone::orderBy('display_order')->get();
+        $stages = Cache::remember('public_schedule_stages', 60, fn () => Stage::orderBy('code')->get());
+        $zones = Cache::remember('public_schedule_zones', 60, fn () => Zone::orderBy('display_order')->get());
         $distinctDates = Schedule::whereNotNull('start_time')
             ->selectRaw('DATE(start_time) as schedule_date')
             ->distinct()

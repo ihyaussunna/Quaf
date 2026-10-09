@@ -327,6 +327,9 @@ class SyncOfficialStudentsCommand extends Command
             // 7. Recalculate Points Engine
             app(PointCalculationService::class)->recalculateAllPoints();
             $this->info('Points calculated and clean state initialized.');
+
+            // 8. Pre-generate student user accounts
+            $this->call('app:sync-student-accounts');
         });
 
         return Command::SUCCESS;

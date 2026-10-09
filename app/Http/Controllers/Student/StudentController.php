@@ -41,7 +41,8 @@ class StudentController extends Controller
         $identifier = trim($validated['identifier']);
 
         // Search by student_id, or by chest_number in program_entries
-        $student = Student::where('student_id', $identifier)
+        $student = Student::with('user')
+            ->where('student_id', $identifier)
             ->orWhereHas('entries', fn ($q) => $q->where('chest_number', $identifier))
             ->first();
 
@@ -53,14 +54,16 @@ class StudentController extends Controller
 
         // Ensure user account exists
         if (! $student->user_id || ! $student->user) {
-            $user = User::create([
-                'name' => $student->name,
-                'email' => Str::slug($student->student_id).'@student.quaf.org',
-                'password' => Hash::make(Str::random(16)),
-                'role' => 'student',
-                'phone' => $student->contact,
-                'is_active' => true,
-            ]);
+            $user = User::firstOrCreate(
+                ['email' => Str::slug($student->student_id).'@student.quaf.org'],
+                [
+                    'name' => $student->name,
+                    'password' => Hash::make(Str::random(16)),
+                    'role' => 'student',
+                    'phone' => $student->contact,
+                    'is_active' => true,
+                ]
+            );
             $student->update(['user_id' => $user->id]);
             $student->setRelation('user', $user);
         }

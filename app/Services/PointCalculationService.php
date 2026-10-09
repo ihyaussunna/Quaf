@@ -512,6 +512,11 @@ class PointCalculationService
         Cache::forget('public_leaderboard');
         Cache::forget('public_results_summary');
         Cache::forget('chart_performance_data_cached');
+        Cache::forget('public_home_data');
+        Cache::forget('public_groups_list');
+        Cache::forget('public_results_categories');
+        Cache::forget('public_results_groups');
+        Cache::forget('public_results_stages');
     }
 
     /**

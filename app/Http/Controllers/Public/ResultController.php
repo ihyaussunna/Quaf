@@ -9,6 +9,7 @@ use App\Models\ProgramCategory;
 use App\Models\Result;
 use App\Models\Stage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ResultController extends Controller
@@ -62,9 +63,9 @@ class ResultController extends Controller
         $results = $query->latest('published_at')->paginate(12)->withQueryString();
 
         $zones = Program::ZONES;
-        $categories = ProgramCategory::orderBy('name')->get();
-        $groups = Group::orderBy('rank_cache')->get();
-        $stages = Stage::all();
+        $categories = Cache::remember('public_results_categories', 60, fn () => ProgramCategory::orderBy('name')->get());
+        $groups = Cache::remember('public_results_groups', 30, fn () => Group::orderBy('rank_cache')->get());
+        $stages = Cache::remember('public_results_stages', 60, fn () => Stage::all());
 
         return view('public.results', compact(
             'results',

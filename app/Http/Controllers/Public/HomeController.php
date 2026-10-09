@@ -16,6 +16,7 @@ use App\Models\Student;
 use App\Models\VideoItem;
 use App\Models\Zone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -75,87 +76,92 @@ class HomeController extends Controller
     {
         $liveFestMode = FestivalSetting::get('live_fest_mode', '1') === '1';
 
-        $groups = Group::orderBy('rank_cache', 'asc')
-            ->orderByDesc('points_cache')
-            ->withCount(['students', 'entries'])
-            ->get();
+        $ttl = app()->environment('testing') ? 0 : 20;
 
-        $stages = Stage::with(['currentProgram.category', 'nextProgram.category'])->get();
+        $data = Cache::remember('public_home_data', $ttl, function () {
+            $groups = Group::orderBy('rank_cache', 'asc')
+                ->orderByDesc('points_cache')
+                ->withCount(['students', 'entries'])
+                ->get();
 
-        $latestResults = Result::where('status', 'published')
-            ->with([
-                'program.category',
-                'firstEntry.student.group',
-                'secondEntry.student.group',
-                'thirdEntry.student.group',
-            ])
-            ->latest('published_at')
-            ->take(6)
-            ->get();
+            $stages = Stage::with(['currentProgram.category', 'nextProgram.category'])->get();
 
-        $featuredPrograms = Program::with(['category', 'stage', 'schedule'])
-            ->whereIn('status', ['upcoming', 'in_progress'])
-            ->take(8)
-            ->get();
+            $latestResults = Result::where('status', 'published')
+                ->with([
+                    'program.category',
+                    'firstEntry.student.group',
+                    'secondEntry.student.group',
+                    'thirdEntry.student.group',
+                ])
+                ->latest('published_at')
+                ->take(6)
+                ->get();
 
-        $announcements = Announcement::where('is_active', true)
-            ->where(function ($q) {
-                $q->whereNull('target_role')->orWhere('target_role', 'all');
-            })
-            ->latest()
-            ->take(5)
-            ->get();
+            $featuredPrograms = Program::with(['category', 'stage', 'schedule'])
+                ->whereIn('status', ['upcoming', 'in_progress'])
+                ->take(8)
+                ->get();
 
-        $latestNews = News::where('status', 'published')
-            ->latest('published_at')
-            ->take(3)
-            ->get();
+            $announcements = Announcement::where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('target_role')->orWhere('target_role', 'all');
+                })
+                ->latest()
+                ->take(5)
+                ->get();
 
-        $galleryPreview = GalleryItem::latest()
-            ->take(6)
-            ->get();
+            $latestNews = News::where('status', 'published')
+                ->latest('published_at')
+                ->take(3)
+                ->get();
 
-        $featuredVideo = VideoItem::where('is_live', true)
-            ->first() ?? VideoItem::latest()->first();
-        $highlightVideos = VideoItem::latest()->take(4)->get();
+            $galleryPreview = GalleryItem::latest()
+                ->take(6)
+                ->get();
 
-        $categories = ProgramCategory::withCount('programs')->get();
+            $featuredVideo = VideoItem::where('is_live', true)
+                ->first() ?? VideoItem::latest()->first();
+            $highlightVideos = VideoItem::latest()->take(4)->get();
 
-        $dbZones = Zone::orderBy('display_order')->get();
-        $zones = [];
-        foreach ($dbZones as $z) {
-            $zones[$z->name] = [
-                'name' => $z->name,
-                'sub' => $z->sub_text,
-                'classes' => $z->classes,
-                'color' => $z->color_hex ?: '#be1e2d',
-                'programs_count' => Program::where('zone_id', $z->id)->orWhere('eligibility', $z->name)->count(),
-                'students_count' => Student::where('zone_id', $z->id)->orWhere('category', $z->name)->count(),
+            $categories = ProgramCategory::withCount('programs')->get();
+
+            $dbZones = Zone::orderBy('display_order')->get();
+            $zones = [];
+            foreach ($dbZones as $z) {
+                $zones[$z->name] = [
+                    'name' => $z->name,
+                    'sub' => $z->sub_text,
+                    'classes' => $z->classes,
+                    'color' => $z->color_hex ?: '#be1e2d',
+                    'programs_count' => Program::where('zone_id', $z->id)->orWhere('eligibility', $z->name)->count(),
+                    'students_count' => Student::where('zone_id', $z->id)->orWhere('category', $z->name)->count(),
+                ];
+            }
+
+            $stats = [
+                'programs' => Program::count(),
+                'students' => Student::count(),
+                'groups' => $groups->count(),
+                'stages' => $stages->count(),
+                'zones' => count($zones),
             ];
-        }
 
-        $stats = [
-            'programs' => Program::count(),
-            'students' => Student::count(),
-            'groups' => $groups->count(),
-            'stages' => $stages->count(),
-            'zones' => count($zones),
-        ];
+            return compact(
+                'groups',
+                'stages',
+                'latestResults',
+                'featuredPrograms',
+                'announcements',
+                'latestNews',
+                'galleryPreview',
+                'featuredVideo',
+                'highlightVideos',
+                'categories',
+                'zones',
+                'stats'
+            );
+        });
 
-        return view('public.home', compact(
-            'liveFestMode',
-            'groups',
-            'stages',
-            'latestResults',
-            'featuredPrograms',
-            'announcements',
-            'latestNews',
-            'galleryPreview',
-            'featuredVideo',
-            'highlightVideos',
-            'categories',
-            'zones',
-            'stats'
-        ));
+        return view('public.home', array_merge(['liveFestMode' => $liveFestMode], $data));
     }
 }
