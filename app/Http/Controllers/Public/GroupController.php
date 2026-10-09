@@ -12,13 +12,12 @@ class GroupController extends Controller
 {
     public function index(): View
     {
-        $ttl = app()->environment('testing') ? 0 : 30;
-        $groups = Cache::remember('public_groups_list', $ttl, function () {
-            return Group::orderBy('rank_cache', 'asc')
-                ->orderByDesc('points_cache')
-                ->withCount(['students', 'entries'])
-                ->get();
-        });
+        Cache::forget('public_groups_list');
+
+        $groups = Group::orderBy('rank_cache', 'asc')
+            ->orderByDesc('points_cache')
+            ->withCount(['students', 'entries'])
+            ->get();
 
         return view('public.groups', compact('groups'));
     }

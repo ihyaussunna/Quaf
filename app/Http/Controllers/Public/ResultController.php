@@ -62,10 +62,14 @@ class ResultController extends Controller
 
         $results = $query->latest('published_at')->paginate(12)->withQueryString();
 
+        Cache::forget('public_results_categories');
+        Cache::forget('public_results_groups');
+        Cache::forget('public_results_stages');
+
         $zones = Program::ZONES;
-        $categories = Cache::remember('public_results_categories', 60, fn () => ProgramCategory::orderBy('name')->get());
-        $groups = Cache::remember('public_results_groups', 30, fn () => Group::orderBy('rank_cache')->get());
-        $stages = Cache::remember('public_results_stages', 60, fn () => Stage::all());
+        $categories = ProgramCategory::orderBy('name')->get();
+        $groups = Group::orderBy('rank_cache')->get();
+        $stages = Stage::all();
 
         return view('public.results', compact(
             'results',
