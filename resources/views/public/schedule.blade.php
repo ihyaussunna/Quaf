@@ -61,8 +61,12 @@
                 <select name="stage" onchange="this.form.submit()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/20 focus:border-[#be1e2d]">
                     <option value="">All Stages</option>
                     @foreach($stages as $stg)
-                        <option value="{{ $stg->id }}" {{ $selectedStage == $stg->id ? 'selected' : '' }}>
-                            {{ $stg->name }}
+                        @php
+                            $stgId = is_object($stg) ? $stg->id : (is_array($stg) ? ($stg['id'] ?? $stg) : $stg);
+                            $stgName = is_object($stg) ? $stg->name : (is_array($stg) ? ($stg['name'] ?? $stg) : $stg);
+                        @endphp
+                        <option value="{{ $stgId }}" {{ (string) $selectedStage === (string) $stgId ? 'selected' : '' }}>
+                            {{ $stgName }}
                         </option>
                     @endforeach
                 </select>
@@ -73,8 +77,11 @@
                 <select name="zone" onchange="this.form.submit()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/20 focus:border-[#be1e2d]">
                     <option value="">All Zones</option>
                     @foreach($zones as $z)
-                        <option value="{{ $z->name }}" {{ $selectedZone == $z->name ? 'selected' : '' }}>
-                            {{ $z->name }}
+                        @php
+                            $zName = is_object($z) ? $z->name : (is_array($z) ? ($z['name'] ?? $z) : $z);
+                        @endphp
+                        <option value="{{ $zName }}" {{ (string) $selectedZone === (string) $zName ? 'selected' : '' }}>
+                            {{ $zName }}
                         </option>
                     @endforeach
                 </select>

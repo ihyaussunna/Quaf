@@ -29,8 +29,11 @@ class ScheduleController extends Controller
         $selectedZone = $request->query('zone');
         $search = $request->query('search');
 
-        $stages = Cache::remember('public_schedule_stages', 60, fn () => Stage::orderBy('code')->get());
-        $zones = Cache::remember('public_schedule_zones', 60, fn () => Zone::orderBy('display_order')->get());
+        Cache::forget('public_schedule_stages');
+        Cache::forget('public_schedule_zones');
+
+        $stages = Stage::orderBy('code')->get();
+        $zones = Zone::orderBy('display_order')->get();
         $distinctDates = Schedule::whereNotNull('start_time')
             ->selectRaw('DATE(start_time) as schedule_date')
             ->distinct()

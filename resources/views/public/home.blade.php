@@ -5,12 +5,52 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative overflow-hidden bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10">
+<section class="relative overflow-x-clip bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10 z-10">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
     <div class="absolute bottom-10 right-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#005c94]/15 rounded-full blur-[130px] pointer-events-none"></div>
     <div class="absolute bottom-0 left-1/3 w-64 h-64 bg-[#009444]/10 rounded-full blur-[110px] pointer-events-none"></div>
+
+    <!-- Rotating Yellow Pattern Burst (Hero Background Accent with Entrance Animation) -->
+    <style>
+        @keyframes patternHeroSlideIn {
+            0% {
+                transform: translate3d(85%, 25px, 0);
+                opacity: 0;
+            }
+            100% {
+                transform: translate3d(25%, 0, 0);
+                opacity: 0.85;
+            }
+        }
+        @keyframes patternHeroSpin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .animate-pattern-slide-in {
+            animation: patternHeroSlideIn 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity;
+        }
+        .animate-pattern-spin {
+            animation: patternHeroSpin 55s linear infinite;
+            will-change: transform;
+        }
+    </style>
+
+    <div class="absolute -bottom-24 sm:-bottom-36 md:-bottom-44 lg:-bottom-52 right-0 pointer-events-none select-none z-0 animate-pattern-slide-in"
+         aria-hidden="true">
+        <!-- Soft golden radial glow backdrop -->
+        <div class="absolute inset-0 rounded-full bg-[#f3bd2e]/20 blur-[80px] pointer-events-none"></div>
+
+        <img src="{{ asset('images/pattern-yellow-round-line.svg') }}" 
+             alt="" 
+             class="w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] md:w-[520px] md:h-[520px] lg:w-[620px] lg:h-[620px] max-w-none object-contain animate-pattern-spin drop-shadow-[0_0_30px_rgba(243,189,46,0.3)]">
+    </div>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
         
