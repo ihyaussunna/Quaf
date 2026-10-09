@@ -5,7 +5,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative overflow-x-clip bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10 z-10">
+<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-8 sm:pb-10 z-20">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -14,45 +14,97 @@
 
     <!-- Rotating Yellow Pattern Burst (Hero Background Accent with Entrance Animation) -->
     <style>
-        @keyframes patternHeroSlideIn {
+        @keyframes heroPatternSlideIn {
             0% {
-                transform: translate3d(85%, 25px, 0);
+                transform: translate3d(100%, 0, 0);
                 opacity: 0;
             }
             100% {
                 transform: translate3d(25%, 0, 0);
-                opacity: 0.85;
+                opacity: 0.95;
             }
         }
-        @keyframes patternHeroSpin {
-            from {
+        @keyframes heroPatternSpin {
+            0% {
                 transform: rotate(0deg);
             }
-            to {
+            100% {
                 transform: rotate(360deg);
             }
         }
-        .animate-pattern-slide-in {
-            animation: patternHeroSlideIn 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .hero-pattern-wrapper {
+            position: absolute;
+            right: 0;
+            bottom: -90px;
+            width: 320px;
+            height: 320px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 15;
+            animation: heroPatternSlideIn 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             will-change: transform, opacity;
         }
-        .animate-pattern-spin {
-            animation: patternHeroSpin 55s linear infinite;
+        @media (min-width: 640px) {
+            .hero-pattern-wrapper {
+                bottom: -120px;
+                width: 440px;
+                height: 440px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .hero-pattern-wrapper {
+                bottom: -150px;
+                width: 580px;
+                height: 580px;
+            }
+        }
+        .hero-pattern-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transform-origin: center center;
+            animation: heroPatternSpin 48s linear infinite;
             will-change: transform;
+            filter: drop-shadow(0 0 25px rgba(243, 189, 46, 0.45));
         }
     </style>
 
-    <div class="absolute -bottom-24 sm:-bottom-36 md:-bottom-44 lg:-bottom-52 right-0 pointer-events-none select-none z-0 animate-pattern-slide-in"
-         aria-hidden="true">
+    <div class="hero-pattern-wrapper" aria-hidden="true">
         <!-- Soft golden radial glow backdrop -->
-        <div class="absolute inset-0 rounded-full bg-[#f3bd2e]/20 blur-[80px] pointer-events-none"></div>
+        <div style="position: absolute; inset: 0; border-radius: 9999px; background: rgba(243, 189, 46, 0.22); filter: blur(75px); pointer-events: none;"></div>
 
-        <img src="{{ asset('images/pattern-yellow-round-line.svg') }}" 
-             alt="" 
-             class="w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] md:w-[520px] md:h-[520px] lg:w-[620px] lg:h-[620px] max-w-none object-contain animate-pattern-spin drop-shadow-[0_0_30px_rgba(243,189,46,0.3)]">
+        <!-- Inline SVG burst pattern with zero-dependency rendering -->
+        <svg class="hero-pattern-svg" viewBox="0 0 27.7 27.7" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <style>.pat-burst-line { fill: #f3bd2e; }</style>
+            </defs>
+            <g>
+                <polygon class="pat-burst-line" points="13.8 11.66 13.55 0 14.15 0 13.89 11.66 13.8 11.66 13.8 11.66"/>
+                <polygon class="pat-burst-line" points="13.13 11.78 9.28 .77 9.86 .58 13.21 11.75 13.13 11.78 13.13 11.78"/>
+                <polygon class="pat-burst-line" points="12.53 12.1 5.46 2.82 5.95 2.47 12.6 12.05 12.53 12.1 12.53 12.1"/>
+                <polygon class="pat-burst-line" points="12.05 12.6 2.47 5.95 2.82 5.46 12.1 12.53 12.05 12.6 12.05 12.6"/>
+                <polygon class="pat-burst-line" points="11.75 13.21 .58 9.86 .77 9.28 11.78 13.13 11.75 13.21 11.75 13.21"/>
+                <polygon class="pat-burst-line" points="11.66 13.89 0 14.15 0 13.55 11.66 13.8 11.66 13.89 11.66 13.89"/>
+                <polygon class="pat-burst-line" points="11.78 14.57 .77 18.41 .58 17.84 11.75 14.48 11.78 14.57 11.78 14.57"/>
+                <polygon class="pat-burst-line" points="12.1 15.17 2.82 22.23 2.47 21.74 12.05 15.1 12.1 15.17 12.1 15.17"/>
+                <polygon class="pat-burst-line" points="12.6 15.64 5.95 25.23 5.46 24.87 12.53 15.59 12.6 15.64 12.6 15.64"/>
+                <polygon class="pat-burst-line" points="13.21 15.94 9.86 27.11 9.28 26.92 13.13 15.91 13.21 15.94 13.21 15.94"/>
+                <polygon class="pat-burst-line" points="13.89 16.04 14.15 27.7 13.55 27.7 13.8 16.04 13.89 16.04 13.89 16.04"/>
+                <polygon class="pat-burst-line" points="14.57 15.91 18.41 26.92 17.84 27.11 14.48 15.94 14.57 15.91 14.57 15.91"/>
+                <polygon class="pat-burst-line" points="15.17 15.59 22.23 24.87 21.74 25.23 15.1 15.64 15.17 15.59 15.17 15.59"/>
+                <polygon class="pat-burst-line" points="15.64 15.1 25.23 21.74 24.87 22.23 15.59 15.17 15.64 15.1 15.64 15.1"/>
+                <polygon class="pat-burst-line" points="15.94 14.48 27.11 17.84 26.92 18.41 15.91 14.57 15.94 14.48 15.94 14.48"/>
+                <polygon class="pat-burst-line" points="16.04 13.8 27.7 13.55 27.7 14.15 16.04 13.89 16.04 13.8 16.04 13.8"/>
+                <polygon class="pat-burst-line" points="15.91 13.13 26.92 9.28 27.11 9.86 15.94 13.21 15.91 13.13 15.91 13.13"/>
+                <polygon class="pat-burst-line" points="15.59 12.53 24.87 5.46 25.23 5.95 15.64 12.6 15.59 12.53 15.59 12.53"/>
+                <polygon class="pat-burst-line" points="15.1 12.05 21.74 2.47 22.23 2.82 15.17 12.1 15.1 12.05 15.1 12.05"/>
+                <polygon class="pat-burst-line" points="14.48 11.75 17.84 .58 18.41 .77 14.57 11.78 14.48 11.75 14.48 11.75"/>
+            </g>
+            <circle class="pat-burst-line" cx="13.82" cy="13.91" r="2.28"/>
+        </svg>
     </div>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full flex flex-col items-center text-center">
         
         <!-- Hero Center: Alternating Official Theme Logo & QUAF Festival Logo with Apple-style blur crossfade -->
         <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center"
@@ -108,7 +160,7 @@
      JUNCTION: INFINITE ANIMATED GIF RIBBON (BLACK TO WHITE TRANSITION)
      Loops continuously to the left with active GIF animation, attached to shape
      ===================================================================== -->
-<div class="relative w-full overflow-hidden bg-[#07070a] select-none p-0 m-0 leading-none z-20">
+<div class="relative w-full overflow-hidden bg-[#07070a] select-none p-0 m-0 leading-none z-10">
     <style>
         @keyframes ribbonScrollLeft {
             0% {
