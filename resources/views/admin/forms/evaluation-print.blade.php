@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <style>
         @page {
-            size: landscape;
+            size: A4 portrait;
             margin: 8mm 12mm;
         }
         * {

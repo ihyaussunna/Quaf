@@ -130,7 +130,7 @@
 
 <style>
 @page {
-    size: landscape;
+    size: A4 portrait;
     margin: 8mm 12mm;
 }
 @media print {

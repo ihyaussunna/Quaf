@@ -40,7 +40,7 @@
             }
         }
         @page {
-            size: A4 landscape;
+            size: A4 portrait;
             margin: 8mm;
         }
     </style>
