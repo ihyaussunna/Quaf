@@ -75,6 +75,11 @@ class OnlineSubmissionForm extends Model
 
     public function getQrCodeUrlAttribute(): string
     {
+        return QrCodeService::url($this->public_url, 300);
+    }
+
+    public function getQrCodeSvgAttribute(): string
+    {
         return QrCodeService::svg($this->public_url, 300);
     }
 

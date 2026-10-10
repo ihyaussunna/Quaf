@@ -42,9 +42,15 @@
 
         <!-- QR Code Container -->
         <div class="p-5 rounded-3xl bg-slate-50 border-2 border-slate-200 shadow-md mb-6 max-w-xs w-full flex items-center justify-center">
-            <img src="{{ $qrCodeSvg }}" 
-                 alt="Submission QR Code" 
-                 class="w-64 h-64 sm:w-72 sm:h-72 object-contain rounded-xl">
+            @if(str_starts_with(trim($qrCodeSvg), '<img'))
+                <div class="w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
+                    {!! $qrCodeSvg !!}
+                </div>
+            @else
+                <img src="{{ $qrCodeSvg }}" 
+                     alt="Submission QR Code" 
+                     class="w-64 h-64 sm:w-72 sm:h-72 object-contain rounded-xl">
+            @endif
         </div>
 
         <div class="space-y-2 max-w-md">

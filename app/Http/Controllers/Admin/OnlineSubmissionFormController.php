@@ -195,7 +195,7 @@ class OnlineSubmissionFormController extends Controller
     {
         $form->load(['program.category', 'program.zone']);
         $publicUrl = $form->public_url;
-        $qrCodeSvg = QrCodeService::svg($publicUrl, 420);
+        $qrCodeSvg = QrCodeService::url($publicUrl, 420);
 
         return view('admin.online-forms.qr', compact('form', 'publicUrl', 'qrCodeSvg'));
     }

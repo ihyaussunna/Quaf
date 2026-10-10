@@ -570,7 +570,7 @@ class StudentController extends Controller
             ->merge($student->participations ?? collect())
             ->unique('id');
 
-        $qrCodeSvg = QrCodeService::svg(route('verify.student', $student->qr_token), 220);
+        $qrCodeSvg = QrCodeService::url(route('verify.student', $student->qr_token), 220);
 
         return view('admin.students.show', compact('student', 'allEntries', 'qrCodeSvg'));
     }

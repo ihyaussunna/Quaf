@@ -37,7 +37,11 @@
                     @endif
                 </div>
                 <div class="w-28 h-28 bg-white p-2 rounded-xl border border-slate-200 shadow-inner flex items-center justify-center">
-                    <img src="{{ $qrCodeSvg }}" alt="QR Code" class="w-full h-full object-contain">
+                    @if(str_starts_with(trim($qrCodeSvg), '<img'))
+                        {!! $qrCodeSvg !!}
+                    @else
+                        <img src="{{ $qrCodeSvg }}" alt="QR Code" class="w-full h-full object-contain">
+                    @endif
                 </div>
                 <span class="text-[10px] font-mono text-slate-500">Scan to Verify</span>
             </div>

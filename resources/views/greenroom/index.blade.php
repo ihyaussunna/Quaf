@@ -596,7 +596,13 @@
                                         @click="showQrModal = true" 
                                         class="shrink-0 p-3 bg-white rounded-2xl shadow-lg group cursor-pointer hover:scale-105 transition"
                                         title="ക്യുആർ കോഡ് വലുതായി കാണിക്കാൻ ക്ലിക്ക് ചെയ്യുക">
-                                    <img src="{{ $onlineForm->qr_code_url }}" alt="Submission QR Code" class="w-20 h-20 sm:w-24 sm:h-24 object-contain">
+                                    @if(str_starts_with(trim($onlineForm->qr_code_url), '<img'))
+                                        <div class="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+                                            {!! $onlineForm->qr_code_url !!}
+                                        </div>
+                                    @else
+                                        <img src="{{ $onlineForm->qr_code_url }}" alt="Submission QR Code" class="w-20 h-20 sm:w-24 sm:h-24 object-contain">
+                                    @endif
                                     <span class="block text-[9px] font-mono font-bold text-slate-800 text-center mt-1 group-hover:text-[#be1e2d]">
                                         Fullscreen &rarr;
                                     </span>
@@ -1212,9 +1218,15 @@
 
             <!-- Large Projector QR Code -->
             <div class="p-6 rounded-3xl bg-slate-50 shadow-inner mb-6">
-                <img src="{{ $onlineForm->qr_code_url }}" 
-                     alt="Submission QR Code" 
-                     class="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-2xl mx-auto shadow-sm">
+                @if(str_starts_with(trim($onlineForm->qr_code_url), '<img'))
+                    <div class="w-64 h-64 sm:w-80 sm:h-80 mx-auto flex items-center justify-center">
+                        {!! $onlineForm->qr_code_url !!}
+                    </div>
+                @else
+                    <img src="{{ $onlineForm->qr_code_url }}" 
+                         alt="Submission QR Code" 
+                         class="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-2xl mx-auto shadow-sm">
+                @endif
             </div>
 
             <p class="text-xs text-slate-600 max-w-md leading-relaxed mb-6">
