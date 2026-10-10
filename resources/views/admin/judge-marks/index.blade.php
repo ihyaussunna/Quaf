@@ -161,8 +161,8 @@
                                     </div>
                                     <div class="flex flex-wrap items-center gap-1.5 mt-0.5 font-mono text-[10px]">
                                         <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">{{ $program->code }}</span>
-                                        @if($program->category)
-                                            <span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">{{ $program->category->name }}</span>
+                                        @if($program->zone || $program->eligibility)
+                                            <span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">{{ $program->zone?->name ?? $program->eligibility }}</span>
                                         @endif
                                         @if($program->stage)
                                             <span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700">{{ $program->stage->name }}</span>

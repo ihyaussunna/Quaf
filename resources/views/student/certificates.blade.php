@@ -21,7 +21,7 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-[#f3bd2e]/30 uppercase">
-                            {{ $cert->program->category->name ?? 'General' }}
+                            {{ $cert->program->zone?->name ?? $cert->program->eligibility ?? 'All Zones' }}
                         </span>
                         <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold">
                             {{ $cert->position }}

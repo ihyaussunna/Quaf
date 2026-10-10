@@ -18,7 +18,7 @@
         <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border-2 border-[#f3bd2e]/40 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
             <!-- Header Stripe -->
             <div class="p-4 text-center border-b border-slate-100 bg-gradient-to-b from-amber-50/60 to-white print:from-gray-100 print:to-white">
-                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-9 mx-auto mb-1.5 object-contain">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" style="height: 27px; max-height: 27px;" class="h-[27px] w-auto mx-auto mb-1.5 object-contain">
                 <p class="text-[9px] font-mono tracking-[0.2em] text-[#f3bd2e] font-bold uppercase">
                     IHYAUSSUNNA STUDENTS UNION
                 </p>
@@ -56,7 +56,7 @@
                         {{ $student->group->name }}
                     </span>
                     <span class="text-slate-400">•</span>
-                    <span class="text-xs font-mono text-slate-600 print:text-black">{{ $student->category }}</span>
+                    <span class="text-xs font-mono text-slate-600 print:text-black">{{ $student->zone_name ?? $student->category }}</span>
                 </div>
 
                 <!-- QR Code Block -->

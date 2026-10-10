@@ -149,11 +149,8 @@ class StudentController extends Controller
         return view('student.idcard', compact('student', 'qrCodeSvg'));
     }
 
-    public function certificates(): View
+    public function certificates()
     {
-        $student = $this->getStudent();
-        $certificates = $student->certificates()->with(['program.category', 'entry'])->latest('issued_at')->get();
-
-        return view('student.certificates', compact('student', 'certificates'));
+        return redirect()->route('student.dashboard');
     }
 }

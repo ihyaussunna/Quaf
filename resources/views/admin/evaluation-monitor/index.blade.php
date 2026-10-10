@@ -146,7 +146,7 @@
                                     {{ $prog->name }}
                                 </a>
                                 <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                                    ID: {{ $prog->code }} &bull; {{ $prog->category->name ?? $prog->eligibility ?? 'General' }}
+                                    ID: {{ $prog->code }} &bull; {{ $prog->zone?->name ?? $prog->eligibility ?? 'All Zones' }}
                                 </div>
                             </td>
                             <td class="px-4 py-3 font-medium text-slate-700">

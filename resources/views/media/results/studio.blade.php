@@ -30,7 +30,7 @@
                 {{ $result->program->name }}
             </h1>
             <p class="text-xs text-slate-500">
-                Category: <strong class="text-slate-700">{{ $result->program->category->name ?? 'General' }}</strong> &bull;
+                Zone: <strong class="text-slate-700">{{ $result->program->zone->name ?? $result->program->eligibility ?? 'All Zones' }}</strong> &bull;
                 Stage: <strong class="text-slate-700">{{ $result->program->stage->name ?? 'Stage' }}</strong> &bull;
                 Podium Winners: <strong class="text-slate-700">1st, 2nd, and 3rd Places Only</strong>
             </p>
@@ -515,7 +515,7 @@ function posterStudio() {
         // Content Data
         data: {
             result_no: '{{ $result->program->code ?? "01" }}',
-            category: '{{ $result->program->category->name ?? $result->program->eligibility ?? "General" }}',
+            category: '{{ $result->program->zone?->name ?? $result->program->eligibility ?? "All Zones" }}',
             competition: '{{ $result->program->name }}',
             winners: {
                 first: [

@@ -14,7 +14,7 @@
                 {{ $program->name }}
             </h1>
             <p class="text-xs text-slate-500 mt-0.5 font-mono">
-                ID: {{ $program->code }} &bull; {{ $program->category->name ?? 'General' }} &bull; Stage: {{ $program->stage->name ?? 'TBA' }} &bull; Duration: {{ $program->duration_minutes }} Mins
+                ID: {{ $program->code }} &bull; {{ $program->zone?->name ?? $program->eligibility ?? 'All Zones' }} &bull; Stage: {{ $program->stage->name ?? 'TBA' }} &bull; Duration: {{ $program->duration_minutes }} Mins
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">

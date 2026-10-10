@@ -28,12 +28,9 @@
         </div>
 
         <div class="flex items-center gap-3 relative z-10">
-            <a href="{{ route('student.idcard') }}" class="px-5 py-2.5 bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase rounded-xl hover:brightness-105 flex items-center gap-2 shadow-md shadow-[#f3bd2e]/20">
+            <a href="{{ route('student.idcard') }}" class="px-5 py-2.5 bg-[#f3bd2e] hover:bg-amber-500 text-white font-mono font-bold text-xs uppercase rounded-xl flex items-center gap-2 shadow-md shadow-[#f3bd2e]/20 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                 <span>View QR Badge</span>
-            </a>
-            <a href="{{ route('student.certificates') }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-semibold">
-                Certificates ({{ $myResults->count() }})
             </a>
         </div>
     </div>
@@ -140,179 +137,6 @@
         </div>
     </div>
 
-    <!-- DIGITAL SCRATCH-TO-REVEAL CARD SECTION -->
-    @php
-        $scratchEntries = $myPrograms->filter(fn($e) => !empty($e->code_letter) || ($e->status === 'verified' && $e->program?->status !== 'completed'));
-    @endphp
-
-    <div class="space-y-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-[#f3bd2e] animate-pulse"></span>
-                <h2 class="text-xl font-sora font-bold text-slate-900">Anonymous Code Scratch Card</h2>
-            </div>
-            <span class="text-xs font-mono text-[#f3bd2e] font-bold">Strictly Confidential</span>
-        </div>
-
-        @forelse($scratchEntries as $scratchEntry)
-            <div class="bg-white border-2 border-amber-200 rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden"
-                 x-data="{
-                     revealed: false,
-                     scratchedPercent: 0,
-                     init() {
-                         const canvas = this.$refs.scratchCanvas;
-                         if (!canvas) return;
-                         const ctx = canvas.getContext('2d');
-                         const rect = canvas.getBoundingClientRect();
-                         canvas.width = canvas.offsetWidth;
-                         canvas.height = canvas.offsetHeight;
-
-                         // Draw Golden Foil Metallic Cover
-                         const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                         grad.addColorStop(0, '#f3bd2e');
-                         grad.addColorStop(0.3, '#f5deb3');
-                         grad.addColorStop(0.5, '#f3bd2e');
-                         grad.addColorStop(0.7, '#e6ca65');
-                         grad.addColorStop(1, '#be1e2d');
-                         ctx.fillStyle = grad;
-                         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                         // Add Texture / Pattern
-                         ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-                         for (let i = 0; i < canvas.width; i += 20) {
-                             ctx.fillRect(i, 0, 10, canvas.height);
-                         }
-
-                         // Text on Foil
-                         ctx.fillStyle = '#ffffff';
-                         ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                         ctx.shadowBlur = 4;
-                         ctx.font = 'bold 15px Sora, sans-serif';
-                         ctx.textAlign = 'center';
-                         ctx.textBaseline = 'middle';
-                         ctx.fillText('SCRATCH HERE', canvas.width / 2, canvas.height / 2 - 14);
-                         ctx.font = 'bold 11px monospace';
-                         ctx.fillText('SCRATCH TO REVEAL CODE', canvas.width / 2, canvas.height / 2 + 14);
-
-                         // Scratch Logic
-                         let isDrawing = false;
-                         const erase = (x, y) => {
-                             ctx.globalCompositeOperation = 'destination-out';
-                             ctx.beginPath();
-                             ctx.arc(x, y, 28, 0, Math.PI * 2, false);
-                             ctx.fill();
-                             this.checkPercent();
-                         };
-
-                         const getPos = (e) => {
-                             const r = canvas.getBoundingClientRect();
-                             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                             return { x: clientX - r.left, y: clientY - r.top };
-                         };
-
-                         canvas.addEventListener('mousedown', (e) => { isDrawing = true; const p = getPos(e); erase(p.x, p.y); });
-                         canvas.addEventListener('mousemove', (e) => { if (isDrawing) { const p = getPos(e); erase(p.x, p.y); } });
-                         window.addEventListener('mouseup', () => { isDrawing = false; });
-
-                         canvas.addEventListener('touchstart', (e) => { isDrawing = true; const p = getPos(e); erase(p.x, p.y); e.preventDefault(); }, { passive: false });
-                         canvas.addEventListener('touchmove', (e) => { if (isDrawing) { const p = getPos(e); erase(p.x, p.y); } e.preventDefault(); }, { passive: false });
-                         window.addEventListener('touchend', () => { isDrawing = false; });
-                     },
-                     checkPercent() {
-                         const canvas = this.$refs.scratchCanvas;
-                         if (!canvas || this.revealed) return;
-                         const ctx = canvas.getContext('2d');
-                         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                         let transparent = 0;
-                         const total = imgData.data.length / 4;
-                         // Sample every 16th pixel for high speed
-                         for (let i = 3; i < imgData.data.length; i += 64) {
-                             if (imgData.data[i] === 0) transparent++;
-                         }
-                         const percent = (transparent / (total / 16)) * 100;
-                         if (percent > 30) {
-                             this.revealed = true;
-                         }
-                     },
-                     forceReveal() {
-                         this.revealed = true;
-                     }
-                 }">
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                    <!-- Left: Program Info & Guidelines -->
-                    <div class="lg:col-span-7 space-y-3">
-                        <div class="flex items-center gap-2">
-                            <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-amber-200 uppercase">
-                                {{ $scratchEntry->program->category->name ?? 'Program' }}
-                            </span>
-                            <span class="text-xs font-mono text-slate-500">Chest #{{ $scratchEntry->chest_number }}</span>
-                        </div>
-
-                        <h3 class="text-2xl font-sora font-black text-slate-900">{{ $scratchEntry->program->name }}</h3>
-                        
-                        <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-600">
-                            <span>Venue: <strong class="text-slate-900">{{ $scratchEntry->program->stage->name ?? 'TBA' }}</strong></span>
-                            <span>•</span>
-                            <span>Time: <strong class="text-[#f3bd2e]">{{ $scratchEntry->program->scheduled_time?->format('h:i A') ?? 'TBA' }}</strong></span>
-                        </div>
-
-                        <!-- Anonymity Notice -->
-                        <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl text-xs text-amber-950 font-sora leading-relaxed flex items-start gap-2.5">
-                            <svg class="w-4 h-4 text-[#f3bd2e] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <div>
-                                <strong class="font-bold text-slate-900 block font-mono text-[11px]">Strict Anonymity Rule:</strong>
-                                To the judges, your sole identity is this secret code letter. Do not disclose your name, chest number, or group at any time on stage.
-                            </div>
-                        </div>
-
-                        <div>
-                            <button type="button" @click="forceReveal()"
-                                    class="text-xs font-mono text-slate-500 hover:text-[#f3bd2e] underline cursor-pointer">
-                                ➔ Tap to Reveal directly
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Right: Interactive Scratch Card Area -->
-                    <div class="lg:col-span-5 flex justify-center">
-                        <div class="w-full max-w-[320px] h-[190px] relative rounded-3xl overflow-hidden border-2 border-amber-300 shadow-xl select-none">
-                            <!-- Underneath Secret Code Layer -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-amber-100 flex flex-col items-center justify-center p-4 text-center">
-                                @if($scratchEntry->code_letter)
-                                    <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Secret Code Letter</span>
-                                    <div class="text-6xl font-sora font-black text-[#f3bd2e] tracking-wider my-1 animate-bounce">
-                                        Code {{ $scratchEntry->code_letter }}
-                                    </div>
-                                    <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
-                                        Active For Judges
-                                    </span>
-                                @else
-                                    <span class="text-xs font-mono text-slate-400">Available once attendance is verified at the Green Room.</span>
-                                    <span class="text-xl font-bold font-mono text-slate-700 mt-2">Awaiting Draw</span>
-                                @endif
-                            </div>
-
-                            <!-- Scratchable Foil Canvas Layer -->
-                            <canvas x-ref="scratchCanvas"
-                                    x-show="!revealed"
-                                    x-transition:leave="transition ease-in duration-300"
-                                    x-transition:leave-start="opacity-100 scale-100"
-                                    x-transition:leave-end="opacity-0 scale-105"
-                                    class="absolute inset-0 w-full h-full cursor-crosshair touch-none z-20">
-                            </canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="py-8 text-center text-slate-500 font-mono text-xs bg-white rounded-3xl border border-slate-200 shadow-sm">
-                No active scratch cards right now. Your secret code will appear here once your event starts at the Green Room.
-            </div>
-        @endforelse
-    </div>
-
     <!-- Enrolled Programs Grid (Light Theme) -->
     <div class="space-y-4">
         <div class="flex items-center justify-between">
@@ -324,8 +148,8 @@
             @forelse($myPrograms as $entry)
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 hover:border-[#f3bd2e]/40 transition-all shadow-sm hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-amber-200 uppercase">
-                            {{ $entry->program->category->name ?? 'General' }}
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                            {{ $entry->program->zone?->name ?? $entry->program->eligibility ?? 'All Zones' }} • {{ ucfirst($entry->program->type) }}
                         </span>
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase font-bold
                             {{ $entry->status === 'verified' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600' }}">
@@ -335,7 +159,7 @@
 
                     <div>
                         <h3 class="text-xl font-sora font-bold text-slate-900">{{ $entry->program->name }}</h3>
-                        <p class="text-xs font-mono text-slate-500 mt-1">Code: {{ $entry->program->code }} • Chest #{{ $entry->chest_number }}</p>
+                        <p class="text-xs font-mono text-slate-500 mt-1">Program Code: {{ $entry->program->code }} • Chest #{{ $entry->chest_number }}</p>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs font-mono">

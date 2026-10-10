@@ -412,7 +412,7 @@
 
                     <div class="candidate-meta-right">
                         <div><strong>Program:</strong> {{ $program->name ?? $form?->title }} ({{ $program->code ?? 'PRG' }})</div>
-                        <div><strong>Category / Zone:</strong> {{ $program->category->name ?? 'General' }} • {{ $program->zone->name ?? $program->eligibility ?? 'All Zones' }}</div>
+                        <div><strong>Zone:</strong> {{ $program->zone->name ?? $program->eligibility ?? 'All Zones' }}</div>
                         <div><strong>Submitted At:</strong> {{ $sub->submitted_at?->format('d M Y, h:i A') ?? $sub->created_at->format('d M Y, h:i A') }}</div>
 
                         @if(!$isJudgeView)

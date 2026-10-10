@@ -411,7 +411,7 @@
                             {{ $selectedProgram->code ?: '#'.$selectedProgram->id }}
                         </span>
                         <span class="text-xs text-slate-500 font-mono">
-                            {{ $selectedProgram->category->name ?? $selectedProgram->eligibility ?? 'General' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
+                            {{ $selectedProgram->zone?->name ?? $selectedProgram->eligibility ?? 'All Zones' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
                         </span>
                         @php $progWindow = $selectedProgram->getCallListWindowState(); @endphp
                         @if($selectedProgram->is_call_list_locked)

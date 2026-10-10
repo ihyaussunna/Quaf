@@ -67,7 +67,7 @@
                             Active Program: {{ $activeProgram->code ?: '#'.$activeProgram->id }}
                         </span>
                         <span class="text-xs text-slate-500 font-mono">
-                            {{ $activeProgram->category->name ?? $activeProgram->eligibility ?? 'General' }} &bull; Stage: {{ $stage?->name }} &bull; Duration: {{ $activeProgram->duration_minutes }} Mins
+                            {{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All Zones' }} &bull; Stage: {{ $stage?->name }} &bull; Duration: {{ $activeProgram->duration_minutes }} Mins
                         </span>
                         @if($activeProgram->is_call_list_locked)
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200">
