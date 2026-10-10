@@ -188,15 +188,15 @@
         <div class="flex w-max animate-ribbon-loop pointer-events-none p-0 m-0 leading-none">
             <!-- Sequence 1 -->
             <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[20px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[20px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[20px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
             </div>
             <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
             <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[20px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[20px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[20px] sm:h-[33px] md:h-[37px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
             </div>
         </div>
     </div>
