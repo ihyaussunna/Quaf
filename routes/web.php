@@ -56,6 +56,7 @@ use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
+use App\Services\FileStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -68,15 +69,17 @@ use Illuminate\Support\Facades\Route;
 */
 // Storage asset delivery fallback
 Route::get('/storage/{path}', function (string $path) {
-    $fullPath = storage_path('app/public/'.$path);
-    if (! file_exists($fullPath) || ! is_file($fullPath)) {
-        $fullPath = public_path('storage/'.$path);
-    }
-    if (! file_exists($fullPath) || ! is_file($fullPath)) {
-        abort(404);
+    $resolvedPath = FileStorageService::resolveFilePath($path);
+    if (! $resolvedPath || ! @file_exists($resolvedPath) || ! @is_file($resolvedPath)) {
+        abort(404, 'File not found');
     }
 
-    return response()->file($fullPath, [
+    $mime = @mime_content_type($resolvedPath) ?: 'application/octet-stream';
+    $filename = basename($resolvedPath);
+
+    return response()->file($resolvedPath, [
+        'Content-Type' => $mime,
+        'Content-Disposition' => 'inline; filename="'.addslashes($filename).'"',
         'Cache-Control' => 'public, max-age=86400',
         'Access-Control-Allow-Origin' => '*',
     ]);
@@ -110,6 +113,7 @@ Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.in
 Route::get('/submit/{slug}', [PublicOnlineSubmissionController::class, 'show'])->name('online-submission.show');
 Route::post('/submit/{slug}', [PublicOnlineSubmissionController::class, 'submit'])->name('online-submission.submit');
 Route::get('/submit/program/{program}', [PublicOnlineSubmissionController::class, 'showByProgram'])->name('online-submission.by-program');
+Route::get('/submissions/file/{submission}', [PublicOnlineSubmissionController::class, 'viewFile'])->name('online-submission.file');
 
 // Public Verifications & Live Displays
 Route::get('/verify', [VerificationController::class, 'index'])->name('verify.index');

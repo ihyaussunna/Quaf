@@ -382,7 +382,7 @@
         @forelse($submissions as $index => $sub)
             @php
                 $codeLetter = $sub->code_letter ?: chr(65 + $index);
-                $isImage = $sub->file_path && in_array(strtolower($sub->file_type ?? pathinfo($sub->file_path, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+                $isImage = $sub->file_path && $sub->isImage();
                 $wordCount = $sub->text_content ? str_word_count(strip_tags($sub->text_content)) : 0;
             @endphp
 

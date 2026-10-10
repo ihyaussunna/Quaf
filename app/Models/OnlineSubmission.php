@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class OnlineSubmission extends Model
 {
@@ -66,7 +65,21 @@ class OnlineSubmission extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->file_path);
+        return route('online-submission.file', $this->id);
+    }
+
+    public function isImage(): bool
+    {
+        $ext = strtolower($this->file_type ?: pathinfo($this->file_name ?? (string) $this->file_path, PATHINFO_EXTENSION));
+
+        return in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp'], true);
+    }
+
+    public function isPdf(): bool
+    {
+        $ext = strtolower($this->file_type ?: pathinfo($this->file_name ?? (string) $this->file_path, PATHINFO_EXTENSION));
+
+        return $ext === 'pdf';
     }
 
     public function getFormattedFileSizeAttribute(): string

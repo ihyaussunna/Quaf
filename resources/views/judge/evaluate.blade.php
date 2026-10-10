@@ -320,8 +320,7 @@
 
                     @if($entrySubmission)
                         @php
-                            $subFileType = strtolower($entrySubmission->file_type ?? pathinfo($entrySubmission->file_path ?? '', PATHINFO_EXTENSION));
-                            $isImageFile = in_array($subFileType, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+                            $isImageFile = $entrySubmission->isImage();
                             $subWordCount = $entrySubmission->text_content ? str_word_count(strip_tags($entrySubmission->text_content)) : 0;
                         @endphp
                         <div class="rounded-2xl border-2 border-indigo-200/90 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 p-4 sm:p-5 shadow-xs space-y-4"

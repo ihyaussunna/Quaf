@@ -11,8 +11,9 @@
          modalFileName: '',
          modalVideoUrl: '',
          modalTimestamp: '',
+         modalIsImage: false,
 
-         openModal(code, info, text, fileUrl, fileName, videoUrl, time) {
+         openModal(code, info, text, fileUrl, fileName, videoUrl, time, isImage = false) {
              this.modalCodeLetter = code;
              this.modalStudentInfo = info;
              this.modalText = text;
@@ -20,6 +21,7 @@
              this.modalFileName = fileName;
              this.modalVideoUrl = videoUrl;
              this.modalTimestamp = time;
+             this.modalIsImage = isImage;
              this.viewingModal = true;
          }
      }">
@@ -117,7 +119,7 @@
                                             {{ $s->text_content }}
                                         </p>
                                         <button type="button" 
-                                                @click="openModal('{{ $s->code_letter }}', '{{ addslashes($studentInfo) }}', '{{ addslashes($s->text_content) }}', '{{ $s->file_url }}', '{{ addslashes($s->file_name ?? '') }}', '{{ addslashes($s->video_url ?? '') }}', '{{ $s->submitted_at?->format('d M Y, h:i A') }}')"
+                                                @click="openModal('{{ $s->code_letter }}', '{{ addslashes($studentInfo) }}', '{{ addslashes($s->text_content) }}', '{{ $s->file_url }}', '{{ addslashes($s->file_name ?? '') }}', '{{ addslashes($s->video_url ?? '') }}', '{{ $s->submitted_at?->format('d M Y, h:i A') }}', {{ $s->isImage() ? 'true' : 'false' }})"
                                                 class="text-[11px] text-[#be1e2d] hover:underline font-bold mt-1 inline-block cursor-pointer">
                                             View Full Text &rarr;
                                         </button>
@@ -130,15 +132,22 @@
                                 <td class="py-4 px-4">
                                     <div class="flex flex-col gap-1.5">
                                         @if($s->file_path)
-                                            <a href="{{ $s->file_url }}" 
-                                               target="_blank" 
-                                               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold hover:bg-emerald-100 transition w-fit">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                <span>{{ Str::limit($s->file_name ?: 'View Attachment', 18) }}</span>
-                                                @if($s->formatted_file_size)
-                                                    <span class="text-[9px] text-slate-500">({{ $s->formatted_file_size }})</span>
+                                            <div class="flex items-center gap-2">
+                                                @if($s->isImage())
+                                                    <a href="{{ $s->file_url }}" target="_blank" class="block shrink-0 group" title="Click to view full photo">
+                                                        <img src="{{ $s->file_url }}" alt="{{ $s->file_name }}" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shadow-xs group-hover:scale-105 transition">
+                                                    </a>
                                                 @endif
-                                            </a>
+                                                <a href="{{ $s->file_url }}" 
+                                                   target="_blank" 
+                                                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold hover:bg-emerald-100 transition w-fit">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                    <span>{{ Str::limit($s->file_name ?: 'View Attachment', 18) }}</span>
+                                                    @if($s->formatted_file_size)
+                                                        <span class="text-[9px] text-slate-500">({{ $s->formatted_file_size }})</span>
+                                                    @endif
+                                                </a>
+                                            </div>
                                         @endif
 
                                         @if($s->video_url)
@@ -165,7 +174,7 @@
                                 <td class="py-4 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button type="button" 
-                                                @click="openModal('{{ $s->code_letter }}', '{{ addslashes($studentInfo) }}', '{{ addslashes($s->text_content ?? '') }}', '{{ $s->file_url }}', '{{ addslashes($s->file_name ?? '') }}', '{{ addslashes($s->video_url ?? '') }}', '{{ $s->submitted_at?->format('d M Y, h:i A') }}')"
+                                                @click="openModal('{{ $s->code_letter }}', '{{ addslashes($studentInfo) }}', '{{ addslashes($s->text_content ?? '') }}', '{{ $s->file_url }}', '{{ addslashes($s->file_name ?? '') }}', '{{ addslashes($s->video_url ?? '') }}', '{{ $s->submitted_at?->format('d M Y, h:i A') }}', {{ $s->isImage() ? 'true' : 'false' }})"
                                                 class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" 
                                                 title="View Details">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -250,17 +259,26 @@
             </div>
 
             <!-- File Attachment -->
-            <div x-show="modalFileUrl" class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <div>
-                    <h4 class="text-xs font-mono uppercase font-bold text-slate-500 mb-1">Attached File:</h4>
-                    <span class="text-xs font-sans text-slate-800" x-text="modalFileName"></span>
+            <div x-show="modalFileUrl" class="mt-4 pt-4 border-t border-slate-100">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <h4 class="text-xs font-mono uppercase font-bold text-slate-500 mb-1">Attached File / ഫയൽ:</h4>
+                        <span class="text-xs font-sans text-slate-800 font-medium" x-text="modalFileName"></span>
+                    </div>
+                    <a :href="modalFileUrl" 
+                       target="_blank" 
+                       class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs uppercase flex items-center gap-1.5 transition shadow-xs">
+                        <span>Open in New Tab</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
                 </div>
-                <a :href="modalFileUrl" 
-                   target="_blank" 
-                   class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs uppercase flex items-center gap-1.5 transition">
-                    <span>Download / Open</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                </a>
+
+                <!-- Inline Image Preview -->
+                <template x-if="modalIsImage">
+                    <div class="mt-3 rounded-2xl border border-slate-200 bg-slate-900/5 p-2 flex items-center justify-center overflow-hidden">
+                        <img :src="modalFileUrl" :alt="modalFileName" class="max-h-96 w-auto rounded-xl object-contain shadow-xs">
+                    </div>
+                </template>
             </div>
 
             <!-- Video -->

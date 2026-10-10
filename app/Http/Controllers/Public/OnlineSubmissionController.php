@@ -8,10 +8,11 @@ use App\Models\OnlineSubmissionForm;
 use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Services\AuditLogger;
+use App\Services\FileStorageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OnlineSubmissionController extends Controller
 {
@@ -96,18 +97,19 @@ class OnlineSubmissionController extends Controller
 
         if ($request->hasFile('submission_file')) {
             $file = $request->file('submission_file');
-            $fileName = $file->getClientOriginalName();
-            $fileType = $file->getClientOriginalExtension();
-            $fileSize = $file->getSize();
-            $filePath = $file->store("submissions/{$form->program_id}", 'public');
+            $stored = FileStorageService::storeSubmissionFile($file, $form->program_id);
+            $fileName = $stored['file_name'];
+            $fileType = $stored['file_type'];
+            $fileSize = $stored['file_size'];
+            $filePath = $stored['relative_path'];
         }
 
         // Handle Video Upload or Link
         $videoUrl = $validated['video_url'] ?? null;
         if ($request->hasFile('video_file')) {
             $videoFile = $request->file('video_file');
-            $videoPath = $videoFile->store("submissions/{$form->program_id}/videos", 'public');
-            $videoUrl = Storage::disk('public')->url($videoPath);
+            $videoStored = FileStorageService::storeSubmissionFile($videoFile, "{$form->program_id}/videos");
+            $videoUrl = url('/storage/'.$videoStored['relative_path']);
         }
 
         // Check if an existing submission was made with this code letter for this form
@@ -166,5 +168,29 @@ class OnlineSubmissionController extends Controller
         AuditLogger::log('online_submission_received', $submission);
 
         return view('public.online-submission.success', compact('form', 'submission'));
+    }
+
+    public function viewFile(Request $request, OnlineSubmission $submission): BinaryFileResponse
+    {
+        if (! $submission->file_path) {
+            abort(404, 'ഈ സബ്മിഷനിൽ ഫയൽ അറ്റാച്ച് ചെയ്തിട്ടില്ല.');
+        }
+
+        $resolvedPath = FileStorageService::resolveFilePath($submission->file_path);
+
+        if (! $resolvedPath || ! @file_exists($resolvedPath) || ! @is_file($resolvedPath)) {
+            abort(404, 'അപ്‌ലോഡ് ചെയ്ത ഫയൽ കണ്ടെത്താൻ സാധിച്ചില്ല.');
+        }
+
+        $mime = @mime_content_type($resolvedPath) ?: 'application/octet-stream';
+        $downloadName = $submission->file_name ?: basename($resolvedPath);
+        $isDownload = $request->boolean('download');
+
+        return response()->file($resolvedPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => ($isDownload ? 'attachment' : 'inline').'; filename="'.addslashes($downloadName).'"',
+            'Cache-Control' => 'public, max-age=86400',
+            'Access-Control-Allow-Origin' => '*',
+        ]);
     }
 }

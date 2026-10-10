@@ -14,6 +14,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -327,5 +328,54 @@ class OnlineSubmissionFeatureTest extends TestCase
         $response->assertSee('Code K');
         $response->assertSee('Once upon a time in Cordoba, the libraries sparkled with wisdom.');
         $response->assertSee('Print / Download Answers (PDF)');
+    }
+
+    public function test_student_file_upload_and_viewing_via_dedicated_and_fallback_routes(): void
+    {
+        $program = Program::create([
+            'name' => 'Water Color Painting',
+            'code' => 'WCP01',
+            'category_id' => $this->category->id,
+            'zone_id' => $this->zone->id,
+            'type' => 'single',
+        ]);
+
+        $form = OnlineSubmissionForm::create([
+            'program_id' => $program->id,
+            'slug' => 'wcp01-art',
+            'title' => 'Water Color Painting Form',
+            'allow_text' => false,
+            'allow_image' => true,
+            'is_image_required' => true,
+            'is_open' => true,
+        ]);
+
+        $uploadedPhoto = UploadedFile::fake()->image('nature_art.jpg', 600, 400);
+
+        $submitResponse = $this->post(route('online-submission.submit', $form->slug), [
+            'code_letter' => 'M',
+            'submission_file' => $uploadedPhoto,
+        ]);
+
+        $submitResponse->assertStatus(200);
+
+        $submission = OnlineSubmission::where('online_submission_form_id', $form->id)
+            ->where('code_letter', 'M')
+            ->first();
+
+        $this->assertNotNull($submission);
+        $this->assertNotEmpty($submission->file_path);
+        $this->assertTrue($submission->isImage());
+        $this->assertStringContainsString('/submissions/file/'.$submission->id, $submission->file_url);
+
+        // Test dedicated file viewing route
+        $fileResponse = $this->get(route('online-submission.file', $submission->id));
+        $fileResponse->assertStatus(200);
+        $fileResponse->assertHeader('Content-Disposition', 'inline; filename="nature_art.jpg"');
+
+        // Test fallback storage route as well
+        $fallbackResponse = $this->get('/storage/'.$submission->file_path);
+        $fallbackResponse->assertStatus(200);
+        $fallbackResponse->assertHeader('Content-Disposition', 'inline; filename="'.basename($submission->file_path).'"');
     }
 }

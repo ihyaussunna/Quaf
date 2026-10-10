@@ -226,11 +226,10 @@ class QuafSeason09WorkflowTest extends TestCase
         $loginResponse->assertRedirect(route('student.dashboard'));
         $this->assertAuthenticated();
 
-        // 3. Student dashboard displays scratch card component
+        // 3. Student dashboard displays candidate programs (anonymous code letters are hidden from students)
         $dashboardResponse = $this->get('/student');
         $dashboardResponse->assertStatus(200);
-        $dashboardResponse->assertSee('Anonymous Code Scratch Card');
-        $dashboardResponse->assertSee('Code A');
+        $dashboardResponse->assertDontSee('Anonymous Code Scratch Card');
     }
 
     public function test_leader_registration_window_enforcement(): void
