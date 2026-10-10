@@ -178,9 +178,27 @@
                 animation: ribbonScrollLeft 44s linear infinite;
                 will-change: transform;
             }
+            .quaf-theme-ribbon-img {
+                height: 16px !important;
+                max-height: 16px !important;
+                width: auto !important;
+                object-fit: contain;
+                display: block !important;
+                flex-shrink: 0;
+            }
             @media (min-width: 640px) {
                 .animate-ribbon-loop {
                     animation: ribbonScrollLeft 32s linear infinite;
+                }
+                .quaf-theme-ribbon-img {
+                    height: 22px !important;
+                    max-height: 22px !important;
+                }
+            }
+            @media (min-width: 1024px) {
+                .quaf-theme-ribbon-img {
+                    height: 27px !important;
+                    max-height: 27px !important;
                 }
             }
         </style>
@@ -188,15 +206,15 @@
         <div class="flex w-max animate-ribbon-loop pointer-events-none p-0 m-0 leading-none">
             <!-- Sequence 1 -->
             <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="quaf-theme-ribbon-img m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="quaf-theme-ribbon-img m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="quaf-theme-ribbon-img m-0 p-0">
             </div>
             <!-- Sequence 2 (Identical Clone for seamless infinite loop) -->
             <div class="flex shrink-0 items-center p-0 m-0 leading-none">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
-                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="h-[15px] sm:h-[25px] md:h-[28px] w-auto object-contain block shrink-0 m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="quaf-theme-ribbon-img m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="quaf-theme-ribbon-img m-0 p-0">
+                <img src="{{ asset('images/footer_web_1.gif') }}" alt="QUAF Theme Ribbon" class="quaf-theme-ribbon-img m-0 p-0">
             </div>
         </div>
     </div>
