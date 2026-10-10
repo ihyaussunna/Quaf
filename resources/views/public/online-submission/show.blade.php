@@ -1,16 +1,23 @@
-@extends('layouts.public', ['title' => 'Submit Entry: ' . ($form->program?->name ?? $form->title) . ' | QUAF'])
+@extends('layouts.public', [
+    'title' => 'Submit Entry: ' . ($form->program?->name ?? $form->title) . ' | QUAF',
+    'hideHeader' => true,
+    'hideFooter' => true,
+])
 
 @section('content')
-<section class="min-h-[85vh] py-10 sm:py-16 bg-slate-50 flex items-center justify-center relative overflow-hidden">
+<section class="min-h-screen py-8 sm:py-14 bg-[#f8fafc] flex flex-col items-center justify-center relative overflow-hidden">
     <!-- Ambient Glows -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[340px] sm:h-[400px] bg-red-500/10 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-10 right-10 w-72 h-72 bg-amber-400/10 rounded-full blur-[120px] pointer-events-none"></div>
 
     <div class="max-w-2xl mx-auto px-4 sm:px-6 w-full relative z-10">
 
-        <!-- Header Card -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[11px] font-mono uppercase tracking-widest text-slate-600 mb-3">
+        <!-- Header Brand & Title -->
+        <div class="text-center mb-6 sm:mb-8">
+            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" 
+                 alt="QUAF" 
+                 class="h-10 sm:h-12 w-auto mx-auto mb-3 object-contain">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white shadow-xs text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-slate-600 mb-3">
                 <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
                 <span>QUAF Digital Submission Desk</span>
             </div>
@@ -24,7 +31,7 @@
                     {{ $form->program?->code ?? 'ONLINE' }}
                 </span>
                 
-                <span>•</span>
+                <span>&bull;</span>
                 <span style="color: {{ $form->program?->zone?->color_hex ?? '#005c94' }};" class="font-bold">
                     {{ $form->program?->zone?->name ?? $form->program?->eligibility ?? 'All' }}
                 </span>
@@ -32,8 +39,8 @@
         </div>
 
         @if($isOpen)
-            <!-- Submission Form Card (Apple Glassy Style) -->
-            <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl relative overflow-hidden"
+            <!-- Submission Form Card (Elevated Clean Style) -->
+            <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden"
                  x-data="{
                      submitting: false,
                      codeLetter: '{{ old('code_letter') }}',
@@ -47,7 +54,7 @@
 
                 <!-- Rules / Instructions Accordion or Box -->
                 @if($form->instructions)
-                    <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/60 border border-amber-200/80 mb-6 text-xs text-amber-950 font-sans leading-relaxed">
+                    <div class="p-4 sm:p-5 rounded-2xl bg-amber-50 mb-6 text-xs text-amber-950 font-sans leading-relaxed shadow-xs">
                         <div class="flex items-center gap-2 font-mono font-bold text-amber-900 text-xs mb-1.5 uppercase tracking-wide">
                             <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>നിർദ്ദേശങ്ങൾ (Instructions & Guidelines)</span>
@@ -57,7 +64,7 @@
                 @endif
 
                 @if($errors->any())
-                    <div class="p-4 rounded-2xl bg-red-50 border border-red-200 mb-6">
+                    <div class="p-4 rounded-2xl bg-red-50 mb-6 shadow-xs">
                         <div class="flex items-center gap-2 text-xs font-bold text-red-800 font-mono mb-1">
                             <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             <span>സബ്മിഷനിൽ ചില തടസ്സങ്ങൾ കണ്ടെത്തി:</span>
@@ -90,7 +97,7 @@
                                    x-model="codeLetter" 
                                    placeholder="e.g. A, B, C, D..." 
                                    maxlength="10" 
-                                   class="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 focus:border-[#be1e2d] text-slate-900 font-mono text-lg font-black uppercase tracking-widest placeholder-slate-400 focus:outline-none transition">
+                                   class="w-full px-4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200/60 focus:bg-white focus:ring-2 focus:ring-[#be1e2d]/25 text-slate-900 font-mono text-lg font-black uppercase tracking-widest placeholder-slate-400 focus:outline-none transition shadow-2xs">
                         </div>
                         <p class="text-[11px] text-slate-500 mt-1.5">
                             ഗ്രീൻ റൂമിൽ നിന്നും അല്ലെങ്കിൽ കോർഡിനേറ്ററിൽ നിന്നും നിങ്ങൾക്ക് നൽകിയ കോഡ് ലെറ്റർ ഇവിടെ രേഖപ്പെടുത്തുക.
@@ -113,7 +120,7 @@
                                       x-model="textContent" 
                                       {{ $form->is_text_required ? 'required' : '' }}
                                       placeholder="{{ $form->text_placeholder ?: 'നിങ്ങളുടെ രചന ഇവിടെ ടൈപ്പ് ചെയ്യുക അല്ലെങ്കിൽ പേസ്റ്റ് ചെയ്യുക...' }}" 
-                                      class="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#be1e2d] text-slate-900 text-sm font-sans leading-relaxed placeholder-slate-400 focus:outline-none transition"></textarea>
+                                      class="w-full px-4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200/60 focus:bg-white focus:ring-2 focus:ring-[#be1e2d]/25 text-slate-900 text-sm font-sans leading-relaxed placeholder-slate-400 focus:outline-none transition shadow-2xs"></textarea>
                         </div>
                     @endif
 
@@ -125,7 +132,7 @@
                                 @if($form->is_image_required) <span class="text-red-500">*</span> @endif
                             </label>
                             
-                            <label class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 hover:border-[#be1e2d] rounded-2xl bg-slate-50 hover:bg-slate-100/60 transition cursor-pointer text-center">
+                            <label class="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 hover:bg-slate-100 transition cursor-pointer text-center shadow-xs">
                                 <svg class="w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 <span class="text-xs font-bold text-slate-800" x-text="fileName ? fileName : 'Choose photo, drawing scan or PDF file'"></span>
                                 <span class="text-[10px] text-slate-500 font-mono mt-1">Supported: JPG, PNG, WEBP, PDF (Max 30MB)</span>
@@ -156,7 +163,7 @@
                                        id="video_url" 
                                        value="{{ old('video_url') }}" 
                                        placeholder="https://drive.google.com/... or https://youtu.be/..." 
-                                       class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                                       class="w-full px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200/60 focus:bg-white focus:ring-2 focus:ring-[#be1e2d]/25 text-xs font-mono focus:outline-none transition">
                             </div>
 
                             <div class="text-center font-mono text-xs text-slate-400">OR</div>
@@ -168,7 +175,7 @@
                                 <input type="file" 
                                        name="video_file" 
                                        accept="video/mp4,video/quicktime,video/webm" 
-                                       class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
+                                       class="w-full px-3 py-2 rounded-xl bg-slate-100 text-xs font-mono">
                             </div>
                         </div>
                     @endif
@@ -177,7 +184,7 @@
                     <div class="pt-4 border-t border-slate-100">
                         <button type="submit" 
                                 :disabled="submitting" 
-                                class="w-full py-4 px-6 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                                class="w-full py-4 px-6 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-red-600/25 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
                             <template x-if="submitting">
                                 <span class="flex items-center gap-2">
                                     <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
@@ -197,7 +204,7 @@
             </div>
         @else
             <!-- Closed State Notice -->
-            <div class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 text-center shadow-lg max-w-lg mx-auto">
+            <div class="bg-white rounded-3xl p-8 sm:p-12 text-center shadow-xl max-w-lg mx-auto">
                 <div class="w-16 h-16 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </div>
@@ -212,6 +219,10 @@
                 </a>
             </div>
         @endif
+
+        <p class="text-center text-[11px] font-mono text-slate-400 mt-6">
+            &copy; 2026 QUAF &bull; Markaz Cultural Festival
+        </p>
 
     </div>
 </section>

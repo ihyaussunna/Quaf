@@ -208,7 +208,7 @@
     @php
         $urgentAlert = \App\Models\Announcement::where('is_active', true)->where('priority', 'urgent')->latest()->first();
     @endphp
-    @if($urgentAlert)
+    @if($urgentAlert && !($hideHeader ?? false))
         <div class="bg-amber-100 border-b border-amber-300 text-amber-950 text-xs sm:text-sm px-4 py-2 sticky top-0 z-50 shadow-xs">
             <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2 overflow-hidden">
@@ -220,6 +220,7 @@
         </div>
     @endif
 
+    @if(!($hideHeader ?? false))
     <!-- Global Header (Apple-inspired Sticky Navigation with Dynamic Glassmorphism) -->
     <header class="hidden lg:block sticky top-0 z-40 transition-all duration-300 text-white"
             :class="(scrolled || {{ !request()->routeIs('home.view') && !request()->routeIs('home') ? 'true' : 'false' }}) 
@@ -248,12 +249,14 @@
             </div>
         </div>
     </header>
+    @endif
 
     <!-- Main Content Slot -->
-    <main class="flex-1 w-full {{ (request()->routeIs('home.view') || request()->routeIs('home')) ? 'pb-0 lg:-mt-20' : 'pb-16 lg:pb-0' }}">
+    <main class="flex-1 w-full {{ (request()->routeIs('home.view') || request()->routeIs('home')) ? 'pb-0 lg:-mt-20' : (($hideFooter ?? false) ? 'pb-0' : 'pb-16 lg:pb-0') }}">
         @yield('content')
     </main>
 
+    @if(!($hideFooter ?? false))
     <!-- Global Premium Dark Footer (Section 30) -->
     <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-32 sm:pb-36 lg:pb-14 {{ (request()->routeIs('home.view') || request()->routeIs('home')) ? 'mt-0' : 'mt-16 sm:mt-24' }} relative overflow-hidden">
         <!-- Subtle Glow in Footer -->
@@ -376,6 +379,7 @@
 
         </div>
     </nav>
+    @endif
 
     <!-- iPhone-Style Glassy Modal Popup for Mobile Navigation -->
     <div x-show="mobileOpen"
