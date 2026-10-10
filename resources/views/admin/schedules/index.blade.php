@@ -1,4 +1,12 @@
-@extends('layouts.admin', ['title' => 'Festival Schedule — All Stages | Quaf'])
+@php
+    $isProgramCommittee = (isset($isProgramCommittee) && $isProgramCommittee)
+        || request()->routeIs('program-committee.*')
+        || request()->is('program-committee/*')
+        || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && !auth()->user()->isAdmin());
+    $layout = $layout ?? ($isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin');
+    $routePrefix = $routePrefix ?? ($isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.');
+@endphp
+@extends($layout, ['title' => 'Festival Schedule — All Stages | Quaf'])
 
 @section('content')
 <div class="space-y-6" x-data="{
@@ -78,7 +86,7 @@
         this.isCheckingClash = true;
         this.clashWarning = null;
 
-        fetch(`{{ route('admin.schedules.check-conflict') }}?program_id=${this.modalProgramId}&stage_id=${this.modalStageId}&date=${this.modalDate}&time=${this.modalTime}&duration=${this.modalDuration}`, {
+        fetch(`{{ route($routePrefix . 'check-conflict') }}?program_id=${this.modalProgramId}&stage_id=${this.modalStageId}&date=${this.modalDate}&time=${this.modalTime}&duration=${this.modalDuration}`, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
@@ -141,14 +149,14 @@
         <!-- Action Buttons -->
         <div class="flex flex-wrap items-center gap-2.5">
             <!-- Offstage Scheduler Direct Shortcut -->
-            <a href="{{ route('admin.schedules.offstage') }}" 
+            <a href="{{ route($routePrefix . 'offstage') }}" 
                class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all flex items-center gap-2 border border-slate-300">
                 <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 <span>Offstage & Clashes</span>
             </a>
 
             <!-- Print Rockwell PDF -->
-            <a href="{{ route('admin.schedules.offstage.pdf', ['date' => $date && $date !== 'all' ? $date : 'all']) }}" target="_blank"
+            <a href="{{ route($routePrefix . 'offstage.pdf', ['date' => $date && $date !== 'all' ? $date : 'all']) }}" target="_blank"
                class="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all flex items-center gap-2 shadow-2xs">
                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 <span>Print PDF (Rockwell)</span>
@@ -188,7 +196,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <form method="POST" action="{{ route('admin.schedules.auto-resolve') }}">
+                    <form method="POST" action="{{ route($routePrefix . 'auto-resolve') }}">
                         @csrf
                         <input type="hidden" name="date" value="{{ $date && $date !== 'all' ? $date : 'all' }}">
                         <button type="submit" 
@@ -203,7 +211,7 @@
                             class="px-3.5 py-1.5 rounded-xl bg-white border border-red-300 text-red-900 font-bold text-xs hover:bg-red-50 transition cursor-pointer">
                         <span x-text="showClashDrawer ? 'Hide Clash Breakdown' : 'View Clash Breakdown'"></span>
                     </button>
-                    <a href="{{ route('admin.schedules.offstage') }}" class="px-3 py-1.5 rounded-xl bg-red-700 text-white font-bold text-xs hover:bg-red-800 transition">
+                    <a href="{{ route($routePrefix . 'offstage') }}" class="px-3 py-1.5 rounded-xl bg-red-700 text-white font-bold text-xs hover:bg-red-800 transition">
                         Resolve in Offstage Scheduler →
                     </a>
                 </div>
@@ -263,7 +271,7 @@
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 select-none">
             <span class="text-[11px] font-mono uppercase text-slate-400 font-bold shrink-0 mr-1">Festival Date:</span>
             @foreach($festivalDates as $dKey => $dLabel)
-                <a href="{{ route('admin.schedules.index', array_merge(request()->query(), ['date' => $dKey])) }}"
+                <a href="{{ route($routePrefix . 'index', array_merge(request()->query(), ['date' => $dKey])) }}"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition-all shadow-2xs {{ ($date ?? 'all') === $dKey ? 'bg-[#be1e2d] text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     {{ $dLabel }}
                 </a>
@@ -275,17 +283,17 @@
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[11px] font-mono uppercase text-slate-400 font-bold shrink-0 mr-1">Stage Scope:</span>
                 
-                <a href="{{ route('admin.schedules.index', array_merge(request()->query(), ['stage' => 'all', 'group' => null])) }}"
+                <a href="{{ route($routePrefix . 'index', array_merge(request()->query(), ['stage' => 'all', 'group' => null])) }}"
                    class="px-3 py-1.5 rounded-xl text-xs font-medium transition {{ empty($stageId) && empty($stageGroup) ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     All Stages ({{ $stages->count() }})
                 </a>
 
-                <a href="{{ route('admin.schedules.index', array_merge(request()->query(), ['group' => 'main', 'stage' => null])) }}"
+                <a href="{{ route($routePrefix . 'index', array_merge(request()->query(), ['group' => 'main', 'stage' => null])) }}"
                    class="px-3 py-1.5 rounded-xl text-xs font-medium transition {{ $stageGroup === 'main' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-red-50 hover:bg-red-100 text-[#be1e2d]' }}">
                     Main Stages (01–04)
                 </a>
 
-                <a href="{{ route('admin.schedules.index', array_merge(request()->query(), ['group' => 'offstage', 'stage' => null])) }}"
+                <a href="{{ route($routePrefix . 'index', array_merge(request()->query(), ['group' => 'offstage', 'stage' => null])) }}"
                    class="px-3 py-1.5 rounded-xl text-xs font-medium transition {{ $stageGroup === 'offstage' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-amber-50 hover:bg-amber-100 text-amber-900' }}">
                     Offstage Venues (NF3, ID3, U2, S3)
                 </a>
@@ -293,9 +301,9 @@
                 <!-- Specific Stage Selector Dropdown -->
                 <div class="relative inline-block ml-1">
                     <select onchange="window.location.href = this.value" class="bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-sora font-medium focus:outline-none focus:border-[#be1e2d]">
-                        <option value="{{ route('admin.schedules.index', array_merge(request()->query(), ['stage' => 'all', 'group' => null])) }}">Select Specific Stage...</option>
+                        <option value="{{ route($routePrefix . 'index', array_merge(request()->query(), ['stage' => 'all', 'group' => null])) }}">Select Specific Stage...</option>
                         @foreach($stages as $stg)
-                            <option value="{{ route('admin.schedules.index', array_merge(request()->query(), ['stage' => $stg->id, 'group' => null])) }}" {{ $stageId == $stg->id ? 'selected' : '' }}>
+                            <option value="{{ route($routePrefix . 'index', array_merge(request()->query(), ['stage' => $stg->id, 'group' => null])) }}" {{ $stageId == $stg->id ? 'selected' : '' }}>
                                 {{ $stg->name }} ({{ $stg->location ?? $stg->code }}) — {{ $stg->schedules_count }} events
                             </option>
                         @endforeach
@@ -327,7 +335,7 @@
         </div>
 
         <!-- Search Bar -->
-        <form method="GET" action="{{ route('admin.schedules.index') }}" class="pt-2">
+        <form method="GET" action="{{ route($routePrefix . 'index') }}" class="pt-2">
             <input type="hidden" name="date" value="{{ $date ?? 'all' }}">
             <input type="hidden" name="stage" value="{{ $stageId ?? '' }}">
             <input type="hidden" name="group" value="{{ $stageGroup ?? '' }}">
@@ -437,7 +445,7 @@
                                         class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] hover:bg-slate-200 transition cursor-pointer">
                                     Reschedule
                                 </button>
-                                <form method="POST" action="{{ route('admin.schedules.destroy', $item) }}" onsubmit="return confirm('Remove program {{ $item->program->code }} from festival schedule?');" class="inline">
+                                <form method="POST" action="{{ route($routePrefix . 'destroy', $item) }}" onsubmit="return confirm('Remove program {{ $item->program->code }} from festival schedule?');" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="px-2 py-1 text-slate-400 hover:text-red-600 transition cursor-pointer" title="Delete Schedule">
@@ -580,7 +588,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.schedules.quick-slot') }}" class="space-y-4 font-sora">
+            <form method="POST" action="{{ route($routePrefix . 'quick-slot') }}" class="space-y-4 font-sora">
                 @csrf
                 <input type="hidden" name="redirect_to" value="index">
 
@@ -798,7 +806,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.schedules.stages.store') }}" class="space-y-4 font-sora">
+            <form method="POST" action="{{ route($routePrefix . 'stages.store') }}" class="space-y-4 font-sora">
                 @csrf
                 <div>
                     <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Stage Name *</label>

@@ -1,14 +1,22 @@
-@extends('layouts.admin', ['title' => 'Schedule Event'])
+@php
+    $isProgramCommittee = (isset($isProgramCommittee) && $isProgramCommittee)
+        || request()->routeIs('program-committee.*')
+        || request()->is('program-committee/*')
+        || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && !auth()->user()->isAdmin());
+    $layout = $layout ?? ($isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin');
+    $routePrefix = $routePrefix ?? ($isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.');
+@endphp
+@extends($layout, ['title' => 'Schedule Event'])
 
 @section('content')
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
-        <a href="{{ route('admin.schedules.index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to Schedule</a>
+        <a href="{{ route($routePrefix . 'index') }}" class="text-xs font-mono text-[#f3bd2e] hover:underline mb-2 block font-semibold">← Back to Schedule</a>
         <h1 class="text-3xl font-sora font-black text-slate-900">Schedule Event</h1>
         <p class="text-xs font-mono text-slate-500 mt-1">Assign program to a stage and time window. The conflict engine automatically verifies participant and judge availability.</p>
     </div>
 
-    <form method="POST" action="{{ route('admin.schedules.store') }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
+    <form method="POST" action="{{ route($routePrefix . 'store') }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
         @csrf
 
         <div>
@@ -59,7 +67,7 @@
         </div>
 
         <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-            <a href="{{ route('admin.schedules.index') }}" class="px-5 py-3 rounded-xl text-xs font-mono text-slate-500 hover:text-slate-800">Cancel</a>
+            <a href="{{ route($routePrefix . 'index') }}" class="px-5 py-3 rounded-xl text-xs font-mono text-slate-500 hover:text-slate-800">Cancel</a>
             <button type="submit" class="px-6 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-[#f3bd2e] text-white hover:brightness-110 shadow-lg shadow-[#f3bd2e]/20">
                 Confirm Schedule & Check Clashes
             </button>

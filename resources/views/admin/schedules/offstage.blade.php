@@ -1,4 +1,12 @@
-@extends('layouts.admin', ['title' => 'Offstage Schedule & Conflict Detector | QUAF'])
+@php
+    $isProgramCommittee = (isset($isProgramCommittee) && $isProgramCommittee)
+        || request()->routeIs('program-committee.*')
+        || request()->is('program-committee/*')
+        || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && !auth()->user()->isAdmin());
+    $layout = $layout ?? ($isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin');
+    $routePrefix = $routePrefix ?? ($isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.');
+@endphp
+@extends($layout, ['title' => 'Offstage Schedule & Conflict Detector | QUAF'])
 
 @section('content')
 <div class="space-y-6" x-data="{
@@ -116,7 +124,7 @@
                 exclude_schedule_id: this.formScheduleId || ''
             });
 
-            const res = await fetch(`{{ route('admin.schedules.check-conflict') }}?${params.toString()}`, {
+            const res = await fetch(`{{ route($routePrefix . 'check-conflict') }}?${params.toString()}`, {
                 headers: { 'Accept': 'application/json' }
             });
             const data = await res.json();
@@ -135,7 +143,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 text-xs text-slate-500 font-mono mb-1">
-                <a href="{{ route('admin.schedules.index') }}" class="hover:text-[#be1e2d] transition">Schedules</a>
+                <a href="{{ route($routePrefix . 'index') }}" class="hover:text-[#be1e2d] transition">Schedules</a>
                 <span>/</span>
                 <span class="text-slate-800 font-semibold">Offstage & Clash Detector</span>
             </div>
@@ -160,7 +168,7 @@
             </button>
 
             <!-- PDF Print / Export Button -->
-            <a href="{{ route('admin.schedules.offstage.pdf', ['date' => $selectedDate]) }}" target="_blank"
+            <a href="{{ route($routePrefix . 'offstage.pdf', ['date' => $selectedDate]) }}" target="_blank"
                class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-1.5">
                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 <span>Print Rockwell PDF</span>
@@ -183,7 +191,7 @@
         </div>
         <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             @foreach($defaultDates as $dateVal => $dateLabel)
-                <a href="{{ route('admin.schedules.offstage', ['date' => $dateVal]) }}"
+                <a href="{{ route($routePrefix . 'offstage', ['date' => $dateVal]) }}"
                    class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ $selectedDate === $dateVal ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200' }}">
                     <span>{{ $dateLabel }}</span>
                     @php
@@ -218,7 +226,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 flex-wrap">
-                    <form method="POST" action="{{ route('admin.schedules.auto-resolve') }}">
+                    <form method="POST" action="{{ route($routePrefix . 'auto-resolve') }}">
                         @csrf
                         <input type="hidden" name="date" value="{{ $selectedDate }}">
                         <button type="submit"
@@ -379,7 +387,7 @@
                                         class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer" title="Edit Slot">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
-                                <form method="POST" action="{{ route('admin.schedules.destroy', $sch->id) }}" onsubmit="return confirm('Remove this program from schedule?');">
+                                <form method="POST" action="{{ route($routePrefix . 'destroy', $sch->id) }}" onsubmit="return confirm('Remove this program from schedule?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-2 rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50 transition cursor-pointer" title="Delete Slot">
@@ -426,7 +434,7 @@
                     </button>
                 </div>
 
-                <form method="POST" action="{{ route('admin.schedules.quick-slot') }}" class="space-y-4 mt-4">
+                <form method="POST" action="{{ route($routePrefix . 'quick-slot') }}" class="space-y-4 mt-4">
                     @csrf
                     <input type="hidden" name="schedule_id" :value="formScheduleId">
 
@@ -616,7 +624,7 @@
                     </button>
                 </div>
 
-                <form method="POST" action="{{ route('admin.schedules.stages.store') }}" class="space-y-4 mt-4">
+                <form method="POST" action="{{ route($routePrefix . 'stages.store') }}" class="space-y-4 mt-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-bold text-slate-700 font-sora mb-1">Stage Name <span class="text-red-500">*</span></label>

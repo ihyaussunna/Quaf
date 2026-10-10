@@ -23,6 +23,12 @@ class ScheduleController extends Controller
 
     public function index(Request $request): View
     {
+        $isProgramCommittee = $request->routeIs('program-committee.*')
+            || $request->is('program-committee/*')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
+        $layout = $isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin';
+        $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
+
         $stageId = $request->query('stage');
         $date = $request->query('date');
         $stageGroup = $request->query('group');
@@ -126,6 +132,9 @@ class ScheduleController extends Controller
         $unscheduledCount = $totalProgramsCount - $scheduledCount;
 
         return view('admin.schedules.index', compact(
+            'layout',
+            'routePrefix',
+            'isProgramCommittee',
             'schedules',
             'stages',
             'mainStages',
@@ -154,6 +163,12 @@ class ScheduleController extends Controller
      */
     public function offstage(Request $request): View
     {
+        $isProgramCommittee = $request->routeIs('program-committee.*')
+            || $request->is('program-committee/*')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
+        $layout = $isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin';
+        $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
+
         $selectedDate = $request->query('date', '2026-10-06');
 
         // All distinct festival dates scheduled or available
@@ -194,6 +209,9 @@ class ScheduleController extends Controller
         $zones = Zone::orderBy('display_order')->get();
 
         return view('admin.schedules.offstage', compact(
+            'layout',
+            'routePrefix',
+            'isProgramCommittee',
             'selectedDate',
             'defaultDates',
             'stages',
@@ -421,10 +439,16 @@ class ScheduleController extends Controller
 
     public function create(): View
     {
+        $isProgramCommittee = request()->routeIs('program-committee.*')
+            || request()->is('program-committee/*')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
+        $layout = $isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin';
+        $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
+
         $programs = Program::doesntHave('schedule')->orderBy('name')->get();
         $stages = Stage::all();
 
-        return view('admin.schedules.create', compact('programs', 'stages'));
+        return view('admin.schedules.create', compact('layout', 'routePrefix', 'isProgramCommittee', 'programs', 'stages'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -476,7 +500,10 @@ class ScheduleController extends Controller
             $msg .= ' WARNING: Clashes were detected and recorded in schedule notes!';
         }
 
-        $isProgramCommittee = $request->routeIs('program-committee.*') || str_contains(url()->previous(), 'program-committee');
+        $isProgramCommittee = $request->routeIs('program-committee.*')
+            || $request->is('program-committee/*')
+            || str_contains(url()->previous(), 'program-committee')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
         $indexRoute = $isProgramCommittee ? 'program-committee.schedules.index' : 'admin.schedules.index';
 
         return redirect()->route($indexRoute)->with('success', $msg);
@@ -484,10 +511,16 @@ class ScheduleController extends Controller
 
     public function edit(Schedule $schedule): View
     {
+        $isProgramCommittee = request()->routeIs('program-committee.*')
+            || request()->is('program-committee/*')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
+        $layout = $isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin';
+        $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
+
         $stages = Stage::all();
         $programs = Program::orderBy('name')->get();
 
-        return view('admin.schedules.edit', compact('schedule', 'stages', 'programs'));
+        return view('admin.schedules.edit', compact('layout', 'routePrefix', 'isProgramCommittee', 'schedule', 'stages', 'programs'));
     }
 
     public function update(Request $request, Schedule $schedule): RedirectResponse
@@ -533,7 +566,10 @@ class ScheduleController extends Controller
 
         AuditLogger::log('update_schedule', $schedule, $old, $schedule->toArray());
 
-        $isProgramCommittee = $request->routeIs('program-committee.*') || str_contains(url()->previous(), 'program-committee');
+        $isProgramCommittee = $request->routeIs('program-committee.*')
+            || $request->is('program-committee/*')
+            || str_contains(url()->previous(), 'program-committee')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
         $indexRoute = $isProgramCommittee ? 'program-committee.schedules.index' : 'admin.schedules.index';
 
         return redirect()->route($indexRoute)->with('success', "Schedule for '{$schedule->program->name}' updated.");
