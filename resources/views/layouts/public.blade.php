@@ -379,7 +379,6 @@
 
         </div>
     </nav>
-    @endif
 
     <!-- iPhone-Style Glassy Modal Popup for Mobile Navigation -->
     <div x-show="mobileOpen"
@@ -472,6 +471,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Student Portal Chest Number Lookup Modal (Apple Glassy Dialog) -->
     <div x-show="showStudentModal" 

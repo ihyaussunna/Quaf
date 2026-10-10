@@ -5,7 +5,7 @@
 ])
 
 @section('content')
-<section class="min-h-screen py-8 sm:py-14 bg-[#f8fafc] flex flex-col items-center justify-center relative overflow-hidden">
+<section class="min-h-screen py-10 sm:py-16 bg-[#f8fafc] flex flex-col items-center justify-start sm:justify-center relative overflow-x-hidden">
     <!-- Ambient Glows -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[340px] sm:h-[400px] bg-red-500/10 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-10 right-10 w-72 h-72 bg-amber-400/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -211,18 +211,11 @@
                 <h3 class="font-sora text-xl font-bold text-slate-900 mb-2">
                     Submissions Closed (സബ്മിഷൻ അവസാനിച്ചു)
                 </h3>
-                <p class="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto mb-6">
+                <p class="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
                     ഈ പ്രോഗ്രാമിന്റെ ഓൺലൈൻ സബ്മിഷൻ സമയം അവസാനിച്ചിരിക്കുന്നു. കൂടുതൽ വിവരങ്ങൾക്ക് ഗ്രീൻ റൂം കോർഡിനേറ്ററുമായി ബന്ധപ്പെടുക.
                 </p>
-                <a href="{{ route('home.view') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-mono text-xs font-bold uppercase">
-                    Return to Festival Home
-                </a>
             </div>
         @endif
-
-        <p class="text-center text-[11px] font-mono text-slate-400 mt-6">
-            &copy; 2026 QUAF &bull; Markaz Cultural Festival
-        </p>
 
     </div>
 </section>

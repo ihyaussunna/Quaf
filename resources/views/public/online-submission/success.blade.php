@@ -63,23 +63,14 @@
                 </div>
             </div>
 
-            <div class="space-y-3 w-full">
+            <div class="w-full">
                 <a href="{{ route('online-submission.show', $form->slug) }}" 
                    class="w-full py-3.5 px-6 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition shadow-md shadow-red-600/20">
                     <span>Submit Another Entry (മറ്റൊരു രചന സമർപ്പിക്കുക)</span>
                 </a>
-                <a href="{{ route('home.view') }}" 
-                   class="w-full py-3.5 px-6 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition">
-                    <span>Back to Festival Home</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </a>
             </div>
 
         </div>
-
-        <p class="text-center text-[11px] font-mono text-slate-400 mt-6">
-            &copy; 2026 QUAF &bull; Markaz Cultural Festival
-        </p>
 
     </div>
 </section>
