@@ -26,48 +26,6 @@
 <body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-[100dvh] flex flex-col w-full overflow-x-clip"
       x-data="{ mobileOpen: false }">
 
-    <!-- Top Navigation Bar (Smooth Header, Smaller Logo, QR Badge Action) -->
-    <header class="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/90 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-40 shadow-xs">
-        <!-- Left: Logo & Portal Identity -->
-        <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
-            <a href="{{ route('student.dashboard') }}" class="flex items-center gap-2 sm:gap-3 shrink-0 group">
-                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" 
-                     alt="QUAF Logo" 
-                     class="h-7 sm:h-8 max-h-8 w-auto object-contain transition-transform group-hover:scale-105">
-                <div class="leading-tight">
-                    <span class="font-bold tracking-wider text-xs sm:text-sm text-slate-900 block font-sora">STUDENT PORTAL</span>
-                    <span class="text-[9px] sm:text-[10px] font-mono tracking-widest text-[#be1e2d] block uppercase font-bold">DELEGATE CONSOLE</span>
-                </div>
-            </a>
-        </div>
-
-        <!-- Center: Prominent Digital QR Badge Button (Replaced Nav Bar) -->
-        <div class="flex items-center justify-center">
-            <a href="{{ route('student.idcard') }}" 
-               class="app-tap inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold bg-[#f3bd2e] hover:bg-amber-500 text-white shadow-xs shadow-amber-500/20 transition-all">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                </svg>
-                <span class="hidden sm:inline">Digital QR Badge</span>
-                <span class="sm:hidden text-[11px]">QR Badge</span>
-            </a>
-        </div>
-
-        <!-- Right: Profile & Logout -->
-        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-            <div class="text-right hidden sm:block leading-tight">
-                <span class="text-xs font-bold text-slate-900 block truncate max-w-[140px]">{{ Auth::user()->name }}</span>
-                <span class="text-[10px] font-mono text-[#f3bd2e] font-bold">Participant</span>
-            </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="app-tap px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all cursor-pointer">
-                    Sign Out
-                </button>
-            </form>
-        </div>
-    </header>
-
     <!-- Main Content (With safe padding for mobile bottom bar) -->
     <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 md:p-8 pb-24 md:pb-12 min-w-0 overflow-x-clip">
         @yield('content')
