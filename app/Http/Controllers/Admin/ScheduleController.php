@@ -229,6 +229,11 @@ class ScheduleController extends Controller
     public function offstagePdf(Request $request): View
     {
         $date = $request->query('date', '2026-10-07');
+        $isProgramCommittee = $request->routeIs('program-committee.*')
+            || $request->is('program-committee/*')
+            || str_contains(url()->previous(), 'program-committee')
+            || (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && ! auth()->user()->isAdmin());
+        $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
 
         if ($date === 'all') {
             $schedules = Schedule::with(['program.zone', 'stage'])
@@ -248,6 +253,8 @@ class ScheduleController extends Controller
             return view('admin.schedules.offstage-pdf', [
                 'mode' => 'all',
                 'groupedByDate' => $groupedByDate,
+                'routePrefix' => $routePrefix,
+                'isProgramCommittee' => $isProgramCommittee,
             ]);
         }
 
@@ -270,6 +277,8 @@ class ScheduleController extends Controller
             'date' => $date,
             'formattedDate' => $formattedDate,
             'schedulesByTime' => $schedulesByTime,
+            'routePrefix' => $routePrefix,
+            'isProgramCommittee' => $isProgramCommittee,
         ]);
     }
 
