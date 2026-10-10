@@ -16,7 +16,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-screen flex flex-col"
+<body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex flex-col"
       x-data="{
           showRulesModal: false,
           showCriteriaModal: false,
@@ -189,31 +189,32 @@
          x-transition:leave="transition ease-in duration-200 transform"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-2"
-         class="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl px-4 py-3 shadow-xl font-mono text-xs flex items-center gap-3 border bg-slate-900 text-emerald-300 border-slate-700"
+         class="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl px-4 py-3 shadow-xl font-mono text-xs flex items-center gap-3 bg-slate-900 text-emerald-300"
          style="display: none;">
         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
         <span x-text="toastMessage"></span>
     </div>
 
     <!-- Unified Green Room Topbar -->
-    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-40 shadow-xs gap-4">
+    <header class="h-20 bg-white/95 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-40 shadow-xs gap-4">
         <div class="flex items-center gap-3 sm:gap-4 shrink-0">
             <a href="{{ route('greenroom.index') }}" class="flex items-center shrink-0">
                 <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-9 sm:h-10 w-auto object-contain max-h-10" style="height: 38px; width: auto; max-width: 125px; object-fit: contain;">
             </a>
-            <div class="border-l border-slate-200 pl-3 sm:pl-4">
+            <div class="pl-2 sm:pl-3">
                 <div class="flex items-center gap-2">
                     <h1 class="font-sora font-black tracking-tight text-base sm:text-lg text-slate-900 leading-none">
                         Welcome to Green Room Desk
                     </h1>
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
                 </div>
+                <p class="text-[10px] font-mono text-slate-400 mt-0.5 hidden sm:block">Digital Call List & Live Attendance Console</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
             <!-- IST Live Clock Badge (Auto-updates every second without refresh) -->
-            <div class="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 shadow-2xs"
+            <div class="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-slate-100/80 text-xs font-mono font-bold text-slate-700 shadow-2xs"
                  x-data="{
                      currentTime: '',
                      updateClock() {
@@ -234,7 +235,7 @@
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-all whitespace-nowrap cursor-pointer">
+                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-red-700 hover:bg-red-50 transition-all whitespace-nowrap cursor-pointer">
                     Sign Out
                 </button>
             </form>
@@ -244,14 +245,14 @@
     <!-- Flash Messages -->
     @if(session('success'))
         <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 mt-4">
-            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-mono flex items-center justify-between shadow-xs">
+            <div class="p-4 rounded-2xl bg-emerald-50 text-emerald-900 text-xs font-mono flex items-center justify-between shadow-xs">
                 <span>{{ session('success') }}</span>
             </div>
         </div>
     @endif
     @if(session('error'))
         <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 mt-4">
-            <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs font-mono flex items-center justify-between shadow-xs">
+            <div class="p-4 rounded-2xl bg-red-50 text-red-900 text-xs font-mono flex items-center justify-between shadow-xs">
                 <span>{{ session('error') }}</span>
             </div>
         </div>
@@ -260,23 +261,23 @@
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6">
 
         <!-- Stage Switcher Tabs: Stages 1 to 8 -->
-        <div class="space-y-2">
+        <div class="space-y-2.5">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono uppercase font-bold text-slate-500 tracking-wider">Festival Stage Venues (Stages 01 - 08)</span>
-                <span class="text-xs font-mono text-slate-500">Selected: <strong>{{ $stage?->name }}</strong></span>
+                <span class="text-[11px] font-mono uppercase font-bold text-slate-500 tracking-wider">Festival Stage Venues</span>
+                <span class="text-xs font-mono text-slate-500">Selected: <strong class="text-slate-900">{{ $stage?->name }}</strong></span>
             </div>
-            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <div class="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
                 @foreach($stages as $st)
                     @php
                         $isActive = ((int) $selectedStageId === (int) $st->id);
                         $hasActiveSlot = $st->schedules()->where('start_time', '<=', now()->copy()->addMinutes(10))->where('end_time', '>=', now())->exists();
                     @endphp
                     <a href="{{ route('greenroom.index', ['stage_id' => $st->id]) }}"
-                       class="px-4 sm:px-5 py-3 rounded-2xl font-mono text-xs font-bold transition-all flex-shrink-0 flex items-center gap-2.5 border {{ $isActive ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-md scale-102' : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border-slate-200 shadow-2xs' }}">
-                        <span class="w-2.5 h-2.5 rounded-full {{ $isActive ? 'bg-white' : ($hasActiveSlot ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400') }}"></span>
+                       class="px-4 sm:px-5 py-2.5 rounded-2xl font-mono text-xs font-bold transition-all flex-shrink-0 flex items-center gap-2.5 {{ $isActive ? 'bg-[#be1e2d] text-white shadow-md shadow-[#be1e2d]/25 scale-[1.02]' : 'bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 shadow-xs hover:shadow-sm' }}">
+                        <span class="w-2 h-2 rounded-full {{ $isActive ? 'bg-white' : ($hasActiveSlot ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300') }}"></span>
                         <span>{{ $st->name }}</span>
                         @if($hasActiveSlot && ! $isActive)
-                            <span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-100 text-emerald-800 font-bold uppercase">LIVE</span>
+                            <span class="px-1.5 py-0.5 rounded-md text-[9px] bg-emerald-100 text-emerald-800 font-bold uppercase">LIVE</span>
                         @endif
                     </a>
                 @endforeach
@@ -286,8 +287,8 @@
         @if($stage)
             <!-- Stage Schedule Lineup Ribbon -->
             @if($stageSchedules->isNotEmpty())
-                <div class="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center gap-2.5 overflow-x-auto scrollbar-none text-xs font-mono">
-                    <span class="text-slate-500 font-bold uppercase text-[10px] shrink-0 flex items-center gap-1">
+                <div class="p-3 rounded-2xl bg-white shadow-xs flex items-center gap-2 overflow-x-auto scrollbar-none text-xs font-mono">
+                    <span class="text-slate-500 font-bold uppercase text-[10px] shrink-0 flex items-center gap-1 pl-1">
                         <svg class="w-3.5 h-3.5 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span>Stage Schedule:</span>
                     </span>
@@ -301,7 +302,7 @@
                             $schZoneColor = $sch->program?->zone?->color_hex ?? '#005c94';
                         @endphp
                         <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $sch->program_id]) }}"
-                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 border {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-xs ring-2 ring-slate-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200' }}">
+                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100/70 hover:bg-slate-200/70 text-slate-700' }}">
                             <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('d M, h:i A') }}</span>
                             <span>{{ Str::limit($sch->program?->name, 22) }}</span>
                             @if($schZoneName)
@@ -325,185 +326,193 @@
                 </div>
             @endif
 
-            <!-- Selected Stage Overview: NOW ON STAGE & UP NEXT IN LINE -->
-            <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 grid grid-cols-1 lg:grid-cols-3 gap-6 shadow-xs">
+            <!-- Selected Stage Overview: NOW ON STAGE & UP NEXT IN LINE & STAGE CONTROLS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- 1. Now On Stage Card -->
-                <div class="space-y-3 p-4 sm:p-5 rounded-2xl border transition-all {{ ($activeProgram && $currentProgram && $activeProgram->id === $currentProgram->id) ? 'bg-red-50/20 border-[#be1e2d] ring-2 ring-[#be1e2d]/30' : 'bg-slate-50/40 border-slate-200' }}">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Now On Stage</span>
-                        @if($currentProgram)
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>LIVE NOW</span>
-                            </span>
-                        @else
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200">
-                                INTERMISSION
-                            </span>
-                        @endif
-                    </div>
-
-                    @if($currentProgram)
-                        <div>
-                            <div class="flex items-center gap-2 flex-wrap mb-1.5">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
-                                      style="background-color: {{ $currentProgram->zone?->color_hex ?? '#be1e2d' }};">
-                                    {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'General' }}
+                <div class="rounded-3xl bg-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4 relative overflow-hidden {{ ($activeProgram && $currentProgram && $activeProgram->id === $currentProgram->id) ? 'bg-gradient-to-br from-rose-50/40 via-white to-white' : '' }}">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Now On Stage</span>
+                            @if($currentProgram)
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-emerald-50 text-emerald-800 flex items-center gap-1.5 shadow-2xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>LIVE NOW</span>
                                 </span>
-                            </div>
-                            <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 tracking-tight">
-                                {{ $currentProgram->name }}
-                            </h3>
-                            @if($currentProgram->malayalam_name)
-                                <p class="text-xs font-ml text-slate-600 mt-0.5">{{ $currentProgram->malayalam_name }}</p>
+                            @else
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-100 text-slate-600 shadow-2xs">
+                                    INTERMISSION
+                                </span>
                             @endif
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-600">
-                            <span class="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-800">ID: {{ $currentProgram->code }}</span>
-                            <span>&bull;</span>
-                            <span class="font-bold text-slate-700">Zone: {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'All' }}</span>
-                            <span>&bull;</span>
-                            <span class="text-emerald-700 font-bold">
-                                {{ $activeSchedule?->start_time?->format('d M, h:i A') ?? $currentProgram->scheduled_time?->format('d M, h:i A') }}
-                                @if($activeSchedule?->end_time) – {{ $activeSchedule->end_time->format('h:i A') }} @endif
-                            </span>
-                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px]">
-                                {{ $currentProgram->duration_minutes ?: 30 }} Mins
-                            </span>
-                        </div>
+                        @if($currentProgram)
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
+                                          style="background-color: {{ $currentProgram->zone?->color_hex ?? '#be1e2d' }};">
+                                        {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'General' }}
+                                    </span>
+                                </div>
+                                <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 tracking-tight leading-snug">
+                                    {{ $currentProgram->name }}
+                                </h3>
+                                @if($currentProgram->malayalam_name)
+                                    <p class="text-xs font-ml text-slate-600 mt-1">{{ $currentProgram->malayalam_name }}</p>
+                                @endif
+                            </div>
 
-                        <!-- Niyamavali & Criteria Modals Buttons -->
-                        <div class="flex items-center gap-2 pt-1 flex-wrap">
-                            <button type="button"
-                                    @click="openRules('{{ addslashes($currentProgram->name) }}', '{{ $currentProgram->code }}', '{{ addslashes($currentProgram->rules ?? '') }}')"
-                                    class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-                                <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <span>നിയമാവലി (Rules)</span>
-                            </button>
+                            <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-600 pt-1">
+                                <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-800">ID: {{ $currentProgram->code }}</span>
+                                <span>&bull;</span>
+                                <span class="font-bold text-slate-700">Zone: {{ $currentProgram->zone?->name ?? $currentProgram->eligibility ?? 'All' }}</span>
+                                <span>&bull;</span>
+                                <span class="text-emerald-700 font-bold">
+                                    {{ $activeSchedule?->start_time?->format('d M, h:i A') ?? $currentProgram->scheduled_time?->format('d M, h:i A') }}
+                                    @if($activeSchedule?->end_time) – {{ $activeSchedule->end_time->format('h:i A') }} @endif
+                                </span>
+                                <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 font-bold text-[11px]">
+                                    {{ $currentProgram->duration_minutes ?: 30 }} Mins
+                                </span>
+                            </div>
 
-                            <button type="button"
-                                    @click="openCriteria('{{ addslashes($currentProgram->name) }}', '{{ $currentProgram->code }}', {{ json_encode($currentProgram->scoringCriteria) }})"
-                                    class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-                                <svg class="w-3.5 h-3.5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                                <span>മാനദണ്ഡങ്ങൾ (Criteria)</span>
-                            </button>
-                        </div>
+                            <!-- Niyamavali & Criteria Modals Buttons -->
+                            <div class="flex items-center gap-2 pt-2 flex-wrap">
+                                <button type="button"
+                                        @click="openRules('{{ addslashes($currentProgram->name) }}', '{{ $currentProgram->code }}', '{{ addslashes($currentProgram->rules ?? '') }}')"
+                                        class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <span>നിയമാവലി (Rules)</span>
+                                </button>
 
-                        <!-- Attend / View Call List Action -->
-                        <div class="pt-2">
+                                <button type="button"
+                                        @click="openCriteria('{{ addslashes($currentProgram->name) }}', '{{ $currentProgram->code }}', {{ json_encode($currentProgram->scoringCriteria) }})"
+                                        class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                    <span>മാനദണ്ഡങ്ങൾ (Criteria)</span>
+                                </button>
+                            </div>
+                        @else
+                            <div class="py-6">
+                                <h3 class="text-lg font-sora font-semibold text-slate-500">Stage on Intermission</h3>
+                                <p class="text-xs font-mono text-slate-400 mt-1">ഈ സ്റ്റേജിൽ ഇപ്പോൾ ലൈവ് പ്രോഗ്രാം നടന്നു കൊണ്ടിരിക്കുന്നില്ല. അടുത്ത ഷെഡ്യൂൾ ഉടൻ ആരംഭിക്കും.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Attend / View Call List Action -->
+                    @if($currentProgram)
+                        <div class="pt-3">
                             @if($activeProgram && $activeProgram->id === $currentProgram->id)
-                                <div class="w-full py-2.5 px-3.5 rounded-xl bg-[#be1e2d] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-xs">
+                                <div class="w-full py-3 px-4 rounded-2xl bg-emerald-600 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-sm">
                                     <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                                     <span>ഈ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് തുറന്നിരിക്കുന്നു (Active Call List)</span>
                                 </div>
                             @else
                                 <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $currentProgram->id]) }}"
-                                   class="w-full py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-mono font-bold text-xs flex items-center justify-center gap-2 border border-slate-300 shadow-2xs transition-all cursor-pointer active:scale-98">
-                                    <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                   class="w-full py-3 px-4 rounded-2xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-[#be1e2d]/20 transition-all cursor-pointer active:scale-98">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     <span>ഇപ്പോഴത്തെ പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് (View Now On Stage)</span>
                                 </a>
                             @endif
-                        </div>
-                    @else
-                        <div class="py-4">
-                            <h3 class="text-lg font-sora font-semibold text-slate-500">Stage on Intermission</h3>
-                            <p class="text-xs font-mono text-slate-400 mt-1">ഈ സ്റ്റേജിൽ ഇപ്പോൾ ലൈവ് പ്രോഗ്രാം നടന്നു കൊണ്ടിരിക്കുന്നില്ല. അടുത്ത ഷെഡ്യൂൾ ഉടൻ ആരംഭിക്കും.</p>
                         </div>
                     @endif
                 </div>
 
                 <!-- 2. Up Next In Line Card -->
-                <div class="space-y-3 lg:border-l lg:border-slate-200 lg:pl-6 p-4 sm:p-5 rounded-2xl border transition-all {{ ($activeProgram && $nextProgram && $activeProgram->id === $nextProgram->id) ? 'bg-blue-50/20 border-[#005c94] ring-2 ring-[#005c94]/30' : 'bg-slate-50/40 border-slate-200' }}">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Up Next in Line</span>
-                        @if($nextProgram)
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-blue-100 text-blue-800 border border-blue-200">
-                                SCHEDULED SLOT
-                            </span>
-                        @else
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">
-                                NONE QUEUED
-                            </span>
-                        @endif
-                    </div>
-
-                    @if($nextProgram)
-                        <div>
-                            <div class="flex items-center gap-2 flex-wrap mb-1.5">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
-                                      style="background-color: {{ $nextProgram->zone?->color_hex ?? '#005c94' }};">
-                                    {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'General' }}
+                <div class="rounded-3xl bg-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4 relative overflow-hidden {{ ($activeProgram && $nextProgram && $activeProgram->id === $nextProgram->id) ? 'bg-gradient-to-br from-blue-50/40 via-white to-white' : '' }}">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Up Next in Line</span>
+                            @if($nextProgram)
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-blue-50 text-blue-800 shadow-2xs">
+                                    SCHEDULED SLOT
                                 </span>
-                            </div>
-                            <h3 class="text-xl sm:text-2xl font-sora font-bold text-slate-900 tracking-tight">
-                                {{ $nextProgram->name }}
-                            </h3>
-                            @if($nextProgram->malayalam_name)
-                                <p class="text-xs font-ml text-slate-600 mt-0.5">{{ $nextProgram->malayalam_name }}</p>
+                            @else
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-100 text-slate-500 shadow-2xs">
+                                    NONE QUEUED
+                                </span>
                             @endif
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-600">
-                            <span class="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-800">ID: {{ $nextProgram->code }}</span>
-                            <span>&bull;</span>
-                            <span class="font-bold text-slate-700">Zone: {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'All' }}</span>
-                            <span>&bull;</span>
-                            <span class="text-blue-800 font-bold">
-                                {{ $nextSchedule?->start_time?->format('d M, h:i A') ?? $nextProgram->scheduled_time?->format('d M, h:i A') ?? 'TBA' }}
-                            </span>
-                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px]">
-                                {{ $nextProgram->duration_minutes ?: 30 }} Mins
-                            </span>
-                        </div>
+                        @if($nextProgram)
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
+                                          style="background-color: {{ $nextProgram->zone?->color_hex ?? '#005c94' }};">
+                                        {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'General' }}
+                                    </span>
+                                </div>
+                                <h3 class="text-xl sm:text-2xl font-sora font-bold text-slate-900 tracking-tight leading-snug">
+                                    {{ $nextProgram->name }}
+                                </h3>
+                                @if($nextProgram->malayalam_name)
+                                    <p class="text-xs font-ml text-slate-600 mt-1">{{ $nextProgram->malayalam_name }}</p>
+                                @endif
+                            </div>
 
-                        <!-- Niyamavali & Criteria Modals Buttons -->
-                        <div class="flex items-center gap-2 pt-1 flex-wrap">
-                            <button type="button"
-                                    @click="openRules('{{ addslashes($nextProgram->name) }}', '{{ $nextProgram->code }}', '{{ addslashes($nextProgram->rules ?? '') }}')"
-                                    class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-                                <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <span>നിയമാവലി (Rules)</span>
-                            </button>
+                            <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-600 pt-1">
+                                <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-bold text-slate-800">ID: {{ $nextProgram->code }}</span>
+                                <span>&bull;</span>
+                                <span class="font-bold text-slate-700">Zone: {{ $nextProgram->zone?->name ?? $nextProgram->eligibility ?? 'All' }}</span>
+                                <span>&bull;</span>
+                                <span class="text-blue-800 font-bold">
+                                    {{ $nextSchedule?->start_time?->format('d M, h:i A') ?? $nextProgram->scheduled_time?->format('d M, h:i A') ?? 'TBA' }}
+                                </span>
+                                <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 font-bold text-[11px]">
+                                    {{ $nextProgram->duration_minutes ?: 30 }} Mins
+                                </span>
+                            </div>
 
-                            <button type="button"
-                                    @click="openCriteria('{{ addslashes($nextProgram->name) }}', '{{ $nextProgram->code }}', {{ json_encode($nextProgram->scoringCriteria) }})"
-                                    class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-                                <svg class="w-3.5 h-3.5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                                <span>മാനദണ്ഡങ്ങൾ (Criteria)</span>
-                            </button>
-                        </div>
+                            <!-- Niyamavali & Criteria Modals Buttons -->
+                            <div class="flex items-center gap-2 pt-2 flex-wrap">
+                                <button type="button"
+                                        @click="openRules('{{ addslashes($nextProgram->name) }}', '{{ $nextProgram->code }}', '{{ addslashes($nextProgram->rules ?? '') }}')"
+                                        class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <span>നിയമാവലി (Rules)</span>
+                                </button>
 
-                        <!-- Attend Next Program Call List Action Button -->
-                        <div class="pt-2">
+                                <button type="button"
+                                        @click="openCriteria('{{ addslashes($nextProgram->name) }}', '{{ $nextProgram->code }}', {{ json_encode($nextProgram->scoringCriteria) }})"
+                                        class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                    <span>മാനദണ്ഡങ്ങൾ (Criteria)</span>
+                                </button>
+                            </div>
+                        @else
+                            <div class="py-6">
+                                <h3 class="text-lg font-sora font-semibold text-slate-500">None Queued</h3>
+                                <p class="text-xs font-mono text-slate-400 mt-1">ഈ സ്റ്റേജിൽ അടുത്ത പ്രോഗ്രാമുകൾ ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Attend Next Program Call List Action Button -->
+                    @if($nextProgram)
+                        <div class="pt-3">
                             @if($activeProgram && $activeProgram->id === $nextProgram->id)
-                                <div class="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-xs">
+                                <div class="w-full py-3 px-4 rounded-2xl bg-emerald-600 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-sm">
                                     <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                                     <span>അടുത്ത പ്രോഗ്രാമിന്റെ കോൾ ലിസ്റ്റ് തുറന്നിരിക്കുന്നു (Active Call List)</span>
                                 </div>
                             @else
                                 <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $nextProgram->id]) }}"
-                                   class="w-full py-2.5 px-3.5 rounded-xl bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer active:scale-98">
+                                   class="w-full py-3 px-4 rounded-2xl bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-[#005c94]/20 transition-all cursor-pointer active:scale-98">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                                     <span>അടുത്ത പ്രോഗ്രാം ഹാജർ രേഖപ്പെടുത്തുക (Attend Next Program Call List)</span>
                                 </a>
                             @endif
                         </div>
-                    @else
-                        <div class="py-4">
-                            <h3 class="text-lg font-sora font-semibold text-slate-500">None Queued</h3>
-                            <p class="text-xs font-mono text-slate-400 mt-1">ഈ സ്റ്റേജിൽ അടുത്ത പ്രോഗ്രാമുകൾ ഷെഡ്യൂൾ ചെയ്തിട്ടില്ല.</p>
-                        </div>
                     @endif
                 </div>
 
-                <!-- 3. Stage Controls -->
-                <div class="space-y-3 lg:border-l lg:border-slate-200 lg:pl-6 flex flex-col justify-between">
+                <!-- 3. Stage Controls Card -->
+                <div class="rounded-3xl bg-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4">
                     <div>
-                        <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Stage Controls</span>
-                        <div class="text-xs font-mono text-slate-600 mt-1">
-                            Current Stage: <strong class="text-slate-900">{{ $stage->name }}</strong>
+                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Stage Controls</span>
+                        <div class="text-xs font-mono text-slate-600 mt-2">
+                            Current Stage: <strong class="text-slate-900 text-sm">{{ $stage->name }}</strong>
                             @if($activeProgram)
                                 <div class="mt-1 text-[11px] font-mono font-bold text-[#005c94]">
                                     Managing: {{ $activeProgram->name }} ({{ $activeProgram->code }})
@@ -518,7 +527,7 @@
                                 <!-- Submit & Lock Call List Button -->
                                 <button type="button"
                                         @click="openSubmitLockModal()"
-                                        class="w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95">
+                                        class="w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-mono font-bold text-xs uppercase rounded-2xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     <span>Submit & Lock (സമർപ്പിച്ച് ലോക്ക് ചെയ്യുക)</span>
                                 </button>
@@ -527,7 +536,7 @@
                                 <button type="button"
                                         @click="saveAllCodeLetters('{{ route('greenroom.batch-update-code-letters', $activeProgram->id) }}')"
                                         :disabled="savingAllCodes"
-                                        class="w-full px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold text-xs uppercase rounded-2xl border border-slate-300 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
+                                        class="w-full px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold text-xs uppercase rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50">
                                     <template x-if="savingAllCodes">
                                         <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                     </template>
@@ -537,11 +546,11 @@
                                     <span x-text="savingAllCodes ? 'Saving Codes...' : 'Save Codes (കോഡുകൾ സേവ് ചെയ്യുക)'"></span>
                                 </button>
 
-                                <p class="text-[11px] font-mono text-slate-500">
+                                <p class="text-[11px] font-mono text-slate-500 leading-relaxed">
                                     മത്സരാർത്ഥികൾക്ക് കോഡ് നൽകിയ ശേഷം "Submit & Lock" ബട്ടൺ അമർത്തി സമർപ്പിക്കുക. സമർപ്പിച്ചാൽ കോൾ ലിസ്റ്റ് ലോക്ക് ആകുന്നതാണ്.
                                 </p>
                             @elseif($activeProgram->is_call_list_locked ?? false)
-                                <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-mono text-xs flex flex-col gap-2">
+                                <div class="p-4 rounded-2xl bg-amber-50 text-amber-900 font-mono text-xs flex flex-col gap-2 shadow-2xs">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -564,7 +573,7 @@
                             @endif
                         </div>
                     @else
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-500 text-center">
+                        <div class="p-6 rounded-2xl bg-slate-50 text-xs font-mono text-slate-500 text-center">
                             Awaiting schedule slot to activate green room stage controls.
                         </div>
                     @endif
@@ -578,14 +587,14 @@
 
                     <!-- Online Submission Form QR Code Card (Automatic when form configured by Admin) -->
                     @if($onlineForm)
-                        <div class="rounded-3xl bg-slate-900 text-white p-5 sm:p-6 border border-slate-800 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-5">
+                        <div class="rounded-3xl bg-slate-900 text-white p-6 sm:p-7 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-5">
                             <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
                             <div class="flex items-start gap-4 z-10 w-full md:w-auto">
                                 <!-- Clickable QR Code -->
                                 <button type="button" 
                                         @click="showQrModal = true" 
-                                        class="shrink-0 p-2.5 bg-white rounded-2xl shadow-lg border-2 border-emerald-400 group cursor-pointer hover:scale-105 transition"
+                                        class="shrink-0 p-3 bg-white rounded-2xl shadow-lg group cursor-pointer hover:scale-105 transition"
                                         title="ക്യുആർ കോഡ് വലുതായി കാണിക്കാൻ ക്ലിക്ക് ചെയ്യുക">
                                     <img src="{{ $onlineForm->qr_code_url }}" alt="Submission QR Code" class="w-20 h-20 sm:w-24 sm:h-24 object-contain">
                                     <span class="block text-[9px] font-mono font-bold text-slate-800 text-center mt-1 group-hover:text-[#be1e2d]">
@@ -595,11 +604,11 @@
 
                                 <div class="space-y-1.5 flex-1">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold uppercase border border-emerald-500/30 flex items-center gap-1">
+                                        <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold uppercase flex items-center gap-1.5">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                             <span>ONLINE SUBMISSION ACTIVE</span>
                                         </span>
-                                        <span class="px-2 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px] font-mono">
+                                        <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] font-mono">
                                             {{ $onlineSubmissionsCount }} Submissions Received
                                         </span>
                                     </div>
@@ -616,14 +625,14 @@
                                     <div class="pt-2 flex flex-wrap items-center gap-2 text-xs font-mono">
                                         <button type="button" 
                                                 @click="showQrModal = true" 
-                                                class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 transition cursor-pointer">
+                                                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                             <span>Project QR (ക്യുആർ വലുതായി കാണിക്കുക)</span>
                                         </button>
 
                                         <button type="button" 
                                                 @click="navigator.clipboard.writeText('{{ $onlineForm->public_url }}'); triggerToast('സബ്മിഷൻ ലിങ്ക് കോപ്പി ചെയ്തു!')"
-                                                class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold border border-white/10 transition cursor-pointer">
+                                                class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-bold transition cursor-pointer">
                                             <span>Copy Link</span>
                                         </button>
                                     </div>
@@ -634,7 +643,7 @@
 
                     <!-- Timing Window & Lock Alert Banner -->
                     @if($windowState['state'] === 'open')
-                        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="p-4 rounded-2xl bg-emerald-50 text-emerald-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                                 <div>
@@ -644,16 +653,16 @@
                             </div>
                             @if($windowState['scheduled_start'])
                                 <div class="shrink-0 flex items-center gap-2">
-                                    <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                                    <span class="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold">
                                         ഷെഡ്യൂൾ: {{ $windowState['scheduled_start']?->format('h:i A') }} @if($windowState['closes_at']) – {{ $windowState['closes_at']->format('h:i A') }} @endif
                                     </span>
                                 </div>
                             @endif
                         </div>
                     @elseif($windowState['state'] === 'auto_locked_ended')
-                        <div class="p-4 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="p-4 rounded-2xl bg-rose-50 text-rose-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                             <div class="flex items-center gap-2.5">
-                                <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 <div>
                                     <strong class="font-bold">പ്രോഗ്രാം പൂർത്തിയായി (PROGRAM COMPLETED):</strong>
                                     <span>പ്രോഗ്രാം പൂർത്തിയായതിനാൽ കോൾ ലിസ്റ്റ് പൂർണ്ണമായി ലോക്ക് ചെയ്യപ്പെട്ടു.</span>
@@ -661,9 +670,9 @@
                             </div>
                         </div>
                     @elseif($windowState['state'] === 'locked_by_admin')
-                        <div class="p-4 rounded-2xl bg-red-50 border border-red-300 text-red-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="p-4 rounded-2xl bg-rose-50 text-rose-900 text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                             <div class="flex items-center gap-2.5">
-                                <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 <div>
                                     <strong class="font-bold">അഡ്മിൻ ലോക്ക് ചെയ്തു (LOCKED BY ADMIN):</strong>
                                     <span>{{ $windowState['message'] }}</span>
@@ -673,11 +682,11 @@
                     @endif
 
                     <!-- Header & Summary Counters -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                             <div>
                                 <div class="flex items-center gap-2.5 flex-wrap">
-                                    <h2 class="text-xl font-sora font-black text-slate-900">
+                                    <h2 class="text-xl font-sora font-black text-slate-900 tracking-tight">
                                         Digital Call List & Attendance: {{ $activeProgram->name }}
                                     </h2>
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-2xs"
@@ -685,19 +694,19 @@
                                         {{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'General' }}
                                     </span>
                                     @if($currentProgram && $activeProgram->id === $currentProgram->id)
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 flex items-center gap-1.5 shadow-2xs">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                             <span>NOW ON STAGE</span>
                                         </span>
                                     @elseif($nextProgram && $activeProgram->id === $nextProgram->id)
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-100 text-blue-900 border border-blue-300 flex items-center gap-1">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-900 flex items-center gap-1.5 shadow-2xs">
                                             <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                                             <span>UP NEXT (മുൻകൂട്ടി തയ്യാറാക്കുന്നു)</span>
                                         </span>
                                     @endif
                                 </div>
                                 <p class="text-xs font-mono text-slate-500 mt-1">
-                                    Code: <strong>{{ $activeProgram->code }}</strong> &bull; Zone: <strong>{{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All' }}</strong> &bull; Stage: <strong>{{ $stage->name }}</strong> &bull; Total Registered: <strong>{{ $stats['total'] }} Students</strong>
+                                    Code: <strong class="text-slate-800">{{ $activeProgram->code }}</strong> &bull; Zone: <strong class="text-slate-800">{{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All' }}</strong> &bull; Stage: <strong class="text-slate-800">{{ $stage->name }}</strong> &bull; Total Registered: <strong class="text-slate-800">{{ $stats['total'] }} Students</strong>
                                 </p>
                             </div>
 
@@ -705,14 +714,14 @@
                             <div class="flex items-center gap-2 flex-wrap shrink-0">
                                 @if($currentProgram)
                                     <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $currentProgram->id]) }}"
-                                       class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border {{ $activeProgram->id === $currentProgram->id ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200' }}">
+                                       class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 {{ $activeProgram->id === $currentProgram->id ? 'bg-[#be1e2d] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                                         <span class="w-2 h-2 rounded-full {{ $activeProgram->id === $currentProgram->id ? 'bg-white' : 'bg-red-500' }}"></span>
                                         <span>Now On Stage: {{ Str::limit($currentProgram->name, 16) }}</span>
                                     </a>
                                 @endif
                                 @if($nextProgram)
                                     <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $nextProgram->id]) }}"
-                                       class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border {{ $activeProgram->id === $nextProgram->id ? 'bg-[#005c94] text-white border-[#005c94] shadow-sm' : 'bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-200' }}">
+                                       class="px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 {{ $activeProgram->id === $nextProgram->id ? 'bg-[#005c94] text-white shadow-sm' : 'bg-blue-50 hover:bg-blue-100 text-blue-900' }}">
                                         <span class="w-2 h-2 rounded-full {{ $activeProgram->id === $nextProgram->id ? 'bg-white' : 'bg-blue-600 animate-pulse' }}"></span>
                                         <span>Up Next: {{ Str::limit($nextProgram->name, 16) }}</span>
                                     </a>
@@ -722,21 +731,21 @@
 
                         <!-- 4 Summary Counters (Reactive Real-time Counters) -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                                <span class="text-slate-500 font-mono block text-[11px]">Total Call List</span>
-                                <span class="text-xl font-black text-slate-900 mt-1 block font-mono" x-text="stats.total">{{ $stats['total'] }}</span>
+                            <div class="p-4 rounded-2xl bg-slate-50 shadow-2xs">
+                                <span class="text-slate-500 font-mono block text-[11px] font-semibold">Total Call List</span>
+                                <span class="text-2xl font-black text-slate-900 mt-1 block font-mono" x-text="stats.total">{{ $stats['total'] }}</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-                                <span class="font-mono block text-emerald-700 text-[11px]">Present (ഹാജർ)</span>
-                                <span class="text-xl font-black mt-1 block font-mono" x-text="stats.present">{{ $stats['present'] }}</span>
+                            <div class="p-4 rounded-2xl bg-emerald-50 text-emerald-950 shadow-2xs">
+                                <span class="font-mono block text-emerald-700 text-[11px] font-semibold">Present (ഹാജർ)</span>
+                                <span class="text-2xl font-black mt-1 block font-mono" x-text="stats.present">{{ $stats['present'] }}</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900">
-                                <span class="font-mono block text-red-700 text-[11px]">Absent (ഹാജരില്ല)</span>
-                                <span class="text-xl font-black mt-1 block font-mono" x-text="stats.absent">{{ $stats['absent'] }}</span>
+                            <div class="p-4 rounded-2xl bg-rose-50 text-rose-950 shadow-2xs">
+                                <span class="font-mono block text-rose-700 text-[11px] font-semibold">Absent (ഹാജരില്ല)</span>
+                                <span class="text-2xl font-black mt-1 block font-mono" x-text="stats.absent">{{ $stats['absent'] }}</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
-                                <span class="font-mono block text-amber-700 text-[11px]">Waiting (കാത്തിരിപ്പ്)</span>
-                                <span class="text-xl font-black mt-1 block font-mono" x-text="stats.waiting">{{ $stats['waiting'] }}</span>
+                            <div class="p-4 rounded-2xl bg-amber-50 text-amber-950 shadow-2xs">
+                                <span class="font-mono block text-amber-700 text-[11px] font-semibold">Waiting (കാത്തിരിപ്പ്)</span>
+                                <span class="text-2xl font-black mt-1 block font-mono" x-text="stats.waiting">{{ $stats['waiting'] }}</span>
                             </div>
                         </div>
 
@@ -746,60 +755,60 @@
                                 <input type="text"
                                        x-model="searchQuery"
                                        placeholder="Search chest #, student name, group, code..."
-                                       class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono focus:bg-white focus:border-[#be1e2d] focus:outline-none transition">
-                                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                       class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-[#005c94]/20 text-xs font-mono shadow-2xs transition">
+                                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             </div>
 
-                            <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-mono">
+                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-mono">
                                 <button type="button" @click="attendanceFilter = 'all'"
-                                        :class="attendanceFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                        class="px-3 py-1.5 rounded-lg transition cursor-pointer">
+                                        :class="attendanceFilter === 'all' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                        class="px-3.5 py-2 rounded-xl transition cursor-pointer">
                                     All (<span x-text="stats.total">{{ $stats['total'] }}</span>)
                                 </button>
                                 <button type="button" @click="attendanceFilter = 'present'"
-                                        :class="attendanceFilter === 'present' ? 'bg-emerald-600 text-white font-bold' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'"
-                                        class="px-3 py-1.5 rounded-lg transition cursor-pointer">
+                                        :class="attendanceFilter === 'present' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'"
+                                        class="px-3.5 py-2 rounded-xl transition cursor-pointer">
                                     Present (<span x-text="stats.present">{{ $stats['present'] }}</span>)
                                 </button>
                                 <button type="button" @click="attendanceFilter = 'absent'"
-                                        :class="attendanceFilter === 'absent' ? 'bg-red-600 text-white font-bold' : 'bg-red-50 text-red-800 hover:bg-red-100'"
-                                        class="px-3 py-1.5 rounded-lg transition cursor-pointer">
+                                        :class="attendanceFilter === 'absent' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'bg-rose-50 text-rose-800 hover:bg-rose-100'"
+                                        class="px-3.5 py-2 rounded-xl transition cursor-pointer">
                                     Absent (<span x-text="stats.absent">{{ $stats['absent'] }}</span>)
                                 </button>
                                 <button type="button" @click="attendanceFilter = 'waiting'"
-                                        :class="attendanceFilter === 'waiting' ? 'bg-amber-600 text-white font-bold' : 'bg-amber-50 text-amber-800 hover:bg-amber-100'"
-                                        class="px-3 py-1.5 rounded-lg transition cursor-pointer">
+                                        :class="attendanceFilter === 'waiting' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'bg-amber-50 text-amber-800 hover:bg-amber-100'"
+                                        class="px-3.5 py-2 rounded-xl transition cursor-pointer">
                                     Waiting (<span x-text="stats.waiting">{{ $stats['waiting'] }}</span>)
                                 </button>
                             </div>
                         </div>
 
                         <!-- Student Call Board & Attendance Table -->
-                        <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-2xs">
+                        <div class="overflow-x-auto rounded-2xl bg-white shadow-2xs">
                             <table class="w-full text-left text-xs">
                                 <thead>
-                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono text-[11px] uppercase tracking-wider">
-                                        <th class="py-3 px-4 w-12 text-center">#</th>
-                                        <th class="py-3 px-4 w-36 sm:w-44 text-center">Code Letter</th>
-                                        <th class="py-3 px-4 w-24">Chest #</th>
-                                        <th class="py-3 px-4">Student Name</th>
-                                        <th class="py-3 px-4">Group / Team</th>
-                                        <th class="py-3 px-4 text-center">Attendance Action</th>
+                                    <tr class="bg-slate-50/80 text-slate-500 font-mono text-[11px] uppercase tracking-wider font-bold">
+                                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                                        <th class="py-3.5 px-4 w-36 sm:w-44 text-center">Code Letter</th>
+                                        <th class="py-3.5 px-4 w-24">Chest #</th>
+                                        <th class="py-3.5 px-4">Student Name</th>
+                                        <th class="py-3.5 px-4">Group / Team</th>
+                                        <th class="py-3.5 px-4 text-center">Attendance Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     @forelse($entries as $index => $entry)
                                         <tr class="hover:bg-slate-50/70 transition-colors"
-                                            :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-50/40' : (entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-red-50/30' : '')"
+                                            :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-50/30' : (entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-rose-50/30' : '')"
                                             x-show="(attendanceFilter === 'all' || attendanceFilter === entriesStatus[{{ $entry->id }}]) && (!searchQuery || ('{{ strtolower($entry->chest_number . ' ' . ($entry->student?->name ?? '') . ' ' . ($entry->group?->name ?? '')) }} ' + (entriesCode[{{ $entry->id }}] || '')).toLowerCase().includes(searchQuery.toLowerCase()))">
                                             
                                             <!-- Index -->
-                                            <td class="py-3.5 px-4 text-center font-mono text-slate-400 font-bold">
+                                            <td class="py-4 px-4 text-center font-mono text-slate-400 font-bold">
                                                 {{ $index + 1 }}
                                             </td>
 
                                             <!-- Code Letter (Manual Input / View) -->
-                                            <td class="py-2.5 px-3 text-center">
+                                            <td class="py-3 px-3 text-center">
                                                 @if($isEditable)
                                                     <div class="inline-flex items-center justify-center gap-1.5" x-data="{
                                                         lastSavedVal: '{{ $entry->code_letter }}',
@@ -832,14 +841,14 @@
                                                                @blur="saveCode()"
                                                                @keydown.enter.prevent="saveCode(); $event.target.blur()"
                                                                title="Enter Code Letter (A, B, C...) - Automatically saves on change or click Save"
-                                                               class="code-letter-input w-12 sm:w-14 h-9 text-center uppercase font-mono font-black text-xs sm:text-sm rounded-xl border border-slate-300 bg-white hover:border-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-2xs transition-all">
+                                                               class="code-letter-input w-12 sm:w-14 h-10 text-center uppercase font-mono font-black text-xs sm:text-sm rounded-xl bg-slate-100 hover:bg-slate-200/60 focus:bg-white focus:ring-2 focus:ring-[#005c94]/30 shadow-2xs transition-all">
 
                                                         <button type="button"
                                                                 @click="saveCode()"
                                                                 :disabled="isSaving"
-                                                                :class="isSaved ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-100 hover:bg-[#005c94] hover:text-white text-slate-700 border-slate-300'"
+                                                                :class="isSaved ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-[#005c94] hover:text-white text-slate-700'"
                                                                 title="Save this code letter"
-                                                                class="h-9 px-2 sm:px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95">
+                                                                class="h-10 px-2.5 sm:px-3 rounded-xl text-[11px] font-mono font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95">
                                                             <template x-if="isSaving">
                                                                 <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                                             </template>
@@ -854,7 +863,7 @@
                                                     </div>
                                                 @else
                                                     <template x-if="entriesCode[{{ $entry->id }}]">
-                                                        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-purple-100 text-purple-900 border border-purple-200 font-mono font-black text-xs shadow-2xs"
+                                                        <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-purple-50 text-purple-900 font-mono font-black text-xs shadow-2xs"
                                                               x-text="entriesCode[{{ $entry->id }}]">
                                                         </span>
                                                     </template>
@@ -865,14 +874,14 @@
                                             </td>
 
                                             <!-- Chest # -->
-                                            <td class="py-3.5 px-4">
-                                                <span class="font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">
+                                            <td class="py-4 px-4">
+                                                <span class="font-mono font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-xl text-xs">
                                                     #{{ $entry->chest_number }}
                                                 </span>
                                             </td>
 
                                             <!-- Student Name -->
-                                            <td class="py-3.5 px-4">
+                                            <td class="py-4 px-4">
                                                 <div class="font-sora font-bold text-slate-900 text-sm">
                                                     {{ $entry->student?->name ?? 'Enrolled Participant' }}
                                                 </div>
@@ -882,23 +891,23 @@
                                             </td>
 
                                             <!-- Group / Team -->
-                                            <td class="py-3.5 px-4">
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-semibold"
-                                                      style="background-color: {{ $entry->group?->color_hex ?? '#64748b' }}15; color: {{ $entry->group?->color_hex ?? '#64748b' }}; border: 1px solid {{ $entry->group?->color_hex ?? '#64748b' }}30;">
+                                            <td class="py-4 px-4">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-semibold"
+                                                      style="background-color: {{ $entry->group?->color_hex ?? '#64748b' }}15; color: {{ $entry->group?->color_hex ?? '#64748b' }};">
                                                     <span class="w-2 h-2 rounded-full" style="background-color: {{ $entry->group?->color_hex ?? '#64748b' }};"></span>
                                                     <span>{{ $entry->group?->name ?? 'Team' }}</span>
                                                 </span>
                                             </td>
 
                                             <!-- Attendance Action -->
-                                            <td class="py-3.5 px-4 text-center">
+                                            <td class="py-4 px-4 text-center">
                                                 @if($isEditable)
                                                     <div class="inline-flex items-center gap-1.5">
                                                         <button type="button"
                                                                 @click="submitAttendance('{{ route('greenroom.mark-attendance', $entry) }}', {{ $entry->id }}, 'present')"
                                                                 :disabled="loadingEntryId === {{ $entry->id }}"
-                                                                :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-600/30' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'"
-                                                                class="px-3.5 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 disabled:opacity-50">
+                                                                :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600'"
+                                                                class="px-4 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
                                                             <template x-if="loadingEntryId === {{ $entry->id }}">
                                                                 <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                                             </template>
@@ -911,8 +920,8 @@
                                                         <button type="button"
                                                                 @click="submitAttendance('{{ route('greenroom.mark-attendance', $entry) }}', {{ $entry->id }}, 'absent')"
                                                                 :disabled="loadingEntryId === {{ $entry->id }}"
-                                                                :class="entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-red-600 text-white shadow-sm ring-2 ring-red-600/30' : 'bg-red-50 hover:bg-red-100 text-red-800 border border-red-200'"
-                                                                class="px-3 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 disabled:opacity-50">
+                                                                :class="entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20' : 'bg-slate-100 hover:bg-rose-50 hover:text-rose-800 text-slate-600'"
+                                                                class="px-4 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
                                                             <template x-if="loadingEntryId === {{ $entry->id }}">
                                                                 <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                                             </template>
@@ -924,7 +933,7 @@
                                                     </div>
                                                 @else
                                                     <div class="inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl font-mono text-xs font-bold"
-                                                         :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-100 text-emerald-800' : (entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-500')">
+                                                         :class="entriesStatus[{{ $entry->id }}] === 'present' ? 'bg-emerald-100 text-emerald-800' : (entriesStatus[{{ $entry->id }}] === 'absent' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-600')">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                                         <span x-text="(entriesStatus[{{ $entry->id }}] || 'WAITING').toUpperCase()"></span>
                                                     </div>
@@ -944,7 +953,7 @@
                     </div>
                 @else
                     <!-- No Program Scheduled Alert for this stage -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3 shadow-xs">
+                    <div class="bg-white rounded-3xl p-12 text-center space-y-3 shadow-sm">
                         <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 mx-auto flex items-center justify-center font-bold">
                             <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
@@ -973,7 +982,7 @@
          style="display: none;"
          @click.self="showRulesModal = false">
         
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 relative transform transition-all"
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative transform transition-all"
              @click.stop>
             
             <div class="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -1012,7 +1021,7 @@
          style="display: none;"
          @click.self="showCriteriaModal = false">
         
-        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 relative transform transition-all"
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative transform transition-all"
              @click.stop>
             
             <div class="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -1028,9 +1037,9 @@
 
             <div>
                 <template x-if="modalCriteria && modalCriteria.length > 0">
-                    <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                    <div class="bg-slate-50 rounded-2xl overflow-hidden shadow-xs">
                         <table class="w-full text-xs font-mono">
-                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase">
+                            <thead class="bg-slate-100/70 text-slate-500 uppercase">
                                 <tr>
                                     <th class="py-2.5 px-4 text-left">Criterion</th>
                                     <th class="py-2.5 px-4 text-right">Max Marks</th>
@@ -1038,7 +1047,7 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 <template x-for="crit in modalCriteria" :key="crit.id || crit.criterion_name">
-                                    <tr class="hover:bg-slate-50">
+                                    <tr class="hover:bg-white transition-colors">
                                         <td class="py-2.5 px-4 text-slate-800 font-bold" x-text="crit.criterion_name"></td>
                                         <td class="py-2.5 px-4 text-right font-black text-[#be1e2d]" x-text="crit.max_marks + ' Marks'"></td>
                                     </tr>
@@ -1048,7 +1057,7 @@
                     </div>
                 </template>
                 <template x-if="!modalCriteria || modalCriteria.length === 0">
-                    <div class="p-6 text-center text-slate-500 font-mono text-xs bg-slate-50 rounded-2xl border border-slate-200">
+                    <div class="p-6 text-center text-slate-500 font-mono text-xs bg-slate-50 rounded-2xl">
                         ഈ പ്രോഗ്രാമിന് മാനദണ്ഡങ്ങൾ പ്രത്യേകം രേഖപ്പെടുത്തിയിട്ടില്ല. ജനറൽ മൂല്യനിർണ്ണയ രീതി ബാധകമാണ്.
                     </div>
                 </template>
@@ -1076,7 +1085,7 @@
          style="display: none;"
          @click.self="showSubmitLockModal = false">
         
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 relative transform transition-all"
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative transform transition-all"
              @click.stop>
             
             <div class="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -1097,7 +1106,7 @@
             </div>
 
             <!-- Warning Notice Box -->
-            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 space-y-2 text-xs font-mono">
+            <div class="p-4 rounded-2xl bg-amber-50 text-amber-950 space-y-2 text-xs font-mono shadow-xs">
                 <div class="flex items-center gap-2 font-bold text-amber-900 uppercase">
                     <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     <span>ശ്രദ്ധിക്കുക (Important Notice)</span>
@@ -1109,15 +1118,15 @@
 
             <!-- Stats Overview -->
             <div class="grid grid-cols-3 gap-2.5 text-center font-mono text-xs">
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="p-3 rounded-xl bg-slate-50">
                     <span class="text-slate-500 text-[10px] uppercase block">Total</span>
                     <span class="text-base font-black text-slate-900 block mt-0.5">{{ $stats['total'] }}</span>
                 </div>
-                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                <div class="p-3 rounded-xl bg-emerald-50">
                     <span class="text-emerald-700 text-[10px] uppercase block">Present</span>
                     <span class="text-base font-black text-emerald-900 block mt-0.5">{{ $stats['present'] }}</span>
                 </div>
-                <div class="p-3 rounded-xl bg-red-50 border border-red-200">
+                <div class="p-3 rounded-xl bg-red-50">
                     <span class="text-red-700 text-[10px] uppercase block">Absent</span>
                     <span class="text-base font-black text-red-900 block mt-0.5">{{ $stats['absent'] }}</span>
                 </div>
@@ -1155,7 +1164,7 @@
                                 document.getElementById('submit-lock-form').submit();
                             "
                             :disabled="isSubmittingLock"
-                            class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold transition cursor-pointer shadow-md flex items-center gap-2">
+                            class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold transition cursor-pointer shadow-md shadow-emerald-600/20 flex items-center gap-2">
                         <template x-if="isSubmittingLock">
                             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                         </template>
@@ -1181,7 +1190,7 @@
          @click.self="showQrModal = false"
          @keydown.escape.window="showQrModal = false">
         
-        <div class="bg-white rounded-3xl max-w-xl w-full p-8 sm:p-10 shadow-2xl border border-slate-200 relative text-center flex flex-col items-center">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-8 sm:p-10 shadow-2xl relative text-center flex flex-col items-center">
             
             <button type="button" 
                     @click="showQrModal = false" 
@@ -1202,7 +1211,7 @@
             </p>
 
             <!-- Large Projector QR Code -->
-            <div class="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 shadow-inner mb-6">
+            <div class="p-6 rounded-3xl bg-slate-50 shadow-inner mb-6">
                 <img src="{{ $onlineForm->qr_code_url }}" 
                      alt="Submission QR Code" 
                      class="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-2xl mx-auto shadow-sm">
@@ -1219,8 +1228,8 @@
                     Copy Link
                 </button>
                 <a href="{{ $onlineForm->public_url }}" 
-                   target="_blank" 
-                   class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-mono text-xs font-bold transition">
+                    target="_blank" 
+                    class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-mono text-xs font-bold transition shadow-sm">
                     Open Submission Page &rarr;
                 </a>
             </div>

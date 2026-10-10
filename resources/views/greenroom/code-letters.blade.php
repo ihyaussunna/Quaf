@@ -14,11 +14,11 @@
         </div>
 
         <!-- Filter Card matching screenshot -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs">
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
             <form method="GET" action="{{ route('greenroom.code-letters') }}" class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
                 <div class="sm:col-span-3">
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Zone</label>
-                    <select name="zone" onchange="this.form.submit()" class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#5b4df2]/20 focus:border-[#5b4df2]">
+                    <select name="zone" onchange="this.form.submit()" class="w-full bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5b4df2]/20">
                         <option value="">-- All Zones --</option>
                         @foreach($zones as $zKey => $zVal)
                             @php
@@ -31,7 +31,7 @@
                 </div>
                 <div class="sm:col-span-6">
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Program</label>
-                    <select name="program" class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#5b4df2]/20 focus:border-[#5b4df2]">
+                    <select name="program" class="w-full bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5b4df2]/20">
                         <option value="">-- Select Program --</option>
                         @foreach($programs as $prog)
                             <option value="{{ $prog->id }}" {{ (string)$selectedProgramId === (string)$prog->id ? 'selected' : '' }}>{{ $prog->name }} — ID: {{ $prog->code ?: $prog->id }}</option>
@@ -39,7 +39,7 @@
                     </select>
                 </div>
                 <div class="sm:col-span-3">
-                    <button type="submit" class="w-full bg-[#5243e8] text-white py-2.5 px-4 rounded-xl text-sm font-bold hover:bg-[#4335cf] transition shadow-xs flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full bg-[#5243e8] hover:bg-[#4335cf] text-white py-2.5 px-4 rounded-xl text-sm font-bold transition shadow-sm shadow-[#5243e8]/20 flex items-center justify-center gap-2 cursor-pointer">
                         View Code Letters
                     </button>
                 </div>
@@ -48,11 +48,11 @@
 
         @if($selectedProgram)
             <!-- Table Card matching screenshot -->
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead>
-                            <tr class="bg-gray-50/75 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            <tr class="bg-slate-50 text-xs font-bold text-gray-400 uppercase tracking-wider">
                                 <th class="px-6 py-4">STUDENT</th>
                                 <th class="px-6 py-4">ID</th>
                                 <th class="px-6 py-4">CLASS</th>
@@ -66,7 +66,7 @@
                                     $studentName = $entry->student?->name ?: 'Chest #'.$entry->chest_number;
                                     $initials = collect(explode(' ', $studentName))->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('');
                                 @endphp
-                                <tr class="hover:bg-gray-50/60 transition">
+                                <tr class="hover:bg-slate-50/70 transition">
                                     <!-- Student avatar with initials + name -->
                                     <td class="px-6 py-4 flex items-center gap-3.5">
                                         <div class="w-10 h-10 rounded-full bg-blue-50 text-[#005c94] font-bold text-xs flex items-center justify-center flex-shrink-0">
@@ -89,7 +89,7 @@
                                     <!-- Code letter green badge matching screenshot -->
                                     <td class="px-6 py-4 text-center">
                                         @if($entry->code_letter)
-                                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-extrabold text-sm border border-emerald-200">
+                                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-700 font-extrabold text-sm shadow-xs">
                                                 {{ $entry->code_letter }}
                                             </span>
                                         @else
