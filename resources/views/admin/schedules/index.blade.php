@@ -28,6 +28,46 @@
     // Zone & Search Filters for Easy Scheduling
     selectedZoneFilter: 'all',
     programSearch: '',
+    // Quick Status Overrides & AJAX Toggle
+    statusOverrides: {},
+    statusLoading: {},
+    isItemCompleted(id, defaultVal) {
+        if (this.statusOverrides[id] !== undefined) {
+            return this.statusOverrides[id] === 'completed';
+        }
+        return defaultVal;
+    },
+    async toggleScheduleStatus(scheduleId, targetStatus, url) {
+        if (this.statusLoading[scheduleId]) return;
+        this.statusLoading[scheduleId] = true;
+        try {
+            const res = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ status: targetStatus })
+            });
+            const data = await res.json();
+            if (data.success) {
+                this.statusOverrides[scheduleId] = targetStatus;
+                const p = this.programsList.find(prog => String(prog.schedule_id) === String(scheduleId));
+                if (p) {
+                    p.is_completed = (targetStatus === 'completed');
+                }
+            } else {
+                alert(data.message || 'Status update failed.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Network error while updating status.');
+        } finally {
+            this.statusLoading[scheduleId] = false;
+        }
+    },
+
     programsList: {{ Js::from($allPrograms->map(fn($p) => [
         'id' => (string) $p->id,
         'code' => $p->code,
@@ -36,12 +76,17 @@
         'zone_name' => $p->zone?->name ?? 'Mix',
         'is_stage' => (bool) $p->is_stage,
         'is_scheduled' => (bool) $p->schedule,
+        'is_completed' => (bool) ($p->status === 'completed' || $p->schedule?->status === 'completed'),
         'schedule_id' => $p->schedule ? (string) $p->schedule->id : '',
         'duration' => (int) ($p->duration_minutes ?: 30),
     ])) }},
 
     get filteredPrograms() {
         return this.programsList.filter(p => {
+            if (p.is_completed && p.id !== this.modalProgramId) {
+                return false;
+            }
+
             const matchZone = this.selectedZoneFilter === 'all' || 
                 (this.selectedZoneFilter === 'mix' && (!p.zone_id || p.zone_name.toLowerCase().includes('mix'))) ||
                 p.zone_id === this.selectedZoneFilter;
@@ -395,8 +440,7 @@
                     @forelse($schedules as $item)
                         @php
                             $conflictCount = $conflictsSummary['program_conflict_counts'][$item->program_id] ?? 0;
-                            $validNotes = !empty($item->conflict_notes) && (!str_contains($item->conflict_notes, "booked for '{$item->program?->name}'") || str_contains($item->conflict_notes, "\n"));
-                            $hasConflict = $validNotes || $conflictCount > 0;
+                            $hasConflict = $conflictCount > 0;
                         @endphp
                         <tr class="hover:bg-slate-50/80 transition-colors {{ $hasConflict ? 'bg-red-50/40' : '' }}">
                             <!-- Time Slot -->
@@ -422,7 +466,7 @@
                                                 <a href="{{ route($routePrefix . 'offstage', ['date' => $item->start_time ? $item->start_time->format('Y-m-d') : '2026-10-11']) }}"
                                                    class="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-red-700 bg-red-100 hover:bg-red-200 px-2 py-0.5 rounded border border-red-300 transition">
                                                     <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                                    <span>{{ $conflictCount > 0 ? $conflictCount . ' Clash' . ($conflictCount > 1 ? 'es' : '') : 'Clash Flagged' }}</span>
+                                                    <span>{{ $conflictCount . ' Clash' . ($conflictCount > 1 ? 'es' : '') }}</span>
                                                 </a>
                                             </div>
                                         @endif
@@ -455,43 +499,38 @@
 
                             <!-- Status -->
                             <td class="px-5 py-4 text-center font-mono">
-                                @if($item->status === 'completed')
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        Completed
-                                    </span>
-                                @elseif($item->status === 'in_progress')
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                        Live
-                                    </span>
-                                @else
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 uppercase">
-                                        {{ $item->status }}
-                                    </span>
-                                @endif
+                                <span x-show="isItemCompleted('{{ $item->id }}', {{ ($item->status === 'completed' || $item->program?->status === 'completed') ? 'true' : 'false' }})"
+                                      class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    Completed
+                                </span>
+                                <span x-show="!isItemCompleted('{{ $item->id }}', {{ ($item->status === 'completed' || $item->program?->status === 'completed') ? 'true' : 'false' }})"
+                                      class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $item->status === 'in_progress' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-600 border border-slate-200 uppercase' }}">
+                                    {{ $item->status === 'in_progress' ? 'Live' : ($item->status ?: 'Scheduled') }}
+                                </span>
                             </td>
 
                             <!-- Actions -->
                             <td class="px-5 py-4 text-right space-x-1.5 whitespace-nowrap">
-                                @if($item->status === 'completed' || $item->program?->status === 'completed')
-                                    <form method="POST" action="{{ route($routePrefix . 'update-status', $item) }}" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="scheduled">
-                                        <button type="submit" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[10px] transition cursor-pointer inline-flex items-center gap-1" title="Reopen / Reset Status">
-                                            Reopen
-                                        </button>
-                                    </form>
-                                @else
-                                    <form method="POST" action="{{ route($routePrefix . 'update-status', $item) }}" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="completed">
-                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] border border-emerald-200 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs" title="Mark as Completed">
-                                            <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            <span>Complete</span>
-                                        </button>
-                                    </form>
-                                @endif
+                                <!-- Reopen / Reset Status (AJAX, Zero Scroll Jump) -->
+                                <button type="button"
+                                        x-show="isItemCompleted('{{ $item->id }}', {{ ($item->status === 'completed' || $item->program?->status === 'completed') ? 'true' : 'false' }})"
+                                        @click.prevent="toggleScheduleStatus('{{ $item->id }}', 'scheduled', '{{ route($routePrefix . 'update-status', $item) }}')"
+                                        :disabled="statusLoading['{{ $item->id }}']"
+                                        class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[10px] transition cursor-pointer inline-flex items-center gap-1"
+                                        title="Reopen / Reset Status">
+                                    <span x-text="statusLoading['{{ $item->id }}'] ? '...' : 'Reopen'"></span>
+                                </button>
+
+                                <!-- Mark as Completed (AJAX, Zero Scroll Jump) -->
+                                <button type="button"
+                                        x-show="!isItemCompleted('{{ $item->id }}', {{ ($item->status === 'completed' || $item->program?->status === 'completed') ? 'true' : 'false' }})"
+                                        @click.prevent="toggleScheduleStatus('{{ $item->id }}', 'completed', '{{ route($routePrefix . 'update-status', $item) }}')"
+                                        :disabled="statusLoading['{{ $item->id }}']"
+                                        class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] border border-emerald-200 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs"
+                                        title="Mark as Completed">
+                                    <svg x-show="!statusLoading['{{ $item->id }}']" class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span x-text="statusLoading['{{ $item->id }}'] ? 'Saving...' : 'Complete'"></span>
+                                </button>
                                 <button @click="modalProgramId = '{{ $item->program_id }}'; modalScheduleId = '{{ $item->id }}'; modalStageId = '{{ $item->stage_id }}'; modalDate = '{{ $item->start_time->format('Y-m-d') }}'; modalTime = '{{ $item->start_time->format('H:i') }}'; modalDuration = {{ $item->program->duration_minutes ?? 30 }}; showScheduleModal = true; checkClash()"
                                         class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] hover:bg-slate-200 transition cursor-pointer">
                                     Reschedule

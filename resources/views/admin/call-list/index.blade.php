@@ -310,19 +310,14 @@
 
                                 <!-- Program Status (Upcoming, In Progress, Completed) -->
                                 <td class="px-4 py-3.5 text-center">
-                                    @if($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed'))
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                            Completed
-                                        </span>
-                                    @elseif($prog->status === 'in_progress' || ($prog->schedule && $prog->schedule->status === 'ongoing'))
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-amber-100 text-amber-800 border border-amber-200">
-                                            In Progress
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-slate-100 text-slate-700 border border-slate-200">
-                                            Upcoming
-                                        </span>
-                                    @endif
+                                    <span x-show="isProgCompleted('{{ $prog->id }}', {{ ($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed')) ? 'true' : 'false' }})"
+                                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        Completed
+                                    </span>
+                                    <span x-show="!isProgCompleted('{{ $prog->id }}', {{ ($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed')) ? 'true' : 'false' }})"
+                                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase {{ $prog->status === 'in_progress' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
+                                        {{ $prog->status === 'in_progress' ? 'In Progress' : 'Upcoming' }}
+                                    </span>
                                 </td>
 
                                 <!-- Call List Lock & Timing Status -->
@@ -357,19 +352,20 @@
                                 <!-- Actions -->
                                 <td class="px-4 py-3.5 text-right whitespace-nowrap">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <!-- Quick Status Toggle Form (Completed / Upcoming) -->
-                                        <form method="POST" action="{{ route('admin.call-list.toggle-status', $prog) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="p-1.5 rounded-xl transition cursor-pointer {{ $prog->status === 'completed' ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-500' }}"
-                                                    title="{{ $prog->status === 'completed' ? 'Mark as Upcoming (Reopen)' : 'Mark as Completed' }}">
-                                                @if($prog->status === 'completed')
-                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                                @else
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                @endif
-                                            </button>
-                                        </form>
+                                        <!-- Quick Status Toggle (Completed / Upcoming AJAX, Zero Scroll Jump) -->
+                                        <button type="button" 
+                                                @click.prevent="toggleProgramStatus('{{ $prog->id }}', '{{ route('admin.call-list.toggle-status', $prog) }}')"
+                                                :disabled="statusLoading['{{ $prog->id }}']"
+                                                class="p-1.5 rounded-xl transition cursor-pointer"
+                                                :class="isProgCompleted('{{ $prog->id }}', {{ ($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed')) ? 'true' : 'false' }}) ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'"
+                                                :title="isProgCompleted('{{ $prog->id }}', {{ ($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed')) ? 'true' : 'false' }}) ? 'Mark as Upcoming (Reopen)' : 'Mark as Completed'">
+                                            <span x-show="isProgCompleted('{{ $prog->id }}', {{ ($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed')) ? 'true' : 'false' }})">
+                                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            </span>
+                                            <span x-show="!isProgCompleted('{{ $prog->id }}', {{ ($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed')) ? 'true' : 'false' }})">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </span>
+                                        </button>
 
                                         <!-- Open Call List Button -->
                                         <a href="{{ route('admin.call-list.index', ['program_id' => $prog->id]) }}"
@@ -667,6 +663,40 @@
                 this.toast.timeout = setTimeout(() => {
                     this.toast.show = false;
                 }, 3500);
+            },
+            statusOverrides: {},
+            statusLoading: {},
+            isProgCompleted(id, defaultVal) {
+                if (this.statusOverrides[id] !== undefined) {
+                    return this.statusOverrides[id] === 'completed';
+                }
+                return defaultVal;
+            },
+            async toggleProgramStatus(progId, url) {
+                if (this.statusLoading[progId]) return;
+                this.statusLoading[progId] = true;
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Error updating status.');
+                    }
+                    this.statusOverrides[progId] = data.status;
+                    this.showToast(data.message);
+                } catch (err) {
+                    this.showToast(err.message || 'Error updating status.', true);
+                } finally {
+                    this.statusLoading[progId] = false;
+                }
             },
             async updateAttendance(entryId, status) {
                 try {

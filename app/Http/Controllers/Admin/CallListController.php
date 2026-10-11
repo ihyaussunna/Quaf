@@ -603,7 +603,7 @@ class CallListController extends Controller
     /**
      * Toggle status for an individual program directly from Call List.
      */
-    public function toggleStatus(Program $program): RedirectResponse
+    public function toggleStatus(Request $request, Program $program): JsonResponse|RedirectResponse
     {
         $newStatus = $program->status === 'completed' ? 'upcoming' : 'completed';
         $program->update(['status' => $newStatus]);
@@ -614,6 +614,16 @@ class CallListController extends Controller
         }
 
         $label = $newStatus === 'completed' ? 'marked as Completed' : 'reopened as Upcoming';
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'status' => $newStatus,
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'message' => "Program '{$program->name}' ({$program->code}) {$label}.",
+            ]);
+        }
 
         return back()->with('success', "Program '{$program->name}' ({$program->code}) {$label}.");
     }

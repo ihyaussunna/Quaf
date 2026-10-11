@@ -125,9 +125,24 @@ class ScheduleController extends Controller
             return $sch->start_time ? $sch->start_time->format('h:i A') : 'Unscheduled';
         });
 
-        // Unscheduled and All programs for Quick-Slot
-        $programsWithoutSchedule = Program::doesntHave('schedule')->with('zone')->orderBy('is_stage')->orderBy('name')->get();
-        $allPrograms = Program::with(['zone', 'schedule.stage'])->orderBy('is_stage')->orderBy('name')->get();
+        // Unscheduled and All programs for Quick-Slot (exclude completed programs)
+        $programsWithoutSchedule = Program::where('status', '!=', 'completed')
+            ->whereDoesntHave('schedule', function ($q) {
+                $q->where('status', 'completed');
+            })
+            ->doesntHave('schedule')
+            ->with('zone')
+            ->orderBy('is_stage')
+            ->orderBy('name')
+            ->get();
+        $allPrograms = Program::where('status', '!=', 'completed')
+            ->whereDoesntHave('schedule', function ($q) {
+                $q->where('status', 'completed');
+            })
+            ->with(['zone', 'schedule.stage'])
+            ->orderBy('is_stage')
+            ->orderBy('name')
+            ->get();
         $zones = Zone::orderBy('display_order')->get();
 
         // Conflict Detection Scan
@@ -249,8 +264,12 @@ class ScheduleController extends Controller
         // Run full conflict detection for this date
         $conflicts = $this->conflictService->detectAllScheduleConflicts($selectedDate);
 
-        // Fetch programs list for scheduler selection (offstage programs first, then others)
-        $programs = Program::with(['zone', 'schedule.stage'])
+        // Fetch programs list for scheduler selection (exclude completed programs)
+        $programs = Program::where('status', '!=', 'completed')
+            ->whereDoesntHave('schedule', function ($q) {
+                $q->where('status', 'completed');
+            })
+            ->with(['zone', 'schedule.stage'])
             ->orderBy('is_stage')
             ->orderBy('name')
             ->get();
@@ -510,7 +529,13 @@ class ScheduleController extends Controller
         $layout = $isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin';
         $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
 
-        $programs = Program::doesntHave('schedule')->orderBy('name')->get();
+        $programs = Program::where('status', '!=', 'completed')
+            ->whereDoesntHave('schedule', function ($q) {
+                $q->where('status', 'completed');
+            })
+            ->doesntHave('schedule')
+            ->orderBy('name')
+            ->get();
         $stages = Stage::all();
 
         return view('admin.schedules.create', compact('layout', 'routePrefix', 'isProgramCommittee', 'programs', 'stages'));
@@ -583,7 +608,13 @@ class ScheduleController extends Controller
         $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
 
         $stages = Stage::all();
-        $programs = Program::orderBy('name')->get();
+        $programs = Program::where(function ($q) {
+            $q->where('status', '!=', 'completed')
+                ->whereDoesntHave('schedule', fn ($sq) => $sq->where('status', 'completed'));
+        })
+            ->orWhere('id', $schedule->program_id)
+            ->orderBy('name')
+            ->get();
 
         return view('admin.schedules.edit', compact('layout', 'routePrefix', 'isProgramCommittee', 'schedule', 'stages', 'programs'));
     }
@@ -694,7 +725,7 @@ class ScheduleController extends Controller
     /**
      * Quick status update for schedule and associated program (completed, ongoing, scheduled, delayed).
      */
-    public function updateStatus(Request $request, Schedule $schedule): RedirectResponse
+    public function updateStatus(Request $request, Schedule $schedule): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'status' => ['required', 'in:scheduled,ongoing,completed,delayed'],
@@ -716,6 +747,17 @@ class ScheduleController extends Controller
         AuditLogger::log('update_schedule_status', $schedule, $old, $schedule->toArray());
 
         $statusLabel = ucfirst($validated['status']);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'status' => $validated['status'],
+                'schedule_id' => $schedule->id,
+                'program_id' => $schedule->program_id,
+                'program_name' => $schedule->program?->name,
+                'message' => "Status for '{$schedule->program?->name}' updated to {$statusLabel}.",
+            ]);
+        }
 
         return back()->with('success', "Status for '{$schedule->program?->name}' updated to {$statusLabel}.");
     }
