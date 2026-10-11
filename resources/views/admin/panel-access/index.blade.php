@@ -12,6 +12,42 @@
             this.copiedId = id;
             setTimeout(() => { this.copiedId = null; }, 2000);
         });
+    },
+    statusOverrides: {},
+    statusLoading: {},
+    isUserActive(userId, defaultVal) {
+        if (this.statusOverrides[userId] !== undefined) {
+            return this.statusOverrides[userId];
+        }
+        return defaultVal;
+    },
+    async toggleUserStatus(userId, url, confirmMsg) {
+        if (confirmMsg && !confirm(confirmMsg)) return;
+        if (this.statusLoading[userId]) return;
+        this.statusLoading[userId] = true;
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.message || 'Error updating status.');
+                return;
+            }
+            this.statusOverrides[userId] = data.is_active;
+        } catch (e) {
+            console.error(e);
+            alert('Error updating user status.');
+        } finally {
+            this.statusLoading[userId] = false;
+        }
     }
 }">
     <!-- Header Section -->
@@ -387,19 +423,16 @@
                                 @endif
                             </td>
 
-                            <!-- Status -->
+                            <!-- Status (Reactive) -->
                             <td class="py-4 px-4 align-middle">
-                                @if($user->is_active)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        Active
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                        Locked
-                                    </span>
-                                @endif
+                                <span x-show="isUserActive({{ $user->id }}, {{ $user->is_active ? 'true' : 'false' }})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Active
+                                </span>
+                                <span x-show="!isUserActive({{ $user->id }}, {{ $user->is_active ? 'true' : 'false' }})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200" style="display: none;">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                    Locked
+                                </span>
                             </td>
 
                             <!-- Actions (Lock/Unlock & Password Change) -->
@@ -408,24 +441,19 @@
                                     <!-- Change Password Button -->
                                     <button type="button" 
                                             @click="currentUser = { id: {{ $user->id }}, name: '{{ addslashes($user->name) }}', email: '{{ $user->email }}', role: '{{ $user->role }}' }; editModalOpen = true;"
-                                            class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-[11px] transition-colors">
+                                            class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-[11px] transition-colors cursor-pointer">
                                         Edit Pass
                                     </button>
 
-                                    <!-- Block / Unlock Form -->
+                                    <!-- Block / Unlock Button (AJAX, Zero Scroll Jump) -->
                                     @if($user->id !== Auth::id())
-                                        <form method="POST" action="{{ route('admin.panel-access.toggle-status', $user) }}" class="inline" onsubmit="return confirm('{{ $user->is_active ? 'Are you sure you want to lock this account? They will not be able to log in.' : 'Are you sure you want to reactivate this account?' }}')">
-                                            @csrf
-                                            @if($user->is_active)
-                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-[11px] transition-colors">
-                                                    Lock Account
-                                                </button>
-                                            @else
-                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition-colors">
-                                                    Unlock
-                                                </button>
-                                            @endif
-                                        </form>
+                                        <button type="button"
+                                                @click.prevent="toggleUserStatus({{ $user->id }}, '{{ route('admin.panel-access.toggle-status', $user) }}', isUserActive({{ $user->id }}, {{ $user->is_active ? 'true' : 'false' }}) ? 'Are you sure you want to lock this account? They will not be able to log in.' : 'Are you sure you want to reactivate this account?')"
+                                                :disabled="statusLoading[{{ $user->id }}]"
+                                                class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer"
+                                                :class="isUserActive({{ $user->id }}, {{ $user->is_active ? 'true' : 'false' }}) ? 'bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+                                            <span x-text="isUserActive({{ $user->id }}, {{ $user->is_active ? 'true' : 'false' }}) ? 'Lock Account' : 'Unlock'">{{ $user->is_active ? 'Lock Account' : 'Unlock' }}</span>
+                                        </button>
                                     @else
                                         <span class="text-[10px] text-slate-400 italic">Current User</span>
                                     @endif

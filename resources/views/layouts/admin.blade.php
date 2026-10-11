@@ -128,7 +128,41 @@
           sidebarOpen: false, 
           settingsDrawerOpen: false, 
           activeDrawerTab: 'add_mark',
-          adminMenuOpen: false
+          adminMenuOpen: false,
+          settingsLoading: {},
+          settingsState: {
+              regOpen: {{ (\App\Models\FestivalSetting::get('registration_open', '1') == '1') ? 'true' : 'false' }},
+              stageOpen: {{ (\App\Models\FestivalSetting::get('stage_registration_open', '1') == '1') ? 'true' : 'false' }},
+              offStageOpen: {{ (\App\Models\FestivalSetting::get('off_stage_registration_open', '1') == '1') ? 'true' : 'false' }},
+              editingOpen: {{ (\App\Models\FestivalSetting::get('student_editing_open', '1') == '1') ? 'true' : 'false' }}
+          },
+          async toggleSetting(key, url) {
+              if (this.settingsLoading[key]) return;
+              this.settingsLoading[key] = true;
+              try {
+                  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                  const res = await fetch(url, {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRF-TOKEN': token,
+                          'Accept': 'application/json',
+                          'X-Requested-With': 'XMLHttpRequest'
+                      }
+                  });
+                  const data = await res.json();
+                  if (!res.ok || !data.success) {
+                      alert(data.message || 'Error updating setting.');
+                      return;
+                  }
+                  this.settingsState[key] = data.is_open;
+              } catch (e) {
+                  console.error(e);
+                  alert('Error updating setting.');
+              } finally {
+                  this.settingsLoading[key] = false;
+              }
+          }
       }">
 
     <!-- Mobile Backdrop for Sidebar -->
@@ -722,60 +756,66 @@
                             $drawerStageOpen = (\App\Models\FestivalSetting::get('stage_registration_open', '1') == '1');
                             $drawerOffStageOpen = (\App\Models\FestivalSetting::get('off_stage_registration_open', '1') == '1');
                         @endphp
-                        <div class="p-5 rounded-2xl {{ $drawerRegOpen ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200' : 'bg-rose-950/60 border border-rose-500/40 text-rose-200' }} text-xs space-y-4">
+                        <div class="p-5 rounded-2xl text-xs space-y-4"
+                             :class="settingsState.regOpen ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200' : 'bg-rose-950/60 border border-rose-500/40 text-rose-200'">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerRegOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
-                                    Global Status: {{ $drawerRegOpen ? 'REGISTRATION OPEN' : 'REGISTRATION CLOSED' }}
+                                    <span class="w-2.5 h-2.5 rounded-full"
+                                          :class="settingsState.regOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'"></span>
+                                    <span>Global Status: <span x-text="settingsState.regOpen ? 'REGISTRATION OPEN' : 'REGISTRATION CLOSED'"></span></span>
                                 </span>
                             </div>
-                            <p class="text-slate-300 text-[11px] leading-relaxed">
-                                {{ $drawerRegOpen ? 'Group leaders can currently submit participant registrations. Click the button below to close global registration.' : 'Global registration is currently closed. Leaders cannot submit new entries until reopened.' }}
-                            </p>
-                            <form method="POST" action="{{ route('admin.settings.toggle-registration') }}">
-                                @csrf
-                                <button type="submit" class="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerRegOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $drawerRegOpen ? 'Close Global Registration Now' : 'Open Global Registration Now' }}
-                                </button>
-                            </form>
+                            <p class="text-slate-300 text-[11px] leading-relaxed"
+                               x-text="settingsState.regOpen ? 'Group leaders can currently submit participant registrations. Click the button below to close global registration.' : 'Global registration is currently closed. Leaders cannot submit new entries until reopened.'"></p>
+                            <button type="button"
+                                    @click.prevent="toggleSetting('regOpen', '{{ route('admin.settings.toggle-registration') }}')"
+                                    :disabled="settingsLoading.regOpen"
+                                    class="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                                    :class="settingsState.regOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+                                <span x-text="settingsState.regOpen ? 'Close Global Registration Now' : 'Open Global Registration Now'"></span>
+                            </button>
                         </div>
 
                         <!-- Stage Programs Card in Drawer -->
-                        <div class="p-4 rounded-2xl {{ $drawerStageOpen ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/40 border border-rose-500/30 text-rose-200' }} text-xs space-y-3">
+                        <div class="p-4 rounded-2xl text-xs space-y-3"
+                             :class="settingsState.stageOpen ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/40 border border-rose-500/30 text-rose-200'">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerStageOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
-                                    Stage Competitions: {{ $drawerStageOpen ? 'OPEN' : 'CLOSED' }}
+                                    <span class="w-2.5 h-2.5 rounded-full"
+                                          :class="settingsState.stageOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'"></span>
+                                    <span>Stage Competitions: <span x-text="settingsState.stageOpen ? 'OPEN' : 'CLOSED'"></span></span>
                                 </span>
                             </div>
-                            <p class="text-slate-300 text-[11px] leading-relaxed">
-                                {{ $drawerStageOpen ? 'Stage competitions registration is open for group leaders.' : 'Stage competitions registration is closed.' }}
-                            </p>
-                            <form method="POST" action="{{ route('admin.settings.toggle-stage-registration') }}">
-                                @csrf
-                                <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $drawerStageOpen ? 'Close Stage Registration' : 'Open Stage Registration' }}
-                                </button>
-                            </form>
+                            <p class="text-slate-300 text-[11px] leading-relaxed"
+                               x-text="settingsState.stageOpen ? 'Stage competitions registration is open for group leaders.' : 'Stage competitions registration is closed.'"></p>
+                            <button type="button"
+                                    @click.prevent="toggleSetting('stageOpen', '{{ route('admin.settings.toggle-stage-registration') }}')"
+                                    :disabled="settingsLoading.stageOpen"
+                                    class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                                    :class="settingsState.stageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+                                <span x-text="settingsState.stageOpen ? 'Close Stage Registration' : 'Open Stage Registration'"></span>
+                            </button>
                         </div>
 
                         <!-- Off-Stage Programs Card in Drawer -->
-                        <div class="p-4 rounded-2xl {{ $drawerOffStageOpen ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/40 border border-rose-500/30 text-rose-200' }} text-xs space-y-3">
+                        <div class="p-4 rounded-2xl text-xs space-y-3"
+                             :class="settingsState.offStageOpen ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/40 border border-rose-500/30 text-rose-200'">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerOffStageOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
-                                    Off-Stage Competitions: {{ $drawerOffStageOpen ? 'OPEN' : 'CLOSED' }}
+                                    <span class="w-2.5 h-2.5 rounded-full"
+                                          :class="settingsState.offStageOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'"></span>
+                                    <span>Off-Stage Competitions: <span x-text="settingsState.offStageOpen ? 'OPEN' : 'CLOSED'"></span></span>
                                 </span>
                             </div>
-                            <p class="text-slate-300 text-[11px] leading-relaxed">
-                                {{ $drawerOffStageOpen ? 'Off-stage competitions registration is open for group leaders.' : 'Off-stage competitions registration is closed.' }}
-                            </p>
-                            <form method="POST" action="{{ route('admin.settings.toggle-off-stage-registration') }}">
-                                @csrf
-                                <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerOffStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $drawerOffStageOpen ? 'Close Off-Stage Registration' : 'Open Off-Stage Registration' }}
-                                </button>
-                            </form>
+                            <p class="text-slate-300 text-[11px] leading-relaxed"
+                               x-text="settingsState.offStageOpen ? 'Off-stage competitions registration is open for group leaders.' : 'Off-stage competitions registration is closed.'"></p>
+                            <button type="button"
+                                    @click.prevent="toggleSetting('offStageOpen', '{{ route('admin.settings.toggle-off-stage-registration') }}')"
+                                    :disabled="settingsLoading.offStageOpen"
+                                    class="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                                    :class="settingsState.offStageOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+                                <span x-text="settingsState.offStageOpen ? 'Close Off-Stage Registration' : 'Open Off-Stage Registration'"></span>
+                            </button>
                         </div>
                     </div>
 
@@ -785,25 +825,24 @@
                             <h2 class="text-2xl font-bold text-white tracking-tight">Student Name Editing</h2>
                             <p class="text-xs text-slate-400 mt-1">Allow or Block group leaders from editing student names</p>
                         </div>
-                        @php
-                            $drawerEditingOpen = (\App\Models\FestivalSetting::get('student_editing_open', '1') == '1');
-                        @endphp
-                        <div class="p-5 rounded-2xl {{ $drawerEditingOpen ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200' : 'bg-rose-950/60 border border-rose-500/40 text-rose-200' }} text-xs space-y-4">
+                        <div class="p-5 rounded-2xl text-xs space-y-4"
+                             :class="settingsState.editingOpen ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200' : 'bg-rose-950/60 border border-rose-500/40 text-rose-200'">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full {{ $drawerEditingOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400' }}"></span>
-                                    Status: {{ $drawerEditingOpen ? 'EDITING ALLOWED' : 'EDITING BLOCKED' }}
+                                    <span class="w-2.5 h-2.5 rounded-full"
+                                          :class="settingsState.editingOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'"></span>
+                                    <span>Status: <span x-text="settingsState.editingOpen ? 'EDITING ALLOWED' : 'EDITING BLOCKED'"></span></span>
                                 </span>
                             </div>
-                            <p class="text-slate-300 text-[11px] leading-relaxed">
-                                {{ $drawerEditingOpen ? 'Group leaders can currently edit student names to fix spelling errors. Click the button below to block editing.' : 'Student name editing is currently blocked. Leaders cannot modify any student names.' }}
-                            </p>
-                            <form method="POST" action="{{ route('admin.settings.toggle-student-editing') }}">
-                                @csrf
-                                <button type="submit" class="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md {{ $drawerEditingOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $drawerEditingOpen ? 'Block Student Editing Now' : 'Allow Student Editing Now' }}
-                                </button>
-                            </form>
+                            <p class="text-slate-300 text-[11px] leading-relaxed"
+                               x-text="settingsState.editingOpen ? 'Group leaders can currently edit student names to fix spelling errors. Click the button below to block editing.' : 'Student name editing is currently blocked. Leaders cannot modify any student names.'"></p>
+                            <button type="button"
+                                    @click.prevent="toggleSetting('editingOpen', '{{ route('admin.settings.toggle-student-editing') }}')"
+                                    :disabled="settingsLoading.editingOpen"
+                                    class="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                                    :class="settingsState.editingOpen ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+                                <span x-text="settingsState.editingOpen ? 'Block Student Editing Now' : 'Allow Student Editing Now'"></span>
+                            </button>
                         </div>
                     </div>
                 </div>

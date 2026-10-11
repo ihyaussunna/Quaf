@@ -24,6 +24,83 @@
     },
     clearSelection() {
         this.selectedIds = [];
+    },
+    regOverrides: {},
+    regLoading: {},
+    isProgRegOpen(id, defaultVal) {
+        if (this.regOverrides[id] !== undefined) {
+            return this.regOverrides[id];
+        }
+        return defaultVal;
+    },
+    async toggleProgramRegistration(progId, url) {
+        if (this.regLoading[progId]) return;
+        this.regLoading[progId] = true;
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                this.regOverrides[progId] = data.is_registration_open;
+            } else {
+                alert(data.message || 'Error updating registration status.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error updating registration status.');
+        } finally {
+            this.regLoading[progId] = false;
+        }
+    },
+    bulkLoading: false,
+    async bulkToggle(target, action) {
+        if (this.bulkLoading) return;
+        if (target === 'selected' && this.selectedIds.length === 0) {
+            alert('Please select competitions first.');
+            return;
+        }
+        this.bulkLoading = true;
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const payload = {
+                target: target,
+                action: action,
+                program_ids: target === 'selected' ? this.selectedIds : []
+            };
+            const res = await fetch('{{ route('admin.programs.bulk-toggle-registration') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (target === 'selected') {
+                    this.selectedIds.forEach(id => {
+                        this.regOverrides[id] = (action === 'open');
+                    });
+                }
+            } else {
+                alert(data.message || 'Error updating registration status.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error updating registration status.');
+        } finally {
+            this.bulkLoading = false;
+        }
     }
 }">
     <!-- Header -->
@@ -172,31 +249,21 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <!-- Open Registration Form -->
-            <form method="POST" action="{{ route('admin.programs.bulk-toggle-registration') }}" class="inline">
-                @csrf
-                <input type="hidden" name="target" value="selected">
-                <input type="hidden" name="action" value="open">
-                <template x-for="id in selectedIds" :key="id">
-                    <input type="hidden" name="program_ids[]" :value="id">
-                </template>
-                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm">
-                    <span>Open Registration for Selected</span>
-                </button>
-            </form>
+            <!-- Open Registration Button -->
+            <button type="button"
+                    @click.prevent="bulkToggle('selected', 'open')"
+                    :disabled="bulkLoading"
+                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm cursor-pointer">
+                <span>Open Registration for Selected</span>
+            </button>
 
-            <!-- Close Registration Form -->
-            <form method="POST" action="{{ route('admin.programs.bulk-toggle-registration') }}" class="inline">
-                @csrf
-                <input type="hidden" name="target" value="selected">
-                <input type="hidden" name="action" value="close">
-                <template x-for="id in selectedIds" :key="id">
-                    <input type="hidden" name="program_ids[]" :value="id">
-                </template>
-                <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm">
-                    <span>Close Registration for Selected</span>
-                </button>
-            </form>
+            <!-- Close Registration Button -->
+            <button type="button"
+                    @click.prevent="bulkToggle('selected', 'close')"
+                    :disabled="bulkLoading"
+                    class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm cursor-pointer">
+                <span>Close Registration for Selected</span>
+            </button>
         </div>
     </div>
 
@@ -284,15 +351,16 @@
                                 {{ $p->entries_count }}
                             </td>
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <form method="POST" action="{{ route('admin.programs.toggle-registration', $p) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" 
-                                            title="Click to {{ $isDirectOpen ? 'Close' : 'Open' }} registration for this competition"
-                                            class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono inline-flex items-center gap-1 transition-all shadow-2xs {{ $isDirectOpen ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300' : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-300' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full {{ $isDirectOpen ? 'bg-emerald-600' : 'bg-rose-600' }}"></span>
-                                        <span>{{ $isDirectOpen ? 'OPEN' : 'CLOSED' }}</span>
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        @click.prevent="toggleProgramRegistration('{{ $p->id }}', '{{ route('admin.programs.toggle-registration', $p) }}')"
+                                        :disabled="regLoading['{{ $p->id }}']"
+                                        :title="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'Click to Close registration for this competition' : 'Click to Open registration for this competition'"
+                                        class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono inline-flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
+                                        :class="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300' : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-300'">
+                                    <span class="w-1.5 h-1.5 rounded-full"
+                                          :class="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'bg-emerald-600' : 'bg-rose-600'"></span>
+                                    <span x-text="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'OPEN' : 'CLOSED'">{{ $isDirectOpen ? 'OPEN' : 'CLOSED' }}</span>
+                                </button>
                                 @if($isDirectOpen && ! $isEffectiveOpen)
                                     <span class="block text-[9px] text-amber-700 font-sans font-medium mt-0.5" title="{{ $p->getRegistrationClosureReason() }}">
                                         (Parent Locked)
@@ -306,12 +374,12 @@
                                 <div x-show="menuOpen" @click.away="menuOpen = false" class="absolute right-5 mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-20 text-left text-xs" style="display: none;">
                                     <a href="{{ route('admin.programs.show', $p) }}" class="block px-3 py-1.5 text-slate-700 hover:bg-slate-50">View Details</a>
                                     <a href="{{ route('admin.programs.edit', $p) }}" class="block px-3 py-1.5 text-slate-700 hover:bg-slate-50">Edit</a>
-                                    <form method="POST" action="{{ route('admin.programs.toggle-registration', $p) }}">
-                                        @csrf
-                                        <button type="submit" class="w-full text-left px-3 py-1.5 {{ $isDirectOpen ? 'text-amber-700 hover:bg-amber-50' : 'text-emerald-700 hover:bg-emerald-50' }}">
-                                            {{ $isDirectOpen ? 'Close Registration' : 'Open Registration' }}
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            @click.prevent="toggleProgramRegistration('{{ $p->id }}', '{{ route('admin.programs.toggle-registration', $p) }}'); menuOpen = false"
+                                            class="w-full text-left px-3 py-1.5 font-medium cursor-pointer"
+                                            :class="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'text-amber-700 hover:bg-amber-50' : 'text-emerald-700 hover:bg-emerald-50'">
+                                        <span x-text="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'Close Registration' : 'Open Registration'">{{ $isDirectOpen ? 'Close Registration' : 'Open Registration' }}</span>
+                                    </button>
                                     <form method="POST" action="{{ route('admin.programs.destroy', $p) }}" onsubmit="return confirm('Delete this competition?');">
                                         @csrf
                                         @method('DELETE')

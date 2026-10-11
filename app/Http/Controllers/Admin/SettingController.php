@@ -7,6 +7,7 @@ use App\Models\Announcement;
 use App\Models\FestivalSetting;
 use App\Models\Program;
 use App\Services\AuditLogger;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -58,7 +59,7 @@ class SettingController extends Controller
         return back()->with('success', 'Festival settings updated successfully.');
     }
 
-    public function toggleRegistration(Request $request): RedirectResponse
+    public function toggleRegistration(Request $request): JsonResponse|RedirectResponse
     {
         $current = FestivalSetting::get('registration_open', '1');
         $new = ($current === '1' || $current === true) ? '0' : '1';
@@ -67,10 +68,20 @@ class SettingController extends Controller
         $statusText = $new === '1' ? 'തുറന്നു (Opened / Allowed)' : 'ബ്ലോക്ക് ചെയ്തു (Blocked / Closed)';
         AuditLogger::log('toggle_registration', null, ['registration_open' => $current], ['registration_open' => $new]);
 
-        return back()->with('success', "പ്രോഗ്രാം രജിസ്ട്രേഷൻ പോർട്ടൽ വിജയകരമായി {$statusText}.");
+        $message = "പ്രോഗ്രാം രജിസ്ട്രേഷൻ പോർട്ടൽ വിജയകരമായി {$statusText}.";
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_open' => $new === '1',
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
-    public function toggleStageRegistration(Request $request): RedirectResponse
+    public function toggleStageRegistration(Request $request): JsonResponse|RedirectResponse
     {
         $current = FestivalSetting::get('stage_registration_open', '1');
         $new = ($current === '1' || $current === true) ? '0' : '1';
@@ -79,10 +90,20 @@ class SettingController extends Controller
         $statusText = $new === '1' ? 'തുറന്നു (Opened / Allowed)' : 'ബ്ലോക്ക് ചെയ്തു (Blocked / Closed)';
         AuditLogger::log('toggle_stage_registration', null, ['stage_registration_open' => $current], ['stage_registration_open' => $new]);
 
-        return back()->with('success', "സ്റ്റേജ് പ്രോഗ്രാം രജിസ്ട്രേഷൻ വിജയകരമായി {$statusText}.");
+        $message = "സ്റ്റേജ് പ്രോഗ്രാം രജിസ്ട്രേഷൻ വിജയകരമായി {$statusText}.";
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_open' => $new === '1',
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
-    public function toggleOffStageRegistration(Request $request): RedirectResponse
+    public function toggleOffStageRegistration(Request $request): JsonResponse|RedirectResponse
     {
         $current = FestivalSetting::get('off_stage_registration_open', '1');
         $new = ($current === '1' || $current === true) ? '0' : '1';
@@ -91,10 +112,20 @@ class SettingController extends Controller
         $statusText = $new === '1' ? 'തുറന്നു (Opened / Allowed)' : 'ബ്ലോക്ക് ചെയ്തു (Blocked / Closed)';
         AuditLogger::log('toggle_off_stage_registration', null, ['off_stage_registration_open' => $current], ['off_stage_registration_open' => $new]);
 
-        return back()->with('success', "ഓഫ്-സ്റ്റേജ് പ്രോഗ്രാം രജിസ്ട്രേഷൻ വിജയകരമായി {$statusText}.");
+        $message = "ഓഫ്-സ്റ്റേജ് പ്രോഗ്രാം രജിസ്ട്രേഷൻ വിജയകരമായി {$statusText}.";
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_open' => $new === '1',
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
-    public function toggleStudentEditing(Request $request): RedirectResponse
+    public function toggleStudentEditing(Request $request): JsonResponse|RedirectResponse
     {
         $current = FestivalSetting::get('student_editing_open', '1');
         $new = ($current === '1' || $current === true) ? '0' : '1';
@@ -103,7 +134,17 @@ class SettingController extends Controller
         $statusText = $new === '1' ? 'തുറന്നു (Allowed / Open)' : 'ബ്ലോക്ക് ചെയ്തു (Blocked / Closed)';
         AuditLogger::log('toggle_student_editing', null, ['student_editing_open' => $current], ['student_editing_open' => $new]);
 
-        return back()->with('success', "വിദ്യാർത്ഥികളുടെ പേര് / വിവരങ്ങൾ തിരുത്താനുള്ള സൗകര്യം വിജയകരമായി {$statusText}.");
+        $message = "വിദ്യാർത്ഥികളുടെ പേര് / വിവരങ്ങൾ തിരുത്താനുള്ള സൗകര്യം വിജയകരമായി {$statusText}.";
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_open' => $new === '1',
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function markSettings(Request $request): RedirectResponse

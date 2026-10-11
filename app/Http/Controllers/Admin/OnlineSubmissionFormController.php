@@ -8,6 +8,7 @@ use App\Models\OnlineSubmissionForm;
 use App\Models\Program;
 use App\Services\AuditLogger;
 use App\Services\QrCodeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -150,14 +151,24 @@ class OnlineSubmissionFormController extends Controller
             ->with('success', 'ഓൺലൈൻ സബ്മിഷൻ ഫോം വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു.');
     }
 
-    public function toggleStatus(OnlineSubmissionForm $form): RedirectResponse
+    public function toggleStatus(Request $request, OnlineSubmissionForm $form): JsonResponse|RedirectResponse
     {
         $form->is_open = ! $form->is_open;
         $form->save();
 
         $statusText = $form->is_open ? 'തുറന്നു (Open)' : 'അടച്ചു (Closed)';
+        $message = "ഫോം സബ്മിഷൻ വിജയകരമായി {$statusText}.";
 
-        return back()->with('success', "ഫോം സബ്മിഷൻ വിജയകരമായി {$statusText}.");
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_open' => (bool) $form->isOpenForSubmissions(),
+                'form_id' => $form->id,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function destroy(OnlineSubmissionForm $form): RedirectResponse

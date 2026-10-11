@@ -324,17 +324,16 @@
                                 <td class="px-4 py-3.5 text-center">
                                     @php $wState = $prog->getCallListWindowState(); @endphp
                                     <div class="space-y-1">
-                                        @if($prog->is_call_list_locked)
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-red-100 text-red-800 border border-red-200">
-                                                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                                Locked
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                Unlocked
-                                            </span>
-                                        @endif
+                                        <span x-show="isProgLocked('{{ $prog->id }}', {{ $prog->is_call_list_locked ? 'true' : 'false' }})"
+                                              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-red-100 text-red-800 border border-red-200">
+                                            <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            Locked
+                                        </span>
+                                        <span x-show="!isProgLocked('{{ $prog->id }}', {{ $prog->is_call_list_locked ? 'true' : 'false' }})"
+                                              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            Unlocked
+                                        </span>
                                         <div class="text-[9px] font-mono font-semibold">
                                             @if($wState['state'] === 'auto_locked_ended')
                                                 <span class="text-red-600">Ended (Auto-Locked)</span>
@@ -381,19 +380,20 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                         </a>
 
-                                        <!-- Quick Toggle Lock Form -->
-                                        <form method="POST" action="{{ route('admin.call-list.toggle-lock', $prog) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="p-1.5 rounded-xl transition {{ $prog->is_call_list_locked ? 'bg-red-50 hover:bg-red-100 text-red-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-600' }}"
-                                                    title="{{ $prog->is_call_list_locked ? 'Unlock Call List' : 'Lock Call List (Remove Green Room Access)' }}">
-                                                @if($prog->is_call_list_locked)
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                                @else
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                                                @endif
-                                            </button>
-                                        </form>
+                                        <!-- Quick Toggle Lock (AJAX, Zero Scroll Jump) -->
+                                        <button type="button" 
+                                                @click.prevent="toggleProgramLock('{{ $prog->id }}', '{{ route('admin.call-list.toggle-lock', $prog) }}')"
+                                                :disabled="lockLoading['{{ $prog->id }}']"
+                                                class="p-1.5 rounded-xl transition cursor-pointer"
+                                                :class="isProgLocked('{{ $prog->id }}', {{ $prog->is_call_list_locked ? 'true' : 'false' }}) ? 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'"
+                                                :title="isProgLocked('{{ $prog->id }}', {{ $prog->is_call_list_locked ? 'true' : 'false' }}) ? 'Unlock Call List' : 'Lock Call List (Remove Green Room Access)'">
+                                            <span x-show="isProgLocked('{{ $prog->id }}', {{ $prog->is_call_list_locked ? 'true' : 'false' }})">
+                                                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            </span>
+                                            <span x-show="!isProgLocked('{{ $prog->id }}', {{ $prog->is_call_list_locked ? 'true' : 'false' }})">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                            </span>
+                                        </button>
 
                                     </div>
                                 </td>
@@ -433,27 +433,28 @@
                             {{ $selectedProgram->zone?->name ?? $selectedProgram->eligibility ?? 'All Zones' }} &bull; Stage: {{ $selectedProgram->stage->name ?? 'TBA' }}
                         </span>
                         @php $progWindow = $selectedProgram->getCallListWindowState(); @endphp
-                        @if($selectedProgram->is_call_list_locked)
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
-                                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                LOCKED BY ADMIN
-                            </span>
-                        @elseif($progWindow['state'] === 'auto_locked_ended')
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
-                                <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                AUTO-LOCKED (TIME ENDED)
-                            </span>
-                        @elseif($progWindow['state'] === 'upcoming_window')
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 font-mono">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                OPENS 10M BEFORE ({{ $progWindow['opens_at']?->format('h:i A') }})
-                            </span>
-                        @else
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 font-mono">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                OPEN / ATTENDANCE ACTIVE
-                            </span>
-                        @endif
+                        <span x-show="isProgLocked('{{ $selectedProgram->id }}', {{ $selectedProgram->is_call_list_locked ? 'true' : 'false' }})" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
+                            <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            LOCKED BY ADMIN
+                        </span>
+                        <div x-show="!isProgLocked('{{ $selectedProgram->id }}', {{ $selectedProgram->is_call_list_locked ? 'true' : 'false' }})">
+                            @if($progWindow['state'] === 'auto_locked_ended')
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200 flex items-center gap-1 font-mono">
+                                    <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    AUTO-LOCKED (TIME ENDED)
+                                </span>
+                            @elseif($progWindow['state'] === 'upcoming_window')
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 font-mono">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    OPENS 10M BEFORE ({{ $progWindow['opens_at']?->format('h:i A') }})
+                                </span>
+                            @else
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 font-mono">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    OPEN / ATTENDANCE ACTIVE
+                                </span>
+                            @endif
+                        </div>
                     </div>
                     <h2 class="text-2xl font-black text-slate-900 tracking-tight font-sora">
                         {{ $selectedProgram->name }}
@@ -465,16 +466,15 @@
 
                 <!-- Program Actions: Lock Toggle, Shuffle Codes, Print -->
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Toggle Lock -->
-                    <form method="POST" action="{{ route('admin.call-list.toggle-lock', $selectedProgram) }}">
-                        @csrf
-                        <button type="submit"
-                                class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs font-sora {{ $selectedProgram->is_call_list_locked ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-red-700 hover:bg-red-800 text-white' }}"
-                                onclick="return confirm('{{ $selectedProgram->is_call_list_locked ? 'Unlock this call list?' : 'Lock this call list? When locked, only PRESENT students will be accessible in judge evaluation.' }}');">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                            <span>{{ $selectedProgram->is_call_list_locked ? 'Unlock Call List' : 'Lock Call List' }}</span>
-                        </button>
-                    </form>
+                    <!-- Toggle Lock (AJAX, Zero Scroll Jump) -->
+                    <button type="button"
+                            @click.prevent="toggleProgramLock('{{ $selectedProgram->id }}', '{{ route('admin.call-list.toggle-lock', $selectedProgram) }}')"
+                            :disabled="lockLoading['{{ $selectedProgram->id }}']"
+                            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs font-sora cursor-pointer"
+                            :class="isProgLocked('{{ $selectedProgram->id }}', {{ $selectedProgram->is_call_list_locked ? 'true' : 'false' }}) ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-red-700 hover:bg-red-800 text-white'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span x-text="isProgLocked('{{ $selectedProgram->id }}', {{ $selectedProgram->is_call_list_locked ? 'true' : 'false' }}) ? 'Unlock Call List' : 'Lock Call List'"></span>
+                    </button>
 
                     <!-- Shuffle Code Letters -->
                     @if(!$selectedProgram->is_call_list_locked)
@@ -696,6 +696,40 @@
                     this.showToast(err.message || 'Error updating status.', true);
                 } finally {
                     this.statusLoading[progId] = false;
+                }
+            },
+            lockOverrides: {},
+            lockLoading: {},
+            isProgLocked(id, defaultVal) {
+                if (this.lockOverrides[id] !== undefined) {
+                    return this.lockOverrides[id];
+                }
+                return defaultVal;
+            },
+            async toggleProgramLock(progId, url) {
+                if (this.lockLoading[progId]) return;
+                this.lockLoading[progId] = true;
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Error updating lock status.');
+                    }
+                    this.lockOverrides[progId] = data.is_locked;
+                    this.showToast(data.message);
+                } catch (err) {
+                    this.showToast(err.message || 'Error updating lock status.', true);
+                } finally {
+                    this.lockLoading[progId] = false;
                 }
             },
             async updateAttendance(entryId, status) {

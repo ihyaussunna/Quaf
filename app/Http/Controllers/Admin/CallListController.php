@@ -253,7 +253,7 @@ class CallListController extends Controller
     /**
      * Toggle lock status on program call list.
      */
-    public function toggleLock(Program $program): RedirectResponse
+    public function toggleLock(Request $request, Program $program): JsonResponse|RedirectResponse
     {
         Program::ensureSchema();
 
@@ -262,6 +262,16 @@ class CallListController extends Controller
 
         $statusText = $newStatus ? 'LOCKED' : 'UNLOCKED';
         AuditLogger::log('admin_toggle_call_list_lock', $program, null, ['is_call_list_locked' => $newStatus]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_locked' => $newStatus,
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'message' => "Call list for '{$program->name}' has been {$statusText}.",
+            ]);
+        }
 
         return back()->with('success', "Call list for '{$program->name}' has been {$statusText}.");
     }

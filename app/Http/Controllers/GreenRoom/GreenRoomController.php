@@ -586,9 +586,16 @@ class GreenRoomController extends Controller
         return back()->with('success', "പ്രോഗ്രാം '{$program->name}' കോഡ് ലെറ്ററുകൾ സമർപ്പിച്ച് കോൾ ലിസ്റ്റ് വിജയകരമായി ലോക്ക് ചെയ്തു (Call list finalized & locked).");
     }
 
-    public function toggleLockCallList(Program $program): RedirectResponse
+    public function toggleLockCallList(Request $request, Program $program): JsonResponse|RedirectResponse
     {
         if (! in_array(auth()->user()?->role, ['admin', 'super_admin'])) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'അഡ്മിന് മാത്രമേ കോൾ ലിസ്റ്റ് ലോക്ക് / അൺലോക്ക് ചെയ്യാൻ അനുവാദമുള്ളൂ.',
+                ], 403);
+            }
+
             return back()->with('error', 'അഡ്മിന് മാത്രമേ കോൾ ലിസ്റ്റ് ലോക്ക് / അൺലോക്ക് ചെയ്യാൻ അനുവാദമുള്ളൂ.');
         }
 
@@ -606,6 +613,13 @@ class GreenRoomController extends Controller
             $program->is_call_list_locked = $newStatus;
             $program->save();
         } catch (\Throwable) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ഡാറ്റാബേസിൽ പുതിയ കോളം അപ്‌ഡേറ്റ് ചെയ്യാൻ സാധിച്ചില്ല.',
+                ], 500);
+            }
+
             return back()->with('error', 'ഡാറ്റാബേസിൽ പുതിയ കോളം അപ്‌ഡേറ്റ് ചെയ്യാൻ https://quaf.ihyaussunna.in/migrate-db?token=quaf2026setup സന്ദർശിക്കുക.');
         }
 
@@ -615,6 +629,15 @@ class GreenRoomController extends Controller
             'program_id' => $program->id,
             'is_call_list_locked' => $program->is_call_list_locked,
         ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_locked' => (bool) $program->is_call_list_locked,
+                'program_id' => $program->id,
+                'message' => "പ്രോഗ്രാം '{$program->name}' കോൾ ലിസ്റ്റ് വിജയകരമായി {$statusText}.",
+            ]);
+        }
 
         return back()->with('success', "പ്രോഗ്രാം '{$program->name}' കോൾ ലിസ്റ്റ് വിജയകരമായി {$statusText}.");
     }

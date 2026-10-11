@@ -1,7 +1,43 @@
 @extends('layouts.admin', ['title' => 'Online Submission Forms | QUAF'])
 
 @section('content')
-<div class="space-y-6 max-w-7xl mx-auto">
+<div class="space-y-6 max-w-7xl mx-auto" x-data="{
+    statusOverrides: {},
+    statusLoading: {},
+    isFormOpen(formId, defaultVal) {
+        if (this.statusOverrides[formId] !== undefined) {
+            return this.statusOverrides[formId];
+        }
+        return defaultVal;
+    },
+    async toggleFormStatus(formId, url) {
+        if (this.statusLoading[formId]) return;
+        this.statusLoading[formId] = true;
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.message || 'Error updating status.');
+                return;
+            }
+            this.statusOverrides[formId] = data.is_open;
+        } catch (e) {
+            console.error(e);
+            alert('Error updating form status.');
+        } finally {
+            this.statusLoading[formId] = false;
+        }
+    }
+}">
 
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
@@ -110,15 +146,15 @@
                                     </a>
                                 </td>
 
-                                <!-- Status Toggle -->
+                                <!-- Status Toggle (AJAX, Zero Scroll Jump) -->
                                 <td class="py-4 px-4 text-center">
-                                    <form action="{{ route('admin.online-forms.toggle', $form->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" 
-                                                class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase transition cursor-pointer {{ $form->isOpenForSubmissions() ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-red-100 text-red-800 hover:bg-red-200' }}">
-                                            {{ $form->isOpenForSubmissions() ? 'OPEN' : 'CLOSED' }}
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            @click.prevent="toggleFormStatus({{ $form->id }}, '{{ route('admin.online-forms.toggle', $form->id) }}')"
+                                            :disabled="statusLoading[{{ $form->id }}]"
+                                            class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase transition cursor-pointer"
+                                            :class="isFormOpen({{ $form->id }}, {{ $form->isOpenForSubmissions() ? 'true' : 'false' }}) ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-red-100 text-red-800 hover:bg-red-200'">
+                                        <span x-text="isFormOpen({{ $form->id }}, {{ $form->isOpenForSubmissions() ? 'true' : 'false' }}) ? 'OPEN' : 'CLOSED'">{{ $form->isOpenForSubmissions() ? 'OPEN' : 'CLOSED' }}</span>
+                                    </button>
                                 </td>
 
                                 <!-- QR Code Link -->

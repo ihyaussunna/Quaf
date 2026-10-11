@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\AuditLogger;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -93,9 +94,16 @@ class PanelAccessController extends Controller
     /**
      * Toggle account status (Lock / Activate).
      */
-    public function toggleStatus(User $user): RedirectResponse
+    public function toggleStatus(Request $request, User $user): JsonResponse|RedirectResponse
     {
         if ($user->id === Auth::id()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'സ്വന്തം അഡ്മിൻ അക്കൗണ്ട് ലോക്ക് ചെയ്യാൻ സാധ്യമല്ല.',
+                ], 422);
+            }
+
             return back()->with('error', 'സ്വന്തം അഡ്മിൻ അക്കൗണ്ട് ലോക്ക് ചെയ്യാൻ സാധ്യമല്ല.');
         }
 
@@ -111,6 +119,15 @@ class PanelAccessController extends Controller
             ['is_active' => $oldStatus],
             ['is_active' => $user->is_active]
         );
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_active' => (bool) $user->is_active,
+                'user_id' => $user->id,
+                'message' => "{$user->name} അക്കൗണ്ട് വിജയകരമായി {$actionName}.",
+            ]);
+        }
 
         return back()->with('success', "{$user->name} അക്കൗണ്ട് വിജയകരമായി {$actionName}.");
     }
