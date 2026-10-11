@@ -85,19 +85,22 @@ class ScheduleController extends Controller
             ->filter()
             ->values();
 
-        $milestoneLabels = [
-            '2026-10-06' => 'Oct 06 (Offstage)',
-            '2026-10-07' => 'Oct 07 (Offstage)',
-            '2026-10-08' => 'Oct 08 (Offstage)',
-            '2026-10-09' => 'Oct 09 (Offstage)',
-            '2026-10-10' => 'Oct 10 (Offstage)',
-            '2026-10-11' => 'Oct 11 (Sun)',
-            '2026-10-12' => 'Oct 12 (Mon)',
-            '2026-10-13' => 'Oct 13 (Tue)',
-            '2026-10-14' => 'Oct 14 (Wed)',
-            '2026-10-31' => 'Oct 31 (Main Stage Day 1)',
-            '2026-11-01' => 'Nov 01 (Main Stage Day 2)',
-        ];
+        $startDate = Carbon::parse('2026-10-06');
+        $endDate = Carbon::parse('2026-11-01');
+
+        $milestoneLabels = [];
+        $cursor = $startDate->copy();
+        while ($cursor->lte($endDate)) {
+            $ymd = $cursor->format('Y-m-d');
+            if ($ymd === '2026-10-31') {
+                $milestoneLabels[$ymd] = 'Oct 31 (Main Stage Day 1)';
+            } elseif ($ymd === '2026-11-01') {
+                $milestoneLabels[$ymd] = 'Nov 01 (Main Stage Day 2)';
+            } else {
+                $milestoneLabels[$ymd] = $cursor->format('M d').' ('.$cursor->format('D').')';
+            }
+            $cursor->addDay();
+        }
 
         $allUniqueDates = $distinctDates->merge(array_keys($milestoneLabels))->unique()->sort()->values();
 
@@ -175,20 +178,23 @@ class ScheduleController extends Controller
 
         $selectedDate = $request->query('date', '2026-10-06');
 
-        // All milestone dates across offstage and mainstage
-        $milestoneLabels = [
-            '2026-10-06' => 'Oct 06 (Tue)',
-            '2026-10-07' => 'Oct 07 (Wed)',
-            '2026-10-08' => 'Oct 08 (Thu)',
-            '2026-10-09' => 'Oct 09 (Fri)',
-            '2026-10-10' => 'Oct 10 (Sat)',
-            '2026-10-11' => 'Oct 11 (Sun)',
-            '2026-10-12' => 'Oct 12 (Mon)',
-            '2026-10-13' => 'Oct 13 (Tue)',
-            '2026-10-14' => 'Oct 14 (Wed)',
-            '2026-10-31' => 'Oct 31 (Sat - Main Stage)',
-            '2026-11-01' => 'Nov 01 (Sun - Main Stage)',
-        ];
+        // All festival dates from Oct 06 to Nov 01
+        $startDate = Carbon::parse('2026-10-06');
+        $endDate = Carbon::parse('2026-11-01');
+
+        $milestoneLabels = [];
+        $cursor = $startDate->copy();
+        while ($cursor->lte($endDate)) {
+            $ymd = $cursor->format('Y-m-d');
+            if ($ymd === '2026-10-31') {
+                $milestoneLabels[$ymd] = 'Oct 31 (Sat - Main Stage)';
+            } elseif ($ymd === '2026-11-01') {
+                $milestoneLabels[$ymd] = 'Nov 01 (Sun - Main Stage)';
+            } else {
+                $milestoneLabels[$ymd] = $cursor->format('M d').' ('.$cursor->format('D').')';
+            }
+            $cursor->addDay();
+        }
 
         // Fetch distinct dates that have schedules from DB
         $distinctDates = Schedule::whereNotNull('start_time')

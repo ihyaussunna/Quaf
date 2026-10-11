@@ -187,7 +187,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
         <div class="flex items-center justify-between gap-3 mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">Festival Dates</span>
-            <span class="text-xs text-slate-400">Offstage Oct 06 – Oct 14 • Mainstage Oct 31 – Nov 01</span>
+            <span class="text-xs text-slate-400">Festival Dates: Oct 06 – Nov 01 • Mainstage Oct 31 & Nov 01</span>
         </div>
         <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             @foreach($defaultDates as $dateVal => $dateLabel)
@@ -515,23 +515,27 @@
                         </div>
                     </div>
 
-                    <!-- Date & Time Row -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 font-sora mb-1">Date</label>
-                            <input type="date" name="date" x-model="formDate" @change="checkLiveConflict()" required
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] bg-white">
+                    <!-- Date Selection & Quick Chips -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 font-sora mb-1">Date</label>
+                        <div class="flex items-center gap-1.5 mb-2 flex-wrap max-h-24 overflow-y-auto no-scrollbar">
+                            @foreach($defaultDates as $dVal => $dLbl)
+                                <button type="button" @click="formDate = '{{ $dVal }}'; checkLiveConflict()"
+                                        :class="formDate === '{{ $dVal }}' ? 'bg-[#be1e2d] text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono transition cursor-pointer">
+                                    {{ $dLbl }}
+                                </button>
+                            @endforeach
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 font-sora mb-1">Time (24h or Preset)</label>
-                            <input type="time" name="time" x-model="formTime" @change="checkLiveConflict()" required
-                                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] bg-white">
-                        </div>
+                        <input type="date" name="date" x-model="formDate" @change="checkLiveConflict()" required
+                               class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] bg-white font-mono">
                     </div>
 
-                    <!-- Quick Time Presets (Mobile Friendly Chips) -->
+                    <!-- Time & Quick Presets -->
                     <div>
+                        <label class="block text-xs font-bold text-slate-700 font-sora mb-1">Time (24h or Preset)</label>
+                        <input type="time" name="time" x-model="formTime" @change="checkLiveConflict()" required
+                               class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-[#be1e2d] bg-white font-mono mb-2">
                         <div class="text-[10px] font-mono font-bold text-slate-400 mb-1">QUICK TIME PRESETS</div>
                         <div class="flex items-center gap-1.5 flex-wrap">
                             @foreach(['16:40' => '04:40 PM', '17:10' => '05:10 PM', '21:15' => '09:15 PM', '21:45' => '09:45 PM', '22:25' => '10:25 PM'] as $tVal => $tLbl)

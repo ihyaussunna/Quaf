@@ -130,7 +130,7 @@
                         <a href="{{ route('program-committee.schedules.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('program-committee.schedules.index') || request()->routeIs('program-committee.schedule') || request()->routeIs('admin.schedules.index') ? 'bg-[#be1e2d]/20 text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">All Stages Schedule</a>
                         <a href="{{ route('program-committee.schedules.offstage') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('program-committee.schedules.offstage') || request()->routeIs('admin.schedules.offstage') ? 'bg-[#be1e2d]/20 text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
                             <span>Offstage & Clashes</span>
-                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Oct 6-14</span>
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Oct 6 - Nov 1</span>
                         </a>
                         <a href="{{ route('program-committee.schedules.offstage.pdf') }}" target="_blank" class="block px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5">Print PDF (Rockwell)</a>
                     </div>

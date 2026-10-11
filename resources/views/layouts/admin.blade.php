@@ -188,7 +188,7 @@
                         </a>
                         <a href="{{ route('program-committee.schedules.offstage') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('program-committee.schedules.offstage') || request()->routeIs('admin.schedules.offstage') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
                             <span>Offstage & Clashes</span>
-                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Oct 6-14</span>
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Oct 6 - Nov 1</span>
                         </a>
                         <a href="{{ route('program-committee.schedules.offstage.pdf') }}" target="_blank" class="flex items-center justify-between px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40">
                             <span>Print Rockwell PDF</span>
@@ -381,7 +381,7 @@
                     </a>
                     <a href="{{ route('admin.schedules.offstage') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.schedules.offstage*') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
                         <span>Offstage & Clashes</span>
-                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Oct 6-14</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Oct 6 - Nov 1</span>
                     </a>
                     <a href="{{ route('admin.schedules.offstage.pdf') }}" target="_blank" class="flex items-center justify-between px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40">
                         <span>Print Rockwell PDF</span>
