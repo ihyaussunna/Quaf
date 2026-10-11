@@ -690,4 +690,33 @@ class ScheduleController extends Controller
 
         return back()->with($result['remaining_conflicts'] === 0 ? 'success' : 'warning', $message);
     }
+
+    /**
+     * Quick status update for schedule and associated program (completed, ongoing, scheduled, delayed).
+     */
+    public function updateStatus(Request $request, Schedule $schedule): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'in:scheduled,ongoing,completed,delayed'],
+        ]);
+
+        $old = $schedule->toArray();
+        $schedule->update(['status' => $validated['status']]);
+
+        // Keep associated program status synchronized
+        if ($schedule->program) {
+            $programStatus = match ($validated['status']) {
+                'completed' => 'completed',
+                'ongoing' => 'in_progress',
+                'delayed', 'scheduled' => 'upcoming',
+            };
+            $schedule->program->update(['status' => $programStatus]);
+        }
+
+        AuditLogger::log('update_schedule_status', $schedule, $old, $schedule->toArray());
+
+        $statusLabel = ucfirst($validated['status']);
+
+        return back()->with('success', "Status for '{$schedule->program?->name}' updated to {$statusLabel}.");
+    }
 }

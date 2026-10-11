@@ -472,6 +472,26 @@
 
                             <!-- Actions -->
                             <td class="px-5 py-4 text-right space-x-1.5 whitespace-nowrap">
+                                @if($item->status === 'completed' || $item->program?->status === 'completed')
+                                    <form method="POST" action="{{ route($routePrefix . 'update-status', $item) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="scheduled">
+                                        <button type="submit" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[10px] transition cursor-pointer inline-flex items-center gap-1" title="Reopen / Reset Status">
+                                            Reopen
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route($routePrefix . 'update-status', $item) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] border border-emerald-200 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs" title="Mark as Completed">
+                                            <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span>Complete</span>
+                                        </button>
+                                    </form>
+                                @endif
                                 <button @click="modalProgramId = '{{ $item->program_id }}'; modalScheduleId = '{{ $item->id }}'; modalStageId = '{{ $item->stage_id }}'; modalDate = '{{ $item->start_time->format('Y-m-d') }}'; modalTime = '{{ $item->start_time->format('H:i') }}'; modalDuration = {{ $item->program->duration_minutes ?? 30 }}; showScheduleModal = true; checkClash()"
                                         class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] hover:bg-slate-200 transition cursor-pointer">
                                     Reschedule

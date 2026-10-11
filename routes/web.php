@@ -513,6 +513,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::post('schedules/quick-slot', [AdminScheduleController::class, 'quickSlot'])->name('schedules.quick-slot');
     Route::post('schedules/stages', [AdminScheduleController::class, 'storeStage'])->name('schedules.stages.store');
     Route::post('schedules/auto-resolve', [AdminScheduleController::class, 'autoResolveClashes'])->name('schedules.auto-resolve');
+    Route::patch('schedules/{schedule}/status', [AdminScheduleController::class, 'updateStatus'])->name('schedules.update-status');
     Route::resource('schedules', AdminScheduleController::class);
 
     // Judges Management
@@ -724,6 +725,7 @@ Route::prefix('program-committee')->name('program-committee.')->middleware(['aut
     Route::post('/schedules', [AdminScheduleController::class, 'store'])->name('schedules.store');
     Route::get('/schedules/{schedule}/edit', [AdminScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/schedules/{schedule}', [AdminScheduleController::class, 'update'])->name('schedules.update');
+    Route::patch('/schedules/{schedule}/status', [AdminScheduleController::class, 'updateStatus'])->name('schedules.update-status');
     Route::delete('/schedules/{schedule}', [AdminScheduleController::class, 'destroy'])->name('schedules.destroy');
 });
 

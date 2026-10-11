@@ -370,6 +370,19 @@
                                                 <span>Clash Detected</span>
                                             </span>
                                         @endif
+                                        @if($sch->status === 'completed' || $sch->program?->status === 'completed')
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                Completed
+                                            </span>
+                                        @elseif($sch->status === 'ongoing' || $sch->program?->status === 'in_progress')
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                                                Ongoing
+                                            </span>
+                                        @elseif($sch->status === 'delayed')
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                                                Delayed
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="flex items-center gap-3 text-xs text-slate-500 mt-1">
                                         <span class="font-mono">{{ $sch->start_time->format('h:i A') }} – {{ $sch->end_time->format('h:i A') }}</span>
@@ -383,6 +396,27 @@
 
                             <!-- Right: Quick Slot Action Buttons -->
                             <div class="flex items-center gap-2 self-end sm:self-center">
+                                @if($sch->status === 'completed' || $sch->program?->status === 'completed')
+                                    <form method="POST" action="{{ route($routePrefix . 'update-status', $sch->id) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="scheduled">
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[10px] border border-slate-200 transition cursor-pointer" title="Reopen / Mark as Scheduled">
+                                            Reopen
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route($routePrefix . 'update-status', $sch->id) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] border border-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Mark as Completed">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <span>Complete</span>
+                                        </button>
+                                    </form>
+                                @endif
+
                                 <button type="button" @click="openEditSlot({{ $sch->toJson() }})"
                                         class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer" title="Edit Slot">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
