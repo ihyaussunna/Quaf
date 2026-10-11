@@ -242,6 +242,11 @@ class Program extends Model
         return $this->hasMany(PointsTransaction::class);
     }
 
+    public function coinTransactions(): HasMany
+    {
+        return $this->hasMany(CoinTransaction::class);
+    }
+
     public function isIndividual(): bool
     {
         return strtolower($this->type) === 'individual';

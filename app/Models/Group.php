@@ -109,6 +109,11 @@ class Group extends Model
         return $this->hasMany(PointsTransaction::class);
     }
 
+    public function coinTransactions(): HasMany
+    {
+        return $this->hasMany(CoinTransaction::class);
+    }
+
     public function galleryItems(): HasMany
     {
         return $this->hasMany(GalleryItem::class);

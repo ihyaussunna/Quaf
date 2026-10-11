@@ -1,7 +1,27 @@
 @extends('layouts.admin', ['title' => 'Results & Team Leaderboard | Quaf'])
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{
+    modalOpen: false,
+    loading: false,
+    previewData: null,
+    publishUrl: '',
+    csrfToken: '{{ csrf_token() }}',
+    async openPreview(resultId, url) {
+        this.publishUrl = url;
+        this.loading = true;
+        this.modalOpen = true;
+        this.previewData = null;
+        try {
+            const res = await fetch('/admin/results/' + resultId + '/coin-preview');
+            this.previewData = await res.json();
+        } catch (e) {
+            console.error('Failed to load coin preview', e);
+        } finally {
+            this.loading = false;
+        }
+    }
+}">
     <!-- Top Header -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
@@ -185,13 +205,24 @@
                                             </form>
                                         @endif
                                         @if($res->status !== 'published')
-                                            <form method="POST" action="{{ route('admin.results.publish', $res) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-semibold text-[11px] hover:bg-emerald-700 transition-colors shadow-2xs">
-                                                    Publish
+                                            @if($res->program && $res->program->isGroup())
+                                                <button type="button"
+                                                        @click="openPreview({{ $res->id }}, '{{ route('admin.results.publish', $res) }}')"
+                                                        class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold text-[11px] hover:bg-amber-400 transition-colors shadow-2xs">
+                                                    Review & Publish
                                                 </button>
-                                            </form>
+                                            @else
+                                                <form method="POST" action="{{ route('admin.results.publish', $res) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-semibold text-[11px] hover:bg-emerald-700 transition-colors shadow-2xs">
+                                                        Publish
+                                                    </button>
+                                                </form>
+                                            @endif
                                         @endif
+                                        <a href="{{ route('admin.results.show', $res) }}" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold text-[11px] hover:bg-slate-200 transition-colors">
+                                            View
+                                        </a>
                                         <a href="{{ route('admin.results.edit', $res) }}" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold text-[11px] hover:bg-slate-200 transition-colors">
                                             Edit
                                         </a>
@@ -282,6 +313,129 @@
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-sora">
                     <span>Updates instantly on results</span>
                     <a href="{{ route('admin.points.index') }}" class="text-[#be1e2d] hover:underline font-medium">Points Rules →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coin Preview & Verification Modal -->
+    <div x-show="modalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4"
+         style="display: none;">
+        <div @click.outside="modalOpen = false"
+             class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-linear-to-r from-amber-500 to-amber-600 text-slate-950 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-mono font-black uppercase tracking-wider bg-slate-950 text-white px-2 py-0.5 rounded">
+                        Verification Required
+                    </span>
+                    <h3 class="font-sora font-black text-lg text-slate-950 mt-1" x-text="previewData?.program_name ? 'Publish Verdict: ' + previewData.program_name : 'Group Program Coin Reward Preview'"></h3>
+                </div>
+                <button type="button" @click="modalOpen = false" class="text-slate-900 hover:text-white text-2xl font-bold leading-none">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <template x-if="loading">
+                    <div class="py-12 text-center text-slate-500 font-mono text-xs">
+                        Loading official participants and coin calculation preview...
+                    </div>
+                </template>
+
+                <template x-if="!loading && previewData">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-mono">
+                            <div>
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Reward Rule</span>
+                                <span class="font-bold text-slate-800" x-text="previewData.reward_rule_id"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Total Credit across Wallets</span>
+                                <span class="font-black text-amber-700 text-sm" x-text="previewData.total_coins_to_credit + ' Coins (' + previewData.total_eligible_participants + ' students)'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Warnings / Flags -->
+                        <template x-if="previewData.flags && previewData.flags.length > 0">
+                            <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-mono text-red-800 space-y-1">
+                                <template x-for="flag in previewData.flags" :key="flag">
+                                    <div class="flex items-center gap-1.5 font-medium">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                        <span x-text="flag"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Placements Loop -->
+                        <div class="space-y-3">
+                            <template x-for="p in previewData.placements" :key="p.position">
+                                <div class="rounded-xl border border-slate-200 overflow-hidden">
+                                    <div class="px-4 py-2.5 bg-slate-50 flex items-center justify-between text-xs font-mono border-b border-slate-200">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 rounded font-bold uppercase text-[10px]"
+                                                  :class="p.position === 1 ? 'bg-amber-400 text-slate-950' : (p.position === 2 ? 'bg-slate-300 text-slate-800' : 'bg-amber-100 text-amber-900')"
+                                                  x-text="p.position_label"></span>
+                                            <span class="font-bold text-slate-900" x-text="p.group_name"></span>
+                                            <span class="text-slate-400" x-text="'(Grade ' + p.grade + ')'"></span>
+                                        </div>
+                                        <div class="font-bold text-slate-800" x-text="p.coins_per_participant + ' coins each • Total ' + p.total_coins"></div>
+                                    </div>
+
+                                    <div class="p-2">
+                                        <table class="w-full text-left text-xs font-mono">
+                                            <thead class="text-slate-400 uppercase text-[10px]">
+                                                <tr>
+                                                    <th class="px-3 py-1 font-semibold">Student ID</th>
+                                                    <th class="px-3 py-1 font-semibold">Name</th>
+                                                    <th class="px-3 py-1 font-semibold">Role</th>
+                                                    <th class="px-3 py-1 font-semibold text-right">Coins to Credit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                                <template x-for="stu in p.participants" :key="stu.student_id">
+                                                    <tr>
+                                                        <td class="px-3 py-1.5 font-bold" x-text="stu.student_number"></td>
+                                                        <td class="px-3 py-1.5" x-text="stu.name"></td>
+                                                        <td class="px-3 py-1.5 capitalize text-slate-400" x-text="stu.role"></td>
+                                                        <td class="px-3 py-1.5 text-right font-bold text-emerald-700" x-text="'+' + stu.coins"></td>
+                                                    </tr>
+                                                </template>
+                                                <template x-if="!p.participants || p.participants.length === 0">
+                                                    <tr>
+                                                        <td colspan="4" class="px-3 py-2 text-center text-slate-400 italic">No registered participants found</td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                <span class="text-xs font-mono text-slate-500">Only verified participants will be credited. Non-participants receive 0 coins.</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="modalOpen = false" class="px-4 py-2 rounded-xl text-xs font-mono text-slate-600 hover:bg-slate-200">
+                        Cancel
+                    </button>
+                    <form method="POST" :action="publishUrl" class="inline">
+                        <input type="hidden" name="_token" :value="csrfToken">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-mono font-bold bg-emerald-600 hover:bg-emerald-700 text-white uppercase tracking-wider shadow-md">
+                            Approve & Publish Result
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

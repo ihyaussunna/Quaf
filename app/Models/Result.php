@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Result extends Model
 {
@@ -13,8 +14,11 @@ class Result extends Model
     protected $fillable = [
         'program_id',
         'first_entry_id',
+        'first_grade',
         'second_entry_id',
+        'second_grade',
         'third_entry_id',
+        'third_grade',
         'status',
         'verified_by',
         'published_at',
@@ -64,6 +68,11 @@ class Result extends Model
     public function template(): BelongsTo
     {
         return $this->belongsTo(ResultTemplate::class, 'template_id');
+    }
+
+    public function coinTransactions(): HasMany
+    {
+        return $this->hasMany(CoinTransaction::class);
     }
 
     /**

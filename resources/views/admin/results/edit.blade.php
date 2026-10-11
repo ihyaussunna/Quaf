@@ -50,52 +50,95 @@
         </div>
     @endif
 
+    @if(!empty($coinPreview))
+        @include('admin.results.partials.coin_preview_card', ['coinPreview' => $coinPreview])
+    @endif
+
     <form method="POST" action="{{ route('admin.results.update', $result) }}" class="rounded-2xl bg-white border border-slate-200 p-8 space-y-6 shadow-sm">
         @csrf
         @method('PUT')
 
-        <div>
-            <label class="block text-xs font-mono uppercase text-[#f3bd2e] mb-1.5 font-bold">1st Place (Champion)</label>
-            <select name="first_entry_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-                @foreach($result->program->entries as $entry)
-                    <option value="{{ $entry->id }}" {{ old('first_entry_id', $result->first_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
-                        @if(!empty($podium['first']) && $podium['first']->id === $entry->id)
-                            [AUTO 1ST - {{ $podium['first']->computed_avg_score }} pts]
-                        @endif
-                    </option>
-                @endforeach
-            </select>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            <div class="sm:col-span-9">
+                <label class="block text-xs font-mono uppercase text-[#f3bd2e] mb-1.5 font-bold">1st Place (Champion)</label>
+                <select name="first_entry_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    @foreach($result->program->entries as $entry)
+                        <option value="{{ $entry->id }}" {{ old('first_entry_id', $result->first_entry_id) == $entry->id ? 'selected' : '' }}>
+                            Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                            @if(!empty($podium['first']) && $podium['first']->id === $entry->id)
+                                [AUTO 1ST - {{ $podium['first']->computed_avg_score }} pts]
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sm:col-span-3">
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">1st Grade</label>
+                <select name="first_grade" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    <option value="">Auto (Judge Mark)</option>
+                    <option value="A+" {{ old('first_grade', $result->first_grade) === 'A+' ? 'selected' : '' }}>A+</option>
+                    <option value="A" {{ old('first_grade', $result->first_grade) === 'A' ? 'selected' : '' }}>A</option>
+                    <option value="B" {{ old('first_grade', $result->first_grade) === 'B' ? 'selected' : '' }}>B</option>
+                    <option value="C" {{ old('first_grade', $result->first_grade) === 'C' ? 'selected' : '' }}>C</option>
+                    <option value="NO_GRADE" {{ old('first_grade', $result->first_grade) === 'NO_GRADE' ? 'selected' : '' }}>No Grade</option>
+                </select>
+            </div>
         </div>
 
-        <div>
-            <label class="block text-xs font-mono uppercase text-slate-700 mb-1.5 font-bold">2nd Place</label>
-            <select name="second_entry_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-                <option value="">-- None --</option>
-                @foreach($result->program->entries as $entry)
-                    <option value="{{ $entry->id }}" {{ old('second_entry_id', $result->second_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
-                        @if(!empty($podium['second']) && $podium['second']->id === $entry->id)
-                            [AUTO 2ND - {{ $podium['second']->computed_avg_score }} pts]
-                        @endif
-                    </option>
-                @endforeach
-            </select>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            <div class="sm:col-span-9">
+                <label class="block text-xs font-mono uppercase text-slate-700 mb-1.5 font-bold">2nd Place</label>
+                <select name="second_entry_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    <option value="">-- None --</option>
+                    @foreach($result->program->entries as $entry)
+                        <option value="{{ $entry->id }}" {{ old('second_entry_id', $result->second_entry_id) == $entry->id ? 'selected' : '' }}>
+                            Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                            @if(!empty($podium['second']) && $podium['second']->id === $entry->id)
+                                [AUTO 2ND - {{ $podium['second']->computed_avg_score }} pts]
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sm:col-span-3">
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">2nd Grade</label>
+                <select name="second_grade" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    <option value="">Auto (Judge Mark)</option>
+                    <option value="A+" {{ old('second_grade', $result->second_grade) === 'A+' ? 'selected' : '' }}>A+</option>
+                    <option value="A" {{ old('second_grade', $result->second_grade) === 'A' ? 'selected' : '' }}>A</option>
+                    <option value="B" {{ old('second_grade', $result->second_grade) === 'B' ? 'selected' : '' }}>B</option>
+                    <option value="C" {{ old('second_grade', $result->second_grade) === 'C' ? 'selected' : '' }}>C</option>
+                    <option value="NO_GRADE" {{ old('second_grade', $result->second_grade) === 'NO_GRADE' ? 'selected' : '' }}>No Grade</option>
+                </select>
+            </div>
         </div>
 
-        <div>
-            <label class="block text-xs font-mono uppercase text-amber-700 mb-1.5 font-bold">3rd Place</label>
-            <select name="third_entry_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
-                <option value="">-- None --</option>
-                @foreach($result->program->entries as $entry)
-                    <option value="{{ $entry->id }}" {{ old('third_entry_id', $result->third_entry_id) == $entry->id ? 'selected' : '' }}>
-                        Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
-                        @if(!empty($podium['third']) && $podium['third']->id === $entry->id)
-                            [AUTO 3RD - {{ $podium['third']->computed_avg_score }} pts]
-                        @endif
-                    </option>
-                @endforeach
-            </select>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            <div class="sm:col-span-9">
+                <label class="block text-xs font-mono uppercase text-amber-700 mb-1.5 font-bold">3rd Place</label>
+                <select name="third_entry_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    <option value="">-- None --</option>
+                    @foreach($result->program->entries as $entry)
+                        <option value="{{ $entry->id }}" {{ old('third_entry_id', $result->third_entry_id) == $entry->id ? 'selected' : '' }}>
+                            Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                            @if(!empty($podium['third']) && $podium['third']->id === $entry->id)
+                                [AUTO 3RD - {{ $podium['third']->computed_avg_score }} pts]
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sm:col-span-3">
+                <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">3rd Grade</label>
+                <select name="third_grade" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                    <option value="">Auto (Judge Mark)</option>
+                    <option value="A+" {{ old('third_grade', $result->third_grade) === 'A+' ? 'selected' : '' }}>A+</option>
+                    <option value="A" {{ old('third_grade', $result->third_grade) === 'A' ? 'selected' : '' }}>A</option>
+                    <option value="B" {{ old('third_grade', $result->third_grade) === 'B' ? 'selected' : '' }}>B</option>
+                    <option value="C" {{ old('third_grade', $result->third_grade) === 'C' ? 'selected' : '' }}>C</option>
+                    <option value="NO_GRADE" {{ old('third_grade', $result->third_grade) === 'NO_GRADE' ? 'selected' : '' }}>No Grade</option>
+                </select>
+            </div>
         </div>
 
         <div>

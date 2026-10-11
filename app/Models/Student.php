@@ -35,6 +35,7 @@ class Student extends Model
         'photo_url',
         'qr_token',
         'points_cache',
+        'coins_cache',
     ];
 
     protected $appends = [
@@ -47,6 +48,7 @@ class Student extends Model
         return [
             'dob' => 'date',
             'points_cache' => 'integer',
+            'coins_cache' => 'integer',
         ];
     }
 
@@ -85,6 +87,11 @@ class Student extends Model
     public function pointsTransactions(): HasMany
     {
         return $this->hasMany(PointsTransaction::class);
+    }
+
+    public function coinTransactions(): HasMany
+    {
+        return $this->hasMany(CoinTransaction::class);
     }
 
     public function getNameAttribute(?string $value): string

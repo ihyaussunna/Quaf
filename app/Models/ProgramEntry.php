@@ -83,6 +83,11 @@ class ProgramEntry extends Model
         return $this->hasMany(PointsTransaction::class, 'entry_id');
     }
 
+    public function coinTransactions(): HasMany
+    {
+        return $this->hasMany(CoinTransaction::class, 'entry_id');
+    }
+
     public function isActive(): bool
     {
         return in_array($this->status, self::ACTIVE_STATUSES);

@@ -9,8 +9,10 @@ use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Services\AuditLogger;
+use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +22,8 @@ use Illuminate\View\View;
 class ResultController extends Controller
 {
     public function __construct(
-        protected PointCalculationService $pointService
+        protected PointCalculationService $pointService,
+        protected CoinRewardService $coinService
     ) {}
 
     public function index(Request $request): View
@@ -68,12 +71,33 @@ class ResultController extends Controller
     public function create(Request $request): View
     {
         $programId = $request->query('program_id');
-        $program = Program::with(['entries.student.group', 'entries.scoreSheets', 'scoringCriteria'])
+        $program = Program::with(['entries.student.group', 'entries.participants', 'entries.scoreSheets', 'scoringCriteria'])
             ->findOrFail($programId);
 
         $podium = PointCalculationService::determinePodiumForProgram($program);
 
-        return view('admin.results.create', compact('program', 'podium'));
+        $coinPreview = null;
+        if ($program->isGroup()) {
+            $tempResult = new Result([
+                'program_id' => $program->id,
+                'first_entry_id' => $podium['first']?->id,
+                'second_entry_id' => $podium['second']?->id,
+                'third_entry_id' => $podium['third']?->id,
+            ]);
+            $tempResult->setRelation('program', $program);
+            if ($podium['first']) {
+                $tempResult->setRelation('firstEntry', $podium['first']);
+            }
+            if ($podium['second']) {
+                $tempResult->setRelation('secondEntry', $podium['second']);
+            }
+            if ($podium['third']) {
+                $tempResult->setRelation('thirdEntry', $podium['third']);
+            }
+            $coinPreview = $this->coinService->previewGroupCoinDistribution($tempResult);
+        }
+
+        return view('admin.results.create', compact('program', 'podium', 'coinPreview'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -96,8 +120,11 @@ class ResultController extends Controller
         $validated = $request->validate([
             'program_id' => ['required', 'exists:programs,id', 'unique:results,program_id'],
             'first_entry_id' => ['required', 'exists:program_entries,id'],
+            'first_grade' => ['nullable', 'string', 'max:10'],
             'second_entry_id' => ['nullable', 'exists:program_entries,id'],
+            'second_grade' => ['nullable', 'string', 'max:10'],
             'third_entry_id' => ['nullable', 'exists:program_entries,id'],
+            'third_grade' => ['nullable', 'string', 'max:10'],
             'status' => ['required', 'in:draft,submitted,under_review,verified,published'],
             'remarks' => ['nullable', 'string'],
         ]);
@@ -114,6 +141,7 @@ class ResultController extends Controller
         if ($result->status === 'published') {
             $this->issueCertificates($result);
             $this->pointService->recalculateAllPoints();
+            $this->coinService->distributeCoinsForResult($result);
         }
 
         return redirect()->route('admin.results.index')->with('success', "Result for '{$result->program->name}' saved ({$result->status}).");
@@ -123,15 +151,27 @@ class ResultController extends Controller
     {
         $result->load([
             'program.entries.student.group',
+            'program.entries.participants',
             'program.entries.scoreSheets',
-            'firstEntry',
-            'secondEntry',
-            'thirdEntry',
+            'firstEntry.group',
+            'firstEntry.student',
+            'firstEntry.participants',
+            'secondEntry.group',
+            'secondEntry.student',
+            'secondEntry.participants',
+            'thirdEntry.group',
+            'thirdEntry.student',
+            'thirdEntry.participants',
         ]);
 
         $podium = PointCalculationService::determinePodiumForProgram($result->program);
 
-        return view('admin.results.edit', compact('result', 'podium'));
+        $coinPreview = null;
+        if ($result->program?->isGroup()) {
+            $coinPreview = $this->coinService->previewGroupCoinDistribution($result);
+        }
+
+        return view('admin.results.edit', compact('result', 'podium', 'coinPreview'));
     }
 
     public function autoDetermine(Program $program): RedirectResponse
@@ -151,15 +191,19 @@ class ResultController extends Controller
     {
         $validated = $request->validate([
             'first_entry_id' => ['required', 'exists:program_entries,id'],
+            'first_grade' => ['nullable', 'string', 'max:10'],
             'second_entry_id' => ['nullable', 'exists:program_entries,id'],
+            'second_grade' => ['nullable', 'string', 'max:10'],
             'third_entry_id' => ['nullable', 'exists:program_entries,id'],
+            'third_grade' => ['nullable', 'string', 'max:10'],
             'status' => ['required', 'in:draft,submitted,under_review,verified,published'],
             'remarks' => ['nullable', 'string'],
         ]);
 
         $old = $result->toArray();
+        $wasPublished = $result->status === 'published';
 
-        if ($validated['status'] === 'published' && $result->status !== 'published') {
+        if ($validated['status'] === 'published' && ! $wasPublished) {
             $validated['published_at'] = Carbon::now();
             $validated['verified_by'] = Auth::id();
         }
@@ -168,9 +212,14 @@ class ResultController extends Controller
 
         AuditLogger::log('update_result', $result, $old, $result->toArray());
 
+        if ($wasPublished && $result->wasChanged(['first_entry_id', 'second_entry_id', 'third_entry_id', 'first_grade', 'second_grade', 'third_grade', 'status'])) {
+            $this->coinService->reverseCoinDistributionForResult($result, 'Podium or status updated');
+        }
+
         if ($result->status === 'published') {
             $this->issueCertificates($result);
             $this->pointService->recalculateAllPoints();
+            $this->coinService->distributeCoinsForResult($result);
         }
 
         return redirect()->route('admin.results.index')->with('success', "Result for '{$result->program->name}' updated ({$result->status}).");
@@ -189,10 +238,11 @@ class ResultController extends Controller
 
         $this->issueCertificates($result);
         $this->pointService->recalculateAllPoints();
+        $this->coinService->distributeCoinsForResult($result);
 
         AuditLogger::log('publish_result', $result, $old, $result->toArray());
 
-        return back()->with('success', "Result for '{$result->program->name}' is now PUBLISHED and points have been calculated.");
+        return back()->with('success', "Result for '{$result->program->name}' is now PUBLISHED and points and coins have been calculated.");
     }
 
     public function sendToAnnouncer(Result $result): RedirectResponse
@@ -274,6 +324,7 @@ class ResultController extends Controller
     public function undeclare(Result $result): RedirectResponse
     {
         $programName = $result->program?->name ?? 'Program';
+        $this->coinService->reverseCoinDistributionForResult($result, 'Verdict undeclared');
         $result->delete();
 
         $this->pointService->recalculateAllPoints();
@@ -292,6 +343,7 @@ class ResultController extends Controller
             $program->update(['status' => 'upcoming']);
         }
 
+        $this->coinService->reverseCoinDistributionForResult($result, 'Verdict deleted');
         $result->delete();
 
         $this->pointService->recalculateAllPoints();
@@ -299,6 +351,50 @@ class ResultController extends Controller
         AuditLogger::log('delete_result', null, ['program' => $programName], null);
 
         return redirect()->route('admin.results.index')->with('success', "Verdict for '{$programName}' deleted successfully and points recalculated.");
+    }
+
+    public function coinPreview(Result $result): JsonResponse
+    {
+        $result->load([
+            'program',
+            'firstEntry.group',
+            'firstEntry.student',
+            'firstEntry.participants',
+            'secondEntry.group',
+            'secondEntry.student',
+            'secondEntry.participants',
+            'thirdEntry.group',
+            'thirdEntry.student',
+            'thirdEntry.participants',
+        ]);
+
+        $preview = $this->coinService->previewGroupCoinDistribution($result);
+
+        return response()->json($preview);
+    }
+
+    public function show(Result $result): View
+    {
+        $result->load([
+            'program.category',
+            'program.stage',
+            'firstEntry.group',
+            'firstEntry.student',
+            'firstEntry.participants',
+            'secondEntry.group',
+            'secondEntry.student',
+            'secondEntry.participants',
+            'thirdEntry.group',
+            'thirdEntry.student',
+            'thirdEntry.participants',
+            'verifier',
+        ]);
+
+        $coinPreview = $result->program?->isGroup()
+            ? $this->coinService->previewGroupCoinDistribution($result)
+            : null;
+
+        return view('admin.results.show', compact('result', 'coinPreview'));
     }
 
     public function specified(Request $request): View
