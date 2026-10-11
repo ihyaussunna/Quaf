@@ -454,4 +454,27 @@ class CallListAndEvaluationWorkflowTest extends TestCase
             'code_letter' => null,
         ]);
     }
+
+    public function test_admin_can_sync_completed_programs(): void
+    {
+        $prog = Program::create([
+            'name' => 'Sync Test Program',
+            'code' => 'Q9-117',
+            'category_id' => $this->category->id,
+            'status' => 'upcoming',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->post(route('admin.call-list.sync-completed'));
+
+        $response->assertRedirect();
+        $this->assertEquals('completed', $prog->fresh()->status);
+
+        // Test JSON request
+        $responseJson = $this->actingAs($this->admin)
+            ->postJson(route('admin.call-list.sync-completed'));
+
+        $responseJson->assertOk();
+        $responseJson->assertJson(['success' => true]);
+    }
 }

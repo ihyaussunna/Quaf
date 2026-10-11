@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramEntry;
+use App\Models\Schedule;
 use App\Models\ScoreSheet;
 use App\Models\Stage;
 use App\Services\AuditLogger;
@@ -584,7 +585,7 @@ class CallListController extends Controller
     /**
      * Sync Oct 06 & 07 conducted festival programs as completed.
      */
-    public function syncCompletedPrograms(): RedirectResponse
+    public function syncCompletedPrograms(Request $request): JsonResponse|RedirectResponse
     {
         $completedProgramCodes = [
             // October 06
@@ -607,7 +608,16 @@ class CallListController extends Controller
         // 3. Mark programs by code
         Program::whereIn('code', $completedProgramCodes)->update(['status' => 'completed']);
 
-        return back()->with('success', 'Festival programs for Oct 06 & 07 have been successfully marked as Completed.');
+        $message = 'Festival programs for Oct 06 & 07 have been successfully marked as Completed.';
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     /**

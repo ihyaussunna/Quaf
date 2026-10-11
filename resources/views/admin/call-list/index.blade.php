@@ -27,14 +27,13 @@
                     <span>&larr; All Programs (Call Lists)</span>
                 </a>
             @else
-                <form method="POST" action="{{ route('admin.call-list.sync-completed') }}" class="inline">
-                    @csrf
-                    <button type="submit" onclick="return confirm('Sync and mark all Oct 06 & 07 conducted programs as Completed?');"
-                            class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center gap-1.5 font-sora cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Sync Oct 06-07 Completed</span>
-                    </button>
-                </form>
+                <button type="button" 
+                        @click.prevent="syncCompleted('{{ route('admin.call-list.sync-completed') }}')"
+                        :disabled="syncLoading"
+                        class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center gap-1.5 font-sora cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span x-text="syncLoading ? 'Syncing...' : 'Sync Oct 06-07 Completed'">Sync Oct 06-07 Completed</span>
+                </button>
             @endif
             <a href="{{ route('admin.evaluation-monitor.index') }}"
                class="px-4 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs uppercase hover:bg-purple-700 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
@@ -730,6 +729,34 @@
                     this.showToast(err.message || 'Error updating lock status.', true);
                 } finally {
                     this.lockLoading[progId] = false;
+                }
+            },
+            syncLoading: false,
+            async syncCompleted(url) {
+                if (!confirm('Sync and mark all Oct 06 & 07 conducted programs as Completed?')) return;
+                if (this.syncLoading) return;
+                this.syncLoading = true;
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Error syncing completed programs.');
+                    }
+                    this.showToast(data.message);
+                    setTimeout(() => window.location.reload(), 800);
+                } catch (err) {
+                    this.showToast(err.message || 'Error syncing completed programs.', true);
+                } finally {
+                    this.syncLoading = false;
                 }
             },
             async updateAttendance(entryId, status) {
