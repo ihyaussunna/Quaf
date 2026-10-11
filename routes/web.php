@@ -485,6 +485,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Call List & Attendance Center
     Route::get('call-list', [AdminCallListController::class, 'index'])->name('call-list.index');
+    Route::post('call-list/sync-completed', [AdminCallListController::class, 'syncCompletedPrograms'])->name('call-list.sync-completed');
+    Route::post('call-list/{program}/toggle-status', [AdminCallListController::class, 'toggleStatus'])->name('call-list.toggle-status');
     Route::post('call-list/reset-all', [AdminCallListController::class, 'resetAll'])->name('call-list.reset-all');
     Route::post('call-list/{program}/reset', [AdminCallListController::class, 'resetProgram'])->name('call-list.reset-program');
     Route::post('call-list/{entry}/attendance', [AdminCallListController::class, 'markAttendance'])->name('call-list.attendance');

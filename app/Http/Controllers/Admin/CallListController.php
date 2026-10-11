@@ -41,12 +41,19 @@ class CallListController extends Controller
         $allPrograms = Program::orderBy('name')->get();
         $groups = Group::orderBy('name')->get();
 
+        $totalProgramsCount = Program::count();
+        $completedProgramsCount = Program::where(function ($q) {
+            $q->where('status', 'completed')
+                ->orWhereHas('schedule', fn ($sq) => $sq->where('status', 'completed'))
+                ->orWhereHas('result');
+        })->count();
+
         // Macro counters across the whole festival system
         $stats = [
-            'total_programs' => Program::count(),
+            'total_programs' => $totalProgramsCount,
             'locked_programs' => Program::where('is_call_list_locked', true)->count(),
-            'pending_programs' => Program::where('status', '!=', 'completed')->count(),
-            'completed_programs' => Program::where('status', 'completed')->count(),
+            'pending_programs' => max(0, $totalProgramsCount - $completedProgramsCount),
+            'completed_programs' => $completedProgramsCount,
             'open_programs' => Program::where(function ($q) {
                 $q->whereNull('is_call_list_locked')->orWhere('is_call_list_locked', false);
             })->count(),
@@ -415,13 +422,20 @@ class CallListController extends Controller
                 });
         })->count();
 
+        $totalProgramsCount = Program::count();
+        $completedProgramsCount = Program::where(function ($q) {
+            $q->where('status', 'completed')
+                ->orWhereHas('schedule', fn ($sq) => $sq->where('status', 'completed'))
+                ->orWhereHas('result');
+        })->count();
+
         $stats = [
-            'total_programs' => Program::count(),
+            'total_programs' => $totalProgramsCount,
             'evaluated_programs' => $evaluatedProgramsCount,
-            'pending_programs' => max(0, Program::count() - $evaluatedProgramsCount),
-            'completed_programs' => Program::where('status', 'completed')->count(),
+            'pending_programs' => max(0, $totalProgramsCount - $evaluatedProgramsCount),
+            'completed_programs' => $completedProgramsCount,
             'in_progress_programs' => Program::where('status', 'in_progress')->count(),
-            'upcoming_programs' => Program::where('status', 'upcoming')->count(),
+            'upcoming_programs' => max(0, $totalProgramsCount - $completedProgramsCount),
         ];
 
         $zones = Program::ZONES;
@@ -555,5 +569,52 @@ class CallListController extends Controller
             'zone',
             'stageId'
         ));
+    }
+
+    /**
+     * Sync Oct 06 & 07 conducted festival programs as completed.
+     */
+    public function syncCompletedPrograms(): RedirectResponse
+    {
+        $completedProgramCodes = [
+            // October 06
+            'Q9-117', 'Q9-144', 'Q9-165', 'Q9-116', 'Q9-143', 'Q9-166', 'Q9-229',
+            'Q9-207', 'Q9-119', 'Q9-146', 'Q9-168', 'Q9-211', 'Q9-220', 'Q9-136',
+            'Q9-142', 'Q9-164', 'Q9-115',
+            // October 07
+            'Q9-113', 'Q9-148', 'Q9-163', 'Q9-205', 'Q9-125', 'Q9-151', 'Q9-173',
+            'Q9-206', 'Q9-114', 'Q9-140', 'Q9-162', 'Q9-209', 'Q9-112', 'Q9-139',
+            'Q9-161', 'Q9-212', 'Q9-141', 'Q9-170', 'Q9-208',
+        ];
+
+        // 1. Mark schedules up to Oct 07 as completed
+        Schedule::whereDate('start_time', '<=', '2026-10-07')->update(['status' => 'completed']);
+
+        // 2. Mark corresponding programs as completed
+        $progIdsFromSchedules = Schedule::where('status', 'completed')->pluck('program_id')->filter();
+        Program::whereIn('id', $progIdsFromSchedules)->update(['status' => 'completed']);
+
+        // 3. Mark programs by code
+        Program::whereIn('code', $completedProgramCodes)->update(['status' => 'completed']);
+
+        return back()->with('success', 'Festival programs for Oct 06 & 07 have been successfully marked as Completed.');
+    }
+
+    /**
+     * Toggle status for an individual program directly from Call List.
+     */
+    public function toggleStatus(Program $program): RedirectResponse
+    {
+        $newStatus = $program->status === 'completed' ? 'upcoming' : 'completed';
+        $program->update(['status' => $newStatus]);
+
+        if ($program->schedule) {
+            $scheduleStatus = $newStatus === 'completed' ? 'completed' : 'scheduled';
+            $program->schedule->update(['status' => $scheduleStatus]);
+        }
+
+        $label = $newStatus === 'completed' ? 'marked as Completed' : 'reopened as Upcoming';
+
+        return back()->with('success', "Program '{$program->name}' ({$program->code}) {$label}.");
     }
 }

@@ -26,6 +26,15 @@
                    class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs font-sora transition-colors shadow-2xs flex items-center gap-1.5">
                     <span>&larr; All Programs (Call Lists)</span>
                 </a>
+            @else
+                <form method="POST" action="{{ route('admin.call-list.sync-completed') }}" class="inline">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Sync and mark all Oct 06 & 07 conducted programs as Completed?');"
+                            class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center gap-1.5 font-sora cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Sync Oct 06-07 Completed</span>
+                    </button>
+                </form>
             @endif
             <a href="{{ route('admin.evaluation-monitor.index') }}"
                class="px-4 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs uppercase hover:bg-purple-700 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
@@ -301,11 +310,11 @@
 
                                 <!-- Program Status (Upcoming, In Progress, Completed) -->
                                 <td class="px-4 py-3.5 text-center">
-                                    @if($prog->status === 'completed')
+                                    @if($prog->status === 'completed' || ($prog->schedule && $prog->schedule->status === 'completed'))
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
                                             Completed
                                         </span>
-                                    @elseif($prog->status === 'in_progress')
+                                    @elseif($prog->status === 'in_progress' || ($prog->schedule && $prog->schedule->status === 'ongoing'))
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-amber-100 text-amber-800 border border-amber-200">
                                             In Progress
                                         </span>
@@ -348,6 +357,20 @@
                                 <!-- Actions -->
                                 <td class="px-4 py-3.5 text-right whitespace-nowrap">
                                     <div class="flex items-center justify-end gap-1.5">
+                                        <!-- Quick Status Toggle Form (Completed / Upcoming) -->
+                                        <form method="POST" action="{{ route('admin.call-list.toggle-status', $prog) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" 
+                                                    class="p-1.5 rounded-xl transition cursor-pointer {{ $prog->status === 'completed' ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-500' }}"
+                                                    title="{{ $prog->status === 'completed' ? 'Mark as Upcoming (Reopen)' : 'Mark as Completed' }}">
+                                                @if($prog->status === 'completed')
+                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                @else
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                @endif
+                                            </button>
+                                        </form>
+
                                         <!-- Open Call List Button -->
                                         <a href="{{ route('admin.call-list.index', ['program_id' => $prog->id]) }}"
                                            class="px-3 py-1.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs transition-all shadow-2xs flex items-center gap-1 font-sora">
