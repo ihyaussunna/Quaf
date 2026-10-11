@@ -344,12 +344,15 @@ class ScheduleController extends Controller
             $start = Carbon::parse("{$validated['date']} {$validated['time']}");
             $end = (clone $start)->addMinutes((int) $validated['duration']);
 
+            $existingSchedule = Schedule::where('program_id', $validated['program_id'])->first();
+            $excludeScheduleId = $validated['exclude_schedule_id'] ?? $existingSchedule?->id;
+
             $results = $this->conflictService->checkProgramSlotConflicts(
                 $validated['program_id'],
                 $start,
                 $end,
                 $validated['stage_id'] ?? null,
-                $validated['exclude_schedule_id'] ?? null
+                $excludeScheduleId
             );
 
             return response()->json([
@@ -383,12 +386,15 @@ class ScheduleController extends Controller
         $start = Carbon::parse("{$validated['date']} {$validated['time']}");
         $end = (clone $start)->addMinutes((int) $validated['duration']);
 
+        $existingSchedule = Schedule::where('program_id', $validated['program_id'])->first();
+        $excludeScheduleId = $validated['schedule_id'] ?? $existingSchedule?->id;
+
         $conflicts = $this->conflictService->checkProgramSlotConflicts(
             $validated['program_id'],
             $start,
             $end,
             $validated['stage_id'],
-            $validated['schedule_id'] ?? null
+            $excludeScheduleId
         );
 
         $conflictNotes = [];

@@ -47,12 +47,13 @@ class ScheduleConflictService
     }
 
     /**
-     * Check if a stage is already occupied at overlapping time.
+     * Check if a stage is already occupied at overlapping time by another schedule.
      */
-    public function checkStageConflict(int $stageId, Carbon $startTime, Carbon $endTime, ?int $excludeScheduleId = null): ?Schedule
+    public function checkStageConflict(int $stageId, Carbon $startTime, Carbon $endTime, ?int $excludeScheduleId = null, ?int $excludeProgramId = null): ?Schedule
     {
         return Schedule::where('stage_id', $stageId)
             ->when($excludeScheduleId, fn ($q) => $q->where('id', '!=', $excludeScheduleId))
+            ->when($excludeProgramId, fn ($q) => $q->where('program_id', '!=', $excludeProgramId))
             ->where(function ($query) use ($startTime, $endTime) {
                 $query->where(function ($q) use ($startTime, $endTime) {
                     $q->where('start_time', '<', $endTime)
@@ -94,7 +95,7 @@ class ScheduleConflictService
 
         // 1. Stage Conflict Check
         if ($stageId) {
-            $stageConflict = $this->checkStageConflict($stageId, $startTime, $endTime, $excludeScheduleId);
+            $stageConflict = $this->checkStageConflict($stageId, $startTime, $endTime, $excludeScheduleId, $programId);
             if ($stageConflict && $stageConflict->program) {
                 $stageConflictData = [
                     'stage_id' => $stageId,

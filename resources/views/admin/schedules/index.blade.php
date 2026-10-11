@@ -17,6 +17,7 @@
     
     // Quick Slot Modal State
     modalProgramId: '{{ $programsWithoutSchedule->first()?->id ?? ($allPrograms->first()?->id ?? '') }}',
+    modalScheduleId: '{{ $programsWithoutSchedule->first()?->schedule?->id ?? ($allPrograms->first()?->schedule?->id ?? '') }}',
     modalStageId: '{{ $stageId && is_numeric($stageId) ? $stageId : ($stages->first()?->id ?? '') }}',
     modalDate: '{{ $date && $date !== 'all' ? $date : '2026-10-31' }}',
     modalTime: '09:00',
@@ -35,6 +36,7 @@
         'zone_name' => $p->zone?->name ?? 'Mix',
         'is_stage' => (bool) $p->is_stage,
         'is_scheduled' => (bool) $p->schedule,
+        'schedule_id' => $p->schedule ? (string) $p->schedule->id : '',
         'duration' => (int) ($p->duration_minutes ?: 30),
     ])) }},
 
@@ -54,8 +56,11 @@
     onProgramChange(id) {
         this.modalProgramId = id;
         const prog = this.programsList.find(p => String(p.id) === String(id));
-        if (prog && prog.duration) {
-            this.modalDuration = prog.duration;
+        if (prog) {
+            if (prog.duration) {
+                this.modalDuration = prog.duration;
+            }
+            this.modalScheduleId = prog.schedule_id || '';
         }
         this.checkClash();
     },
@@ -86,7 +91,8 @@
         this.isCheckingClash = true;
         this.clashWarning = null;
 
-        fetch(`{{ route($routePrefix . 'check-conflict') }}?program_id=${this.modalProgramId}&stage_id=${this.modalStageId}&date=${this.modalDate}&time=${this.modalTime}&duration=${this.modalDuration}`, {
+        const excludeParam = this.modalScheduleId ? `&exclude_schedule_id=${this.modalScheduleId}` : '';
+        fetch(`{{ route($routePrefix . 'check-conflict') }}?program_id=${this.modalProgramId}&stage_id=${this.modalStageId}&date=${this.modalDate}&time=${this.modalTime}&duration=${this.modalDuration}${excludeParam}`, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
@@ -389,7 +395,8 @@
                     @forelse($schedules as $item)
                         @php
                             $conflictCount = $conflictsSummary['program_conflict_counts'][$item->program_id] ?? 0;
-                            $hasConflict = !empty($item->conflict_notes) || $conflictCount > 0;
+                            $validNotes = !empty($item->conflict_notes) && (!str_contains($item->conflict_notes, "booked for '{$item->program?->name}'") || str_contains($item->conflict_notes, "\n"));
+                            $hasConflict = $validNotes || $conflictCount > 0;
                         @endphp
                         <tr class="hover:bg-slate-50/80 transition-colors {{ $hasConflict ? 'bg-red-50/40' : '' }}">
                             <!-- Time Slot -->
@@ -465,7 +472,7 @@
 
                             <!-- Actions -->
                             <td class="px-5 py-4 text-right space-x-1.5 whitespace-nowrap">
-                                <button @click="modalProgramId = '{{ $item->program_id }}'; modalStageId = '{{ $item->stage_id }}'; modalDate = '{{ $item->start_time->format('Y-m-d') }}'; modalTime = '{{ $item->start_time->format('H:i') }}'; modalDuration = {{ $item->program->duration_minutes ?? 30 }}; showScheduleModal = true; checkClash()"
+                                <button @click="modalProgramId = '{{ $item->program_id }}'; modalScheduleId = '{{ $item->id }}'; modalStageId = '{{ $item->stage_id }}'; modalDate = '{{ $item->start_time->format('Y-m-d') }}'; modalTime = '{{ $item->start_time->format('H:i') }}'; modalDuration = {{ $item->program->duration_minutes ?? 30 }}; showScheduleModal = true; checkClash()"
                                         class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px] hover:bg-slate-200 transition cursor-pointer">
                                     Reschedule
                                 </button>
@@ -531,7 +538,7 @@
                                 </h4>
                                 <div class="mt-2 flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1 border-t border-slate-100">
                                     <span>{{ $sItem->program->code }}</span>
-                                    <button @click="modalProgramId = '{{ $sItem->program_id }}'; modalStageId = '{{ $sItem->stage_id }}'; modalDate = '{{ $sItem->start_time->format('Y-m-d') }}'; modalTime = '{{ $sItem->start_time->format('H:i') }}'; modalDuration = {{ $sItem->program->duration_minutes ?? 30 }}; showScheduleModal = true; checkClash()"
+                                    <button @click="modalProgramId = '{{ $sItem->program_id }}'; modalScheduleId = '{{ $sItem->id }}'; modalStageId = '{{ $sItem->stage_id }}'; modalDate = '{{ $sItem->start_time->format('Y-m-d') }}'; modalTime = '{{ $sItem->start_time->format('H:i') }}'; modalDuration = {{ $sItem->program->duration_minutes ?? 30 }}; showScheduleModal = true; checkClash()"
                                             class="text-[#be1e2d] font-bold hover:underline cursor-pointer">
                                         Edit
                                     </button>
@@ -615,6 +622,7 @@
             <form method="POST" action="{{ route($routePrefix . 'quick-slot') }}" class="space-y-4 font-sora">
                 @csrf
                 <input type="hidden" name="redirect_to" value="index">
+                <input type="hidden" name="schedule_id" :value="modalScheduleId">
 
                 <!-- 1. Select Stage / Venue -->
                 <div>
