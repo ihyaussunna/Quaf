@@ -187,16 +187,16 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
         <div class="flex items-center justify-between gap-3 mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">Festival Dates</span>
-            <span class="text-xs text-slate-400">Offstage begins Oct 06 • Mainstage Oct 31 – Nov 01</span>
+            <span class="text-xs text-slate-400">Offstage Oct 06 – Oct 14 • Mainstage Oct 31 – Nov 01</span>
         </div>
         <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             @foreach($defaultDates as $dateVal => $dateLabel)
+                @php
+                    $dayCount = $scheduleCountsByDate[$dateVal] ?? 0;
+                @endphp
                 <a href="{{ route($routePrefix . 'offstage', ['date' => $dateVal]) }}"
                    class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ $selectedDate === $dateVal ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200' }}">
                     <span>{{ $dateLabel }}</span>
-                    @php
-                        $dayCount = \App\Models\Schedule::whereDate('start_time', $dateVal)->count();
-                    @endphp
                     @if($dayCount > 0)
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono {{ $selectedDate === $dateVal ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700' }}">
                             {{ $dayCount }}

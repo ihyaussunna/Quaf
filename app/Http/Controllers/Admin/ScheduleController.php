@@ -91,6 +91,10 @@ class ScheduleController extends Controller
             '2026-10-08' => 'Oct 08 (Offstage)',
             '2026-10-09' => 'Oct 09 (Offstage)',
             '2026-10-10' => 'Oct 10 (Offstage)',
+            '2026-10-11' => 'Oct 11 (Sun)',
+            '2026-10-12' => 'Oct 12 (Mon)',
+            '2026-10-13' => 'Oct 13 (Tue)',
+            '2026-10-14' => 'Oct 14 (Wed)',
             '2026-10-31' => 'Oct 31 (Main Stage Day 1)',
             '2026-11-01' => 'Nov 01 (Main Stage Day 2)',
         ];
@@ -171,16 +175,55 @@ class ScheduleController extends Controller
 
         $selectedDate = $request->query('date', '2026-10-06');
 
-        // All distinct festival dates scheduled or available
-        $defaultDates = [
+        // All milestone dates across offstage and mainstage
+        $milestoneLabels = [
             '2026-10-06' => 'Oct 06 (Tue)',
             '2026-10-07' => 'Oct 07 (Wed)',
             '2026-10-08' => 'Oct 08 (Thu)',
             '2026-10-09' => 'Oct 09 (Fri)',
             '2026-10-10' => 'Oct 10 (Sat)',
+            '2026-10-11' => 'Oct 11 (Sun)',
+            '2026-10-12' => 'Oct 12 (Mon)',
+            '2026-10-13' => 'Oct 13 (Tue)',
+            '2026-10-14' => 'Oct 14 (Wed)',
             '2026-10-31' => 'Oct 31 (Sat - Main Stage)',
             '2026-11-01' => 'Nov 01 (Sun - Main Stage)',
         ];
+
+        // Fetch distinct dates that have schedules from DB
+        $distinctDates = Schedule::whereNotNull('start_time')
+            ->selectRaw('DATE(start_time) as schedule_date')
+            ->distinct()
+            ->orderBy('schedule_date')
+            ->pluck('schedule_date')
+            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->filter()
+            ->values();
+
+        $allUniqueDates = collect(array_keys($milestoneLabels))
+            ->merge($distinctDates)
+            ->when($selectedDate, fn ($c) => $c->push($selectedDate))
+            ->unique()
+            ->sort()
+            ->values();
+
+        $defaultDates = [];
+        foreach ($allUniqueDates as $dt) {
+            if (isset($milestoneLabels[$dt])) {
+                $defaultDates[$dt] = $milestoneLabels[$dt];
+            } else {
+                $carbon = Carbon::parse($dt);
+                $defaultDates[$dt] = $carbon->format('M d').' ('.$carbon->format('D').')';
+            }
+        }
+
+        // Precompute counts per date to avoid N+1 queries in view
+        $scheduleCountsByDate = Schedule::whereNotNull('start_time')
+            ->selectRaw('DATE(start_time) as schedule_date, count(*) as total')
+            ->groupBy('schedule_date')
+            ->pluck('total', 'schedule_date')
+            ->mapWithKeys(fn ($total, $d) => [Carbon::parse($d)->format('Y-m-d') => (int) $total])
+            ->toArray();
 
         // Fetch all stages, ensuring offstage stages are listed first or highlighted
         $stages = Stage::orderBy('code')->get();
@@ -214,6 +257,7 @@ class ScheduleController extends Controller
             'isProgramCommittee',
             'selectedDate',
             'defaultDates',
+            'scheduleCountsByDate',
             'stages',
             'schedules',
             'schedulesByTime',

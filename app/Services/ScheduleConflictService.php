@@ -206,6 +206,36 @@ class ScheduleConflictService
         $studentConflicts = [];
         $programConflictCounts = [];
 
+        $programIds = $schedules->pluck('program_id')->filter()->unique()->values();
+
+        // Map: [program_id => [student_id => chest_number]]
+        $programStudentsMap = [];
+
+        if ($programIds->isNotEmpty()) {
+            $individualEntries = DB::table('program_entries')
+                ->whereIn('program_id', $programIds)
+                ->where('status', '!=', 'rejected')
+                ->whereNotNull('student_id')
+                ->select('program_id', 'student_id', 'chest_number')
+                ->get();
+
+            $groupEntries = DB::table('program_entry_participants')
+                ->join('program_entries', 'program_entries.id', '=', 'program_entry_participants.entry_id')
+                ->whereIn('program_entries.program_id', $programIds)
+                ->where('program_entries.status', '!=', 'rejected')
+                ->whereNotNull('program_entry_participants.student_id')
+                ->select(
+                    'program_entries.program_id',
+                    'program_entry_participants.student_id',
+                    'program_entries.chest_number'
+                )
+                ->get();
+
+            foreach ($individualEntries->concat($groupEntries) as $row) {
+                $programStudentsMap[$row->program_id][$row->student_id] = $row->chest_number;
+            }
+        }
+
         // Check pairwise overlaps
         $count = $schedules->count();
         for ($i = 0; $i < $count; $i++) {
@@ -247,12 +277,9 @@ class ScheduleConflictService
                     $programConflictCounts[$schB->program_id] = ($programConflictCounts[$schB->program_id] ?? 0) + 1;
                 }
 
-                // 2. Student Clashes between Program A and Program B
-                $progAEntries = $schA->program?->entries ?? collect();
-                $progBEntries = $schB->program?->entries ?? collect();
-
-                $studentsA = $progAEntries->pluck('student_id')->filter()->unique()->toArray();
-                $studentsB = $progBEntries->pluck('student_id')->filter()->unique()->toArray();
+                // 2. Student Clashes between Program A and Program B (Individual & Group Participants)
+                $studentsA = isset($programStudentsMap[$schA->program_id]) ? array_keys($programStudentsMap[$schA->program_id]) : [];
+                $studentsB = isset($programStudentsMap[$schB->program_id]) ? array_keys($programStudentsMap[$schB->program_id]) : [];
 
                 $commonStudents = array_intersect($studentsA, $studentsB);
 
@@ -262,13 +289,14 @@ class ScheduleConflictService
                         continue;
                     }
 
-                    $entryA = $progAEntries->firstWhere('student_id', $studentId);
-                    $entryB = $progBEntries->firstWhere('student_id', $studentId);
+                    $chestNoA = $programStudentsMap[$schA->program_id][$studentId] ?? null;
+                    $chestNoB = $programStudentsMap[$schB->program_id][$studentId] ?? null;
+                    $chestNumber = $chestNoA ?: ($chestNoB ?: ($student->chest_number ?? $student->student_id));
 
                     $studentConflicts[] = [
                         'student_id' => $student->id,
                         'student_name' => $student->name,
-                        'chest_number' => $entryA?->chest_number ?? $student->student_id,
+                        'chest_number' => $chestNumber,
                         'group_name' => $student->group?->name ?? 'Team',
                         'group_color' => $student->group?->color ?? '#be1e2d',
                         'program_a' => [
@@ -291,7 +319,7 @@ class ScheduleConflictService
                             'end_time' => $schB->end_time->format('H:i'),
                             'time' => $schB->start_time->format('h:i A').' - '.$schB->end_time->format('h:i A'),
                         ],
-                        'message' => "Student {$student->name} (#{$entryA?->chest_number}) is in both '{$schA->program?->name}' ({$schA->stage?->venue}) and '{$schB->program?->name}' ({$schB->stage?->venue}) at overlapping times.",
+                        'message' => "Student {$student->name} (#{$chestNumber}) is in both '{$schA->program?->name}' ({$schA->stage?->venue}) and '{$schB->program?->name}' ({$schB->stage?->venue}) at overlapping times.",
                     ];
 
                     $programConflictCounts[$schA->program_id] = ($programConflictCounts[$schA->program_id] ?? 0) + 1;
