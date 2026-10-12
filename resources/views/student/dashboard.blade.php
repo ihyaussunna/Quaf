@@ -41,6 +41,29 @@
         </div>
     </div>
 
+    <!-- Official Coin Wallet Banner -->
+    <div class="rounded-3xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 p-6 sm:p-7 text-slate-950 shadow-md flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden border border-amber-300">
+        <div class="space-y-1 relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/15 text-slate-950 text-xs font-mono font-bold">
+                <svg class="w-4 h-4 text-slate-950" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
+                <span>QUAF 09 FEST COIN WALLET</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-black tracking-tight">You Have Earned Coins!</h3>
+            <p class="text-xs font-anek text-slate-800 max-w-lg">
+                ഗ്രൂപ്പ് പ്രോഗ്രാമുകളിലൂടെ ലഭിച്ച കോയിനുകൾ ഉപയോഗിച്ച് Presentation Desk-ൽ നിന്ന് പുസ്തകങ്ങളും സമ്മാനങ്ങളും വാങ്ങാവുന്നതാണ്.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-4 bg-white/30 backdrop-blur-xs px-6 py-4 rounded-2xl border border-white/40 flex-shrink-0 relative z-10">
+            <div class="text-right">
+                <div class="text-3xl sm:text-4xl font-black font-mono text-slate-950">
+                    {{ number_format($student->coins_cache ?? 0) }}
+                </div>
+                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-800">Available Coins</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Official Individual Programme Quota Meter (5 Max) -->
     <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
         <div class="space-y-1">

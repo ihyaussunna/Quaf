@@ -38,6 +38,7 @@ use App\Http\Controllers\Judge\JudgeController;
 use App\Http\Controllers\Leader\LeaderController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Media\MediaResultController;
+use App\Http\Controllers\Presentation\PresentationController;
 use App\Http\Controllers\ProgramCommittee\ProgramCommitteeController;
 use App\Http\Controllers\Public\BrochureController;
 use App\Http\Controllers\Public\GalleryController;
@@ -652,6 +653,20 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
     Route::post('/enter-stage/{call}', [AnnouncerController::class, 'enterStage'])->name('enter-stage');
     Route::post('/complete-stage/{call}', [AnnouncerController::class, 'completeStage'])->name('complete-stage');
     Route::post('/{result}/announced', [AnnouncerController::class, 'markAnnounced'])->name('announced');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Presentation Desk Routes (Coins & Gift Redemption)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:admin,super_admin,presentation_team,presentation'])->group(function () {
+    Route::get('/', [PresentationController::class, 'index'])->name('dashboard');
+    Route::get('/search-student', [PresentationController::class, 'searchStudent'])->name('search-student');
+    Route::post('/redeem', [PresentationController::class, 'redeem'])->name('redeem');
+    Route::post('/transactions/{transaction}/reverse', [PresentationController::class, 'reverseRedemption'])->name('reverse');
+    Route::get('/transactions/{transaction}/receipt', [PresentationController::class, 'receipt'])->name('receipt');
+    Route::get('/report', [PresentationController::class, 'report'])->name('report');
 });
 
 /*

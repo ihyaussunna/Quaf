@@ -252,6 +252,10 @@
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'announcer' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                 Announcer Desk
             </a>
+            <a href="{{ route('admin.panel-access.index', ['panel' => 'presentation']) }}" 
+               class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'presentation' ? 'bg-yellow-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                Presentation Desk
+            </a>
             <a href="{{ route('admin.panel-access.index', ['panel' => 'media']) }}" 
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'media' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                 Media Wing

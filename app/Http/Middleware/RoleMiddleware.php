@@ -59,6 +59,7 @@ class RoleMiddleware
                 'media_team', 'media_manager' => route('media.dashboard'),
                 'green_room_coordinator' => route('greenroom.index'),
                 'announcer' => route('announcer.index'),
+                'presentation_team', 'presentation' => route('presentation.dashboard'),
                 'program_committee', 'program_coordinator' => route('program-committee.dashboard'),
                 'student' => route('student.dashboard'),
                 default => route('home'),

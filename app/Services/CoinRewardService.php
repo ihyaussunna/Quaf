@@ -10,6 +10,7 @@ use App\Models\Student;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class CoinRewardService
 {
@@ -455,5 +456,155 @@ class CoinRewardService
                 }
             }
         }
+    }
+
+    /**
+     * Get real-time coin ledger summary for a student.
+     *
+     * @return array{balance: int, total_earned: int, total_spent: int}
+     */
+    public function getStudentCoinSummary(Student $student): array
+    {
+        CoinTransaction::ensureSchema();
+
+        $earned = (int) CoinTransaction::where('student_id', $student->id)
+            ->where('coins', '>', 0)
+            ->sum('coins');
+
+        $spent = (int) abs(CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'debit')
+            ->sum('coins'));
+
+        $balance = max(0, (int) CoinTransaction::where('student_id', $student->id)->sum('coins'));
+
+        return [
+            'balance' => $balance,
+            'total_earned' => $earned,
+            'total_spent' => $spent,
+        ];
+    }
+
+    /**
+     * Record a coin redemption / purchase for a student at the Presentation Desk.
+     *
+     * @param array{
+     *     item_name: string,
+     *     coins: int,
+     *     quantity?: int,
+     *     item_category?: string,
+     *     notes?: string|null,
+     *     operator_id?: int|null,
+     *     operator_name?: string|null
+     * } $details
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function redeemCoins(Student $student, array $details): CoinTransaction
+    {
+        CoinTransaction::ensureSchema();
+
+        return DB::transaction(function () use ($student, $details) {
+            $summary = $this->getStudentCoinSummary($student);
+            $available = $summary['balance'];
+
+            $quantity = max(1, (int) ($details['quantity'] ?? 1));
+            $unitCoins = (int) $details['coins'];
+            $totalCoins = $unitCoins * $quantity;
+
+            if ($totalCoins <= 0) {
+                throw new \InvalidArgumentException('Coin amount must be greater than zero.');
+            }
+
+            if ($available < $totalCoins) {
+                throw new \InvalidArgumentException("Insufficient coins! Student has {$available} coins available, but purchase requires {$totalCoins} coins.");
+            }
+
+            $itemName = trim($details['item_name']);
+            $category = $details['item_category'] ?? 'book';
+            $notes = $details['notes'] ?? null;
+            $opId = $details['operator_id'] ?? null;
+            $opName = $details['operator_name'] ?? null;
+
+            $ref = 'COIN-PURCH-STU'.$student->id.'-'.now()->format('YmdHis').'-'.strtoupper(Str::random(5));
+
+            $transaction = CoinTransaction::create([
+                'student_id' => $student->id,
+                'group_id' => $student->group_id,
+                'program_id' => null,
+                'entry_id' => null,
+                'result_id' => null,
+                'prize_position' => 0,
+                'grade' => null,
+                'reward_rule_id' => 'QUAF09_PRESENTATION_PURCHASE_V1',
+                'coins' => -$totalCoins,
+                'transaction_type' => 'debit',
+                'transaction_reference' => $ref,
+                'status' => 'completed',
+                'description' => "Purchase: {$itemName}".($quantity > 1 ? " (Qty: {$quantity})" : '')." [{$totalCoins} coins]",
+                'metadata' => [
+                    'item_name' => $itemName,
+                    'item_category' => $category,
+                    'quantity' => $quantity,
+                    'coins_per_unit' => $unitCoins,
+                    'total_coins' => $totalCoins,
+                    'balance_before' => $available,
+                    'balance_after' => $available - $totalCoins,
+                    'notes' => $notes,
+                    'operator_id' => $opId,
+                    'operator_name' => $opName,
+                ],
+            ]);
+
+            $this->syncStudentCoinsCache($student->id);
+
+            return $transaction;
+        });
+    }
+
+    /**
+     * Reverse an accidental coin purchase/redemption.
+     */
+    public function reverseRedemption(CoinTransaction $transaction, string $reason = 'Purchase cancelled', ?int $operatorId = null, ?string $operatorName = null): CoinTransaction
+    {
+        CoinTransaction::ensureSchema();
+
+        if ($transaction->transaction_type !== 'debit') {
+            throw new \InvalidArgumentException('Only debit/purchase transactions can be reversed through this method.');
+        }
+
+        return DB::transaction(function () use ($transaction, $reason, $operatorId, $operatorName) {
+            $revRef = 'COIN-REV-PURCH-'.$transaction->id.'-'.now()->format('YmdHis');
+
+            if (CoinTransaction::where('transaction_reference', $revRef)->exists()) {
+                throw new \InvalidArgumentException('This purchase has already been reversed.');
+            }
+
+            $reversal = CoinTransaction::create([
+                'student_id' => $transaction->student_id,
+                'group_id' => $transaction->group_id,
+                'program_id' => null,
+                'entry_id' => null,
+                'result_id' => null,
+                'prize_position' => 0,
+                'grade' => null,
+                'reward_rule_id' => 'QUAF09_PRESENTATION_PURCHASE_REVERSAL_V1',
+                'coins' => abs($transaction->coins),
+                'transaction_type' => 'reversal',
+                'transaction_reference' => $revRef,
+                'status' => 'completed',
+                'description' => "Cancelled Purchase: {$reason} (Ref: {$transaction->transaction_reference})",
+                'metadata' => [
+                    'original_transaction_id' => $transaction->id,
+                    'original_reference' => $transaction->transaction_reference,
+                    'reversal_reason' => $reason,
+                    'operator_id' => $operatorId,
+                    'operator_name' => $operatorName,
+                ],
+            ]);
+
+            $this->syncStudentCoinsCache($transaction->student_id);
+
+            return $reversal;
+        });
     }
 }

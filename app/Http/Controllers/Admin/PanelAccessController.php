@@ -46,6 +46,8 @@ class PanelAccessController extends Controller
                 $query->whereIn('role', ['media_team', 'media_manager']);
             } elseif ($panel === 'announcer') {
                 $query->where('role', 'announcer');
+            } elseif ($panel === 'presentation') {
+                $query->whereIn('role', ['presentation_team', 'presentation']);
             } elseif ($panel === 'greenroom') {
                 $query->where('role', 'green_room_coordinator');
             } elseif ($panel === 'student') {

@@ -20,6 +20,7 @@ class PanelPasswordsSeeder extends Seeder
             'judge1@quaf.fest' => 'Judge1#2026@Quaf!',
             'judge2@quaf.fest' => 'Judge2#2026@Quaf!',
             'student@quaf.fest' => 'Student#2026@Quaf!',
+            'presentation@quaf.fest' => 'Presentation#2026@Quaf!',
         ];
 
         User::firstOrCreate(
@@ -31,6 +32,18 @@ class PanelPasswordsSeeder extends Seeder
                 'is_active' => true,
                 'plain_password' => 'Announcer#2026@QuafLive!',
                 'password' => Hash::make('Announcer#2026@QuafLive!'),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'presentation@quaf.fest'],
+            [
+                'name' => 'QUAF Presentation Desk (പ്രസന്റേഷൻ ഡെസ്ക്)',
+                'role' => 'presentation_team',
+                'phone' => '+91 98470 00020',
+                'is_active' => true,
+                'plain_password' => 'Presentation#2026@Quaf!',
+                'password' => Hash::make('Presentation#2026@Quaf!'),
             ]
         );
 

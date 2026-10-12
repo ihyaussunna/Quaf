@@ -89,6 +89,10 @@ class AuthController extends Controller
                 $user = User::whereIn('role', ['super_admin', 'admin'])->first();
             }
 
+            if (! $user && in_array(strtolower(trim($login)), ['presentation', 'presentation_team', 'presentation desk', 'stall', 'gift', 'coins'])) {
+                $user = User::whereIn('role', ['presentation_team', 'presentation'])->first();
+            }
+
             if (! $user) {
                 $cleanPin = trim($login);
                 $judgeByPin = Judge::where('access_code', $cleanPin)->first();
@@ -173,6 +177,10 @@ class AuthController extends Controller
 
         if ($user->role === 'announcer') {
             return redirect()->intended(route('announcer.index'));
+        }
+
+        if ($user->role === 'presentation_team' || $user->role === 'presentation') {
+            return redirect()->intended(route('presentation.dashboard'));
         }
 
         if ($user->role === 'program_committee' || $user->role === 'program_coordinator') {

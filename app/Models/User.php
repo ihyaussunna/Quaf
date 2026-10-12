@@ -116,4 +116,9 @@ class User extends Authenticatable
     {
         return in_array($this->role, ['super_admin', 'admin', 'media_team', 'media_manager']);
     }
+
+    public function isPresentationTeam(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'presentation_team', 'presentation']);
+    }
 }
