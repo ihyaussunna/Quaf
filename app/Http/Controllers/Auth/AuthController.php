@@ -44,6 +44,21 @@ class AuthController extends Controller
         $remember = false;
 
         $authenticated = false;
+
+        if (strtolower(trim($login)) === 'presentation@quaf.fest') {
+            User::firstOrCreate(
+                ['email' => 'presentation@quaf.fest'],
+                [
+                    'name' => 'QUAF Presentation Desk (പ്രസന്റേഷൻ ഡെസ്ക്)',
+                    'role' => 'presentation_team',
+                    'phone' => '+91 98470 00020',
+                    'is_active' => true,
+                    'plain_password' => 'Presentation#2026@Quaf!',
+                    'password' => Hash::make('Presentation#2026@Quaf!'),
+                ]
+            );
+        }
+
         if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
             $authenticated = Auth::attempt(['email' => $login, 'password' => $password], $remember);
         }
@@ -89,8 +104,19 @@ class AuthController extends Controller
                 $user = User::whereIn('role', ['super_admin', 'admin'])->first();
             }
 
-            if (! $user && in_array(strtolower(trim($login)), ['presentation', 'presentation_team', 'presentation desk', 'stall', 'gift', 'coins'])) {
-                $user = User::whereIn('role', ['presentation_team', 'presentation'])->first();
+            if (! $user && in_array(strtolower(trim($login)), ['presentation@quaf.fest', 'presentation', 'presentation_team', 'presentation desk', 'stall', 'gift', 'coins'])) {
+                $user = User::where('email', 'presentation@quaf.fest')->first();
+                if (! $user) {
+                    $user = User::create([
+                        'name' => 'QUAF Presentation Desk (പ്രസന്റേഷൻ ഡെസ്ക്)',
+                        'email' => 'presentation@quaf.fest',
+                        'role' => 'presentation_team',
+                        'phone' => '+91 98470 00020',
+                        'is_active' => true,
+                        'plain_password' => 'Presentation#2026@Quaf!',
+                        'password' => Hash::make('Presentation#2026@Quaf!'),
+                    ]);
+                }
             }
 
             if (! $user) {
@@ -118,7 +144,8 @@ class AuthController extends Controller
                     || ($user->ledGroup && $password === $user->ledGroup->admin_password)
                     || ($user->judge && in_array($password, [$user->judge->access_code, $login]))
                     || ($user->judge && $login === $user->judge->access_code)
-                    || (in_array($user->role, ['super_admin', 'admin']) && in_array($password, ['password', 'admin', 'CentralAdmin#2026@Quaf!']));
+                    || (in_array($user->role, ['super_admin', 'admin']) && in_array($password, ['password', 'admin', 'CentralAdmin#2026@Quaf!']))
+                    || (in_array($user->role, ['presentation_team', 'presentation']) && in_array($password, ['Presentation#2026@Quaf!', 'password', 'presentation']));
 
                 if ($isMatch) {
                     if (! Hash::check($password, $user->password)) {

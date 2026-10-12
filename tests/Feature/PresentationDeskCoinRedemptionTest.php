@@ -29,7 +29,7 @@ class PresentationDeskCoinRedemptionTest extends TestCase
 
         CoinTransaction::ensureSchema();
 
-        $this->presentationUser = User::create([
+        $this->presentationUser = User::where('email', 'presentation@quaf.fest')->first() ?? User::create([
             'name' => 'Presentation Desk Officer',
             'email' => 'presentation@quaf.fest',
             'password' => bcrypt('Presentation#2026@Quaf!'),
@@ -61,6 +61,18 @@ class PresentationDeskCoinRedemptionTest extends TestCase
             'qr_token' => 'qr-token-bilal-test-999',
             'coins_cache' => 0,
         ]);
+    }
+
+    public function test_presentation_user_can_login_via_web_login(): void
+    {
+        $response = $this->post(route('login'), [
+            'username' => 'presentation@quaf.fest',
+            'password' => 'Presentation#2026@Quaf!',
+        ]);
+
+        $response->assertRedirect(route('presentation.dashboard'));
+        $this->assertAuthenticated();
+        $this->assertEquals('presentation_team', auth()->user()->role);
     }
 
     public function test_unauthenticated_user_cannot_access_presentation_dashboard(): void
