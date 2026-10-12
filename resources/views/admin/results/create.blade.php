@@ -32,10 +32,13 @@
                         <span class="text-xs font-mono font-bold text-emerald-700">{{ $podium['first']->computed_avg_score }} pts</span>
                     </div>
                     <div class="font-sora font-bold text-sm text-slate-900 truncate">
-                        {{ $podium['first']->student?->name ?? $podium['first']->group?->name }}
+                        {{ $program->isGroup() ? (($podium['first']->group?->name ?? 'Group') . ' Team') : ($podium['first']->student?->name ?? $podium['first']->group?->name) }}
                     </div>
                     <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
                         Chest #{{ $podium['first']->chest_number }} &bull; {{ $podium['first']->group?->name }}
+                        @if($program->isGroup() && $podium['first']->participants->isNotEmpty())
+                            &bull; {{ $podium['first']->participants->count() }} Members
+                        @endif
                     </div>
                     <div class="mt-2 text-[11px] font-mono font-bold text-emerald-800">
                         Grade: {{ $podium['first']->computed_grade ?? 'None' }}
@@ -50,10 +53,13 @@
                             <span class="text-xs font-mono font-bold text-emerald-700">{{ $podium['second']->computed_avg_score }} pts</span>
                         </div>
                         <div class="font-sora font-bold text-sm text-slate-900 truncate">
-                            {{ $podium['second']->student?->name ?? $podium['second']->group?->name }}
+                            {{ $program->isGroup() ? (($podium['second']->group?->name ?? 'Group') . ' Team') : ($podium['second']->student?->name ?? $podium['second']->group?->name) }}
                         </div>
                         <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
                             Chest #{{ $podium['second']->chest_number }} &bull; {{ $podium['second']->group?->name }}
+                            @if($program->isGroup() && $podium['second']->participants->isNotEmpty())
+                                &bull; {{ $podium['second']->participants->count() }} Members
+                            @endif
                         </div>
                         <div class="mt-2 text-[11px] font-mono font-bold text-emerald-800">
                             Grade: {{ $podium['second']->computed_grade ?? 'None' }}
@@ -73,10 +79,13 @@
                             <span class="text-xs font-mono font-bold text-emerald-700">{{ $podium['third']->computed_avg_score }} pts</span>
                         </div>
                         <div class="font-sora font-bold text-sm text-slate-900 truncate">
-                            {{ $podium['third']->student?->name ?? $podium['third']->group?->name }}
+                            {{ $program->isGroup() ? (($podium['third']->group?->name ?? 'Group') . ' Team') : ($podium['third']->student?->name ?? $podium['third']->group?->name) }}
                         </div>
                         <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
                             Chest #{{ $podium['third']->chest_number }} &bull; {{ $podium['third']->group?->name }}
+                            @if($program->isGroup() && $podium['third']->participants->isNotEmpty())
+                                &bull; {{ $podium['third']->participants->count() }} Members
+                            @endif
                         </div>
                         <div class="mt-2 text-[11px] font-mono font-bold text-emerald-800">
                             Grade: {{ $podium['third']->computed_grade ?? 'None' }}
@@ -127,7 +136,18 @@
                                 @endif
                             </td>
                             <td class="px-6 py-3 font-bold text-[#f3bd2e]">{{ $entry->chest_number }}</td>
-                            <td class="px-6 py-3 font-medium text-slate-900">{{ $entry->student?->name ?? $entry->group?->name }}</td>
+                            <td class="px-6 py-3 font-medium text-slate-900">
+                                @if($program->isGroup())
+                                    <div class="font-bold text-slate-900">{{ $entry->group?->name }} Team</div>
+                                    @if($entry->participants->isNotEmpty())
+                                        <div class="text-[11px] text-slate-500 font-sora mt-0.5">
+                                            {{ $entry->participants->pluck('name')->join(', ') }}
+                                        </div>
+                                    @endif
+                                @else
+                                    {{ $entry->student?->name ?? 'Participant' }}
+                                @endif
+                            </td>
                             <td class="px-6 py-3">{{ $entry->group?->name }}</td>
                             <td class="px-6 py-3 font-bold text-emerald-700">
                                 {{ $entry->computed_avg_score > 0 ? $entry->computed_avg_score . ' pts' : 'Pending' }}
@@ -173,7 +193,7 @@
                     <option value="">-- Choose 1st Place Entry --</option>
                     @foreach($program->entries as $entry)
                         <option value="{{ $entry->id }}" {{ (string) old('first_entry_id', $podium['first']?->id ?? '') === (string) $entry->id ? 'selected' : '' }}>
-                            Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                            Chest #{{ $entry->chest_number }} &mdash; {{ $program->isGroup() ? (($entry->group?->name ?? 'Group') . ' Team' . ($entry->participants->isNotEmpty() ? ' [' . $entry->participants->pluck('name')->join(', ') . ']' : '')) : ($entry->student?->name ?? 'Participant') }} ({{ $entry->group?->name }})
                             @if(!empty($podium['first']) && $podium['first']->id === $entry->id)
                                 [AUTO 1ST - {{ $podium['first']->computed_avg_score }} pts]
                             @endif
@@ -201,7 +221,7 @@
                     <option value="">-- Choose 2nd Place Entry --</option>
                     @foreach($program->entries as $entry)
                         <option value="{{ $entry->id }}" {{ (string) old('second_entry_id', $podium['second']?->id ?? '') === (string) $entry->id ? 'selected' : '' }}>
-                            Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                            Chest #{{ $entry->chest_number }} &mdash; {{ $program->isGroup() ? (($entry->group?->name ?? 'Group') . ' Team' . ($entry->participants->isNotEmpty() ? ' [' . $entry->participants->pluck('name')->join(', ') . ']' : '')) : ($entry->student?->name ?? 'Participant') }} ({{ $entry->group?->name }})
                             @if(!empty($podium['second']) && $podium['second']->id === $entry->id)
                                 [AUTO 2ND - {{ $podium['second']->computed_avg_score }} pts]
                             @endif
@@ -229,7 +249,7 @@
                     <option value="">-- Choose 3rd Place Entry --</option>
                     @foreach($program->entries as $entry)
                         <option value="{{ $entry->id }}" {{ (string) old('third_entry_id', $podium['third']?->id ?? '') === (string) $entry->id ? 'selected' : '' }}>
-                            Chest #{{ $entry->chest_number }} &mdash; {{ $entry->student?->name ?? 'Group Team' }} ({{ $entry->group?->name }})
+                            Chest #{{ $entry->chest_number }} &mdash; {{ $program->isGroup() ? (($entry->group?->name ?? 'Group') . ' Team' . ($entry->participants->isNotEmpty() ? ' [' . $entry->participants->pluck('name')->join(', ') . ']' : '')) : ($entry->student?->name ?? 'Participant') }} ({{ $entry->group?->name }})
                             @if(!empty($podium['third']) && $podium['third']->id === $entry->id)
                                 [AUTO 3RD - {{ $podium['third']->computed_avg_score }} pts]
                             @endif

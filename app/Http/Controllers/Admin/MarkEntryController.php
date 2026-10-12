@@ -74,7 +74,7 @@ class MarkEntryController extends Controller
         $presentEntries = $program->entries()
             ->where('status', 'verified')
             ->where('attendance_status', 'present')
-            ->with(['student.group', 'group', 'scores.judge'])
+            ->with(['student.group', 'group', 'scores.judge', 'participants.group'])
             ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
             ->get();
 

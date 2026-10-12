@@ -619,6 +619,12 @@ class StudentController extends Controller
         $old = $student->toArray();
         $student->update($validated);
 
+        if ($student->user && ! empty($validated['name'])) {
+            $student->user->update([
+                'name' => $student->name,
+            ]);
+        }
+
         AuditLogger::log('update_student', $student, $old, $student->toArray());
 
         return redirect()->route('admin.students.index')->with('success', "Student '{$student->name}' updated.");

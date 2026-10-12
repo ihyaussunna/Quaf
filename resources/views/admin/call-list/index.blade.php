@@ -569,11 +569,59 @@
                                 </td>
 
                                 <!-- Student Identity -->
-                                <td class="px-4 py-3">
-                                    <div class="font-bold text-slate-900 text-sm">{{ $entry->student?->name ?? 'Participant' }}</div>
-                                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                                        Chest: #{{ $entry->chest_number }} &bull; ID: {{ $entry->student?->student_id ?? '-' }}
-                                    </div>
+                                <td class="px-4 py-3" x-data="{ showMembers: false }">
+                                    @php
+                                        $isGroup = $selectedProgram->isGroup() || $entry->isGroupEntry() || $entry->participants->isNotEmpty();
+                                        $leaderStudent = $isGroup
+                                            ? ($entry->participants->firstWhere('pivot.role', 'captain') ?? $entry->student ?? $entry->participants->first())
+                                            : $entry->student;
+                                    @endphp
+                                    @if($isGroup)
+                                        <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5 flex-wrap">
+                                            <span>{{ $entry->group?->name ?? 'Team' }}</span>
+                                            @if($entry->chest_number)
+                                                <span class="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-bold">
+                                                    #{{ $entry->chest_number }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        @if($entry->participants->isNotEmpty())
+                                            <div class="mt-1 text-xs">
+                                                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
+                                                    <span>{{ $entry->participants->count() }} Members</span>
+                                                    <span>&bull;</span>
+                                                    <button type="button" @click="showMembers = !showMembers" class="text-brand-orange hover:underline font-sora font-bold cursor-pointer">
+                                                        <span x-text="showMembers ? 'Hide Roster' : 'Show Roster'"></span>
+                                                    </button>
+                                                </div>
+                                                <div x-show="showMembers" x-cloak class="mt-2 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1">
+                                                    @foreach($entry->participants as $pIdx => $part)
+                                                        <div class="flex items-center justify-between text-slate-800">
+                                                            <span>
+                                                                {{ $pIdx + 1 }}. <strong>{{ $part->name }}</strong>
+                                                                <span class="text-slate-400 font-mono text-[10px]">(#{{ $part->student_id ?: $part->id }})</span>
+                                                            </span>
+                                                            @if($part->id === ($leaderStudent?->id ?? $entry->student_id) || $part->pivot?->role === 'captain')
+                                                                <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold text-[9px]">Captain</span>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                <div x-show="!showMembers" class="text-[11px] text-slate-600 truncate max-w-xs mt-0.5">
+                                                    {{ $entry->participants->pluck('name')->join(', ') }}
+                                                </div>
+                                            </div>
+                                        @elseif($entry->student)
+                                            <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                Captain: {{ $entry->student->name }} (#{{ $entry->student->student_id }})
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="font-bold text-slate-900 text-sm">{{ $entry->student?->name ?? 'Participant' }}</div>
+                                        <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                                            Chest: #{{ $entry->chest_number }} &bull; ID: {{ $entry->student?->student_id ?? '-' }}
+                                        </div>
+                                    @endif
                                 </td>
 
                                 <!-- Group -->

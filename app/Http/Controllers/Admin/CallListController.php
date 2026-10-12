@@ -78,13 +78,14 @@ class CallListController extends Controller
             if ($selectedProgram) {
                 $entriesQuery = ProgramEntry::where('program_id', $selectedProgram->id)
                     ->where('status', 'verified')
-                    ->with(['student.group', 'group', 'scoreSheets.judge']);
+                    ->with(['student.group', 'group', 'scoreSheets.judge', 'participants.zone', 'participants.group']);
 
                 if ($search) {
                     $entriesQuery->where(function ($q) use ($search) {
                         $q->where('chest_number', 'like', "%{$search}%")
                             ->orWhere('code_letter', 'like', "%{$search}%")
-                            ->orWhereHas('student', fn ($sq) => $sq->where('name', 'like', "%{$search}%")->orWhere('student_id', 'like', "%{$search}%"))
+                            ->orWhereHas('student', fn ($sq) => $sq->where('students.name', 'like', "%{$search}%")->orWhere('students.student_id', 'like', "%{$search}%"))
+                            ->orWhereHas('participants', fn ($pq) => $pq->where('students.name', 'like', "%{$search}%")->orWhere('students.student_id', 'like', "%{$search}%"))
                             ->orWhereHas('group', fn ($gq) => $gq->where('name', 'like', "%{$search}%"));
                     });
                 }

@@ -99,9 +99,15 @@
                                 $studentName = '';
                                 $teamName = '';
                                 if ($entry) {
-                                    $studentId = $entry->student?->chest_number ?? $entry->student?->student_id ?? $entry->chest_number ?? '';
-                                    $studentName = $entry->student?->name ?? $entry->group?->name ?? '';
-                                    $teamName = $entry->student?->group?->name ?? $entry->group?->name ?? '';
+                                    $isGroup = $selectedProgram->isGroup() || $entry->isGroupEntry() || $entry->participants->isNotEmpty();
+                                    $studentId = $entry->chest_number ?: ($entry->student?->student_id ?: $entry->student?->chest_number ?: '');
+                                    $teamName = $entry->group?->name ?? $entry->student?->group?->name ?? '';
+                                    if ($isGroup && $entry->participants->isNotEmpty()) {
+                                        $membersStr = $entry->participants->map(fn($p) => $p->name . ($p->student_id ? " [{$p->student_id}]" : ''))->join(', ');
+                                        $studentName = $teamName . ' — ' . $membersStr;
+                                    } else {
+                                        $studentName = $entry->student?->name ?? $teamName;
+                                    }
                                 }
                             @endphp
                             <tr class="h-11">

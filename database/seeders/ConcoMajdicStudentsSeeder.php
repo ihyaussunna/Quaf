@@ -63,9 +63,16 @@ class ConcoMajdicStudentsSeeder extends Seeder
             $category = $zone ? $zone->name : 'A Zone';
             $zoneId = $zone ? $zone->id : 1;
 
-            Student::updateOrCreate(
-                ['student_id' => $chest],
-                [
+            $existingStudent = Student::where('student_id', $chest)->first();
+            if ($existingStudent) {
+                // PRESERVE MANUAL EDITS: Never overwrite existing names, category, or QR tokens
+                if (! $existingStudent->group_id) {
+                    $existingStudent->group_id = $concoGroup->id;
+                    $existingStudent->save();
+                }
+            } else {
+                Student::create([
+                    'student_id' => $chest,
                     'name' => $name,
                     'group_id' => $concoGroup->id,
                     'zone_id' => $zoneId,
@@ -73,8 +80,8 @@ class ConcoMajdicStudentsSeeder extends Seeder
                     'class_level' => $class,
                     'gender' => 'Male',
                     'qr_token' => Str::random(40),
-                ]
-            );
+                ]);
+            }
         }
     }
 }

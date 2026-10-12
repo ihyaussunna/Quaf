@@ -177,9 +177,9 @@ class SyncOfficialStudentsCommand extends Command
 
             $this->info('Configured all 5 official Groups and Leaders.');
 
-            // 4. Wipe all previous students
-            Student::query()->delete();
-            $this->info('Wiped all previous student records.');
+            // 4. Check existing students to preserve manual corrections and IDs
+            $existingStudentIds = Student::pluck('student_id')->flip()->toArray();
+            $this->info('Checking existing student records to preserve manual corrections and tokens.');
 
             // 5. Read CSV and insert students
             $groupsByLetter = [
@@ -269,8 +269,11 @@ class SyncOfficialStudentsCommand extends Command
                     // Clean unicode whitespace and NBSP
                     $name = trim(preg_replace('/[\s\x{00a0}\x{200b}]+/u', ' ', $rawName));
                     $class = trim(preg_replace('/[\s\x{00a0}\x{200b}]+/u', ' ', $rawClass));
-                    $zoneStr = strtoupper(trim(preg_replace('/[\s\x{00a0}\x{200b}]+/u', ' ', $rawZone)));
+                    if (isset($existingStudentIds[$chestNo])) {
+                        continue;
+                    }
 
+                    $zoneStr = strtoupper(trim(preg_replace('/[\s\x{00a0}\x{200b}]+/u', ' ', $rawZone)));
                     $zoneModel = $zonesByName[$zoneStr] ?? $aZone;
 
                     $studentsBatch[] = [

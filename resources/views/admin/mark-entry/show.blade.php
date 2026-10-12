@@ -82,13 +82,25 @@
                                 $remarks = $entry->scores->first()?->remarks ?? '';
                             @endphp
                             <tr class="hover:bg-slate-50/50">
+                                @php
+                                    $isGroup = $program->isGroup() || $entry->isGroupEntry() || $entry->participants->isNotEmpty();
+                                @endphp
                                 <td class="px-4 py-3 font-bold text-[#f3bd2e]">
-                                    {{ $entry->student?->student_id ?? 'GROUP-'.$entry->id }}
+                                    {{ $entry->chest_number ?: ($entry->student?->student_id ?? 'GROUP-'.$entry->id) }}
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="font-sora font-bold text-sm text-slate-900 block">
-                                        {{ $entry->student?->name ?? $entry->group?->name }}
+                                        @if($isGroup)
+                                            {{ $entry->group?->name ?? 'Team' }}
+                                        @else
+                                            {{ $entry->student?->name ?? 'Participant' }}
+                                        @endif
                                     </span>
+                                    @if($isGroup && $entry->participants->isNotEmpty())
+                                        <span class="text-[11px] text-slate-500 font-sora block mt-0.5">
+                                            {{ $entry->participants->pluck('name')->join(', ') }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="font-medium text-slate-800">
