@@ -478,6 +478,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Program Registrations / Entries
     Route::get('registrations/stats', [AdminRegistrationController::class, 'stats'])->name('registrations.stats');
     Route::post('registrations/verify-all', [AdminRegistrationController::class, 'verifyAllPending'])->name('registrations.verify-all');
+    Route::delete('registrations/by-program/{program}', [AdminRegistrationController::class, 'destroyByProgram'])->name('registrations.destroy-by-program');
     Route::post('registrations/{entry}/verify', [AdminRegistrationController::class, 'verify'])->name('registrations.verify');
     Route::post('registrations/{entry}/reject', [AdminRegistrationController::class, 'reject'])->name('registrations.reject');
     Route::resource('registrations', AdminRegistrationController::class)->parameters([
