@@ -51,6 +51,7 @@
           colMalName: true,
           colZone: true,
           colType: true,
+          colStatus: true,
           colStage: true,
           colLimit: true,
           colTime: true,
@@ -111,9 +112,28 @@
         </div>
 
         <!-- Filter Selectors -->
-        <form method="GET" action="{{ route('admin.print.programs') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <form method="GET" action="{{ route('admin.print.programs') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <div>
-                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by Zone</label>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Status</label>
+                <select name="status" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Statuses</option>
+                    <option value="upcoming" {{ ($selectedStatus ?? '') === 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                    <option value="completed" {{ ($selectedStatus ?? '') === 'completed' ? 'selected' : '' }}>Completed</option>
+                    <option value="in_progress" {{ ($selectedStatus ?? '') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Format</label>
+                <select name="is_stage" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Formats</option>
+                    <option value="1" {{ ($selectedIsStage ?? '') === '1' ? 'selected' : '' }}>Stage Programs</option>
+                    <option value="0" {{ ($selectedIsStage ?? '') === '0' ? 'selected' : '' }}>Non-Stage (Off-Stage)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Zone</label>
                 <select name="zone" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
                     <option value="">All Zones</option>
                     @foreach($zones as $val => $label)
@@ -123,7 +143,7 @@
             </div>
 
             <div>
-                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by Stage Venue</label>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Stage Venue</label>
                 <select name="stage" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
                     <option value="">All Venues</option>
                     @foreach($stages as $stg)
@@ -135,19 +155,22 @@
             <div>
                 <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Type</label>
                 <select name="type" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
-                    <option value="">All Types (Individual & Group)</option>
+                    <option value="">All Types</option>
                     <option value="individual" {{ $selectedType == 'individual' ? 'selected' : '' }}>Individual</option>
                     <option value="group" {{ $selectedType == 'group' ? 'selected' : '' }}>Group</option>
                 </select>
             </div>
 
-            <div class="flex items-end gap-2">
+            <div class="flex items-end gap-1.5">
                 <div class="w-full">
                     <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Search Event</label>
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Search program..."
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Search code/name..."
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
                 </div>
-                <button type="submit" class="px-4 py-2 text-xs font-mono font-bold bg-slate-800 text-white rounded-xl">Go</button>
+                <button type="submit" class="px-3 py-2 text-xs font-mono font-bold bg-slate-800 text-white rounded-xl hover:bg-slate-700">Go</button>
+                @if($search || $selectedZone || $selectedStageId || $selectedType || ($selectedStatus ?? '') || ($selectedIsStage !== null && $selectedIsStage !== ''))
+                    <a href="{{ route('admin.print.programs') }}" class="px-2.5 py-2 text-xs font-mono font-medium text-slate-500 hover:text-slate-800 bg-slate-200 rounded-xl" title="Reset all filters">✕</a>
+                @endif
             </div>
         </form>
 
@@ -173,6 +196,11 @@
             <label class="flex items-center gap-1.5 cursor-pointer">
                 <input type="checkbox" x-model="colType" class="rounded border-slate-300 text-[#be1e2d] focus:ring-0">
                 <span>Type</span>
+            </label>
+
+            <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" x-model="colStatus" class="rounded border-slate-300 text-[#be1e2d] focus:ring-0">
+                <span>Status</span>
             </label>
 
             <label class="flex items-center gap-1.5 cursor-pointer">
@@ -254,6 +282,12 @@
                 @if($selectedZone)
                     <div class="text-[#be1e2d] font-bold">Zone: {{ $selectedZone }}</div>
                 @endif
+                @if($selectedStatus)
+                    <div class="text-[#be1e2d] font-bold">Status: {{ ucfirst(str_replace('_', ' ', $selectedStatus)) }}</div>
+                @endif
+                @if($selectedIsStage !== null && $selectedIsStage !== '')
+                    <div class="text-[#be1e2d] font-bold">Format: {{ $selectedIsStage == '1' ? 'Stage' : 'Non-Stage' }}</div>
+                @endif
             </div>
         </div>
 
@@ -274,6 +308,7 @@
                             <th x-show="colMalName" class="py-2 px-3">Malayalam Name</th>
                             <th x-show="colZone" class="py-2 px-2.5">Zone</th>
                             <th x-show="colType" class="py-2 px-2 text-center">Type</th>
+                            <th x-show="colStatus" class="py-2 px-2 text-center">Status</th>
                             <th x-show="colStage" class="py-2 px-2.5">Stage / Off Stage</th>
                             <th x-show="colLimit" class="py-2 px-2 text-center w-12">Limit</th>
                             <th x-show="colTime" class="py-2 px-2.5">Scheduled Time</th>
@@ -316,6 +351,18 @@
 
                                 <td x-show="colType" class="py-2 px-2 text-center uppercase font-mono text-[10px] font-bold {{ $p->type === 'group' ? 'text-[#005c94]' : 'text-[#009444]' }}">
                                     {{ $p->type }}
+                                </td>
+
+                                <td x-show="colStatus" class="py-2 px-2 text-center whitespace-nowrap font-mono text-[10px] font-bold">
+                                    @if($p->status === 'completed')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">Completed</span>
+                                    @elseif(in_array($p->status, ['ongoing', 'in_progress']))
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded uppercase bg-blue-100 text-blue-800 border border-blue-200">In Progress</span>
+                                    @elseif($p->status === 'cancelled')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded uppercase bg-rose-100 text-rose-800 border border-rose-200">Cancelled</span>
+                                    @else
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded uppercase bg-amber-100 text-amber-800 border border-amber-200">Upcoming</span>
+                                    @endif
                                 </td>
 
                                 <td x-show="colStage" class="py-2 px-2.5 text-[11px]">

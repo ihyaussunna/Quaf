@@ -135,6 +135,8 @@ class PrintReportController extends Controller
         $selectedStageId = $request->query('stage');
         $selectedType = $request->query('type');
         $selectedZone = $request->query('zone');
+        $selectedStatus = $request->query('status');
+        $selectedIsStage = $request->query('is_stage');
         $search = $request->query('search');
 
         $categories = ProgramCategory::orderBy('name')->get();
@@ -159,6 +161,18 @@ class PrintReportController extends Controller
             $query->where('eligibility', $selectedZone);
         }
 
+        if ($selectedStatus) {
+            if ($selectedStatus === 'in_progress' || $selectedStatus === 'ongoing') {
+                $query->whereIn('status', ['in_progress', 'ongoing']);
+            } else {
+                $query->where('status', $selectedStatus);
+            }
+        }
+
+        if ($selectedIsStage !== null && $selectedIsStage !== '') {
+            $query->where('is_stage', (bool) $selectedIsStage);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -178,6 +192,8 @@ class PrintReportController extends Controller
             'selectedStageId',
             'selectedType',
             'selectedZone',
+            'selectedStatus',
+            'selectedIsStage',
             'search'
         ));
     }

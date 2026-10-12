@@ -37,7 +37,7 @@
         if (this.regLoading[progId]) return;
         this.regLoading[progId] = true;
         try {
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const token = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '{{ csrf_token() }}';
             const res = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -69,7 +69,7 @@
         }
         this.bulkLoading = true;
         try {
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const token = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '{{ csrf_token() }}';
             const payload = {
                 target: target,
                 action: action,
@@ -118,6 +118,96 @@
                 <span>+</span> <span>New Competition</span>
             </a>
         </div>
+    </div>
+
+    <!-- Program Summary Counts & Quick Filter Metrics -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <!-- Total Competitions -->
+        <a href="{{ route('admin.programs.index') }}"
+           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ empty($status) && ($isStage === null || $isStage === '') ? 'bg-slate-900 border-slate-900 text-white ring-2 ring-slate-900/10' : 'bg-white border-slate-200 text-slate-800 hover:border-slate-300 hover:bg-slate-50/50' }}">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-slate-300' : 'text-slate-500' }}">Total</span>
+                <span class="text-[10px] font-mono font-semibold {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-slate-300' : 'text-slate-400' }}">All</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-2xl font-black font-sora {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-white' : 'text-slate-900' }}">{{ $counts['total'] }}</span>
+                <span class="block text-[10px] {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-slate-300' : 'text-slate-400' }} font-sora mt-0.5">Competitions</span>
+            </div>
+        </a>
+
+        <!-- Upcoming -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['status' => 'upcoming'])) }}"
+           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'upcoming' ? 'bg-amber-500 border-amber-600 text-white ring-2 ring-amber-500/20' : 'bg-white border-slate-200 text-slate-800 hover:border-amber-300 hover:bg-amber-50/20' }}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full {{ $status === 'upcoming' ? 'bg-white' : 'bg-amber-500' }}"></span>
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'upcoming' ? 'text-amber-100' : 'text-amber-800' }}">Upcoming</span>
+                </div>
+                <span class="text-[10px] font-mono font-semibold {{ $status === 'upcoming' ? 'text-amber-100' : 'text-amber-600' }}">Pending</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-2xl font-black font-sora {{ $status === 'upcoming' ? 'text-white' : 'text-amber-700' }}">{{ $counts['upcoming'] }}</span>
+                <span class="block text-[10px] {{ $status === 'upcoming' ? 'text-amber-100' : 'text-slate-400' }} font-sora mt-0.5">To be held</span>
+            </div>
+        </a>
+
+        <!-- In Progress -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['status' => 'in_progress'])) }}"
+           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'in_progress' ? 'bg-blue-600 border-blue-700 text-white ring-2 ring-blue-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-blue-300 hover:bg-blue-50/20' }}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full {{ $status === 'in_progress' ? 'bg-white animate-pulse' : 'bg-blue-500 animate-pulse' }}"></span>
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'in_progress' ? 'text-blue-100' : 'text-blue-800' }}">Ongoing</span>
+                </div>
+                <span class="text-[10px] font-mono font-semibold {{ $status === 'in_progress' ? 'text-blue-100' : 'text-blue-600' }}">Live</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-2xl font-black font-sora {{ $status === 'in_progress' ? 'text-white' : 'text-blue-700' }}">{{ $counts['in_progress'] }}</span>
+                <span class="block text-[10px] {{ $status === 'in_progress' ? 'text-blue-100' : 'text-slate-400' }} font-sora mt-0.5">In Progress</span>
+            </div>
+        </a>
+
+        <!-- Completed -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['status' => 'completed'])) }}"
+           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'completed' ? 'bg-emerald-600 border-emerald-700 text-white ring-2 ring-emerald-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/20' }}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full {{ $status === 'completed' ? 'bg-white' : 'bg-emerald-500' }}"></span>
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'completed' ? 'text-emerald-100' : 'text-emerald-800' }}">Completed</span>
+                </div>
+                <span class="text-[10px] font-mono font-semibold {{ $status === 'completed' ? 'text-emerald-100' : 'text-emerald-600' }}">Done</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-2xl font-black font-sora {{ $status === 'completed' ? 'text-white' : 'text-emerald-700' }}">{{ $counts['completed'] }}</span>
+                <span class="block text-[10px] {{ $status === 'completed' ? 'text-emerald-100' : 'text-slate-400' }} font-sora mt-0.5">Evaluated</span>
+            </div>
+        </a>
+
+        <!-- Stage Events -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['is_stage' => '1'])) }}"
+           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($isStage ?? '') === '1' ? 'bg-[#be1e2d] border-[#be1e2d] text-white ring-2 ring-[#be1e2d]/20' : 'bg-white border-slate-200 text-slate-800 hover:border-rose-300 hover:bg-rose-50/20' }}">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-500' }}">Stage</span>
+                <span class="text-[10px] font-mono font-semibold {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-400' }}">Venues</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-2xl font-black font-sora {{ ($isStage ?? '') === '1' ? 'text-white' : 'text-slate-900' }}">{{ $counts['stage'] }}</span>
+                <span class="block text-[10px] {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-400' }} font-sora mt-0.5">Stage Programs</span>
+            </div>
+        </a>
+
+        <!-- Off-Stage Events -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['is_stage' => '0'])) }}"
+           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($isStage ?? '') === '0' ? 'bg-indigo-600 border-indigo-700 text-white ring-2 ring-indigo-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/20' }}">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($isStage ?? '') === '0' ? 'text-indigo-100' : 'text-slate-500' }}">Off-Stage</span>
+                <span class="text-[10px] font-mono font-semibold {{ ($isStage ?? '') === '0' ? 'text-indigo-100' : 'text-slate-400' }}">Non-Stage</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-2xl font-black font-sora {{ ($isStage ?? '') === '0' ? 'text-white' : 'text-slate-900' }}">{{ $counts['off_stage'] }}</span>
+                <span class="block text-[10px] {{ ($isStage ?? '') === '0' ? 'text-indigo-100' : 'text-slate-400' }} font-sora mt-0.5">Written / Studio</span>
+            </div>
+        </a>
     </div>
 
     <!-- Category Registration Control Widgets (Stage & Off-Stage) -->
@@ -284,6 +374,7 @@
                         <th class="px-4 py-3.5">Type</th>
                         <th class="px-4 py-3.5">Stage / Off Stage</th>
                         <th class="px-4 py-3.5">Zone</th>
+                        <th class="px-4 py-3.5 text-center">Status</th>
                         <th class="px-4 py-3.5">Limit</th>
                         <th class="px-4 py-3.5">Entries</th>
                         <th class="px-4 py-3.5 text-center">Registration</th>
@@ -342,6 +433,29 @@
                                     {{ $p->eligibility ?? 'A Zone' }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                @if($p->status === 'completed')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        Completed
+                                    </span>
+                                @elseif(in_array($p->status, ['in_progress', 'ongoing']))
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-blue-100 text-blue-800 border border-blue-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                        In Progress
+                                    </span>
+                                @elseif($p->status === 'cancelled')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-rose-100 text-rose-800 border border-rose-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                        Cancelled
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase bg-amber-100 text-amber-800 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                                        Upcoming
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">
                                     {{ $p->participant_count ?? 2 }}
@@ -390,7 +504,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="px-5 py-12 text-center text-slate-400">
+                            <td colspan="11" class="px-5 py-12 text-center text-slate-400">
                                 No competitions found.
                             </td>
                         </tr>

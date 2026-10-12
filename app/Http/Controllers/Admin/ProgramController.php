@@ -50,7 +50,11 @@ class ProgramController extends Controller
         }
 
         if ($status) {
-            $query->where('status', $status);
+            if ($status === 'in_progress' || $status === 'ongoing') {
+                $query->whereIn('status', ['in_progress', 'ongoing']);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         if ($isStage !== null && $isStage !== '') {
@@ -86,11 +90,39 @@ class ProgramController extends Controller
         $stages = Stage::all();
         $zones = Zone::orderBy('display_order')->get();
 
+        $counts = [
+            'total' => Program::count(),
+            'upcoming' => Program::where('status', 'upcoming')->count(),
+            'completed' => Program::where('status', 'completed')->count(),
+            'in_progress' => Program::whereIn('status', ['in_progress', 'ongoing'])->count(),
+            'stage' => Program::where('is_stage', true)->count(),
+            'off_stage' => Program::where('is_stage', false)->count(),
+        ];
+
         $isStageRegOpen = (FestivalSetting::get('stage_registration_open', '1') == '1');
         $isOffStageRegOpen = (FestivalSetting::get('off_stage_registration_open', '1') == '1');
         $isGlobalRegOpen = (FestivalSetting::get('registration_open', '1') == '1');
 
-        return view('admin.programs.index', compact('programs', 'categories', 'stages', 'zones', 'zone', 'zoneId', 'categoryId', 'stageId', 'status', 'isStage', 'gender', 'type', 'search', 'regStatus', 'isStageRegOpen', 'isOffStageRegOpen', 'isGlobalRegOpen'));
+        return view('admin.programs.index', compact(
+            'programs',
+            'categories',
+            'stages',
+            'zones',
+            'zone',
+            'zoneId',
+            'categoryId',
+            'stageId',
+            'status',
+            'isStage',
+            'gender',
+            'type',
+            'search',
+            'regStatus',
+            'isStageRegOpen',
+            'isOffStageRegOpen',
+            'isGlobalRegOpen',
+            'counts'
+        ));
     }
 
     public function programWise(Request $request): View

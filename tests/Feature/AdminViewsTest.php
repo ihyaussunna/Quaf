@@ -498,4 +498,93 @@ class AdminViewsTest extends TestCase
         $response->assertSee('92.0');
         $response->assertSee('84.0');
     }
+
+    public function test_admin_programs_index_displays_counts_and_filters_by_status(): void
+    {
+        $cat = ProgramCategory::first();
+
+        $completedProg = Program::create([
+            'name' => 'A_Completed Recitation Test',
+            'code' => 'TCOMP01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'completed',
+            'is_stage' => 1,
+            'eligibility' => 'A Zone',
+        ]);
+
+        $upcomingProg = Program::create([
+            'name' => 'A_Upcoming Quiz Test',
+            'code' => 'TUP01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'upcoming',
+            'is_stage' => 0,
+            'eligibility' => 'A Zone',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.programs.index'));
+        $response->assertOk();
+        $response->assertSee('Total Competitions');
+        $response->assertSee('Upcoming');
+        $response->assertSee('Completed');
+
+        // Filter by completed
+        $compResponse = $this->actingAs($this->admin)->get(route('admin.programs.index', ['status' => 'completed']));
+        $compResponse->assertOk();
+        $this->assertTrue($compResponse->viewData('programs')->contains('id', $completedProg->id));
+        $this->assertFalse($compResponse->viewData('programs')->contains('id', $upcomingProg->id));
+
+        // Filter by upcoming
+        $upResponse = $this->actingAs($this->admin)->get(route('admin.programs.index', ['status' => 'upcoming']));
+        $upResponse->assertOk();
+        $this->assertTrue($upResponse->viewData('programs')->contains('id', $upcomingProg->id));
+        $this->assertFalse($upResponse->viewData('programs')->contains('id', $completedProg->id));
+    }
+
+    public function test_admin_print_programs_filters_by_status_and_format(): void
+    {
+        $cat = ProgramCategory::first();
+
+        $progA = Program::create([
+            'name' => 'Finished Stage Program',
+            'code' => 'PRINT_FIN_01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'completed',
+            'is_stage' => 1,
+            'eligibility' => 'A Zone',
+        ]);
+
+        $progB = Program::create([
+            'name' => 'Future Off Stage Program',
+            'code' => 'PRINT_OFF_02',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'upcoming',
+            'is_stage' => 0,
+            'eligibility' => 'A Zone',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.print.programs'));
+        $response->assertOk();
+        $response->assertSee('Competitions Master List Customizer');
+        $response->assertSee('Finished Stage Program');
+        $response->assertSee('Future Off Stage Program');
+        $response->assertSee('Status');
+
+        // Test filtering by completed status
+        $completedResponse = $this->actingAs($this->admin)->get(route('admin.print.programs', ['status' => 'completed']));
+        $completedResponse->assertOk();
+        $completedResponse->assertSee('Finished Stage Program');
+        $completedResponse->assertDontSee('Future Off Stage Program');
+        $completedResponse->assertSee('Status: Completed');
+
+        // Test filtering by stage format
+        $stageResponse = $this->actingAs($this->admin)->get(route('admin.print.programs', ['is_stage' => '1']));
+        $stageResponse->assertOk();
+        $stageResponse->assertSee('Finished Stage Program');
+        $stageResponse->assertDontSee('Future Off Stage Program');
+        $stageResponse->assertSee('Format: Stage');
+    }
 }
