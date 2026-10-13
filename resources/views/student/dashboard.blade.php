@@ -9,7 +9,7 @@
         <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-gradient-to-tr from-slate-100 to-transparent rounded-full blur-xl pointer-events-none"></div>
 
         <div class="flex items-center gap-6 relative z-10">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-[#be1e2d]/30 ring-4 ring-[#be1e2d]/10 flex items-center justify-center font-sora text-3xl font-bold text-[#be1e2d] overflow-hidden flex-shrink-0 shadow-sm">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-red-200 ring-4 ring-red-50 flex items-center justify-center font-sora text-3xl font-bold text-[#be1e2d] overflow-hidden flex-shrink-0 shadow-sm">
                 @if($student->photo_path)
                     <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                 @else
@@ -55,7 +55,7 @@
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none"></div>
 
         <div class="space-y-2 relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/25 backdrop-blur-sm text-red-100 text-xs font-mono font-bold border border-white/15 shadow-2xs">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-mono font-bold border border-white/25 shadow-2xs">
                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
                 <span>QUAF 09 FEST COIN WALLET</span>
             </div>
@@ -110,14 +110,14 @@
         </div>
     </div>
 
-    <!-- PROMINENT NEXT PROGRAM COUNTDOWN WIDGET (Theme Red Gradient) -->
-    <div class="rounded-3xl bg-gradient-to-br from-red-50/70 via-white to-red-50/30 border-2 border-[#be1e2d]/25 p-6 sm:p-8 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <!-- PROMINENT NEXT PROGRAM COUNTDOWN WIDGET (Clean Standard Design) -->
+    <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <!-- Subtle Ambient Background Glow -->
-        <div class="absolute -top-16 -right-16 w-52 h-52 bg-gradient-to-br from-[#be1e2d]/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -top-16 -right-16 w-52 h-52 bg-gradient-to-br from-[#be1e2d]/8 to-transparent rounded-full blur-2xl pointer-events-none"></div>
 
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
             <div class="space-y-2.5">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100/80 border border-red-200/90 text-[#be1e2d] text-xs font-mono font-bold shadow-2xs">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-[#be1e2d] text-xs font-mono font-bold shadow-2xs">
                     <span class="w-2 h-2 rounded-full bg-[#be1e2d] shadow-[0_0_6px_#be1e2d] animate-ping"></span>
                     <span>NEXT PROGRAM STAGE SLOT</span>
                 </div>
@@ -165,19 +165,19 @@
                         this.seconds = Math.floor((diff % (1000 * 60)) / 1000);
                     }
                 }" class="flex items-center gap-2 sm:gap-3 font-mono">
-                    <div class="bg-white border border-red-100 hover:border-red-300 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                    <div class="bg-white border border-slate-200/80 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
                         <span class="text-2xl sm:text-3xl font-black text-[#be1e2d] tracking-tight block" x-text="days">0</span>
                         <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Days</span>
                     </div>
-                    <div class="bg-white border border-slate-200 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
-                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight block" x-text="hours">0</span>
+                    <div class="bg-white border border-slate-200/80 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                        <span class="text-2xl sm:text-3xl font-black text-[#be1e2d] tracking-tight block" x-text="hours">0</span>
                         <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Hours</span>
                     </div>
-                    <div class="bg-white border border-slate-200 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
-                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight block" x-text="minutes">0</span>
+                    <div class="bg-white border border-slate-200/80 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                        <span class="text-2xl sm:text-3xl font-black text-[#be1e2d] tracking-tight block" x-text="minutes">0</span>
                         <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Mins</span>
                     </div>
-                    <div class="bg-white border border-red-200 hover:border-red-400 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                    <div class="bg-white border border-slate-200/80 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
                         <span class="text-2xl sm:text-3xl font-black text-[#be1e2d] tracking-tight block" x-text="seconds">0</span>
                         <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Secs</span>
                     </div>
@@ -195,7 +195,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @forelse($myPrograms as $entry)
-                <div class="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 hover:border-[#be1e2d]/40 transition-all shadow-sm hover:shadow-md">
+                <div class="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 hover:border-red-300 transition-all shadow-sm hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
                             {{ $entry->program->zone?->name ?? $entry->program->eligibility ?? 'All Zones' }} • {{ ucfirst($entry->program->type) }}

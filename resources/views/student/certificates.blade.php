@@ -17,7 +17,7 @@
     <!-- Certificates Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @forelse($certificates as $cert)
-            <div class="bg-white border border-slate-200 rounded-3xl p-6 hover:border-[#be1e2d]/40 transition-all flex flex-col justify-between space-y-6 shadow-sm hover:shadow-md">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 hover:border-red-300 transition-all flex flex-col justify-between space-y-6 shadow-sm hover:shadow-md">
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-red-50 text-[#be1e2d] border border-red-200 uppercase">

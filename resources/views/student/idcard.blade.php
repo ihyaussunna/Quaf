@@ -23,7 +23,7 @@
 
     <!-- Official Student Badge Card -->
     <div class="flex justify-center">
-        <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border-2 border-[#be1e2d]/30 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
+        <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
             <!-- Header Stripe -->
             <div class="p-4 text-center border-b border-slate-100 bg-gradient-to-b from-red-50/70 to-white print:from-gray-100 print:to-white">
                 <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" style="height: 27px; max-height: 27px;" class="h-[27px] w-auto mx-auto mb-1.5 object-contain">
@@ -38,7 +38,7 @@
             <!-- Student Details -->
             <div class="p-6 text-center space-y-4">
                 <div class="relative inline-block">
-                    <div class="w-28 h-28 mx-auto rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-[#be1e2d] flex items-center justify-center font-sora text-4xl font-bold text-[#be1e2d] overflow-hidden shadow-md">
+                    <div class="w-28 h-28 mx-auto rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-red-200 flex items-center justify-center font-sora text-4xl font-bold text-[#be1e2d] overflow-hidden shadow-md">
                         @if($student->photo_path)
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                         @else
