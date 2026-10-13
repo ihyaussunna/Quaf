@@ -62,7 +62,7 @@
                         <svg class="w-3.5 h-3.5 text-amber-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
                         <span>QUAF 09 FEST COIN WALLET</span>
                     </div>
-                    <h2 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">Fest Coins & Redemption Summary</h2>
+                    <h2 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">You Have Earned Coins!</h2>
                     <p class="text-xs font-anek text-red-100/90 max-w-xl leading-relaxed">
                         ഗ്രൂപ്പ് പ്രോഗ്രാമുകളിലൂടെ ലഭിച്ച കോയിനുകൾ ഉപയോഗിച്ച് Presentation Desk-ൽ നിന്ന് പുസ്തകങ്ങളും മറ്റ് സമ്മാനങ്ങളും വാങ്ങാവുന്നതാണ്.
                     </p>
@@ -126,7 +126,7 @@
                         <div class="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight drop-shadow-sm">
                             {{ number_format($coinSummary['balance'] ?? ($student->coins_cache ?? 0)) }}
                         </div>
-                        <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Available Balance</p>
+                        <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Available Coins</p>
                     </div>
                 </div>
             </div>
