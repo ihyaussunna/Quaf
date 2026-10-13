@@ -101,20 +101,10 @@
     <!-- Clean Subtle Pattern Grid Overlay -->
     <div class="fixed inset-0 pointer-events-none z-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px]"></div>
 
-    <!-- Top Bar: Organization Identity -->
-    <header class="w-full max-w-6xl mx-auto flex items-center justify-center sm:justify-start z-10 relative">
-        <div class="flex items-center gap-2.5 sm:gap-3 py-1.5 px-3.5 rounded-full bg-slate-50 border border-slate-200/80 shadow-2xs">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#be1e2d] shadow-[0_0_8px_#be1e2d] animate-ping"></span>
-            <span class="text-[11px] sm:text-xs font-mono tracking-widest text-slate-800 uppercase font-semibold">
-                IHYAUSSUNNA STUDENTS UNION
-            </span>
-        </div>
-    </header>
-
     <!-- Main Center Stage -->
     <main class="w-full max-w-3xl mx-auto flex flex-col items-center text-center my-auto py-8 sm:py-12 z-10 relative">
         
-        <!-- Replaced Official Logo (Asset 15.svg) -->
+        <!-- Official Logo -->
         <div class="relative mb-6 sm:mb-8 animate-float w-full flex items-center justify-center">
             <div class="p-3 sm:p-5 max-w-full">
                 <img src="{{ asset('images/quaf-launch-logo.svg') }}" 
@@ -172,18 +162,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                     <span>LAUNCH WEBSITE</span>
-                    <span class="hidden sm:inline-flex items-center text-xs font-mono font-medium px-2 py-0.5 rounded bg-black/30 border border-white/20 text-slate-100">
-                        &crarr; Enter
-                    </span>
                 </span>
             </button>
-
-            <!-- Keyboard & Tap Hint -->
-            <p class="text-[11px] sm:text-xs font-mono text-slate-500 mt-4 sm:mt-5 flex items-center gap-1.5">
-                <span>Click the button or press</span>
-                <kbd class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold border border-slate-300 shadow-2xs">Enter</kbd>
-                <span>to launch</span>
-            </p>
         </div>
 
         <!-- Loading State (Reveals smoothly upon click or Enter) -->

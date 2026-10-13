@@ -24,7 +24,8 @@ class LaunchPageWhiteDesignTest extends TestCase
 
         // Assert white theme and elements
         $response->assertSee('bg-white');
-        $response->assertSee('IHYAUSSUNNA STUDENTS UNION');
+        $response->assertDontSee('IHYAUSSUNNA STUDENTS UNION');
+        $response->assertDontSee('&crarr; Enter', false);
         $response->assertSee('QUAF 2026');
         $response->assertSee('WEBSITE LAUNCHING');
         $response->assertSee('LAUNCH WEBSITE');
