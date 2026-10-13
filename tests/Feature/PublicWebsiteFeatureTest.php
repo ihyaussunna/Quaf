@@ -111,6 +111,20 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('QUAF');
     }
 
+    public function test_root_url_renders_home_page_by_default_when_launched(): void
+    {
+        FestivalSetting::updateOrCreate(
+            ['key' => 'launch_status'],
+            ['value' => 'launched', 'group' => 'general']
+        );
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertViewIs('public.home');
+        $response->assertSee('QUAF');
+    }
+
     public function test_home_page_renders_with_official_quaf_data(): void
     {
         $response = $this->get('/home');

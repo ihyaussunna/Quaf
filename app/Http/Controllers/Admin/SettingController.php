@@ -27,6 +27,7 @@ class SettingController extends Controller
             'student_editing_open' => FestivalSetting::get('student_editing_open', '1'),
             'registration_start' => FestivalSetting::get('registration_start', ''),
             'registration_end' => FestivalSetting::get('registration_end', ''),
+            'launch_status' => FestivalSetting::get('launch_status', 'launched'),
             'organizer' => FestivalSetting::get('organizer', 'Ihyaussunna Students Union, Markazu Saquafathi Sunniyya'),
         ];
 
@@ -37,6 +38,7 @@ class SettingController extends Controller
     {
         $keys = [
             'live_fest_mode',
+            'launch_status',
             'festival_name',
             'festival_dates',
             'tagline',

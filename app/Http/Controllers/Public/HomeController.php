@@ -23,10 +23,9 @@ class HomeController extends Controller
 {
     public function index(Request $request): View
     {
-        $defaultLaunchStatus = app()->environment('testing') ? 'launched' : 'coming_soon';
-        $launchStatus = FestivalSetting::get('launch_status', $defaultLaunchStatus);
+        $launchStatus = FestivalSetting::get('launch_status', 'launched');
 
-        // Keep existing landing page at root URL until website is officially launched, unless previewed
+        // Only show coming-soon landing page if explicitly configured as coming_soon and not previewed
         if ($launchStatus === 'coming_soon' && ! $request->has('portal') && ! $request->has('preview')) {
             return view('public.coming-soon');
         }
