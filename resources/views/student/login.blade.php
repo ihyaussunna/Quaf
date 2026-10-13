@@ -14,17 +14,17 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-50 text-slate-900 font-sora antialiased min-h-screen flex flex-col justify-between selection:bg-[#f3bd2e] selection:text-white">
+<body class="bg-slate-50 text-slate-900 font-sora antialiased min-h-screen flex flex-col justify-between selection:bg-[#be1e2d] selection:text-white">
 
     <!-- Header -->
     <header class="h-20 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#f3bd2e] to-[#be1e2d] flex items-center justify-center p-0.5 shadow-sm">
-                <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-sora font-black text-sm text-[#f3bd2e]">Q9</div>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#be1e2d] to-[#991522] flex items-center justify-center p-0.5 shadow-sm">
+                <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-sora font-black text-sm text-[#be1e2d]">Q9</div>
             </div>
             <div>
-                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF</span>
-                <span class="text-[10px] font-mono tracking-widest text-[#f3bd2e] block uppercase font-bold">Student Portal</span>
+                <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#be1e2d] transition-colors">QUAF</span>
+                <span class="text-[10px] font-mono tracking-widest text-[#be1e2d] block uppercase font-bold">Student Portal</span>
             </div>
         </a>
 
@@ -39,7 +39,7 @@
 
             <!-- Top Emblem -->
             <div class="text-center space-y-2 mb-6">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#f3bd2e] shadow-xs">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[#be1e2d] shadow-xs">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
@@ -75,7 +75,7 @@
                                readonly
                                onfocus="this.removeAttribute('readonly');"
                                placeholder="e.g. QUAF-ST-1001 or 101"
-                               class="w-full text-base font-mono font-bold py-3.5 px-4 bg-slate-50 border-2 border-slate-300 focus:border-[#f3bd2e] focus:bg-white rounded-2xl outline-none transition-all text-slate-900 placeholder:text-slate-400">
+                                class="w-full text-base font-mono font-bold py-3.5 px-4 bg-slate-50 border-2 border-slate-300 focus:border-[#be1e2d] focus:bg-white rounded-2xl outline-none transition-all text-slate-900 placeholder:text-slate-400">
                     </div>
                     <p class="text-[11px] font-mono text-slate-400">
                         Use the ID from your official badge or registration slip.
@@ -83,14 +83,14 @@
                 </div>
 
                 <button type="submit"
-                        class="w-full py-4 bg-[#f3bd2e] text-white font-mono font-bold text-sm uppercase rounded-2xl shadow-lg shadow-[#f3bd2e]/20 hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                        class="w-full py-4 bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] text-white font-mono font-bold text-sm uppercase rounded-2xl shadow-lg shadow-red-900/20 hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <span>Access Student Portal</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
             </form>
 
             <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center text-xs font-mono">
-                <a href="{{ route('results.index') }}" class="text-[#f3bd2e] hover:underline">
+                <a href="{{ route('results.index') }}" class="text-[#be1e2d] hover:underline font-semibold">
                     &larr; Live Festival Results
                 </a>
             </div>

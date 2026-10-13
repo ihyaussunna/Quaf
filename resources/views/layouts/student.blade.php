@@ -26,6 +26,33 @@
 <body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-[100dvh] flex flex-col w-full overflow-x-clip"
       x-data="{ mobileOpen: false }">
 
+    <!-- Top Festival Brand Header -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-2xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <a href="{{ route('home.view') }}" class="flex items-center gap-3">
+                <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF" class="h-8 sm:h-9 w-auto object-contain">
+                <span class="hidden sm:inline-block h-4 w-[1px] bg-slate-300"></span>
+                <span class="hidden sm:inline-block text-[11px] font-mono font-bold tracking-wider uppercase text-[#be1e2d]">
+                    Student Portal
+                </span>
+            </a>
+            <div class="flex items-center gap-2 sm:gap-3 text-xs font-mono">
+                <a href="{{ route('home.view') }}" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition font-semibold">
+                    Home
+                </a>
+                <a href="{{ route('schedule.index') }}" class="hidden sm:inline-block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition font-semibold">
+                    Schedule
+                </a>
+                <a href="{{ route('results.index') }}" class="hidden sm:inline-block px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition font-semibold">
+                    Results
+                </a>
+                <a href="{{ route('student.idcard') }}" class="hidden sm:inline-block px-3 py-1.5 rounded-lg text-[#be1e2d] bg-red-50 hover:bg-red-100 transition font-bold border border-red-200/80">
+                    QR Badge
+                </a>
+            </div>
+        </div>
+    </header>
+
     <!-- Main Content (With safe padding for mobile bottom bar) -->
     <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 md:p-8 pb-24 md:pb-12 min-w-0 overflow-x-clip">
         @yield('content')
@@ -35,7 +62,7 @@
     <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-28 sm:pb-32 lg:pb-14 mt-12 sm:mt-16 relative overflow-hidden">
         <!-- Subtle Glow in Footer -->
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-[#be1e2d]/5 rounded-full blur-[140px] pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-12 border-b border-slate-800">
@@ -52,7 +79,7 @@
                         QUAF Markaz Cultural Festival 2026. The grand confluence of eloquence, arts, and intellectual heritage uniting premier collegiate groups across 140+ cultural and literary disciplines.
                     </p>
                     <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-400 pt-1">
-                        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-amber-400 font-semibold">31 OCT — 01 NOV 2026</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-red-400 font-semibold">31 OCT — 01 NOV 2026</span>
                         <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">JAMIA MARKAZ KARANTHUR</span>
                     </div>
                 </div>
@@ -90,7 +117,7 @@
                 <div class="flex items-center gap-3 font-mono text-[11px]">
                     <span class="text-slate-400">Powered by QUAF Management Platform</span>
                     <span>•</span>
-                    <a href="{{ route('home.view') }}" class="text-[#f3bd2e] hover:underline">Official Portal</a>
+                    <a href="{{ route('home.view') }}" class="text-red-400 hover:text-red-300 hover:underline">Official Portal</a>
                 </div>
             </div>
         </div>
@@ -123,7 +150,7 @@
                     type="button"
                     class="flex flex-col items-center justify-center -mt-4 group cursor-pointer"
                     aria-label="Navigation Menu">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#be1e2d] via-red-600 to-[#f3bd2e] text-white flex items-center justify-center shadow-lg shadow-red-600/30 ring-4 ring-white transition-all transform active:scale-95 group-hover:scale-105">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#be1e2d] via-red-600 to-[#991522] text-white flex items-center justify-center shadow-lg shadow-red-600/30 ring-4 ring-white transition-all transform active:scale-95 group-hover:scale-105">
                     <svg class="w-6 h-6 transition-transform duration-300" :class="mobileOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
@@ -188,7 +215,7 @@
 
             <!-- Brand Badge -->
             <div class="flex items-center justify-center gap-2 mb-3">
-                <span class="text-[11px] font-mono uppercase tracking-widest text-[#f3bd2e] font-bold">QUAF Navigation</span>
+                <span class="text-[11px] font-mono uppercase tracking-widest text-red-400 font-bold">QUAF Navigation</span>
             </div>
 
             <!-- Navigation Links -->
@@ -238,7 +265,7 @@
 
                 <a href="{{ route('student.dashboard') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-bold tracking-wide transition-all transform active:scale-95 bg-white/15 text-[#f3bd2e] shadow-sm">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-bold tracking-wide transition-all transform active:scale-95 bg-[#be1e2d] text-white shadow-md shadow-red-900/30">
                     Student Dashboard
                 </a>
                 <a href="{{ route('student.idcard') }}" 

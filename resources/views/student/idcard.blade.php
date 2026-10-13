@@ -8,13 +8,13 @@
             &larr; Dashboard
         </a>
         <div class="flex items-center gap-2">
-            <button onclick="window.print()" class="px-5 py-2 bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase rounded-xl hover:brightness-110 flex items-center gap-2 shadow-lg shadow-[#f3bd2e]/20">
+            <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] text-white font-mono font-bold text-xs uppercase rounded-xl hover:brightness-110 flex items-center gap-2 shadow-md shadow-red-900/20 transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 <span>Print / Save Badge</span>
             </button>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="app-tap px-3.5 py-2 bg-slate-100 hover:bg-red-50 hover:text-red-700 text-slate-700 rounded-xl text-xs font-mono font-bold border border-slate-200 cursor-pointer">
+                <button type="submit" class="app-tap px-3.5 py-2.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 text-slate-700 rounded-xl text-xs font-mono font-bold border border-slate-200 cursor-pointer transition">
                     Sign Out
                 </button>
             </form>
@@ -23,11 +23,11 @@
 
     <!-- Official Student Badge Card -->
     <div class="flex justify-center">
-        <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border-2 border-[#f3bd2e]/40 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
+        <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border-2 border-[#be1e2d]/30 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
             <!-- Header Stripe -->
-            <div class="p-4 text-center border-b border-slate-100 bg-gradient-to-b from-amber-50/60 to-white print:from-gray-100 print:to-white">
+            <div class="p-4 text-center border-b border-slate-100 bg-gradient-to-b from-red-50/70 to-white print:from-gray-100 print:to-white">
                 <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" style="height: 27px; max-height: 27px;" class="h-[27px] w-auto mx-auto mb-1.5 object-contain">
-                <p class="text-[9px] font-mono tracking-[0.2em] text-[#f3bd2e] font-bold uppercase">
+                <p class="text-[9px] font-mono tracking-[0.2em] text-[#be1e2d] font-bold uppercase">
                     IHYAUSSUNNA STUDENTS UNION
                 </p>
                 <p class="text-[9px] font-mono text-slate-500 uppercase">
@@ -38,14 +38,14 @@
             <!-- Student Details -->
             <div class="p-6 text-center space-y-4">
                 <div class="relative inline-block">
-                    <div class="w-28 h-28 mx-auto rounded-2xl bg-slate-50 border-2 border-[#f3bd2e] flex items-center justify-center font-sora text-4xl font-bold text-[#f3bd2e] overflow-hidden shadow-md">
+                    <div class="w-28 h-28 mx-auto rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-[#be1e2d] flex items-center justify-center font-sora text-4xl font-bold text-[#be1e2d] overflow-hidden shadow-md">
                         @if($student->photo_path)
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                         @else
                             {{ substr($student->name, 0, 1) }}
                         @endif
                     </div>
-                    <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#f3bd2e] text-white font-mono font-bold text-[10px] uppercase shadow-md whitespace-nowrap">
+                    <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#be1e2d] text-white font-mono font-bold text-[10px] uppercase shadow-md whitespace-nowrap">
                         CHEST #{{ $student->chest_number ?? '---' }}
                     </div>
                 </div>

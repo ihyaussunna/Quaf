@@ -8,7 +8,7 @@
             <p class="text-xs font-mono text-slate-500 mt-1">Official festival merit and participation credentials.</p>
         </div>
         <div>
-            <span class="px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm text-xs font-mono text-[#f3bd2e] font-bold">
+            <span class="px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm text-xs font-mono text-[#be1e2d] font-bold">
                 Total: {{ $certificates->count() }} Issued
             </span>
         </div>
@@ -17,10 +17,10 @@
     <!-- Certificates Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @forelse($certificates as $cert)
-            <div class="bg-white border border-slate-200 rounded-3xl p-6 hover:border-[#f3bd2e]/40 transition-all flex flex-col justify-between space-y-6 shadow-sm hover:shadow-md">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 hover:border-[#be1e2d]/40 transition-all flex flex-col justify-between space-y-6 shadow-sm hover:shadow-md">
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-[#f3bd2e] border border-[#f3bd2e]/30 uppercase">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-red-50 text-[#be1e2d] border border-red-200 uppercase">
                             {{ $cert->program->zone?->name ?? $cert->program->eligibility ?? 'All Zones' }}
                         </span>
                         <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold">
@@ -30,7 +30,7 @@
 
                     <div>
                         <h3 class="text-xl font-sora font-bold text-slate-900">{{ $cert->program->name }}</h3>
-                        <p class="text-xs font-mono text-slate-500 mt-0.5">Certificate Serial: <strong class="text-[#f3bd2e]">{{ $cert->certificate_number }}</strong></p>
+                        <p class="text-xs font-mono text-slate-500 mt-0.5">Certificate Serial: <strong class="text-[#be1e2d]">{{ $cert->certificate_number }}</strong></p>
                     </div>
 
                     <div class="text-xs font-mono text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between">
@@ -44,7 +44,7 @@
 
                 <div class="pt-4 border-t border-slate-100 flex items-center gap-3">
                     <a href="{{ route('verify.certificate', $cert->certificate_number) }}" target="_blank"
-                       class="flex-1 py-2.5 bg-[#f3bd2e] hover:brightness-110 text-white font-mono font-bold text-xs uppercase rounded-xl text-center shadow-lg shadow-[#f3bd2e]/20 transition-all">
+                       class="flex-1 py-2.5 bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-110 text-white font-mono font-bold text-xs uppercase rounded-xl text-center shadow-md shadow-red-900/20 transition-all">
                         View & Download Certificate &nearr;
                     </a>
                 </div>

@@ -2,10 +2,14 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Student Profile Hero (Light Theme) -->
-    <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm">
+    <!-- Student Profile Hero (Standard Executive Card) -->
+    <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <!-- Subtle Ambient Theme Red Aura in the background -->
+        <div class="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-[#be1e2d]/8 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-gradient-to-tr from-slate-100 to-transparent rounded-full blur-xl pointer-events-none"></div>
+
         <div class="flex items-center gap-6 relative z-10">
-            <div class="w-20 h-20 rounded-2xl bg-slate-100 border-2 border-[#f3bd2e]/60 flex items-center justify-center font-sora text-3xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0 shadow-md">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-[#be1e2d]/30 ring-4 ring-[#be1e2d]/10 flex items-center justify-center font-sora text-3xl font-bold text-[#be1e2d] overflow-hidden flex-shrink-0 shadow-sm">
                 @if($student->photo_path)
                     <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                 @else
@@ -15,21 +19,23 @@
 
             <div class="space-y-1">
                 <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold" style="background-color: {{ $student->group->color_hex }}20; color: {{ $student->group->color_hex }}">
+                    <span class="px-3 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide" style="background-color: {{ $student->group->color_hex }}18; color: {{ $student->group->color_hex }}; border: 1px solid {{ $student->group->color_hex }}30;">
                         {{ $student->group->name }}
                     </span>
-                    <span class="text-[10px] font-mono text-slate-500">• {{ $student->zone_name }}</span>
+                    <span class="text-[11px] font-mono font-medium text-slate-500">• {{ $student->zone_name }}</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-sora font-black text-slate-900">{{ $student->name }}</h1>
-                <p class="text-xs font-mono text-slate-500">
-                    Chest #: <strong class="text-[#f3bd2e] font-bold">{{ $student->chest_number ?? '---' }}</strong> • Student ID: {{ $student->student_id }}
+                <h1 class="text-2xl sm:text-3xl font-sora font-black tracking-tight text-slate-900">{{ $student->name }}</h1>
+                <p class="text-xs font-mono text-slate-600 flex items-center gap-2 flex-wrap">
+                    <span>Chest #: <strong class="text-[#be1e2d] font-bold text-sm">#{{ $student->chest_number ?? '---' }}</strong></span>
+                    <span class="text-slate-300">•</span>
+                    <span>Student ID: <span class="font-semibold text-slate-700">{{ $student->student_id }}</span></span>
                 </p>
             </div>
         </div>
 
         <div class="flex items-center gap-3 relative z-10">
-            <a href="{{ route('student.idcard') }}" class="px-5 py-2.5 bg-[#f3bd2e] hover:bg-amber-500 text-white font-mono font-bold text-xs uppercase rounded-xl flex items-center gap-2 shadow-md shadow-[#f3bd2e]/20 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            <a href="{{ route('student.idcard') }}" class="app-tap px-5 py-2.5 bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:from-red-700 hover:to-red-900 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl flex items-center gap-2.5 shadow-md shadow-red-900/20 hover:shadow-lg hover:shadow-red-900/30 active:scale-95 transition-all">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                 <span>View QR Badge</span>
             </a>
             <form method="POST" action="{{ route('logout') }}">
@@ -41,77 +47,91 @@
         </div>
     </div>
 
-    <!-- Official Coin Wallet Banner -->
-    <div class="rounded-3xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 p-6 sm:p-7 text-slate-950 shadow-md flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden border border-amber-300">
-        <div class="space-y-1 relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/15 text-slate-950 text-xs font-mono font-bold">
-                <svg class="w-4 h-4 text-slate-950" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
+    <!-- Official Coin Wallet Banner (Theme Crimson & Ruby Gradient) -->
+    <div class="rounded-3xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] p-6 sm:p-8 text-white shadow-lg shadow-red-900/20 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden border border-red-500/40">
+        <!-- Ambient Decorative Lighting Elements -->
+        <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute left-1/4 -top-12 w-48 h-48 bg-black/15 rounded-full blur-xl pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none"></div>
+
+        <div class="space-y-2 relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/25 backdrop-blur-sm text-red-100 text-xs font-mono font-bold border border-white/15 shadow-2xs">
+                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
                 <span>QUAF 09 FEST COIN WALLET</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-black tracking-tight">You Have Earned Coins!</h3>
-            <p class="text-xs font-anek text-slate-800 max-w-lg">
+            <h3 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">You Have Earned Coins!</h3>
+            <p class="text-xs font-anek text-red-100/90 max-w-lg leading-relaxed">
                 ഗ്രൂപ്പ് പ്രോഗ്രാമുകളിലൂടെ ലഭിച്ച കോയിനുകൾ ഉപയോഗിച്ച് Presentation Desk-ൽ നിന്ന് പുസ്തകങ്ങളും സമ്മാനങ്ങളും വാങ്ങാവുന്നതാണ്.
             </p>
         </div>
 
-        <div class="flex items-center gap-4 bg-white/30 backdrop-blur-xs px-6 py-4 rounded-2xl border border-white/40 flex-shrink-0 relative z-10">
+        <div class="flex items-center gap-4 bg-white/15 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/25 flex-shrink-0 relative z-10 shadow-inner">
             <div class="text-right">
-                <div class="text-3xl sm:text-4xl font-black font-mono text-slate-950">
+                <div class="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight drop-shadow-xs">
                     {{ number_format($student->coins_cache ?? 0) }}
                 </div>
-                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-800">Available Coins</div>
+                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-red-100/85">Available Coins</div>
             </div>
         </div>
     </div>
 
     <!-- Official Individual Programme Quota Meter (5 Max) -->
-    <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div class="space-y-1">
+    <div class="rounded-3xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
+        <div class="space-y-2 w-full sm:w-auto">
             <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full {{ ($individualCount ?? 0) >= 5 ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse' }}"></span>
+                <span class="w-2.5 h-2.5 rounded-full {{ ($individualCount ?? 0) >= 5 ? 'bg-[#be1e2d]' : 'bg-emerald-500 animate-pulse' }}"></span>
                 <h3 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-900">Individual Programme Quota</h3>
             </div>
             <p class="text-xs text-slate-500 font-sora">
                 Each student can participate in a maximum of 5 individual programmes (Own Zone + Mix Zone).
             </p>
+            <!-- 5 Visual Pill Indicators -->
+            <div class="flex items-center gap-1.5 pt-1 max-w-xs">
+                @for($i = 1; $i <= ($maxSlots ?? 5); $i++)
+                    <div class="h-1.5 flex-1 rounded-full {{ $i <= ($individualCount ?? 0) ? 'bg-[#be1e2d]' : 'bg-slate-200' }}"></div>
+                @endfor
+            </div>
         </div>
-        <div class="flex items-center gap-5 flex-shrink-0 bg-slate-50 border border-slate-200/80 px-6 py-3 rounded-2xl">
+        <div class="flex items-center gap-5 flex-shrink-0 bg-slate-50 border border-slate-200/80 px-6 py-3.5 rounded-2xl">
             <div class="text-right">
                 <div class="text-2xl font-sora font-black">
                     <span class="{{ ($individualCount ?? 0) >= 5 ? 'text-[#be1e2d]' : 'text-emerald-700' }}">{{ $individualCount ?? 0 }}</span>
                     <span class="text-slate-400 text-lg">/ {{ $maxSlots ?? 5 }}</span>
                 </div>
-                <span class="text-[10px] font-mono font-bold uppercase text-slate-500">Used Slots</span>
+                <span class="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">Used Slots</span>
             </div>
             <div class="h-8 w-[1px] bg-slate-300"></div>
             <div class="text-left">
-                <div class="text-2xl font-sora font-black {{ ($remainingSlots ?? 0) > 0 ? 'text-[#f3bd2e]' : 'text-slate-400' }}">
+                <div class="text-2xl font-sora font-black {{ ($remainingSlots ?? 0) > 0 ? 'text-[#be1e2d]' : 'text-slate-400' }}">
                     {{ $remainingSlots ?? 5 }}
                 </div>
-                <span class="text-[10px] font-mono font-bold uppercase text-slate-500">Remaining</span>
+                <span class="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">Remaining</span>
             </div>
         </div>
     </div>
 
-    <!-- PROMINENT NEXT PROGRAM COUNTDOWN WIDGET (Light Theme) -->
-    <div class="rounded-3xl bg-gradient-to-br from-amber-50/80 via-white to-amber-50/40 border-2 border-[#f3bd2e]/40 p-6 sm:p-8 relative overflow-hidden shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-[#be1e2d] text-xs font-mono font-bold">
-                    <span class="w-2 h-2 rounded-full bg-[#f3bd2e] animate-ping"></span>
+    <!-- PROMINENT NEXT PROGRAM COUNTDOWN WIDGET (Theme Red Gradient) -->
+    <div class="rounded-3xl bg-gradient-to-br from-red-50/70 via-white to-red-50/30 border-2 border-[#be1e2d]/25 p-6 sm:p-8 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <!-- Subtle Ambient Background Glow -->
+        <div class="absolute -top-16 -right-16 w-52 h-52 bg-gradient-to-br from-[#be1e2d]/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            <div class="space-y-2.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100/80 border border-red-200/90 text-[#be1e2d] text-xs font-mono font-bold shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-[#be1e2d] shadow-[0_0_6px_#be1e2d] animate-ping"></span>
                     <span>NEXT PROGRAM STAGE SLOT</span>
                 </div>
 
                 @if($nextEntry)
-                    <h2 class="text-2xl sm:text-3xl font-sora font-black text-slate-900 tracking-wide">
+                    <h2 class="text-2xl sm:text-3xl font-sora font-black text-slate-900 tracking-tight">
                         {{ $nextEntry->program->name }}
                     </h2>
-                    <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-600">
-                        <span>Venue: <strong class="text-slate-900">{{ $nextEntry->program->stage->name ?? 'TBA' }}</strong></span>
-                        <span>•</span>
-                        <span>Scheduled: <strong class="text-[#f3bd2e]">{{ $nextEntry->program->scheduled_time?->format('M d, h:i A') }}</strong></span>
-                        <span>•</span>
-                        <span>Chest: <strong class="text-slate-900">#{{ $nextEntry->chest_number }}</strong></span>
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-mono text-slate-600">
+                        <span>Venue: <strong class="text-slate-900 font-bold">{{ $nextEntry->program->stage->name ?? 'TBA' }}</strong></span>
+                        <span class="text-slate-300">•</span>
+                        <span>Scheduled: <strong class="text-[#be1e2d] font-bold">{{ $nextEntry->program->scheduled_time?->format('M d, h:i A') }}</strong></span>
+                        <span class="text-slate-300">•</span>
+                        <span>Chest: <strong class="text-slate-900 font-bold">#{{ $nextEntry->chest_number }}</strong></span>
                     </div>
                 @else
                     <h2 class="text-xl font-sora font-bold text-slate-700">
@@ -124,7 +144,7 @@
             </div>
 
             @if($nextEntry && $nextEntry->program->scheduled_time)
-                <!-- Live Countdown Timer (Light Theme) -->
+                <!-- Live Countdown Timer (Theme Red Digit Cards) -->
                 <div x-data="{
                     target: new Date('{{ $nextEntry->program->scheduled_time->toIso8601String() }}').getTime(),
                     now: new Date().getTime(),
@@ -145,37 +165,37 @@
                         this.seconds = Math.floor((diff % (1000 * 60)) / 1000);
                     }
                 }" class="flex items-center gap-2 sm:gap-3 font-mono">
-                    <div class="bg-white border border-amber-200 rounded-2xl p-3 text-center min-w-[64px] shadow-xs">
-                        <span class="text-2xl font-bold text-[#f3bd2e]" x-text="days">0</span>
-                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-semibold">Days</span>
+                    <div class="bg-white border border-red-100 hover:border-red-300 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                        <span class="text-2xl sm:text-3xl font-black text-[#be1e2d] tracking-tight block" x-text="days">0</span>
+                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Days</span>
                     </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl p-3 text-center min-w-[64px] shadow-xs">
-                        <span class="text-2xl font-bold text-slate-900" x-text="hours">0</span>
-                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-semibold">Hours</span>
+                    <div class="bg-white border border-slate-200 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight block" x-text="hours">0</span>
+                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Hours</span>
                     </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl p-3 text-center min-w-[64px] shadow-xs">
-                        <span class="text-2xl font-bold text-slate-900" x-text="minutes">0</span>
-                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-semibold">Mins</span>
+                    <div class="bg-white border border-slate-200 hover:border-red-200 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight block" x-text="minutes">0</span>
+                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Mins</span>
                     </div>
-                    <div class="bg-white border border-amber-200 rounded-2xl p-3 text-center min-w-[64px] shadow-xs">
-                        <span class="text-2xl font-bold text-amber-600" x-text="seconds">0</span>
-                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-semibold">Secs</span>
+                    <div class="bg-white border border-red-200 hover:border-red-400 rounded-2xl p-3 sm:p-3.5 text-center min-w-[68px] sm:min-w-[76px] shadow-sm transition-all">
+                        <span class="text-2xl sm:text-3xl font-black text-[#be1e2d] tracking-tight block" x-text="seconds">0</span>
+                        <span class="text-[9px] text-slate-500 block uppercase mt-0.5 font-bold tracking-wider">Secs</span>
                     </div>
                 </div>
             @endif
         </div>
     </div>
 
-    <!-- Enrolled Programs Grid (Light Theme) -->
+    <!-- Enrolled Programs Grid (Standard Card Design) -->
     <div class="space-y-4">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-sora font-bold text-slate-900">My Enrolled Programs</h2>
-            <span class="text-xs font-mono text-slate-500 font-semibold">Total: {{ $myPrograms->count() }} Events</span>
+            <span class="text-xs font-mono text-slate-500 font-semibold px-3 py-1 bg-slate-100 rounded-full border border-slate-200">Total: {{ $myPrograms->count() }} Events</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @forelse($myPrograms as $entry)
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 hover:border-[#f3bd2e]/40 transition-all shadow-sm hover:shadow-md">
+                <div class="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 hover:border-[#be1e2d]/40 transition-all shadow-sm hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
                             {{ $entry->program->zone?->name ?? $entry->program->eligibility ?? 'All Zones' }} • {{ ucfirst($entry->program->type) }}
@@ -188,17 +208,17 @@
 
                     <div>
                         <h3 class="text-xl font-sora font-bold text-slate-900">{{ $entry->program->name }}</h3>
-                        <p class="text-xs font-mono text-slate-500 mt-1">Program Code: {{ $entry->program->code }} • Chest #{{ $entry->chest_number }}</p>
+                        <p class="text-xs font-mono text-slate-500 mt-1">Program Code: <span class="font-semibold text-slate-700">{{ $entry->program->code }}</span> • Chest <span class="text-[#be1e2d] font-bold">#{{ $entry->chest_number }}</span></p>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs font-mono">
-                        <div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold">Stage Venue</span>
-                            <span class="text-slate-800 font-semibold">{{ $entry->program->stage->name ?? 'TBA' }}</span>
+                            <span class="text-slate-900 font-bold">{{ $entry->program->stage->name ?? 'TBA' }}</span>
                         </div>
-                        <div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold">Schedule Slot</span>
-                            <span class="text-slate-800 font-semibold">{{ $entry->program->scheduled_time?->format('M d, h:i A') ?? 'TBA' }}</span>
+                            <span class="text-[#be1e2d] font-bold">{{ $entry->program->scheduled_time?->format('M d, h:i A') ?? 'TBA' }}</span>
                         </div>
                     </div>
                 </div>
@@ -212,16 +232,19 @@
 
     <!-- Announcements -->
     @if($announcements->isNotEmpty())
-        <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
-            <h3 class="text-lg font-sora font-bold text-slate-900">Festival Announcements</h3>
+        <div class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#be1e2d]"></span>
+                <h3 class="text-lg font-sora font-bold text-slate-900">Festival Announcements</h3>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @foreach($announcements as $ann)
-                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                    <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-1 hover:border-slate-300 transition">
                         <div class="flex items-center justify-between">
                             <h4 class="text-xs font-sora font-bold text-slate-900">{{ $ann->title }}</h4>
                             <span class="text-[10px] font-mono text-slate-400">{{ $ann->created_at->diffForHumans() }}</span>
                         </div>
-                        <p class="text-xs font-sora text-slate-700">{{ $ann->content }}</p>
+                        <p class="text-xs font-sora text-slate-700 leading-relaxed">{{ $ann->content }}</p>
                     </div>
                 @endforeach
             </div>
