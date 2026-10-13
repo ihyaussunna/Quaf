@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\CoinTransaction;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\CoinRewardService;
 use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -127,6 +129,12 @@ class StudentController extends Controller
 
         $qrCodeSvg = QrCodeService::svg(route('verify.student', $student->qr_token), 200);
 
+        $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student);
+        $coinTransactions = CoinTransaction::where('student_id', $student->id)
+            ->latest()
+            ->take(6)
+            ->get();
+
         return view('student.dashboard', compact(
             'student',
             'nextEntry',
@@ -136,7 +144,9 @@ class StudentController extends Controller
             'qrCodeSvg',
             'individualCount',
             'remainingSlots',
-            'maxSlots'
+            'maxSlots',
+            'coinSummary',
+            'coinTransactions'
         ));
     }
 

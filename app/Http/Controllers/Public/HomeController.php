@@ -118,9 +118,14 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
-        $featuredVideo = VideoItem::where('is_live', true)
-            ->first() ?? VideoItem::latest()->first();
-        $highlightVideos = VideoItem::latest()->take(4)->get();
+        $liveVideo = VideoItem::where('is_live', true)->first();
+        $featuredVideo = $liveVideo
+            ?? VideoItem::where('is_featured', true)->first()
+            ?? VideoItem::latest()->first();
+        $highlightVideos = VideoItem::where('id', '!=', $featuredVideo?->id ?? 0)
+            ->latest()
+            ->take(4)
+            ->get();
 
         $categories = ProgramCategory::withCount('programs')->get();
 

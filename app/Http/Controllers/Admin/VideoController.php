@@ -31,6 +31,7 @@ class VideoController extends Controller
             'thumbnail_path' => ['nullable', 'string'],
             'category' => ['required', 'string'],
             'is_live' => ['boolean'],
+            'is_featured' => ['nullable', 'boolean'],
             'display_order' => ['integer'],
         ]);
 

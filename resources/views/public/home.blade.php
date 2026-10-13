@@ -121,14 +121,14 @@
                 <!-- 1. Adabic Inheritance Logo -->
                 <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
                      alt="Ādabīc Inheritance — QUAF" 
-                     class="max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
-                     :class="activeLogo === 0 ? 'opacity-100 scale-100 blur-none relative z-10' : 'opacity-0 scale-95 blur-md absolute pointer-events-none z-0'">
+                     class="max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
+                     :class="activeLogo === 0 ? 'opacity-100 scale-100 relative z-10' : 'opacity-0 scale-95 absolute pointer-events-none z-0'">
 
                 <!-- 2. QUAF Festival Logo -->
                 <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
                      alt="QUAF — Markaz Cultural Festival" 
-                     class="max-w-[195px] xs:max-w-[240px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-1000 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
-                     :class="activeLogo === 1 ? 'opacity-100 scale-100 blur-none relative z-10' : 'opacity-0 scale-95 blur-md absolute pointer-events-none z-0'">
+                     class="max-w-[195px] xs:max-w-[240px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
+                     :class="activeLogo === 1 ? 'opacity-100 scale-100 relative z-10' : 'opacity-0 scale-95 absolute pointer-events-none z-0'">
             </div>
 
             <!-- Festival Info Pills -->
@@ -722,8 +722,16 @@
                 <div class="lg:col-span-4 rounded-3xl p-6 sm:p-8 bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-                            <span class="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">Featured Spotlight</span>
+                            @if($featuredVideo->is_live)
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                                <span class="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">Live Broadcast</span>
+                            @elseif($featuredVideo->is_featured)
+                                <span class="text-amber-400 font-bold text-sm">★</span>
+                                <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Featured Spotlight Video</span>
+                            @else
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                                <span class="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">Featured Video</span>
+                            @endif
                         </div>
                         <h3 class="font-sora text-xl sm:text-2xl font-bold text-white mb-3 leading-snug">
                             {{ $featuredVideo->title }}

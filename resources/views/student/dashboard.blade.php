@@ -47,31 +47,122 @@
         </div>
     </div>
 
-    <!-- Official Coin Wallet Banner (Theme Crimson & Ruby Gradient) -->
-    <div class="rounded-3xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] p-6 sm:p-8 text-white shadow-lg shadow-red-900/20 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden border border-red-500/40">
-        <!-- Ambient Decorative Lighting Elements -->
-        <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute left-1/4 -top-12 w-48 h-48 bg-black/15 rounded-full blur-xl pointer-events-none"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)] pointer-events-none"></div>
+    <!-- Official Coin Wallet & Rewards Hub (Attractive 3-Metric Executive Design) -->
+    <div class="rounded-3xl bg-gradient-to-br from-[#be1e2d] via-[#ad1826] to-[#800f1c] p-6 sm:p-8 text-white shadow-xl shadow-red-950/20 relative overflow-hidden border border-red-500/30">
+        <!-- Ambient Decorative Glows -->
+        <div class="absolute -right-12 -bottom-12 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute left-1/4 -top-16 w-60 h-60 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.18),transparent_65%)] pointer-events-none"></div>
 
-        <div class="space-y-2 relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-mono font-bold border border-white/25 shadow-2xs">
-                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
-                <span>QUAF 09 FEST COIN WALLET</span>
-            </div>
-            <h3 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">You Have Earned Coins!</h3>
-            <p class="text-xs font-anek text-red-100/90 max-w-lg leading-relaxed">
-                ഗ്രൂപ്പ് പ്രോഗ്രാമുകളിലൂടെ ലഭിച്ച കോയിനുകൾ ഉപയോഗിച്ച് Presentation Desk-ൽ നിന്ന് പുസ്തകങ്ങളും സമ്മാനങ്ങളും വാങ്ങാവുന്നതാണ്.
-            </p>
-        </div>
-
-        <div class="flex items-center gap-4 bg-white/15 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/25 flex-shrink-0 relative z-10 shadow-inner">
-            <div class="text-right">
-                <div class="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight drop-shadow-xs">
-                    {{ number_format($student->coins_cache ?? 0) }}
+        <div class="relative z-10 space-y-6">
+            <!-- Header Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-5">
+                <div class="space-y-1.5">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-mono font-bold border border-white/20 shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-amber-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.48 0 2.22-.88 2.22-1.74 0-1.22-.87-1.84-2.58-2.31-2.14-.59-3.51-1.48-3.51-3.32 0-1.76 1.34-3.05 3.06-3.39V4h2.67v1.89c1.64.38 2.8 1.54 2.91 3.16h-1.96c-.14-.88-.73-1.63-1.85-1.63-1.23 0-1.99.73-1.99 1.62 0 1.05.78 1.62 2.45 2.1 2.29.65 3.65 1.51 3.65 3.52 0 1.87-1.39 3.08-3.21 3.43z"/></svg>
+                        <span>QUAF 09 FEST COIN WALLET</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">Fest Coins & Redemption Summary</h2>
+                    <p class="text-xs font-anek text-red-100/90 max-w-xl leading-relaxed">
+                        ഗ്രൂപ്പ് പ്രോഗ്രാമുകളിലൂടെ ലഭിച്ച കോയിനുകൾ ഉപയോഗിച്ച് Presentation Desk-ൽ നിന്ന് പുസ്തകങ്ങളും മറ്റ് സമ്മാനങ്ങളും വാങ്ങാവുന്നതാണ്.
+                    </p>
                 </div>
-                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-red-100/85">Available Coins</div>
+
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono self-start sm:self-auto text-red-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Live Wallet Ledger</span>
+                </div>
             </div>
+
+            <!-- 3 Attractive Metric Cards: Earned, Spent, Balance -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- 1. Total Earned (ലഭിച്ച കോയിനുകൾ) -->
+                <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 transition-all flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-red-100/85">
+                            ലഭിച്ച കോയിനുകൾ
+                        </span>
+                        <div class="w-7 h-7 rounded-lg bg-emerald-400/20 text-emerald-300 flex items-center justify-center font-bold text-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
+                            +{{ number_format($coinSummary['earned'] ?? 0) }}
+                        </div>
+                        <p class="text-[10px] font-mono text-emerald-200 mt-0.5">Total Credited Rewards</p>
+                    </div>
+                </div>
+
+                <!-- 2. Total Spent / Redeemed (ഉപയോഗിച്ച കോയിനുകൾ) -->
+                <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 transition-all flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-red-100/85">
+                            ഉപയോഗിച്ച കോയിനുകൾ
+                        </span>
+                        <div class="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
+                            -{{ number_format($coinSummary['spent'] ?? 0) }}
+                        </div>
+                        <p class="text-[10px] font-mono text-amber-200 mt-0.5">Presentation Purchases</p>
+                    </div>
+                </div>
+
+                <!-- 3. Available Balance (ബാക്കിയുള്ള കോയിനുകൾ) -->
+                <div class="bg-white/20 hover:bg-white/25 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/30 transition-all flex flex-col justify-between space-y-3 shadow-inner">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-white">
+                            ബാക്കിയുള്ള കോയിനുകൾ
+                        </span>
+                        <div class="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs">
+                            ★
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight drop-shadow-sm">
+                            {{ number_format($coinSummary['balance'] ?? ($student->coins_cache ?? 0)) }}
+                        </div>
+                        <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Available Balance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Ledger Activity Feed (Recent Transactions) -->
+            @if(isset($coinTransactions) && $coinTransactions->isNotEmpty())
+                <div class="pt-4 border-t border-white/15">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-red-100 flex items-center gap-2">
+                            <span>സമീപകാല കോയിൻ ഇടപാടുകൾ</span>
+                            <span class="text-[10px] opacity-75 font-normal">({{ $coinTransactions->count() }})</span>
+                        </h4>
+                        <span class="text-[10px] font-mono text-red-200">Recent Activity</span>
+                    </div>
+
+                    <div class="space-y-2">
+                        @foreach($coinTransactions as $tx)
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-2.5 border border-white/15 flex items-center justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span class="w-2 h-2 rounded-full {{ $tx->coins > 0 ? 'bg-emerald-400' : 'bg-amber-300' }} flex-shrink-0"></span>
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-white truncate text-xs">{{ $tx->description ?: 'Coin Transaction' }}</p>
+                                        <p class="text-[10px] font-mono text-red-200 truncate">{{ $tx->created_at->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <span class="font-mono font-bold {{ $tx->coins > 0 ? 'text-emerald-300' : 'text-amber-200' }}">
+                                        {{ $tx->coins > 0 ? '+' : '' }}{{ number_format($tx->coins) }}
+                                    </span>
+                                    <span class="text-[10px] font-mono text-red-200 block">coins</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 

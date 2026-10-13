@@ -781,6 +781,7 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::put('/videos/{video}', [MediaController::class, 'videosUpdate'])->name('videos.update');
     Route::delete('/videos/{video}', [MediaController::class, 'videosDestroy'])->name('videos.destroy');
     Route::post('/videos/{video}/toggle-live', [MediaController::class, 'videosToggleLive'])->name('videos.toggle-live');
+    Route::post('/videos/{video}/toggle-featured', [MediaController::class, 'videosToggleFeatured'])->name('videos.toggle-featured');
 
     // Results & Poster Designer
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');

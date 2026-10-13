@@ -320,6 +320,10 @@ class MediaController extends Controller
             $query->where('is_live', $request->boolean('is_live'));
         }
 
+        if ($request->has('is_featured')) {
+            $query->where('is_featured', $request->boolean('is_featured'));
+        }
+
         $videos = $query->paginate(15);
         $categories = VideoItem::distinct()->pluck('category')->filter()->values();
 
@@ -340,6 +344,7 @@ class MediaController extends Controller
             'thumbnail_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
             'category' => ['required', 'string', 'max:100'],
             'is_live' => ['nullable', 'boolean'],
+            'is_featured' => ['nullable', 'boolean'],
             'display_order' => ['nullable', 'integer'],
         ]);
 
@@ -352,12 +357,18 @@ class MediaController extends Controller
             $thumbnailPath = "https://img.youtube.com/vi/{$youtubeId}/maxresdefault.jpg";
         }
 
+        $isFeatured = $request->boolean('is_featured');
+        if ($isFeatured) {
+            VideoItem::where('is_featured', true)->update(['is_featured' => false]);
+        }
+
         $video = VideoItem::create([
             'title' => $validated['title'],
             'youtube_id' => $youtubeId,
             'thumbnail_path' => $thumbnailPath,
             'category' => $validated['category'],
             'is_live' => $request->boolean('is_live'),
+            'is_featured' => $isFeatured,
             'display_order' => $validated['display_order'] ?? 0,
         ]);
 
@@ -380,6 +391,7 @@ class MediaController extends Controller
             'thumbnail_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'category' => ['required', 'string', 'max:100'],
             'is_live' => ['nullable', 'boolean'],
+            'is_featured' => ['nullable', 'boolean'],
             'display_order' => ['nullable', 'integer'],
         ]);
 
@@ -390,6 +402,11 @@ class MediaController extends Controller
             $thumbnailPath = FileStorageService::storePublicFile($request->file('thumbnail_file'), 'media/videos');
         }
 
+        $isFeatured = $request->boolean('is_featured');
+        if ($isFeatured) {
+            VideoItem::where('id', '!=', $video->id)->where('is_featured', true)->update(['is_featured' => false]);
+        }
+
         $old = $video->toArray();
         $video->update([
             'title' => $validated['title'],
@@ -397,6 +414,7 @@ class MediaController extends Controller
             'thumbnail_path' => $thumbnailPath,
             'category' => $validated['category'],
             'is_live' => $request->boolean('is_live'),
+            'is_featured' => $isFeatured,
             'display_order' => $validated['display_order'] ?? 0,
         ]);
 
@@ -421,6 +439,23 @@ class MediaController extends Controller
         $video->save();
 
         return back()->with('success', 'ലൈവ് സ്റ്റാറ്റസ് മാറ്റി: '.($video->is_live ? 'ലൈവ് ഓൺ' : 'ലൈവ് ഓഫ്'));
+    }
+
+    public function videosToggleFeatured(VideoItem $video): RedirectResponse
+    {
+        $newFeatured = ! $video->is_featured;
+        if ($newFeatured) {
+            VideoItem::where('is_featured', true)->update(['is_featured' => false]);
+            $video->is_featured = true;
+            $video->save();
+            $msg = "വീഡിയോ '{$video->title}' ഫീച്ചേർഡ് വീഡിയോ ആയി തിരഞ്ഞെടുത്തു.";
+        } else {
+            $video->is_featured = false;
+            $video->save();
+            $msg = 'ഫീച്ചേർഡ് സ്റ്റാറ്റസ് ഒഴിവാക്കി.';
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**

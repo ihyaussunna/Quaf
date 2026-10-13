@@ -120,29 +120,25 @@
         .animate-marquee:hover {
             animation-play-state: paused;
         }
-        /* Heading & Subtitle Kinetic Letter-by-Letter Fade Up Animation (Mobile & Desktop) */
+        /* Heading & Subtitle Kinetic Letter-by-Letter Fade Up Animation (Mobile & Desktop - Blur-Free) */
         @keyframes letterFadeUp {
             0% {
                 opacity: 0;
-                transform: translateY(22px) scale(0.92);
-                filter: blur(4px);
+                transform: translateY(16px);
             }
             100% {
                 opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0px);
+                transform: translateY(0);
             }
         }
         @keyframes headingReveal {
             0% {
                 opacity: 0;
-                transform: translateY(16px);
-                filter: blur(4px);
+                transform: translateY(14px);
             }
             100% {
                 opacity: 1;
                 transform: translateY(0);
-                filter: blur(0px);
             }
         }
         .animate-heading,
@@ -154,35 +150,46 @@
         .animate-subheading .letter-char {
             display: inline-block;
             opacity: 0;
-            transform: translateY(22px) scale(0.92);
-            filter: blur(4px);
-            will-change: transform, opacity, filter;
+            transform: translateY(16px);
+            will-change: transform, opacity;
             transition: none;
         }
         /* Staggered cascading animation when scrolled into view */
         .animate-heading.in-view .letter-char {
-            animation: letterFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-delay: calc(var(--char-i, 0) * 0.022s);
+            animation: letterFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: calc(var(--char-i, 0) * 0.018s);
         }
         .animate-subheading {
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .animate-subheading:not(.in-view) {
             opacity: 0.3;
-            transform: translateY(8px);
+            transform: translateY(6px);
         }
         .animate-subheading.in-view {
             opacity: 1;
             transform: translateY(0);
         }
         .animate-subheading.in-view .letter-char {
-            animation: letterFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-delay: calc(var(--char-i, 0) * 0.016s + 0.05s);
+            animation: letterFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: calc(var(--char-i, 0) * 0.014s + 0.04s);
         }
         /* Fallback for elements before JS splitting runs */
         .animate-heading:not([data-split-done]),
         .animate-subheading:not([data-split-done]) {
-            animation: headingReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation: headingReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        /* Mobile-specific lag prevention: instant silky smooth transforms with zero blur */
+        @media (max-width: 768px) {
+            .animate-heading .letter-char,
+            .animate-subheading .letter-char {
+                filter: none !important;
+                -webkit-filter: none !important;
+                animation-duration: 0.4s !important;
+            }
+            .animate-heading.in-view .letter-char {
+                animation-delay: calc(var(--char-i, 0) * 0.01s) !important;
+            }
         }
         @media (prefers-reduced-motion: reduce) {
             .animate-heading .letter-char,

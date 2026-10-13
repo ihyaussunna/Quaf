@@ -29,7 +29,9 @@ class VideoController extends Controller
             $query->where('title', 'like', "%{$search}%");
         }
 
-        $featured = VideoItem::where('is_live', true)->first() ?? VideoItem::latest()->first();
+        $featured = VideoItem::where('is_live', true)->first()
+            ?? VideoItem::where('is_featured', true)->first()
+            ?? VideoItem::latest()->first();
 
         $videos = $query->orderBy('display_order')->latest()->paginate(12)->withQueryString();
 

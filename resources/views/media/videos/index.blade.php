@@ -22,9 +22,15 @@
     <!-- Filters -->
     <div class="bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
-            @php $currentLive = request('is_live', ''); @endphp
-            <a href="{{ route('media.videos.index') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ $currentLive === '' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+            @php 
+                $currentLive = request('is_live', ''); 
+                $currentFeatured = request('is_featured', '');
+            @endphp
+            <a href="{{ route('media.videos.index') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ $currentLive === '' && $currentFeatured === '' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                 All Videos
+            </a>
+            <a href="{{ route('media.videos.index', ['is_featured' => '1']) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 {{ $currentFeatured === '1' ? 'bg-amber-500 text-slate-950 font-black' : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100' }}">
+                <span>★ Featured Video</span>
             </a>
             <a href="{{ route('media.videos.index', ['is_live' => '1']) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ $currentLive === '1' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                 Live Now
@@ -43,20 +49,27 @@
     @if($videos->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach($videos as $video)
-                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs group flex flex-col justify-between">
+                <div class="bg-white rounded-2xl border {{ $video->is_featured ? 'border-amber-300 ring-2 ring-amber-100 shadow-sm' : 'border-slate-200 shadow-2xs' }} overflow-hidden group flex flex-col justify-between">
                     <div>
-                        <!-- Thumbnail with Live Indicator -->
+                        <!-- Thumbnail with Live / Featured Indicators -->
                         <div class="relative aspect-video bg-slate-900 overflow-hidden">
                             <img src="{{ $video->thumbnail_path ?? 'https://img.youtube.com/vi/' . $video->youtube_id . '/hqdefault.jpg' }}" 
                                  alt="{{ $video->title }}" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             
-                            @if($video->is_live)
-                                <div class="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-600 text-white font-bold text-[9px] uppercase tracking-wider shadow">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-                                    <span>LIVE</span>
-                                </div>
-                            @endif
+                            <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                                @if($video->is_live)
+                                    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-600 text-white font-bold text-[9px] uppercase tracking-wider shadow">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                                        <span>LIVE</span>
+                                    </div>
+                                @endif
+                                @if($video->is_featured)
+                                    <div class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow">
+                                        <span>★ FEATURED</span>
+                                    </div>
+                                @endif
+                            </div>
 
                             <a href="https://www.youtube.com/watch?v={{ $video->youtube_id }}" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <div class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg">
@@ -76,22 +89,34 @@
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="px-3.5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <form method="POST" action="{{ route('media.videos.toggle-live', $video) }}">
-                            @csrf
-                            <button type="submit" class="text-[10px] font-bold px-2 py-0.5 rounded border transition-colors {{ $video->is_live ? 'bg-red-50 text-red-700 border-red-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">
-                                {{ $video->is_live ? 'Live Stream' : 'Offline' }}
-                            </button>
-                        </form>
+                    <div class="px-3.5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex flex-col gap-2 text-xs">
+                        <div class="flex items-center justify-between gap-1.5">
+                            <!-- Toggle Featured Video -->
+                            <form method="POST" action="{{ route('media.videos.toggle-featured', $video) }}">
+                                @csrf
+                                <button type="submit" title="{{ $video->is_featured ? 'Click to unfeature' : 'Select as homepage spotlight video when not live' }}" class="text-[10px] font-bold px-2 py-0.5 rounded border transition-colors flex items-center gap-1 cursor-pointer {{ $video->is_featured ? 'bg-amber-100 text-amber-800 border-amber-300 font-extrabold' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700 border-slate-200' }}">
+                                    <span>{{ $video->is_featured ? '★ Featured' : '☆ Set Featured' }}</span>
+                                </button>
+                            </form>
 
-                        <div class="inline-flex items-center gap-2">
+                            <!-- Toggle Live Stream -->
+                            <form method="POST" action="{{ route('media.videos.toggle-live', $video) }}">
+                                @csrf
+                                <button type="submit" class="text-[10px] font-bold px-2 py-0.5 rounded border transition-colors cursor-pointer {{ $video->is_live ? 'bg-red-50 text-red-700 border-red-200' : 'bg-slate-100 text-slate-500 border-slate-200' }}">
+                                    {{ $video->is_live ? 'Live' : 'Offline' }}
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-1 border-t border-slate-200/60">
                             <a href="{{ route('media.videos.edit', $video) }}" class="text-slate-600 hover:text-slate-900 font-semibold text-[11px]">
                                 Edit
                             </a>
+                            <span class="text-slate-300">•</span>
                             <form method="POST" action="{{ route('media.videos.destroy', $video) }}" onsubmit="return confirm('Are you sure you want to delete this video?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-rose-600 hover:text-rose-800 font-semibold text-[11px]">
+                                <button type="submit" class="text-rose-600 hover:text-rose-800 font-semibold text-[11px] cursor-pointer">
                                     Delete
                                 </button>
                             </form>

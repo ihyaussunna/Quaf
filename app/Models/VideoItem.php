@@ -15,6 +15,7 @@ class VideoItem extends Model
         'thumbnail_path',
         'category',
         'is_live',
+        'is_featured',
         'display_order',
     ];
 
@@ -22,6 +23,7 @@ class VideoItem extends Model
     {
         return [
             'is_live' => 'boolean',
+            'is_featured' => 'boolean',
             'display_order' => 'integer',
         ];
     }

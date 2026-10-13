@@ -65,11 +65,16 @@
                 </datalist>
             </div>
 
-            <div class="flex items-center pt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 pt-6">
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $video->is_featured) ? 'checked' : '' }}
+                           class="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-600">
+                    <span class="text-xs font-bold text-slate-700">★ Set as Featured Spotlight Video</span>
+                </label>
                 <label class="inline-flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="is_live" value="1" {{ old('is_live', $video->is_live) ? 'checked' : '' }}
                            class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-600">
-                    <span class="text-xs font-bold text-slate-700">This is an active Live Stream</span>
+                    <span class="text-xs font-bold text-slate-700">Active Live Stream</span>
                 </label>
             </div>
         </div>
