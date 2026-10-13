@@ -29,6 +29,8 @@ class LaunchPageWhiteDesignTest extends TestCase
         $response->assertSee('QUAF 2026');
         $response->assertSee('WEBSITE LAUNCHING');
         $response->assertSee('LAUNCH WEBSITE');
+        $response->assertSee('fullscreenToggleBtn');
+        $response->assertSee('Full Screen (F11)');
     }
 
     public function test_launch_route_also_renders_clean_white_design(): void
