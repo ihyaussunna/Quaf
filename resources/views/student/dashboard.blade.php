@@ -63,8 +63,8 @@
                         <span>QUAF 09 FEST COIN WALLET</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">You Have Earned Coins!</h2>
-                    <p class="text-xs font-anek text-red-100/90 max-w-xl leading-relaxed">
-                        ഗ്രൂപ്പ് പ്രോഗ്രാമുകളിലൂടെ ലഭിച്ച കോയിനുകൾ ഉപയോഗിച്ച് Presentation Desk-ൽ നിന്ന് പുസ്തകങ്ങളും മറ്റ് സമ്മാനങ്ങളും വാങ്ങാവുന്നതാണ്.
+                    <p class="text-xs font-sora text-red-100/90 max-w-xl leading-relaxed">
+                        Coins awarded for 1st, 2nd, and 3rd positions as well as grades across individual and group competitions. Redeem your earned coins for books and awards at the Presentation Desk.
                     </p>
                 </div>
 
@@ -76,11 +76,11 @@
 
             <!-- 3 Attractive Metric Cards: Earned, Spent, Balance -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <!-- 1. Total Earned (ലഭിച്ച കോയിനുകൾ) -->
+                <!-- 1. Total Earned -->
                 <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 transition-all flex flex-col justify-between space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-red-100/85">
-                            ലഭിച്ച കോയിനുകൾ
+                            Earned Coins
                         </span>
                         <div class="w-7 h-7 rounded-lg bg-emerald-400/20 text-emerald-300 flex items-center justify-center font-bold text-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -94,11 +94,11 @@
                     </div>
                 </div>
 
-                <!-- 2. Total Spent / Redeemed (ഉപയോഗിച്ച കോയിനുകൾ) -->
+                <!-- 2. Total Spent / Redeemed -->
                 <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 transition-all flex flex-col justify-between space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-red-100/85">
-                            ഉപയോഗിച്ച കോയിനുകൾ
+                            Spent Coins
                         </span>
                         <div class="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-xs">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
@@ -112,11 +112,11 @@
                     </div>
                 </div>
 
-                <!-- 3. Available Balance (ബാക്കിയുള്ള കോയിനുകൾ) -->
+                <!-- 3. Available Balance -->
                 <div class="bg-white/20 hover:bg-white/25 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/30 transition-all flex flex-col justify-between space-y-3 shadow-inner">
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-white">
-                            ബാക്കിയുള്ള കോയിനുകൾ
+                            Available Coins
                         </span>
                         <div class="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs">
                             ★
@@ -126,7 +126,7 @@
                         <div class="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight drop-shadow-sm">
                             {{ number_format($coinSummary['balance'] ?? ($student->coins_cache ?? 0)) }}
                         </div>
-                        <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Available Coins</p>
+                        <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Current Balance</p>
                     </div>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                 <div class="pt-4 border-t border-white/15">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-red-100 flex items-center gap-2">
-                            <span>സമീപകാല കോയിൻ ഇടപാടുകൾ</span>
+                            <span>Recent Coin Transactions</span>
                             <span class="text-[10px] opacity-75 font-normal">({{ $coinTransactions->count() }})</span>
                         </h4>
                         <span class="text-[10px] font-mono text-red-200">Recent Activity</span>

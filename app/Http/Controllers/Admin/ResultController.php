@@ -77,7 +77,7 @@ class ResultController extends Controller
         $podium = PointCalculationService::determinePodiumForProgram($program);
 
         $coinPreview = null;
-        if ($program->isGroup()) {
+        if ($podium['first'] || $podium['second'] || $podium['third']) {
             $tempResult = new Result([
                 'program_id' => $program->id,
                 'first_entry_id' => $podium['first']?->id,
@@ -166,10 +166,7 @@ class ResultController extends Controller
 
         $podium = PointCalculationService::determinePodiumForProgram($result->program);
 
-        $coinPreview = null;
-        if ($result->program?->isGroup()) {
-            $coinPreview = $this->coinService->previewGroupCoinDistribution($result);
-        }
+        $coinPreview = $this->coinService->previewGroupCoinDistribution($result);
 
         return view('admin.results.edit', compact('result', 'podium', 'coinPreview'));
     }
@@ -390,9 +387,7 @@ class ResultController extends Controller
             'verifier',
         ]);
 
-        $coinPreview = $result->program?->isGroup()
-            ? $this->coinService->previewGroupCoinDistribution($result)
-            : null;
+        $coinPreview = $this->coinService->previewGroupCoinDistribution($result);
 
         return view('admin.results.show', compact('result', 'coinPreview'));
     }

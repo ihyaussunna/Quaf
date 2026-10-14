@@ -197,7 +197,7 @@ class CoinRewardService
                     'student_id' => $student->id,
                     'student_number' => $student->student_id ?? 'STU-'.$student->id,
                     'name' => $student->name,
-                    'role' => $student->pivot?->role ?? 'participant',
+                    'role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
                     'coins' => $isAbsent ? 0 : $coinsPerParticipant,
                 ];
             }
@@ -206,11 +206,13 @@ class CoinRewardService
             $subtotal = $count * $coinsPerParticipant;
 
             if ($participants->isEmpty()) {
-                $flags[] = "{$cfg['label']} ({$group?->name}): No registered participants found in official team list.";
+                $identifier = $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? 'Participant');
+                $flags[] = "{$cfg['label']} ({$identifier}): No registered participant found.";
             }
 
             if ($isAbsent) {
-                $flags[] = "{$cfg['label']} ({$group?->name}): Marked absent in Green Room attendance. Zero coins credited.";
+                $identifier = $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? 'Participant');
+                $flags[] = "{$cfg['label']} ({$identifier}): Marked absent in Green Room attendance. Zero coins credited.";
             }
 
             $totalParticipants += $count;
@@ -222,7 +224,7 @@ class CoinRewardService
                 'entry_id' => $entry->id,
                 'chest_number' => $entry->chest_number,
                 'group_id' => $entry->group_id,
-                'group_name' => $group?->name ?? 'Team',
+                'group_name' => $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? $group?->name ?? 'Participant'),
                 'group_code' => $group?->code ?? '',
                 'attendance_status' => $entry->attendance_status,
                 'is_absent' => $isAbsent,
@@ -249,7 +251,7 @@ class CoinRewardService
     }
 
     /**
-     * Distribute individual wallet coins for a published group program result.
+     * Distribute individual wallet coins for a published program result (group or individual).
      * Enforces strict idempotency and auditable transaction logs.
      *
      * @return array{credited_count: int, total_coins: int, skipped: bool}
@@ -259,7 +261,7 @@ class CoinRewardService
         CoinTransaction::ensureSchema();
 
         $program = $result->program ?? Program::find($result->program_id);
-        if (! $program || ! $program->isGroup()) {
+        if (! $program) {
             return [
                 'credited_count' => 0,
                 'total_coins' => 0,
@@ -277,9 +279,10 @@ class CoinRewardService
             $creditedCount = 0;
             $totalCoins = 0;
             $affectedStudentIds = [];
+            $isGroup = $program->isGroup();
 
             foreach ($placements as $pos => $entry) {
-                if (! $entry || ! $entry->group_id) {
+                if (! $entry) {
                     continue;
                 }
 
@@ -313,10 +316,11 @@ class CoinRewardService
                     }
 
                     $ref = "COIN-RES{$result->id}-ENT{$entry->id}-STU{$student->id}-P{$pos}-CR";
+                    $progType = $isGroup ? 'Group' : 'Individual';
 
                     CoinTransaction::create([
                         'student_id' => $student->id,
-                        'group_id' => $entry->group_id,
+                        'group_id' => $entry->group_id ?: $student->group_id,
                         'program_id' => $program->id,
                         'entry_id' => $entry->id,
                         'result_id' => $result->id,
@@ -327,15 +331,16 @@ class CoinRewardService
                         'transaction_type' => 'credit',
                         'transaction_reference' => $ref,
                         'status' => 'completed',
-                        'description' => "QUAF 09 Group Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
+                        'description' => "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
                         'metadata' => [
                             'program_name' => $program->name,
+                            'program_type' => $program->type,
                             'group_name' => $entry->group?->name,
                             'student_number' => $student->student_id,
                             'student_name' => $student->name,
                             'prize_position' => $pos,
                             'grade' => $grade ?: 'NO_GRADE',
-                            'participant_role' => $student->pivot?->role ?? 'participant',
+                            'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
                         ],
                     ]);
 

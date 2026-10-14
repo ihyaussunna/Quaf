@@ -323,7 +323,7 @@ class GroupProgramCoinDistributionTest extends TestCase
         $this->assertEquals(0, $studentB->coins_cache);
     }
 
-    public function test_individual_programs_are_skipped_by_group_coin_distribution(): void
+    public function test_individual_programs_now_award_coins_based_on_position_and_grade(): void
     {
         $group = Group::create([
             'name' => 'YUGO RUSHDIC',
@@ -364,9 +364,10 @@ class GroupProgramCoinDistributionTest extends TestCase
 
         $res = app(CoinRewardService::class)->distributeCoinsForResult($result);
 
-        $this->assertTrue($res['skipped']);
-        $this->assertEquals(0, $res['credited_count']);
-        $this->assertEquals(0, CoinTransaction::count());
+        $this->assertFalse($res['skipped']);
+        $this->assertEquals(1, $res['credited_count']);
+        $this->assertEquals(200, $res['total_coins']);
+        $this->assertEquals(1, CoinTransaction::count());
     }
 
     public function test_multi_podium_places_award_correct_individual_rewards(): void

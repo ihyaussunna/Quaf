@@ -1,4 +1,4 @@
-@if(!empty($coinPreview) && !empty($coinPreview['is_group']))
+@if(!empty($coinPreview))
 <div class="rounded-2xl bg-linear-to-br from-amber-50/80 via-white to-amber-100/40 border border-amber-300 p-6 shadow-xs space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/80 pb-4">
         <div>
@@ -6,7 +6,7 @@
                 <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500 text-slate-950 uppercase tracking-wider">
                     QUAF 09 Coin Distribution Preview
                 </span>
-                <span class="text-xs font-mono text-slate-500 font-semibold">Group Program Rule V1</span>
+                <span class="text-xs font-mono text-slate-500 font-semibold">{{ !empty($coinPreview['is_group']) ? 'Group Program Rule' : 'Individual Program Rule' }}</span>
             </div>
             <h3 class="font-sora font-black text-lg text-slate-900 mt-1">
                 {{ $coinPreview['program_name'] }} <span class="text-slate-400 font-normal font-mono">({{ $coinPreview['program_code'] }})</span>
