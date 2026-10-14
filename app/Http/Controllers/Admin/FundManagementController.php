@@ -21,6 +21,8 @@ class FundManagementController extends Controller
      */
     public function index(Request $request): View
     {
+        FundReceipt::ensureSchema();
+
         $today = now()->startOfDay();
 
         $baseQuery = FundReceipt::query();

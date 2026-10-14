@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\FundReceipt;
 use App\Models\Judge;
 use App\Models\Program;
 use Illuminate\Support\Facades\Blade;
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                 Program::ensureSchema();
                 Judge::ensureCredentials();
+                FundReceipt::ensureSchema();
             }
         } catch (\Throwable) {
         }

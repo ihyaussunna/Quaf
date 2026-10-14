@@ -43,6 +43,8 @@ class FundReceiptSetting extends Model
      */
     public static function current(): self
     {
+        FundReceipt::ensureSchema();
+
         return static::firstOrCreate([], [
             'header_title' => 'QUAF SEASON 09',
             'organization_name' => 'JAMIA IHYA-US-SUNNA',

@@ -20,6 +20,8 @@ class FundController extends Controller
      */
     public function dashboard(Request $request): View
     {
+        FundReceipt::ensureSchema();
+
         $today = now()->startOfDay();
 
         // Active receipts query (excluding soft-deleted / cancelled)
@@ -72,6 +74,8 @@ class FundController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        FundReceipt::ensureSchema();
+
         $validated = $request->validate([
             'donor_name' => ['required', 'string', 'max:150'],
             'donor_phone' => ['nullable', 'string', 'max:25'],
