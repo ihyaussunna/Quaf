@@ -1,104 +1,74 @@
-@extends('layouts.student', ['title' => 'My Digital QR Badge'])
+@extends('layouts.student', ['title' => 'My Digital QR Code'])
 
 @section('content')
 <div class="space-y-6 max-w-xl mx-auto">
-    <!-- Action Bar -->
-    <div class="print:hidden flex items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
-        <a href="{{ route('student.dashboard') }}" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono">
-            &larr; Dashboard
+    <!-- Action Bar (Without Print Button) -->
+    <div class="flex items-center justify-between gap-4 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-sm">
+        <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-bold transition">
+            <span>&larr;</span>
+            <span>Dashboard</span>
         </a>
-        <div class="flex items-center gap-2">
-            <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] text-white font-mono font-bold text-xs uppercase rounded-xl hover:brightness-110 flex items-center gap-2 shadow-md shadow-red-900/20 transition-all cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                <span>Print / Save Badge</span>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="px-3.5 py-2 bg-slate-100 hover:bg-red-50 hover:text-[#be1e2d] text-slate-700 rounded-xl text-xs font-mono font-bold border border-slate-200 cursor-pointer transition">
+                Sign Out
             </button>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="app-tap px-3.5 py-2.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 text-slate-700 rounded-xl text-xs font-mono font-bold border border-slate-200 cursor-pointer transition">
-                    Sign Out
-                </button>
-            </form>
-        </div>
+        </form>
     </div>
 
-    <!-- Official Student Badge Card -->
-    <div class="flex justify-center">
-        <div id="badge-card" class="w-[340px] bg-white text-slate-900 rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden relative print:border-2 print:border-black print:text-black print:bg-white">
-            <!-- Header Stripe -->
-            <div class="p-4 text-center border-b border-slate-100 bg-gradient-to-b from-red-50/70 to-white print:from-gray-100 print:to-white">
-                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" style="height: 27px; max-height: 27px;" class="h-[27px] w-auto mx-auto mb-1.5 object-contain">
-                <p class="text-[9px] font-mono tracking-[0.2em] text-[#be1e2d] font-bold uppercase">
-                    IHYAUSSUNNA STUDENTS UNION
-                </p>
-                <p class="text-[9px] font-mono text-slate-500 uppercase">
-                    Official Participant Pass
-                </p>
+    <!-- Official Student Details & QR Code View -->
+    <div class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <!-- Student Info Header -->
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left border-b border-slate-100 pb-6">
+            <!-- Avatar / Photo -->
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-red-200/80 flex items-center justify-center font-sora text-3xl font-black text-[#be1e2d] overflow-hidden shadow-sm shrink-0">
+                @if($student->photo_path)
+                    <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
+                @else
+                    {{ substr($student->name, 0, 1) }}
+                @endif
             </div>
 
-            <!-- Student Details -->
-            <div class="p-6 text-center space-y-4">
-                <div class="relative inline-block">
-                    <div class="w-28 h-28 mx-auto rounded-2xl bg-gradient-to-br from-red-50 to-slate-100 border-2 border-red-200 flex items-center justify-center font-sora text-4xl font-bold text-[#be1e2d] overflow-hidden shadow-md">
-                        @if($student->photo_path)
-                            <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
-                        @else
-                            {{ substr($student->name, 0, 1) }}
-                        @endif
-                    </div>
-                    <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#be1e2d] text-white font-mono font-bold text-[10px] uppercase shadow-md whitespace-nowrap">
-                        CHEST #{{ $student->chest_number ?? '---' }}
-                    </div>
-                </div>
-
-                <div class="pt-2">
-                    <h3 class="text-xl font-sora font-bold text-slate-900 tracking-wide print:text-black">
-                        {{ $student->name }}
-                    </h3>
-                    <p class="text-xs font-mono text-slate-500 mt-0.5">ID: {{ $student->student_id }}</p>
-                </div>
-
-                <!-- Group Badge -->
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-200" style="background-color: {{ $student->group->color_hex }}15;">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ $student->group->color_hex }};"></span>
-                    <span class="text-xs font-mono font-bold uppercase tracking-wider" style="color: {{ $student->group->color_hex }};">
-                        {{ $student->group->name }}
+            <!-- Name & Identifiers -->
+            <div class="space-y-1.5 flex-1 min-w-0">
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200 text-[#be1e2d] font-mono font-bold text-xs uppercase">
+                        Chest #{{ $student->chest_number ?? '---' }}
                     </span>
-                    <span class="text-slate-400">•</span>
-                    <span class="text-xs font-mono text-slate-600 print:text-black">{{ $student->zone_name ?? $student->category }}</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-xs">
+                        ID: {{ $student->student_id }}
+                    </span>
                 </div>
-
-                <!-- QR Code Block -->
-                <div class="pt-4 border-t border-slate-100">
-                    <div class="w-40 h-40 mx-auto bg-white p-2 rounded-2xl border border-slate-200 shadow-inner flex items-center justify-center">
-                        {!! $qrCodeSvg !!}
-                    </div>
-                    <p class="text-[9px] font-mono text-slate-500 mt-2 uppercase tracking-widest">
-                        Show this pass at green room check-in
-                    </p>
+                <h1 class="text-2xl font-sora font-black text-slate-900 tracking-tight">
+                    {{ $student->name }}
+                </h1>
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs font-mono pt-1">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 bg-slate-50 font-bold" style="color: {{ $student->group->color_hex }};">
+                        <span class="w-2 h-2 rounded-full" style="background-color: {{ $student->group->color_hex }};"></span>
+                        <span>{{ $student->group->name }}</span>
+                    </span>
+                    <span class="text-slate-300">•</span>
+                    <span class="text-slate-600 font-semibold">{{ $student->zone_name ?? $student->category }}</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Footer -->
-            <div class="p-3 bg-slate-50 border-t border-slate-100 text-center text-[9px] font-mono text-slate-500 print:bg-white print:border-t-2">
-                Markazu Saquafathi Sunniyya • Karanthur
+        <!-- High-Resolution QR Code Section -->
+        <div class="flex flex-col items-center justify-center py-4 space-y-4 text-center">
+            <div class="p-4 bg-white rounded-3xl border-2 border-slate-200/90 shadow-md inline-block">
+                <div class="w-52 h-52 sm:w-60 sm:h-60 flex items-center justify-center">
+                    {!! $qrCodeSvg !!}
+                </div>
+            </div>
+            <div class="space-y-1 max-w-sm">
+                <p class="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider">
+                    Official Student QR Code
+                </p>
+                <p class="text-xs text-slate-500 font-sora">
+                    Present this QR code for verification at stages, green rooms, and presentation desk.
+                </p>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-@media print {
-    body {
-        background: white !important;
-        color: black !important;
-    }
-    header, nav, footer, .print\:hidden {
-        display: none !important;
-    }
-    #badge-card {
-        box-shadow: none !important;
-        margin: 20px auto !important;
-    }
-}
-</style>
 @endsection

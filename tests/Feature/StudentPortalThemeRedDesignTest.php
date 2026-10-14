@@ -151,8 +151,8 @@ class StudentPortalThemeRedDesignTest extends TestCase
 
         // Verify Theme Red accents
         $response->assertSee('#be1e2d');
-        $response->assertSee('Print / Save Badge');
-        $response->assertSee('from-[#be1e2d]');
+        $response->assertSee('Dashboard');
+        $response->assertDontSee('Print / Save Badge');
 
         // Verify old yellow is absent
         $response->assertDontSee('#f3bd2e');

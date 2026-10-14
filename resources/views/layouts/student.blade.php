@@ -280,7 +280,7 @@
                 <a href="{{ route('student.idcard') }}" 
                    @click="mobileOpen = false" 
                    class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Digital QR Badge
+                    Digital QR Code
                 </a>
             </nav>
         </div>
