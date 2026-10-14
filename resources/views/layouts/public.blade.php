@@ -319,12 +319,16 @@
 
             </div>
 
-            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3 text-center sm:text-left">
-                <p>© 2026 QUAF — Ihyaussunna-Markaz Students' Union, Markazu Saquafathi Sunniyya. All Rights Reserved.</p>
-                <div class="flex items-center gap-3 font-mono text-[11px]">
-                    <span class="text-slate-400">Powered by QUAF Management Platform</span>
-                    <span>•</span>
-                    <a href="{{ route('home.view') }}" class="text-[#f3bd2e] hover:underline">Official Portal</a>
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4 text-center sm:text-left">
+                <p>© {{ date('Y') }} QUAF — Ihyaussunna-Markaz Students' Union, Markazu Saquafathi Sunniyya. All Rights Reserved.</p>
+                <div class="flex items-center justify-center sm:justify-end gap-2 text-[11px] text-slate-400">
+                    <span>Designed and Developed by</span>
+                    <a href="https://ahrazdesign.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center transition-opacity hover:opacity-80 group" title="Ahraz Design">
+                        <img src="{{ asset('images/ahraz-design-footer.svg') }}" 
+                             alt="Ahraz Design" 
+                             class="h-4 sm:h-4.5 w-auto object-contain inline-block"
+                             style="height: 16px; max-height: 18px; width: auto;">
+                    </a>
                 </div>
             </div>
         </div>
@@ -395,7 +399,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/65 backdrop-blur-md lg:hidden"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/30 backdrop-blur-md lg:hidden"
          style="display: none;"
          @keydown.escape.window="mobileOpen = false"
          @click.self="mobileOpen = false">
@@ -408,15 +412,20 @@
              x-transition:leave="transition ease-in duration-200 transform"
              x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-90 translate-y-8"
-             class="relative w-full max-w-sm bg-slate-950/85 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] text-center text-white overflow-hidden ring-1 ring-white/15">
+             class="relative w-full max-w-sm bg-slate-900/40 backdrop-blur-2xl backdrop-saturate-150 border border-white/25 rounded-[2.5rem] p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.35),inset_0_-1px_1px_rgba(255,255,255,0.1)] text-center text-white overflow-hidden ring-1 ring-white/10">
+
+            <!-- Ambient Glass Reflections -->
+            <div class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/15 via-white/5 to-transparent pointer-events-none rounded-t-[2.5rem]"></div>
+            <div class="absolute -top-16 -left-16 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -right-16 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
 
             <!-- iPhone Dynamic Indicator / Pill Grabber -->
-            <div class="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-3"></div>
+            <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-3 shadow-xs"></div>
 
             <!-- Close Button (Top-Right Glassy Circle) -->
             <button type="button" 
                     @click="mobileOpen = false" 
-                    class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition cursor-pointer"
+                    class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/25 flex items-center justify-center text-white/90 hover:text-white transition cursor-pointer backdrop-blur-md"
                     aria-label="Close menu">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
@@ -424,54 +433,54 @@
             </button>
 
             <!-- Brand Badge -->
-            <div class="flex items-center justify-center gap-2 mb-3">
+            <div class="flex items-center justify-center gap-2 mb-3 relative z-10">
                 <span class="text-[11px] font-mono uppercase tracking-widest text-[#f3bd2e] font-bold">QUAF Navigation</span>
             </div>
 
             <!-- Beautifully Animated & Centered Navigation Links -->
-            <nav class="space-y-1 py-1">
+            <nav class="space-y-1 py-1 relative z-10">
                 <a href="{{ route('home.view') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Home
                 </a>
                 <a href="{{ route('results.index') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('results.*') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('results.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Festival Results
                 </a>
                 <a href="{{ route('schedule.index') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('schedule.*') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('schedule.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Festival Schedule
                 </a>
                 <a href="{{ route('gallery.index') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('gallery.*') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('gallery.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Photo Gallery
                 </a>
                 <a href="{{ route('news.index') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('news.*') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('news.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Festival News
                 </a>
                 <a href="{{ route('media.index') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Media & Videos
                 </a>
                 <a href="{{ route('brochure.index') }}" 
                    @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 hover:bg-white/10 {{ request()->routeIs('brochure.*') ? 'bg-white/15 text-[#f3bd2e] shadow-sm font-bold' : 'text-slate-200 hover:text-white' }}">
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('brochure.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Official Brochure
                 </a>
             </nav>
 
             <!-- Bottom Action: Student Portal Button -->
-            <div class="mt-4 pt-3 border-t border-white/10">
+            <div class="mt-4 pt-3 border-t border-white/15 relative z-10">
                 <button type="button" 
                         @click="mobileOpen = false; showStudentModal = true" 
-                        class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white text-xs font-semibold uppercase tracking-wider shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition cursor-pointer">
+                        class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white text-xs font-semibold uppercase tracking-wider shadow-lg shadow-red-950/40 border border-white/20 flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     <span>Student Portal (Chest No)</span>
                 </button>

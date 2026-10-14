@@ -35,24 +35,36 @@ class ScheduleController extends Controller
         $stages = Stage::orderBy('code')->get();
         $zones = Zone::orderBy('display_order')->get();
 
+        $todayStr = Carbon::today()->format('Y-m-d');
+
         // Only include dates that actually have scheduled competitions
         $distinctDates = Schedule::whereNotNull('start_time')
             ->selectRaw('DATE(start_time) as schedule_date')
             ->distinct()
-            ->orderBy('schedule_date')
             ->pluck('schedule_date')
             ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
             ->filter()
-            ->unique()
-            ->sort()
-            ->values();
+            ->unique();
+
+        if (! $distinctDates->contains($todayStr)) {
+            $distinctDates->push($todayStr);
+        }
+
+        // Put Today first immediately after All Days, followed by the other dates in chronological order
+        $orderedDates = $distinctDates->sort()->values()->sortBy(function ($dt) use ($todayStr) {
+            return $dt === $todayStr ? 0 : 1;
+        })->values();
 
         $festivalDays = [];
-        foreach ($distinctDates as $dt) {
-            if (isset(self::FESTIVAL_TITLES[$dt])) {
+        foreach ($orderedDates as $dt) {
+            $carbon = Carbon::parse($dt);
+            $isToday = ($dt === $todayStr);
+
+            if ($isToday) {
+                $festivalDays[$dt] = $carbon->format('d M').' — Today';
+            } elseif (isset(self::FESTIVAL_TITLES[$dt])) {
                 $festivalDays[$dt] = self::FESTIVAL_TITLES[$dt];
             } else {
-                $carbon = Carbon::parse($dt);
                 if ($carbon->greaterThanOrEqualTo(Carbon::parse('2026-10-31'))) {
                     $festivalDays[$dt] = $carbon->format('d M').' — Festival Day';
                 } else {
