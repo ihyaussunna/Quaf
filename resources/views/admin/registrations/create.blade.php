@@ -13,8 +13,8 @@ window.quafRegistrationData = {
 function adminRegistrationManager() {
     return {
         selectedGroupId: '{{ old('group_id', $selectedGroupId ?? '') }}',
-        selectedZone: '{{ old('zone', '') }}',
-        selectedProgramId: '{{ old('program_id', '') }}',
+        selectedZone: '{{ old('zone', $selectedZone ?? '') }}',
+        selectedProgramId: '{{ old('program_id', $selectedProgramId ?? '') }}',
         selectedStudents: [],
         leaderStudentId: null,
         studentSearch: '',
@@ -33,6 +33,12 @@ function adminRegistrationManager() {
             window.quafAdminRegManagerInstance = this;
             if (!this.selectedGroupId && this.allGroups.length > 0) {
                 this.selectedGroupId = String(this.allGroups[0].id);
+            }
+            if (this.selectedProgramId && !this.selectedZone) {
+                const targetP = this.allPrograms.find(p => String(p.id) === String(this.selectedProgramId));
+                if (targetP) {
+                    this.selectedZone = targetP.zone_name;
+                }
             }
             this.updateProgramDropdown();
             if (this.selectedZone && this.selectedProgramId) {
@@ -178,7 +184,14 @@ function adminRegistrationManager() {
             this.filteredPrograms.forEach((p, idx) => {
                 const isSelected = String(p.id) === currentProgId;
                 if (isSelected) matched = true;
-                const closedLabel = !p.is_registration_open ? ' [Closed / ക്ലോസ് ചെയ്തു]' : '';
+                let closedLabel = '';
+                if (!p.is_registration_open) {
+                    if (p.is_stage) {
+                        closedLabel = ' [Stage Closed • Admin Override Active]';
+                    } else {
+                        closedLabel = ' [Off-Stage Closed • Admin Override Active]';
+                    }
+                }
                 select.options[idx + 1] = new Option(`${p.name} ${p.tag}${closedLabel}`, String(p.id), false, isSelected);
             });
 
@@ -608,15 +621,22 @@ function adminRegistrationManager() {
                             </div>
                         </div>
 
-                        <!-- Registration Closure Notice -->
+                        <!-- Registration Closure & Admin Override Active Notice -->
                         <template x-if="!currentProgram.is_registration_open">
-                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-sora space-y-0.5">
-                                <div class="flex items-center gap-2 font-bold text-rose-800">
-                                    <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                    <span x-text="currentProgram.closure_reason_ml || 'മത്സരത്തിന്റെ രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു (Closed).'"></span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] bg-rose-200 text-rose-900 font-mono font-bold">Admin Override Allowed</span>
+                            <div class="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-300 text-amber-950 text-xs font-sora space-y-1 shadow-2xs">
+                                <div class="flex flex-wrap items-center justify-between gap-2 font-bold text-amber-900">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span x-text="currentProgram.closure_reason_ml || (currentProgram.is_stage ? 'സ്റ്റേജ് മത്സരങ്ങളുടെ രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു.' : 'ഓഫ്-സ്റ്റേജ് മത്സരങ്ങളുടെ രജിസ്ട്രേഷൻ ക്ലോസ് ചെയ്തിരിക്കുന്നു.')"></span>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-bold flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        Admin Override Active (അഡ്മിൻ പ്രവേശനാനുമതി)
+                                    </span>
                                 </div>
-                                <p class="text-[11px] text-rose-600 font-mono pl-6" x-text="currentProgram.closure_reason || 'Registration closed for group leaders. Desk admins may still register participants.'"></p>
+                                <p class="text-[11px] text-amber-800 font-medium pl-6 leading-relaxed">
+                                    ഗ്രൂപ്പ് ലീഡർമാർക്കുള്ള സ്റ്റേജ് / ഓഫ്-സ്റ്റേജ് എൻട്രി ക്ലോസ് ചെയ്താലും, അഡ്മിൻ പാനൽ വഴി പുതിയ വിദ്യാർത്ഥികളെ മത്സരത്തിലേക്ക് ചേർക്കാനും (Add Participants), മാറ്റങ്ങൾ വരുത്താനും, റോസ്റ്റർ സേവ് ചെയ്യാനും പൂർണ്ണ അനുമതിയുണ്ട്.
+                                </p>
                             </div>
                         </template>
                     </div>

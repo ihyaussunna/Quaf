@@ -255,4 +255,119 @@ class ProgramRegistrationControlTest extends TestCase
 
         $response->assertSessionHasErrors(['registration']);
     }
+
+    public function test_admin_can_register_individual_student_when_stage_and_offstage_closed(): void
+    {
+        FestivalSetting::set('stage_registration_open', '0');
+        FestivalSetting::set('off_stage_registration_open', '0');
+
+        $this->assertFalse($this->stageProgram->fresh()->isRegistrationOpen());
+        $this->assertFalse($this->offStageProgram->fresh()->isRegistrationOpen());
+
+        $this->actingAs($this->adminUser);
+
+        // Admin registers for closed stage program
+        $response = $this->post(route('admin.registrations.store'), [
+            'group_id' => $this->group->id,
+            'program_id' => $this->stageProgram->id,
+            'student_ids' => [$this->student->id],
+            'student_id' => $this->student->id,
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('program_entries', [
+            'program_id' => $this->stageProgram->id,
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+        ]);
+
+        // Student 2 for off-stage program
+        $student2 = Student::create([
+            'student_id' => 'STU102',
+            'name' => 'Adil K',
+            'chest_number' => '102',
+            'class_level' => '10',
+            'qr_token' => 'qr-token-stu102',
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zone->id,
+            'is_active' => true,
+        ]);
+
+        // Admin registers for closed off-stage program
+        $response2 = $this->post(route('admin.registrations.store'), [
+            'group_id' => $this->group->id,
+            'program_id' => $this->offStageProgram->id,
+            'student_ids' => [$student2->id],
+            'student_id' => $student2->id,
+        ]);
+
+        $response2->assertSessionHas('success');
+        $this->assertDatabaseHas('program_entries', [
+            'program_id' => $this->offStageProgram->id,
+            'student_id' => $student2->id,
+            'group_id' => $this->group->id,
+        ]);
+    }
+
+    public function test_admin_can_register_group_program_when_stage_registration_closed(): void
+    {
+        $groupProgram = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Group Song Stage',
+            'slug' => 'group-song-stage',
+            'code' => 'GRP-SONG',
+            'zone_id' => $this->zone->id,
+            'type' => 'group',
+            'is_stage' => true,
+            'is_registration_open' => true,
+            'participant_count' => 5,
+            'participant_limit' => 5,
+            'is_active' => true,
+        ]);
+
+        FestivalSetting::set('stage_registration_open', '0');
+        $this->assertFalse($groupProgram->fresh()->isRegistrationOpen());
+
+        $this->actingAs($this->adminUser);
+
+        $studentB = Student::create([
+            'student_id' => 'STU103',
+            'name' => 'Bilal M',
+            'chest_number' => '103',
+            'class_level' => '10',
+            'qr_token' => 'qr-token-stu103',
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zone->id,
+            'is_active' => true,
+        ]);
+
+        $response = $this->post(route('admin.registrations.store'), [
+            'group_id' => $this->group->id,
+            'program_id' => $groupProgram->id,
+            'student_ids' => [$this->student->id, $studentB->id],
+            'leader_id' => $this->student->id,
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('program_entries', [
+            'program_id' => $groupProgram->id,
+            'group_id' => $this->group->id,
+        ]);
+    }
+
+    public function test_admin_can_view_registration_create_page_with_preselected_closed_program(): void
+    {
+        FestivalSetting::set('stage_registration_open', '0');
+
+        $this->actingAs($this->adminUser);
+
+        $response = $this->get(route('admin.registrations.create', [
+            'program_id' => $this->stageProgram->id,
+            'group_id' => $this->group->id,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee($this->stageProgram->name);
+        $response->assertSee('Admin Override Active');
+    }
 }

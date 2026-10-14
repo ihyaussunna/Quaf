@@ -163,6 +163,15 @@ class RegistrationController extends Controller
             ->get();
 
         $selectedGroupId = $request->query('group') ?: $request->query('group_id');
+        $selectedProgramId = $request->query('program') ?: $request->query('program_id');
+        $selectedZone = $request->query('zone');
+
+        if ($selectedProgramId) {
+            $targetProg = $programs->firstWhere('id', (int) $selectedProgramId);
+            if ($targetProg) {
+                $selectedZone = $targetProg->zone?->name ?? ($targetProg->eligibility ?? 'Mix Zone');
+            }
+        }
 
         $entriesByGroupAndProgram = [];
         foreach ($allEntries as $entry) {
@@ -283,7 +292,9 @@ class RegistrationController extends Controller
             'groupsData',
             'zonesData',
             'entriesByGroupAndProgram',
-            'selectedGroupId'
+            'selectedGroupId',
+            'selectedProgramId',
+            'selectedZone'
         ));
     }
 

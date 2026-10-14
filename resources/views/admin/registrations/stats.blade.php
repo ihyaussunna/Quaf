@@ -208,21 +208,25 @@
                                     $cell = $row['groups'][$grp->id] ?? ['status' => 'pending', 'enrolled' => 0, 'limit' => $p->limit, 'remaining' => $p->limit];
                                 @endphp
                                 <td class="px-3 py-3 text-center">
-                                    @if($cell['status'] === 'full')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono font-bold" title="Full Quota Registered ({{ $cell['enrolled'] }}/{{ $cell['limit'] }})">
-                                            <span>✓</span>
-                                            <span>{{ $cell['enrolled'] }}/{{ $cell['limit'] }}</span>
-                                        </span>
-                                    @elseif($cell['status'] === 'partial')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-mono font-bold" title="Partial Registration: {{ $cell['enrolled'] }}/{{ $cell['limit'] }} ({{ $cell['remaining'] }} slot left)">
-                                            <span>{{ $cell['enrolled'] }}/{{ $cell['limit'] }}</span>
-                                            <span class="text-[9px] text-amber-600 font-normal">({{ $cell['remaining'] }} left)</span>
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-1 rounded-lg bg-slate-50 text-slate-400 border border-slate-200 text-[10px] font-mono" title="Pending: 0 enrolled out of {{ $cell['limit'] }}">
-                                            0/{{ $cell['limit'] }}
-                                        </span>
-                                    @endif
+                                    <a href="{{ route('admin.registrations.create', ['program_id' => $p->id, 'group_id' => $grp->id]) }}" 
+                                       class="inline-block transition-transform hover:scale-105"
+                                       title="Click to Enroll / Manage {{ $grp->name }} participants for {{ $p->name }}">
+                                        @if($cell['status'] === 'full')
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono font-bold hover:bg-emerald-100">
+                                                <span>✓</span>
+                                                <span>{{ $cell['enrolled'] }}/{{ $cell['limit'] }}</span>
+                                            </span>
+                                        @elseif($cell['status'] === 'partial')
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-mono font-bold hover:bg-amber-100">
+                                                <span>{{ $cell['enrolled'] }}/{{ $cell['limit'] }}</span>
+                                                <span class="text-[9px] text-amber-600 font-normal">({{ $cell['remaining'] }} left)</span>
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-1 rounded-lg bg-slate-50 text-slate-500 hover:text-slate-900 border border-slate-200 text-[10px] font-mono hover:bg-slate-100 font-medium">
+                                                + 0/{{ $cell['limit'] }}
+                                            </span>
+                                        @endif
+                                    </a>
                                 </td>
                             @endforeach
                         </tr>

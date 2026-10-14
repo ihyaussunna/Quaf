@@ -22,6 +22,10 @@
                         Edit Official Verdict ({{ $program->result->status }})
                     </a>
                 @endif
+                <a href="{{ route('admin.registrations.create', ['program_id' => $program->id]) }}" class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>+ Enroll Contestants</span>
+                </a>
                 <a href="{{ route('admin.programs.edit', $program) }}" class="px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-mono text-xs font-bold uppercase hover:bg-slate-50 shadow-sm">
                     Edit Program
                 </a>
@@ -107,9 +111,22 @@
 
     <!-- Registered Entries Roster -->
     <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
-        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-            <h3 class="font-sora font-bold text-lg text-slate-900">Contestants Roster</h3>
-            <span class="text-xs font-mono text-slate-500">{{ $program->entries->count() }} Entries</span>
+        <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h3 class="font-sora font-bold text-lg text-slate-900">Contestants Roster</h3>
+                @if(!$program->isRegistrationOpen())
+                    <span class="text-[11px] font-mono text-amber-700 font-bold block mt-0.5">
+                        Stage/Off-stage closed for leaders &bull; Admin direct enrollment active
+                    </span>
+                @endif
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-mono text-slate-500">{{ $program->entries->count() }} Entries</span>
+                <a href="{{ route('admin.registrations.create', ['program_id' => $program->id]) }}" class="px-3 py-1.5 rounded-lg bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs uppercase transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>+ Enroll / Add</span>
+                </a>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs font-mono">

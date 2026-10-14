@@ -184,11 +184,17 @@
                                         <div class="font-bold text-slate-900">{{ $pp['name'] }}</div>
                                         <div class="text-[10px] font-mono text-slate-500">{{ $pp['code'] }} • {{ $pp['zone'] }} • {{ ucfirst($pp['type']) }}</div>
                                     </div>
-                                    <div class="text-right">
-                                        <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-mono font-bold text-[11px]">
-                                            {{ $pp['enrolled'] }} / {{ $pp['limit'] }} Filled
-                                        </span>
-                                        <span class="block text-[10px] font-mono text-amber-600 mt-0.5">({{ $pp['remaining'] }} slot left)</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-right">
+                                            <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-mono font-bold text-[11px]">
+                                                {{ $pp['enrolled'] }} / {{ $pp['limit'] }} Filled
+                                            </span>
+                                            <span class="block text-[10px] font-mono text-amber-600 mt-0.5">({{ $pp['remaining'] }} slot left)</span>
+                                        </div>
+                                        <a href="{{ route('admin.registrations.create', ['program_id' => $pp['id'], 'group_id' => $grp->id]) }}" 
+                                           class="px-2.5 py-1 rounded-lg bg-[#005c94] hover:bg-[#004875] text-white font-mono text-[10px] font-bold transition">
+                                            + Enroll
+                                        </a>
                                     </div>
                                 </div>
                             @empty
@@ -204,9 +210,15 @@
                                         <div class="font-bold text-slate-800">{{ $pp['name'] }}</div>
                                         <div class="text-[10px] font-mono text-slate-400">{{ $pp['code'] }} • {{ $pp['zone'] }} • {{ ucfirst($pp['type']) }}</div>
                                     </div>
-                                    <span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono font-bold text-[10px]">
-                                        0 / {{ $pp['limit'] }} (Unregistered)
-                                    </span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono font-bold text-[10px]">
+                                            0 / {{ $pp['limit'] }} (Unregistered)
+                                        </span>
+                                        <a href="{{ route('admin.registrations.create', ['program_id' => $pp['id'], 'group_id' => $grp->id]) }}" 
+                                           class="px-2.5 py-1 rounded-lg bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono text-[10px] font-bold transition">
+                                            + Enroll
+                                        </a>
+                                    </div>
                                 </div>
                             @empty
                                 <div class="py-8 text-center text-slate-400 font-mono">All programs have at least one registration.</div>

@@ -475,9 +475,15 @@
                                           :class="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'bg-emerald-600' : 'bg-rose-600'"></span>
                                     <span x-text="isProgRegOpen('{{ $p->id }}', {{ $isDirectOpen ? 'true' : 'false' }}) ? 'OPEN' : 'CLOSED'">{{ $isDirectOpen ? 'OPEN' : 'CLOSED' }}</span>
                                 </button>
-                                @if($isDirectOpen && ! $isEffectiveOpen)
+                                @if(! $isEffectiveOpen)
                                     <span class="block text-[9px] text-amber-700 font-sans font-medium mt-0.5" title="{{ $p->getRegistrationClosureReason() }}">
-                                        (Parent Locked)
+                                        @if($p->is_stage && !($isStageRegOpen ?? true))
+                                            (Stage Closed • Admin Active)
+                                        @elseif(! $p->is_stage && !($isOffStageRegOpen ?? true))
+                                            (Off-Stage Closed • Admin Active)
+                                        @else
+                                            (Closed • Admin Active)
+                                        @endif
                                     </span>
                                 @endif
                             </td>
@@ -485,7 +491,11 @@
                                 <button @click="menuOpen = !menuOpen" class="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100">
                                     <span class="font-bold text-sm leading-none">···</span>
                                 </button>
-                                <div x-show="menuOpen" @click.away="menuOpen = false" class="absolute right-5 mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-20 text-left text-xs" style="display: none;">
+                                <div x-show="menuOpen" @click.away="menuOpen = false" class="absolute right-5 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-20 text-left text-xs" style="display: none;">
+                                    <a href="{{ route('admin.registrations.create', ['program_id' => $p->id]) }}" class="block px-3 py-1.5 text-[#be1e2d] hover:bg-amber-50 font-bold flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ Add Participants</span>
+                                    </a>
                                     <a href="{{ route('admin.programs.show', $p) }}" class="block px-3 py-1.5 text-slate-700 hover:bg-slate-50">View Details</a>
                                     <a href="{{ route('admin.programs.edit', $p) }}" class="block px-3 py-1.5 text-slate-700 hover:bg-slate-50">Edit</a>
                                     <button type="button" 
