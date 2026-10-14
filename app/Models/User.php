@@ -121,4 +121,9 @@ class User extends Authenticatable
     {
         return in_array($this->role, ['super_admin', 'admin', 'presentation_team', 'presentation']);
     }
+
+    public function isFundCollector(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'fund_collector', 'fund_manager']);
+    }
 }

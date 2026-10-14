@@ -451,6 +451,21 @@
                 <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">COINS</span>
             </a>
 
+            <!-- Fund Collection & Receipts -->
+            <div x-data="{ open: {{ request()->routeIs('admin.fund.*') ? 'true' : 'false' }} }" class="space-y-0.5">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('admin.fund.*') ? 'text-white font-semibold' : '' }}">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span>Fund Collection</span>
+                    </div>
+                    <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-[11px]" style="display: none;">
+                    <a href="{{ route('admin.fund.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.fund.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">All Receipts Ledger</a>
+                    <a href="{{ route('admin.fund.settings') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.fund.settings') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Receipt Customizer</a>
+                </div>
+            </div>
+
             <!-- 15. Panel Access & Passwords Hub -->
             <a href="{{ route('admin.panel-access.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.panel-access.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>

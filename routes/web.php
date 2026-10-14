@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CodeLetterController as AdminCodeLetterController
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExportController as AdminExportController;
 use App\Http\Controllers\Admin\FormController as AdminFormController;
+use App\Http\Controllers\Admin\FundManagementController as AdminFundManagementController;
 use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Admin\GroupController as AdminGroupController;
 use App\Http\Controllers\Admin\IdCardController as AdminIdCardController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\Admin\WebsiteBuilderController as AdminWebsiteBuilderCo
 use App\Http\Controllers\Admin\ZoneController as AdminZoneController;
 use App\Http\Controllers\Announcer\AnnouncerController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Fund\FundController;
 use App\Http\Controllers\GreenRoom\GreenRoomController;
 use App\Http\Controllers\Judge\JudgeController;
 use App\Http\Controllers\Leader\LeaderController;
@@ -609,6 +611,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('panel-access', [AdminPanelAccessController::class, 'index'])->name('panel-access.index');
     Route::post('panel-access/{user}/toggle-status', [AdminPanelAccessController::class, 'toggleStatus'])->name('panel-access.toggle-status');
     Route::post('panel-access/{user}/update-password', [AdminPanelAccessController::class, 'updatePassword'])->name('panel-access.update-password');
+
+    // Fund Collection Ledger & Settings (Admin Exclusive Delete & Customizer)
+    Route::prefix('fund')->name('fund.')->group(function () {
+        Route::get('/', [AdminFundManagementController::class, 'index'])->name('index');
+        Route::get('/receipts/{receipt}', [AdminFundManagementController::class, 'show'])->name('receipts.show');
+        Route::delete('/receipts/{receipt}', [AdminFundManagementController::class, 'destroy'])->name('receipts.destroy');
+        Route::get('/settings', [AdminFundManagementController::class, 'settings'])->name('settings');
+        Route::post('/settings', [AdminFundManagementController::class, 'updateSettings'])->name('settings.update');
+    });
 });
 
 /*
@@ -795,4 +806,15 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::delete('/results/templates/{template}', [MediaResultController::class, 'templateDestroy'])->name('results.templates.destroy');
     Route::get('/results/templates/{template}/customize', [MediaResultController::class, 'templateCustomize'])->name('results.templates.customize');
     Route::post('/results/templates/{template}/customize', [MediaResultController::class, 'templateSaveCustomization'])->name('results.templates.save-customization');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Fund Collection & Receipts Desk Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('fund')->name('fund.')->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->group(function () {
+    Route::get('/', [FundController::class, 'dashboard'])->name('dashboard');
+    Route::post('/receipts', [FundController::class, 'store'])->name('receipts.store');
+    Route::get('/receipts/{receipt}', [FundController::class, 'show'])->name('receipts.show');
 });

@@ -62,6 +62,7 @@ class RoleMiddleware
                 'presentation_team', 'presentation' => route('presentation.dashboard'),
                 'program_committee', 'program_coordinator' => route('program-committee.dashboard'),
                 'student' => route('student.dashboard'),
+                'fund_collector', 'fund_manager' => route('fund.dashboard'),
                 default => route('home'),
             };
 

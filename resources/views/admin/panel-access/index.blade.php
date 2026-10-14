@@ -94,7 +94,7 @@
     @endif
 
     <!-- Metric Stat Badges -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Accounts</div>
             <div class="text-2xl font-black text-slate-900 mt-1">{{ $stats['total'] }}</div>
@@ -118,6 +118,10 @@
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Media Wing</div>
             <div class="text-2xl font-black text-slate-900 mt-1">{{ $stats['media'] }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-emerald-200 bg-emerald-50/20 shadow-2xs">
+            <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Fund Desk</div>
+            <div class="text-2xl font-black text-emerald-700 mt-1">{{ $stats['fund'] ?? 0 }}</div>
         </div>
     </div>
 
@@ -268,6 +272,10 @@
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'greenroom' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                 Green Room
             </a>
+            <a href="{{ route('admin.panel-access.index', ['panel' => 'fund']) }}" 
+               class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'fund' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                Fund Collection
+            </a>
         </div>
 
         <form method="GET" action="{{ route('admin.panel-access.index') }}" class="flex items-center gap-2">
@@ -312,6 +320,7 @@
                                 'program_committee', 'program_coordinator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                 'announcer' => 'bg-amber-50 text-amber-900 border-amber-300',
                                 'media_team', 'media_manager' => 'bg-purple-50 text-purple-700 border-purple-200',
+                                'fund_collector', 'fund_manager' => 'bg-emerald-50 text-emerald-800 border-emerald-300',
                                 'group_leader' => 'bg-amber-50 text-amber-800 border-amber-200',
                                 'judge' => 'bg-blue-50 text-blue-700 border-blue-200',
                                 'green_room_coordinator' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -324,6 +333,7 @@
                                 'program_committee', 'program_coordinator' => 'Program Samithi',
                                 'announcer' => 'Announcer Desk',
                                 'media_team', 'media_manager' => 'Media Wing',
+                                'fund_collector', 'fund_manager' => 'Fund Collection Desk',
                                 'group_leader' => 'Team Leader (' . ($user->ledGroup->name ?? 'Group') . ')',
                                 'judge' => 'Judges Panel',
                                 'green_room_coordinator' => 'Green Room Coordinator',
@@ -335,6 +345,7 @@
                                 'program_committee', 'program_coordinator' => 'samithi',
                                 'announcer' => 'announcer',
                                 'media_team', 'media_manager' => 'media',
+                                'fund_collector', 'fund_manager' => 'fund',
                                 'group_leader' => strtolower($user->ledGroup->code ?? 'leader'),
                                 default => null
                             };

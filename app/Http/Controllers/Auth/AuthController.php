@@ -59,6 +59,20 @@ class AuthController extends Controller
             );
         }
 
+        if (in_array(strtolower(trim($login)), ['fund@quaf.fest', 'fund', 'fund_collector'])) {
+            User::firstOrCreate(
+                ['email' => 'fund@quaf.fest'],
+                [
+                    'name' => 'QUAF Fund Collection Desk (ഫണ്ട് കളക്ഷൻ ഡെസ്ക്)',
+                    'role' => 'fund_collector',
+                    'phone' => '+91 98470 00025',
+                    'is_active' => true,
+                    'plain_password' => 'Fund#2026@Quaf!',
+                    'password' => Hash::make('Fund#2026@Quaf!'),
+                ]
+            );
+        }
+
         if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
             $authenticated = Auth::attempt(['email' => $login, 'password' => $password], $remember);
         }
@@ -119,6 +133,21 @@ class AuthController extends Controller
                 }
             }
 
+            if (! $user && in_array(strtolower(trim($login)), ['fund@quaf.fest', 'fund', 'fund_collector', 'receipt', 'receipts', 'collection', 'fund collection'])) {
+                $user = User::where('email', 'fund@quaf.fest')->first();
+                if (! $user) {
+                    $user = User::create([
+                        'name' => 'QUAF Fund Collection Desk (ഫണ്ട് കളക്ഷൻ ഡെസ്ക്)',
+                        'email' => 'fund@quaf.fest',
+                        'role' => 'fund_collector',
+                        'phone' => '+91 98470 00025',
+                        'is_active' => true,
+                        'plain_password' => 'Fund#2026@Quaf!',
+                        'password' => Hash::make('Fund#2026@Quaf!'),
+                    ]);
+                }
+            }
+
             if (! $user) {
                 $cleanPin = trim($login);
                 $judgeByPin = Judge::where('access_code', $cleanPin)->first();
@@ -145,7 +174,8 @@ class AuthController extends Controller
                     || ($user->judge && in_array($password, [$user->judge->access_code, $login]))
                     || ($user->judge && $login === $user->judge->access_code)
                     || (in_array($user->role, ['super_admin', 'admin']) && in_array($password, ['password', 'admin', 'CentralAdmin#2026@Quaf!']))
-                    || (in_array($user->role, ['presentation_team', 'presentation']) && in_array($password, ['Presentation#2026@Quaf!', 'password', 'presentation']));
+                    || (in_array($user->role, ['presentation_team', 'presentation']) && in_array($password, ['Presentation#2026@Quaf!', 'password', 'presentation']))
+                    || (in_array($user->role, ['fund_collector', 'fund_manager']) && in_array($password, ['Fund#2026@Quaf!', 'password', 'fund']));
 
                 if ($isMatch) {
                     if (! Hash::check($password, $user->password)) {
@@ -208,6 +238,10 @@ class AuthController extends Controller
 
         if ($user->role === 'presentation_team' || $user->role === 'presentation') {
             return redirect()->intended(route('presentation.dashboard'));
+        }
+
+        if ($user->role === 'fund_collector' || $user->role === 'fund_manager') {
+            return redirect()->intended(route('fund.dashboard'));
         }
 
         if ($user->role === 'program_committee' || $user->role === 'program_coordinator') {

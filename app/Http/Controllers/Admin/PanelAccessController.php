@@ -48,6 +48,8 @@ class PanelAccessController extends Controller
                 $query->where('role', 'announcer');
             } elseif ($panel === 'presentation') {
                 $query->whereIn('role', ['presentation_team', 'presentation']);
+            } elseif ($panel === 'fund') {
+                $query->whereIn('role', ['fund_collector', 'fund_manager']);
             } elseif ($panel === 'greenroom') {
                 $query->where('role', 'green_room_coordinator');
             } elseif ($panel === 'student') {
@@ -71,10 +73,11 @@ class PanelAccessController extends Controller
                 WHEN role IN ('program_committee', 'program_coordinator') THEN 3
                 WHEN role = 'announcer' THEN 4
                 WHEN role IN ('media_team', 'media_manager') THEN 5
-                WHEN role = 'group_leader' THEN 6
-                WHEN role = 'judge' THEN 7
-                WHEN role = 'green_room_coordinator' THEN 8
-                ELSE 9
+                WHEN role IN ('fund_collector', 'fund_manager') THEN 6
+                WHEN role = 'group_leader' THEN 7
+                WHEN role = 'judge' THEN 8
+                WHEN role = 'green_room_coordinator' THEN 9
+                ELSE 10
             END ASC
         ")->orderBy('id')->get();
 
@@ -86,6 +89,7 @@ class PanelAccessController extends Controller
             'judges' => User::where('role', 'judge')->count(),
             'media' => User::whereIn('role', ['media_team', 'media_manager'])->count(),
             'announcer' => User::where('role', 'announcer')->count(),
+            'fund' => User::whereIn('role', ['fund_collector', 'fund_manager'])->count(),
         ];
 
         $groups = Group::with('leader')->orderBy('name')->get();
