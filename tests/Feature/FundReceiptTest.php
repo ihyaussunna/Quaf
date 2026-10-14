@@ -223,4 +223,50 @@ class FundReceiptTest extends TestCase
         $response->assertSee('fund@quaf.fest');
         $response->assertSee('Fund Collection Desk');
     }
+
+    public function test_fund_collector_can_stream_and_download_receipt_image(): void
+    {
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'Q9-RCP-'.date('Y').'-0005',
+            'donor_name' => 'Vaheed Zaman',
+            'amount' => 2000.00,
+            'amount_in_words' => 'Two Thousand Rupees Only',
+            'payment_method' => 'upi',
+            'collector_id' => $this->fundCollector->id,
+            'collector_name' => $this->fundCollector->name,
+        ]);
+
+        // Inline image stream
+        $imageResponse = $this->actingAs($this->fundCollector)->get(route('fund.receipts.image', $receipt));
+        $imageResponse->assertOk();
+        $this->assertEquals('image/jpeg', $imageResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('inline', $imageResponse->headers->get('Content-Disposition'));
+
+        // Download attachment
+        $downloadResponse = $this->actingAs($this->fundCollector)->get(route('fund.receipts.download', $receipt));
+        $downloadResponse->assertOk();
+        $this->assertEquals('image/jpeg', $downloadResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('attachment', $downloadResponse->headers->get('Content-Disposition'));
+    }
+
+    public function test_admin_can_stream_and_download_receipt_image(): void
+    {
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'Q9-RCP-'.date('Y').'-0006',
+            'donor_name' => 'Vaheed Zaman Admin',
+            'amount' => 5000.00,
+            'amount_in_words' => 'Five Thousand Rupees Only',
+            'payment_method' => 'cash',
+            'collector_id' => $this->admin->id,
+            'collector_name' => $this->admin->name,
+        ]);
+
+        $imageResponse = $this->actingAs($this->admin)->get(route('admin.fund.receipts.image', $receipt));
+        $imageResponse->assertOk();
+        $this->assertEquals('image/jpeg', $imageResponse->headers->get('Content-Type'));
+
+        $downloadResponse = $this->actingAs($this->admin)->get(route('admin.fund.receipts.download', $receipt));
+        $downloadResponse->assertOk();
+        $this->assertEquals('image/jpeg', $downloadResponse->headers->get('Content-Type'));
+    }
 }

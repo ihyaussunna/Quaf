@@ -7,10 +7,12 @@ use App\Models\FundReceipt;
 use App\Models\FundReceiptSetting;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\ReceiptImageGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FundManagementController extends Controller
 {
@@ -90,6 +92,22 @@ class FundManagementController extends Controller
         $settings = FundReceiptSetting::current();
 
         return view('fund.receipt', compact('receipt', 'settings'));
+    }
+
+    /**
+     * Stream the generated receipt image inline.
+     */
+    public function image(FundReceipt $receipt): StreamedResponse
+    {
+        return ReceiptImageGenerator::streamResponse($receipt, false);
+    }
+
+    /**
+     * Download the generated receipt image as a JPEG file.
+     */
+    public function download(FundReceipt $receipt): StreamedResponse
+    {
+        return ReceiptImageGenerator::streamResponse($receipt, true);
     }
 
     /**

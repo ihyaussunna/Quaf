@@ -14,8 +14,8 @@
 
     <style>
         @page {
-            size: auto;
-            margin: 8mm;
+            size: portrait;
+            margin: 6mm;
         }
 
         @media print {
@@ -23,14 +23,26 @@
                 background: #ffffff !important;
                 color: #000000 !important;
                 padding: 0 !important;
+                margin: 0 !important;
             }
             .no-print {
                 display: none !important;
             }
-            .receipt-card {
+            .print-wrapper {
+                padding: 0 !important;
+                margin: 0 !important;
                 box-shadow: none !important;
-                border: 2px solid {{ $settings->primary_color }} !important;
+                border: none !important;
+                background: transparent !important;
+            }
+            .receipt-graphic-poster {
+                max-height: 98vh !important;
+                max-width: 100% !important;
+                width: auto !important;
                 margin: 0 auto !important;
+                display: block !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
                 page-break-inside: avoid !important;
             }
         }
@@ -44,243 +56,261 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen py-6 px-3 sm:px-6 font-sora antialiased text-slate-900">
+<body class="bg-slate-900 min-h-screen py-6 px-3 sm:px-6 font-sora antialiased text-slate-100"
+      x-data="{ 
+          copied: false,
+          activeTab: 'poster',
+          copyLink() {
+              navigator.clipboard.writeText('{{ route('fund.receipts.show', $receipt) }}');
+              this.copied = true;
+              setTimeout(() => this.copied = false, 2500);
+          }
+      }">
 
     @php
-        // Resolve dynamic alignment classes
-        $alignClass = match($settings->text_alignment) {
-            'left' => 'text-left',
-            'right' => 'text-right',
-            default => 'text-center',
-        };
+        $downloadUrl = Auth::user()?->isAdmin() 
+            ? route('admin.fund.receipts.download', $receipt) 
+            : route('fund.receipts.download', $receipt);
 
-        $headerFlex = match($settings->text_alignment) {
-            'left' => 'justify-start items-start',
-            'right' => 'justify-end items-end',
-            default => 'justify-center items-center',
-        };
+        $imageUrl = Auth::user()?->isAdmin() 
+            ? route('admin.fund.receipts.image', $receipt) 
+            : route('fund.receipts.image', $receipt);
 
-        // Resolve dynamic font size scale
-        $fontSizeScale = match($settings->font_size) {
-            'small' => 'text-xs',
-            'large' => 'text-base',
-            default => 'text-sm',
-        };
-
-        $titleScale = match($settings->font_size) {
-            'small' => 'text-lg sm:text-xl',
-            'large' => 'text-2xl sm:text-3xl',
-            default => 'text-xl sm:text-2xl',
-        };
-
-        // Resolve dynamic padding scale
-        $paddingScale = match($settings->padding_size) {
-            'compact' => 'p-4 sm:p-6',
-            'relaxed' => 'p-8 sm:p-12',
-            default => 'p-6 sm:p-8',
-        };
+        $waText = urlencode("QUAF '09 - Official Contribution Receipt\n\n" .
+            "Receipt No: " . $receipt->receipt_number . "\n" .
+            "Received with thanks from: " . $receipt->donor_name . "\n" .
+            "Amount: Rs." . number_format($receipt->amount, 0) . "/-\n" .
+            "Date: " . $receipt->created_at->format('d/m/Y') . "\n\n" .
+            "View / Download Official Receipt:\n" . route('fund.receipts.download', $receipt));
     @endphp
 
     <!-- Top Action Ribbon (Hidden when printing) -->
-    <div class="max-w-2xl mx-auto mb-6 no-print flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-            @if(Auth::user()?->isAdmin())
-                <a href="{{ route('admin.fund.index') }}" 
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-all shadow-xs">
-                    <span>← All Receipts Ledger</span>
-                </a>
-                <a href="{{ route('admin.fund.settings') }}" 
-                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-                    <span>Customize Design</span>
-                </a>
-            @else
-                <a href="{{ route('fund.dashboard') }}" 
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-all shadow-xs">
-                    <span>← Back to Fund Desk</span>
-                </a>
-            @endif
-        </div>
-
-        <div class="flex items-center gap-2">
-            @if(!Auth::user()?->isAdmin())
-                <a href="{{ route('fund.dashboard') }}#new-receipt-card"
-                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition-all">
-                    <span>+ New Receipt</span>
-                </a>
-            @endif
-
-            <button type="button" onclick="window.print()" 
-                    class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                <span>Print Receipt Voucher</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- The Printable Receipt Voucher Document -->
-    <div class="receipt-card max-w-2xl mx-auto rounded-3xl shadow-xl transition-all relative overflow-hidden {{ $paddingScale }} {{ $fontSizeScale }}"
-         style="background-color: {{ $settings->bg_color }}; color: {{ $settings->text_color }}; border: 2px solid {{ $settings->primary_color }}33;">
-
-        <!-- Top Accent Color Bar -->
-        <div class="absolute top-0 left-0 right-0 h-2.5" style="background: linear-gradient(90deg, {{ $settings->primary_color }}, {{ $settings->accent_color }});"></div>
-
-        <!-- Watermark / Background Texture -->
-        <div class="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center font-black text-7xl select-none" style="color: {{ $settings->primary_color }};">
-            {{ $settings->header_title }}
-        </div>
-
-        <!-- Receipt Header Section -->
-        <div class="relative z-10 flex flex-col {{ $headerFlex }} {{ $alignClass }} pb-6 border-b border-dashed border-slate-300/80">
-            @if($settings->show_logo)
-                <div class="mb-3">
-                    <img src="{{ asset('images/dashboard-logo.svg') }}" alt="Logo" class="h-12 w-auto object-contain max-w-[200px]" onerror="this.style.display='none'">
-                </div>
-            @endif
-
-            <span class="text-[11px] font-mono font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-1" 
-                  style="background-color: {{ $settings->primary_color }}15; color: {{ $settings->primary_color }};">
-                {{ $settings->organization_name }}
-            </span>
-
-            <h1 class="{{ $titleScale }} font-black tracking-tight" style="color: {{ $settings->primary_color }};">
-                {{ $settings->header_title }}
-            </h1>
-
-            <p class="text-xs text-slate-500 font-medium mt-0.5">
-                {{ $settings->subtitle }}
-            </p>
-        </div>
-
-        <!-- Receipt Metadata Ribbon -->
-        <div class="relative z-10 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 font-mono text-xs">
+    <div class="max-w-2xl mx-auto mb-6 no-print space-y-4">
+        <!-- Navigation Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 backdrop-blur-md p-3.5 rounded-2xl border border-slate-700/80 shadow-lg">
             <div class="flex items-center gap-2">
-                <span class="text-slate-400 font-bold uppercase text-[10px]">Receipt No:</span>
-                <span class="px-2.5 py-1 rounded-lg font-black tracking-wider text-white shadow-2xs" style="background-color: {{ $settings->primary_color }};">
-                    {{ $receipt->receipt_number }}
-                </span>
-            </div>
-
-            <div class="flex items-center gap-2 text-slate-600">
-                <span class="text-slate-400 font-bold uppercase text-[10px]">Date & Time:</span>
-                <span class="font-bold text-slate-800">{{ $receipt->created_at->format('d M Y, h:i A') }}</span>
-            </div>
-        </div>
-
-        <!-- Donor Information & Contribution Details -->
-        <div class="relative z-10 py-6 space-y-4">
-            <!-- Donor Name & Place -->
-            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/70">
-                <div class="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400">Received With Thanks From:</div>
-                <div class="text-lg sm:text-xl font-black text-slate-900 mt-1 uppercase tracking-tight">
-                    {{ $receipt->donor_name }}
-                </div>
-                @if($receipt->donor_place || $receipt->donor_phone)
-                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium mt-1 font-mono">
-                        @if($receipt->donor_place)
-                            <span>Location: <strong class="text-slate-800">{{ $receipt->donor_place }}</strong></span>
-                        @endif
-                        @if($receipt->donor_phone)
-                            @if($receipt->donor_place) <span>•</span> @endif
-                            <span>Phone: <strong class="text-slate-800">{{ $receipt->donor_phone }}</strong></span>
-                        @endif
-                    </div>
+                @if(Auth::user()?->isAdmin())
+                    <a href="{{ route('admin.fund.index') }}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition-all shadow-xs">
+                        <span>← Ledger</span>
+                    </a>
+                    <a href="{{ route('admin.fund.settings') }}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold text-xs transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                        <span>Customizer</span>
+                    </a>
+                @else
+                    <a href="{{ route('fund.dashboard') }}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition-all shadow-xs">
+                        <span>← Back to Fund Desk</span>
+                    </a>
+                    <a href="{{ route('fund.dashboard') }}#new-receipt-card"
+                       class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all">
+                        <span>+ New</span>
+                    </a>
                 @endif
             </div>
 
-            <!-- Amount Highlight Box -->
-            <div class="p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border"
-                 style="background-color: {{ $settings->primary_color }}08; border-color: {{ $settings->primary_color }}25;">
-                <div>
-                    <div class="text-[10px] uppercase font-mono font-bold tracking-wider" style="color: {{ $settings->primary_color }};">
-                        Amount Received / ലഭിച്ച തുക
-                    </div>
-                    <div class="text-2xl sm:text-3xl font-black font-mono mt-1" style="color: {{ $settings->primary_color }};">
-                        ₹{{ number_format($receipt->amount, 2) }}
-                    </div>
-                </div>
-
-                <div class="sm:text-right font-mono text-xs">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full font-bold uppercase text-[11px] shadow-2xs text-white" 
-                          style="background-color: {{ $settings->accent_color }};">
-                        Mode: {{ strtoupper($receipt->payment_method) }}
-                    </span>
-                    @if($receipt->transaction_reference)
-                        <div class="text-[10px] text-slate-500 mt-1">
-                            Txn Ref: {{ $receipt->transaction_reference }}
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Amount in Words -->
-            <div class="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200/80 font-mono text-xs">
-                <span class="text-[10px] uppercase font-bold text-slate-400 mr-2">In Words:</span>
-                <span class="font-bold text-slate-900">{{ $receipt->amount_in_words }}</span>
-            </div>
-
-            <!-- Purpose & Category -->
-            <div class="grid grid-cols-2 gap-3 text-xs font-mono pt-1">
-                <div class="p-3 rounded-xl bg-slate-50/50 border border-slate-200/60">
-                    <div class="text-[10px] uppercase text-slate-400 font-bold">Purpose / Category</div>
-                    <div class="font-bold text-slate-800 mt-0.5">{{ $receipt->category ?? 'Festival Fund' }}</div>
-                </div>
-                <div class="p-3 rounded-xl bg-slate-50/50 border border-slate-200/60">
-                    <div class="text-[10px] uppercase text-slate-400 font-bold">Issued By</div>
-                    <div class="font-bold text-slate-800 mt-0.5">{{ $receipt->collector_name ?? 'QUAF Fund Desk' }}</div>
-                </div>
-            </div>
-
-            @if($receipt->notes)
-                <div class="p-3 rounded-xl bg-slate-50/50 border border-slate-200/60 text-xs">
-                    <span class="text-[10px] font-mono font-bold uppercase text-slate-400">Memo / Notes:</span>
-                    <span class="text-slate-700 ml-1">{{ $receipt->notes }}</span>
-                </div>
-            @endif
-
-            @if($receipt->is_cancelled)
-                <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        <span>VOID / CANCELLED VOUCHER: {{ $receipt->cancelled_reason ?? 'Cancelled by Admin' }}</span>
-                    </div>
-                    <span class="font-mono text-[10px]">{{ $receipt->cancelled_at?->format('d M Y') }}</span>
-                </div>
-            @endif
-        </div>
-
-        <!-- Receipt Footer & Verification / Signatures -->
-        <div class="relative z-10 pt-6 mt-4 border-t border-dashed border-slate-300/80 flex flex-col sm:flex-row items-center justify-between gap-6">
-            <!-- QR Code Matrix for Verification -->
-            <div class="flex items-center gap-3">
-                <div class="w-16 h-16 p-1 bg-white rounded-xl border border-slate-300 shrink-0">
-                    {!! \App\Services\QrCodeService::svg(route('fund.receipts.show', $receipt), 100) !!}
-                </div>
-                <div class="text-[10px] font-mono text-slate-500 leading-tight">
-                    <div class="font-bold text-slate-800">Scan to Verify</div>
-                    <div>Official Digital Voucher</div>
-                    <div class="text-emerald-700 font-bold">Valid & Authenticated</div>
-                </div>
-            </div>
-
-            <!-- Signature & Stamp Placeholder -->
-            <div class="text-center sm:text-right">
-                <div class="h-10 flex items-end justify-center sm:justify-end mb-1">
-                    <span class="font-mono text-xs italic text-slate-400 font-semibold tracking-wider">Signed Digitally</span>
-                </div>
-                <div class="w-44 border-t border-slate-400/60 mx-auto sm:ml-auto"></div>
-                <div class="text-[11px] font-bold text-slate-800 mt-1 uppercase tracking-wider font-mono">
-                    {{ $settings->authorized_by }}
-                </div>
+            <!-- View Mode Switcher -->
+            <div class="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 text-xs font-bold">
+                <button type="button" @click="activeTab = 'poster'"
+                        :class="activeTab === 'poster' ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-400 hover:text-white'"
+                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                    Receipt Card
+                </button>
+                <button type="button" @click="activeTab = 'ledger'"
+                        :class="activeTab === 'ledger' ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-400 hover:text-white'"
+                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                    Details
+                </button>
             </div>
         </div>
 
-        <!-- Bottom Footer Note -->
-        @if($settings->footer_text)
-            <div class="relative z-10 mt-6 pt-4 border-t border-slate-200/60 text-center text-[11px] text-slate-500 {{ $alignClass }}">
-                {{ $settings->footer_text }}
+        <!-- Quick Action Buttons Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <!-- Download JPG -->
+            <a href="{{ $downloadUrl }}" 
+               class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 active:scale-98">
+                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Download JPG</span>
+            </a>
+
+            <!-- Print Receipt Voucher -->
+            <button type="button" onclick="window.print()" 
+                    class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 cursor-pointer active:scale-98">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span>Print</span>
+            </button>
+
+            <!-- Share WhatsApp -->
+            <a href="https://api.whatsapp.com/send?text={{ $waText }}" target="_blank"
+               class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5b] text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#25D366]/20 active:scale-98">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                <span>WhatsApp</span>
+            </a>
+
+            <!-- Copy Link -->
+            <button type="button" @click="copyLink()" 
+                    class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider transition-all border border-slate-700 cursor-pointer active:scale-98">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                <span x-text="copied ? 'Copied!' : 'Copy Link'">Copy Link</span>
+            </button>
+        </div>
+
+        @if(session('success'))
+            <div class="p-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-bold flex items-center justify-between">
+                <span>{{ session('success') }}</span>
+                <span class="text-[11px] font-mono text-emerald-300">#{{ $receipt->receipt_number }}</span>
             </div>
         @endif
+    </div>
+
+    <!-- MAIN RECEIPT DISPLAY CONTAINER -->
+    <div class="max-w-2xl mx-auto print-wrapper">
+
+        <!-- TAB 1: THE GRAPHIC POSTER VOUCHER (DEFAULT) -->
+        <div x-show="activeTab === 'poster'" class="transition-all duration-300">
+            <div class="relative bg-slate-950 p-2 sm:p-4 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
+                <!-- Glowing Accent Glow -->
+                <div class="absolute -top-24 -left-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- The Exact Generated Image Poster -->
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-amber-500/20 bg-black">
+                    <img src="{{ $imageUrl }}" 
+                         alt="QUAF Official Receipt {{ $receipt->receipt_number }}" 
+                         class="receipt-graphic-poster w-full h-auto block select-none">
+                </div>
+
+                <!-- Footer Hint in Dark Mode (hidden in print) -->
+                <div class="mt-3.5 px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono no-print">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-slate-300 font-bold">1126 x 1407 HD Voucher</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ $downloadUrl }}" class="text-amber-400 hover:underline font-bold">Download JPG</a>
+                        <span>•</span>
+                        <button type="button" @click="activeTab = 'ledger'" class="text-slate-300 hover:text-white underline">View Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: DETAILED LEDGER BREAKDOWN & AUDIT METADATA -->
+        <div x-show="activeTab === 'ledger'" x-cloak class="transition-all duration-300 space-y-4">
+            <div class="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+                            Official Digital Record
+                        </span>
+                        <h2 class="text-xl font-black text-slate-900 mt-2">Fund Contribution Voucher</h2>
+                        <p class="text-xs text-slate-500 font-mono">QUAF '09 • Ihya-Us-Sunna Arts Fest</p>
+                    </div>
+                    <div class="text-right font-mono">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold">Receipt No</div>
+                        <div class="text-base font-black text-slate-900">{{ $receipt->receipt_number }}</div>
+                    </div>
+                </div>
+
+                <!-- Donor Card -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                    <div class="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400">Contributor Details</div>
+                    <div class="text-lg font-black text-slate-900 uppercase">
+                        {{ $receipt->donor_name }}
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xs font-mono text-slate-600 pt-1">
+                        <div>
+                            <span class="text-slate-400">Phone:</span>
+                            <span class="font-bold text-slate-800">{{ $receipt->donor_phone ?: 'Not provided' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400">Place:</span>
+                            <span class="font-bold text-slate-800">{{ $receipt->donor_place ?: 'Not provided' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount Breakdown -->
+                <div class="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="text-[10px] uppercase font-mono font-bold tracking-wider text-emerald-800">Contribution Amount</div>
+                        <div class="text-3xl font-black font-mono text-emerald-900 mt-1">
+                            ₹{{ number_format($receipt->amount, 2) }}
+                        </div>
+                        <div class="text-xs font-mono text-emerald-700 mt-1">
+                            {{ $receipt->amount_in_words }}
+                        </div>
+                    </div>
+
+                    <div class="sm:text-right font-mono text-xs">
+                        <span class="inline-block px-3 py-1 rounded-full font-bold uppercase text-[11px] bg-emerald-700 text-white shadow-2xs">
+                            {{ strtoupper($receipt->payment_method) }}
+                        </span>
+                        @if($receipt->transaction_reference)
+                            <div class="text-[10px] text-slate-600 mt-1.5">
+                                Ref: {{ $receipt->transaction_reference }}
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Key Attributes -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold">Category</div>
+                        <div class="font-bold text-slate-800 mt-0.5">{{ $receipt->category ?? 'Festival Fund' }}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold">Issued By</div>
+                        <div class="font-bold text-slate-800 mt-0.5">{{ $receipt->collector_name ?? 'QUAF Fund Desk' }}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 col-span-2 sm:col-span-1">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold">Date & Time</div>
+                        <div class="font-bold text-slate-800 mt-0.5">{{ $receipt->created_at->format('d M Y, h:i A') }}</div>
+                    </div>
+                </div>
+
+                @if($receipt->notes)
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                        <span class="text-[10px] font-mono font-bold uppercase text-slate-400">Notes / Memo:</span>
+                        <span class="text-slate-700 ml-1">{{ $receipt->notes }}</span>
+                    </div>
+                @endif
+
+                @if($receipt->is_cancelled)
+                    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <span>VOID / CANCELLED VOUCHER: {{ $receipt->cancelled_reason ?? 'Cancelled by Admin' }}</span>
+                        </div>
+                        <span class="font-mono text-[10px]">{{ $receipt->cancelled_at?->format('d M Y') }}</span>
+                    </div>
+                @endif
+
+                <!-- QR Code Verification Block -->
+                <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-16 h-16 p-1 bg-white rounded-xl border border-slate-300 shrink-0">
+                            {!! \App\Services\QrCodeService::svg(route('fund.receipts.show', $receipt), 100) !!}
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 leading-tight">
+                            <div class="font-bold text-slate-800">Scan to Verify</div>
+                            <div>QUAF '09 Secured Record</div>
+                            <div class="text-emerald-700 font-bold">Valid & Authenticated</div>
+                        </div>
+                    </div>
+
+                    <button type="button" @click="activeTab = 'poster'" 
+                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors">
+                        View Card Poster ↗
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </body>

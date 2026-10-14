@@ -616,6 +616,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::prefix('fund')->name('fund.')->group(function () {
         Route::get('/', [AdminFundManagementController::class, 'index'])->name('index');
         Route::get('/receipts/{receipt}', [AdminFundManagementController::class, 'show'])->name('receipts.show');
+        Route::get('/receipts/{receipt}/image', [AdminFundManagementController::class, 'image'])->name('receipts.image');
+        Route::get('/receipts/{receipt}/download', [AdminFundManagementController::class, 'download'])->name('receipts.download');
         Route::delete('/receipts/{receipt}', [AdminFundManagementController::class, 'destroy'])->name('receipts.destroy');
         Route::get('/settings', [AdminFundManagementController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminFundManagementController::class, 'updateSettings'])->name('settings.update');
@@ -817,4 +819,6 @@ Route::prefix('fund')->name('fund.')->middleware(['auth', 'role:fund_collector,f
     Route::get('/', [FundController::class, 'dashboard'])->name('dashboard');
     Route::post('/receipts', [FundController::class, 'store'])->name('receipts.store');
     Route::get('/receipts/{receipt}', [FundController::class, 'show'])->name('receipts.show');
+    Route::get('/receipts/{receipt}/image', [FundController::class, 'image'])->name('receipts.image');
+    Route::get('/receipts/{receipt}/download', [FundController::class, 'download'])->name('receipts.download');
 });

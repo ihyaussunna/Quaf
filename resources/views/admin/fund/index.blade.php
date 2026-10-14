@@ -255,6 +255,12 @@
                                         Voucher ↗
                                     </a>
 
+                                    <a href="{{ route('admin.fund.receipts.download', $rcp) }}" 
+                                       class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs transition-colors"
+                                       title="Download JPG Voucher">
+                                        JPG ↓
+                                    </a>
+
                                     @if(!$rcp->is_cancelled && !$rcp->trashed())
                                         <button type="button" 
                                                 @click="openDeleteModal({{ $rcp->id }}, '{{ $rcp->receipt_number }}', '{{ addslashes($rcp->donor_name) }}', {{ $rcp->amount }})"
