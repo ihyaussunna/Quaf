@@ -119,16 +119,6 @@ function fundHomePage() {
                 </div>
             </div>
 
-            <!-- Title & Subtitle -->
-            <div class="max-w-2xl mx-auto mb-6">
-                <h1 class="text-2xl sm:text-4xl font-black font-sora tracking-tight text-white">
-                    QUAF '09 Festival Fund Portal
-                </h1>
-                <p class="text-xs sm:text-sm text-slate-300 font-anek mt-2">
-                    മഹത്തായ ക്വാഫ് ഫെസ്റ്റിവലിന്റെ വിജയത്തിനായി വിദ്യാർത്ഥികൾക്ക് നേരിട്ട് രസീത് വിതരണം ചെയ്യാനും സംഭാവനകൾ രേഖപ്പെടുത്താനുമുള്ള ഔദ്യോഗിക പ്ലാറ്റ്‌ഫോം.
-                </p>
-            </div>
-
             <!-- Primary Action CTA (Only Student Desk / Login Button - No Admin Ledger Button) -->
             <div class="flex items-center justify-center max-w-md mb-10 sm:mb-12">
                 @if($currentStudent)
