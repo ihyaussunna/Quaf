@@ -395,12 +395,12 @@ function fundHomePage() {
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md"
-         style="display: none;"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md"
+         style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important; z-index: 99999 !important; display: flex !important; align-items: center !important; justify-content: center !important; background-color: rgba(10, 15, 30, 0.8) !important; -webkit-backdrop-filter: blur(8px) !important; backdrop-filter: blur(8px) !important;"
          @keydown.escape.window="showLoginModal = false">
         
         <!-- Backdrop Click to Close -->
-        <div class="fixed inset-0" @click="showLoginModal = false"></div>
+        <div class="fixed inset-0" style="position: absolute; inset: 0; width: 100%; height: 100%;" @click="showLoginModal = false"></div>
 
         <!-- Pure White Apple-Style Dialog Card -->
         <div x-show="showLoginModal"
@@ -411,6 +411,7 @@ function fundHomePage() {
              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
              x-transition:leave-end="opacity-0 translate-y-6 scale-95"
              class="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 z-10 text-slate-900 space-y-5"
+             style="position: relative !important; z-index: 100000 !important; background-color: #ffffff !important; color: #0f172a !important; border-radius: 24px !important; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45) !important; max-height: calc(100dvh - 32px) !important; overflow-y: auto !important;"
              @click.stop>
             
             <!-- Apple-Style Circular Close Button -->
