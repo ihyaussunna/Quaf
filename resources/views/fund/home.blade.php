@@ -45,84 +45,10 @@ function fundHomePage() {
          ===================================================================== -->
     <section class="relative bg-[#07070a] text-white pt-20 sm:pt-28 lg:pt-36 pb-0 z-10 overflow-hidden">
 
-        <!-- Multi-Color Festival Mesh Glows -->
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
-        <div class="absolute bottom-10 right-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#005c94]/15 rounded-full blur-[130px] pointer-events-none"></div>
-        <div class="absolute bottom-0 left-1/3 w-64 h-64 bg-[#009444]/10 rounded-full blur-[110px] pointer-events-none"></div>
-
-        <!-- Rotating Yellow Pattern Burst (Hero Background Accent) -->
-        <style>
-            @keyframes heroPatternSlideIn {
-                0% { transform: translate3d(100%, 0, 0); opacity: 0; }
-                100% { transform: translate3d(36%, 0, 0); opacity: 0.95; }
-            }
-            @keyframes heroPatternSpin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-            .hero-pattern-wrapper {
-                position: absolute;
-                right: 0;
-                bottom: -60px;
-                width: 260px;
-                height: 260px;
-                pointer-events: none;
-                user-select: none;
-                z-index: 5;
-                animation: heroPatternSlideIn 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                will-change: transform, opacity;
-            }
-            @media (max-width: 639px) {
-                .hero-pattern-wrapper { bottom: -35px; width: 230px; height: 230px; }
-                .hero-pattern-svg { animation: heroPatternSpin 72s linear infinite; }
-            }
-            @media (min-width: 640px) {
-                .hero-pattern-wrapper { bottom: -75px; width: 360px; height: 360px; }
-            }
-            @media (min-width: 1024px) {
-                .hero-pattern-wrapper { bottom: -95px; width: 440px; height: 440px; }
-            }
-            .hero-pattern-svg {
-                width: 100%;
-                height: 100%;
-                display: block;
-                transform-origin: center center;
-                animation: heroPatternSpin 52s linear infinite;
-                will-change: transform;
-            }
-        </style>
-
-        <div class="hero-pattern-wrapper" style="z-index: 5;" aria-hidden="true">
-            <svg class="hero-pattern-svg" viewBox="0 0 27.7 27.7" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <style>.pat-burst-line { fill: #f3bd2e; }</style>
-                </defs>
-                <g>
-                    <polygon class="pat-burst-line" points="13.8 11.66 13.55 0 14.15 0 13.89 11.66 13.8 11.66 13.8 11.66"/>
-                    <polygon class="pat-burst-line" points="13.13 11.78 9.28 .77 9.86 .58 13.21 11.75 13.13 11.78 13.13 11.78"/>
-                    <polygon class="pat-burst-line" points="12.53 12.1 5.46 2.82 5.95 2.47 12.6 12.05 12.53 12.1 12.53 12.1"/>
-                    <polygon class="pat-burst-line" points="12.05 12.6 2.47 5.95 2.82 5.46 12.1 12.53 12.05 12.6 12.05 12.6"/>
-                    <polygon class="pat-burst-line" points="11.75 13.21 .58 9.86 .77 9.28 11.78 13.13 11.75 13.21 11.75 13.21"/>
-                    <polygon class="pat-burst-line" points="11.66 13.89 0 14.15 0 13.55 11.66 13.8 11.66 13.89 11.66 13.89"/>
-                    <polygon class="pat-burst-line" points="11.78 14.57 .77 18.41 .58 17.84 11.75 14.48 11.78 14.57 11.78 14.57"/>
-                    <polygon class="pat-burst-line" points="12.1 15.17 2.82 22.23 2.47 21.74 12.05 15.1 12.1 15.17 12.1 15.17"/>
-                    <polygon class="pat-burst-line" points="12.6 15.64 5.95 25.23 5.46 24.87 12.53 15.59 12.6 15.64 12.6 15.64"/>
-                    <polygon class="pat-burst-line" points="13.21 15.94 9.86 27.11 9.28 26.92 13.13 15.91 13.21 15.94 13.21 15.94"/>
-                    <polygon class="pat-burst-line" points="13.89 16.04 14.15 27.7 13.55 27.7 13.8 16.04 13.89 16.04 13.89 16.04"/>
-                    <polygon class="pat-burst-line" points="14.57 15.91 18.41 26.92 17.84 27.11 14.48 15.94 14.57 15.91 14.57 15.91"/>
-                    <polygon class="pat-burst-line" points="15.17 15.59 22.23 24.87 21.74 25.23 15.1 15.64 15.17 15.59 15.17 15.59"/>
-                    <polygon class="pat-burst-line" points="15.64 15.1 25.23 21.74 24.87 22.23 15.59 15.17 15.64 15.1 15.64 15.1"/>
-                    <polygon class="pat-burst-line" points="15.94 14.48 27.11 17.84 26.92 18.41 15.91 14.57 15.94 14.48 15.94 14.48"/>
-                    <polygon class="pat-burst-line" points="16.04 13.8 27.7 13.55 27.7 14.15 16.04 13.89 16.04 13.8 16.04 13.8"/>
-                    <polygon class="pat-burst-line" points="15.91 13.13 26.92 9.28 27.11 9.86 15.94 13.21 15.91 13.13 15.91 13.13"/>
-                    <polygon class="pat-burst-line" points="15.59 12.53 24.87 5.46 25.23 5.95 15.64 12.6 15.59 12.53 15.59 12.53"/>
-                    <polygon class="pat-burst-line" points="15.1 12.05 21.74 2.47 22.23 2.82 15.17 12.1 15.1 12.05 15.1 12.05"/>
-                    <polygon class="pat-burst-line" points="14.48 11.75 17.84 .58 18.41 .77 14.57 11.78 14.48 11.75 14.48 11.75"/>
-                </g>
-                <circle class="pat-burst-line" cx="13.82" cy="13.91" r="2.28"/>
-            </svg>
-        </div>
+        <!-- Symmetrical Festival Ambient Mesh Lighting (Standard & Polished) -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[640px] h-[340px] sm:h-[460px] bg-[#be1e2d]/18 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 sm:w-96 h-64 sm:h-96 bg-[#f3bd2e]/12 rounded-full blur-[130px] pointer-events-none"></div>
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-72 sm:w-[480px] h-48 bg-[#005c94]/10 rounded-full blur-[120px] pointer-events-none"></div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full flex flex-col items-center text-center">
             
@@ -459,44 +385,70 @@ function fundHomePage() {
     </section>
 
     <!-- =====================================================================
-         STUDENT SELECTION & LOGIN MODAL (OUTSIDE OVERFLOW CONTAINERS AT ROOT LEVEL)
+         STUDENT SELECTION & LOGIN MODAL (APPLE-GRADE WHITE DESIGN WITH SMOOTH TRANSITIONS)
          ===================================================================== -->
     <div x-show="showLoginModal" 
          x-cloak 
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md"
+         style="display: none;"
          @keydown.escape.window="showLoginModal = false">
         
-        <div class="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl text-white space-y-5"
-             @click.away="showLoginModal = false">
+        <!-- Backdrop Click to Close -->
+        <div class="fixed inset-0" @click="showLoginModal = false"></div>
+
+        <!-- Pure White Apple-Style Dialog Card -->
+        <div x-show="showLoginModal"
+             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-300"
+             x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-6 scale-95"
+             class="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 z-10 text-slate-900 space-y-5"
+             @click.stop>
             
-            <!-- Close Button -->
-            <button type="button" @click="showLoginModal = false"
-                    class="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <!-- Apple-Style Circular Close Button -->
+            <button type="button" 
+                    @click="showLoginModal = false"
+                    class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
             <!-- Modal Header -->
-            <div>
-                <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
-                    Student Login
-                </span>
-                <h3 class="text-xl sm:text-2xl font-black mt-2 text-white">
-                    നിങ്ങളുടെ പേര് തിരഞ്ഞെടുക്കുക
-                </h3>
-                <p class="text-xs text-slate-400 font-anek mt-1">
-                    ക്ലാസ്സ് സെലക്ട് ചെയ്ത ശേഷം നിങ്ങളുടെ പേര് സെർച്ച് ചെയ്ത് ലോഗിൻ ചെയ്യുക.
-                </p>
+            <div class="flex items-center gap-3.5 pr-8">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#be1e2d] to-amber-500 flex items-center justify-center text-white shadow-md shadow-red-500/20 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200/80">
+                        Student Fund Desk
+                    </span>
+                    <h3 class="font-sora text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-0.5">
+                        Student Login
+                    </h3>
+                    <p class="text-xs text-slate-500 font-anek">
+                        രസീത് നൽകാൻ നിങ്ങളുടെ പേര് സെലക്ട് ചെയ്യുക
+                    </p>
+                </div>
             </div>
 
             <!-- Filter Controls -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <!-- 1. Class Dropdown -->
                 <div class="space-y-1">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 font-mono">
                         Select Class / ക്ലാസ്സ്
                     </label>
                     <select x-model="selectedClass" @change="searchStudents()"
-                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-amber-400">
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/25 focus:border-[#be1e2d] transition-all">
                         <option value="">All Classes / എല്ലാ ക്ലാസ്സും</option>
                         @foreach($classes as $c)
                             <option value="{{ $c }}">{{ $c }}</option>
@@ -504,14 +456,14 @@ function fundHomePage() {
                     </select>
                 </div>
 
-                <!-- 2. Group Dropdown (Optional! Not required) -->
+                <!-- 2. Group Dropdown (Optional) -->
                 <div class="space-y-1">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center justify-between">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 font-mono flex items-center justify-between">
                         <span>Group / ഗ്രൂപ്പ്</span>
-                        <span class="text-[9px] text-slate-500 normal-case">(Optional)</span>
+                        <span class="text-[9px] text-slate-400 font-normal lowercase">(optional)</span>
                     </label>
                     <select x-model="selectedGroup" @change="searchStudents()"
-                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-amber-400">
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/25 focus:border-[#be1e2d] transition-all">
                         <option value="">All Groups / എല്ലാ ഗ്രൂപ്പും</option>
                         @foreach($groups as $g)
                             <option value="{{ $g->id }}">{{ $g->name }} ({{ $g->code }})</option>
@@ -522,55 +474,59 @@ function fundHomePage() {
 
             <!-- 3. Name Search Input -->
             <div class="space-y-1">
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-                    Type Your Name / Chest Number
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 font-mono">
+                    Type Name or Chest Number
                 </label>
                 <div class="relative">
-                    <input type="text" x-model="searchQuery" @input.debounce.300ms="searchStudents()"
+                    <input type="text" x-model="searchQuery" @input.debounce.250ms="searchStudents()"
                            placeholder="Type to filter name or chest no..."
-                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
-                    <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/25 focus:border-[#be1e2d] transition-all">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
             </div>
 
             <!-- Filtered Students Result List -->
             <div class="space-y-2">
-                <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                    <span>Matching Students:</span>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                    <span class="font-bold uppercase tracking-wider">Matching Students</span>
                     <span x-text="students.length + ' found'"></span>
                 </div>
 
-                <div class="max-h-52 overflow-y-auto space-y-1.5 pr-1 border border-slate-800 rounded-2xl p-2 bg-slate-950/60">
+                <div class="max-h-56 overflow-y-auto space-y-1.5 p-2 bg-slate-50/70 border border-slate-200/90 rounded-2xl">
                     <template x-if="loading">
-                        <div class="py-6 text-center text-xs text-slate-400 font-mono">Loading students...</div>
+                        <div class="py-8 text-center text-xs text-slate-400 font-mono flex items-center justify-center gap-2">
+                            <svg class="animate-spin w-4 h-4 text-[#be1e2d]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span>Loading students...</span>
+                        </div>
                     </template>
 
                     <template x-if="!loading && students.length === 0">
-                        <div class="py-6 text-center text-xs text-slate-500">
-                            No students found. Try selecting your class or clearing search.
+                        <div class="py-8 text-center text-xs text-slate-400 font-anek">
+                            വിദ്യാർത്ഥികളെ കണ്ടെത്താനായില്ല. ക്ലാസ്സ് മാറ്റുകയോ പേര് ശരിയായി ടൈപ്പ് ചെയ്യുകയോ ചെയ്യുക.
                         </div>
                     </template>
 
                     <template x-for="s in students" :key="s.id">
                         <div @click="selectStudent(s)" 
-                             class="p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3"
-                             :class="selectedStudent && selectedStudent.id === s.id ? 'bg-amber-500/20 border-amber-400 text-white shadow-sm' : 'bg-slate-800/80 border-slate-700/60 hover:bg-slate-800 text-slate-200'">
+                             class="p-2.5 sm:p-3 rounded-xl border transition-all duration-150 cursor-pointer flex items-center justify-between gap-3 select-none"
+                             :class="selectedStudent && selectedStudent.id === s.id 
+                                 ? 'bg-red-50/90 border-[#be1e2d] text-slate-950 shadow-xs ring-1 ring-[#be1e2d]/30' 
+                                 : 'bg-white border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/90 text-slate-800 shadow-2xs'">
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
-                                      :style="'background-color: ' + (s.group_color || '#be1e2d') + '33; color: ' + (s.group_color || '#f3bd2e') + ';'">
-                                    <span x-text="s.chest_number ? s.chest_number.slice(-2) : 'Q'"></span>
+                                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 font-mono"
+                                      :style="'background-color: ' + (s.group_color || '#be1e2d') + '18; color: ' + (s.group_color || '#be1e2d') + '; border: 1px solid ' + (s.group_color || '#be1e2d') + '35;'">
+                                    <span x-text="s.chest_number ? s.chest_number.slice(-3) : 'Q'"></span>
                                 </span>
                                 <div class="truncate">
-                                    <div class="text-xs font-bold truncate" x-text="s.name"></div>
-                                    <div class="text-[10px] text-slate-400 font-mono">
-                                        Chest: <span class="font-bold text-slate-300" x-text="s.chest_number"></span> • Class: <span x-text="s.class_level"></span>
+                                    <div class="text-xs font-bold truncate text-slate-900" x-text="s.name"></div>
+                                    <div class="text-[10px] text-slate-500 font-mono mt-0.5">
+                                        Chest: <span class="font-bold text-slate-700" x-text="s.chest_number"></span> • Class: <span x-text="s.class_level"></span>
                                     </div>
                                 </div>
                             </div>
 
                             <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0"
-                                  style="background-color: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);"
-                                  :style="'color: ' + (s.group_color || '#f3bd2e') + ';'"
+                                  :style="'background-color: ' + (s.group_color || '#be1e2d') + '15; color: ' + (s.group_color || '#be1e2d') + '; border: 1px solid ' + (s.group_color || '#be1e2d') + '30;'"
                                   x-text="s.group_name">
                             </span>
                         </div>
@@ -579,16 +535,18 @@ function fundHomePage() {
             </div>
 
             <!-- Login Form / Action -->
-            <form method="POST" action="{{ route('fund.student.login') }}">
+            <form method="POST" action="{{ route('fund.student.login') }}" class="pt-1">
                 @csrf
                 <input type="hidden" name="student_id" :value="selectedStudent ? selectedStudent.id : ''">
 
                 <button type="submit" 
                         :disabled="!selectedStudent"
-                        class="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
-                        :class="selectedStudent ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/20 cursor-pointer active:scale-98' : 'bg-slate-800 text-slate-500 cursor-not-allowed'">
+                        class="w-full py-3.5 px-6 rounded-2xl font-black text-xs uppercase tracking-wider transition-all duration-200 shadow-lg flex items-center justify-center gap-2 select-none"
+                        :class="selectedStudent 
+                            ? 'bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#be1e2d] hover:brightness-110 text-white shadow-red-600/25 cursor-pointer active:scale-[0.99]' 
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/60'">
                     <span x-text="selectedStudent ? 'Enter Desk as ' + selectedStudent.name : 'Select Your Name to Proceed'"></span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
             </form>
 
