@@ -2,6 +2,42 @@
 
 @section('content')
 
+<script>
+function fundHomePage() {
+    return {
+        showLoginModal: {{ request()->has('login') || request()->has('open_login') ? 'true' : 'false' }},
+        selectedClass: '',
+        selectedGroup: '',
+        searchQuery: '',
+        selectedStudent: null,
+        students: [],
+        loading: false,
+        init() {
+            this.searchStudents();
+        },
+        async searchStudents() {
+            this.loading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.selectedClass) params.append('class_level', this.selectedClass);
+                if (this.selectedGroup) params.append('group_id', this.selectedGroup);
+                if (this.searchQuery) params.append('query', this.searchQuery);
+                
+                const res = await fetch('{{ route('fund.api.search-students') }}?' + params.toString());
+                this.students = await res.json();
+            } catch (e) {
+                console.error('Search error:', e);
+            } finally {
+                this.loading = false;
+            }
+        },
+        selectStudent(s) {
+            this.selectedStudent = s;
+        }
+    };
+}
+</script>
+
 <div x-data="fundHomePage()" class="relative w-full">
 
     <!-- =====================================================================
@@ -561,42 +597,5 @@
 
 </div>
 
-@push('scripts')
-<script>
-function fundHomePage() {
-    return {
-        showLoginModal: {{ request()->has('login') || request()->has('open_login') ? 'true' : 'false' }},
-        selectedClass: '',
-        selectedGroup: '',
-        searchQuery: '',
-        selectedStudent: null,
-        students: [],
-        loading: false,
-        init() {
-            this.searchStudents();
-        },
-        async searchStudents() {
-            this.loading = true;
-            try {
-                const params = new URLSearchParams();
-                if (this.selectedClass) params.append('class_level', this.selectedClass);
-                if (this.selectedGroup) params.append('group_id', this.selectedGroup);
-                if (this.searchQuery) params.append('query', this.searchQuery);
-                
-                const res = await fetch('{{ route('fund.api.search-students') }}?' + params.toString());
-                this.students = await res.json();
-            } catch (e) {
-                console.error('Search error:', e);
-            } finally {
-                this.loading = false;
-            }
-        },
-        selectStudent(s) {
-            this.selectedStudent = s;
-        }
-    };
-}
-</script>
-@endpush
-
 @endsection
+

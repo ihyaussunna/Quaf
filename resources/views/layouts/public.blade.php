@@ -64,6 +64,10 @@
             font-display: swap;
         }
 
+        [x-cloak] {
+            display: none !important;
+        }
+
         :root {
             --fest-red: #be1e2d;
             --fest-gold: #f3bd2e;
@@ -675,5 +679,6 @@
             window.addEventListener('load', initLetterAnimations);
         })();
     </script>
+    @stack('scripts')
 </body>
 </html>

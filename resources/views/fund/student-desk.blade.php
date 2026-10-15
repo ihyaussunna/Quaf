@@ -1,6 +1,92 @@
 @extends('layouts.public', ['title' => 'Student Fund Desk — ' . $student->name])
 
 @section('content')
+<script>
+function studentFundDesk() {
+    return {
+        amount: {{ old('amount', 500) }},
+        paymentMethod: '{{ old('payment_method', 'cash') }}',
+        convertAmountToWords(num) {
+            num = Number(num);
+            if (!num || num <= 0) return 'Zero Rupees Only';
+            
+            const words = {
+                0: '', 1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five',
+                6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten',
+                11: 'Eleven', 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen',
+                16: 'Sixteen', 17: 'Seventeen', 18: 'Eighteen', 19: 'Nineteen', 20: 'Twenty',
+                30: 'Thirty', 40: 'Forty', 50: 'Fifty', 60: 'Sixty', 70: 'Seventy',
+                80: 'Eighty', 90: 'Ninety'
+            };
+            
+            function subHundred(val) {
+                if (val <= 20) return words[val] || '';
+                const tens = Math.floor(val / 10) * 10;
+                const units = val % 10;
+                return ((words[tens] || '') + ' ' + (words[units] || '')).trim();
+            }
+
+            let no = Math.floor(num);
+            let parts = [];
+
+            if (no >= 10000000) {
+                let crores = Math.floor(no / 10000000);
+                parts.push(subHundred(crores) + ' Crore');
+                no %= 10000000;
+            }
+            if (no >= 100000) {
+                let lakhs = Math.floor(no / 100000);
+                parts.push(subHundred(lakhs) + ' Lakh');
+                no %= 100000;
+            }
+            if (no >= 1000) {
+                let thousands = Math.floor(no / 1000);
+                parts.push(subHundred(thousands) + ' Thousand');
+                no %= 1000;
+            }
+            if (no >= 100) {
+                let hundreds = Math.floor(no / 100);
+                parts.push((words[hundreds] || '') + ' Hundred');
+                no %= 100;
+            }
+            if (no > 0) {
+                parts.push(subHundred(no));
+            }
+
+            return parts.filter(Boolean).join(' ') + ' Rupees Only';
+        },
+        async shareReceiptImage(imageUrl, fileName) {
+            try {
+                if (navigator.share) {
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'QUAF Receipt',
+                            text: 'QUAF 09 Official Receipt - ' + fileName
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('Share error or canceled:', e);
+            }
+
+            // Fallback for desktop: download JPG and open WhatsApp
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.open('https://api.whatsapp.com/', '_blank');
+        }
+    };
+}
+</script>
+
 <div class="bg-slate-950 text-white min-h-screen py-10 sm:py-16 px-4 sm:px-6 lg:px-8 font-sora relative overflow-hidden"
      x-data="studentFundDesk()">
 
@@ -367,91 +453,5 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-function studentFundDesk() {
-    return {
-        amount: {{ old('amount', 500) }},
-        paymentMethod: '{{ old('payment_method', 'cash') }}',
-        convertAmountToWords(num) {
-            num = Number(num);
-            if (!num || num <= 0) return 'Zero Rupees Only';
-            
-            const words = {
-                0: '', 1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five',
-                6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten',
-                11: 'Eleven', 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen',
-                16: 'Sixteen', 17: 'Seventeen', 18: 'Eighteen', 19: 'Nineteen', 20: 'Twenty',
-                30: 'Thirty', 40: 'Forty', 50: 'Fifty', 60: 'Sixty', 70: 'Seventy',
-                80: 'Eighty', 90: 'Ninety'
-            };
-            
-            function subHundred(val) {
-                if (val <= 20) return words[val] || '';
-                const tens = Math.floor(val / 10) * 10;
-                const units = val % 10;
-                return ((words[tens] || '') + ' ' + (words[units] || '')).trim();
-            }
-
-            let no = Math.floor(num);
-            let parts = [];
-
-            if (no >= 10000000) {
-                let crores = Math.floor(no / 10000000);
-                parts.push(subHundred(crores) + ' Crore');
-                no %= 10000000;
-            }
-            if (no >= 100000) {
-                let lakhs = Math.floor(no / 100000);
-                parts.push(subHundred(lakhs) + ' Lakh');
-                no %= 100000;
-            }
-            if (no >= 1000) {
-                let thousands = Math.floor(no / 1000);
-                parts.push(subHundred(thousands) + ' Thousand');
-                no %= 1000;
-            }
-            if (no >= 100) {
-                let hundreds = Math.floor(no / 100);
-                parts.push((words[hundreds] || '') + ' Hundred');
-                no %= 100;
-            }
-            if (no > 0) {
-                parts.push(subHundred(no));
-            }
-
-            return parts.filter(Boolean).join(' ') + ' Rupees Only';
-        },
-        async shareReceiptImage(imageUrl, fileName) {
-            try {
-                if (navigator.share) {
-                    const response = await fetch(imageUrl);
-                    const blob = await response.blob();
-                    const file = new File([blob], fileName, { type: 'image/jpeg' });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: 'QUAF Receipt',
-                            text: 'QUAF 09 Official Receipt - ' + fileName
-                        });
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.warn('Share error or canceled:', e);
-            }
-
-            // Fallback for desktop: download JPG and open WhatsApp
-            const a = document.createElement('a');
-            a.href = imageUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.open('https://api.whatsapp.com/', '_blank');
-        }
-    };
-}
-</script>
-@endpush
 @endsection
+
