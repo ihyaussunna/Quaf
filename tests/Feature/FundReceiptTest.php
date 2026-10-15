@@ -336,6 +336,7 @@ class FundReceiptTest extends TestCase
             'name' => 'Zubair Ahmad',
             'chest_number' => '202',
             'class_level' => 'Aliya',
+            'group_code' => 'AH',
         ]);
     }
 
@@ -394,7 +395,13 @@ class FundReceiptTest extends TestCase
 
         $storeResponse->assertRedirect(route('fund.receipts.show', $receipt));
 
-        // 4. Logout
+        // 4. View Receipt Voucher - verify no admin links
+        $receiptView = $this->withSession(['fund_student_id' => $student->id])->get(route('fund.receipts.show', $receipt));
+        $receiptView->assertOk();
+        $receiptView->assertDontSee('← Ledger');
+        $receiptView->assertDontSee('Customizer');
+
+        // 5. Logout
         $logoutResponse = $this->withSession(['fund_student_id' => $student->id])->get(route('fund.student.logout'));
         $logoutResponse->assertRedirect(route('fund.home'));
         $this->assertNull(session('fund_student_id'));

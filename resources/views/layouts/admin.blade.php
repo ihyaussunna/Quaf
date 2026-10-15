@@ -184,8 +184,11 @@
                 <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px] drop-shadow-xs">
             </a>
             <!-- Close button on mobile -->
-            <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <button type="button" 
+                    @click.stop="sidebarOpen = false" 
+                    class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-300 hover:text-white rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 active:scale-95 transition-all shrink-0 cursor-pointer shadow-xs" 
+                    aria-label="Close sidebar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 

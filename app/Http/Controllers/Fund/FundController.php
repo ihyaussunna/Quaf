@@ -114,12 +114,16 @@ class FundController extends Controller
         $students = $query->orderBy('name')->take(40)->get();
 
         return response()->json($students->map(function ($s) {
+            $groupName = $s->group?->name ?? 'No Group';
+            $groupCode = $s->group?->code ?: (strtok($groupName, ' ') ?: $groupName);
+
             return [
                 'id' => $s->id,
                 'name' => $s->name,
                 'chest_number' => $s->chest_number ?: $s->student_id,
                 'class_level' => $s->class_level ?? '',
-                'group_name' => $s->group?->name ?? 'No Group',
+                'group_name' => $groupName,
+                'group_code' => $groupCode,
                 'group_color' => $s->group?->color_hex ?? '#be1e2d',
             ];
         }));

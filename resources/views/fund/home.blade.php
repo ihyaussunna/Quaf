@@ -227,24 +227,21 @@ function fundHomePage() {
 
                                 <!-- Student Details -->
                                 <div class="min-w-0">
-                                    <div class="flex items-center gap-2">
-                                        <h3 class="text-xs sm:text-sm font-black text-slate-900 uppercase truncate">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-xs sm:text-sm font-black text-slate-900 uppercase break-words leading-tight">
                                             {{ $st->name }}
                                         </h3>
                                         @if($st->group)
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 hidden xs:inline-block"
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0"
                                                   style="background-color: {{ $st->group->color_hex }}15; color: {{ $st->group->color_hex }}; border: 1px solid {{ $st->group->color_hex }}30;">
-                                                {{ $st->group->code }}
+                                                {{ $st->group->code ?: $st->group->name }}
                                             </span>
                                         @endif
                                     </div>
-                                    <div class="flex items-center gap-2 text-[10px] sm:text-xs font-mono text-slate-500 mt-0.5">
+                                    <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 text-[10px] sm:text-xs font-mono text-slate-500 mt-1">
                                         <span>Chest: <strong class="text-slate-700">{{ $st->chest_number ?: $st->student_id }}</strong></span>
                                         <span>•</span>
                                         <span>Class: {{ $st->class_level ?? '-' }}</span>
-                                        @if($st->group)
-                                            <span class="xs:hidden">• {{ $st->group->name }}</span>
-                                        @endif
                                     </div>
                                 </div>
 
@@ -356,7 +353,7 @@ function fundHomePage() {
                                           style="background-color: {{ $grp->color_hex ?? '#be1e2d' }}20; color: {{ $grp->color_hex ?? '#be1e2d' }};">
                                         {{ $grp->code }}
                                     </span>
-                                    <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate">
+                                    <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-tight break-words">
                                         {{ $grp->name }}
                                     </h3>
                                 </div>
@@ -513,22 +510,18 @@ function fundHomePage() {
                              :class="selectedStudent && selectedStudent.id === s.id 
                                  ? 'bg-red-50/90 border-[#be1e2d] text-slate-950 shadow-xs ring-1 ring-[#be1e2d]/30' 
                                  : 'bg-white border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/90 text-slate-800 shadow-2xs'">
-                            <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 font-mono"
-                                      :style="'background-color: ' + (s.group_color || '#be1e2d') + '18; color: ' + (s.group_color || '#be1e2d') + '; border: 1px solid ' + (s.group_color || '#be1e2d') + '35;'">
-                                    <span x-text="s.chest_number ? s.chest_number.slice(-3) : 'Q'"></span>
-                                </span>
-                                <div class="truncate">
-                                    <div class="text-xs font-bold truncate text-slate-900" x-text="s.name"></div>
-                                    <div class="text-[10px] text-slate-500 font-mono mt-0.5">
-                                        Chest: <span class="font-bold text-slate-700" x-text="s.chest_number"></span> • Class: <span x-text="s.class_level"></span>
-                                    </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-xs sm:text-sm font-bold text-slate-900 break-words leading-snug" x-text="s.name"></div>
+                                <div class="text-[11px] text-slate-500 font-mono mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                    <span>Chest: <strong class="text-slate-800" x-text="s.chest_number"></strong></span>
+                                    <span>•</span>
+                                    <span>Class: <span class="text-slate-700" x-text="s.class_level || '-'"></span></span>
                                 </div>
                             </div>
 
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0"
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 uppercase tracking-wide"
                                   :style="'background-color: ' + (s.group_color || '#be1e2d') + '15; color: ' + (s.group_color || '#be1e2d') + '; border: 1px solid ' + (s.group_color || '#be1e2d') + '30;'"
-                                  x-text="s.group_name">
+                                  x-text="s.group_code || s.group_name">
                             </span>
                         </div>
                     </template>
