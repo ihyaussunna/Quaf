@@ -122,55 +122,86 @@
             }
         }
     </style>
+    <script>
+    function adminLayoutState() {
+        return {
+            sidebarOpen: false,
+            settingsDrawerOpen: false,
+            activeDrawerTab: 'add_mark',
+            adminMenuOpen: false,
+            settingsLoading: {},
+            settingsState: {
+                regOpen: {{ (\App\Models\FestivalSetting::get('registration_open', '1') == '1') ? 'true' : 'false' }},
+                stageOpen: {{ (\App\Models\FestivalSetting::get('stage_registration_open', '1') == '1') ? 'true' : 'false' }},
+                offStageOpen: {{ (\App\Models\FestivalSetting::get('off_stage_registration_open', '1') == '1') ? 'true' : 'false' }},
+                editingOpen: {{ (\App\Models\FestivalSetting::get('student_editing_open', '1') == '1') ? 'true' : 'false' }}
+            },
+            openSidebar() {
+                this.sidebarOpen = true;
+            },
+            closeSidebar() {
+                this.sidebarOpen = false;
+            },
+            toggleSidebar() {
+                this.sidebarOpen = !this.sidebarOpen;
+            },
+            openSettings() {
+                this.sidebarOpen = false;
+                this.adminMenuOpen = false;
+                this.settingsDrawerOpen = true;
+            },
+            closeSettings() {
+                this.settingsDrawerOpen = false;
+            },
+            async toggleSetting(key, url) {
+                if (this.settingsLoading[key]) return;
+                this.settingsLoading[key] = true;
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                        alert(data.message || 'Error updating setting.');
+                        return;
+                    }
+                    this.settingsState[key] = data.is_open;
+                } catch (e) {
+                    console.error(e);
+                    alert('Error updating setting.');
+                } finally {
+                    this.settingsLoading[key] = false;
+                }
+            }
+        };
+    }
+    </script>
 </head>
 <body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-[100dvh] flex overflow-x-clip max-w-full w-full" 
-      x-data="{ 
-          sidebarOpen: false, 
-          settingsDrawerOpen: false, 
-          activeDrawerTab: 'add_mark',
-          adminMenuOpen: false,
-          settingsLoading: {},
-          settingsState: {
-              regOpen: {{ (\App\Models\FestivalSetting::get('registration_open', '1') == '1') ? 'true' : 'false' }},
-              stageOpen: {{ (\App\Models\FestivalSetting::get('stage_registration_open', '1') == '1') ? 'true' : 'false' }},
-              offStageOpen: {{ (\App\Models\FestivalSetting::get('off_stage_registration_open', '1') == '1') ? 'true' : 'false' }},
-              editingOpen: {{ (\App\Models\FestivalSetting::get('student_editing_open', '1') == '1') ? 'true' : 'false' }}
-          },
-          async toggleSetting(key, url) {
-              if (this.settingsLoading[key]) return;
-              this.settingsLoading[key] = true;
-              try {
-                  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                  const res = await fetch(url, {
-                      method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'X-CSRF-TOKEN': token,
-                          'Accept': 'application/json',
-                          'X-Requested-With': 'XMLHttpRequest'
-                      }
-                  });
-                  const data = await res.json();
-                  if (!res.ok || !data.success) {
-                      alert(data.message || 'Error updating setting.');
-                      return;
-                  }
-                  this.settingsState[key] = data.is_open;
-              } catch (e) {
-                  console.error(e);
-                  alert('Error updating setting.');
-              } finally {
-                  this.settingsLoading[key] = false;
-              }
-          }
-      }">
+      x-data="adminLayoutState()">
 
     <!-- Mobile Backdrop for Sidebar -->
-    <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden" style="display: none;"></div>
+    <div x-show="sidebarOpen" 
+         @click="closeSidebar()" 
+         x-transition:enter="transition-opacity ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden" 
+         style="display: none;"></div>
 
     <!-- Sidebar Navigation (Light / Obsidian-Accented Theme) -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-           class="fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#121417] text-slate-300 border-r border-slate-800 flex flex-col transition-transform duration-300 overflow-y-auto shadow-xl print:hidden">
+           class="fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#121417] text-slate-300 border-r border-slate-800 flex flex-col transition-transform duration-300 overflow-y-auto shadow-xl print:hidden -translate-x-full lg:translate-x-0">
         
         @php
             $isPcView = (auth()->check() && in_array(auth()->user()->role, ['program_committee', 'program_coordinator']) && !auth()->user()->isAdmin())
@@ -185,8 +216,8 @@
             </a>
             <!-- Close button on mobile -->
             <button type="button" 
-                    @click.stop="sidebarOpen = false" 
-                    class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-300 hover:text-white rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 active:scale-95 transition-all shrink-0 cursor-pointer shadow-xs" 
+                    @click="closeSidebar()" 
+                    class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-300 hover:text-white rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-95 transition-all shrink-0 cursor-pointer shadow-xs" 
                     aria-label="Close sidebar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -507,14 +538,14 @@
                     <span>Profile</span>
                 </a>
                 @if(!$isPcView)
-                <button @click="settingsDrawerOpen = true; adminMenuOpen = false" class="w-full flex items-center gap-2 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 text-left">
+                <button type="button" @click="openSettings()" class="w-full flex items-center gap-2 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 text-left cursor-pointer">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span>Settings</span>
                 </button>
                 @endif
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 text-left font-medium">
+                    <button type="submit" class="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 text-left font-medium cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         <span>Signout</span>
                     </button>
@@ -528,7 +559,7 @@
         <!-- Top Navbar -->
         <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-30 shadow-2xs w-full max-w-full overflow-hidden print:hidden">
             <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 shrink-0" aria-label="Toggle Navigation">
+                <button type="button" @click="toggleSidebar()" class="lg:hidden p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 shrink-0 cursor-pointer" aria-label="Toggle Navigation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
 
@@ -546,8 +577,9 @@
             <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 @if(!$isPcView)
                 <!-- Settings Drawer Trigger -->
-                <button @click="settingsDrawerOpen = true" 
-                        class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">
+                <button type="button" 
+                        @click="openSettings()" 
+                        class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer">
                     <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span class="hidden sm:inline">Settings</span>
                 </button>
@@ -586,7 +618,7 @@
     <div x-show="settingsDrawerOpen" class="fixed inset-0 z-50 overflow-hidden" style="display: none;">
         <!-- Backdrop -->
         <div x-show="settingsDrawerOpen" 
-             @click="settingsDrawerOpen = false"
+             @click="closeSettings()"
              x-transition:enter="transition-opacity ease-linear duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -611,7 +643,7 @@
                         <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         <span>Festival Settings</span>
                     </span>
-                    <button @click="settingsDrawerOpen = false" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-slate-800">
+                    <button type="button" @click="closeSettings()" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-slate-800 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -883,7 +915,7 @@
                                 <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                 <span>Settings</span>
                             </span>
-                            <button @click="settingsDrawerOpen = false" class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+                            <button type="button" @click="closeSettings()" class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>

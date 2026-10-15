@@ -111,7 +111,8 @@ class FundController extends Controller
             });
         }
 
-        $students = $query->orderBy('name')->take(40)->get();
+        $limit = $search !== '' ? 60 : 40;
+        $students = $query->orderBy('name')->take($limit)->get();
 
         return response()->json($students->map(function ($s) {
             $groupName = $s->group?->name ?? 'No Group';

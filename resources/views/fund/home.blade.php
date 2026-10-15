@@ -12,23 +12,60 @@ function fundHomePage() {
         selectedStudent: null,
         students: [],
         loading: false,
+        searchSeq: 0,
+        searchDebounceTimer: null,
         init() {
+            this.$watch('searchQuery', () => {
+                this.searchStudentsDebounced();
+            });
+            this.$watch('selectedClass', () => {
+                this.searchStudents();
+            });
+            this.$watch('selectedGroup', () => {
+                this.searchStudents();
+            });
             this.searchStudents();
         },
+        searchStudentsDebounced() {
+            clearTimeout(this.searchDebounceTimer);
+            this.searchDebounceTimer = setTimeout(() => {
+                this.searchStudents();
+            }, 120);
+        },
+        get filteredStudents() {
+            const q = (this.searchQuery || '').trim().toLowerCase();
+            if (!q) return this.students;
+            return this.students.filter(s => {
+                const name = (s.name || '').toLowerCase();
+                const chest = (s.chest_number || '').toLowerCase();
+                const id = s.id ? String(s.id).toLowerCase() : '';
+                return name.includes(q) || chest.includes(q) || id.includes(q);
+            });
+        },
         async searchStudents() {
+            const seq = ++this.searchSeq;
             this.loading = true;
             try {
                 const params = new URLSearchParams();
                 if (this.selectedClass) params.append('class_level', this.selectedClass);
                 if (this.selectedGroup) params.append('group_id', this.selectedGroup);
-                if (this.searchQuery) params.append('query', this.searchQuery);
+                const q = (this.searchQuery || '').trim();
+                if (q) params.append('query', q);
                 
-                const res = await fetch('{{ route('fund.api.search-students') }}?' + params.toString());
-                this.students = await res.json();
+                const res = await fetch('{{ route('fund.api.search-students') }}?' + params.toString(), {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (seq === this.searchSeq) {
+                    this.students = data;
+                }
             } catch (e) {
                 console.error('Search error:', e);
             } finally {
-                this.loading = false;
+                if (seq === this.searchSeq) {
+                    this.loading = false;
+                }
             }
         },
         selectStudent(s) {
@@ -476,8 +513,16 @@ function fundHomePage() {
                     Type Name or Chest Number
                 </label>
                 <div class="relative">
-                    <input type="text" x-model="searchQuery" @input.debounce.250ms="searchStudents()"
-                           placeholder="Type to filter name or chest no..."
+                    <input type="text" 
+                           x-model="searchQuery" 
+                           @input="searchQuery = $event.target.value; searchStudentsDebounced()"
+                           @keyup="searchQuery = $event.target.value; searchStudentsDebounced()"
+                           @change="searchQuery = $event.target.value; searchStudents()"
+                           autocomplete="off"
+                           autocorrect="off"
+                           autocapitalize="none"
+                           spellcheck="false"
+                           placeholder="Type to filter name or chest no (e.g. Salim)..."
                            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/25 focus:border-[#be1e2d] transition-all">
                     <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
@@ -487,7 +532,7 @@ function fundHomePage() {
             <div class="space-y-2">
                 <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
                     <span class="font-bold uppercase tracking-wider">Matching Students</span>
-                    <span x-text="students.length + ' found'"></span>
+                    <span x-text="filteredStudents.length + ' found'"></span>
                 </div>
 
                 <div class="max-h-56 overflow-y-auto space-y-1.5 p-2 bg-slate-50/70 border border-slate-200/90 rounded-2xl">
@@ -498,13 +543,13 @@ function fundHomePage() {
                         </div>
                     </template>
 
-                    <template x-if="!loading && students.length === 0">
+                    <template x-if="!loading && filteredStudents.length === 0">
                         <div class="py-8 text-center text-xs text-slate-400 font-anek">
                             വിദ്യാർത്ഥികളെ കണ്ടെത്താനായില്ല. ക്ലാസ്സ് മാറ്റുകയോ പേര് ശരിയായി ടൈപ്പ് ചെയ്യുകയോ ചെയ്യുക.
                         </div>
                     </template>
 
-                    <template x-for="s in students" :key="s.id">
+                    <template x-for="s in filteredStudents" :key="s.id">
                         <div @click="selectStudent(s)" 
                              class="p-2.5 sm:p-3 rounded-xl border transition-all duration-150 cursor-pointer flex items-center justify-between gap-3 select-none"
                              :class="selectedStudent && selectedStudent.id === s.id 
