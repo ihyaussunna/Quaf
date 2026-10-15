@@ -94,6 +94,11 @@ class Student extends Model
         return $this->hasMany(CoinTransaction::class);
     }
 
+    public function fundReceipts(): HasMany
+    {
+        return $this->hasMany(FundReceipt::class, 'student_id');
+    }
+
     public function getNameAttribute(?string $value): string
     {
         return ltrim((string) $value, "? \t\n\r\0\x0B");

@@ -205,9 +205,7 @@
                     </label>
                     <select name="category" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-500 text-sm font-semibold text-slate-800">
                         <option value="Festival Fund">Festival Fund (ഫെസ്റ്റിവൽ ഫണ്ട്)</option>
-                        <option value="Mahabba Token">Mahabba / Token of Halawa (മഹബ്ബ)</option>
-                        <option value="Sponsorship">Fest Sponsorship (സ്പോൺസർഷിപ്പ്)</option>
-                        <option value="General Contribution">General Donation (പൊതു സംഭാവന)</option>
+                        <option value="Fest Sponsorship">Fest Sponsorship (സ്പോൺസർഷിപ്പ്)</option>
                     </select>
                 </div>
 
@@ -396,7 +394,7 @@ function fundDesk() {
                 6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten',
                 11: 'Eleven', 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen',
                 16: 'Sixteen', 17: 'Seventeen', 18: 'Eighteen', 19: 'Nineteen', 20: 'Twenty',
-                30: 'Thirty', 40 => 'Forty', 50: 'Fifty', 60: 'Sixty', 70: 'Seventy',
+                30: 'Thirty', 40: 'Forty', 50: 'Fifty', 60: 'Sixty', 70: 'Seventy',
                 80: 'Eighty', 90: 'Ninety'
             };
             

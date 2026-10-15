@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\FundReceipt;
 use App\Models\FundReceiptSetting;
+use App\Models\Group;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -96,7 +98,7 @@ class FundReceiptTest extends TestCase
         $this->assertNotNull($receipt);
         $this->assertEquals(2500, (float) $receipt->amount);
         $this->assertStringContainsString('Two Thousand Five Hundred Rupees Only', $receipt->amount_in_words);
-        $this->assertStringStartsWith('Q9-RCP-', $receipt->receipt_number);
+        $this->assertStringStartsWith('QFR-', $receipt->receipt_number);
 
         $response->assertRedirect(route('fund.receipts.show', $receipt));
 
@@ -268,5 +270,133 @@ class FundReceiptTest extends TestCase
         $downloadResponse = $this->actingAs($this->admin)->get(route('admin.fund.receipts.download', $receipt));
         $downloadResponse->assertOk();
         $this->assertEquals('image/jpeg', $downloadResponse->headers->get('Content-Type'));
+    }
+
+    public function test_public_fund_home_displays_top_students_and_groups(): void
+    {
+        $group = Group::create([
+            'name' => 'Subulul Huda',
+            'slug' => 'subulul-huda',
+            'code' => 'SH',
+            'color_hex' => '#009444',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Muhammad Rashid',
+            'student_id' => '101',
+            'qr_token' => 'token_101',
+            'class_level' => 'Thanawiyya',
+            'group_id' => $group->id,
+        ]);
+
+        FundReceipt::create([
+            'receipt_number' => 'QFR-26-01',
+            'donor_name' => 'Haji Usman',
+            'amount' => 10000.00,
+            'amount_in_words' => 'Ten Thousand Rupees Only',
+            'payment_method' => 'cash',
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+            'collector_name' => $student->name,
+        ]);
+
+        $response = $this->get(route('fund.home'));
+
+        $response->assertOk();
+        $response->assertSee('Festival Fund Portal');
+        $response->assertSee('Muhammad Rashid');
+        $response->assertSee('Subulul Huda');
+        $response->assertSee('10,000');
+    }
+
+    public function test_api_search_students_returns_filtered_results(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Hilal',
+            'slug' => 'al-hilal',
+            'code' => 'AH',
+            'color_hex' => '#005c94',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Zubair Ahmad',
+            'student_id' => '202',
+            'qr_token' => 'token_202',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $response = $this->getJson(route('fund.api.search-students', [
+            'class_level' => 'Aliya',
+            'query' => 'Zubair',
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonFragment([
+            'name' => 'Zubair Ahmad',
+            'chest_number' => '202',
+            'class_level' => 'Aliya',
+        ]);
+    }
+
+    public function test_student_can_login_and_issue_receipt_from_desk(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Furqan',
+            'slug' => 'al-furqan',
+            'code' => 'AF',
+            'color_hex' => '#be1e2d',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Abdullah Nizar',
+            'student_id' => '303',
+            'qr_token' => 'token_303',
+            'class_level' => 'Thanawiyya',
+            'group_id' => $group->id,
+        ]);
+
+        // 1. Login
+        $loginResponse = $this->post(route('fund.student.login'), [
+            'student_id' => $student->id,
+        ]);
+
+        $loginResponse->assertRedirect(route('fund.student.desk'));
+        $this->assertEquals($student->id, session('fund_student_id'));
+
+        // 2. View Desk with active student session
+        $deskResponse = $this->withSession(['fund_student_id' => $student->id])->get(route('fund.student.desk'));
+        $deskResponse->assertOk();
+        $deskResponse->assertSee('Abdullah Nizar');
+        $deskResponse->assertSee('303');
+        $deskResponse->assertSee('Al Furqan');
+
+        // 3. Issue Receipt with active student session
+        $storeResponse = $this->withSession(['fund_student_id' => $student->id])->post(route('fund.student.receipts.store'), [
+            'donor_name' => 'Hamza Musliyar',
+            'donor_phone' => '9847112233',
+            'donor_place' => 'Perinthalmanna',
+            'amount' => 7500,
+            'payment_method' => 'cash',
+            'category' => 'Festival Fund',
+            'notes' => 'Donation via student desk',
+        ]);
+
+        $storeResponse->assertSessionHasNoErrors();
+        $storeResponse->assertRedirect();
+
+        $receipt = FundReceipt::where('donor_name', 'Hamza Musliyar')->first();
+        $this->assertNotNull($receipt);
+        $this->assertEquals($student->id, $receipt->student_id);
+        $this->assertEquals($group->id, $receipt->group_id);
+        $this->assertEquals(7500, (float) $receipt->amount);
+        $this->assertStringStartsWith('QFR-26-', $receipt->receipt_number);
+
+        $storeResponse->assertRedirect(route('fund.receipts.show', $receipt));
+
+        // 4. Logout
+        $logoutResponse = $this->withSession(['fund_student_id' => $student->id])->get(route('fund.student.logout'));
+        $logoutResponse->assertRedirect(route('fund.home'));
+        $this->assertNull(session('fund_student_id'));
     }
 }

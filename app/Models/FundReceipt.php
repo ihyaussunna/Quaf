@@ -34,6 +34,8 @@ class FundReceipt extends Model
         'notes',
         'collector_id',
         'collector_name',
+        'student_id',
+        'group_id',
         'is_cancelled',
         'cancelled_reason',
         'cancelled_at',
@@ -64,16 +66,30 @@ class FundReceipt extends Model
         return $this->belongsTo(User::class, 'cancelled_by');
     }
 
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class, 'group_id');
+    }
+
     /**
      * Generate unique sequential receipt number (e.g. Q9-RCP-2026-0001).
      */
     public static function nextReceiptNumber(): string
     {
-        $year = date('Y');
-        $prefix = "Q9-RCP-{$year}-";
+        static::ensureSchema();
+
+        $prefix = 'QFR-26-';
 
         $lastReceipt = static::withTrashed()
-            ->where('receipt_number', 'like', "{$prefix}%")
+            ->where(function ($q) use ($prefix) {
+                $q->where('receipt_number', 'like', "{$prefix}%")
+                    ->orWhere('receipt_number', 'like', 'Q9-RCP-%');
+            })
             ->orderBy('id', 'desc')
             ->first();
 
@@ -82,7 +98,7 @@ class FundReceipt extends Model
             $nextSeq = (int) $matches[1] + 1;
         }
 
-        return $prefix.str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) $nextSeq, 2, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -238,6 +254,8 @@ class FundReceipt extends Model
                     $table->text('notes')->nullable();
                     $table->foreignId('collector_id')->nullable()->constrained('users')->nullOnDelete();
                     $table->string('collector_name')->nullable();
+                    $table->foreignId('student_id')->nullable()->constrained('students')->nullOnDelete();
+                    $table->foreignId('group_id')->nullable()->constrained('groups')->nullOnDelete();
                     $table->boolean('is_cancelled')->default(false);
                     $table->string('cancelled_reason')->nullable();
                     $table->timestamp('cancelled_at')->nullable();
@@ -248,7 +266,20 @@ class FundReceipt extends Model
                     $table->index(['created_at', 'is_cancelled']);
                     $table->index(['donor_phone', 'donor_name']);
                     $table->index('collector_id');
+                    $table->index('student_id');
+                    $table->index('group_id');
                 });
+            } else {
+                if (! Schema::hasColumn('fund_receipts', 'student_id')) {
+                    Schema::table('fund_receipts', function (Blueprint $table) {
+                        $table->foreignId('student_id')->nullable()->after('collector_name')->constrained('students')->nullOnDelete();
+                    });
+                }
+                if (! Schema::hasColumn('fund_receipts', 'group_id')) {
+                    Schema::table('fund_receipts', function (Blueprint $table) {
+                        $table->foreignId('group_id')->nullable()->after('student_id')->constrained('groups')->nullOnDelete();
+                    });
+                }
             }
 
             if (Schema::hasTable('users')) {

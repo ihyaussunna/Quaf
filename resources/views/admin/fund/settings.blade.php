@@ -337,7 +337,7 @@
                             </span>
                         </div>
                         <div class="text-slate-600">
-                            {{ $sampleReceipt->created_at->format('d M Y, h:i A') }}
+                            {{ ($sampleReceipt->created_at ?? now())->format('d M Y, h:i A') }}
                         </div>
                     </div>
 

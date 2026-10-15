@@ -65,6 +65,8 @@ return new class extends Migration
                 $table->text('notes')->nullable();
                 $table->foreignId('collector_id')->nullable()->constrained('users')->nullOnDelete();
                 $table->string('collector_name')->nullable();
+                $table->foreignId('student_id')->nullable()->constrained('students')->nullOnDelete();
+                $table->foreignId('group_id')->nullable()->constrained('groups')->nullOnDelete();
                 $table->boolean('is_cancelled')->default(false);
                 $table->string('cancelled_reason')->nullable();
                 $table->timestamp('cancelled_at')->nullable();
@@ -75,6 +77,8 @@ return new class extends Migration
                 $table->index(['created_at', 'is_cancelled']);
                 $table->index(['donor_phone', 'donor_name']);
                 $table->index('collector_id');
+                $table->index('student_id');
+                $table->index('group_id');
             });
         }
     }

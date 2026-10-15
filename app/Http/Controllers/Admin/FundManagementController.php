@@ -142,7 +142,7 @@ class FundManagementController extends Controller
 
         // Sample receipt data for live preview
         $sampleReceipt = new FundReceipt([
-            'receipt_number' => 'Q9-RCP-'.date('Y').'-0042',
+            'receipt_number' => 'QFR-26-042',
             'donor_name' => 'MUHAMMED SHAFI K',
             'donor_phone' => '+91 98470 12345',
             'donor_place' => 'KOZHIKODE',
@@ -150,11 +150,11 @@ class FundManagementController extends Controller
             'amount_in_words' => FundReceipt::amountInWords(5000),
             'payment_method' => 'upi',
             'transaction_reference' => 'UPI/4298129048/OKAXIS',
-            'category' => 'Mahabba Festival Fund',
-            'notes' => 'Token of Halawa Festival contribution',
+            'category' => 'Festival Fund',
+            'notes' => 'Festival contribution',
             'collector_name' => Auth::user()?->name ?? 'QUAF Fund Desk',
-            'created_at' => now(),
         ]);
+        $sampleReceipt->created_at = now();
 
         return view('admin.fund.settings', compact('settings', 'sampleReceipt'));
     }

@@ -812,12 +812,25 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
 
 /*
 |--------------------------------------------------------------------------
-| Fund Collection & Receipts Desk Routes
+| Fund Collection, Public Landing & Student Portal Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('fund')->name('fund.')->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->group(function () {
-    Route::get('/', [FundController::class, 'dashboard'])->name('dashboard');
-    Route::post('/receipts', [FundController::class, 'store'])->name('receipts.store');
+Route::prefix('fund')->name('fund.')->group(function () {
+    // 1. Public Fund Landing / Home Page & Student Finder
+    Route::get('/', [FundController::class, 'index'])->name('home');
+    Route::get('/api/search-students', [FundController::class, 'searchStudents'])->name('api.search-students');
+    Route::post('/student/login', [FundController::class, 'studentLogin'])->name('student.login');
+    Route::get('/student/logout', [FundController::class, 'studentLogout'])->name('student.logout');
+
+    // 2. Student Fund Desk (Session-based student receipt generation)
+    Route::get('/my-desk', [FundController::class, 'studentDesk'])->name('student.desk');
+    Route::post('/my-desk/receipts', [FundController::class, 'studentStoreReceipt'])->name('student.receipts.store');
+
+    // 3. Central Collector / Auth Desk (for legacy tests & staff)
+    Route::get('/desk', [FundController::class, 'dashboard'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('dashboard');
+    Route::post('/receipts', [FundController::class, 'store'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('receipts.store');
+
+    // 4. Public Receipt View, Image & Download (Accessible for donors & WhatsApp sharing)
     Route::get('/receipts/{receipt}', [FundController::class, 'show'])->name('receipts.show');
     Route::get('/receipts/{receipt}/image', [FundController::class, 'image'])->name('receipts.image');
     Route::get('/receipts/{receipt}/download', [FundController::class, 'download'])->name('receipts.download');

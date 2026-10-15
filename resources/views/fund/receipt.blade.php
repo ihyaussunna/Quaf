@@ -56,33 +56,57 @@
         }
     </style>
 </head>
+@php
+    $downloadUrl = Auth::user()?->isAdmin() 
+        ? route('admin.fund.receipts.download', $receipt) 
+        : route('fund.receipts.download', $receipt);
+
+    $imageUrl = Auth::user()?->isAdmin() 
+        ? route('admin.fund.receipts.image', $receipt) 
+        : route('fund.receipts.image', $receipt);
+@endphp
 <body class="bg-slate-900 min-h-screen py-6 px-3 sm:px-6 font-sora antialiased text-slate-100"
       x-data="{ 
           copied: false,
           activeTab: 'poster',
+          sharing: false,
           copyLink() {
               navigator.clipboard.writeText('{{ route('fund.receipts.show', $receipt) }}');
               this.copied = true;
               setTimeout(() => this.copied = false, 2500);
+          },
+          async shareWhatsAppImage() {
+              this.sharing = true;
+              try {
+                  if (navigator.share) {
+                      const response = await fetch('{{ $imageUrl }}');
+                      const blob = await response.blob();
+                      const file = new File([blob], '{{ $receipt->receipt_number }}.jpg', { type: 'image/jpeg' });
+                      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                          await navigator.share({
+                              files: [file],
+                              title: 'QUAF Receipt #{{ $receipt->receipt_number }}',
+                              text: 'QUAF 09 Official Receipt - {{ $receipt->receipt_number }}'
+                          });
+                          this.sharing = false;
+                          return;
+                      }
+                  }
+              } catch (err) {
+                  console.warn('Share file error or canceled:', err);
+              }
+
+              // Fallback: download file and open WhatsApp Web / App
+              const a = document.createElement('a');
+              a.href = '{{ $downloadUrl }}';
+              a.download = '{{ $receipt->receipt_number }}.jpg';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('QUAF 09 Receipt #{{ $receipt->receipt_number }}: ' + window.location.href), '_blank');
+              this.sharing = false;
           }
       }">
-
-    @php
-        $downloadUrl = Auth::user()?->isAdmin() 
-            ? route('admin.fund.receipts.download', $receipt) 
-            : route('fund.receipts.download', $receipt);
-
-        $imageUrl = Auth::user()?->isAdmin() 
-            ? route('admin.fund.receipts.image', $receipt) 
-            : route('fund.receipts.image', $receipt);
-
-        $waText = urlencode("QUAF '09 - Official Contribution Receipt\n\n" .
-            "Receipt No: " . $receipt->receipt_number . "\n" .
-            "Received with thanks from: " . $receipt->donor_name . "\n" .
-            "Amount: Rs." . number_format($receipt->amount, 0) . "/-\n" .
-            "Date: " . $receipt->created_at->format('d/m/Y') . "\n\n" .
-            "View / Download Official Receipt:\n" . route('fund.receipts.download', $receipt));
-    @endphp
 
     <!-- Top Action Ribbon (Hidden when printing) -->
     <div class="max-w-2xl mx-auto mb-6 no-print space-y-4">
@@ -99,14 +123,19 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
                         <span>Customizer</span>
                     </a>
-                @else
-                    <a href="{{ route('fund.dashboard') }}" 
+                @elseif(session('fund_student_id'))
+                    <a href="{{ route('fund.student.desk') }}" 
                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition-all shadow-xs">
-                        <span>← Back to Fund Desk</span>
+                        <span>← My Desk</span>
                     </a>
-                    <a href="{{ route('fund.dashboard') }}#new-receipt-card"
+                    <a href="{{ route('fund.student.desk') }}#new-receipt-card"
                        class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all">
                         <span>+ New</span>
+                    </a>
+                @else
+                    <a href="{{ route('fund.home') }}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition-all shadow-xs">
+                        <span>← Fund Home</span>
                     </a>
                 @endif
             </div>
@@ -142,12 +171,12 @@
                 <span>Print</span>
             </button>
 
-            <!-- Share WhatsApp -->
-            <a href="https://api.whatsapp.com/send?text={{ $waText }}" target="_blank"
-               class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5b] text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#25D366]/20 active:scale-98">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                <span>WhatsApp</span>
-            </a>
+            <!-- Share WhatsApp Image -->
+            <button type="button" @click="shareWhatsAppImage()" :disabled="sharing"
+               class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5b] text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#25D366]/20 active:scale-98 cursor-pointer">
+                <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                <span x-text="sharing ? 'Preparing...' : 'WhatsApp Image'">WhatsApp Image</span>
+            </button>
 
             <!-- Copy Link -->
             <button type="button" @click="copyLink()" 

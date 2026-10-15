@@ -1,0 +1,457 @@
+@extends('layouts.public', ['title' => 'Student Fund Desk — ' . $student->name])
+
+@section('content')
+<div class="bg-slate-950 text-white min-h-screen py-10 sm:py-16 px-4 sm:px-6 lg:px-8 font-sora relative overflow-hidden"
+     x-data="studentFundDesk()">
+
+    <!-- Multi-Color Ambient Mesh Glows -->
+    <div class="absolute top-10 left-1/4 w-96 h-96 bg-[#be1e2d]/15 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute top-40 right-10 w-96 h-96 bg-[#f3bd2e]/10 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute bottom-20 left-1/3 w-96 h-96 bg-[#005c94]/15 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto space-y-8 relative z-10">
+
+        <!-- Top Navigation & Student Identity Banner -->
+        <div class="bg-slate-900/90 backdrop-blur-xl p-5 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+            
+            <!-- Left: Student Info -->
+            <div class="flex items-center gap-4 min-w-0">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-lg sm:text-xl font-black font-mono shrink-0 shadow-lg"
+                     style="background-color: {{ $student->group?->color_hex ?? '#be1e2d' }}25; color: {{ $student->group?->color_hex ?? '#f3bd2e' }}; border: 1.5px solid {{ $student->group?->color_hex ?? '#be1e2d' }}50;">
+                    <span>{{ $student->chest_number ? substr($student->chest_number, -3) : 'STD' }}</span>
+                </div>
+
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Student Desk Active
+                        </span>
+                        @if($student->group)
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider"
+                                  style="background-color: {{ $student->group->color_hex }}20; color: {{ $student->group->color_hex }}; border: 1px solid {{ $student->group->color_hex }}40;">
+                                {{ $student->group->name }} ({{ $student->group->code }})
+                            </span>
+                        @endif
+                    </div>
+
+                    <h1 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight mt-1 truncate">
+                        {{ $student->name }}
+                    </h1>
+
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono text-slate-400 mt-0.5">
+                        <span>Chest: <strong class="text-slate-200">{{ $student->chest_number ?: $student->student_id }}</strong></span>
+                        <span>•</span>
+                        <span>Class: <strong class="text-slate-200">{{ $student->class_level ?: '-' }}</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex flex-wrap items-center gap-2.5 sm:self-center">
+                <a href="{{ route('fund.home') }}" 
+                   class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider border border-slate-700 transition-all">
+                    <span>← Fund Home</span>
+                </a>
+                <a href="{{ route('fund.student.logout') }}" 
+                   class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 font-bold text-xs uppercase tracking-wider border border-rose-500/30 transition-all">
+                    <span>Switch Student / Logout</span>
+                </a>
+            </div>
+
+        </div>
+
+        @if(session('success'))
+            <div class="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs sm:text-sm font-bold flex items-center justify-between">
+                <span>{{ session('success') }}</span>
+                <span class="text-xs font-mono text-emerald-300">Success</span>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs sm:text-sm font-bold">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <!-- Personal Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Total Collected -->
+            <div class="bg-slate-900/80 p-5 rounded-3xl border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">My Total Collection</div>
+                    <div class="text-2xl sm:text-3xl font-black font-mono text-emerald-400 mt-1">
+                        ₹{{ number_format($myTotalCollected, 0) }}
+                    </div>
+                    <div class="text-[10px] text-slate-500 font-anek mt-0.5">താങ്കൾ ഇതുവരെ സ്വീകരിച്ച തുക</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-black font-mono text-xl border border-emerald-500/20">
+                    ₹
+                </div>
+            </div>
+
+            <!-- Total Receipts -->
+            <div class="bg-slate-900/80 p-5 rounded-3xl border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Receipts Issued</div>
+                    <div class="text-2xl sm:text-3xl font-black font-mono text-amber-400 mt-1">
+                        {{ number_format($myReceiptsCount) }}
+                    </div>
+                    <div class="text-[10px] text-slate-500 font-anek mt-0.5">നൽകിയ ആകെ രസീതുകൾ</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold border border-amber-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+            </div>
+
+            <!-- Next Receipt Sequence -->
+            <div class="bg-slate-900/80 p-5 rounded-3xl border border-slate-800 shadow-xl flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Next Receipt Number</div>
+                    <div class="text-xl sm:text-2xl font-black font-mono text-white mt-1 tracking-wider">
+                        {{ $nextReceiptNumber }}
+                    </div>
+                    <div class="text-[10px] text-slate-500 font-mono mt-0.5">Automated Global Sequence</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold border border-blue-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue Receipt Form Card -->
+        <div class="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800 shadow-2xl overflow-hidden" id="new-receipt-card">
+            
+            <div class="px-6 py-5 border-b border-slate-800 bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shadow-md shadow-amber-500/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black text-white tracking-tight">Issue New Receipt (പുതിയ രസീത് നൽകുക)</h2>
+                        <p class="text-xs text-slate-400 font-anek">വിവരങ്ങൾ പൂരിപ്പിച്ച് രസീത് ജനറേറ്റ് ചെയ്യുക</p>
+                    </div>
+                </div>
+
+                <div class="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-slate-800 text-amber-400 border border-slate-700">
+                    Sequence: {{ $nextReceiptNumber }}
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('fund.student.receipts.store') }}" class="p-6 sm:p-8 space-y-6">
+                @csrf
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- Donor Name -->
+                    <div class="space-y-1.5 md:col-span-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Donor Name / ദാതാവിന്റെ പേര് <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="text" name="donor_name" value="{{ old('donor_name') }}" required
+                               placeholder="Enter contributor / donor full name"
+                               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm font-semibold focus:outline-none focus:border-amber-400">
+                        @error('donor_name')
+                            <p class="text-xs text-rose-400 font-mono mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Donor Phone -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Mobile Number / ഫോൺ നമ്പർ
+                        </label>
+                        <input type="tel" name="donor_phone" value="{{ old('donor_phone') }}"
+                               placeholder="WhatsApp / Phone number"
+                               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-amber-400">
+                        @error('donor_phone')
+                            <p class="text-xs text-rose-400 font-mono mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Donor Place -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Place / സ്ഥലം
+                        </label>
+                        <input type="text" name="donor_place" value="{{ old('donor_place') }}"
+                               placeholder="e.g. Kozhikode, Karanthur"
+                               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400">
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="space-y-1.5 md:col-span-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Contribution Amount (INR) / സംഭാവന തുക <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-base font-black font-mono text-amber-400">
+                                ₹
+                            </span>
+                            <input type="number" step="1" min="1" max="10000000" name="amount" x-model.number="amount" required
+                                   placeholder="5000"
+                                   class="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-lg font-black font-mono focus:outline-none focus:border-amber-400">
+                        </div>
+                        @error('amount')
+                            <p class="text-xs text-rose-400 font-mono mt-1">{{ $message }}</p>
+                        @enderror
+
+                        <!-- Quick Amount Chips -->
+                        <div class="flex flex-wrap items-center gap-2 pt-2">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase font-mono mr-1">Quick Select:</span>
+                            <template x-for="val in [500, 1000, 2000, 5000, 10000, 25000]" :key="val">
+                                <button type="button" @click="amount = val" 
+                                        :class="amount === val ? 'bg-amber-400 text-slate-950 font-bold border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700 font-semibold'"
+                                        class="px-2.5 py-1 text-xs rounded-lg border font-mono transition-colors cursor-pointer">
+                                    ₹<span x-text="val.toLocaleString('en-IN')"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <!-- Live In-Words Preview -->
+                        <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs font-mono text-slate-300 flex items-center gap-2 mt-2" x-show="amount > 0">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">In Words:</span>
+                            <span class="font-bold text-slate-200" x-text="convertAmountToWords(amount)"></span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Mode -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Payment Mode / പേയ്മെന്റ് രീതി <span class="text-rose-400">*</span>
+                        </label>
+                        <select name="payment_method" x-model="paymentMethod" required
+                                class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm font-semibold focus:outline-none focus:border-amber-400">
+                            <option value="cash">Cash (പണം)</option>
+                            <option value="upi">UPI / GPay / PhonePe</option>
+                            <option value="bank_transfer">Bank Transfer / NEFT</option>
+                            <option value="card">Debit / Credit Card</option>
+                            <option value="other">Other Mode</option>
+                        </select>
+                    </div>
+
+                    <!-- Transaction Ref (if not cash) -->
+                    <div class="space-y-1.5" x-show="paymentMethod !== 'cash'">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            UPI UTR / Ref Number / ട്രാൻസാക്ഷൻ നമ്പർ
+                        </label>
+                        <input type="text" name="transaction_reference" value="{{ old('transaction_reference') }}"
+                               placeholder="e.g. 4298129048..."
+                               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-amber-400">
+                    </div>
+
+                    <!-- Purpose / Category (Strictly Festival Fund / Fest Sponsorship only) -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Purpose / വിഭാഗം
+                        </label>
+                        <select name="category" 
+                                class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm font-semibold focus:outline-none focus:border-amber-400">
+                            <option value="Festival Fund">Festival Fund (ഫെസ്റ്റിവൽ ഫണ്ട്)</option>
+                            <option value="Fest Sponsorship">Fest Sponsorship (സ്പോൺസർഷിപ്പ്)</option>
+                        </select>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="space-y-1.5 md:col-span-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                            Notes / കുറിപ്പ് (Optional)
+                        </label>
+                        <input type="text" name="notes" value="{{ old('notes') }}"
+                               placeholder="Any reference note"
+                               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400">
+                    </div>
+
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="text-xs text-slate-400 font-anek">
+                        രസീത് സേവ് ചെയ്ത ഉടൻ വൗച്ചറും വാട്ട്‌സ്ആപ്പ് ഷെയറിംഗ് ഓപ്ഷനും ലഭിക്കും.
+                    </div>
+
+                    <button type="submit" 
+                            class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+                        <span>Generate & View Receipt</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- My Receipts Ledger Table -->
+        <div class="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base sm:text-lg font-black text-white tracking-tight">My Issued Receipts</h2>
+                    <p class="text-xs text-slate-400 font-anek">താങ്കൾ വിതരണം ചെയ്ത രസീതുകളുടെ പട്ടിക</p>
+                </div>
+                <span class="text-xs font-mono text-slate-400">Total: {{ $myReceiptsCount }} entries</span>
+            </div>
+
+            @if($myRecentReceipts->isNotEmpty())
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950/60 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="px-5 py-3.5">Receipt #</th>
+                                <th class="px-5 py-3.5">Donor Name & Place</th>
+                                <th class="px-5 py-3.5">Amount</th>
+                                <th class="px-5 py-3.5">Payment</th>
+                                <th class="px-5 py-3.5">Date</th>
+                                <th class="px-5 py-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-200 font-mono">
+                            @foreach($myRecentReceipts as $rcp)
+                                <tr class="hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-5 py-4 font-bold text-amber-400">
+                                        {{ $rcp->receipt_number }}
+                                    </td>
+                                    <td class="px-5 py-4 font-sora">
+                                        <div class="font-bold text-white uppercase text-xs">{{ $rcp->donor_name }}</div>
+                                        @if($rcp->donor_place)
+                                            <div class="text-[11px] text-slate-400">{{ $rcp->donor_place }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-4 font-black text-emerald-400 text-sm">
+                                        ₹{{ number_format($rcp->amount, 0) }}
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-300 border border-slate-700">
+                                            {{ $rcp->payment_method }}
+                                        </span>
+                                    </td>
+                                    <td class="px-5 py-4 text-slate-400 text-[11px]">
+                                        {{ $rcp->created_at->format('d/m/Y h:i A') }}
+                                    </td>
+                                    <td class="px-5 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <!-- View / Print Voucher -->
+                                            <a href="{{ route('fund.receipts.show', $rcp) }}" 
+                                               class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] transition-all">
+                                                View
+                                            </a>
+
+                                            <!-- Download JPG -->
+                                            <a href="{{ route('fund.receipts.download', $rcp) }}" 
+                                               class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[11px] border border-amber-500/30 transition-all">
+                                                JPG
+                                            </a>
+
+                                            <!-- WhatsApp Image Share Button -->
+                                            <button type="button" 
+                                                    @click="shareReceiptImage('{{ route('fund.receipts.image', $rcp) }}', '{{ $rcp->receipt_number }}.jpg')"
+                                                    class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                                <span>Share</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 border-t border-slate-800">
+                    {{ $myRecentReceipts->links() }}
+                </div>
+            @else
+                <div class="py-12 text-center text-slate-500 font-anek text-xs">
+                    നിങ്ങൾ ഇതുവരെ രസീതുകൾ നൽകിയിട്ടില്ല. മുകളിലെ ഫോം ഉപയോഗിച്ച് ആദ്യത്തെ രസീത് നൽകുക.
+                </div>
+            @endif
+        </div>
+
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function studentFundDesk() {
+    return {
+        amount: {{ old('amount', 500) }},
+        paymentMethod: '{{ old('payment_method', 'cash') }}',
+        convertAmountToWords(num) {
+            num = Number(num);
+            if (!num || num <= 0) return 'Zero Rupees Only';
+            
+            const words = {
+                0: '', 1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five',
+                6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten',
+                11: 'Eleven', 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen',
+                16: 'Sixteen', 17: 'Seventeen', 18: 'Eighteen', 19: 'Nineteen', 20: 'Twenty',
+                30: 'Thirty', 40: 'Forty', 50: 'Fifty', 60: 'Sixty', 70: 'Seventy',
+                80: 'Eighty', 90: 'Ninety'
+            };
+            
+            function subHundred(val) {
+                if (val <= 20) return words[val] || '';
+                const tens = Math.floor(val / 10) * 10;
+                const units = val % 10;
+                return ((words[tens] || '') + ' ' + (words[units] || '')).trim();
+            }
+
+            let no = Math.floor(num);
+            let parts = [];
+
+            if (no >= 10000000) {
+                let crores = Math.floor(no / 10000000);
+                parts.push(subHundred(crores) + ' Crore');
+                no %= 10000000;
+            }
+            if (no >= 100000) {
+                let lakhs = Math.floor(no / 100000);
+                parts.push(subHundred(lakhs) + ' Lakh');
+                no %= 100000;
+            }
+            if (no >= 1000) {
+                let thousands = Math.floor(no / 1000);
+                parts.push(subHundred(thousands) + ' Thousand');
+                no %= 1000;
+            }
+            if (no >= 100) {
+                let hundreds = Math.floor(no / 100);
+                parts.push((words[hundreds] || '') + ' Hundred');
+                no %= 100;
+            }
+            if (no > 0) {
+                parts.push(subHundred(no));
+            }
+
+            return parts.filter(Boolean).join(' ') + ' Rupees Only';
+        },
+        async shareReceiptImage(imageUrl, fileName) {
+            try {
+                if (navigator.share) {
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'QUAF Receipt',
+                            text: 'QUAF 09 Official Receipt - ' + fileName
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('Share error or canceled:', e);
+            }
+
+            // Fallback for desktop: download JPG and open WhatsApp
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.open('https://api.whatsapp.com/', '_blank');
+        }
+    };
+}
+</script>
+@endpush
+@endsection

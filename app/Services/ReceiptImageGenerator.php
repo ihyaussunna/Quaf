@@ -27,36 +27,37 @@ class ReceiptImageGenerator
         $h = imagesy($img);
 
         // Fonts
-        $boldFont = public_path('fonts/arialbd.ttf');
-        if (! file_exists($boldFont)) {
-            $boldFont = 'C:/Windows/Fonts/arialbd.ttf';
+        $rockwellBold = public_path('fonts/Rockwell-Bold.otf');
+        if (! file_exists($rockwellBold)) {
+            $rockwellBold = public_path('fonts/arialbd.ttf');
         }
 
-        $serifFont = public_path('fonts/georgiab.ttf');
-        if (! file_exists($serifFont)) {
-            $serifFont = 'C:/Windows/Fonts/georgiab.ttf';
+        $rockwellRegular = public_path('fonts/Rockwell-Regular.otf');
+        if (! file_exists($rockwellRegular)) {
+            $rockwellRegular = $rockwellBold;
         }
 
         // Colors
-        $textColor = imagecolorallocate($img, 30, 41, 59); // dark slate #1e293b
+        // Exact sampled color of "Receipt No :" and "Date :" from template (#5c5a5b -> R:92, G:90, B:91)
+        $labelColor = imagecolorallocate($img, 92, 90, 91);
         $whiteColor = imagecolorallocate($img, 255, 255, 255);
-        $blackColor = imagecolorallocate($img, 15, 23, 42);
+        $blackColor = imagecolorallocate($img, 0, 0, 0);
 
         // 1. Receipt Number (Right next to "Receipt No :")
         $rcpNumber = $receipt->receipt_number;
-        @imagettftext($img, 21, 0, 890, 175, $textColor, $boldFont, $rcpNumber);
+        @imagettftext($img, 20, 0, 890, 175, $labelColor, $rockwellBold, $rcpNumber);
 
         // 2. Date (Right next to "Date :")
         $dateText = $receipt->created_at ? $receipt->created_at->format('d/m/Y') : date('d/m/Y');
-        @imagettftext($img, 21, 0, 830, 230, $textColor, $boldFont, $dateText);
+        @imagettftext($img, 20, 0, 830, 230, $labelColor, $rockwellBold, $dateText);
 
         // 3. Donor Name (Centered below "Thank you" and above "for your kind contribution of")
         $donorName = strtoupper($receipt->donor_name);
-        $fontSize = 42;
+        $fontSize = 40;
         $maxNameWidth = $w - 220; // safe margin
 
         while ($fontSize > 18) {
-            $bbox = @imagettfbbox($fontSize, 0, $boldFont, $donorName);
+            $bbox = @imagettfbbox($fontSize, 0, $rockwellBold, $donorName);
             if (! $bbox) {
                 break;
             }
@@ -67,22 +68,22 @@ class ReceiptImageGenerator
             $fontSize -= 2;
         }
 
-        $bbox = @imagettfbbox($fontSize, 0, $boldFont, $donorName);
+        $bbox = @imagettfbbox($fontSize, 0, $rockwellBold, $donorName);
         if ($bbox) {
             $textW = abs($bbox[4] - $bbox[0]);
             $nameX = (int) (($w - $textW) / 2);
-            @imagettftext($img, $fontSize, 0, $nameX, 610, $whiteColor, $boldFont, $donorName);
+            @imagettftext($img, $fontSize, 0, $nameX, 610, $whiteColor, $rockwellBold, $donorName);
         }
 
         // 4. Amount (Centered inside yellow pill box, X: 357..763, Y: 694..843)
         $amountFormatted = number_format($receipt->amount, 0, '.', ',');
         $amountText = "Rs.{$amountFormatted}/-";
 
-        $amountFontSize = 42;
+        $amountFontSize = 40;
         $maxAmountWidth = 360;
 
         while ($amountFontSize > 20) {
-            $bbox = @imagettfbbox($amountFontSize, 0, $serifFont, $amountText);
+            $bbox = @imagettfbbox($amountFontSize, 0, $rockwellBold, $amountText);
             if (! $bbox) {
                 break;
             }
@@ -93,11 +94,11 @@ class ReceiptImageGenerator
             $amountFontSize -= 2;
         }
 
-        $bbox = @imagettfbbox($amountFontSize, 0, $serifFont, $amountText);
+        $bbox = @imagettfbbox($amountFontSize, 0, $rockwellBold, $amountText);
         if ($bbox) {
             $textW = abs($bbox[4] - $bbox[0]);
             $amountX = (int) (($w - $textW) / 2);
-            @imagettftext($img, $amountFontSize, 0, $amountX, 755, $blackColor, $serifFont, $amountText);
+            @imagettftext($img, $amountFontSize, 0, $amountX, 755, $blackColor, $rockwellBold, $amountText);
         }
 
         return $img;

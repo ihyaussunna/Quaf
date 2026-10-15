@@ -99,6 +99,11 @@ class Group extends Model
         return $this->hasMany(Student::class);
     }
 
+    public function fundReceipts(): HasMany
+    {
+        return $this->hasMany(FundReceipt::class, 'group_id');
+    }
+
     public function entries(): HasMany
     {
         return $this->hasMany(ProgramEntry::class);
