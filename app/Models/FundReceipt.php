@@ -216,7 +216,30 @@ class FundReceipt extends Model
                     $table->boolean('show_logo')->default(true);
                     $table->string('logo_path')->nullable();
                     $table->text('footer_text')->nullable();
-                    $table->string('authorized_by')->default('QUAF Finance Samithi');
+                    $table->integer('rcp_x')->default(890);
+                    $table->integer('rcp_y')->default(175);
+                    $table->integer('rcp_font_size')->default(20);
+                    $table->string('rcp_color', 25)->default('#5c5a5b');
+                    $table->string('rcp_align', 10)->default('left');
+
+                    $table->integer('date_x')->default(830);
+                    $table->integer('date_y')->default(230);
+                    $table->integer('date_font_size')->default(20);
+                    $table->string('date_color', 25)->default('#5c5a5b');
+                    $table->string('date_align', 10)->default('left');
+
+                    $table->integer('donor_x')->default(563);
+                    $table->integer('donor_y')->default(610);
+                    $table->integer('donor_font_size')->default(40);
+                    $table->string('donor_color', 25)->default('#ffffff');
+                    $table->string('donor_align', 10)->default('center');
+
+                    $table->integer('amount_x')->default(563);
+                    $table->integer('amount_y')->default(755);
+                    $table->integer('amount_font_size')->default(40);
+                    $table->string('amount_color', 25)->default('#000000');
+                    $table->string('amount_align', 10)->default('center');
+
                     $table->timestamps();
                 });
 
@@ -234,9 +257,63 @@ class FundReceipt extends Model
                     'show_logo' => true,
                     'footer_text' => 'Thank you for your generous contribution towards QUAF 9.0!',
                     'authorized_by' => 'QUAF Finance Samithi',
+                    'rcp_x' => 890,
+                    'rcp_y' => 175,
+                    'rcp_font_size' => 20,
+                    'rcp_color' => '#5c5a5b',
+                    'rcp_align' => 'left',
+                    'date_x' => 830,
+                    'date_y' => 230,
+                    'date_font_size' => 20,
+                    'date_color' => '#5c5a5b',
+                    'date_align' => 'left',
+                    'donor_x' => 563,
+                    'donor_y' => 610,
+                    'donor_font_size' => 40,
+                    'donor_color' => '#ffffff',
+                    'donor_align' => 'center',
+                    'amount_x' => 563,
+                    'amount_y' => 755,
+                    'amount_font_size' => 40,
+                    'amount_color' => '#000000',
+                    'amount_align' => 'center',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+            } else {
+                $columns = [
+                    'rcp_x' => fn ($t) => $t->integer('rcp_x')->default(890),
+                    'rcp_y' => fn ($t) => $t->integer('rcp_y')->default(175),
+                    'rcp_font_size' => fn ($t) => $t->integer('rcp_font_size')->default(20),
+                    'rcp_color' => fn ($t) => $t->string('rcp_color', 25)->default('#5c5a5b'),
+                    'rcp_align' => fn ($t) => $t->string('rcp_align', 10)->default('left'),
+
+                    'date_x' => fn ($t) => $t->integer('date_x')->default(830),
+                    'date_y' => fn ($t) => $t->integer('date_y')->default(230),
+                    'date_font_size' => fn ($t) => $t->integer('date_font_size')->default(20),
+                    'date_color' => fn ($t) => $t->string('date_color', 25)->default('#5c5a5b'),
+                    'date_align' => fn ($t) => $t->string('date_align', 10)->default('left'),
+
+                    'donor_x' => fn ($t) => $t->integer('donor_x')->default(563),
+                    'donor_y' => fn ($t) => $t->integer('donor_y')->default(610),
+                    'donor_font_size' => fn ($t) => $t->integer('donor_font_size')->default(40),
+                    'donor_color' => fn ($t) => $t->string('donor_color', 25)->default('#ffffff'),
+                    'donor_align' => fn ($t) => $t->string('donor_align', 10)->default('center'),
+
+                    'amount_x' => fn ($t) => $t->integer('amount_x')->default(563),
+                    'amount_y' => fn ($t) => $t->integer('amount_y')->default(755),
+                    'amount_font_size' => fn ($t) => $t->integer('amount_font_size')->default(40),
+                    'amount_color' => fn ($t) => $t->string('amount_color', 25)->default('#000000'),
+                    'amount_align' => fn ($t) => $t->string('amount_align', 10)->default('center'),
+                ];
+
+                Schema::table('fund_receipt_settings', function (Blueprint $table) use ($columns) {
+                    foreach ($columns as $columnName => $callback) {
+                        if (! Schema::hasColumn('fund_receipt_settings', $columnName)) {
+                            $callback($table);
+                        }
+                    }
+                });
             }
 
             if (! Schema::hasTable('fund_receipts')) {

@@ -140,8 +140,8 @@ class FundManagementController extends Controller
     {
         $settings = FundReceiptSetting::current();
 
-        // Sample receipt data for live preview
-        $sampleReceipt = new FundReceipt([
+        $latestReceipt = FundReceipt::latest()->first();
+        $sampleReceipt = $latestReceipt ?? new FundReceipt([
             'receipt_number' => 'QFR-26-042',
             'donor_name' => 'MUHAMMED SHAFI K',
             'donor_phone' => '+91 98470 12345',
@@ -154,7 +154,10 @@ class FundManagementController extends Controller
             'notes' => 'Festival contribution',
             'collector_name' => Auth::user()?->name ?? 'QUAF Fund Desk',
         ]);
-        $sampleReceipt->created_at = now();
+
+        if (! $sampleReceipt->created_at) {
+            $sampleReceipt->created_at = now();
+        }
 
         return view('admin.fund.settings', compact('settings', 'sampleReceipt'));
     }
@@ -178,6 +181,31 @@ class FundManagementController extends Controller
             'show_logo' => ['nullable', 'boolean'],
             'footer_text' => ['nullable', 'string', 'max:500'],
             'authorized_by' => ['required', 'string', 'max:200'],
+
+            // Poster Customizer Rules (Placement, Size, Color, Alignment)
+            'rcp_x' => ['nullable', 'integer', 'min:0', 'max:1126'],
+            'rcp_y' => ['nullable', 'integer', 'min:0', 'max:1407'],
+            'rcp_font_size' => ['nullable', 'integer', 'min:8', 'max:100'],
+            'rcp_color' => ['nullable', 'string', 'max:25'],
+            'rcp_align' => ['nullable', 'string', 'in:left,center,right'],
+
+            'date_x' => ['nullable', 'integer', 'min:0', 'max:1126'],
+            'date_y' => ['nullable', 'integer', 'min:0', 'max:1407'],
+            'date_font_size' => ['nullable', 'integer', 'min:8', 'max:100'],
+            'date_color' => ['nullable', 'string', 'max:25'],
+            'date_align' => ['nullable', 'string', 'in:left,center,right'],
+
+            'donor_x' => ['nullable', 'integer', 'min:0', 'max:1126'],
+            'donor_y' => ['nullable', 'integer', 'min:0', 'max:1407'],
+            'donor_font_size' => ['nullable', 'integer', 'min:8', 'max:100'],
+            'donor_color' => ['nullable', 'string', 'max:25'],
+            'donor_align' => ['nullable', 'string', 'in:left,center,right'],
+
+            'amount_x' => ['nullable', 'integer', 'min:0', 'max:1126'],
+            'amount_y' => ['nullable', 'integer', 'min:0', 'max:1407'],
+            'amount_font_size' => ['nullable', 'integer', 'min:8', 'max:100'],
+            'amount_color' => ['nullable', 'string', 'max:25'],
+            'amount_align' => ['nullable', 'string', 'in:left,center,right'],
         ]);
 
         $settings = FundReceiptSetting::current();

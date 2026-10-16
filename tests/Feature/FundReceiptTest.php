@@ -216,6 +216,70 @@ class FundReceiptTest extends TestCase
         $this->assertTrue($settings->show_logo);
     }
 
+    public function test_admin_can_update_receipt_poster_customizer_fields(): void
+    {
+        $response = $this->actingAs($this->admin)->post(route('admin.fund.settings.update'), [
+            'header_title' => 'QUAF SEASON 09',
+            'organization_name' => 'JAMIA IHYA-US-SUNNA',
+            'subtitle' => 'Grand Festival Fund Collection Voucher',
+            'text_alignment' => 'center',
+            'font_size' => 'normal',
+            'padding_size' => 'normal',
+            'primary_color' => '#be1e2d',
+            'accent_color' => '#d97706',
+            'text_color' => '#0f172a',
+            'bg_color' => '#ffffff',
+            'authorized_by' => 'QUAF Finance Samithi',
+            'rcp_x' => 905,
+            'rcp_y' => 180,
+            'rcp_font_size' => 24,
+            'rcp_color' => '#444444',
+            'rcp_align' => 'right',
+            'date_x' => 840,
+            'date_y' => 235,
+            'date_font_size' => 22,
+            'date_color' => '#333333',
+            'date_align' => 'right',
+            'donor_x' => 570,
+            'donor_y' => 615,
+            'donor_font_size' => 44,
+            'donor_color' => '#ffff00',
+            'donor_align' => 'center',
+            'amount_x' => 565,
+            'amount_y' => 760,
+            'amount_font_size' => 42,
+            'amount_color' => '#111111',
+            'amount_align' => 'center',
+        ]);
+
+        $response->assertRedirect(route('admin.fund.settings'));
+
+        $settings = FundReceiptSetting::current();
+        $this->assertEquals(905, $settings->rcp_x);
+        $this->assertEquals(180, $settings->rcp_y);
+        $this->assertEquals(24, $settings->rcp_font_size);
+        $this->assertEquals('#444444', $settings->rcp_color);
+        $this->assertEquals('right', $settings->rcp_align);
+
+        $this->assertEquals(840, $settings->date_x);
+        $this->assertEquals(235, $settings->date_y);
+        $this->assertEquals(22, $settings->date_font_size);
+        $this->assertEquals('#333333', $settings->date_color);
+        $this->assertEquals('right', $settings->date_align);
+
+        $this->assertEquals(570, $settings->donor_x);
+        $this->assertEquals(615, $settings->donor_y);
+        $this->assertEquals(44, $settings->donor_font_size);
+        $this->assertEquals('#ffff00', $settings->donor_color);
+        $this->assertEquals('center', $settings->donor_align);
+
+        $this->assertEquals(565, $settings->amount_x);
+        $this->assertEquals(760, $settings->amount_y);
+        $this->assertEquals(42, $settings->amount_font_size);
+        $this->assertEquals('#111111', $settings->amount_color);
+        $this->assertEquals('center', $settings->amount_align);
+    }
+
     public function test_panel_access_lists_fund_collector_account(): void
     {
         $response = $this->actingAs($this->admin)->get(route('admin.panel-access.index', ['panel' => 'fund']));
