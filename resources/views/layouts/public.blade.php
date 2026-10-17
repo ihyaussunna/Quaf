@@ -211,7 +211,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="{{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('fund.home')) ? 'bg-[#07070a]' : 'bg-slate-50' }} text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
+<body class="{{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('fund.home') || request()->routeIs('donate*')) ? 'bg-[#07070a]' : 'bg-slate-50' }} text-slate-900 font-sora antialiased selection:bg-[#be1e2d] selection:text-white min-h-[100dvh] flex flex-col relative w-full overflow-x-clip"
       x-data="{ scrolled: false, mobileOpen: false, showStudentModal: false }"
       @scroll.window="scrolled = (window.pageYOffset > 440)">
 
@@ -234,7 +234,7 @@
     @if(!($hideHeader ?? false))
     <!-- Global Header (Apple-inspired Sticky Navigation with Dynamic Glassmorphism) -->
     <header class="hidden lg:block sticky top-0 z-40 transition-all duration-300 text-white"
-            :class="(scrolled || {{ !request()->routeIs('home.view') && !request()->routeIs('home') && !request()->routeIs('fund.home') ? 'true' : 'false' }}) 
+            :class="(scrolled || {{ !request()->routeIs('home.view') && !request()->routeIs('home') && !request()->routeIs('fund.home') && !request()->routeIs('donate*') ? 'true' : 'false' }}) 
                 ? 'bg-slate-950/95 backdrop-blur-md border-b border-white/10 shadow-sm' 
                 : 'bg-transparent border-b border-transparent'">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -263,13 +263,13 @@
     @endif
 
     <!-- Main Content Slot -->
-    <main class="flex-1 w-full {{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('fund.home')) ? 'pb-0 lg:-mt-20' : (($hideFooter ?? false) ? 'pb-0' : 'pb-16 lg:pb-0') }}">
+    <main class="flex-1 w-full {{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('fund.home') || request()->routeIs('donate*')) ? 'pb-0 lg:-mt-20' : (($hideFooter ?? false) ? 'pb-0' : 'pb-16 lg:pb-0') }}">
         @yield('content')
     </main>
 
     @if(!($hideFooter ?? false))
     <!-- Global Premium Dark Footer (Section 30) -->
-    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-32 sm:pb-36 lg:pb-14 {{ (request()->routeIs('home.view') || request()->routeIs('home')) ? 'mt-0' : 'mt-16 sm:mt-24' }} relative overflow-hidden">
+    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-32 sm:pb-36 lg:pb-14 {{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('donate*')) ? 'mt-0' : 'mt-16 sm:mt-24' }} relative overflow-hidden">
         <!-- Subtle Glow in Footer -->
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[140px] pointer-events-none"></div>
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>

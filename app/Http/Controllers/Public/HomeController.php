@@ -71,6 +71,14 @@ class HomeController extends Controller
         return view('public.contact', compact('stages'));
     }
 
+    /**
+     * Dedicated public donation page for QUAF 2026.
+     */
+    public function donate(): View
+    {
+        return view('public.donate');
+    }
+
     protected function renderHomepage(): View
     {
         $liveFestMode = FestivalSetting::get('live_fest_mode', '1') === '1';

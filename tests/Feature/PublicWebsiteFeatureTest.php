@@ -392,4 +392,23 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('High-Fidelity Dynamic Festival Poster');
         $response->assertSee('Print / Save Poster');
     }
+
+    public function test_public_donation_page_renders_successfully(): void
+    {
+        $response = $this->get(route('donate'));
+
+        $response->assertStatus(200);
+        $response->assertSee('QUAF 2026 | ₹100 Challenge');
+        $response->assertSee('qr.9074680630@sib');
+        $response->assertSee('quaf-sib-qr.jpg');
+        $response->assertSee('1500+');
+        $response->assertSee('₹100');
+    }
+
+    public function test_donate_alias_redirects_to_donatetoquaf(): void
+    {
+        $response = $this->get('/donate');
+
+        $response->assertRedirect(route('donate'));
+    }
 }
