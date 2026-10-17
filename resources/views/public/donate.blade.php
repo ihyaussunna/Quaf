@@ -442,72 +442,40 @@
                     </div>
                 </div>
 
-                <!-- NOT FOUND / INSTANT CLAIM FORM -->
-                <div x-cloak x-show="showClaimForm" class="mt-6 rounded-2xl bg-amber-50/80 p-5 sm:p-6 space-y-4 border-0">
+                <!-- NOT FOUND / VERIFICATION PENDING NOTICE (SECURE & FRAUD-PROTECTED) -->
+                <div x-cloak x-show="notFound" class="mt-6 rounded-2xl bg-amber-50/90 p-5 sm:p-6 space-y-4 border-0">
                     <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-full bg-amber-200/70 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <div class="w-9 h-9 rounded-full bg-amber-200/80 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                         </div>
                         <div>
-                            <div class="font-anek font-bold text-amber-950 text-sm sm:text-base">രസീത് പോസ്റ്റർ ഉടൻ ജനറേറ്റ് ചെയ്യാം</div>
-                            <p class="font-anek text-xs sm:text-sm text-amber-900/90 leading-relaxed mt-1">
-                                ഈ Transaction ID-യിൽ മുൻപ് രസീത് കണ്ടെത്തിയിട്ടില്ല. നിങ്ങളുടെ പേരും വിവരങ്ങളും താഴെ നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഇപ്പോൾ തന്നെ തയ്യാറാക്കാം:
+                            <div class="font-anek font-bold text-amber-950 text-base">ഈ Transaction ID-യിൽ അംഗീകൃത രസീത് ലഭ്യമായിട്ടില്ല</div>
+                            <p class="font-anek text-xs sm:text-sm text-amber-900 leading-relaxed mt-1">
+                                സുരക്ഷാ മാനദണ്ഡങ്ങൾ പ്രകാരം ബാങ്ക് അക്കൗണ്ടിലെ ക്രെഡിറ്റ് ഫണ്ട് ഡെസ്ക് നേരിട്ട് പരിശോധിച്ച ശേഷം മാത്രമേ ഔദ്യോഗിക രസീത് സിസ്റ്റത്തിൽ രേഖപ്പെടുത്തുകയുള്ളൂ.
+                            </p>
+                            <p class="font-anek text-xs sm:text-sm text-amber-900/90 leading-relaxed mt-2">
+                                നിങ്ങൾ പണം അയച്ചിട്ടുണ്ടെങ്കിൽ രസീത് വേഗത്തിൽ ലഭ്യമാക്കാൻ താഴെ ക്ലിക്ക് ചെയ്ത് Transaction ID-യും സ്ക്രീൻഷോട്ടും ഫണ്ട് ഹെൽപ്പ് ഡെസ്കിലേക്ക് WhatsApp വഴി അയക്കൂ:
                             </p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        <div>
-                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">നിങ്ങളുടെ പേര് *</label>
-                            <input type="text" 
-                                   x-model="claimName" 
-                                   placeholder="ഉദാ: Muhammed Shafi" 
-                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">നൽകിയ തുക (₹) *</label>
-                            <input type="number" 
-                                   x-model="claimAmount" 
-                                   min="1"
-                                   step="1"
-                                   placeholder="100" 
-                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-rockwell font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">മൊബൈൽ നമ്പർ (ഓപ്ഷണൽ)</label>
-                            <input type="tel" 
-                                   x-model="claimPhone" 
-                                   placeholder="ഫോൺ നമ്പർ" 
-                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-mono text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">സ്ഥലം (ഓപ്ഷണൽ)</label>
-                            <input type="text" 
-                                   x-model="claimPlace" 
-                                   placeholder="സ്ഥലം" 
-                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
-                        </div>
-                    </div>
-
-                    <div x-cloak x-show="claimError" class="p-3 rounded-xl bg-red-100 text-red-900 font-anek text-xs">
-                        <span x-text="claimError"></span>
-                    </div>
-
-                    <div class="pt-2">
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
                         <button type="button" 
-                                @click="claimReceipt()" 
-                                :disabled="isClaiming || !claimName.trim() || !claimAmount"
-                                style="background-color: #be1e2d !important; color: #ffffff !important;"
-                                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 disabled:opacity-50 text-white font-anek font-bold text-base shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
-                            <template x-if="isClaiming">
-                                <svg class="w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                </svg>
-                            </template>
-                            <span x-text="isClaiming ? 'രസീത് പോസ്റ്റർ തയ്യാറാക്കുന്നു...' : 'രസീത് പോസ്റ്റർ തയ്യാറാക്കി ഡൗൺലോഡ് ചെയ്യുക'"></span>
+                                @click="sendWhatsAppVerification()" 
+                                style="background-color: #25D366 !important; color: #ffffff !important;"
+                                class="flex-1 py-3.5 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-anek font-bold text-sm shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5 fill-white shrink-0" viewBox="0 0 24 24">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.983z"/>
+                            </svg>
+                            <span>ഫണ്ട് ഡെസ്കിലേക്ക് അയക്കുക (WhatsApp)</span>
+                        </button>
+                        <button type="button" 
+                                @click="resetReceiptSearch()" 
+                                style="background-color: #ffffff !important; color: #0f172a !important;"
+                                class="py-3.5 px-5 rounded-2xl bg-white hover:bg-slate-100 text-slate-800 font-anek font-bold text-xs shadow-2xs border-0 transition-all cursor-pointer flex items-center justify-center">
+                            <span>മറ്റൊരു ID പരിശോധിക്കുക</span>
                         </button>
                     </div>
                 </div>
@@ -713,17 +681,10 @@ function quafDonationPage() {
         isSearching: false,
         searchError: '',
         foundReceipt: null,
-        showClaimForm: false,
-        isClaiming: false,
-        claimName: '',
-        claimAmount: 100,
-        claimPhone: '',
-        claimPlace: '',
-        claimError: '',
+        notFound: false,
 
         selectAmount(amt) {
             this.selectedAmount = Number(amt);
-            this.claimAmount = Number(amt);
             this.payNow();
         },
 
@@ -753,7 +714,7 @@ function quafDonationPage() {
             this.isSearching = true;
             this.searchError = '';
             this.foundReceipt = null;
-            this.showClaimForm = false;
+            this.notFound = false;
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch("{{ route('donate.check-receipt') }}", {
@@ -768,9 +729,10 @@ function quafDonationPage() {
                 const data = await res.json();
                 if (data.found && data.receipt) {
                     this.foundReceipt = data.receipt;
+                    this.notFound = false;
                 } else {
-                    this.showClaimForm = true;
-                    this.claimAmount = this.selectedAmount || 100;
+                    this.foundReceipt = null;
+                    this.notFound = true;
                 }
             } catch (e) {
                 this.searchError = 'പരിശോധിക്കുന്നതിനിടയിൽ തടസ്സം നേരിട്ടു. വീണ്ടും ശ്രമിക്കുക.';
@@ -779,50 +741,21 @@ function quafDonationPage() {
             }
         },
 
-        async claimReceipt() {
-            if (!this.claimName.trim() || !this.claimAmount) {
-                this.claimError = 'ദയവായി നിങ്ങളുടെ പേരും തുകയും നൽകുക.';
-                return;
-            }
-            this.isClaiming = true;
-            this.claimError = '';
-            try {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                const res = await fetch("{{ route('donate.claim-receipt') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        transaction_id: this.txnQuery.trim(),
-                        donor_name: this.claimName.trim(),
-                        amount: Number(this.claimAmount),
-                        donor_phone: this.claimPhone.trim(),
-                        donor_place: this.claimPlace.trim(),
-                    })
-                });
-                const data = await res.json();
-                if (data.success && data.receipt) {
-                    this.foundReceipt = data.receipt;
-                    this.showClaimForm = false;
-                } else {
-                    this.claimError = data.message || 'രസീത് തയ്യാറാക്കുന്നതിൽ തടസ്സം നേരിട്ടു.';
-                }
-            } catch (e) {
-                this.claimError = 'രസീത് തയ്യാറാക്കുന്നതിനിടയിൽ തടസ്സം നേരിട്ടു. വീണ്ടും ശ്രമിക്കുക.';
-            } finally {
-                this.isClaiming = false;
-            }
+        sendWhatsAppVerification() {
+            const q = (this.txnQuery || '').trim();
+            const msg = `QUAF 2026 — രസീത് വെരിഫിക്കേഷൻ അഭ്യർത്ഥന\n\n` +
+                        `Transaction ID / UTR: ${q}\n` +
+                        `തുക: ₹${Number(this.selectedAmount).toLocaleString('en-IN')}\n\n` +
+                        `ഞാൻ QUAF 2026 ഫണ്ടിലേക്ക് ഓൺലൈനായി പണം അയച്ചിട്ടുണ്ട്. ബാങ്ക് ക്രെഡിറ്റ് പരിശോധിച്ച് ഔദ്യോഗിക രസീത് ലഭ്യമാക്കാൻ അപേക്ഷിക്കുന്നു.`;
+            const text = encodeURIComponent(msg);
+            window.open("https://wa.me/919074680630?text=" + text, "_blank");
         },
 
         resetReceiptSearch() {
             this.txnQuery = '';
             this.foundReceipt = null;
-            this.showClaimForm = false;
+            this.notFound = false;
             this.searchError = '';
-            this.claimError = '';
         },
 
         applyCustomAmount() {

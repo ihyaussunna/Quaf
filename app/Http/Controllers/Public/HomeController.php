@@ -82,7 +82,7 @@ class HomeController extends Controller
     }
 
     /**
-     * Check if a receipt exists for a given transaction reference or receipt number.
+     * Check if an officially verified receipt exists for a given transaction reference or receipt number.
      */
     public function checkReceipt(Request $request): JsonResponse
     {
@@ -100,8 +100,7 @@ class HomeController extends Controller
         $receipt = FundReceipt::where('is_cancelled', false)
             ->where(function ($q) use ($query) {
                 $q->where('transaction_reference', $query)
-                    ->orWhere('receipt_number', $query)
-                    ->orWhere('transaction_reference', 'like', "%{$query}%");
+                    ->orWhere('receipt_number', $query);
             })
             ->latest('id')
             ->first();
@@ -110,87 +109,12 @@ class HomeController extends Controller
             return response()->json([
                 'found' => false,
                 'transaction_id' => $query,
-                'message' => 'ഈ Transaction ID-യിൽ രസീത് ലഭ്യമായിട്ടില്ല.',
+                'message' => 'ഈ Transaction ID-യിൽ അംഗീകൃത രസീത് ലഭ്യമായിട്ടില്ല.',
             ]);
         }
 
         return response()->json([
             'found' => true,
-            'receipt' => [
-                'id' => $receipt->id,
-                'receipt_number' => $receipt->receipt_number,
-                'donor_name' => $receipt->donor_name,
-                'amount' => (float) $receipt->amount,
-                'formatted_amount' => number_format((float) $receipt->amount),
-                'date' => $receipt->created_at ? $receipt->created_at->format('d/m/Y') : date('d/m/Y'),
-                'download_url' => route('fund.receipts.download', $receipt),
-                'image_url' => route('fund.receipts.image', $receipt),
-                'view_url' => route('fund.receipts.show', $receipt),
-            ],
-        ]);
-    }
-
-    /**
-     * Claim/Generate a receipt poster for a public online donation.
-     */
-    public function claimReceipt(Request $request): JsonResponse
-    {
-        FundReceipt::ensureSchema();
-
-        $validated = $request->validate([
-            'transaction_id' => ['required', 'string', 'min:3', 'max:100'],
-            'donor_name' => ['required', 'string', 'min:2', 'max:150'],
-            'amount' => ['required', 'numeric', 'min:1', 'max:10000000'],
-            'donor_phone' => ['nullable', 'string', 'max:25'],
-            'donor_place' => ['nullable', 'string', 'max:100'],
-        ]);
-
-        $txnId = trim($validated['transaction_id']);
-
-        // Check if receipt already exists for this transaction ID
-        $existing = FundReceipt::where('is_cancelled', false)
-            ->where('transaction_reference', $txnId)
-            ->latest('id')
-            ->first();
-
-        if ($existing) {
-            return response()->json([
-                'success' => true,
-                'already_existed' => true,
-                'receipt' => [
-                    'id' => $existing->id,
-                    'receipt_number' => $existing->receipt_number,
-                    'donor_name' => $existing->donor_name,
-                    'amount' => (float) $existing->amount,
-                    'formatted_amount' => number_format((float) $existing->amount),
-                    'date' => $existing->created_at ? $existing->created_at->format('d/m/Y') : date('d/m/Y'),
-                    'download_url' => route('fund.receipts.download', $existing),
-                    'image_url' => route('fund.receipts.image', $existing),
-                    'view_url' => route('fund.receipts.show', $existing),
-                ],
-            ]);
-        }
-
-        $receiptNumber = FundReceipt::nextReceiptNumber();
-        $amountInWords = FundReceipt::amountInWords($validated['amount']);
-
-        $receipt = FundReceipt::create([
-            'receipt_number' => $receiptNumber,
-            'donor_name' => trim($validated['donor_name']),
-            'donor_phone' => trim($validated['donor_phone'] ?? ''),
-            'donor_place' => trim($validated['donor_place'] ?? ''),
-            'amount' => $validated['amount'],
-            'amount_in_words' => $amountInWords,
-            'payment_method' => 'upi',
-            'transaction_reference' => $txnId,
-            'category' => '₹100 Challenge',
-            'collector_name' => 'Online Public Donation',
-            'is_cancelled' => false,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'already_existed' => false,
             'receipt' => [
                 'id' => $receipt->id,
                 'receipt_number' => $receipt->receipt_number,

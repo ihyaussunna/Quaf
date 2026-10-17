@@ -97,7 +97,6 @@ Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::get('/donatetoquaf', [HomeController::class, 'donate'])->name('donate');
 Route::get('/donate', fn () => redirect()->route('donate'))->name('donate.alias');
 Route::post('/donatetoquaf/check-receipt', [HomeController::class, 'checkReceipt'])->name('donate.check-receipt');
-Route::post('/donatetoquaf/claim-receipt', [HomeController::class, 'claimReceipt'])->name('donate.claim-receipt');
 
 Route::get('/results', [ResultController::class, 'index'])->name('results.index');
 Route::get('/results/{program}', [ResultController::class, 'show'])->name('results.show');
