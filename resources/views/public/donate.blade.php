@@ -316,59 +316,247 @@
                     നിങ്ങളുടെ രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം
                 </h2>
                 <p class="font-anek text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
-                    Payment പൂർത്തിയായ ശേഷം ലഭിച്ച UPI Transaction ID / UTR അല്ലെങ്കിൽ രസീത് നമ്പർ താഴെ നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം.
+                    നിങ്ങൾ പണം അയച്ച ശേഷം ലഭിച്ച Transaction ID, സ്ക്രീൻഷോട്ട്, WhatsApp നമ്പർ എന്നിവ നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഇപ്പോൾ തന്നെ ഡൗൺലോഡ് ചെയ്യാം.
                 </p>
 
-                <!-- Input & Action Bar (Stroke-Free, Modern Inset) -->
-                <div class="bg-slate-100 rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-0">
-                    <div class="relative flex-1">
-                        <input type="text" 
-                               x-model="txnQuery" 
-                               @keydown.enter.prevent="searchReceipt()"
-                               placeholder="UPI Transaction ID / UTR / രസീത് നമ്പർ" 
-                               class="w-full bg-transparent px-3 sm:px-4 py-3 text-sm sm:text-base font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none">
+                <!-- TAB SELECTOR (Stroke-Free, Modern Rounded) -->
+                <template x-if="!foundReceipt">
+                    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-100 mb-6">
+                        <button type="button" 
+                                @click="receiptTab = 'upload'" 
+                                :class="receiptTab === 'upload' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'" 
+                                class="flex-1 py-3 px-3 rounded-xl font-anek text-xs sm:text-sm transition-all border-0 cursor-pointer text-center">
+                            സ്ക്രീൻഷോട്ട് നൽകി ഡൗൺലോഡ് ചെയ്യാം
+                        </button>
+                        <button type="button" 
+                                @click="receiptTab = 'search'" 
+                                :class="receiptTab === 'search' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'" 
+                                class="flex-1 py-3 px-3 rounded-xl font-anek text-xs sm:text-sm transition-all border-0 cursor-pointer text-center">
+                            രസീത് നമ്പർ / ID തിരയുക
+                        </button>
+                    </div>
+                </template>
+
+                <!-- TAB 1: UPLOAD SCREENSHOT & GENERATE/DOWNLOAD POSTER -->
+                <div x-cloak x-show="!foundReceipt && receiptTab === 'upload'" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Transaction ID / UTR -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block font-anek text-xs font-semibold text-slate-700">UPI Transaction ID / UTR *</label>
+                                <button type="button" 
+                                        @click="pasteUploadTxnId()" 
+                                        class="text-[11px] font-sora font-bold text-[#be1e2d] hover:underline cursor-pointer border-0 bg-transparent flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                    <span>Paste</span>
+                                </button>
+                            </div>
+                            <input type="text" 
+                                   x-model="uploadForm.transaction_id" 
+                                   placeholder="ഉദാ: 428765432109" 
+                                   class="w-full bg-slate-100 rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+
+                        <!-- WhatsApp Number -->
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">WhatsApp നമ്പർ *</label>
+                            <input type="tel" 
+                                   x-model="uploadForm.whatsapp_number" 
+                                   placeholder="ഉദാ: 9876543210" 
+                                   class="w-full bg-slate-100 rounded-xl px-3.5 py-3 text-sm font-mono font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+
+                        <!-- Donor Name -->
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">നിങ്ങളുടെ പേര് (Donor Name) *</label>
+                            <input type="text" 
+                                   x-model="uploadForm.donor_name" 
+                                   placeholder="ഉദാ: Muhammed Shafi" 
+                                   class="w-full bg-slate-100 rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+
+                        <!-- Amount -->
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">നൽകിയ തുക (₹) *</label>
+                            <input type="number" 
+                                   x-model="uploadForm.amount" 
+                                   min="1" 
+                                   step="1"
+                                   placeholder="100" 
+                                   class="w-full bg-slate-100 rounded-xl px-3.5 py-3 text-sm font-rockwell font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+
+                        <!-- Place (Optional) -->
+                        <div class="sm:col-span-2">
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">സ്ഥലം (ഓപ്ഷണൽ)</label>
+                            <input type="text" 
+                                   x-model="uploadForm.donor_place" 
+                                   placeholder="ഉദാ: Calicut" 
+                                   class="w-full bg-slate-100 rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <!-- Paste Button -->
-                        <button type="button" 
-                                @click="pasteTxnId()" 
-                                style="background-color: #ffffff !important; color: #1e293b !important;"
-                                class="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-white hover:bg-slate-200/80 text-slate-800 font-sora text-xs font-bold transition-all shadow-2xs border-0 cursor-pointer flex items-center justify-center gap-1.5">
-                            <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                            <span>Paste</span>
-                        </button>
+                    <!-- Payment Screenshot Upload Box -->
+                    <div class="pt-1">
+                        <label class="block font-anek text-xs font-semibold text-slate-700 mb-1.5">
+                            പേയ്‌മെന്റ് സ്ക്രീൻഷോട്ട് (Payment Screenshot) *
+                        </label>
 
-                        <!-- Search Button -->
+                        <div class="relative rounded-2xl bg-slate-100 hover:bg-slate-200/70 transition-all p-4 text-center cursor-pointer border-0">
+                            <input type="file" 
+                                   id="receipt-screenshot-input"
+                                   @change="handleFileSelect($event)" 
+                                   accept="image/*" 
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
+                            <!-- If NO file selected -->
+                            <template x-if="!uploadForm.screenshotPreview">
+                                <div class="flex flex-col items-center justify-center py-2">
+                                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-600 mb-2 shadow-2xs">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-anek text-xs sm:text-sm font-bold text-slate-800">
+                                        GPay / UPI Payment സ്ക്രീൻഷോട്ട് തിരഞ്ഞെടുക്കുക
+                                    </span>
+                                    <span class="font-anek text-[11px] text-slate-500 mt-0.5">
+                                        JPG, PNG അല്ലെങ്കിൽ WEBP (Max 10MB)
+                                    </span>
+                                </div>
+                            </template>
+
+                            <!-- If file selected with preview -->
+                            <template x-if="uploadForm.screenshotPreview">
+                                <div class="flex items-center justify-between gap-3 bg-white p-2.5 rounded-xl text-left">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <img :src="uploadForm.screenshotPreview" alt="Screenshot Preview" class="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200">
+                                        <div class="min-w-0">
+                                            <div class="font-anek text-xs font-bold text-slate-900 truncate" x-text="uploadForm.screenshot ? uploadForm.screenshot.name : 'Screenshot selected'"></div>
+                                            <div class="text-[10px] font-mono text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+                                                <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                ചിത്രം റെഡിയാണ്
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" 
+                                            @click.stop="removeScreenshot()" 
+                                            class="relative z-20 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-anek text-xs font-bold transition-colors cursor-pointer border-0 shrink-0">
+                                        മാറ്റുക
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div x-cloak x-show="uploadError" class="p-3.5 rounded-xl bg-red-100 text-red-900 font-anek text-xs">
+                        <span x-text="uploadError"></span>
+                    </div>
+
+                    <!-- Submit & Download Button -->
+                    <div class="pt-2">
                         <button type="button" 
-                                @click="searchReceipt()" 
-                                :disabled="isSearching || !txnQuery.trim()"
+                                @click="submitUpload()" 
+                                :disabled="isUploading"
                                 style="background-color: #be1e2d !important; color: #ffffff !important;"
-                                class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[#be1e2d] hover:bg-red-700 disabled:opacity-50 text-white font-anek font-bold text-sm transition-all shadow-md border-0 cursor-pointer flex items-center justify-center gap-2">
-                            <template x-if="isSearching">
-                                <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 disabled:opacity-50 text-white font-anek font-bold text-base sm:text-lg shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2.5">
+                            <template x-if="isUploading">
+                                <svg class="w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                                 </svg>
                             </template>
-                            <template x-if="!isSearching">
-                                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            <template x-if="!isUploading">
+                                <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                 </svg>
                             </template>
-                            <span x-text="isSearching ? 'തിരയുന്നു...' : 'കണ്ടെത്തുക'"></span>
+                            <span x-text="isUploading ? 'സ്ക്രീൻഷോട്ട് അപ്‌ലോഡ് ചെയ്യുന്നു...' : 'വിവരങ്ങൾ നൽകി രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യുക'"></span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Error Notice -->
-                <div x-cloak x-show="searchError" class="mt-4 p-4 rounded-2xl bg-red-50 text-red-900 font-anek text-xs sm:text-sm">
-                    <span x-text="searchError"></span>
+                <!-- TAB 2: SEARCH BY TRANSACTION ID / RECEIPT NUMBER -->
+                <div x-cloak x-show="!foundReceipt && receiptTab === 'search'" class="space-y-4">
+                    <div class="bg-slate-100 rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-0">
+                        <div class="relative flex-1">
+                            <input type="text" 
+                                   x-model="txnQuery" 
+                                   @keydown.enter.prevent="searchReceipt()"
+                                   placeholder="UPI Transaction ID / UTR / രസീത് നമ്പർ" 
+                                   class="w-full bg-transparent px-3 sm:px-4 py-3 text-sm sm:text-base font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none">
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <!-- Paste Button -->
+                            <button type="button" 
+                                    @click="pasteTxnId()" 
+                                    style="background-color: #ffffff !important; color: #1e293b !important;"
+                                    class="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-white hover:bg-slate-200/80 text-slate-800 font-sora text-xs font-bold transition-all shadow-2xs border-0 cursor-pointer flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                <span>Paste</span>
+                            </button>
+
+                            <!-- Search Button -->
+                            <button type="button" 
+                                    @click="searchReceipt()" 
+                                    :disabled="isSearching || !txnQuery.trim()"
+                                    style="background-color: #be1e2d !important; color: #ffffff !important;"
+                                    class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[#be1e2d] hover:bg-red-700 disabled:opacity-50 text-white font-anek font-bold text-sm transition-all shadow-md border-0 cursor-pointer flex items-center justify-center gap-2">
+                                <template x-if="isSearching">
+                                    <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="!isSearching">
+                                    <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </template>
+                                <span x-text="isSearching ? 'തിരയുന്നു...' : 'കണ്ടെത്തുക'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Error Notice -->
+                    <div x-cloak x-show="searchError" class="p-3.5 rounded-xl bg-red-100 text-red-900 font-anek text-xs">
+                        <span x-text="searchError"></span>
+                    </div>
+
+                    <!-- Not Found in Search Notice -->
+                    <div x-cloak x-show="notFound" class="rounded-2xl bg-amber-50/90 p-5 space-y-3 border-0">
+                        <div class="font-anek font-bold text-amber-950 text-sm sm:text-base">
+                            ഈ Transaction ID-യിൽ രസീത് മുൻപ് കണ്ടെത്തിയിട്ടില്ല
+                        </div>
+                        <p class="font-anek text-xs sm:text-sm text-amber-900 leading-relaxed">
+                            നിങ്ങൾ പണം അയച്ചിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ പേയ്‌മെന്റ് സ്ക്രീൻഷോട്ടും WhatsApp നമ്പറും നൽകി ഇപ്പോൾ തന്നെ രസീത് പോസ്റ്റർ ലഭ്യമാക്കാം:
+                        </p>
+                        <div class="pt-1 flex flex-wrap gap-2.5">
+                            <button type="button" 
+                                    @click="receiptTab = 'upload'; uploadForm.transaction_id = txnQuery;" 
+                                    style="background-color: #be1e2d !important; color: #ffffff !important;"
+                                    class="py-2.5 px-4 rounded-xl bg-[#be1e2d] hover:bg-red-700 text-white font-anek font-bold text-xs shadow-md border-0 transition-all cursor-pointer">
+                                സ്ക്രീൻഷോട്ട് നൽകാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക
+                            </button>
+                            <button type="button" 
+                                    @click="sendWhatsAppVerification()" 
+                                    style="background-color: #25D366 !important; color: #ffffff !important;"
+                                    class="py-2.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-anek font-bold text-xs shadow-md border-0 transition-all cursor-pointer flex items-center gap-1.5">
+                                <span>WhatsApp ഹെൽപ്പ് ഡെസ്ക്</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- FOUND RECEIPT STATE -->
+                <!-- FOUND / GENERATED RECEIPT STATE (ONE CLICK DOWNLOAD) -->
                 <div x-cloak x-show="foundReceipt" class="mt-6 rounded-2xl bg-slate-50 p-5 sm:p-6 space-y-4 border-0">
                     <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200/60">
                         <div class="flex items-center gap-2">
@@ -431,52 +619,14 @@
                             </a>
                         </div>
 
-                        <!-- Reset / Search Another -->
+                        <!-- Reset / Submit Another -->
                         <div class="text-center pt-1">
                             <button type="button" 
                                     @click="resetReceiptSearch()" 
                                     class="text-xs font-anek text-slate-500 hover:text-slate-800 underline transition-colors cursor-pointer border-0 bg-transparent">
-                                മറ്റൊരു Transaction ID പരിശോധിക്കുക
+                                മറ്റൊരു രസീത് സമർപ്പിക്കുക / പരിശോധിക്കുക
                             </button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- NOT FOUND / VERIFICATION PENDING NOTICE (SECURE & FRAUD-PROTECTED) -->
-                <div x-cloak x-show="notFound" class="mt-6 rounded-2xl bg-amber-50/90 p-5 sm:p-6 space-y-4 border-0">
-                    <div class="flex items-start gap-3">
-                        <div class="w-9 h-9 rounded-full bg-amber-200/80 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="font-anek font-bold text-amber-950 text-base">ഈ Transaction ID-യിൽ അംഗീകൃത രസീത് ലഭ്യമായിട്ടില്ല</div>
-                            <p class="font-anek text-xs sm:text-sm text-amber-900 leading-relaxed mt-1">
-                                സുരക്ഷാ മാനദണ്ഡങ്ങൾ പ്രകാരം ബാങ്ക് അക്കൗണ്ടിലെ ക്രെഡിറ്റ് ഫണ്ട് ഡെസ്ക് നേരിട്ട് പരിശോധിച്ച ശേഷം മാത്രമേ ഔദ്യോഗിക രസീത് സിസ്റ്റത്തിൽ രേഖപ്പെടുത്തുകയുള്ളൂ.
-                            </p>
-                            <p class="font-anek text-xs sm:text-sm text-amber-900/90 leading-relaxed mt-2">
-                                നിങ്ങൾ പണം അയച്ചിട്ടുണ്ടെങ്കിൽ രസീത് വേഗത്തിൽ ലഭ്യമാക്കാൻ താഴെ ക്ലിക്ക് ചെയ്ത് Transaction ID-യും സ്ക്രീൻഷോട്ടും ഫണ്ട് ഹെൽപ്പ് ഡെസ്കിലേക്ക് WhatsApp വഴി അയക്കൂ:
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
-                        <button type="button" 
-                                @click="sendWhatsAppVerification()" 
-                                style="background-color: #25D366 !important; color: #ffffff !important;"
-                                class="flex-1 py-3.5 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-anek font-bold text-sm shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5 fill-white shrink-0" viewBox="0 0 24 24">
-                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.983z"/>
-                            </svg>
-                            <span>ഫണ്ട് ഡെസ്കിലേക്ക് അയക്കുക (WhatsApp)</span>
-                        </button>
-                        <button type="button" 
-                                @click="resetReceiptSearch()" 
-                                style="background-color: #ffffff !important; color: #0f172a !important;"
-                                class="py-3.5 px-5 rounded-2xl bg-white hover:bg-slate-100 text-slate-800 font-anek font-bold text-xs shadow-2xs border-0 transition-all cursor-pointer flex items-center justify-center">
-                            <span>മറ്റൊരു ID പരിശോധിക്കുക</span>
-                        </button>
                     </div>
                 </div>
             </section>
@@ -677,6 +827,19 @@ function quafDonationPage() {
         copiedUPI: false,
         modalOpen: false,
 
+        receiptTab: 'upload',
+        uploadForm: {
+            transaction_id: '',
+            whatsapp_number: '',
+            donor_name: '',
+            amount: 100,
+            donor_place: '',
+            screenshot: null,
+            screenshotPreview: null
+        },
+        isUploading: false,
+        uploadError: '',
+
         txnQuery: '',
         isSearching: false,
         searchError: '',
@@ -685,7 +848,116 @@ function quafDonationPage() {
 
         selectAmount(amt) {
             this.selectedAmount = Number(amt);
+            this.uploadForm.amount = Number(amt);
             this.payNow();
+        },
+
+        handleFileSelect(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                this.uploadError = 'ദയവായി ഒരു ചിത്രം (JPG, PNG, WEBP) തിരഞ്ഞെടുക്കുക.';
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                this.uploadError = 'ഫയൽ സൈസ് 10MB-യിൽ കുറവായിരിക്കണം.';
+                return;
+            }
+            this.uploadForm.screenshot = file;
+            this.uploadError = '';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.uploadForm.screenshotPreview = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        removeScreenshot() {
+            this.uploadForm.screenshot = null;
+            this.uploadForm.screenshotPreview = null;
+            const fileInput = document.getElementById('receipt-screenshot-input');
+            if (fileInput) fileInput.value = '';
+        },
+
+        async pasteUploadTxnId() {
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    const text = await navigator.clipboard.readText();
+                    if (text && text.trim()) {
+                        this.uploadForm.transaction_id = text.trim();
+                        return;
+                    }
+                }
+            } catch (err) {}
+            const manual = prompt("UPI Transaction ID / UTR ഇവിടെ നൽകുക:");
+            if (manual && manual.trim()) {
+                this.uploadForm.transaction_id = manual.trim();
+            }
+        },
+
+        async submitUpload() {
+            if (!this.uploadForm.transaction_id.trim()) {
+                this.uploadError = 'ദയവായി Transaction ID / UTR നൽകുക.';
+                return;
+            }
+            if (!this.uploadForm.whatsapp_number.trim()) {
+                this.uploadError = 'ദയവായി WhatsApp നമ്പർ നൽകുക.';
+                return;
+            }
+            if (!this.uploadForm.donor_name.trim()) {
+                this.uploadError = 'ദയവായി നിങ്ങളുടെ പേര് നൽകുക.';
+                return;
+            }
+            if (!this.uploadForm.amount || Number(this.uploadForm.amount) < 1) {
+                this.uploadError = 'ദയവായി ശരിയായ തുക നൽകുക.';
+                return;
+            }
+            if (!this.uploadForm.screenshot) {
+                this.uploadError = 'ദയവായി പേയ്‌മെന്റ് സ്ക്രീൻഷോട്ട് അപ്‌ലോഡ് ചെയ്യുക.';
+                return;
+            }
+
+            this.isUploading = true;
+            this.uploadError = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('transaction_id', this.uploadForm.transaction_id.trim());
+                formData.append('whatsapp_number', this.uploadForm.whatsapp_number.trim());
+                formData.append('donor_name', this.uploadForm.donor_name.trim());
+                formData.append('amount', Number(this.uploadForm.amount));
+                formData.append('screenshot', this.uploadForm.screenshot);
+                if (this.uploadForm.donor_place) {
+                    formData.append('donor_place', this.uploadForm.donor_place.trim());
+                }
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch("{{ route('donate.upload-receipt') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success && data.receipt) {
+                    this.foundReceipt = data.receipt;
+                    this.uploadError = '';
+                    this.removeScreenshot();
+                    this.$nextTick(() => {
+                        const el = document.getElementById('receipt-download');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    });
+                } else {
+                    this.uploadError = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'അപ്‌ലോഡ് ചെയ്യുന്നതിൽ തടസ്സം നേരിട്ടു.');
+                }
+            } catch (e) {
+                this.uploadError = 'നെറ്റ്‌വർക്ക് തകരാർ കാരണം അപ്‌ലോഡ് പൂർത്തിയായില്ല. വീണ്ടും ശ്രമിക്കുക.';
+            } finally {
+                this.isUploading = false;
+            }
         },
 
         async pasteTxnId() {
@@ -756,6 +1028,8 @@ function quafDonationPage() {
             this.foundReceipt = null;
             this.notFound = false;
             this.searchError = '';
+            this.uploadError = '';
+            this.removeScreenshot();
         },
 
         applyCustomAmount() {

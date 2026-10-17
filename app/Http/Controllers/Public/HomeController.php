@@ -125,7 +125,82 @@ class HomeController extends Controller
                 'download_url' => route('fund.receipts.download', $receipt),
                 'image_url' => route('fund.receipts.image', $receipt),
                 'view_url' => route('fund.receipts.show', $receipt),
+                'screenshot_url' => $receipt->screenshot_url,
             ],
+        ]);
+    }
+
+    /**
+     * Upload transaction details with screenshot proof and generate/download receipt poster.
+     */
+    public function uploadReceipt(Request $request): JsonResponse
+    {
+        FundReceipt::ensureSchema();
+
+        $validated = $request->validate([
+            'transaction_id' => ['required', 'string', 'min:3', 'max:100'],
+            'whatsapp_number' => ['required', 'string', 'min:7', 'max:25'],
+            'donor_name' => ['required', 'string', 'min:2', 'max:150'],
+            'amount' => ['required', 'numeric', 'min:1', 'max:10000000'],
+            'screenshot' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+            'donor_place' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $txnId = trim($validated['transaction_id']);
+        $whatsapp = trim($validated['whatsapp_number']);
+
+        // Store screenshot proof safely
+        $screenshotPath = $request->file('screenshot')->store('receipt_proofs', 'public');
+
+        // Check if receipt already exists for this transaction reference
+        $receipt = FundReceipt::where('is_cancelled', false)
+            ->where('transaction_reference', $txnId)
+            ->latest('id')
+            ->first();
+
+        if ($receipt) {
+            $receipt->update([
+                'screenshot_path' => $screenshotPath,
+                'whatsapp_number' => $whatsapp,
+                'donor_phone' => $receipt->donor_phone ?: $whatsapp,
+            ]);
+        } else {
+            $receiptNumber = FundReceipt::nextReceiptNumber();
+            $amountInWords = FundReceipt::amountInWords($validated['amount']);
+
+            $receipt = FundReceipt::create([
+                'receipt_number' => $receiptNumber,
+                'donor_name' => trim($validated['donor_name']),
+                'donor_phone' => $whatsapp,
+                'whatsapp_number' => $whatsapp,
+                'donor_place' => trim($validated['donor_place'] ?? ''),
+                'amount' => $validated['amount'],
+                'amount_in_words' => $amountInWords,
+                'payment_method' => 'upi',
+                'transaction_reference' => $txnId,
+                'screenshot_path' => $screenshotPath,
+                'category' => '₹100 Challenge',
+                'collector_name' => 'Online Donor Upload',
+                'notes' => 'Uploaded via public donation portal with payment screenshot proof',
+                'is_cancelled' => false,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'receipt' => [
+                'id' => $receipt->id,
+                'receipt_number' => $receipt->receipt_number,
+                'donor_name' => $receipt->donor_name,
+                'amount' => (float) $receipt->amount,
+                'formatted_amount' => number_format((float) $receipt->amount),
+                'date' => $receipt->created_at ? $receipt->created_at->format('d/m/Y') : date('d/m/Y'),
+                'download_url' => route('fund.receipts.download', $receipt),
+                'image_url' => route('fund.receipts.image', $receipt),
+                'view_url' => route('fund.receipts.show', $receipt),
+                'screenshot_url' => $receipt->screenshot_url,
+            ],
+            'message' => 'പേയ്‌മെന്റ് വിവരങ്ങളും സ്ക്രീൻഷോട്ടും വിജയകരമായി സമർപ്പിച്ചു!',
         ]);
     }
 

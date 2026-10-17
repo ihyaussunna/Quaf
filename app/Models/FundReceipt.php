@@ -32,6 +32,8 @@ class FundReceipt extends Model
         'transaction_reference',
         'category',
         'notes',
+        'screenshot_path',
+        'whatsapp_number',
         'collector_id',
         'collector_name',
         'student_id',
@@ -74,6 +76,15 @@ class FundReceipt extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');
+    }
+
+    public function getScreenshotUrlAttribute(): ?string
+    {
+        if (! $this->screenshot_path) {
+            return null;
+        }
+
+        return asset('storage/'.$this->screenshot_path);
     }
 
     /**
@@ -322,11 +333,13 @@ class FundReceipt extends Model
                     $table->string('receipt_number', 50)->unique();
                     $table->string('donor_name');
                     $table->string('donor_phone', 30)->nullable();
+                    $table->string('whatsapp_number', 30)->nullable();
                     $table->string('donor_place', 100)->nullable();
                     $table->decimal('amount', 12, 2);
                     $table->string('amount_in_words')->nullable();
                     $table->string('payment_method', 30)->default('cash');
                     $table->string('transaction_reference', 100)->nullable();
+                    $table->string('screenshot_path')->nullable();
                     $table->string('category', 100)->default('Festival Fund');
                     $table->text('notes')->nullable();
                     $table->foreignId('collector_id')->nullable()->constrained('users')->nullOnDelete();
@@ -355,6 +368,16 @@ class FundReceipt extends Model
                 if (! Schema::hasColumn('fund_receipts', 'group_id')) {
                     Schema::table('fund_receipts', function (Blueprint $table) {
                         $table->foreignId('group_id')->nullable()->after('student_id')->constrained('groups')->nullOnDelete();
+                    });
+                }
+                if (! Schema::hasColumn('fund_receipts', 'screenshot_path')) {
+                    Schema::table('fund_receipts', function (Blueprint $table) {
+                        $table->string('screenshot_path')->nullable()->after('transaction_reference');
+                    });
+                }
+                if (! Schema::hasColumn('fund_receipts', 'whatsapp_number')) {
+                    Schema::table('fund_receipts', function (Blueprint $table) {
+                        $table->string('whatsapp_number', 30)->nullable()->after('donor_phone');
                     });
                 }
             }

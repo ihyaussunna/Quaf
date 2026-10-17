@@ -16,6 +16,8 @@ use App\Models\User;
 use App\Models\VideoItem;
 use App\Models\Zone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PublicWebsiteFeatureTest extends TestCase
@@ -471,5 +473,57 @@ class PublicWebsiteFeatureTest extends TestCase
         ]);
 
         $response->assertStatus(404);
+    }
+
+    public function test_upload_receipt_requires_transaction_id_whatsapp_and_screenshot(): void
+    {
+        $response = $this->postJson(route('donate.upload-receipt'), []);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['transaction_id', 'whatsapp_number', 'donor_name', 'amount', 'screenshot']);
+    }
+
+    public function test_upload_receipt_creates_receipt_with_screenshot_and_returns_download_link(): void
+    {
+        Storage::fake('public');
+        FundReceipt::ensureSchema();
+
+        $file = UploadedFile::fake()->image('gpay_receipt.jpg');
+
+        $response = $this->postJson(route('donate.upload-receipt'), [
+            'transaction_id' => 'UPI428765432109',
+            'whatsapp_number' => '9876543210',
+            'donor_name' => 'Shamsudheen',
+            'amount' => 500,
+            'donor_place' => 'Malappuram',
+            'screenshot' => $file,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'receipt' => [
+                'donor_name' => 'Shamsudheen',
+                'amount' => 500,
+            ],
+        ]);
+
+        $receipt = FundReceipt::where('transaction_reference', 'UPI428765432109')->first();
+        $this->assertNotNull($receipt);
+        $this->assertEquals('9876543210', $receipt->whatsapp_number);
+        $this->assertNotNull($receipt->screenshot_path);
+        Storage::disk('public')->assertExists($receipt->screenshot_path);
+
+        // Verify check-receipt now finds this uploaded receipt
+        $checkResponse = $this->postJson(route('donate.check-receipt'), [
+            'transaction_id' => 'UPI428765432109',
+        ]);
+        $checkResponse->assertStatus(200);
+        $checkResponse->assertJson([
+            'found' => true,
+            'receipt' => [
+                'donor_name' => 'Shamsudheen',
+            ],
+        ]);
     }
 }

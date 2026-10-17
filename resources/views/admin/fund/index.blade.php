@@ -194,7 +194,12 @@
 
                             <!-- Phone -->
                             <td class="py-3 px-4 font-mono text-slate-600 text-[11px]">
-                                {{ $rcp->donor_phone ?: '—' }}
+                                <div>{{ $rcp->donor_phone ?: '—' }}</div>
+                                @if($rcp->whatsapp_number)
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $rcp->whatsapp_number) }}" target="_blank" class="inline-flex items-center gap-0.5 text-[10px] text-emerald-700 font-bold hover:underline mt-0.5">
+                                        WA: {{ $rcp->whatsapp_number }} ↗
+                                    </a>
+                                @endif
                             </td>
 
                             <!-- Amount -->
@@ -210,8 +215,15 @@
                                     {{ strtoupper($rcp->payment_method) }}
                                 </span>
                                 @if($rcp->transaction_reference)
-                                    <div class="text-[9px] text-slate-400 mt-0.5 truncate max-w-[120px]" title="{{ $rcp->transaction_reference }}">
+                                    <div class="text-[9px] text-slate-600 font-bold mt-0.5 truncate max-w-[130px]" title="{{ $rcp->transaction_reference }}">
                                         Ref: {{ $rcp->transaction_reference }}
+                                    </div>
+                                @endif
+                                @if($rcp->screenshot_path)
+                                    <div class="mt-1">
+                                        <a href="{{ asset('storage/' . $rcp->screenshot_path) }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 hover:bg-sky-100 transition-colors">
+                                            Proof Screenshot ↗
+                                        </a>
                                     </div>
                                 @endif
                             </td>

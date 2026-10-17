@@ -56,11 +56,13 @@ return new class extends Migration
                 $table->string('receipt_number', 50)->unique();
                 $table->string('donor_name');
                 $table->string('donor_phone', 30)->nullable();
+                $table->string('whatsapp_number', 30)->nullable();
                 $table->string('donor_place', 100)->nullable();
                 $table->decimal('amount', 12, 2);
                 $table->string('amount_in_words')->nullable();
                 $table->string('payment_method', 30)->default('cash'); // cash, upi, gpay, bank_transfer, other
                 $table->string('transaction_reference', 100)->nullable();
+                $table->string('screenshot_path')->nullable();
                 $table->string('category', 100)->default('Festival Fund');
                 $table->text('notes')->nullable();
                 $table->foreignId('collector_id')->nullable()->constrained('users')->nullOnDelete();
