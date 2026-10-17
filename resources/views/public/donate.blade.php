@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'QUAF 2026 | ₹100 Challenge — Ādabic Inheritance'])
+@extends('layouts.public', ['title' => 'QUAF 2026 | ₹100 Challenge — Ādabic Inheritance', 'hideHeader' => true])
 
 @section('content')
 <div x-data="quafDonationPage()" class="relative w-full font-sora">
@@ -6,7 +6,7 @@
     <!-- =====================================================================
          SECTION 1: HERO HEADER (MATCHING HOME PAGE HERO - STRICTLY NO BUTTONS)
          ===================================================================== -->
-    <section class="relative bg-[#07070a] text-white pt-24 sm:pt-32 lg:pt-36 pb-8 sm:pb-12 z-10 overflow-hidden">
+    <section class="relative bg-[#07070a] text-white pt-12 sm:pt-16 lg:pt-20 pb-0 z-10 overflow-hidden">
 
         <!-- Symmetrical Festival Ambient Mesh Lighting -->
         <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
@@ -416,8 +416,8 @@
                     2026 Oct 31 – Nov 01
                 </p>
 
-                <div class="p-4 rounded-2xl bg-amber-50 text-amber-950 font-anek text-xs sm:text-sm leading-relaxed">
-                    <strong class="text-[#94121b]">ദുആ:</strong> നാഥൻ ഇരു ലോകത്തും പതിന്മടങ്ങ് പ്രതിഫലം പകരം നൽകട്ടെ — ആമീൻ.
+                <div class="p-4 rounded-2xl bg-amber-50 text-amber-950 font-anek text-xs sm:text-sm leading-relaxed text-center font-medium">
+                    നാഥൻ ഇരു ലോകത്തും പതിന്മടങ്ങ് പ്രതിഫലം പകരം നൽകട്ടെ — ആമീൻ.
                 </div>
             </section>
 

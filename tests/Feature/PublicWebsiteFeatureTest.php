@@ -403,6 +403,8 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('quaf-sib-qr.jpg');
         $response->assertSee('1500+');
         $response->assertSee('₹100');
+        $response->assertDontSee('<header class="hidden lg:block', false);
+        $response->assertDontSee('ദുആ:');
     }
 
     public function test_donate_alias_redirects_to_donatetoquaf(): void

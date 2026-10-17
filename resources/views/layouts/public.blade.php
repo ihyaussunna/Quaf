@@ -263,7 +263,7 @@
     @endif
 
     <!-- Main Content Slot -->
-    <main class="flex-1 w-full {{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('fund.home') || request()->routeIs('donate*')) ? 'pb-0 lg:-mt-20' : (($hideFooter ?? false) ? 'pb-0' : 'pb-16 lg:pb-0') }}">
+    <main class="flex-1 w-full {{ ($hideHeader ?? false) ? 'pb-0' : ((request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('fund.home') || request()->routeIs('donate*')) ? 'pb-0 lg:-mt-20' : (($hideFooter ?? false) ? 'pb-0' : 'pb-16 lg:pb-0')) }}">
         @yield('content')
     </main>
 
