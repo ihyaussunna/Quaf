@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FestivalSetting;
+use App\Models\FundReceipt;
 use App\Models\GalleryItem;
 use App\Models\Group;
 use App\Models\News;
@@ -403,6 +404,8 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('quaf-sib-qr.jpg');
         $response->assertSee('1500+');
         $response->assertSee('₹100');
+        $response->assertSee('നിങ്ങളുടെ രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം');
+        $response->assertSee('receipt-download');
         $response->assertDontSee('<header class="hidden lg:block', false);
         $response->assertDontSee('ദുആ:');
     }
@@ -412,5 +415,109 @@ class PublicWebsiteFeatureTest extends TestCase
         $response = $this->get('/donate');
 
         $response->assertRedirect(route('donate'));
+    }
+
+    public function test_check_receipt_returns_not_found_when_no_matching_transaction(): void
+    {
+        $response = $this->postJson(route('donate.check-receipt'), [
+            'transaction_id' => 'NON_EXISTENT_TXN_12345',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'found' => false,
+            'transaction_id' => 'NON_EXISTENT_TXN_12345',
+        ]);
+    }
+
+    public function test_check_receipt_returns_receipt_details_when_found(): void
+    {
+        FundReceipt::ensureSchema();
+
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QUAF-TEST-001',
+            'donor_name' => 'Ahmad Shafi',
+            'amount' => 500,
+            'amount_in_words' => 'Five Hundred Rupees Only',
+            'payment_method' => 'upi',
+            'transaction_reference' => 'UPI987654321000',
+            'category' => '₹100 Challenge',
+            'collector_name' => 'Online Donation',
+            'is_cancelled' => false,
+        ]);
+
+        $response = $this->postJson(route('donate.check-receipt'), [
+            'transaction_id' => 'UPI987654321000',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'found' => true,
+            'receipt' => [
+                'id' => $receipt->id,
+                'receipt_number' => 'QUAF-TEST-001',
+                'donor_name' => 'Ahmad Shafi',
+                'amount' => 500,
+            ],
+        ]);
+    }
+
+    public function test_claim_receipt_creates_and_returns_new_receipt_poster_data(): void
+    {
+        FundReceipt::ensureSchema();
+
+        $response = $this->postJson(route('donate.claim-receipt'), [
+            'transaction_id' => 'UPI2026PAY999',
+            'donor_name' => 'Zainul Abid',
+            'amount' => 313,
+            'donor_phone' => '9876543210',
+            'donor_place' => 'Calicut',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'already_existed' => false,
+            'receipt' => [
+                'donor_name' => 'Zainul Abid',
+                'amount' => 313,
+            ],
+        ]);
+
+        $this->assertDatabaseHas('fund_receipts', [
+            'transaction_reference' => 'UPI2026PAY999',
+            'donor_name' => 'Zainul Abid',
+            'amount' => 313,
+        ]);
+    }
+
+    public function test_claim_receipt_is_idempotent_for_same_transaction_id(): void
+    {
+        FundReceipt::ensureSchema();
+
+        // First claim
+        $this->postJson(route('donate.claim-receipt'), [
+            'transaction_id' => 'UPI_DUPLICATE_CHECK',
+            'donor_name' => 'First Donor',
+            'amount' => 100,
+        ]);
+
+        // Second claim with same transaction id
+        $response2 = $this->postJson(route('donate.claim-receipt'), [
+            'transaction_id' => 'UPI_DUPLICATE_CHECK',
+            'donor_name' => 'Second Donor',
+            'amount' => 100,
+        ]);
+
+        $response2->assertStatus(200);
+        $response2->assertJson([
+            'success' => true,
+            'already_existed' => true,
+            'receipt' => [
+                'donor_name' => 'First Donor',
+            ],
+        ]);
+
+        $this->assertEquals(1, FundReceipt::where('transaction_reference', 'UPI_DUPLICATE_CHECK')->count());
     }
 }

@@ -303,11 +303,221 @@
                 </div>
             </section>
 
-            <!-- CARD 4: STEP 03 - SHARE WITH OTHERS -->
-            <section class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative">
+            <!-- CARD: STEP 03 - DOWNLOAD RECEIPT POSTER -->
+            <section id="receipt-download" class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-4">
                     <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
                         STEP 03
+                    </span>
+                    <span class="text-xs font-mono text-slate-400">Instant Poster Download</span>
+                </div>
+
+                <h2 class="font-anek text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                    നിങ്ങളുടെ രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം
+                </h2>
+                <p class="font-anek text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
+                    Payment പൂർത്തിയായ ശേഷം ലഭിച്ച UPI Transaction ID / UTR അല്ലെങ്കിൽ രസീത് നമ്പർ താഴെ നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം.
+                </p>
+
+                <!-- Input & Action Bar (Stroke-Free, Modern Inset) -->
+                <div class="bg-slate-100 rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-0">
+                    <div class="relative flex-1">
+                        <input type="text" 
+                               x-model="txnQuery" 
+                               @keydown.enter.prevent="searchReceipt()"
+                               placeholder="UPI Transaction ID / UTR / രസീത് നമ്പർ" 
+                               class="w-full bg-transparent px-3 sm:px-4 py-3 text-sm sm:text-base font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <!-- Paste Button -->
+                        <button type="button" 
+                                @click="pasteTxnId()" 
+                                style="background-color: #ffffff !important; color: #1e293b !important;"
+                                class="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-white hover:bg-slate-200/80 text-slate-800 font-sora text-xs font-bold transition-all shadow-2xs border-0 cursor-pointer flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span>Paste</span>
+                        </button>
+
+                        <!-- Search Button -->
+                        <button type="button" 
+                                @click="searchReceipt()" 
+                                :disabled="isSearching || !txnQuery.trim()"
+                                style="background-color: #be1e2d !important; color: #ffffff !important;"
+                                class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[#be1e2d] hover:bg-red-700 disabled:opacity-50 text-white font-anek font-bold text-sm transition-all shadow-md border-0 cursor-pointer flex items-center justify-center gap-2">
+                            <template x-if="isSearching">
+                                <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                </svg>
+                            </template>
+                            <template x-if="!isSearching">
+                                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </template>
+                            <span x-text="isSearching ? 'തിരയുന്നു...' : 'കണ്ടെത്തുക'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Notice -->
+                <div x-cloak x-show="searchError" class="mt-4 p-4 rounded-2xl bg-red-50 text-red-900 font-anek text-xs sm:text-sm">
+                    <span x-text="searchError"></span>
+                </div>
+
+                <!-- FOUND RECEIPT STATE -->
+                <div x-cloak x-show="foundReceipt" class="mt-6 rounded-2xl bg-slate-50 p-5 sm:p-6 space-y-4 border-0">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200/60">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-xs font-bold px-3 py-1 rounded-full bg-slate-900 text-white" x-text="foundReceipt?.receipt_number"></span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-mono font-semibold">
+                                <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Verified Receipt
+                            </span>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500" x-text="foundReceipt?.date"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="block text-[11px] font-mono text-slate-500 uppercase">Donor Name</span>
+                            <span class="font-anek text-lg sm:text-xl font-bold text-slate-900" x-text="foundReceipt?.donor_name"></span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-[11px] font-mono text-slate-500 uppercase">Amount</span>
+                            <span class="font-rockwell text-2xl sm:text-3xl font-bold text-[#94121b]" x-text="'₹' + foundReceipt?.formatted_amount"></span>
+                        </div>
+                    </div>
+
+                    <!-- Direct Action Buttons -->
+                    <div class="space-y-3 pt-2">
+                        <!-- Primary Download Poster Button -->
+                        <a :href="foundReceipt?.download_url" 
+                           target="_blank" 
+                           download
+                           style="background-color: #be1e2d !important; color: #ffffff !important;"
+                           class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 text-white font-sora font-bold text-sm sm:text-base shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2.5">
+                            <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യുക (Download Poster)</span>
+                        </a>
+
+                        <!-- View Poster & View Voucher Dual Buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <a :href="foundReceipt?.image_url" 
+                               target="_blank" 
+                               style="background-color: #0f172a !important; color: #ffffff !important;"
+                               class="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                <span>പോസ്റ്റർ കാണുക</span>
+                            </a>
+                            <a :href="foundReceipt?.view_url" 
+                               target="_blank" 
+                               style="background-color: #f1f5f9 !important; color: #0f172a !important;"
+                               class="py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-sora text-xs sm:text-sm font-bold shadow-2xs border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span>രസീത് വൗച്ചർ</span>
+                            </a>
+                        </div>
+
+                        <!-- Reset / Search Another -->
+                        <div class="text-center pt-1">
+                            <button type="button" 
+                                    @click="resetReceiptSearch()" 
+                                    class="text-xs font-anek text-slate-500 hover:text-slate-800 underline transition-colors cursor-pointer border-0 bg-transparent">
+                                മറ്റൊരു Transaction ID പരിശോധിക്കുക
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOT FOUND / INSTANT CLAIM FORM -->
+                <div x-cloak x-show="showClaimForm" class="mt-6 rounded-2xl bg-amber-50/80 p-5 sm:p-6 space-y-4 border-0">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-200/70 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="font-anek font-bold text-amber-950 text-sm sm:text-base">രസീത് പോസ്റ്റർ ഉടൻ ജനറേറ്റ് ചെയ്യാം</div>
+                            <p class="font-anek text-xs sm:text-sm text-amber-900/90 leading-relaxed mt-1">
+                                ഈ Transaction ID-യിൽ മുൻപ് രസീത് കണ്ടെത്തിയിട്ടില്ല. നിങ്ങളുടെ പേരും വിവരങ്ങളും താഴെ നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഇപ്പോൾ തന്നെ തയ്യാറാക്കാം:
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">നിങ്ങളുടെ പേര് *</label>
+                            <input type="text" 
+                                   x-model="claimName" 
+                                   placeholder="ഉദാ: Muhammed Shafi" 
+                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">നൽകിയ തുക (₹) *</label>
+                            <input type="number" 
+                                   x-model="claimAmount" 
+                                   min="1"
+                                   step="1"
+                                   placeholder="100" 
+                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-rockwell font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">മൊബൈൽ നമ്പർ (ഓപ്ഷണൽ)</label>
+                            <input type="tel" 
+                                   x-model="claimPhone" 
+                                   placeholder="ഫോൺ നമ്പർ" 
+                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-mono text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+                        <div>
+                            <label class="block font-anek text-xs font-semibold text-slate-700 mb-1">സ്ഥലം (ഓപ്ഷണൽ)</label>
+                            <input type="text" 
+                                   x-model="claimPlace" 
+                                   placeholder="സ്ഥലം" 
+                                   class="w-full bg-white rounded-xl px-3.5 py-3 text-sm font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]">
+                        </div>
+                    </div>
+
+                    <div x-cloak x-show="claimError" class="p-3 rounded-xl bg-red-100 text-red-900 font-anek text-xs">
+                        <span x-text="claimError"></span>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="button" 
+                                @click="claimReceipt()" 
+                                :disabled="isClaiming || !claimName.trim() || !claimAmount"
+                                style="background-color: #be1e2d !important; color: #ffffff !important;"
+                                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 disabled:opacity-50 text-white font-anek font-bold text-base shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <template x-if="isClaiming">
+                                <svg class="w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                </svg>
+                            </template>
+                            <span x-text="isClaiming ? 'രസീത് പോസ്റ്റർ തയ്യാറാക്കുന്നു...' : 'രസീത് പോസ്റ്റർ തയ്യാറാക്കി ഡൗൺലോഡ് ചെയ്യുക'"></span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CARD 4: STEP 04 - SHARE WITH OTHERS -->
+            <section class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
+                        STEP 04
                     </span>
                     <span class="text-xs font-mono text-slate-400">Spread The Goodness</span>
                 </div>
@@ -429,20 +639,28 @@
          STICKY BOTTOM MOBILE ACTION BAR (SMART PHONE OPTIMIZED - ZERO STROKES)
          ===================================================================== -->
     <div class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 px-4 py-3 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] border-0">
-        <div class="max-w-md mx-auto flex items-center gap-3">
+        <div class="max-w-md mx-auto flex items-center gap-2.5">
             <button type="button" 
                     @click="payNow()" 
                     style="background-color: #be1e2d !important; color: #ffffff !important;"
-                    class="flex-1 py-3.5 px-4 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-950/20 border-0 text-center flex items-center justify-center gap-2 cursor-pointer">
+                    class="flex-1 py-3.5 px-3 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-950/20 border-0 text-center flex items-center justify-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
-                <span x-text="'ഇപ്പോൾ സഹായിക്കാം (₹' + Number(selectedAmount).toLocaleString('en-IN') + ')'"></span>
+                <span x-text="'സഹായിക്കാം (₹' + Number(selectedAmount).toLocaleString('en-IN') + ')'"></span>
             </button>
+            <a href="#receipt-download"
+               style="background-color: #0f172a !important; color: #ffffff !important;"
+               class="py-3.5 px-3 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-md shadow-slate-950/20 border-0 text-center flex items-center justify-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                <span>രസീത്</span>
+            </a>
             <button type="button" 
                     @click="shareWhatsApp()" 
                     style="background-color: #25D366 !important; color: #ffffff !important;"
-                    class="py-3.5 px-5 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-950/20 border-0 text-center flex items-center justify-center gap-1.5 cursor-pointer">
+                    class="py-3.5 px-3.5 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-950/20 border-0 text-center flex items-center justify-center gap-1 cursor-pointer">
                 <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.983z"/>
                 </svg>
@@ -491,9 +709,120 @@ function quafDonationPage() {
         copiedUPI: false,
         modalOpen: false,
 
+        txnQuery: '',
+        isSearching: false,
+        searchError: '',
+        foundReceipt: null,
+        showClaimForm: false,
+        isClaiming: false,
+        claimName: '',
+        claimAmount: 100,
+        claimPhone: '',
+        claimPlace: '',
+        claimError: '',
+
         selectAmount(amt) {
             this.selectedAmount = Number(amt);
+            this.claimAmount = Number(amt);
             this.payNow();
+        },
+
+        async pasteTxnId() {
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    const text = await navigator.clipboard.readText();
+                    if (text && text.trim()) {
+                        this.txnQuery = text.trim();
+                        this.searchReceipt();
+                        return;
+                    }
+                }
+            } catch (err) {
+                // Clipboard permission blocked or unsupported
+            }
+            const manual = prompt("UPI Transaction ID / UTR ഇവിടെ നൽകുക:");
+            if (manual && manual.trim()) {
+                this.txnQuery = manual.trim();
+                this.searchReceipt();
+            }
+        },
+
+        async searchReceipt() {
+            const q = (this.txnQuery || '').trim();
+            if (!q) return;
+            this.isSearching = true;
+            this.searchError = '';
+            this.foundReceipt = null;
+            this.showClaimForm = false;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch("{{ route('donate.check-receipt') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ transaction_id: q })
+                });
+                const data = await res.json();
+                if (data.found && data.receipt) {
+                    this.foundReceipt = data.receipt;
+                } else {
+                    this.showClaimForm = true;
+                    this.claimAmount = this.selectedAmount || 100;
+                }
+            } catch (e) {
+                this.searchError = 'പരിശോധിക്കുന്നതിനിടയിൽ തടസ്സം നേരിട്ടു. വീണ്ടും ശ്രമിക്കുക.';
+            } finally {
+                this.isSearching = false;
+            }
+        },
+
+        async claimReceipt() {
+            if (!this.claimName.trim() || !this.claimAmount) {
+                this.claimError = 'ദയവായി നിങ്ങളുടെ പേരും തുകയും നൽകുക.';
+                return;
+            }
+            this.isClaiming = true;
+            this.claimError = '';
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch("{{ route('donate.claim-receipt') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        transaction_id: this.txnQuery.trim(),
+                        donor_name: this.claimName.trim(),
+                        amount: Number(this.claimAmount),
+                        donor_phone: this.claimPhone.trim(),
+                        donor_place: this.claimPlace.trim(),
+                    })
+                });
+                const data = await res.json();
+                if (data.success && data.receipt) {
+                    this.foundReceipt = data.receipt;
+                    this.showClaimForm = false;
+                } else {
+                    this.claimError = data.message || 'രസീത് തയ്യാറാക്കുന്നതിൽ തടസ്സം നേരിട്ടു.';
+                }
+            } catch (e) {
+                this.claimError = 'രസീത് തയ്യാറാക്കുന്നതിനിടയിൽ തടസ്സം നേരിട്ടു. വീണ്ടും ശ്രമിക്കുക.';
+            } finally {
+                this.isClaiming = false;
+            }
+        },
+
+        resetReceiptSearch() {
+            this.txnQuery = '';
+            this.foundReceipt = null;
+            this.showClaimForm = false;
+            this.searchError = '';
+            this.claimError = '';
         },
 
         applyCustomAmount() {
