@@ -15,9 +15,6 @@ use Illuminate\View\View;
 class ScheduleController extends Controller
 {
     public const FESTIVAL_TITLES = [
-        '2026-10-06' => '06 Oct — Offstage Day 01',
-        '2026-10-07' => '07 Oct — Offstage Day 02',
-        '2026-10-08' => '08 Oct — Offstage Day 03',
         '2026-10-31' => '31 Oct — Festival Day 01',
         '2026-11-01' => '01 Nov — Festival Day 02',
     ];
@@ -68,7 +65,7 @@ class ScheduleController extends Controller
                 if ($carbon->greaterThanOrEqualTo(Carbon::parse('2026-10-31'))) {
                     $festivalDays[$dt] = $carbon->format('d M').' — Festival Day';
                 } else {
-                    $festivalDays[$dt] = $carbon->format('d M').' — Offstage Day';
+                    $festivalDays[$dt] = $carbon->format('d M').' — '.$carbon->format('l');
                 }
             }
         }

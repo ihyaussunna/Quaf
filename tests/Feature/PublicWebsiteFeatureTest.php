@@ -9,6 +9,7 @@ use App\Models\News;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\Result;
+use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
 use App\Models\VideoItem;
@@ -357,6 +358,22 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee(route('results.index'));
         $response->assertSee(route('schedule.index'));
         $response->assertSee(route('groups.index'));
+    }
+
+    public function test_schedule_page_displays_day_of_week_names_instead_of_offstage_day(): void
+    {
+        Schedule::create([
+            'program_id' => $this->program->id,
+            'stage_id' => $this->program->stage_id,
+            'start_time' => '2026-10-06 10:00:00',
+            'end_time' => '2026-10-06 12:00:00',
+            'status' => 'upcoming',
+        ]);
+
+        $response = $this->get(route('schedule.index'));
+        $response->assertStatus(200);
+        $response->assertDontSee('Offstage Day');
+        $response->assertSee('06 Oct — Tuesday');
     }
 
     public function test_poster_view_renders_dynamic_festival_poster_when_image_is_null(): void
