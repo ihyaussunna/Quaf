@@ -1,4 +1,4 @@
-@extends('layouts.public', ['title' => 'QUAF 2026 | ₹100 Challenge — Ādabic Inheritance', 'hideHeader' => true])
+@extends('layouts.public', ['title' => 'QUAF 2026 | ₹100 Challenge — Ādabic Inheritance', 'hideHeader' => true, 'hideBottomNav' => true])
 
 @section('content')
 <div x-data="quafDonationPage()" class="relative w-full font-sora">
@@ -751,40 +751,6 @@
 
         </main>
 
-    </div>
-
-    <!-- =====================================================================
-         STICKY BOTTOM MOBILE ACTION BAR (SMART PHONE OPTIMIZED - ZERO STROKES)
-         ===================================================================== -->
-    <div class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 px-4 py-3 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] border-0">
-        <div class="max-w-md mx-auto flex items-center gap-2.5">
-            <button type="button" 
-                    @click="payNow()" 
-                    style="background-color: #be1e2d !important; color: #ffffff !important;"
-                    class="flex-1 py-3.5 px-3 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-950/20 border-0 text-center flex items-center justify-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-                <span x-text="'സഹായിക്കാം (₹' + Number(selectedAmount).toLocaleString('en-IN') + ')'"></span>
-            </button>
-            <a href="#receipt-download"
-               style="background-color: #0f172a !important; color: #ffffff !important;"
-               class="py-3.5 px-3 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-md shadow-slate-950/20 border-0 text-center flex items-center justify-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                <span>രസീത്</span>
-            </a>
-            <button type="button" 
-                    @click="shareWhatsApp()" 
-                    style="background-color: #25D366 !important; color: #ffffff !important;"
-                    class="py-3.5 px-3.5 rounded-xl text-white font-sora font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-950/20 border-0 text-center flex items-center justify-center gap-1 cursor-pointer">
-                <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.983z"/>
-                </svg>
-                <span>Share</span>
-            </button>
-        </div>
     </div>
 
     <!-- =====================================================================

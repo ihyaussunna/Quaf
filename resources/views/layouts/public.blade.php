@@ -269,7 +269,7 @@
 
     @if(!($hideFooter ?? false))
     <!-- Global Premium Dark Footer (Section 30) -->
-    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-32 sm:pb-36 lg:pb-14 {{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('donate*')) ? 'mt-0' : 'mt-16 sm:mt-24' }} relative overflow-hidden">
+    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 {{ ($hideBottomNav ?? false) ? 'pb-14' : 'pb-32 sm:pb-36 lg:pb-14' }} {{ (request()->routeIs('home.view') || request()->routeIs('home') || request()->routeIs('donate*')) ? 'mt-0' : 'mt-16 sm:mt-24' }} relative overflow-hidden">
         <!-- Subtle Glow in Footer -->
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[140px] pointer-events-none"></div>
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>
@@ -337,7 +337,9 @@
             </div>
         </div>
     </footer>
+    @endif
 
+    @if(!($hideBottomNav ?? false))
     <!-- Mobile Fixed Bottom Navigation Bar (Apple / App Native Style) -->
     <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 py-1.5 transition-all">
         <div class="grid grid-cols-5 items-center justify-around text-center max-w-lg mx-auto">
