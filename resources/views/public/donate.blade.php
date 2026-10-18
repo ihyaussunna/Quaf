@@ -125,19 +125,11 @@
                     "നാളെയുടെ പ്രബോധകരെ ഏറ്റവും മികച്ച ദാഇകളാക്കി വളർത്തിയെടുക്കാൻ നമുക്കൊരുമിച്ച് നിൽക്കാം."
                 </div>
 
-                <p class="font-anek text-sm sm:text-base text-slate-600 leading-relaxed mb-6">
-                    നിങ്ങളുടെ ₹100 ഒരു തുക മാത്രമല്ല — അറിവിനും കഴിവിനും ഭാവിയിലെ പ്രബോധന പ്രവർത്തനങ്ങൾക്കും നൽകുന്ന ഒരു പിന്തുണയാണ്.
-                </p>
-
-                <!-- 3 Key Impact Stats (Clean, Borderless Solid Tiles) -->
-                <div class="grid grid-cols-3 gap-2.5 sm:gap-4 pt-2">
+                <!-- 2 Key Impact Stats (Clean, Borderless Solid Tiles) -->
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
                     <div class="rounded-2xl bg-slate-50 p-3.5 sm:p-4 text-center">
                         <span class="block font-rockwell text-xl sm:text-2xl font-bold text-[#94121b]">1500+</span>
                         <span class="font-anek text-xs sm:text-sm text-slate-600 font-medium">മുതഅല്ലിമുകൾ</span>
-                    </div>
-                    <div class="rounded-2xl bg-slate-50 p-3.5 sm:p-4 text-center">
-                        <span class="block font-rockwell text-xl sm:text-2xl font-bold text-[#94121b]">₹100</span>
-                        <span class="font-anek text-xs sm:text-sm text-slate-600 font-medium">ചെറിയൊരു വിഹിതം</span>
                     </div>
                     <div class="rounded-2xl bg-slate-50 p-3.5 sm:p-4 text-center">
                         <span class="block font-rockwell text-xl sm:text-2xl font-bold text-[#c99935]">&infin;</span>
