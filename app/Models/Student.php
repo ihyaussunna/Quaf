@@ -137,6 +137,36 @@ class Student extends Model
     }
 
     /**
+     * Scope query to only students who participate in at least one competition (group or individual).
+     */
+    public function scopeParticipants($query)
+    {
+        return $query->where(function ($q) {
+            $q->has('entries')
+                ->orWhereHas('participations')
+                ->orWhereHas('certificates')
+                ->orWhere('points_cache', '>', 0);
+        });
+    }
+
+    /**
+     * Check if this student is an active participant in any competition (group or individual).
+     */
+    public function isCompetitionParticipant(): bool
+    {
+        if (array_key_exists('entries_count', $this->attributes) && array_key_exists('participations_count', $this->attributes)) {
+            if (($this->entries_count + $this->participations_count) > 0) {
+                return true;
+            }
+        }
+
+        return $this->entries()->exists()
+            || $this->participations()->exists()
+            || $this->certificates()->exists()
+            || ($this->points_cache ?? 0) > 0;
+    }
+
+    /**
      * Calculate active individual programme participation count
      * considering student's own zone + Mix zone programmes.
      * Excludes cancelled, rejected, and withdrawn registrations.

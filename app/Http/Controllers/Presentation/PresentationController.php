@@ -40,6 +40,9 @@ class PresentationController extends Controller
     {
         CoinTransaction::ensureSchema();
 
+        $eligibleCount = Student::participants()->count();
+        $totalEligibleGifts = $eligibleCount > 0 ? $eligibleCount : Student::count();
+
         $stats = [
             'total_credited' => (int) CoinTransaction::where('coins', '>', 0)->sum('coins'),
             'total_redeemed' => (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins')),
@@ -48,7 +51,8 @@ class PresentationController extends Controller
             'gifts_delivered' => Schema::hasColumn('students', 'recognition_gift_delivered')
                 ? Student::where('recognition_gift_delivered', true)->count()
                 : 0,
-            'total_students' => Student::count(),
+            'total_students' => $totalEligibleGifts,
+            'total_eligible_students' => $totalEligibleGifts,
         ];
 
         $selectedStudent = null;
@@ -225,6 +229,10 @@ class PresentationController extends Controller
             return redirect()->back()->with('error', 'ഡാറ്റാബേസ് കോളം അപ്‌ഡേറ്റ് ആകുന്നു. ദയവായി അല്പം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക.');
         }
 
+        if (! $student->isCompetitionParticipant()) {
+            return redirect()->back()->with('error', "{$student->name} മത്സരങ്ങളിൽ (Individual / Group) പങ്കെടുത്തിട്ടില്ലാത്തതിനാൽ ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റിന് അർഹതയില്ല.");
+        }
+
         $newStatus = ! (bool) $student->recognition_gift_delivered;
         $operator = Auth::user()?->name ?? 'Presentation Desk';
 
@@ -305,7 +313,9 @@ class PresentationController extends Controller
         $totalGiftsDelivered = Schema::hasColumn('students', 'recognition_gift_delivered')
             ? Student::where('recognition_gift_delivered', true)->count()
             : 0;
-        $totalStudents = Student::count();
+
+        $eligibleCount = Student::participants()->count();
+        $totalStudents = $eligibleCount > 0 ? $eligibleCount : Student::count();
 
         return view('presentation.report', compact(
             'transactions',

@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\CoinTransaction;
 use App\Models\Group;
+use App\Models\Program;
+use App\Models\ProgramEntry;
+use App\Models\Stage;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
@@ -60,6 +63,27 @@ class PresentationDeskCoinRedemptionTest extends TestCase
             'category' => 'A Zone',
             'qr_token' => 'qr-token-bilal-test-999',
             'coins_cache' => 0,
+        ]);
+
+        $stage = Stage::first() ?? Stage::create([
+            'name' => 'Stage 01',
+            'code' => 'ST01',
+            'order' => 1,
+        ]);
+
+        $program = Program::first() ?? Program::create([
+            'name' => 'Elocution English',
+            'code' => 'ENG-ELO',
+            'type' => 'individual',
+            'stage_id' => $stage->id,
+        ]);
+
+        ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+            'chest_number' => 'LM101',
+            'status' => 'verified',
         ]);
     }
 
@@ -295,6 +319,25 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $response2 = $this->actingAs($this->presentationUser)->post(route('presentation.toggle-gift', $this->student->id));
         $response2->assertSessionHas('success');
         $this->assertFalse((bool) $this->student->fresh()->recognition_gift_delivered);
+    }
+
+    public function test_non_participating_student_cannot_receive_recognition_gift(): void
+    {
+        $nonParticipant = Student::create([
+            'name' => 'Campus Visitor',
+            'student_id' => 'LM999',
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zone->id,
+            'category' => 'A Zone',
+            'qr_token' => 'qr-token-visitor-999',
+            'coins_cache' => 0,
+        ]);
+
+        $this->assertFalse($nonParticipant->isCompetitionParticipant());
+
+        $response = $this->actingAs($this->presentationUser)->post(route('presentation.toggle-gift', $nonParticipant->id));
+        $response->assertSessionHas('error');
+        $this->assertFalse((bool) $nonParticipant->fresh()->recognition_gift_delivered);
     }
 
     public function test_scanned_student_verification_page_reveals_secret_code_and_wallet_data(): void

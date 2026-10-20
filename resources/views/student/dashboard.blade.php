@@ -115,17 +115,26 @@
                 </div>
 
                 <!-- Recognition Gift -->
-                <div class="rounded-xl px-3.5 py-2.5 border flex items-center justify-between gap-2 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : 'bg-slate-950/30 border-white/20 text-white' }}">
+                @php
+                    $isParticipant = $student->isCompetitionParticipant();
+                @endphp
+                <div class="rounded-xl px-3.5 py-2.5 border flex items-center justify-between gap-2 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : ($isParticipant ? 'bg-slate-950/30 border-white/20 text-white' : 'bg-slate-950/20 border-white/10 text-white/60') }}">
                     <div class="min-w-0">
                         <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-white/80">
                             Recognition Gift
                         </div>
-                        <div class="text-[10px] truncate {{ $student->recognition_gift_delivered ? 'text-emerald-200 font-bold' : 'text-amber-200' }}">
-                            {{ $student->recognition_gift_delivered ? 'കൈപ്പറ്റി (Delivered)' : 'കൗണ്ടറിൽ നിന്ന് കൈപ്പറ്റുക' }}
+                        <div class="text-[10px] truncate {{ $student->recognition_gift_delivered ? 'text-emerald-200 font-bold' : ($isParticipant ? 'text-amber-200' : 'text-slate-400') }}">
+                            @if($student->recognition_gift_delivered)
+                                കൈപ്പറ്റി (Delivered)
+                            @elseif($isParticipant)
+                                കൗണ്ടറിൽ നിന്ന് കൈപ്പറ്റുക
+                            @else
+                                മത്സരങ്ങളിൽ പങ്കെടുത്തവർക്ക് മാത്രം
+                            @endif
                         </div>
                     </div>
-                    <span class="shrink-0 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : 'bg-amber-400 text-slate-950' }}">
-                        {{ $student->recognition_gift_delivered ? 'Delivered' : 'Pending' }}
+                    <span class="shrink-0 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : ($isParticipant ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-300') }}">
+                        {{ $student->recognition_gift_delivered ? 'Delivered' : ($isParticipant ? 'Pending' : 'N/A') }}
                     </span>
                 </div>
             </div>

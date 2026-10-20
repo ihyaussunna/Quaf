@@ -124,44 +124,61 @@
             @endif
 
             <!-- QUAF RECOGNITION GIFT STATUS -->
-            <div class="p-5 sm:p-6 rounded-2xl border transition-all {{ $student->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                            <span class="text-xs font-mono font-bold uppercase tracking-wider">
-                                QUAF Recognition Gift (ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം)
-                            </span>
+            @if(!$student->isCompetitionParticipant())
+                <div class="p-5 sm:p-6 rounded-2xl border bg-slate-50 border-slate-200 text-slate-700">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-slate-400"></span>
+                        <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-600">
+                            QUAF Recognition Gift (ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം)
+                        </span>
+                    </div>
+                    <div class="text-base sm:text-lg font-black font-sora mt-1 text-slate-800">
+                        അർഹതയില്ല (Not Eligible)
+                    </div>
+                    <div class="text-xs font-anek text-slate-500 mt-0.5">
+                        മത്സരങ്ങളിൽ (Individual / Group) പങ്കെടുത്ത വിദ്യാർത്ഥികൾക്ക് മാത്രമാണ് ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം നൽകുന്നത്.
+                    </div>
+                </div>
+            @else
+                <div class="p-5 sm:p-6 rounded-2xl border transition-all {{ $student->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                <span class="text-xs font-mono font-bold uppercase tracking-wider">
+                                    QUAF Recognition Gift (ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം)
+                                </span>
+                            </div>
+                            
+                            @if($student->recognition_gift_delivered)
+                                <div class="text-lg font-black font-sora mt-1 text-emerald-900">
+                                    സമ്മാനം കൈപ്പറ്റി (Gift Delivered)
+                                </div>
+                                <div class="text-xs font-mono text-emerald-800 mt-0.5">
+                                    തീയതി: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • വിതരണം: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                                </div>
+                            @else
+                                <div class="text-lg font-black font-sora mt-1 text-amber-900">
+                                    സമ്മാനം കൈപ്പറ്റാനുണ്ട് (Pending Collection)
+                                </div>
+                                <div class="text-xs font-anek text-amber-800 mt-0.5">
+                                    പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും നിങ്ങളുടെ ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം കൈപ്പറ്റാവുന്നതാണ്.
+                                </div>
+                            @endif
                         </div>
-                        
-                        @if($student->recognition_gift_delivered)
-                            <div class="text-lg font-black font-sora mt-1 text-emerald-900">
-                                സമ്മാനം കൈപ്പറ്റി (Gift Delivered)
-                            </div>
-                            <div class="text-xs font-mono text-emerald-800 mt-0.5">
-                                തീയതി: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • വിതരണം: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
-                            </div>
-                        @else
-                            <div class="text-lg font-black font-sora mt-1 text-amber-900">
-                                സമ്മാനം കൈപ്പറ്റാനുണ്ട് (Pending Collection)
-                            </div>
-                            <div class="text-xs font-anek text-amber-800 mt-0.5">
-                                പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും നിങ്ങളുടെ ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം കൈപ്പറ്റാവുന്നതാണ്.
-                            </div>
+
+                        @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
+                            <form method="POST" action="{{ route('presentation.toggle-gift', $student->id) }}" class="shrink-0">
+                                @csrf
+                                <button type="submit" 
+                                        class="px-4 py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm {{ $student->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                                    {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (നൽകി എന്ന് അടയാളപ്പെടുത്തുക)' }}
+                                </button>
+                            </form>
                         @endif
                     </div>
-
-                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
-                        <form method="POST" action="{{ route('presentation.toggle-gift', $student->id) }}" class="shrink-0">
-                            @csrf
-                            <button type="submit" 
-                                    class="px-4 py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm {{ $student->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (നൽകി എന്ന് അടയാളപ്പെടുത്തുക)' }}
-                            </button>
-                        </form>
-                    @endif
                 </div>
-            </div>
+            @endif
 
             <!-- PURCHASE HISTORY & REDEEMED ITEMS -->
             <div class="space-y-4">
