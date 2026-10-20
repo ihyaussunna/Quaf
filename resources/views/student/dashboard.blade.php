@@ -45,21 +45,21 @@
         </div>
     </div>
 
-    <!-- Official Coin Wallet & Rewards Hub (Sleek Compact Fintech Design) -->
-    <div class="rounded-3xl bg-gradient-to-br from-[#be1e2d] via-[#a81926] to-[#7d0f1b] p-4 sm:p-6 text-white shadow-lg shadow-red-950/20 relative overflow-hidden border border-red-500/30">
+    <!-- Official Coin Wallet & Rewards Hub (Sleek Compact Red & Yellow Gradient Fintech Design) -->
+    <div class="rounded-3xl bg-gradient-to-br from-[#be1e2d] via-[#d9381e] to-[#f59e0b] p-4 sm:p-6 text-white shadow-xl shadow-red-950/20 relative overflow-hidden border border-amber-300/30">
         <!-- Ambient Decorative Glows -->
-        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute left-1/4 -top-12 w-48 h-48 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-yellow-300/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute left-1/4 -top-12 w-48 h-48 bg-red-900/30 rounded-full blur-2xl pointer-events-none"></div>
 
         <div class="relative z-10 space-y-4">
             <!-- Compact Top Bar -->
             <div class="flex items-center justify-between gap-3">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-mono font-bold border border-white/20 shadow-2xs">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/35 backdrop-blur-md text-white text-[11px] font-mono font-bold border border-white/20 shadow-xs">
                     <svg class="w-3.5 h-3.5 text-amber-300 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.03 6.9C12.68 8.17 11.94 7.66 11.07 7.66H8.28V6.42h7.44v1.24h-2.02c.3.36.52.78.65 1.24H15.72v1.24h-1.25c-.16 1.74-1.62 3.1-3.4 3.1h-.45l4.17 4.34h-1.72L8.9 13.24V12h2.17c1.09 0 2-.81 2.15-1.86H8.28V8.9h4.75z"/></svg>
                     <span>QUAF FEST COIN WALLET</span>
                 </div>
 
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-[10px] font-mono text-emerald-300 border border-white/10">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/35 backdrop-blur-md text-[10px] font-mono text-emerald-300 border border-white/10">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span>Live Wallet</span>
                 </div>
@@ -68,21 +68,21 @@
             <!-- Sleek Horizontal Balance & Quick Stats Showcase -->
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pt-1">
                 <div>
-                    <span class="text-[10px] font-mono uppercase tracking-wider text-red-200/90 font-medium">Available Balance</span>
-                    <div class="text-3xl sm:text-4xl font-black font-sora text-white tracking-tight flex items-baseline gap-2 mt-0.5">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-amber-100 font-semibold drop-shadow-xs">Available Balance</span>
+                    <div class="text-3xl sm:text-4xl font-black font-sora text-white tracking-tight flex items-baseline gap-2 mt-0.5 drop-shadow-sm">
                         <span>{{ number_format($coinSummary['balance'] ?? ($student->coins_cache ?? 0)) }}</span>
-                        <span class="text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">Coins</span>
+                        <span class="text-xs font-mono font-bold text-amber-200 uppercase tracking-widest">Coins</span>
                     </div>
                 </div>
 
                 <!-- 2 Compact Pill Tiles: Earned & Spent -->
                 <div class="flex items-center gap-2">
-                    <div class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
+                    <div class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-slate-950/30 backdrop-blur-md border border-white/20">
                         <span class="text-[9px] font-mono uppercase tracking-wider text-emerald-300 font-bold block">Earned</span>
                         <span class="text-sm sm:text-base font-black font-mono text-white block mt-0.5">+{{ number_format($coinSummary['total_earned'] ?? $coinSummary['earned'] ?? 0) }}</span>
                     </div>
-                    <div class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
-                        <span class="text-[9px] font-mono uppercase tracking-wider text-amber-300 font-bold block">Spent</span>
+                    <div class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-slate-950/30 backdrop-blur-md border border-white/20">
+                        <span class="text-[9px] font-mono uppercase tracking-wider text-amber-200 font-bold block">Spent</span>
                         <span class="text-sm sm:text-base font-black font-mono text-white block mt-0.5">-{{ number_format($coinSummary['total_spent'] ?? $coinSummary['spent'] ?? 0) }}</span>
                     </div>
                 </div>
@@ -91,13 +91,13 @@
             <!-- Compact 2-Column Info Row: Secret PIN & Recognition Gift -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-white/15">
                 <!-- Secret Purchase PIN -->
-                <div class="rounded-xl px-3.5 py-2.5 {{ !empty($isQrVerifiedSession) ? 'bg-amber-400 text-slate-950 border border-amber-300 shadow-sm' : 'bg-black/25 backdrop-blur-sm border border-white/15 text-white' }} flex items-center justify-between gap-2">
+                <div class="rounded-xl px-3.5 py-2.5 {{ !empty($isQrVerifiedSession) ? 'bg-amber-400 text-slate-950 border border-amber-300 shadow-sm' : 'bg-slate-950/40 backdrop-blur-sm border border-white/20 text-white' }} flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <div class="text-[10px] font-mono font-bold uppercase tracking-wider {{ !empty($isQrVerifiedSession) ? 'text-slate-900' : 'text-amber-300' }}">
                             Secret Purchase PIN
                         </div>
-                        <div class="text-[10px] font-anek truncate {{ !empty($isQrVerifiedSession) ? 'text-slate-800 font-medium' : 'text-red-100/70' }}">
-                            {{ !empty($isQrVerifiedSession) ? 'പ്രസന്റേഷൻ കൗണ്ടറിൽ നൽകുക' : 'ഐഡി കാർഡ് QR സ്കാനിൽ കാണാം' }}
+                        <div class="text-[10px] font-anek truncate {{ !empty($isQrVerifiedSession) ? 'text-slate-800 font-medium' : 'text-amber-100/80' }}">
+                            {{ !empty($isQrVerifiedSession) ? 'പ്രസന്റേഷൻ കൗണ്ടറിൽ നൽകുക' : 'കൗണ്ടറിൽ ഫിസിക്കൽ ഐഡി കാർഡ് നൽകുക' }}
                         </div>
                     </div>
                     <div class="shrink-0 font-mono font-black">
@@ -115,7 +115,7 @@
                 </div>
 
                 <!-- Recognition Gift -->
-                <div class="rounded-xl px-3.5 py-2.5 border flex items-center justify-between gap-2 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : 'bg-white/10 border-white/15 text-white' }}">
+                <div class="rounded-xl px-3.5 py-2.5 border flex items-center justify-between gap-2 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : 'bg-slate-950/30 border-white/20 text-white' }}">
                     <div class="min-w-0">
                         <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-white/80">
                             Recognition Gift
