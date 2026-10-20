@@ -53,13 +53,13 @@
         </div>
     </header>
 
-    <!-- Main Content (With safe padding for mobile bottom bar) -->
-    <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 md:p-8 pb-24 md:pb-12 min-w-0 overflow-x-clip">
+    <!-- Main Content -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 md:p-8 pb-10 min-w-0 overflow-x-clip">
         @yield('content')
     </main>
 
     <!-- Global Premium Dark Footer -->
-    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-28 sm:pb-32 lg:pb-14 mt-12 sm:mt-16 relative overflow-hidden">
+    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 pt-14 pb-12 lg:pb-14 mt-12 sm:mt-16 relative overflow-hidden">
         <!-- Subtle Glow in Footer -->
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[140px] pointer-events-none"></div>
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-[#be1e2d]/5 rounded-full blur-[140px] pointer-events-none"></div>
@@ -126,165 +126,6 @@
             </div>
         </div>
     </footer>
-
-    <!-- Mobile Fixed Bottom Navigation Bar (Exact Home Page / App Native Style) -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 py-1.5 transition-all">
-        <div class="grid grid-cols-5 items-center justify-around text-center max-w-lg mx-auto">
-            
-            <!-- 1. Home -->
-            <a href="{{ route('home.view') }}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors text-slate-500 hover:text-slate-800">
-                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                </svg>
-                <span class="text-[10px] tracking-tight font-sans">Home</span>
-            </a>
-
-            <!-- 2. Results -->
-            <a href="{{ route('results.index') }}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors relative text-slate-500 hover:text-slate-800">
-                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-                <span class="text-[10px] tracking-tight font-sans">Results</span>
-            </a>
-
-            <!-- 3. Center Navigation Menu Button -->
-            <button @click="mobileOpen = !mobileOpen" 
-                    type="button"
-                    class="flex flex-col items-center justify-center -mt-4 group cursor-pointer"
-                    aria-label="Navigation Menu">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#be1e2d] via-red-600 to-[#991522] text-white flex items-center justify-center shadow-lg shadow-red-600/30 ring-4 ring-white transition-all transform active:scale-95 group-hover:scale-105">
-                    <svg class="w-6 h-6 transition-transform duration-300" :class="mobileOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </div>
-                <span class="text-[10px] font-bold tracking-tight text-slate-700 mt-1">Menu</span>
-            </button>
-
-            <!-- 4. Schedule -->
-            <a href="{{ route('schedule.index') }}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors text-slate-500 hover:text-slate-800">
-                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <span class="text-[10px] tracking-tight font-sans">Schedule</span>
-            </a>
-
-            <!-- 5. Student Portal Profile (Active Highlight) -->
-            <a href="{{ route('student.dashboard') }}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors text-[#be1e2d] font-bold">
-                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                <span class="text-[10px] tracking-tight font-sans">Portal</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Glassy Modal Popup for Mobile Navigation (From Home Page) -->
-    <div x-show="mobileOpen"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/30 backdrop-blur-md lg:hidden"
-         style="display: none;"
-         @keydown.escape.window="mobileOpen = false"
-         @click.self="mobileOpen = false">
-
-        <div x-show="mobileOpen"
-             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-350 transform"
-             x-transition:enter-start="opacity-0 scale-90 translate-y-8"
-             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200 transform"
-             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-             x-transition:leave-end="opacity-0 scale-90 translate-y-8"
-             class="relative w-full max-w-sm bg-slate-900/40 backdrop-blur-2xl backdrop-saturate-150 border border-white/25 rounded-[2.5rem] p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.35),inset_0_-1px_1px_rgba(255,255,255,0.1)] text-center text-white overflow-hidden ring-1 ring-white/10">
-
-            <!-- Ambient Glass Reflections -->
-            <div class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/15 via-white/5 to-transparent pointer-events-none rounded-t-[2.5rem]"></div>
-            <div class="absolute -top-16 -left-16 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-            <div class="absolute -bottom-16 -right-16 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-
-            <!-- Dynamic Indicator / Pill Grabber -->
-            <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-3 shadow-xs"></div>
-
-            <!-- Close Button -->
-            <button type="button" 
-                    @click="mobileOpen = false" 
-                    class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/25 flex items-center justify-center text-white/90 hover:text-white transition cursor-pointer backdrop-blur-md"
-                    aria-label="Close menu">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-
-            <!-- Brand Badge -->
-            <div class="flex items-center justify-center gap-2 mb-3 relative z-10">
-                <span class="text-[11px] font-mono uppercase tracking-widest text-red-400 font-bold">QUAF Navigation</span>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="space-y-1 py-1 relative z-10">
-                <a href="{{ route('home.view') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Home
-                </a>
-                <a href="{{ route('results.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Results
-                </a>
-                <a href="{{ route('schedule.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Schedule
-                </a>
-                <a href="{{ route('groups.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Academic Groups
-                </a>
-                <a href="{{ route('gallery.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Photo Gallery
-                </a>
-                <a href="{{ route('news.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Festival Journal
-                </a>
-                <a href="{{ route('media.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Media Highlights
-                </a>
-                <a href="{{ route('brochure.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Festival Brochure
-                </a>
-
-                <div class="h-[1px] bg-white/15 my-2"></div>
-
-                <a href="{{ route('student.dashboard') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-bold tracking-wide transition-all transform active:scale-95 bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white shadow-lg shadow-red-950/40 border border-white/20">
-                    Student Dashboard
-                </a>
-                <a href="{{ route('student.idcard') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15">
-                    Digital QR Code
-                </a>
-            </nav>
-        </div>
-    </div>
 
 </body>
 </html>

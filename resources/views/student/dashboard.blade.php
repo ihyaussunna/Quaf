@@ -45,179 +45,124 @@
         </div>
     </div>
 
-    <!-- Official Coin Wallet & Rewards Hub (Attractive 3-Metric Executive Design) -->
-    <div class="rounded-3xl bg-gradient-to-br from-[#be1e2d] via-[#ad1826] to-[#800f1c] p-6 sm:p-8 text-white shadow-xl shadow-red-950/20 relative overflow-hidden border border-red-500/30">
+    <!-- Official Coin Wallet & Rewards Hub (Sleek Compact Fintech Design) -->
+    <div class="rounded-3xl bg-gradient-to-br from-[#be1e2d] via-[#a81926] to-[#7d0f1b] p-4 sm:p-6 text-white shadow-lg shadow-red-950/20 relative overflow-hidden border border-red-500/30">
         <!-- Ambient Decorative Glows -->
-        <div class="absolute -right-12 -bottom-12 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute left-1/4 -top-16 w-60 h-60 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.18),transparent_65%)] pointer-events-none"></div>
+        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute left-1/4 -top-12 w-48 h-48 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
 
-        <div class="relative z-10 space-y-6">
-            <!-- Header Section -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-5">
-                <div class="space-y-1.5">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-mono font-bold border border-white/20 shadow-2xs">
-                        <svg class="w-3.5 h-3.5 text-amber-300 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.03 6.9C12.68 8.17 11.94 7.66 11.07 7.66H8.28V6.42h7.44v1.24h-2.02c.3.36.52.78.65 1.24H15.72v1.24h-1.25c-.16 1.74-1.62 3.1-3.4 3.1h-.45l4.17 4.34h-1.72L8.9 13.24V12h2.17c1.09 0 2-.81 2.15-1.86H8.28V8.9h4.75z"/></svg>
-                        <span>QUAF 09 FEST COIN WALLET</span>
-                    </div>
-                    <h2 class="text-xl sm:text-2xl font-black font-sora tracking-tight text-white">You Have Earned Coins!</h2>
-                    <p class="text-xs font-sora text-red-100/90 max-w-xl leading-relaxed">
-                        Coins awarded for 1st, 2nd, and 3rd positions as well as grades across individual and group competitions. Redeem your earned coins for books and awards at the Presentation Desk.
-                    </p>
+        <div class="relative z-10 space-y-4">
+            <!-- Compact Top Bar -->
+            <div class="flex items-center justify-between gap-3">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-mono font-bold border border-white/20 shadow-2xs">
+                    <svg class="w-3.5 h-3.5 text-amber-300 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.03 6.9C12.68 8.17 11.94 7.66 11.07 7.66H8.28V6.42h7.44v1.24h-2.02c.3.36.52.78.65 1.24H15.72v1.24h-1.25c-.16 1.74-1.62 3.1-3.4 3.1h-.45l4.17 4.34h-1.72L8.9 13.24V12h2.17c1.09 0 2-.81 2.15-1.86H8.28V8.9h4.75z"/></svg>
+                    <span>QUAF FEST COIN WALLET</span>
                 </div>
 
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono self-start sm:self-auto text-red-100">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Live Wallet Ledger</span>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-[10px] font-mono text-emerald-300 border border-white/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Live Wallet</span>
                 </div>
             </div>
 
-            <!-- 3 Attractive Metric Cards: Earned, Spent, Balance -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <!-- 1. Total Earned -->
-                <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 transition-all flex flex-col justify-between space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-red-100/85">
-                            Earned Coins
-                        </span>
-                        <div class="w-7 h-7 rounded-lg bg-emerald-400/20 text-emerald-300 flex items-center justify-center font-bold text-xs">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            +{{ number_format($coinSummary['total_earned'] ?? $coinSummary['earned'] ?? 0) }}
-                        </div>
-                        <p class="text-[10px] font-mono text-emerald-200 mt-0.5">Total Credited Rewards</p>
+            <!-- Sleek Horizontal Balance & Quick Stats Showcase -->
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pt-1">
+                <div>
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-red-200/90 font-medium">Available Balance</span>
+                    <div class="text-3xl sm:text-4xl font-black font-sora text-white tracking-tight flex items-baseline gap-2 mt-0.5">
+                        <span>{{ number_format($coinSummary['balance'] ?? ($student->coins_cache ?? 0)) }}</span>
+                        <span class="text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">Coins</span>
                     </div>
                 </div>
 
-                <!-- 2. Total Spent / Redeemed -->
-                <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 transition-all flex flex-col justify-between space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-red-100/85">
-                            Spent Coins
-                        </span>
-                        <div class="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-xs">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
-                        </div>
+                <!-- 2 Compact Pill Tiles: Earned & Spent -->
+                <div class="flex items-center gap-2">
+                    <div class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
+                        <span class="text-[9px] font-mono uppercase tracking-wider text-emerald-300 font-bold block">Earned</span>
+                        <span class="text-sm sm:text-base font-black font-mono text-white block mt-0.5">+{{ number_format($coinSummary['total_earned'] ?? $coinSummary['earned'] ?? 0) }}</span>
                     </div>
-                    <div>
-                        <div class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            -{{ number_format($coinSummary['total_spent'] ?? $coinSummary['spent'] ?? 0) }}
-                        </div>
-                        <p class="text-[10px] font-mono text-amber-200 mt-0.5">Presentation Purchases</p>
-                    </div>
-                </div>
-
-                <!-- 3. Available Balance -->
-                <div class="bg-white/20 hover:bg-white/25 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/30 transition-all flex flex-col justify-between space-y-3 shadow-inner">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-white">
-                            Available Coins
-                        </span>
-                        <div class="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs">
-                            ★
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight drop-shadow-sm">
-                            {{ number_format($coinSummary['balance'] ?? ($student->coins_cache ?? 0)) }}
-                        </div>
-                        <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Current Balance</p>
+                    <div class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
+                        <span class="text-[9px] font-mono uppercase tracking-wider text-amber-300 font-bold block">Spent</span>
+                        <span class="text-sm sm:text-base font-black font-mono text-white block mt-0.5">-{{ number_format($coinSummary['total_spent'] ?? $coinSummary['spent'] ?? 0) }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Secret Purchase PIN Protection Box -->
-            <div class="rounded-2xl p-4 sm:p-5 border {{ !empty($isQrVerifiedSession) ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md' : 'bg-black/25 backdrop-blur-md border-white/20 text-white' }}">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full {{ !empty($isQrVerifiedSession) ? 'bg-slate-950 animate-pulse' : 'bg-amber-400' }}"></span>
-                            <span class="text-xs font-mono font-bold uppercase tracking-wider {{ !empty($isQrVerifiedSession) ? 'text-slate-900' : 'text-amber-300' }}">
-                                Secret Purchase Code (സീക്രട്ട് പർച്ചേസ് കോഡ്)
-                            </span>
+            <!-- Compact 2-Column Info Row: Secret PIN & Recognition Gift -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-white/15">
+                <!-- Secret Purchase PIN -->
+                <div class="rounded-xl px-3.5 py-2.5 {{ !empty($isQrVerifiedSession) ? 'bg-amber-400 text-slate-950 border border-amber-300 shadow-sm' : 'bg-black/25 backdrop-blur-sm border border-white/15 text-white' }} flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider {{ !empty($isQrVerifiedSession) ? 'text-slate-900' : 'text-amber-300' }}">
+                            Secret Purchase PIN
                         </div>
-                        <p class="text-[11px] font-anek mt-1 {{ !empty($isQrVerifiedSession) ? 'text-slate-900 font-medium' : 'text-red-100/85' }}">
-                            @if(!empty($isQrVerifiedSession))
-                                ഫിസിക്കൽ ഐഡി കാർഡ് സ്കാൻ ചെയ്തതിനാൽ രഹസ്യ കോഡ് അൺലോക്ക് ചെയ്യപ്പെട്ടു. പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും സാധനങ്ങൾ വാങ്ങുമ്പോൾ ഈ കോഡ് നൽകുക.
-                            @else
-                                സുരക്ഷാ മുൻകരുതൽ: വെബ്സൈറ്റിൽ ചെസ്റ്റ് നമ്പർ ടൈപ്പ് ചെയ്യുമ്പോൾ ഈ കോഡ് കാണിക്കില്ല. നിങ്ങളുടെ ഫിസിക്കൽ ഐഡി കാർഡിലെ ക്യുആർ കോഡ് (QR Code) സ്കാൻ ചെയ്യുമ്പോൾ മാത്രമേ സീക്രട്ട് കോഡ് ലഭ്യമാകൂ.
-                            @endif
-                        </p>
+                        <div class="text-[10px] font-anek truncate {{ !empty($isQrVerifiedSession) ? 'text-slate-800 font-medium' : 'text-red-100/70' }}">
+                            {{ !empty($isQrVerifiedSession) ? 'പ്രസന്റേഷൻ കൗണ്ടറിൽ നൽകുക' : 'ഐഡി കാർഡ് QR സ്കാനിൽ കാണാം' }}
+                        </div>
                     </div>
-
-                    <div class="shrink-0 self-start sm:self-center">
+                    <div class="shrink-0 font-mono font-black">
                         @if(!empty($isQrVerifiedSession))
-                            <div class="flex items-center gap-1.5">
-                                @foreach(str_split((string) $student->purchase_pin) as $d)
-                                    <span class="w-10 h-12 rounded-xl bg-slate-950 text-amber-300 font-mono font-black text-xl flex items-center justify-center shadow-md">
-                                        {{ $d }}
-                                    </span>
-                                @endforeach
-                            </div>
+                            <span class="px-2 py-1 rounded-lg bg-slate-950 text-amber-300 tracking-widest text-xs font-bold shadow-xs">
+                                {{ $student->purchase_pin }}
+                            </span>
                         @else
-                            <div class="px-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-center font-mono">
-                                <span class="text-lg font-black tracking-widest text-amber-300">••••</span>
-                                <span class="block text-[9px] uppercase tracking-wider text-slate-400">Scan QR to View</span>
-                            </div>
+                            <span class="px-2.5 py-1 rounded-lg bg-black/40 text-amber-300 tracking-widest text-xs font-bold border border-white/15">
+                                ••••
+                            </span>
+                            <span class="sr-only">Scan QR to View</span>
                         @endif
                     </div>
                 </div>
-            </div>
 
-            <!-- QUAF Recognition Gift Status Banner -->
-            <div class="rounded-2xl p-4 sm:p-5 border {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : 'bg-amber-500/20 border-amber-400/40 text-amber-100' }}">
-                <div class="flex items-center justify-between gap-3 flex-wrap">
-                    <div>
-                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-white/80">QUAF Recognition Gift</span>
-                        @if($student->recognition_gift_delivered)
-                            <div class="text-sm font-bold font-sora text-white mt-0.5">സമ്മാനം കൈപ്പറ്റി (Gift Delivered)</div>
-                            <div class="text-[11px] font-mono text-emerald-200 mt-0.5">{{ $student->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}</div>
-                        @else
-                            <div class="text-sm font-bold font-sora text-white mt-0.5">സമ്മാനം കൈപ്പറ്റാനുണ്ട് (Pending Collection)</div>
-                            <div class="text-[11px] font-anek text-amber-200 mt-0.5">പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും നിങ്ങളുടെ ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം കൈപ്പറ്റുക.</div>
-                        @endif
+                <!-- Recognition Gift -->
+                <div class="rounded-xl px-3.5 py-2.5 border flex items-center justify-between gap-2 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : 'bg-white/10 border-white/15 text-white' }}">
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-white/80">
+                            Recognition Gift
+                        </div>
+                        <div class="text-[10px] truncate {{ $student->recognition_gift_delivered ? 'text-emerald-200 font-bold' : 'text-amber-200' }}">
+                            {{ $student->recognition_gift_delivered ? 'കൈപ്പറ്റി (Delivered)' : 'കൗണ്ടറിൽ നിന്ന് കൈപ്പറ്റുക' }}
+                        </div>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : 'bg-amber-400 text-slate-950' }}">
-                        {{ $student->recognition_gift_delivered ? 'Delivered' : 'Pending Desk Pickup' }}
+                    <span class="shrink-0 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : 'bg-amber-400 text-slate-950' }}">
+                        {{ $student->recognition_gift_delivered ? 'Delivered' : 'Pending' }}
                     </span>
                 </div>
             </div>
 
             <!-- Transaction Ledger Activity Feed (Recent Transactions) -->
             @if(isset($coinTransactions) && $coinTransactions->isNotEmpty())
-                <div class="pt-4 border-t border-white/15">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-red-100 flex items-center gap-2">
+                <div class="pt-2 border-t border-white/15" x-data="{ expanded: false }">
+                    <button type="button" @click="expanded = !expanded" class="w-full flex items-center justify-between text-[11px] font-mono text-red-100/90 hover:text-white transition cursor-pointer py-0.5">
+                        <span class="font-bold uppercase tracking-wider flex items-center gap-1.5">
                             <span>Recent Coin Transactions</span>
-                            <span class="text-[10px] opacity-75 font-normal">({{ $coinTransactions->count() }})</span>
-                        </h4>
-                        <span class="text-[10px] font-mono text-red-200">Recent Activity</span>
-                    </div>
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-white/15 text-white font-mono">({{ $coinTransactions->count() }})</span>
+                        </span>
+                        <span class="text-[10px] underline" x-text="expanded ? 'Hide Ledger' : 'View Ledger'">View Ledger</span>
+                    </button>
 
-                    <div class="space-y-2">
+                    <div x-show="expanded" x-cloak class="space-y-1.5 pt-2">
                         @foreach($coinTransactions as $tx)
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-2.5 border border-white/15 flex items-center justify-between gap-3 text-xs">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <span class="w-2 h-2 rounded-full {{ $tx->coins > 0 ? 'bg-emerald-400' : 'bg-amber-300' }} flex-shrink-0"></span>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/10 flex items-center justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $tx->coins > 0 ? 'bg-emerald-400' : 'bg-amber-300' }} flex-shrink-0"></span>
                                     <div class="min-w-0">
-                                        <p class="font-bold text-white truncate text-xs">{{ $tx->description ?: 'Coin Transaction' }}</p>
-                                        <p class="text-[10px] font-mono text-red-200 truncate">{{ $tx->created_at->diffForHumans() }}</p>
+                                        <p class="font-bold text-white truncate text-[11px]">{{ $tx->description ?: 'Coin Transaction' }}</p>
+                                        <p class="text-[9px] font-mono text-red-200 truncate">{{ $tx->created_at->diffForHumans() }}</p>
                                     </div>
                                 </div>
-                                <div class="text-right flex-shrink-0">
-                                    <span class="font-mono font-bold {{ $tx->coins > 0 ? 'text-emerald-300' : 'text-amber-200' }}">
+                                <div class="text-right flex-shrink-0 font-mono font-black text-xs">
+                                    <span class="{{ $tx->coins > 0 ? 'text-emerald-300' : 'text-amber-200' }}">
                                         {{ $tx->coins > 0 ? '+' : '' }}{{ number_format($tx->coins) }}
                                     </span>
-                                    <span class="text-[10px] font-mono text-red-200 block">coins</span>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
             @endif
+        </div>
+    </div>
         </div>
     </div>
 

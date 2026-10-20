@@ -103,9 +103,8 @@ class StudentPortalThemeRedDesignTest extends TestCase
         $response->assertSee('from-[#be1e2d]');
 
         // 2. Verify Coin Wallet Banner has theme red gradient and no amber gradient
-        $response->assertSee('QUAF 09 FEST COIN WALLET');
-        $response->assertSee('You Have Earned Coins!');
-        $response->assertSee('Available Coins');
+        $response->assertSee('QUAF FEST COIN WALLET');
+        $response->assertSee('Available Balance');
         $response->assertDontSee('from-amber-500');
         $response->assertDontSee('to-yellow-500');
 
