@@ -26,9 +26,7 @@
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-sora font-black tracking-tight text-slate-900">{{ $student->name }}</h1>
                 <p class="text-xs font-mono text-slate-600 flex items-center gap-2 flex-wrap">
-                    <span>Chest #: <strong class="text-[#be1e2d] font-bold text-sm">#{{ $student->chest_number ?? '---' }}</strong></span>
-                    <span class="text-slate-300">•</span>
-                    <span>Student ID: <span class="font-semibold text-slate-700">{{ $student->student_id }}</span></span>
+                    <span>Chest #: <strong class="text-[#be1e2d] font-bold text-sm">#{{ $student->chest_number ?? $student->student_id ?? '---' }}</strong></span>
                 </p>
             </div>
         </div>
@@ -221,8 +219,6 @@
                         <span>Venue: <strong class="text-slate-900 font-bold">{{ $nextEntry->program->stage->name ?? 'TBA' }}</strong></span>
                         <span class="text-slate-300">•</span>
                         <span>Scheduled: <strong class="text-[#be1e2d] font-bold">{{ $nextEntry->program->scheduled_time?->format('M d, h:i A') }}</strong></span>
-                        <span class="text-slate-300">•</span>
-                        <span>Chest: <strong class="text-slate-900 font-bold">#{{ $nextEntry->chest_number }}</strong></span>
                     </div>
                 @else
                     <h2 class="text-xl font-sora font-bold text-slate-700">
@@ -299,7 +295,6 @@
 
                     <div>
                         <h3 class="text-xl font-sora font-bold text-slate-900">{{ $entry->program->name }}</h3>
-                        <p class="text-xs font-mono text-slate-500 mt-1">Program Code: <span class="font-semibold text-slate-700">{{ $entry->program->code }}</span> • Chest <span class="text-[#be1e2d] font-bold">#{{ $entry->chest_number }}</span></p>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs font-mono">

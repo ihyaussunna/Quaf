@@ -33,11 +33,13 @@
             <div class="space-y-1.5 flex-1 min-w-0">
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                     <span class="px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200 text-[#be1e2d] font-mono font-bold text-xs uppercase">
-                        Chest #{{ $student->chest_number ?? '---' }}
+                        Chest #{{ $student->chest_number ?? $student->student_id ?? '---' }}
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-xs">
-                        ID: {{ $student->student_id }}
-                    </span>
+                    @if($student->student_id && $student->student_id !== $student->chest_number)
+                        <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-xs">
+                            ID: {{ $student->student_id }}
+                        </span>
+                    @endif
                 </div>
                 <h1 class="text-2xl font-sora font-black text-slate-900 tracking-tight">
                     {{ $student->name }}
