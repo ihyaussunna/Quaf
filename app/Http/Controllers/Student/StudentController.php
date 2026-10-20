@@ -132,8 +132,10 @@ class StudentController extends Controller
         $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student);
         $coinTransactions = CoinTransaction::where('student_id', $student->id)
             ->latest()
-            ->take(6)
+            ->take(10)
             ->get();
+
+        $isQrVerifiedSession = (bool) session('scanned_qr_verified', false);
 
         return view('student.dashboard', compact(
             'student',
@@ -146,8 +148,50 @@ class StudentController extends Controller
             'remainingSlots',
             'maxSlots',
             'coinSummary',
-            'coinTransactions'
+            'coinTransactions',
+            'isQrVerifiedSession'
         ));
+    }
+
+    /**
+     * One-click authenticated login via scanning the physical QR badge.
+     */
+    public function qrLogin(string $qrToken, Request $request): RedirectResponse
+    {
+        $clean = trim($qrToken);
+
+        $student = Student::where('qr_token', $clean)
+            ->orWhere('student_id', $clean)
+            ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($clean)])
+            ->first();
+
+        if (! $student) {
+            return redirect()->route('student.login')
+                ->withErrors(['identifier' => 'അസാധുവായ QR കോഡ് (Invalid QR Token).']);
+        }
+
+        // Ensure user account exists
+        if (! $student->user_id || ! $student->user) {
+            $user = User::firstOrCreate(
+                ['email' => Str::slug($student->student_id).'@student.quaf.org'],
+                [
+                    'name' => $student->name,
+                    'password' => Hash::make(Str::random(16)),
+                    'role' => 'student',
+                    'phone' => $student->contact,
+                    'is_active' => true,
+                ]
+            );
+            $student->update(['user_id' => $user->id]);
+            $student->setRelation('user', $user);
+        }
+
+        Auth::login($student->user);
+        $request->session()->regenerate();
+        $request->session()->put('scanned_qr_verified', true);
+
+        return redirect()->route('student.dashboard')
+            ->with('success', "സ്വാഗതം, {$student->name}! ഫിസിക്കൽ ഐഡി കാർഡ് വഴി സുരക്ഷിതമായി ലോഗിൻ ചെയ്തു.");
     }
 
     public function idCard(): View

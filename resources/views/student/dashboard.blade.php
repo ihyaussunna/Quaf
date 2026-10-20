@@ -86,7 +86,7 @@
                     </div>
                     <div>
                         <div class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            +{{ number_format($coinSummary['earned'] ?? 0) }}
+                            +{{ number_format($coinSummary['total_earned'] ?? $coinSummary['earned'] ?? 0) }}
                         </div>
                         <p class="text-[10px] font-mono text-emerald-200 mt-0.5">Total Credited Rewards</p>
                     </div>
@@ -104,7 +104,7 @@
                     </div>
                     <div>
                         <div class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            -{{ number_format($coinSummary['spent'] ?? 0) }}
+                            -{{ number_format($coinSummary['total_spent'] ?? $coinSummary['spent'] ?? 0) }}
                         </div>
                         <p class="text-[10px] font-mono text-amber-200 mt-0.5">Presentation Purchases</p>
                     </div>
@@ -126,6 +126,63 @@
                         </div>
                         <p class="text-[10px] font-mono text-white/90 font-bold mt-0.5">Current Balance</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Secret Purchase PIN Protection Box -->
+            <div class="rounded-2xl p-4 sm:p-5 border {{ !empty($isQrVerifiedSession) ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md' : 'bg-black/25 backdrop-blur-md border-white/20 text-white' }}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full {{ !empty($isQrVerifiedSession) ? 'bg-slate-950 animate-pulse' : 'bg-amber-400' }}"></span>
+                            <span class="text-xs font-mono font-bold uppercase tracking-wider {{ !empty($isQrVerifiedSession) ? 'text-slate-900' : 'text-amber-300' }}">
+                                Secret Purchase Code (സീക്രട്ട് പർച്ചേസ് കോഡ്)
+                            </span>
+                        </div>
+                        <p class="text-[11px] font-anek mt-1 {{ !empty($isQrVerifiedSession) ? 'text-slate-900 font-medium' : 'text-red-100/85' }}">
+                            @if(!empty($isQrVerifiedSession))
+                                ഫിസിക്കൽ ഐഡി കാർഡ് സ്കാൻ ചെയ്തതിനാൽ രഹസ്യ കോഡ് അൺലോക്ക് ചെയ്യപ്പെട്ടു. പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും സാധനങ്ങൾ വാങ്ങുമ്പോൾ ഈ കോഡ് നൽകുക.
+                            @else
+                                സുരക്ഷാ മുൻകരുതൽ: വെബ്സൈറ്റിൽ ചെസ്റ്റ് നമ്പർ ടൈപ്പ് ചെയ്യുമ്പോൾ ഈ കോഡ് കാണിക്കില്ല. നിങ്ങളുടെ ഫിസിക്കൽ ഐഡി കാർഡിലെ ക്യുആർ കോഡ് (QR Code) സ്കാൻ ചെയ്യുമ്പോൾ മാത്രമേ സീക്രട്ട് കോഡ് ലഭ്യമാകൂ.
+                            @endif
+                        </p>
+                    </div>
+
+                    <div class="shrink-0 self-start sm:self-center">
+                        @if(!empty($isQrVerifiedSession))
+                            <div class="flex items-center gap-1.5">
+                                @foreach(str_split((string) $student->purchase_pin) as $d)
+                                    <span class="w-10 h-12 rounded-xl bg-slate-950 text-amber-300 font-mono font-black text-xl flex items-center justify-center shadow-md">
+                                        {{ $d }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="px-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-center font-mono">
+                                <span class="text-lg font-black tracking-widest text-amber-300">••••</span>
+                                <span class="block text-[9px] uppercase tracking-wider text-slate-400">Scan QR to View</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUAF Recognition Gift Status Banner -->
+            <div class="rounded-2xl p-4 sm:p-5 border {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : 'bg-amber-500/20 border-amber-400/40 text-amber-100' }}">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-white/80">QUAF Recognition Gift</span>
+                        @if($student->recognition_gift_delivered)
+                            <div class="text-sm font-bold font-sora text-white mt-0.5">സമ്മാനം കൈപ്പറ്റി (Gift Delivered)</div>
+                            <div class="text-[11px] font-mono text-emerald-200 mt-0.5">{{ $student->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}</div>
+                        @else
+                            <div class="text-sm font-bold font-sora text-white mt-0.5">സമ്മാനം കൈപ്പറ്റാനുണ്ട് (Pending Collection)</div>
+                            <div class="text-[11px] font-anek text-amber-200 mt-0.5">പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും നിങ്ങളുടെ ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം കൈപ്പറ്റുക.</div>
+                        @endif
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : 'bg-amber-400 text-slate-950' }}">
+                        {{ $student->recognition_gift_delivered ? 'Delivered' : 'Pending Desk Pickup' }}
+                    </span>
                 </div>
             </div>
 

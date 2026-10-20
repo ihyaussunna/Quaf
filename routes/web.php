@@ -416,6 +416,7 @@ Route::post('/judge/login', [JudgeController::class, 'pinLogin'])->name('judge.l
 // Student Chest Number Quick Login
 Route::get('/student/login', [StudentController::class, 'showLogin'])->name('student.login');
 Route::post('/student/login', [StudentController::class, 'login'])->name('student.login.submit');
+Route::get('/student/qr-login/{qrToken}', [StudentController::class, 'qrLogin'])->name('student.qr-login');
 
 /*
 |--------------------------------------------------------------------------
@@ -682,6 +683,7 @@ Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:
     Route::get('/', [PresentationController::class, 'index'])->name('dashboard');
     Route::get('/search-student', [PresentationController::class, 'searchStudent'])->name('search-student');
     Route::post('/redeem', [PresentationController::class, 'redeem'])->name('redeem');
+    Route::post('/students/{student}/toggle-gift', [PresentationController::class, 'toggleGift'])->name('toggle-gift');
     Route::post('/transactions/{transaction}/reverse', [PresentationController::class, 'reverseRedemption'])->name('reverse');
     Route::get('/transactions/{transaction}/receipt', [PresentationController::class, 'receipt'])->name('receipt');
     Route::get('/report', [PresentationController::class, 'report'])->name('report');

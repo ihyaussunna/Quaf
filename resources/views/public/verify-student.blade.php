@@ -1,49 +1,227 @@
 @extends('layouts.public', ['title' => 'Participant Verification — QUAF'])
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-    <div class="text-center mb-8">
-        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">PARTICIPANT IDENTIFICATION</span>
-        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-2">Official Delegate Profile</h1>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-8">
+    
+    <div class="text-center">
+        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">PARTICIPANT IDENTIFICATION & WALLET</span>
+        <h1 class="text-3xl sm:text-4xl font-sora font-black text-slate-900 mt-1">Official Delegate Profile</h1>
+        <p class="text-xs text-slate-500 font-anek mt-1">ഐഡി കാർഡ് സ്കാൻ ചെയ്തുകൊണ്ടുള്ള ഔദ്യോഗിക വിവരങ്ങളും കോയിൻ ബാലൻസും</p>
     </div>
 
     @if($isValid && $student)
         <!-- Valid Student Profile -->
-        <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-10 shadow-lg mb-12">
-            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-8 pb-8 border-b border-slate-200">
-                <div class="w-32 h-32 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-200 shadow-md shrink-0 flex items-center justify-center">
+        <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-10 shadow-lg space-y-8">
+            
+            <!-- Student Header Profile -->
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-slate-200">
+                <div class="w-28 h-28 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-200 shadow-md shrink-0 flex items-center justify-center">
                     @if($student->photo_url)
                         <img src="{{ $student->photo_url }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
+                    @elseif($student->photo_path)
+                        <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400">
-                            <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mt-1 font-semibold">{{ $student->student_id }}</span>
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400 font-black text-3xl">
+                            {{ strtoupper(substr($student->name, 0, 1)) }}
                         </div>
                     @endif
                 </div>
-                <div class="flex-1 text-center sm:text-left">
+
+                <div class="flex-1 text-center sm:text-left min-w-0">
                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
-                        <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-red-50 text-[#be1e2d] border border-red-200">
-                            {{ $student->student_id }}
+                        <span class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-red-50 text-[#be1e2d] border border-red-200">
+                            Chest #: {{ $student->chest_number ?? $student->student_id }}
                         </span>
-                        <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold" style="background-color: {{ $student->group?->color_hex ?? '#2e3192' }}20; color: {{ $student->group?->color_hex ?? '#2e3192' }}">
-                            House: {{ $student->group?->name }}
+                        <span class="px-3 py-1 rounded-lg text-xs font-mono font-bold" style="background-color: {{ $student->group?->color_hex ?? '#2e3192' }}20; color: {{ $student->group?->color_hex ?? '#2e3192' }}">
+                            House: {{ $student->group?->name ?? 'QUAF' }}
                         </span>
-                        <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-slate-100 text-slate-700">
-                            {{ $student->category }}
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-mono bg-slate-100 text-slate-700">
+                            {{ $student->zone_name }}
                         </span>
                     </div>
-                    <h2 class="text-3xl font-sora font-black text-slate-900 mb-2">{{ $student->name }}</h2>
-                    <div class="text-xs font-mono text-slate-500 space-y-1">
-                        <p>Class: {{ $student->class_level ?? 'Registered Student' }}</p>
-                        <p>Festival Contribution: <span class="text-[#be1e2d] font-bold">{{ $student->points_cache }} Points</span></p>
+                    <h2 class="text-2xl sm:text-3xl font-sora font-black text-slate-900 truncate">{{ $student->name }}</h2>
+                    <div class="text-xs font-mono text-slate-500 space-y-0.5 mt-1">
+                        <p>Class / Category: <strong class="text-slate-700">{{ $student->class_level ?? $student->category }}</strong></p>
+                        <p>Festival Contribution: <strong class="text-[#be1e2d] font-bold">{{ $student->points_cache }} Points</strong></p>
                     </div>
+                </div>
+
+                <!-- Open Full Portal Button -->
+                <div class="shrink-0 flex flex-col gap-2 w-full sm:w-auto">
+                    <a href="{{ route('student.qr-login', $student->qr_token) }}" 
+                       class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md">
+                        Open Student Portal
+                    </a>
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
+                        <a href="{{ route('presentation.dashboard', ['student' => $student->student_id]) }}" 
+                           class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md">
+                            Open in Presentation Desk
+                        </a>
+                    @endif
                 </div>
             </div>
 
+            <!-- SECRET PURCHASE PIN CARD (Visible only on physical QR scan) -->
+            <div class="p-6 sm:p-7 rounded-3xl bg-slate-950 text-white border-2 border-amber-400/50 shadow-xl relative overflow-hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-mono font-bold uppercase tracking-widest text-amber-400">Secret Purchase Code (സീക്രട്ട് പർച്ചേസ് കോഡ്)</span>
+                        </div>
+                        <p class="text-xs text-slate-300 font-anek mt-1">
+                            പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും സമ്മാനങ്ങളും പുസ്തകങ്ങളും വാങ്ങുമ്പോൾ ഈ 4 അക്ക രഹസ്യ കോഡ് നൽകുക.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 self-start sm:self-center">
+                        <span class="sr-only">{{ $student->purchase_pin }}</span>
+                        @foreach(str_split((string) $student->purchase_pin) as $digit)
+                            <div class="w-12 h-14 rounded-2xl bg-slate-900 border-2 border-amber-400 text-amber-300 font-mono font-black text-2xl flex items-center justify-center shadow-lg">
+                                {{ $digit }}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+                    <span>Physical QR Badge Authentication: Verified</span>
+                    <span class="text-amber-300/80">Keep this PIN confidential</span>
+                </div>
+            </div>
+
+            <!-- COIN WALLET BALANCE GRID -->
+            @if($coinSummary)
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Available Balance -->
+                    <div class="p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 shadow-md border border-amber-300">
+                        <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-800">Available Wallet Balance</div>
+                        <div class="text-3xl sm:text-4xl font-black mt-1 font-sora flex items-baseline gap-2">
+                            <span>{{ number_format($coinSummary['balance']) }}</span>
+                            <span class="text-xs font-mono uppercase font-bold text-slate-800">Coins</span>
+                        </div>
+                        <div class="text-[11px] font-anek text-slate-900 mt-2 font-medium">കൈവശമുള്ള ആകെ കോയിനുകൾ</div>
+                    </div>
+
+                    <!-- Total Earned -->
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Coins Earned</div>
+                        <div class="text-2xl sm:text-3xl font-black mt-1 font-sora text-emerald-600">
+                            +{{ number_format($coinSummary['total_earned']) }}
+                        </div>
+                        <div class="text-[11px] font-anek text-slate-500 mt-2 font-medium">വിവിധ മത്സരങ്ങളിൽ നിന്ന് ലഭിച്ചത്</div>
+                    </div>
+
+                    <!-- Total Spent -->
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Coins Spent</div>
+                        <div class="text-2xl sm:text-3xl font-black mt-1 font-sora text-rose-600">
+                            -{{ number_format($coinSummary['total_spent']) }}
+                        </div>
+                        <div class="text-[11px] font-anek text-slate-500 mt-2 font-medium">സമ്മാനങ്ങൾക്കായി ചെലവഴിച്ചത്</div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- QUAF RECOGNITION GIFT STATUS -->
+            <div class="p-5 sm:p-6 rounded-2xl border transition-all {{ $student->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                            <span class="text-xs font-mono font-bold uppercase tracking-wider">
+                                QUAF Recognition Gift (ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം)
+                            </span>
+                        </div>
+                        
+                        @if($student->recognition_gift_delivered)
+                            <div class="text-lg font-black font-sora mt-1 text-emerald-900">
+                                സമ്മാനം കൈപ്പറ്റി (Gift Delivered)
+                            </div>
+                            <div class="text-xs font-mono text-emerald-800 mt-0.5">
+                                തീയതി: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • വിതരണം: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                            </div>
+                        @else
+                            <div class="text-lg font-black font-sora mt-1 text-amber-900">
+                                സമ്മാനം കൈപ്പറ്റാനുണ്ട് (Pending Collection)
+                            </div>
+                            <div class="text-xs font-anek text-amber-800 mt-0.5">
+                                പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും നിങ്ങളുടെ ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം കൈപ്പറ്റാവുന്നതാണ്.
+                            </div>
+                        @endif
+                    </div>
+
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
+                        <form method="POST" action="{{ route('presentation.toggle-gift', $student->id) }}" class="shrink-0">
+                            @csrf
+                            <button type="submit" 
+                                    class="px-4 py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm {{ $student->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
+                                {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (നൽകി എന്ന് അടയാളപ്പെടുത്തുക)' }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+
+            <!-- PURCHASE HISTORY & REDEEMED ITEMS -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-sora font-bold text-lg text-slate-900">Purchase History & Gifts (വാങ്ങിയ സമ്മാനങ്ങൾ)</h3>
+                        <p class="text-xs text-slate-500 font-anek">പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും കോയിൻ നൽകി വാങ്ങിയ മുഴുവൻ ഇനങ്ങളുടെയും വിവരങ്ങൾ.</p>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-400 uppercase">
+                        {{ $purchaseHistory->count() }} Items
+                    </span>
+                </div>
+
+                @if($purchaseHistory->isNotEmpty())
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-500 font-mono uppercase text-[11px] bg-slate-50">
+                                    <th class="py-3 px-4">Date & Time</th>
+                                    <th class="py-3 px-4">Item Details</th>
+                                    <th class="py-3 px-4 text-center">Coins Deducted</th>
+                                    <th class="py-3 px-4 text-center">Receipt Slip</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach($purchaseHistory as $purchase)
+                                    <tr class="hover:bg-slate-50/70 transition-colors">
+                                        <td class="py-3 px-4 font-mono text-slate-500">
+                                            {{ $purchase->created_at?->format('d M Y, h:i A') }}
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <div class="font-bold text-slate-900">{{ $purchase->description }}</div>
+                                            <div class="text-[10px] font-mono text-slate-400">Ref: {{ $purchase->transaction_reference }}</div>
+                                            @if(!empty($purchase->metadata['notes']))
+                                                <div class="text-[10px] text-slate-500 italic">Notes: {{ $purchase->metadata['notes'] }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="py-3 px-4 text-center font-mono font-black text-rose-600 text-sm">
+                                            {{ $purchase->coins }} Coins
+                                        </td>
+                                        <td class="py-3 px-4 text-center">
+                                            <a href="{{ route('presentation.receipt', $purchase->id) }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold text-[10px] uppercase transition-all inline-block">
+                                                Receipt
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="p-6 text-center text-xs text-slate-400 font-mono bg-slate-50 rounded-2xl border border-slate-200/80">
+                        ഇതുവരെ പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും പർച്ചേസുകൾ ഒന്നും നടത്തിയിട്ടില്ല (No purchases recorded yet).
+                    </div>
+                @endif
+            </div>
+
             <!-- Registered Programs & Stage Status -->
-            <div class="mt-8">
-                <h3 class="font-sora font-bold text-lg text-slate-900 mb-4">Allocated Program Registrations</h3>
+            <div class="space-y-4 pt-4 border-t border-slate-200">
+                <h3 class="font-sora font-bold text-lg text-slate-900">Allocated Program Registrations</h3>
                 <div class="space-y-3">
                     @forelse($student->entries as $entry)
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -69,6 +247,7 @@
                     @endforelse
                 </div>
             </div>
+
         </div>
     @else
         <!-- Invalid Student Delegate State -->

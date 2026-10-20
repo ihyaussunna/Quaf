@@ -23,8 +23,15 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- HTML5 QR Code Scanner Library -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" integrity="sha256-n6V3eGf6D0612W6+R0K10iHn4B+R8U87LzJbC1R8QhA=" crossorigin="anonymous" defer></script>
+    <!-- HTML5 QR Code Scanner Library (Bundled locally with CDN fallback) -->
+    <script src="{{ asset('vendor/html5-qrcode.min.js') }}"></script>
+    <script>
+        if (typeof Html5Qrcode === 'undefined') {
+            var fallbackScript = document.createElement('script');
+            fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+            document.head.appendChild(fallbackScript);
+        }
+    </script>
 </head>
 <body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex overflow-x-hidden max-w-full"
       x-data="{ sidebarOpen: false }">

@@ -30,7 +30,7 @@
     </div>
 
     <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -52,6 +52,16 @@
         </div>
 
         <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+            </div>
+            <div>
+                <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Recognition Gifts</div>
+                <div class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ number_format($stats['gifts_delivered'] ?? 0) }} <span class="text-xs font-mono font-normal text-slate-400">/ {{ number_format($stats['total_students'] ?? 550) }}</span></div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center flex-shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             </div>
@@ -61,12 +71,12 @@
             </div>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 col-span-2 lg:col-span-1">
             <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center flex-shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
             <div>
-                <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Coins in Fest</div>
+                <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Fest Coins</div>
                 <div class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ number_format($stats['total_credited']) }}</div>
             </div>
         </div>
@@ -188,6 +198,38 @@
                                 <span class="opacity-70">Total Spent:</span>
                                 <span class="text-rose-950 font-black">-{{ $studentSummary['total_spent'] }}</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- QUAF Recognition Gift Status & Delivery Action -->
+                    <div class="p-4 sm:p-5 rounded-2xl border transition-all {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider">QUAF Recognition Gift</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900' }}">
+                                {{ $selectedStudent->recognition_gift_delivered ? 'Delivered' : 'Pending' }}
+                            </span>
+                        </div>
+
+                        <div class="mt-2">
+                            @if($selectedStudent->recognition_gift_delivered)
+                                <div class="text-sm font-bold font-sora text-emerald-900">സമ്മാനം നൽകി (Gift Delivered)</div>
+                                <div class="text-[10px] font-mono text-emerald-700 mt-0.5">
+                                    {{ $selectedStudent->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $selectedStudent->recognition_gift_delivered_by }}
+                                </div>
+                            @else
+                                <div class="text-sm font-bold font-sora text-amber-900">സമ്മാനം നൽകിയിട്ടില്ല (Gift Pending)</div>
+                                <div class="text-[10px] text-amber-800 font-anek mt-0.5">ഈ വിദ്യാർത്ഥിക്ക് ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് നൽകുക.</div>
+                            @endif
+                        </div>
+
+                        <div class="mt-3 pt-3 border-t {{ $selectedStudent->recognition_gift_delivered ? 'border-emerald-200' : 'border-amber-200' }}">
+                            <form method="POST" action="{{ route('presentation.toggle-gift', $selectedStudent->id) }}">
+                                @csrf
+                                <button type="submit" 
+                                        class="w-full py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs {{ $selectedStudent->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20' }}">
+                                    {{ $selectedStudent->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (സമ്മാനം നൽകി)' }}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -317,6 +359,31 @@
                                    x-model="notes" 
                                    placeholder="Bill or voucher number..."
                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:bg-white focus:border-amber-500 focus:outline-none transition-all">
+                        </div>
+
+                        <!-- Secret Purchase PIN Protection Input -->
+                        <div class="sm:col-span-2 space-y-1.5 p-4 rounded-2xl bg-amber-50 border-2 border-amber-300">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-mono font-bold uppercase tracking-wider text-amber-950">
+                                    Student Secret Code (സീക്രട്ട് പർച്ചേസ് കോഡ്) <span class="text-rose-600">*</span>
+                                </label>
+                                <span class="text-[10px] font-mono text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded font-bold">From ID Card QR Scan</span>
+                            </div>
+                            <div class="relative">
+                                <input :type="showPin ? 'text' : 'password'" 
+                                       name="secret_code" 
+                                       x-model="secretCode"
+                                       maxlength="10"
+                                       required 
+                                       placeholder="Enter 4-digit code from student's scanned card..."
+                                       class="w-full pl-4 pr-12 py-3 bg-white border border-amber-400 rounded-xl text-base font-mono font-black text-slate-900 tracking-widest focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all">
+                                <button type="button" @click="showPin = !showPin" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer text-xs font-mono">
+                                    <span x-text="showPin ? 'Hide' : 'Show'"></span>
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-amber-900 font-anek">
+                                വിദ്യാർത്ഥി തന്റെ ഐഡി കാർഡ് സ്കാൻ ചെയ്യുമ്പോൾ ഫോണിൽ കാണിക്കുന്ന 4 അക്ക രഹസ്യ കോഡ് നൽകുക. (ചെസ്റ്റ് നമ്പർ മാത്രം വെബ്സൈറ്റിൽ അടിച്ചാൽ ഈ കോഡ് ലഭിക്കില്ല).
+                            </p>
                         </div>
                     </div>
 
@@ -517,6 +584,8 @@ function presentationDesk() {
         quantity: 1,
         itemCategory: '{{ $presets[0]['category'] ?? 'book' }}',
         notes: '',
+        secretCode: '',
+        showPin: false,
 
         selectPreset(name, coins, category) {
             this.itemName = name;
@@ -524,7 +593,29 @@ function presentationDesk() {
             this.itemCategory = category;
         },
 
+        playBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        },
+
         confirmSubmit(event) {
+            if (!this.secretCode || this.secretCode.trim() === '') {
+                alert('വിദ്യാർത്ഥിയുടെ രഹസ്യ കോഡ് (Secret Purchase Code) നൽകുക.');
+                event.preventDefault();
+                return;
+            }
+
             let total = this.unitCoins * this.quantity;
             if (!confirm(this.itemName + ' നൽകി ' + total + ' കോയിനുകൾ കുറയ്ക്കട്ടെ?')) {
                 event.preventDefault();
@@ -544,6 +635,7 @@ function presentationDesk() {
             this.$nextTick(() => {
                 if (typeof Html5Qrcode === 'undefined') {
                     alert('Camera scanner library is loading. Please try again in a moment.');
+                    this.scannerActive = false;
                     return;
                 }
 
@@ -559,10 +651,10 @@ function presentationDesk() {
                         this.onScanSuccess(decodedText);
                     },
                     (errorMessage) => {
-                        // ignore background frame errors
+                        // background frame errors
                     }
                 ).catch(err => {
-                    alert('Unable to start camera: ' + err);
+                    alert('ക്യാമറ തുറക്കാൻ സാധിച്ചില്ല: ' + err + '\nദയവായി ക്യാമറ പെർമിഷൻ നൽകിയിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുക.');
                     this.scannerActive = false;
                 });
             });
@@ -581,7 +673,9 @@ function presentationDesk() {
         },
 
         onScanSuccess(decodedText) {
+            this.playBeep();
             this.stopCameraScanner();
+
             // Automatically put scanned text into search input and submit
             const input = document.getElementById('studentScanInput');
             if (input) {

@@ -34,8 +34,12 @@ class Student extends Model
         'contact',
         'photo_url',
         'qr_token',
+        'purchase_pin',
         'points_cache',
         'coins_cache',
+        'recognition_gift_delivered',
+        'recognition_gift_delivered_at',
+        'recognition_gift_delivered_by',
     ];
 
     protected $appends = [
@@ -49,6 +53,8 @@ class Student extends Model
             'dob' => 'date',
             'points_cache' => 'integer',
             'coins_cache' => 'integer',
+            'recognition_gift_delivered' => 'boolean',
+            'recognition_gift_delivered_at' => 'datetime',
         ];
     }
 
@@ -117,6 +123,17 @@ class Student extends Model
     public function getChestNumberAttribute(): string
     {
         return (string) ($this->attributes['chest_number'] ?? $this->student_id ?? '');
+    }
+
+    public function getPurchasePinAttribute(?string $value): string
+    {
+        if (! empty($value)) {
+            return (string) $value;
+        }
+
+        $token = $this->qr_token ?: $this->student_id ?: (string) $this->id;
+
+        return str_pad((string) (abs(crc32($token)) % 9000 + 1000), 4, '0', STR_PAD_LEFT);
     }
 
     /**

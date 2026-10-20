@@ -131,6 +131,7 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         // Student currently has 0 coins
         $response = $this->actingAs($this->presentationUser)->post(route('presentation.redeem'), [
             'student_id' => $this->student->id,
+            'secret_code' => $this->student->purchase_pin,
             'item_name' => 'Islamic History Book',
             'coins' => 100,
             'quantity' => 1,
@@ -139,6 +140,33 @@ class PresentationDeskCoinRedemptionTest extends TestCase
 
         $response->assertSessionHas('error');
         $this->assertEquals(0, $this->student->fresh()->coins_cache);
+    }
+
+    public function test_student_cannot_redeem_with_invalid_secret_code(): void
+    {
+        // Credit coins first
+        CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+            'prize_position' => 1,
+            'coins' => 100,
+            'transaction_type' => 'credit',
+            'transaction_reference' => 'COIN-TEST-CREDIT-WRONG-PIN',
+            'status' => 'completed',
+        ]);
+        app(CoinRewardService::class)->syncStudentCoinsCache($this->student->id);
+
+        $response = $this->actingAs($this->presentationUser)->post(route('presentation.redeem'), [
+            'student_id' => $this->student->id,
+            'secret_code' => '0000', // incorrect PIN
+            'item_name' => 'Book',
+            'coins' => 50,
+            'quantity' => 1,
+            'item_category' => 'book',
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertEquals(100, $this->student->fresh()->coins_cache);
     }
 
     public function test_student_can_purchase_book_and_coins_are_deducted_accurately(): void
@@ -160,9 +188,10 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         app(CoinRewardService::class)->syncStudentCoinsCache($this->student->id);
         $this->assertEquals(200, $this->student->fresh()->coins_cache);
 
-        // 2. Student purchases a book for 70 coins (qty 1)
+        // 2. Student purchases a book for 70 coins with valid secret PIN (qty 1)
         $response = $this->actingAs($this->presentationUser)->post(route('presentation.redeem'), [
             'student_id' => $this->student->id,
+            'secret_code' => $this->student->purchase_pin,
             'item_name' => 'Tuhfatul Mujahideen (Book)',
             'coins' => 70,
             'quantity' => 1,
@@ -250,5 +279,59 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $reportResponse->assertSee('Coin Redemption');
         $reportResponse->assertSee('Gift Distribution Report');
         $reportResponse->assertSee('Fest Souvenir');
+    }
+
+    public function test_presentation_desk_can_toggle_recognition_gift(): void
+    {
+        $this->assertFalse((bool) $this->student->fresh()->recognition_gift_delivered);
+
+        // 1. Mark as delivered
+        $response = $this->actingAs($this->presentationUser)->post(route('presentation.toggle-gift', $this->student->id));
+        $response->assertSessionHas('success');
+        $this->assertTrue((bool) $this->student->fresh()->recognition_gift_delivered);
+        $this->assertNotNull($this->student->fresh()->recognition_gift_delivered_at);
+
+        // 2. Toggle back to pending
+        $response2 = $this->actingAs($this->presentationUser)->post(route('presentation.toggle-gift', $this->student->id));
+        $response2->assertSessionHas('success');
+        $this->assertFalse((bool) $this->student->fresh()->recognition_gift_delivered);
+    }
+
+    public function test_scanned_student_verification_page_reveals_secret_code_and_wallet_data(): void
+    {
+        // Credit 150 coins
+        CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+            'prize_position' => 1,
+            'coins' => 150,
+            'transaction_type' => 'credit',
+            'transaction_reference' => 'COIN-TEST-CREDIT-VERIFY',
+            'status' => 'completed',
+            'description' => '1st Prize Qawwali',
+        ]);
+        app(CoinRewardService::class)->syncStudentCoinsCache($this->student->id);
+
+        $response = $this->get(route('verify.student', $this->student->qr_token));
+        $response->assertOk();
+        $response->assertSee('Muhammad Bilal');
+        $response->assertSee('Secret Purchase Code');
+        $response->assertSee((string) $this->student->purchase_pin);
+        $response->assertSee('150');
+        $response->assertSee('QUAF Recognition Gift');
+    }
+
+    public function test_student_portal_via_chest_number_login_masks_secret_code(): void
+    {
+        $response = $this->post(route('student.login.submit'), [
+            'identifier' => 'LM101',
+        ]);
+        $response->assertRedirect(route('student.dashboard'));
+
+        $dashResponse = $this->get(route('student.dashboard'));
+        $dashResponse->assertOk();
+        $dashResponse->assertSee('Muhammad Bilal');
+        $dashResponse->assertSee('Scan QR to View');
+        $dashResponse->assertDontSee($this->student->purchase_pin);
     }
 }

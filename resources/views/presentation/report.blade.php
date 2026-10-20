@@ -55,7 +55,7 @@
     </div>
 
     <!-- Metric Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
             <div class="text-[11px] font-mono font-bold uppercase text-slate-400">Total Coins Redeemed</div>
             <div class="text-2xl font-black text-rose-600 mt-1">{{ number_format($totalCoinsRedeemed) }} Coins</div>
@@ -63,6 +63,10 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
             <div class="text-[11px] font-mono font-bold uppercase text-slate-400">Total Items Distributed</div>
             <div class="text-2xl font-black text-slate-900 mt-1">{{ number_format($totalItemsCount) }} Units</div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="text-[11px] font-mono font-bold uppercase text-slate-400">Recognition Gifts Delivered</div>
+            <div class="text-2xl font-black text-teal-600 mt-1">{{ number_format($totalGiftsDelivered ?? 0) }} <span class="text-xs font-mono font-normal text-slate-400">/ {{ number_format($totalStudents ?? 550) }}</span></div>
         </div>
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
             <div class="text-[11px] font-mono font-bold uppercase text-slate-400">Total Transactions</div>

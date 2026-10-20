@@ -44,6 +44,8 @@ class PresentationController extends Controller
             'total_redeemed' => (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins')),
             'total_purchases' => CoinTransaction::where('transaction_type', 'debit')->count(),
             'unique_students' => CoinTransaction::where('transaction_type', 'debit')->distinct('student_id')->count('student_id'),
+            'gifts_delivered' => Student::where('recognition_gift_delivered', true)->count(),
+            'total_students' => Student::count(),
         ];
 
         $selectedStudent = null;
@@ -151,6 +153,8 @@ class PresentationController extends Controller
                 'balance' => $summary['balance'],
                 'total_earned' => $summary['total_earned'],
                 'total_spent' => $summary['total_spent'],
+                'recognition_gift_delivered' => (bool) $student->recognition_gift_delivered,
+                'recognition_gift_delivered_at' => $student->recognition_gift_delivered_at?->format('d M, h:i A'),
                 'recent_transactions' => $recent,
             ],
         ]);
@@ -158,11 +162,13 @@ class PresentationController extends Controller
 
     /**
      * Record a purchase / coin deduction for the student.
+     * Requires Secret Purchase PIN.
      */
     public function redeem(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'student_id' => 'required|integer|exists:students,id',
+            'secret_code' => 'required|string|max:20',
             'item_name' => 'required|string|max:255',
             'coins' => 'required|integer|min:1',
             'quantity' => 'nullable|integer|min:1|max:100',
@@ -171,6 +177,14 @@ class PresentationController extends Controller
         ]);
 
         $student = Student::with(['group'])->findOrFail($validated['student_id']);
+
+        // Verify Secret Purchase Code
+        $enteredPin = trim((string) $validated['secret_code']);
+        if ($enteredPin !== (string) $student->purchase_pin) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'തെറ്റായ സീക്രട്ട് കോഡ് (Invalid Secret Purchase Code)! വിദ്യാർത്ഥിയുടെ ഐഡി കാർഡ് സ്കാൻ ചെയ്യുമ്പോൾ ലഭിക്കുന്ന 4 അക്ക രഹസ്യ കോഡ് നൽകുക.');
+        }
 
         try {
             $transaction = $this->coinRewardService->redeemCoins($student, [
@@ -195,6 +209,27 @@ class PresentationController extends Controller
                 ->withInput()
                 ->with('error', 'Error processing purchase: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Toggle or mark QUAF Recognition Gift as delivered for a student.
+     */
+    public function toggleGift(Request $request, Student $student): RedirectResponse
+    {
+        $newStatus = ! (bool) $student->recognition_gift_delivered;
+        $operator = Auth::user()?->name ?? 'Presentation Desk';
+
+        $student->update([
+            'recognition_gift_delivered' => $newStatus,
+            'recognition_gift_delivered_at' => $newStatus ? now() : null,
+            'recognition_gift_delivered_by' => $newStatus ? $operator : null,
+        ]);
+
+        $msg = $newStatus
+            ? "{$student->name}-ന് ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് നൽകിയതായി രേഖപ്പെടുത്തി."
+            : "{$student->name}-ന്റെ ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് സ്റ്റാറ്റസ് റദ്ദാക്കി.";
+
+        return redirect()->back()->with('success', $msg);
     }
 
     /**
@@ -258,10 +293,15 @@ class PresentationController extends Controller
             return $tx->metadata['quantity'] ?? 1;
         });
 
+        $totalGiftsDelivered = Student::where('recognition_gift_delivered', true)->count();
+        $totalStudents = Student::count();
+
         return view('presentation.report', compact(
             'transactions',
             'totalCoinsRedeemed',
             'totalItemsCount',
+            'totalGiftsDelivered',
+            'totalStudents',
             'startDate',
             'endDate'
         ));
@@ -272,31 +312,60 @@ class PresentationController extends Controller
      */
     protected function resolveStudent(string $queryStr): ?Student
     {
-        $clean = trim($queryStr);
+        $clean = trim(urldecode($queryStr));
 
-        // If a full QR verification URL was scanned
-        if (preg_match('~/verify/student/([^/?#]+)~', $clean, $matches)) {
-            $clean = trim($matches[1]);
+        // If a full QR verification URL was scanned: https://.../verify/student/{qrToken}
+        if (preg_match('~verify/student/([a-zA-Z0-9_\-\.%]+)~', $clean, $matches)) {
+            $clean = trim(urldecode($matches[1]));
         }
 
-        // Direct token or chest match
+        // Strip "student=" query parameter if present
+        if (preg_match('~[?&]student=([a-zA-Z0-9_\-\.%]+)~', $clean, $matches)) {
+            $clean = trim(urldecode($matches[1]));
+        }
+
+        // Remove any spaces (e.g. "QF 1001" -> "QF1001")
+        $noSpace = str_replace(' ', '', $clean);
+
+        // 1. Direct match on qr_token or student_id
         $student = Student::with(['group', 'zone'])
             ->where('qr_token', $clean)
             ->orWhere('student_id', $clean)
-            ->orWhereRaw('LOWER(student_id) = ?', [strtolower($clean)])
+            ->orWhere('student_id', $noSpace)
+            ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($clean)])
+            ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($noSpace)])
             ->first();
 
-        // Numeric primary key match
-        if (! $student && is_numeric($clean)) {
-            $student = Student::with(['group', 'zone'])->find((int) $clean);
+        // 2. If entered number like "1001", try with "QF" prefix (e.g. "QF1001")
+        if (! $student && is_numeric($noSpace)) {
+            $student = Student::with(['group', 'zone'])
+                ->where('student_id', 'QF'.$noSpace)
+                ->first();
         }
 
-        // Fallback name search
+        // 3. Match against program entries chest_number
+        if (! $student) {
+            $student = Student::with(['group', 'zone'])
+                ->whereHas('entries', function ($eq) use ($clean, $noSpace) {
+                    $eq->where('chest_number', $clean)
+                        ->orWhere('chest_number', $noSpace)
+                        ->orWhere('chest_number', 'QF'.$noSpace)
+                        ->orWhereRaw('UPPER(chest_number) = ?', [strtoupper($noSpace)]);
+                })
+                ->first();
+        }
+
+        // 4. Fallback name search
         if (! $student && strlen($clean) >= 2) {
             $student = Student::with(['group', 'zone'])
                 ->where('name', 'like', "%{$clean}%")
                 ->orWhere('student_id', 'like', "%{$clean}%")
                 ->first();
+        }
+
+        // 5. Numeric primary key match (last resort)
+        if (! $student && is_numeric($noSpace)) {
+            $student = Student::with(['group', 'zone'])->find((int) $noSpace);
         }
 
         return $student;
