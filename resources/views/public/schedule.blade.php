@@ -130,9 +130,6 @@
                                 <h3 class="text-base sm:text-lg font-sora font-bold text-slate-900">
                                     {{ $item->program?->name }}
                                 </h3>
-                                @if($item->program?->malayalam_name)
-                                    <p class="text-xs text-slate-500 font-malayalam mt-0.5">{{ $item->program->malayalam_name }}</p>
-                                @endif
                                 <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
                                     <span>Venue: <strong class="text-slate-700">{{ $item->stage?->name ?? 'Main Arena' }}</strong></span>
                                     @if($item->stage?->location)
@@ -198,9 +195,6 @@
                             <h3 class="text-base font-sora font-bold text-slate-900 mb-1 leading-snug">
                                 {{ $prog->name }}
                             </h3>
-                            @if($prog->malayalam_name)
-                                <p class="text-xs text-slate-500 font-malayalam mb-2">{{ $prog->malayalam_name }}</p>
-                            @endif
 
                             <div class="space-y-1 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-100 font-mono">
                                 <div>Zone: <strong class="text-slate-800">{{ $prog->eligibility ?? 'All Zones' }}</strong></div>
