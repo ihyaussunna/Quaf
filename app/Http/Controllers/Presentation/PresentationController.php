@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class PresentationController extends Controller
@@ -44,7 +45,9 @@ class PresentationController extends Controller
             'total_redeemed' => (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins')),
             'total_purchases' => CoinTransaction::where('transaction_type', 'debit')->count(),
             'unique_students' => CoinTransaction::where('transaction_type', 'debit')->distinct('student_id')->count('student_id'),
-            'gifts_delivered' => Student::where('recognition_gift_delivered', true)->count(),
+            'gifts_delivered' => Schema::hasColumn('students', 'recognition_gift_delivered')
+                ? Student::where('recognition_gift_delivered', true)->count()
+                : 0,
             'total_students' => Student::count(),
         ];
 
@@ -216,6 +219,12 @@ class PresentationController extends Controller
      */
     public function toggleGift(Request $request, Student $student): RedirectResponse
     {
+        CoinTransaction::ensureSchema();
+
+        if (! Schema::hasColumn('students', 'recognition_gift_delivered')) {
+            return redirect()->back()->with('error', 'ഡാറ്റാബേസ് കോളം അപ്‌ഡേറ്റ് ആകുന്നു. ദയവായി അല്പം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക.');
+        }
+
         $newStatus = ! (bool) $student->recognition_gift_delivered;
         $operator = Auth::user()?->name ?? 'Presentation Desk';
 
@@ -293,7 +302,9 @@ class PresentationController extends Controller
             return $tx->metadata['quantity'] ?? 1;
         });
 
-        $totalGiftsDelivered = Student::where('recognition_gift_delivered', true)->count();
+        $totalGiftsDelivered = Schema::hasColumn('students', 'recognition_gift_delivered')
+            ? Student::where('recognition_gift_delivered', true)->count()
+            : 0;
         $totalStudents = Student::count();
 
         return view('presentation.report', compact(

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CoinTransaction extends Model
@@ -71,10 +72,38 @@ class CoinTransaction extends Model
                 });
             }
 
-            if (Schema::hasTable('students') && ! Schema::hasColumn('students', 'coins_cache')) {
+            if (Schema::hasTable('students')) {
                 Schema::table('students', function (Blueprint $table) {
-                    $table->integer('coins_cache')->default(0)->after('points_cache');
+                    if (! Schema::hasColumn('students', 'coins_cache')) {
+                        $table->integer('coins_cache')->default(0)->after('points_cache');
+                    }
+                    if (! Schema::hasColumn('students', 'purchase_pin')) {
+                        $table->string('purchase_pin', 10)->nullable()->after('qr_token');
+                    }
+                    if (! Schema::hasColumn('students', 'recognition_gift_delivered')) {
+                        $table->boolean('recognition_gift_delivered')->default(false)->after('coins_cache');
+                    }
+                    if (! Schema::hasColumn('students', 'recognition_gift_delivered_at')) {
+                        $table->timestamp('recognition_gift_delivered_at')->nullable()->after('recognition_gift_delivered');
+                    }
+                    if (! Schema::hasColumn('students', 'recognition_gift_delivered_by')) {
+                        $table->string('recognition_gift_delivered_by', 100)->nullable()->after('recognition_gift_delivered_at');
+                    }
                 });
+
+                if (Schema::hasColumn('students', 'purchase_pin')) {
+                    $needPins = DB::table('students')
+                        ->whereNull('purchase_pin')
+                        ->orWhere('purchase_pin', '')
+                        ->select('id', 'student_id', 'qr_token')
+                        ->limit(500)
+                        ->get();
+                    foreach ($needPins as $s) {
+                        $token = $s->qr_token ?: $s->student_id ?: (string) $s->id;
+                        $pin = str_pad((string) (abs(crc32($token)) % 9000 + 1000), 4, '0', STR_PAD_LEFT);
+                        DB::table('students')->where('id', $s->id)->update(['purchase_pin' => $pin]);
+                    }
+                }
             }
 
             if (Schema::hasTable('results')) {
