@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\GroupController as AdminGroupController;
 use App\Http\Controllers\Admin\IdCardController as AdminIdCardController;
 use App\Http\Controllers\Admin\JudgeController as AdminJudgeController;
 use App\Http\Controllers\Admin\MarkEntryController as AdminMarkEntryController;
+use App\Http\Controllers\Admin\MediaCriticTopicController as AdminMediaCriticTopicController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\OnlineSubmissionFormController as AdminOnlineSubmissionFormController;
 use App\Http\Controllers\Admin\PanelAccessController as AdminPanelAccessController;
@@ -54,6 +55,7 @@ use App\Http\Controllers\Public\ScheduleController;
 use App\Http\Controllers\Public\VerificationController;
 use App\Http\Controllers\Public\VideoController;
 use App\Http\Controllers\Student\StudentController;
+use App\Http\Controllers\TopicPickerController;
 use App\Models\Group;
 use App\Models\Program;
 use App\Models\Student;
@@ -127,6 +129,13 @@ Route::get('/verify', [VerificationController::class, 'index'])->name('verify.in
 Route::get('/verify/certificate/{certificateNumber}', [VerificationController::class, 'verifyCertificate'])->name('verify.certificate');
 Route::get('/verify/student/{qrToken}', [VerificationController::class, 'verifyStudent'])->name('verify.student');
 Route::get('/stages/{stage}/projector', [AdminStageController::class, 'projector'])->name('stages.projector');
+
+// Media Critic Topic Picker Routes
+Route::get('/topic-picker', [TopicPickerController::class, 'index'])->name('topic-picker.index');
+Route::get('/media-critic/topic-picker', fn () => redirect()->route('topic-picker.index'))->name('media-critic.topic-picker');
+Route::post('/topic-picker/login', [TopicPickerController::class, 'login'])->name('topic-picker.login');
+Route::post('/topic-picker/select', [TopicPickerController::class, 'select'])->name('topic-picker.select');
+Route::get('/topic-picker/status', [TopicPickerController::class, 'status'])->name('topic-picker.status');
 
 // Public Cached API Endpoints for Live Web Client
 Route::prefix('api/public')->name('api.public.')->group(function () {
@@ -479,6 +488,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
         Route::delete('/submissions/{submission}', [AdminOnlineSubmissionFormController::class, 'destroySubmission'])->name('submissions.destroy');
     });
 
+    // Media Critic Competition Topics Management
+    Route::prefix('media-critic-topics')->name('media-critic-topics.')->group(function () {
+        Route::get('/', [AdminMediaCriticTopicController::class, 'index'])->name('index');
+        Route::post('/reset/{topic}', [AdminMediaCriticTopicController::class, 'reset'])->name('reset');
+        Route::post('/reset-all', [AdminMediaCriticTopicController::class, 'resetAll'])->name('reset-all');
+        Route::post('/assign', [AdminMediaCriticTopicController::class, 'assign'])->name('assign');
+        Route::put('/{topic}', [AdminMediaCriticTopicController::class, 'update'])->name('update');
+    });
+
     // Stages & Live Status
     Route::post('stages/{stage}/live-status', [AdminStageController::class, 'updateLiveStatus'])->name('stages.live-status');
     Route::resource('stages', AdminStageController::class);
@@ -697,6 +715,7 @@ Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:
 */
 Route::prefix('leader')->name('leader.')->middleware(['auth', 'role:group_leader'])->group(function () {
     Route::get('/', [LeaderController::class, 'dashboard'])->name('dashboard');
+    Route::get('/topic-picker', [TopicPickerController::class, 'index'])->name('topic-picker');
     Route::get('/students', [LeaderController::class, 'students'])->name('students');
     Route::put('/students/{student}', [LeaderController::class, 'updateStudent'])->name('students.update');
     Route::get('/programs', [LeaderController::class, 'programs'])->name('programs');

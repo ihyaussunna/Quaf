@@ -335,6 +335,10 @@
                     <a href="{{ route('admin.programs.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.programs.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Program List</a>
                     <a href="{{ route('admin.registrations.create') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.registrations.create') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Add Student To Program</a>
                     <a href="{{ route('admin.programs.program-wise') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.programs.program-wise') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Program Wise Students</a>
+                    <a href="{{ route('admin.media-critic-topics.index') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.media-critic-topics.*') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                        <span>Media Critic Topics</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 font-mono">LOTTERY</span>
+                    </a>
                 </div>
             </div>
 
