@@ -14,6 +14,7 @@
             <!-- Quick Stats -->
             <div class="flex flex-wrap items-center gap-3">
                 <span class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 font-mono font-bold text-xs text-slate-800">8 Stages / Venues</span>
+                <span class="px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 font-mono font-bold text-xs text-indigo-800">Submission Desk</span>
                 <span class="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-[#be1e2d] font-mono font-bold text-xs">144 Events</span>
             </div>
         </div>
@@ -59,7 +60,10 @@
             <!-- Stage Filter -->
             <div class="sm:col-span-3">
                 <select name="stage" onchange="this.form.submit()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/20 focus:border-[#be1e2d]">
-                    <option value="">All Stages</option>
+                    <option value="">All Stages & Desks</option>
+                    <option value="submissions" {{ (string) $selectedStage === 'submissions' ? 'selected' : '' }} class="font-bold text-indigo-700">
+                        സബ്മിഷൻ ഡെസ്ക് (Submission Desk / Online)
+                    </option>
                     @foreach($stages as $stg)
                         @php
                             $stgId = is_object($stg) ? $stg->id : (is_array($stg) ? ($stg['id'] ?? $stg) : $stg);
@@ -108,33 +112,63 @@
             <div class="space-y-4">
                 @foreach($schedules as $item)
                     @php
+                        $isSub = $item->program?->isSubmissionProgram();
                         $status = $item->computed_status;
-                        $isCompleted = ($status === 'completed');
+                        $deadline = $item->program?->getSubmissionDeadline() ?? $item->end_time;
+                        $isSubOpen = $item->program?->isSubmissionOpen() ?? true;
+                        $isCompleted = ($status === 'completed' || ($isSub && ! $isSubOpen));
                         $isLive = ($status === 'live' || $status === 'in_progress');
                     @endphp
-                    <div class="rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md') }}">
+                    <div class="rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : ($isSub ? 'bg-gradient-to-br from-white via-indigo-50/20 to-amber-50/20 border-indigo-200/80 shadow-2xs hover:shadow-md' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md')) }}">
                         <div class="flex items-start gap-4">
-                            <!-- Time Badge -->
-                            <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-center font-mono shrink-0 min-w-24">
-                                <div class="text-xs font-bold text-slate-900">{{ $item->start_time?->format('h:i A') ?? 'TBD' }}</div>
-                                <div class="text-[10px] font-bold text-[#be1e2d]">{{ $item->start_time?->format('d M Y') ?? 'Oct 2026' }}</div>
-                            </div>
+                            <!-- Time / Deadline Badge -->
+                            @if($isSub)
+                                <div class="p-3 rounded-xl bg-indigo-50/80 border border-indigo-200 text-center font-mono shrink-0 min-w-28">
+                                    <div class="text-[9px] font-bold tracking-wider uppercase text-indigo-700">DEADLINE</div>
+                                    <div class="text-xs font-bold text-slate-900 mt-0.5">{{ $deadline?->format('h:i A') ?? '11:59 PM' }}</div>
+                                    <div class="text-[10px] font-bold text-[#be1e2d]">{{ $deadline?->format('d M Y') ?? '31 Oct 2026' }}</div>
+                                </div>
+                            @else
+                                <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-center font-mono shrink-0 min-w-24">
+                                    <div class="text-xs font-bold text-slate-900">{{ $item->start_time?->format('h:i A') ?? 'TBD' }}</div>
+                                    <div class="text-[10px] font-bold text-[#be1e2d]">{{ $item->start_time?->format('d M Y') ?? 'Oct 2026' }}</div>
+                                </div>
+                            @endif
 
                             <!-- Program Info -->
                             <div>
-                                <div class="flex items-center gap-2 mb-1">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
                                     <span class="font-mono text-xs font-bold text-[#be1e2d]">{{ $item->program?->code }}</span>
                                     <span class="text-slate-300">•</span>
                                     <span class="text-xs font-mono text-slate-500">{{ $item->program?->eligibility ?? 'All Zones' }}</span>
+                                    @if($isSub)
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 uppercase tracking-wide">
+                                            Digital Submission
+                                        </span>
+                                    @endif
                                 </div>
                                 <h3 class="text-base sm:text-lg font-sora font-bold text-slate-900">
                                     {{ $item->program?->name }}
                                 </h3>
-                                <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
-                                    <span>Venue: <strong class="text-slate-700">{{ $item->stage?->name ?? 'Main Arena' }}</strong></span>
-                                    @if($item->stage?->location)
-                                        <span class="text-slate-300">•</span>
-                                        <span>{{ $item->stage->location }}</span>
+                                <div class="flex items-center gap-2 mt-2 text-xs text-slate-500 flex-wrap">
+                                    @if($isSub)
+                                        <span class="inline-flex items-center gap-1.5 font-medium text-indigo-800 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
+                                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                            വേദി: <strong>സബ്മിഷൻ ഡെസ്ക് (Submission Desk)</strong>
+                                        </span>
+                                        <span class="text-slate-400 font-mono text-[11px]">
+                                            അവസാന സമയം: <strong class="text-red-700">{{ $deadline?->format('d M, h:i A') }}</strong>
+                                        </span>
+                                    @else
+                                        <span>Venue: <strong class="text-slate-700">{{ $item->stage?->name ?? 'Main Arena' }}</strong></span>
+                                        @if($item->stage?->location)
+                                            <span class="text-slate-300">•</span>
+                                            <span>{{ $item->stage->location }}</span>
+                                        @endif
+                                        @if($item->program?->duration_minutes)
+                                            <span class="text-slate-300">•</span>
+                                            <span class="font-mono text-slate-500">{{ $item->program->duration_minutes }} Mins</span>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
@@ -142,36 +176,56 @@
 
                         <!-- Status Badge & Action -->
                         <div class="flex items-center justify-between md:flex-col md:items-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                            @if($status === 'live' || $status === 'in_progress')
-                                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 animate-pulse">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                                    <span>LIVE NOW</span>
-                                </span>
-                            @elseif($status === 'completed')
-                                <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                                    COMPLETED
-                                </span>
-                            @elseif($status === 'cancelled')
-                                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-red-100 text-red-800 border border-red-200">
-                                    CANCELLED
-                                </span>
+                            @if($isSub)
+                                @if($isSubOpen)
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <span>ഓപ്പൺ</span>
+                                        </span>
+                                        @if($item->program_id)
+                                            <a href="{{ route('online-submission.by-program', $item->program_id) }}" 
+                                               class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#be1e2d] to-amber-600 hover:from-[#a01824] hover:to-amber-700 text-white font-sora font-bold text-xs shadow-xs hover:shadow-md transition-all">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                                <span>സബ്മിറ്റ് ചെയ്യുക</span>
+                                            </a>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                        സബ്മിഷൻ അവസാനിച്ചു
+                                    </span>
+                                @endif
                             @else
-                                <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    UPCOMING
-                                </span>
+                                @if($status === 'live' || $status === 'in_progress')
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 animate-pulse">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                                        <span>LIVE NOW</span>
+                                    </span>
+                                @elseif($status === 'completed')
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                        COMPLETED
+                                    </span>
+                                @elseif($status === 'cancelled')
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-red-100 text-red-800 border border-red-200">
+                                        CANCELLED
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        UPCOMING
+                                    </span>
+                                @endif
                             @endif
-
-
                         </div>
                     </div>
                 @endforeach
             </div>
 
-        <!-- Case 2: Display Stage Program Lineup with Statuses -->
+        <!-- Case 2: Display Program Lineup with Statuses -->
         @elseif($stagePrograms->isNotEmpty())
             <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-center justify-between gap-4">
                 <div>
-                    <strong>Festival Program Lineup:</strong> Showing official stage competitions categorized under designated stages and academic zones.
+                    <strong>Festival Program Lineup:</strong> Showing official stage competitions and digital submission desks.
                 </div>
                 <span class="font-mono text-xs font-bold shrink-0">{{ $stagePrograms->count() }} Competitions</span>
             </div>
@@ -179,33 +233,81 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach($stagePrograms as $prog)
                     @php
+                        $isSub = $prog->isSubmissionProgram();
                         $progStatus = ($prog->status === 'completed' || $prog->result) ? 'completed' : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
-                        $isCompleted = ($progStatus === 'completed');
+                        $deadline = $prog->getSubmissionDeadline();
+                        $isSubOpen = $prog->isSubmissionOpen();
+                        $isCompleted = ($progStatus === 'completed' || ($isSub && ! $isSubOpen));
                         $isLive = ($progStatus === 'in_progress');
                     @endphp
-                    <div class="rounded-2xl border p-5 transition-all flex flex-col justify-between {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md') }}">
+                    <div class="rounded-2xl border p-5 transition-all flex flex-col justify-between {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : ($isSub ? 'bg-gradient-to-br from-white via-indigo-50/20 to-amber-50/20 border-indigo-200 shadow-2xs hover:shadow-md' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md')) }}">
                         <div>
                             <div class="flex items-center justify-between text-xs font-mono mb-2">
                                 <span class="font-bold text-[#be1e2d]">{{ $prog->code }}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $progStatus === 'completed' ? 'bg-slate-100 text-slate-600' : ($progStatus === 'in_progress' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-blue-700') }}">
-                                    {{ $progStatus === 'in_progress' ? 'LIVE NOW' : ($progStatus === 'completed' ? 'COMPLETED' : 'UPCOMING') }}
-                                </span>
+                                @if($isSub)
+                                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $isSubOpen ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $isSubOpen ? 'സബ്മിഷൻ ഓപ്പൺ' : 'സബ്മിഷൻ ക്ലോസ്ഡ്' }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $progStatus === 'completed' ? 'bg-slate-100 text-slate-600' : ($progStatus === 'in_progress' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-blue-700') }}">
+                                        {{ $progStatus === 'in_progress' ? 'LIVE NOW' : ($progStatus === 'completed' ? 'COMPLETED' : 'UPCOMING') }}
+                                    </span>
+                                @endif
                             </div>
 
                             <h3 class="text-base font-sora font-bold text-slate-900 mb-1 leading-snug">
                                 {{ $prog->name }}
                             </h3>
 
-                            <div class="space-y-1 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-100 font-mono">
-                                <div>Zone: <strong class="text-slate-800">{{ $prog->eligibility ?? 'All Zones' }}</strong></div>
+                            <div class="space-y-1.5 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-100 font-mono">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-500">Zone:</span>
+                                    <strong class="text-slate-800">{{ $prog->eligibility ?? 'All Zones' }}</strong>
+                                </div>
 
-                                <div>Venue: <span class="text-slate-700">{{ $prog->stage?->name ?? 'Designated Stage' }}</span></div>
+                                @if($isSub)
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-500">വേദി:</span>
+                                        <span class="inline-flex items-center gap-1 font-bold text-indigo-700">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                            സബ്മിഷൻ ഡെസ്ക്
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between pt-1 border-t border-slate-100/60">
+                                        <span class="text-slate-500">അവസാന സമയം:</span>
+                                        <strong class="text-[#be1e2d]">{{ $deadline?->format('d M, h:i A') ?? '31 Oct, 06:00 PM' }}</strong>
+                                    </div>
+                                @else
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-500">Venue:</span>
+                                        <span class="text-slate-700 font-semibold">{{ $prog->stage?->name ?? 'Designated Stage' }}</span>
+                                    </div>
+                                    @if($prog->duration_minutes)
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-slate-500">Duration:</span>
+                                            <span class="text-slate-700">{{ $prog->duration_minutes }} Minutes</span>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
                         </div>
 
                         <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                             <span class="text-slate-400 font-mono">{{ $prog->type === 'group' ? 'Group Event' : 'Individual' }}</span>
 
+                            @if($isSub)
+                                @if($isSubOpen)
+                                    <a href="{{ route('online-submission.by-program', $prog->id) }}"
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#be1e2d] to-amber-600 hover:from-[#a01824] hover:to-amber-700 text-white font-sora font-bold text-xs transition-all shadow-xs">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>സബ്മിറ്റ് ചെയ്യുക</span>
+                                    </a>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 font-mono text-[11px]">
+                                        ക്ലോസ്ഡ്
+                                    </span>
+                                @endif
+                            @endif
                         </div>
                     </div>
                 @endforeach

@@ -9,6 +9,7 @@ use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Services\AuditLogger;
 use App\Services\FileStorageService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,7 +36,22 @@ class OnlineSubmissionController extends Controller
 
         $form = $program->onlineSubmissionForm;
         if (! $form) {
-            abort(404, 'ഈ പ്രോഗ്രാമിന് ഓൺലൈൻ സബ്മിഷൻ ഫോം തയ്യാറാക്കിയിട്ടില്ല.');
+            $titleLower = strtolower($program->name ?? '');
+            $isVideo = str_contains($titleLower, 'video') || str_contains($titleLower, 'vlog') || str_contains($titleLower, 'reel') || str_contains($titleLower, 'documentary') || str_contains($titleLower, 'podcast');
+            $isImage = str_contains($titleLower, 'photo') || str_contains($titleLower, 'poster') || str_contains($titleLower, 'design') || str_contains($titleLower, 'project') || str_contains($titleLower, 'magazine') || str_contains($titleLower, 'catalogue');
+
+            $deadline = $program->scheduled_time ?? Carbon::parse('2026-10-31 18:00:00');
+
+            $form = OnlineSubmissionForm::create([
+                'program_id' => $program->id,
+                'title' => $program->name,
+                'instructions' => 'നിങ്ങളുടെ എൻട്രികൾ കൃത്യസമയത്തിന് മുമ്പായി ഇവിടെ അപ്‌ലോഡ് ചെയ്യുക (Please upload your submission before the deadline).',
+                'allow_text' => true,
+                'allow_image' => $isImage || ! $isVideo,
+                'allow_video' => $isVideo,
+                'is_open' => true,
+                'closes_at' => $deadline,
+            ]);
         }
 
         return redirect()->route('online-submission.show', $form->slug);

@@ -75,13 +75,17 @@ class ScheduleController extends Controller
         }
 
         // Fetch explicitly scheduled events if any exist
-        $scheduleQuery = Schedule::with(['program.category', 'program.zone', 'program.stage', 'program.result', 'stage']);
+        $scheduleQuery = Schedule::with(['program.category', 'program.zone', 'program.stage', 'program.result', 'program.onlineSubmissionForm', 'stage']);
 
         if ($selectedDay) {
             $scheduleQuery->whereDate('start_time', $selectedDay);
         }
 
-        if ($selectedStage) {
+        if ($selectedStage === 'submissions' || $selectedStage === 'online') {
+            $scheduleQuery->whereHas('program', function ($q) {
+                $q->where('is_stage', false);
+            });
+        } elseif ($selectedStage) {
             $scheduleQuery->where('stage_id', $selectedStage);
         }
 
@@ -106,12 +110,39 @@ class ScheduleController extends Controller
             return sprintf('%d_%012d', $priority, $timestamp);
         })->values();
 
-        // If specific Schedule records are empty, provide stage programs as festival schedule lineup
-        $stageProgramsQuery = Program::with(['category', 'stage', 'result'])
-            ->where('is_stage', true);
+        // If specific Schedule records are empty, provide stage programs and submission programs as festival lineup
+        $stageProgramsQuery = Program::with(['category', 'stage', 'result', 'onlineSubmissionForm']);
 
-        if ($selectedStage) {
-            $stageProgramsQuery->where('stage_id', $selectedStage);
+        if ($selectedStage === 'submissions' || $selectedStage === 'online') {
+            $stageProgramsQuery->where('is_stage', false);
+        } elseif ($selectedStage) {
+            $stageProgramsQuery->where('stage_id', $selectedStage)->where('is_stage', true);
+        } else {
+            $stageProgramsQuery->where(function ($q) {
+                $q->where('is_stage', true)
+                    ->orWhere(function ($sq) {
+                        $sq->where('is_stage', false)
+                            ->where(function ($nq) {
+                                $nq->has('onlineSubmissionForm')
+                                    ->orWhere('name', 'like', '%vlog%')
+                                    ->orWhere('name', 'like', '%reel%')
+                                    ->orWhere('name', 'like', '%documentary%')
+                                    ->orWhere('name', 'like', '%project%')
+                                    ->orWhere('name', 'like', '%podcast%')
+                                    ->orWhere('name', 'like', '%short video%')
+                                    ->orWhere('name', 'like', '%poster%')
+                                    ->orWhere('name', 'like', '%photography%')
+                                    ->orWhere('name', 'like', '%photo feature%')
+                                    ->orWhere('name', 'like', '%visual story%')
+                                    ->orWhere('name', 'like', '%digital designing%')
+                                    ->orWhere('name', 'like', '%magazine%')
+                                    ->orWhere('name', 'like', '%portfolio%')
+                                    ->orWhere('name', 'like', '%catalogue%')
+                                    ->orWhere('name', 'like', '%typography%')
+                                    ->orWhere('name', 'like', '%master plan%');
+                            });
+                    });
+            });
         }
 
         if ($selectedZone) {
@@ -127,7 +158,12 @@ class ScheduleController extends Controller
         }
 
         $stagePrograms = $stageProgramsQuery->get()->sortBy(function ($prog) {
-            $status = ($prog->status === 'completed' || $prog->result) ? 'completed' : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
+            $isSub = $prog->isSubmissionProgram();
+            $isOpen = $isSub ? $prog->isSubmissionOpen() : true;
+            $status = ($prog->status === 'completed' || $prog->result || ($isSub && ! $isOpen))
+                ? 'completed'
+                : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
+
             $priority = match ($status) {
                 'in_progress' => 0,
                 'upcoming' => 1,

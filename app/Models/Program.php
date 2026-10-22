@@ -289,6 +289,98 @@ class Program extends Model
         return max(1, (int) ($this->participant_count ?: ($this->max_participants_per_group ?: 1)));
     }
 
+    public function isSubmissionProgram(): bool
+    {
+        // 1. If an online submission form exists, it is a submission program
+        if ($this->relationLoaded('onlineSubmissionForm')) {
+            if ($this->onlineSubmissionForm !== null) {
+                return true;
+            }
+        } elseif ($this->onlineSubmissionForm()->exists()) {
+            return true;
+        }
+
+        // 2. Physical stage programs are not submission-only
+        if ((bool) ($this->is_stage ?? false)) {
+            return false;
+        }
+
+        // 3. Check name against standard off-stage digital and project submission competitions
+        $submissionKeywords = [
+            'project',
+            'documentary',
+            'reel',
+            'podcast',
+            'vlog',
+            'short video',
+            'photography',
+            'photo feature',
+            'visual story',
+            'e-poster',
+            'poster designing',
+            'digital designing',
+            'magazine layout',
+            'catalogue making',
+            'portfolio design',
+            'typography',
+            'wall magazine',
+            'master plan',
+            'insight',
+            'interview making',
+            'capture the flag',
+        ];
+
+        $name = strtolower($this->name ?? '');
+        foreach ($submissionKeywords as $kw) {
+            if (str_contains($name, $kw)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getSubmissionDeadline(): ?Carbon
+    {
+        if ($this->relationLoaded('onlineSubmissionForm') && $this->onlineSubmissionForm?->closes_at) {
+            return $this->onlineSubmissionForm->closes_at;
+        }
+
+        if ($this->relationLoaded('schedule') && $this->schedule?->end_time) {
+            return $this->schedule->end_time;
+        }
+
+        $formClosesAt = $this->onlineSubmissionForm?->closes_at;
+        if ($formClosesAt) {
+            return $formClosesAt;
+        }
+
+        $scheduleEnd = $this->schedule?->end_time;
+        if ($scheduleEnd) {
+            return $scheduleEnd;
+        }
+
+        if ($this->scheduled_time) {
+            return $this->scheduled_time;
+        }
+
+        return Carbon::parse('2026-10-31 18:00:00');
+    }
+
+    public function isSubmissionOpen(): bool
+    {
+        if ($this->relationLoaded('onlineSubmissionForm') && $this->onlineSubmissionForm) {
+            return $this->onlineSubmissionForm->isOpenForSubmissions();
+        }
+
+        $deadline = $this->getSubmissionDeadline();
+        if ($deadline && now()->isAfter($deadline)) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Get the real-time attendance window state for Green Room call list.
      *
