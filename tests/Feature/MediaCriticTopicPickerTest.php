@@ -255,4 +255,60 @@ class MediaCriticTopicPickerTest extends TestCase
         $this->assertTrue(Schema::hasTable('media_critic_topics'));
         $this->assertEquals(5, MediaCriticTopic::count());
     }
+
+    public function test_topic_picker_admin_page_shows_team_wise_allocations(): void
+    {
+        $topicD = MediaCriticTopic::where('code_letter', 'D')->first();
+        $topicD->update([
+            'group_id' => $this->groupPacto->id,
+            'picked_by_user_id' => $this->leaderPacto->id,
+            'picked_at' => now(),
+            'is_locked' => true,
+        ]);
+
+        $response = $this->get(route('topic-picker.admin'));
+        $response->assertStatus(200);
+        $response->assertSee('Pacto Hikmic');
+        $response->assertSee('Lumo Fikric');
+        $response->assertSee('Card D');
+        $response->assertSee('ഫലസ്തീൻ ജനതയോടുള്ള ഇസ്രായേൽ വംശഹത്യ');
+        $response->assertSee('തിരഞ്ഞെടുത്തു');
+    }
+
+    public function test_topic_picker_admin_page_returns_live_json(): void
+    {
+        $response = $this->getJson(route('topic-picker.admin'));
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'success',
+            'claimed_count',
+            'remaining_count',
+            'team_allocations' => [
+                '*' => [
+                    'group_id',
+                    'group_name',
+                    'group_code',
+                    'has_selected',
+                ],
+            ],
+        ]);
+    }
+
+    public function test_reset_route_resets_selected_topic_successfully(): void
+    {
+        $topicA = MediaCriticTopic::where('code_letter', 'A')->first();
+        $topicA->update([
+            'group_id' => $this->groupLumo->id,
+            'picked_by_user_id' => $this->leaderLumo->id,
+            'picked_at' => now(),
+            'is_locked' => true,
+        ]);
+
+        $response = $this->post(route('topic-picker.admin.reset', $topicA->id));
+        $response->assertRedirect();
+
+        $topicA->refresh();
+        $this->assertFalse($topicA->is_locked);
+        $this->assertNull($topicA->group_id);
+    }
 }

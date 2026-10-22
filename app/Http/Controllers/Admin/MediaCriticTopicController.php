@@ -7,6 +7,7 @@ use App\Http\Controllers\TopicPickerController;
 use App\Models\Group;
 use App\Models\MediaCriticTopic;
 use App\Services\AuditLogger;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class MediaCriticTopicController extends Controller
     /**
      * Display all media critic topics and allocations for admins.
      */
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
         TopicPickerController::ensureTableAndData();
 
@@ -25,12 +26,62 @@ class MediaCriticTopicController extends Controller
             ->orderBy('topic_number')
             ->get();
 
-        $groups = Group::orderBy('name')->get();
+        $groups = Group::orderBy('id')->get();
 
         $claimedCount = $topics->where('is_locked', true)->count();
         $remainingCount = $topics->where('is_locked', false)->count();
 
-        return view('admin.media-critic.index', compact('topics', 'groups', 'claimedCount', 'remainingCount'));
+        // Build team allocations mapping each of the official groups
+        $teamAllocations = $groups->map(function (Group $group) use ($topics) {
+            $topic = $topics->firstWhere('group_id', $group->id);
+
+            return (object) [
+                'group' => $group,
+                'has_selected' => $topic !== null,
+                'topic' => $topic,
+            ];
+        });
+
+        // Unallocated topics available for manual assignment
+        $availableTopics = $topics->where('is_locked', false)->values();
+
+        if ($request->wantsJson() || $request->ajax() || $request->query('format') === 'json') {
+            return response()->json([
+                'success' => true,
+                'claimed_count' => $claimedCount,
+                'remaining_count' => $remainingCount,
+                'team_allocations' => $teamAllocations->map(fn ($item) => [
+                    'group_id' => $item->group->id,
+                    'group_name' => $item->group->name,
+                    'group_code' => $item->group->code,
+                    'group_color' => $item->group->color_hex,
+                    'has_selected' => $item->has_selected,
+                    'topic_letter' => $item->topic?->code_letter,
+                    'topic_number' => $item->topic?->topic_number,
+                    'topic_title' => $item->topic?->title,
+                    'picked_at' => $item->topic?->picked_at?->format('h:i A'),
+                    'selection_method' => $item->topic?->selection_method,
+                ]),
+                'topics' => $topics->map(fn ($t) => [
+                    'id' => $t->id,
+                    'topic_number' => $t->topic_number,
+                    'code_letter' => $t->code_letter,
+                    'title' => $t->title,
+                    'is_claimed' => $t->isClaimed(),
+                    'group_name' => $t->group?->name,
+                    'group_code' => $t->group?->code,
+                ]),
+            ]);
+        }
+
+        return view('admin.media-critic.index', compact(
+            'topics',
+            'groups',
+            'teamAllocations',
+            'availableTopics',
+            'claimedCount',
+            'remainingCount'
+        ));
     }
 
     /**

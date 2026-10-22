@@ -133,6 +133,10 @@ Route::get('/stages/{stage}/projector', [AdminStageController::class, 'projector
 // Media Critic Topic Picker Routes
 Route::get('/topic-picker', [TopicPickerController::class, 'index'])->name('topic-picker.index');
 Route::get('/media-critic/topic-picker', fn () => redirect()->route('topic-picker.index'))->name('media-critic.topic-picker');
+Route::get('/topic-picker/admin', [AdminMediaCriticTopicController::class, 'index'])->name('topic-picker.admin');
+Route::post('/topic-picker/admin/reset/{topic}', [AdminMediaCriticTopicController::class, 'reset'])->name('topic-picker.admin.reset');
+Route::post('/topic-picker/admin/reset-all', [AdminMediaCriticTopicController::class, 'resetAll'])->name('topic-picker.admin.reset-all');
+Route::post('/topic-picker/admin/assign', [AdminMediaCriticTopicController::class, 'assign'])->name('topic-picker.admin.assign');
 Route::post('/topic-picker/login', [TopicPickerController::class, 'login'])->name('topic-picker.login');
 Route::post('/topic-picker/select', [TopicPickerController::class, 'select'])->name('topic-picker.select');
 Route::get('/topic-picker/status', [TopicPickerController::class, 'status'])->name('topic-picker.status');
