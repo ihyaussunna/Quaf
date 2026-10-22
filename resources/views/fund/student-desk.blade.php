@@ -318,18 +318,8 @@ function studentFundDesk() {
                         </select>
                     </div>
 
-                    <!-- Transaction Ref (if not cash) -->
-                    <div class="space-y-1.5" x-show="paymentMethod !== 'cash'">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                            UPI UTR / Ref Number / ട്രാൻസാക്ഷൻ നമ്പർ
-                        </label>
-                        <input type="text" name="transaction_reference" value="{{ old('transaction_reference') }}"
-                               placeholder="e.g. 4298129048..."
-                               class="w-full px-4 py-3 rounded-xl bg-slate-50/80 hover:bg-slate-100/70 focus:bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
-                    </div>
-
                     <!-- Purpose / Category (Strictly Festival Fund / Fest Sponsorship only) -->
-                    <div class="space-y-1.5">
+                    <div class="space-y-1.5 md:col-span-2">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
                             Purpose / വിഭാഗം
                         </label>

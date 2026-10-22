@@ -246,18 +246,8 @@ function fundDesk() {
                     </select>
                 </div>
 
-                <!-- Transaction Reference (if UPI/Bank) -->
-                <div class="space-y-1.5" x-show="paymentMethod !== 'cash'">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        UPI UTR / Ref Number / ട്രാൻസാക്ഷൻ നമ്പർ
-                    </label>
-                    <input type="text" name="transaction_reference" value="{{ old('transaction_reference') }}"
-                           placeholder="e.g. 4298129048..."
-                           class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-500 text-sm font-mono text-slate-900 placeholder-slate-400">
-                </div>
-
                 <!-- Category / Purpose -->
-                <div class="space-y-1.5">
+                <div class="space-y-1.5 md:col-span-2">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
                         Purpose / വിഭാഗം
                     </label>
