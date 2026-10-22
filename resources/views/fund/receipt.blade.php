@@ -237,7 +237,7 @@
                 <!-- Donor Card -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
                     <div class="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-400">Contributor Details</div>
-                    <div class="text-lg font-black text-slate-900 uppercase">
+                    <div class="text-lg font-black text-slate-900 uppercase font-sora">
                         {{ $receipt->donor_name }}
                     </div>
                     <div class="grid grid-cols-2 gap-3 text-xs font-mono text-slate-600 pt-1">

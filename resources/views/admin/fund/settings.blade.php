@@ -332,6 +332,7 @@
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                                 <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 font-mono">3. Donor Name (ദാതാവിന്റെ പേര്)</h3>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">Font: Sora</span>
                             </div>
                             <span class="text-[11px] font-mono text-slate-500">X: <span x-text="donor_x"></span> | Y: <span x-text="donor_y"></span></span>
                         </div>
@@ -655,8 +656,8 @@
                                   :font-size="donor_font_size" 
                                   :fill="donor_color" 
                                   :text-anchor="donor_align === 'center' ? 'middle' : (donor_align === 'right' ? 'end' : 'start')"
-                                  font-family="'Rockwell', Rockwell, serif" 
-                                  font-weight="bold">{{ strtoupper($sampleReceipt->donor_name ?? 'MUHAMMED SHAFI K') }}</text>
+                                  font-family="'Sora', sans-serif" 
+                                  font-weight="800">{{ strtoupper($sampleReceipt->donor_name ?? 'MUHAMMED SHAFI K') }}</text>
 
                             <!-- 4. Live Amount -->
                             <text :x="amount_x" 

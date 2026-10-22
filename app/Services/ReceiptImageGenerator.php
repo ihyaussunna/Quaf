@@ -32,6 +32,14 @@ class ReceiptImageGenerator
             $rockwellBold = public_path('fonts/arialbd.ttf');
         }
 
+        $soraBold = public_path('fonts/Sora-Bold.ttf');
+        if (! file_exists($soraBold)) {
+            $soraBold = public_path('fonts/Sora-ExtraBold.ttf');
+        }
+        if (! file_exists($soraBold)) {
+            $soraBold = $rockwellBold;
+        }
+
         $rockwellRegular = public_path('fonts/Rockwell-Regular.otf');
         if (! file_exists($rockwellRegular)) {
             $rockwellRegular = $rockwellBold;
@@ -87,7 +95,7 @@ class ReceiptImageGenerator
         $maxNameWidth = $w - 220; // safe margin
 
         while ($donorSize > 14) {
-            $bbox = @imagettfbbox($donorSize, 0, $rockwellBold, $donorName);
+            $bbox = @imagettfbbox($donorSize, 0, $soraBold, $donorName);
             if (! $bbox) {
                 break;
             }
@@ -98,7 +106,7 @@ class ReceiptImageGenerator
             $donorSize -= 2;
         }
 
-        $bbox = @imagettfbbox($donorSize, 0, $rockwellBold, $donorName);
+        $bbox = @imagettfbbox($donorSize, 0, $soraBold, $donorName);
         $donorX = $donorTargetX;
         if ($bbox) {
             $textW = abs($bbox[4] - $bbox[0]);
@@ -108,7 +116,7 @@ class ReceiptImageGenerator
                 $donorX = (int) ($donorTargetX - $textW);
             }
         }
-        @imagettftext($img, $donorSize, 0, $donorX, $donorTargetY, $donorColor, $rockwellBold, $donorName);
+        @imagettftext($img, $donorSize, 0, $donorX, $donorTargetY, $donorColor, $soraBold, $donorName);
 
         // 4. Amount
         $amountFormatted = number_format($receipt->amount, 0, '.', ',');
