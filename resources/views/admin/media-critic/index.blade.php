@@ -167,7 +167,7 @@
     <!-- Printable Official Sheet for Judges (Hidden on Screen, Visible on Print) -->
     <div class="hidden print:block p-8 bg-white text-black font-serif">
         <div class="text-center pb-4 border-b-2 border-black mb-6">
-            <h1 class="text-2xl font-bold uppercase tracking-wider">QUAF 9.0 Sahityotsav</h1>
+            <h1 class="text-2xl font-bold uppercase tracking-wider">QUAF Fest</h1>
             <h2 class="text-xl font-bold mt-1">Media Critic Competition (Q9-183) &mdash; Official Topic Allocation</h2>
             <p class="text-xs text-gray-600 mt-1 font-mono">Generated on {{ now()->format('d M Y, h:i A') }}</p>
         </div>

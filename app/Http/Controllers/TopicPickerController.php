@@ -22,27 +22,25 @@ class TopicPickerController extends Controller
      */
     public static function ensureTableAndData(): void
     {
-        if (! Schema::hasTable('media_critic_topics')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {
-                // Ignore and proceed with fallback
-            }
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+        } catch (\Throwable $e) {
+            // Ignore
+        }
 
-            if (! Schema::hasTable('media_critic_topics')) {
-                Schema::create('media_critic_topics', function ($table) {
-                    $table->id();
-                    $table->unsignedTinyInteger('topic_number')->unique();
-                    $table->string('code_letter', 5)->unique();
-                    $table->text('title');
-                    $table->unsignedBigInteger('group_id')->nullable()->unique();
-                    $table->unsignedBigInteger('picked_by_user_id')->nullable();
-                    $table->dateTime('picked_at')->nullable();
-                    $table->string('selection_method', 50)->default('card');
-                    $table->boolean('is_locked')->default(false);
-                    $table->timestamps();
-                });
-            }
+        if (! Schema::hasTable('media_critic_topics')) {
+            Schema::create('media_critic_topics', function ($table) {
+                $table->id();
+                $table->unsignedTinyInteger('topic_number')->unique();
+                $table->string('code_letter', 5)->unique();
+                $table->text('title');
+                $table->unsignedBigInteger('group_id')->nullable()->unique();
+                $table->unsignedBigInteger('picked_by_user_id')->nullable();
+                $table->dateTime('picked_at')->nullable();
+                $table->string('selection_method', 50)->default('card');
+                $table->boolean('is_locked')->default(false);
+                $table->timestamps();
+            });
         }
 
         $officialTopics = [
@@ -78,6 +76,19 @@ class TopicPickerController extends Controller
         self::ensureTableAndData();
 
         $user = Auth::user();
+
+        // One-time or Admin instant reset via URL (?reset=1 or ?reset=quaf2026)
+        if ($request->query('reset') === '1' || $request->query('reset') === 'quaf2026' || ($request->has('reset') && $user && $user->isAdmin())) {
+            MediaCriticTopic::query()->update([
+                'group_id' => null,
+                'picked_by_user_id' => null,
+                'picked_at' => null,
+                'selection_method' => 'card',
+                'is_locked' => false,
+            ]);
+
+            return redirect()->route('topic-picker.index');
+        }
         $group = null;
         $myTopic = null;
 
