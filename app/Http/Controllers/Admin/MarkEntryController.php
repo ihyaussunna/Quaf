@@ -261,6 +261,10 @@ class MarkEntryController extends Controller
             $second = null;
             $third = null;
 
+            $firstAll = collect();
+            $secondAll = collect();
+            $thirdAll = collect();
+
             if ($prog->result) {
                 $first = $prog->result->firstEntry;
                 $second = $prog->result->secondEntry;
@@ -271,33 +275,58 @@ class MarkEntryController extends Controller
                     $first->total_score = $first->computed_avg_score;
                     $grade = PointCalculationService::getGradeFromScore($first->computed_avg_score);
                     $first->computed_grade = $grade['grade'] ?? '-';
+                    $firstAll->push($first);
                 }
                 if ($second) {
                     $second->computed_avg_score = (float) ($second->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0);
                     $second->total_score = $second->computed_avg_score;
                     $grade = PointCalculationService::getGradeFromScore($second->computed_avg_score);
                     $second->computed_grade = $grade['grade'] ?? '-';
+                    $secondAll->push($second);
                 }
                 if ($third) {
                     $third->computed_avg_score = (float) ($third->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0);
                     $third->total_score = $third->computed_avg_score;
                     $grade = PointCalculationService::getGradeFromScore($third->computed_avg_score);
                     $third->computed_grade = $grade['grade'] ?? '-';
+                    $thirdAll->push($third);
                 }
             }
 
-            // Fallback to evaluated entries if result not set
+            // Fallback to evaluated entries if result not set (supporting tied podium positions)
             if (! $first && ! $second && ! $third && $evaluatedEntriesByProg->has($prog->id)) {
-                $sorted = $evaluatedEntriesByProg[$prog->id]->sortByDesc('computed_avg_score')->values();
-                $first = $sorted->get(0);
-                $second = $sorted->get(1);
-                $third = $sorted->get(2);
+                $progEntries = $evaluatedEntriesByProg[$prog->id]->sortByDesc('computed_avg_score')->values();
+                $uniqueScores = $progEntries->pluck('computed_avg_score')
+                    ->map(fn ($s) => round((float) $s, 2))
+                    ->unique()
+                    ->sortDesc()
+                    ->values();
+
+                $s1 = $uniqueScores->get(0);
+                $s2 = $uniqueScores->get(1);
+                $s3 = $uniqueScores->get(2);
+
+                if ($s1 !== null) {
+                    $firstAll = $progEntries->filter(fn ($e) => abs(round((float) $e->computed_avg_score, 2) - $s1) < 0.001)->values();
+                    $first = $firstAll->first();
+                }
+                if ($s2 !== null) {
+                    $secondAll = $progEntries->filter(fn ($e) => abs(round((float) $e->computed_avg_score, 2) - $s2) < 0.001)->values();
+                    $second = $secondAll->first();
+                }
+                if ($s3 !== null) {
+                    $thirdAll = $progEntries->filter(fn ($e) => abs(round((float) $e->computed_avg_score, 2) - $s3) < 0.001)->values();
+                    $third = $thirdAll->first();
+                }
             }
 
             $prog->podium = [
                 'first' => $first,
                 'second' => $second,
                 'third' => $third,
+                'first_all' => $firstAll,
+                'second_all' => $secondAll,
+                'third_all' => $thirdAll,
             ];
             $prog->has_marks = (bool) (($first && $first->total_score > 0) || ($second && $second->total_score > 0) || ($third && $third->total_score > 0));
 
@@ -315,48 +344,70 @@ class MarkEntryController extends Controller
                     ->with(['student.group', 'group', 'scoreSheets.judge'])
                     ->orderByRaw('CASE WHEN code_letter IS NULL THEN 1 ELSE 0 END, code_letter ASC, chest_number ASC')
                     ->get()
-                    ->map(function ($entry) use ($selectedProgram) {
+                    ->map(function ($entry) {
                         $submitted = $entry->scoreSheets->where('is_submitted', true);
                         $avgScore = $submitted->isNotEmpty() ? (float) $submitted->avg('total_score') : 0.0;
                         $entry->total_score = $avgScore;
                         $grade = PointCalculationService::getGradeFromScore($avgScore);
                         $entry->computed_grade = $grade['grade'] ?? '-';
-
-                        // Check podium rank from result or scores
                         $entry->rank = null;
-                        if ($selectedProgram->result) {
-                            if ($selectedProgram->result->first_entry_id === $entry->id) {
-                                $entry->rank = 1;
-                            } elseif ($selectedProgram->result->second_entry_id === $entry->id) {
-                                $entry->rank = 2;
-                            } elseif ($selectedProgram->result->third_entry_id === $entry->id) {
-                                $entry->rank = 3;
-                            }
-                        }
+                        $entry->is_tied = false;
 
                         return $entry;
                     });
 
-                // Fallback rank calculation if no published result
-                if (! $selectedProgram->result && $entries->where('total_score', '>', 0)->isNotEmpty()) {
-                    $ranked = $entries->where('total_score', '>', 0)->sortByDesc('total_score')->values();
-                    if ($first = $ranked->get(0)) {
-                        $match = $entries->firstWhere('id', $first->id);
-                        if ($match) {
-                            $match->rank = 1;
+                // Dense rank calculation with full tie support (same marks = same rank)
+                $scoredEntries = $entries->where('total_score', '>', 0)->values();
+                if ($scoredEntries->isNotEmpty()) {
+                    if ($selectedProgram->result) {
+                        $res = $selectedProgram->result;
+                        $resFirstScore = $res->firstEntry ? round((float) ($res->firstEntry->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0), 2) : null;
+                        $resSecondScore = $res->secondEntry ? round((float) ($res->secondEntry->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0), 2) : null;
+                        $resThirdScore = $res->thirdEntry ? round((float) ($res->thirdEntry->scoreSheets->where('is_submitted', true)->avg('total_score') ?? 0), 2) : null;
+
+                        foreach ($entries as $entry) {
+                            if ($entry->total_score <= 0) {
+                                continue;
+                            }
+                            $score = round((float) $entry->total_score, 2);
+                            if ($entry->id === $res->first_entry_id || ($resFirstScore !== null && $resFirstScore > 0 && abs($score - $resFirstScore) < 0.001)) {
+                                $entry->rank = 1;
+                            } elseif ($entry->id === $res->second_entry_id || ($resSecondScore !== null && $resSecondScore > 0 && abs($score - $resSecondScore) < 0.001)) {
+                                $entry->rank = 2;
+                            } elseif ($entry->id === $res->third_entry_id || ($resThirdScore !== null && $resThirdScore > 0 && abs($score - $resThirdScore) < 0.001)) {
+                                $entry->rank = 3;
+                            }
+                        }
+                    } else {
+                        $uniqueScores = $scoredEntries->pluck('total_score')
+                            ->map(fn ($s) => round((float) $s, 2))
+                            ->unique()
+                            ->sortDesc()
+                            ->values();
+
+                        $score1 = $uniqueScores->get(0);
+                        $score2 = $uniqueScores->get(1);
+                        $score3 = $uniqueScores->get(2);
+
+                        foreach ($entries as $entry) {
+                            if ($entry->total_score <= 0) {
+                                continue;
+                            }
+                            $score = round((float) $entry->total_score, 2);
+                            if ($score1 !== null && abs($score - $score1) < 0.001) {
+                                $entry->rank = 1;
+                            } elseif ($score2 !== null && abs($score - $score2) < 0.001) {
+                                $entry->rank = 2;
+                            } elseif ($score3 !== null && abs($score - $score3) < 0.001) {
+                                $entry->rank = 3;
+                            }
                         }
                     }
-                    if ($second = $ranked->get(1)) {
-                        $match = $entries->firstWhere('id', $second->id);
-                        if ($match) {
-                            $match->rank = 2;
-                        }
-                    }
-                    if ($third = $ranked->get(2)) {
-                        $match = $entries->firstWhere('id', $third->id);
-                        if ($match) {
-                            $match->rank = 3;
-                        }
+
+                    // Check if multiple entries share the same rank
+                    $rankCounts = $entries->whereNotNull('rank')->groupBy('rank');
+                    foreach ($entries as $entry) {
+                        $entry->is_tied = ($entry->rank && ($rankCounts[$entry->rank] ?? collect())->count() > 1);
                     }
                 }
             }

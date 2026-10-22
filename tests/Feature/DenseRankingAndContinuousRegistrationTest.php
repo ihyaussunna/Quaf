@@ -328,4 +328,106 @@ class DenseRankingAndContinuousRegistrationTest extends TestCase
             'chest_number' => 'QF7002',
         ]);
     }
+
+    public function test_view_marks_assigns_dense_ranking_and_tied_status_to_matching_scores(): void
+    {
+        $cat = ProgramCategory::firstOrCreate(['slug' => 'general'], ['name' => 'General', 'code' => 'GEN']);
+
+        $prog = Program::create([
+            'category_id' => $cat->id,
+            'code' => 'Q9-189',
+            'name' => 'Tahfeezul Burda',
+            'slug' => 'tahfeezul-burda',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'participant_count' => 1,
+            'status' => 'upcoming',
+        ]);
+
+        $judgeUser = User::create([
+            'name' => 'Judge Burda',
+            'email' => 'judge_burda@quaf.test',
+            'password' => Hash::make('secret123'),
+            'role' => 'judge',
+            'is_active' => true,
+        ]);
+
+        $judge = Judge::create([
+            'name' => 'Judge Burda',
+            'access_code' => '7777',
+            'user_id' => $judgeUser->id,
+        ]);
+
+        // Candidates: E=90, B=80, D=65, A=65
+        $candidateData = [
+            ['code' => 'E', 'score' => 90.0, 'chest' => 'QF8001'],
+            ['code' => 'B', 'score' => 80.0, 'chest' => 'QF8002'],
+            ['code' => 'D', 'score' => 65.0, 'chest' => 'QF8003'],
+            ['code' => 'A', 'score' => 65.0, 'chest' => 'QF8004'],
+        ];
+
+        foreach ($candidateData as $c) {
+            $student = Student::create([
+                'group_id' => $this->group->id,
+                'zone_id' => $this->zone->id,
+                'student_id' => $c['chest'],
+                'name' => 'Candidate '.$c['code'],
+                'qr_token' => 'qr-'.$c['code'],
+                'is_active' => true,
+            ]);
+
+            $entry = ProgramEntry::create([
+                'program_id' => $prog->id,
+                'student_id' => $student->id,
+                'group_id' => $this->group->id,
+                'chest_number' => $student->student_id,
+                'code_letter' => $c['code'],
+                'status' => 'verified',
+                'attendance_status' => 'present',
+            ]);
+
+            ScoreSheet::create([
+                'judge_id' => $judge->id,
+                'program_id' => $prog->id,
+                'entry_id' => $entry->id,
+                'total_score' => $c['score'],
+                'is_submitted' => true,
+            ]);
+        }
+
+        // Test PointCalculationService::determinePodiumForProgram
+        $podium = PointCalculationService::determinePodiumForProgram($prog);
+        $this->assertTrue($podium['has_ties']);
+        $this->assertCount(1, $podium['first_all']);
+        $this->assertCount(1, $podium['second_all']);
+        $this->assertCount(2, $podium['third_all']);
+        $this->assertEquals(90.0, $podium['first']->computed_avg_score);
+        $this->assertEquals(80.0, $podium['second']->computed_avg_score);
+        $this->assertEquals(65.0, $podium['third']->computed_avg_score);
+
+        // Test MarkEntryController::viewMarks
+        $res = $this->actingAs($this->admin)->get(route('admin.mark-entry.view-marks', ['program' => $prog->id]));
+        $res->assertStatus(200);
+
+        $entries = $res->viewData('entries');
+        $this->assertCount(4, $entries);
+
+        $entryMap = $entries->keyBy('code_letter');
+
+        // Candidate E (90) -> Rank 1, not tied
+        $this->assertEquals(1, $entryMap['E']->rank);
+        $this->assertFalse($entryMap['E']->is_tied);
+
+        // Candidate B (80) -> Rank 2, not tied
+        $this->assertEquals(2, $entryMap['B']->rank);
+        $this->assertFalse($entryMap['B']->is_tied);
+
+        // Candidate D (65) -> Rank 3, tied!
+        $this->assertEquals(3, $entryMap['D']->rank);
+        $this->assertTrue($entryMap['D']->is_tied);
+
+        // Candidate A (65) -> Rank 3, tied! (Previously unranked / missing badge)
+        $this->assertEquals(3, $entryMap['A']->rank);
+        $this->assertTrue($entryMap['A']->is_tied);
+    }
 }

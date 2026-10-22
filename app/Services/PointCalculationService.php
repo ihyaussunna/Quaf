@@ -136,12 +136,17 @@ class PointCalculationService
 
     /**
      * Automatically determine 1st, 2nd, and 3rd place entries from judge marks.
+     * Supports dense ranking for ties (same scores receive the same rank).
      * Only 'present' entries with submitted judge scores are considered.
      *
      * @return array{
      *     first: ?ProgramEntry,
      *     second: ?ProgramEntry,
      *     third: ?ProgramEntry,
+     *     first_all: Collection<int, ProgramEntry>,
+     *     second_all: Collection<int, ProgramEntry>,
+     *     third_all: Collection<int, ProgramEntry>,
+     *     has_ties: bool,
      *     ranked: Collection<int, ProgramEntry>
      * }
      */
@@ -169,10 +174,51 @@ class PointCalculationService
             ->sortByDesc('computed_avg_score')
             ->values();
 
+        $uniqueScores = $entries->pluck('computed_avg_score')
+            ->map(fn ($s) => round((float) $s, 2))
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $s1 = $uniqueScores->get(0);
+        $s2 = $uniqueScores->get(1);
+        $s3 = $uniqueScores->get(2);
+
+        $firstAll = $s1 !== null ? $entries->filter(fn ($e) => abs(round((float) $e->computed_avg_score, 2) - $s1) < 0.001)->values() : collect();
+        $secondAll = $s2 !== null ? $entries->filter(fn ($e) => abs(round((float) $e->computed_avg_score, 2) - $s2) < 0.001)->values() : collect();
+        $thirdAll = $s3 !== null ? $entries->filter(fn ($e) => abs(round((float) $e->computed_avg_score, 2) - $s3) < 0.001)->values() : collect();
+
+        foreach ($entries as $entry) {
+            $score = round((float) $entry->computed_avg_score, 2);
+            if ($s1 !== null && abs($score - $s1) < 0.001) {
+                $entry->rank = 1;
+                $entry->computed_rank = 'first';
+                $entry->is_tied = $firstAll->count() > 1;
+            } elseif ($s2 !== null && abs($score - $s2) < 0.001) {
+                $entry->rank = 2;
+                $entry->computed_rank = 'second';
+                $entry->is_tied = $secondAll->count() > 1;
+            } elseif ($s3 !== null && abs($score - $s3) < 0.001) {
+                $entry->rank = 3;
+                $entry->computed_rank = 'third';
+                $entry->is_tied = $thirdAll->count() > 1;
+            } else {
+                $entry->rank = null;
+                $entry->computed_rank = null;
+                $entry->is_tied = false;
+            }
+        }
+
+        $hasTies = ($firstAll->count() > 1) || ($secondAll->count() > 1) || ($thirdAll->count() > 1);
+
         return [
-            'first' => $entries->get(0),
-            'second' => $entries->get(1),
-            'third' => $entries->get(2),
+            'first' => $firstAll->first(),
+            'second' => $secondAll->first(),
+            'third' => $thirdAll->first(),
+            'first_all' => $firstAll,
+            'second_all' => $secondAll,
+            'third_all' => $thirdAll,
+            'has_ties' => $hasTies,
             'ranked' => $entries,
         ];
     }

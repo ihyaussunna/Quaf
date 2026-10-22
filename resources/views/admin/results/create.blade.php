@@ -24,46 +24,71 @@
                 <span class="text-xs font-mono text-slate-500">1st, 2nd, and 3rd automatically computed</span>
             </div>
 
+            @if(!empty($podium['has_ties']))
+                <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs font-mono text-amber-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span><strong>Tied Ranking Detected:</strong> Two or more contestants have identical average scores and share the same rank.</span>
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <!-- 1st Place Card -->
                 <div class="p-4 rounded-xl bg-white border-2 border-amber-300 shadow-xs relative overflow-hidden">
                     <div class="flex items-center justify-between mb-1.5">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f3bd2e] text-slate-950 uppercase">1st Place</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f3bd2e] text-slate-950 uppercase">1st Place</span>
+                            @if(!empty($podium['first_all']) && $podium['first_all']->count() > 1)
+                                <span class="text-[9px] bg-amber-200 text-amber-950 font-mono font-bold px-1.5 py-0.2 rounded-full">Tied ({{ $podium['first_all']->count() }})</span>
+                            @endif
+                        </div>
                         <span class="text-xs font-mono font-bold text-emerald-700">{{ $podium['first']->computed_avg_score }} pts</span>
                     </div>
-                    <div class="font-sora font-bold text-sm text-slate-900 truncate">
-                        {{ $program->isGroup() ? (($podium['first']->group?->name ?? 'Group') . ' Team') : ($podium['first']->student?->name ?? $podium['first']->group?->name) }}
-                    </div>
-                    <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
-                        Chest #{{ $podium['first']->chest_number }} &bull; {{ $podium['first']->group?->name }}
-                        @if($program->isGroup() && $podium['first']->participants->isNotEmpty())
-                            &bull; {{ $podium['first']->participants->count() }} Members
-                        @endif
-                    </div>
-                    <div class="mt-2 text-[11px] font-mono font-bold text-emerald-800">
-                        Grade: {{ $podium['first']->computed_grade ?? 'None' }}
-                    </div>
+                    @foreach($podium['first_all'] ?? [$podium['first']] as $firstItem)
+                        <div class="{{ ! $loop->first ? 'border-t border-amber-100 pt-2 mt-2' : '' }}">
+                            <div class="font-sora font-bold text-sm text-slate-900 truncate">
+                                {{ $program->isGroup() ? (($firstItem->group?->name ?? 'Group') . ' Team') : ($firstItem->student?->name ?? $firstItem->group?->name) }}
+                            </div>
+                            <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
+                                Chest #{{ $firstItem->chest_number }} &bull; {{ $firstItem->group?->name }}
+                                @if($program->isGroup() && $firstItem->participants->isNotEmpty())
+                                    &bull; {{ $firstItem->participants->count() }} Members
+                                @endif
+                            </div>
+                            <div class="mt-1 text-[11px] font-mono font-bold text-emerald-800">
+                                Grade: {{ $firstItem->computed_grade ?? 'None' }}
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
                 <!-- 2nd Place Card -->
                 @if(!empty($podium['second']))
                     <div class="p-4 rounded-xl bg-white border border-slate-300 shadow-xs">
                         <div class="flex items-center justify-between mb-1.5">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-800 uppercase">2nd Place</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-800 uppercase">2nd Place</span>
+                                @if(!empty($podium['second_all']) && $podium['second_all']->count() > 1)
+                                    <span class="text-[9px] bg-slate-200 text-slate-950 font-mono font-bold px-1.5 py-0.2 rounded-full">Tied ({{ $podium['second_all']->count() }})</span>
+                                @endif
+                            </div>
                             <span class="text-xs font-mono font-bold text-emerald-700">{{ $podium['second']->computed_avg_score }} pts</span>
                         </div>
-                        <div class="font-sora font-bold text-sm text-slate-900 truncate">
-                            {{ $program->isGroup() ? (($podium['second']->group?->name ?? 'Group') . ' Team') : ($podium['second']->student?->name ?? $podium['second']->group?->name) }}
-                        </div>
-                        <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
-                            Chest #{{ $podium['second']->chest_number }} &bull; {{ $podium['second']->group?->name }}
-                            @if($program->isGroup() && $podium['second']->participants->isNotEmpty())
-                                &bull; {{ $podium['second']->participants->count() }} Members
-                            @endif
-                        </div>
-                        <div class="mt-2 text-[11px] font-mono font-bold text-emerald-800">
-                            Grade: {{ $podium['second']->computed_grade ?? 'None' }}
-                        </div>
+                        @foreach($podium['second_all'] ?? [$podium['second']] as $secondItem)
+                            <div class="{{ ! $loop->first ? 'border-t border-slate-100 pt-2 mt-2' : '' }}">
+                                <div class="font-sora font-bold text-sm text-slate-900 truncate">
+                                    {{ $program->isGroup() ? (($secondItem->group?->name ?? 'Group') . ' Team') : ($secondItem->student?->name ?? $secondItem->group?->name) }}
+                                </div>
+                                <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
+                                    Chest #{{ $secondItem->chest_number }} &bull; {{ $secondItem->group?->name }}
+                                    @if($program->isGroup() && $secondItem->participants->isNotEmpty())
+                                        &bull; {{ $secondItem->participants->count() }} Members
+                                    @endif
+                                </div>
+                                <div class="mt-1 text-[11px] font-mono font-bold text-emerald-800">
+                                    Grade: {{ $secondItem->computed_grade ?? 'None' }}
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @else
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-center text-xs font-mono text-slate-400">
@@ -75,21 +100,30 @@
                 @if(!empty($podium['third']))
                     <div class="p-4 rounded-xl bg-white border border-amber-200/80 shadow-xs">
                         <div class="flex items-center justify-between mb-1.5">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 uppercase">3rd Place</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 uppercase">3rd Place</span>
+                                @if(!empty($podium['third_all']) && $podium['third_all']->count() > 1)
+                                    <span class="text-[9px] bg-orange-200 text-orange-950 font-mono font-bold px-1.5 py-0.2 rounded-full">Tied ({{ $podium['third_all']->count() }})</span>
+                                @endif
+                            </div>
                             <span class="text-xs font-mono font-bold text-emerald-700">{{ $podium['third']->computed_avg_score }} pts</span>
                         </div>
-                        <div class="font-sora font-bold text-sm text-slate-900 truncate">
-                            {{ $program->isGroup() ? (($podium['third']->group?->name ?? 'Group') . ' Team') : ($podium['third']->student?->name ?? $podium['third']->group?->name) }}
-                        </div>
-                        <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
-                            Chest #{{ $podium['third']->chest_number }} &bull; {{ $podium['third']->group?->name }}
-                            @if($program->isGroup() && $podium['third']->participants->isNotEmpty())
-                                &bull; {{ $podium['third']->participants->count() }} Members
-                            @endif
-                        </div>
-                        <div class="mt-2 text-[11px] font-mono font-bold text-emerald-800">
-                            Grade: {{ $podium['third']->computed_grade ?? 'None' }}
-                        </div>
+                        @foreach($podium['third_all'] ?? [$podium['third']] as $thirdItem)
+                            <div class="{{ ! $loop->first ? 'border-t border-amber-100 pt-2 mt-2' : '' }}">
+                                <div class="font-sora font-bold text-sm text-slate-900 truncate">
+                                    {{ $program->isGroup() ? (($thirdItem->group?->name ?? 'Group') . ' Team') : ($thirdItem->student?->name ?? $thirdItem->group?->name) }}
+                                </div>
+                                <div class="text-xs font-mono text-slate-500 truncate mt-0.5">
+                                    Chest #{{ $thirdItem->chest_number }} &bull; {{ $thirdItem->group?->name }}
+                                    @if($program->isGroup() && $thirdItem->participants->isNotEmpty())
+                                        &bull; {{ $thirdItem->participants->count() }} Members
+                                    @endif
+                                </div>
+                                <div class="mt-1 text-[11px] font-mono font-bold text-emerald-800">
+                                    Grade: {{ $thirdItem->computed_grade ?? 'None' }}
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @else
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-center text-xs font-mono text-slate-400">
@@ -123,14 +157,29 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @forelse($podium['ranked'] ?? [] as $idx => $entry)
-                        <tr class="hover:bg-slate-50/70 transition-colors {{ $idx === 0 ? 'bg-amber-50/40' : '' }}">
+                        <tr class="hover:bg-slate-50/70 transition-colors {{ ($entry->rank ?? null) === 1 ? 'bg-amber-50/40' : '' }}">
                             <td class="px-6 py-3 font-bold">
-                                @if($idx === 0)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f3bd2e] text-slate-950">1st</span>
-                                @elseif($idx === 1)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-300 text-slate-900">2nd</span>
-                                @elseif($idx === 2)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900">3rd</span>
+                                @if(($entry->rank ?? null) === 1)
+                                    <span class="inline-flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f3bd2e] text-slate-950">1st</span>
+                                        @if($entry->is_tied)
+                                            <span class="text-[9px] bg-amber-200 text-amber-950 font-bold px-1 rounded">Tied</span>
+                                        @endif
+                                    </span>
+                                @elseif(($entry->rank ?? null) === 2)
+                                    <span class="inline-flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-300 text-slate-900">2nd</span>
+                                        @if($entry->is_tied)
+                                            <span class="text-[9px] bg-slate-200 text-slate-950 font-bold px-1 rounded">Tied</span>
+                                        @endif
+                                    </span>
+                                @elseif(($entry->rank ?? null) === 3)
+                                    <span class="inline-flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900">3rd</span>
+                                        @if($entry->is_tied)
+                                            <span class="text-[9px] bg-orange-200 text-orange-950 font-bold px-1 rounded">Tied</span>
+                                        @endif
+                                    </span>
                                 @else
                                     <span class="text-slate-400 font-normal">{{ $idx + 1 }}</span>
                                 @endif

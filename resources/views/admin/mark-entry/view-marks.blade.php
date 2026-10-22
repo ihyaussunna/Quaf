@@ -187,6 +187,11 @@
                                                 3rd Place (Bronze)
                                             </span>
                                         @endif
+                                        @if(!empty($entry->is_tied))
+                                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300 font-mono" title="Same score achieved by another candidate">
+                                                Tied
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500 mt-0.5">
                                         <span>Code Letter: <strong class="text-slate-800 font-mono">{{ $entry->code_letter ?: 'Pending' }}</strong></span>
@@ -423,19 +428,21 @@
                                         </div>
 
                                         @if($prog->podium['first'])
-                                            <div class="flex items-center gap-2.5 pt-1">
-                                                <span class="w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                                                    {{ $prog->podium['first']->code_letter ?: '?' }}
-                                                </span>
-                                                <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate">
-                                                        {{ $prog->podium['first']->student?->name ?: ($prog->podium['first']->group?->name ?: 'Chest #'.$prog->podium['first']->chest_number) }}
-                                                    </div>
-                                                    <div class="text-[11px] text-slate-500 truncate">
-                                                        Letter: <strong class="text-slate-700">{{ $prog->podium['first']->code_letter ?: '-' }}</strong> • {{ $prog->podium['first']->group?->name ?? $prog->podium['first']->student?->group?->name ?? '-' }}
+                                            @foreach($prog->podium['first_all'] ?? [$prog->podium['first']] as $firstEntry)
+                                                <div class="flex items-center gap-2.5 pt-1 {{ ! $loop->first ? 'border-t border-amber-100 mt-1 pt-1.5' : '' }}">
+                                                    <span class="w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                                        {{ $firstEntry->code_letter ?: '?' }}
+                                                    </span>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-slate-900 truncate">
+                                                            {{ $firstEntry->student?->name ?: ($firstEntry->group?->name ?: 'Chest #'.$firstEntry->chest_number) }}
+                                                        </div>
+                                                        <div class="text-[11px] text-slate-500 truncate">
+                                                            Letter: <strong class="text-slate-700">{{ $firstEntry->code_letter ?: '-' }}</strong> • {{ $firstEntry->group?->name ?? $firstEntry->student?->group?->name ?? '-' }}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endforeach
                                         @else
                                             <p class="text-xs text-slate-400 italic pt-1">Not determined yet</p>
                                         @endif
@@ -447,6 +454,9 @@
                                             <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500 text-white flex items-center gap-1 shadow-2xs">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
                                                 <span>2nd Place (Silver)</span>
+                                                @if(!empty($prog->podium['second_all']) && $prog->podium['second_all']->count() > 1)
+                                                    <span class="text-[9px] bg-slate-200 text-slate-800 font-mono font-bold px-1.5 py-0.2 rounded-full">Tied ({{ $prog->podium['second_all']->count() }})</span>
+                                                @endif
                                             </span>
                                             @if($prog->podium['second']?->total_score > 0)
                                                 <div class="text-right">
@@ -463,19 +473,21 @@
                                         </div>
 
                                         @if($prog->podium['second'])
-                                            <div class="flex items-center gap-2.5 pt-1">
-                                                <span class="w-8 h-8 rounded-full bg-slate-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                                                    {{ $prog->podium['second']->code_letter ?: '?' }}
-                                                </span>
-                                                <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate">
-                                                        {{ $prog->podium['second']->student?->name ?: ($prog->podium['second']->group?->name ?: 'Chest #'.$prog->podium['second']->chest_number) }}
-                                                    </div>
-                                                    <div class="text-[11px] text-slate-500 truncate">
-                                                        Letter: <strong class="text-slate-700">{{ $prog->podium['second']->code_letter ?: '-' }}</strong> • {{ $prog->podium['second']->group?->name ?? $prog->podium['second']->student?->group?->name ?? '-' }}
+                                            @foreach($prog->podium['second_all'] ?? [$prog->podium['second']] as $secondEntry)
+                                                <div class="flex items-center gap-2.5 pt-1 {{ ! $loop->first ? 'border-t border-slate-100 mt-1 pt-1.5' : '' }}">
+                                                    <span class="w-8 h-8 rounded-full bg-slate-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                                        {{ $secondEntry->code_letter ?: '?' }}
+                                                    </span>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-slate-900 truncate">
+                                                            {{ $secondEntry->student?->name ?: ($secondEntry->group?->name ?: 'Chest #'.$secondEntry->chest_number) }}
+                                                        </div>
+                                                        <div class="text-[11px] text-slate-500 truncate">
+                                                            Letter: <strong class="text-slate-700">{{ $secondEntry->code_letter ?: '-' }}</strong> • {{ $secondEntry->group?->name ?? $secondEntry->student?->group?->name ?? '-' }}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endforeach
                                         @else
                                             <p class="text-xs text-slate-400 italic pt-1">Not determined yet</p>
                                         @endif
@@ -487,6 +499,9 @@
                                             <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#b45309] text-white flex items-center gap-1 shadow-2xs">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
                                                 <span>3rd Place (Bronze)</span>
+                                                @if(!empty($prog->podium['third_all']) && $prog->podium['third_all']->count() > 1)
+                                                    <span class="text-[9px] bg-orange-200 text-orange-950 font-mono font-bold px-1.5 py-0.2 rounded-full">Tied ({{ $prog->podium['third_all']->count() }})</span>
+                                                @endif
                                             </span>
                                             @if($prog->podium['third']?->total_score > 0)
                                                 <div class="text-right">
@@ -503,19 +518,21 @@
                                         </div>
 
                                         @if($prog->podium['third'])
-                                            <div class="flex items-center gap-2.5 pt-1">
-                                                <span class="w-8 h-8 rounded-full bg-[#b45309] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                                                    {{ $prog->podium['third']->code_letter ?: '?' }}
-                                                </span>
-                                                <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate">
-                                                        {{ $prog->podium['third']->student?->name ?: ($prog->podium['third']->group?->name ?: 'Chest #'.$prog->podium['third']->chest_number) }}
-                                                    </div>
-                                                    <div class="text-[11px] text-slate-500 truncate">
-                                                        Letter: <strong class="text-slate-700">{{ $prog->podium['third']->code_letter ?: '-' }}</strong> • {{ $prog->podium['third']->group?->name ?? $prog->podium['third']->student?->group?->name ?? '-' }}
+                                            @foreach($prog->podium['third_all'] ?? [$prog->podium['third']] as $thirdEntry)
+                                                <div class="flex items-center gap-2.5 pt-1 {{ ! $loop->first ? 'border-t border-orange-100 mt-1 pt-1.5' : '' }}">
+                                                    <span class="w-8 h-8 rounded-full bg-[#b45309] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                                        {{ $thirdEntry->code_letter ?: '?' }}
+                                                    </span>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-slate-900 truncate">
+                                                            {{ $thirdEntry->student?->name ?: ($thirdEntry->group?->name ?: 'Chest #'.$thirdEntry->chest_number) }}
+                                                        </div>
+                                                        <div class="text-[11px] text-slate-500 truncate">
+                                                            Letter: <strong class="text-slate-700">{{ $thirdEntry->code_letter ?: '-' }}</strong> • {{ $thirdEntry->group?->name ?? $thirdEntry->student?->group?->name ?? '-' }}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endforeach
                                         @else
                                             <p class="text-xs text-slate-400 italic pt-1">Not determined yet</p>
                                         @endif

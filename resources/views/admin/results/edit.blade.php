@@ -24,26 +24,58 @@
 
     @if(!empty($podium['first']))
         <!-- Judge Scores Auto-Podium Reference -->
-        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-5 space-y-2">
-            <span class="text-[10px] font-mono uppercase tracking-wider font-bold text-slate-500">Judge Scores Ranking:</span>
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-5 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono uppercase tracking-wider font-bold text-slate-500">Judge Scores Ranking:</span>
+                @if(!empty($podium['has_ties']))
+                    <span class="text-[10px] font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">Tied Scores Detected</span>
+                @endif
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                 <div class="p-3 rounded-xl bg-white border border-amber-200">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase">1st: </span>
-                    <span class="font-bold text-slate-900">{{ $podium['first']->student?->name ?? $podium['first']->group?->name }}</span>
-                    <div class="text-[11px] text-slate-500">{{ $podium['first']->computed_avg_score }} pts &bull; Grade {{ $podium['first']->computed_grade ?? 'None' }}</div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold text-amber-700 uppercase">1st Place</span>
+                        @if(!empty($podium['first_all']) && $podium['first_all']->count() > 1)
+                            <span class="text-[9px] bg-amber-200 text-amber-950 font-bold px-1.5 rounded-full">Tied ({{ $podium['first_all']->count() }})</span>
+                        @endif
+                    </div>
+                    @foreach($podium['first_all'] ?? [$podium['first']] as $firstItem)
+                        <div class="{{ ! $loop->first ? 'border-t border-slate-100 pt-1.5 mt-1.5' : '' }}">
+                            <div class="font-bold text-slate-900 truncate">{{ $firstItem->student?->name ?? $firstItem->group?->name }}</div>
+                            <div class="text-[11px] text-slate-500">Chest #{{ $firstItem->chest_number }} &bull; {{ $firstItem->computed_avg_score }} pts &bull; Grade {{ $firstItem->computed_grade ?? 'None' }}</div>
+                        </div>
+                    @endforeach
                 </div>
                 @if(!empty($podium['second']))
                     <div class="p-3 rounded-xl bg-white border border-slate-200">
-                        <span class="text-[10px] font-bold text-slate-700 uppercase">2nd: </span>
-                        <span class="font-bold text-slate-900">{{ $podium['second']->student?->name ?? $podium['second']->group?->name }}</span>
-                        <div class="text-[11px] text-slate-500">{{ $podium['second']->computed_avg_score }} pts &bull; Grade {{ $podium['second']->computed_grade ?? 'None' }}</div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-slate-700 uppercase">2nd Place</span>
+                            @if(!empty($podium['second_all']) && $podium['second_all']->count() > 1)
+                                <span class="text-[9px] bg-slate-200 text-slate-950 font-bold px-1.5 rounded-full">Tied ({{ $podium['second_all']->count() }})</span>
+                            @endif
+                        </div>
+                        @foreach($podium['second_all'] ?? [$podium['second']] as $secondItem)
+                            <div class="{{ ! $loop->first ? 'border-t border-slate-100 pt-1.5 mt-1.5' : '' }}">
+                                <div class="font-bold text-slate-900 truncate">{{ $secondItem->student?->name ?? $secondItem->group?->name }}</div>
+                                <div class="text-[11px] text-slate-500">Chest #{{ $secondItem->chest_number }} &bull; {{ $secondItem->computed_avg_score }} pts &bull; Grade {{ $secondItem->computed_grade ?? 'None' }}</div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
                 @if(!empty($podium['third']))
                     <div class="p-3 rounded-xl bg-white border border-slate-200">
-                        <span class="text-[10px] font-bold text-amber-900 uppercase">3rd: </span>
-                        <span class="font-bold text-slate-900">{{ $podium['third']->student?->name ?? $podium['third']->group?->name }}</span>
-                        <div class="text-[11px] text-slate-500">{{ $podium['third']->computed_avg_score }} pts &bull; Grade {{ $podium['third']->computed_grade ?? 'None' }}</div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-amber-900 uppercase">3rd Place</span>
+                            @if(!empty($podium['third_all']) && $podium['third_all']->count() > 1)
+                                <span class="text-[9px] bg-orange-200 text-orange-950 font-bold px-1.5 rounded-full">Tied ({{ $podium['third_all']->count() }})</span>
+                            @endif
+                        </div>
+                        @foreach($podium['third_all'] ?? [$podium['third']] as $thirdItem)
+                            <div class="{{ ! $loop->first ? 'border-t border-slate-100 pt-1.5 mt-1.5' : '' }}">
+                                <div class="font-bold text-slate-900 truncate">{{ $thirdItem->student?->name ?? $thirdItem->group?->name }}</div>
+                                <div class="text-[11px] text-slate-500">Chest #{{ $thirdItem->chest_number }} &bull; {{ $thirdItem->computed_avg_score }} pts &bull; Grade {{ $thirdItem->computed_grade ?? 'None' }}</div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
             </div>
