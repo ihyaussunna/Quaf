@@ -38,6 +38,7 @@ class Program extends Model
         'mix_zone_open_to_all',
         'eligibility_rules',
         'is_stage',
+        'submission_type',
         'is_registration_open',
         'gender_restriction',
         'eligibility',
@@ -159,6 +160,11 @@ class Program extends Model
             if (! Schema::hasColumn('programs', 'is_registration_open')) {
                 Schema::table('programs', function (Blueprint $table) {
                     $table->boolean('is_registration_open')->default(true)->after('is_stage');
+                });
+            }
+            if (! Schema::hasColumn('programs', 'submission_type')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->string('submission_type', 20)->nullable()->default(null)->after('is_stage');
                 });
             }
             OnlineSubmissionForm::ensureSchema();
@@ -289,55 +295,97 @@ class Program extends Model
         return max(1, (int) ($this->participant_count ?: ($this->max_participants_per_group ?: 1)));
     }
 
-    public function isSubmissionProgram(): bool
+    public function submissionType(): string
     {
-        // 1. If an online submission form exists, it is a submission program
+        $explicit = strtolower((string) ($this->submission_type ?? ''));
+        if (in_array($explicit, ['online', 'office', 'none'], true)) {
+            return $explicit;
+        }
+
+        if ((bool) ($this->is_stage ?? false)) {
+            return 'stage';
+        }
+
         if ($this->relationLoaded('onlineSubmissionForm')) {
             if ($this->onlineSubmissionForm !== null) {
-                return true;
+                return 'online';
             }
         } elseif ($this->onlineSubmissionForm()->exists()) {
-            return true;
+            return 'online';
         }
-
-        // 2. Physical stage programs are not submission-only
-        if ((bool) ($this->is_stage ?? false)) {
-            return false;
-        }
-
-        // 3. Check name against standard off-stage digital and project submission competitions
-        $submissionKeywords = [
-            'project',
-            'documentary',
-            'reel',
-            'podcast',
-            'vlog',
-            'short video',
-            'photography',
-            'photo feature',
-            'visual story',
-            'e-poster',
-            'poster designing',
-            'digital designing',
-            'magazine layout',
-            'catalogue making',
-            'portfolio design',
-            'typography',
-            'wall magazine',
-            'master plan',
-            'insight',
-            'interview making',
-            'capture the flag',
-        ];
 
         $name = strtolower($this->name ?? '');
-        foreach ($submissionKeywords as $kw) {
+
+        // Office / Physical submissions (e.g. Project, Wall Magazine, Spot Magazine, Master Plan, Catalogue, Book Writing)
+        $officeKeywords = [
+            'project',
+            'wall magazine',
+            'spot magazine',
+            'master plan',
+            'catalogue',
+            'book writing',
+            'craft',
+            'model',
+            'album',
+        ];
+        foreach ($officeKeywords as $kw) {
             if (str_contains($name, $kw)) {
-                return true;
+                return 'office';
             }
         }
 
-        return false;
+        // Online portal submissions (e.g. Vlog, Reel, Podcast, Documentary, Short Video, Digital Designing, E-Poster, Photography, Typography)
+        $onlineKeywords = [
+            'vlog',
+            'reel',
+            'podcast',
+            'documentary',
+            'short video',
+            'digital designing',
+            'poster designing',
+            'e-poster',
+            'portfolio design',
+            'visual story',
+            'photo feature',
+            'photography',
+            'typography',
+            'capture the flag',
+        ];
+        foreach ($onlineKeywords as $kw) {
+            if (str_contains($name, $kw)) {
+                return 'online';
+            }
+        }
+
+        return 'none';
+    }
+
+    public function isOnlineSubmission(): bool
+    {
+        return $this->submissionType() === 'online';
+    }
+
+    public function isOfficeSubmission(): bool
+    {
+        return $this->submissionType() === 'office';
+    }
+
+    public function isSubmissionProgram(): bool
+    {
+        return in_array($this->submissionType(), ['online', 'office'], true);
+    }
+
+    public function getSubmissionVenueLabel(): string
+    {
+        if ($this->isOnlineSubmission()) {
+            return 'ഓൺലൈൻ സബ്മിഷൻ (Online Portal)';
+        }
+
+        if ($this->isOfficeSubmission()) {
+            return 'ഫെസ്റ്റിവൽ ഓഫീസ് (Festival Office)';
+        }
+
+        return $this->stage?->name ?? 'Designated Stage';
     }
 
     public function getSubmissionDeadline(): ?Carbon

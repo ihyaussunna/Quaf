@@ -58,10 +58,10 @@ class OnlineSubmissionScheduleTest extends TestCase
 
     public function test_public_schedule_displays_submission_desks_and_filters(): void
     {
-        $category = ProgramCategory::create([
-            'name' => 'Offstage Media',
-            'slug' => 'offstage-media',
-        ]);
+        $category = ProgramCategory::firstOrCreate(
+            ['slug' => 'offstage-media'],
+            ['name' => 'Offstage Media']
+        );
 
         $vlog = Program::create([
             'name' => 'Vlog Malayalam',
@@ -71,10 +71,28 @@ class OnlineSubmissionScheduleTest extends TestCase
             'type' => 'individual',
         ]);
 
-        $response = $this->get(route('schedule.index', ['stage' => 'submissions']));
-        $response->assertOk();
-        $response->assertSee('Vlog Malayalam');
-        $response->assertSee('സബ്മിഷൻ ഡെസ്ക്');
+        $project = Program::create([
+            'name' => 'Project',
+            'code' => 'Q9-238',
+            'category_id' => $category->id,
+            'is_stage' => false,
+            'type' => 'group',
+        ]);
+
+        $this->assertTrue($vlog->isOnlineSubmission());
+        $this->assertTrue($project->isOfficeSubmission());
+
+        // Test filtering by online
+        $responseOnline = $this->get(route('schedule.index', ['stage' => 'online']));
+        $responseOnline->assertOk();
+        $responseOnline->assertSee('Vlog Malayalam');
+        $responseOnline->assertSee('ഓൺലൈൻ സബ്മിഷൻ');
+
+        // Test filtering by office
+        $responseOffice = $this->get(route('schedule.index', ['stage' => 'office']));
+        $responseOffice->assertOk();
+        $responseOffice->assertSee('Project');
+        $responseOffice->assertSee('ഫെസ്റ്റിവൽ ഓഫീസ്');
     }
 
     public function test_show_by_program_auto_initializes_submission_form(): void

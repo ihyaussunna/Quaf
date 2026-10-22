@@ -13,8 +13,9 @@
             
             <!-- Quick Stats -->
             <div class="flex flex-wrap items-center gap-3">
-                <span class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 font-mono font-bold text-xs text-slate-800">8 Stages / Venues</span>
-                <span class="px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 font-mono font-bold text-xs text-indigo-800">Submission Desk</span>
+                <span class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 font-mono font-bold text-xs text-slate-800">8 Stages</span>
+                <span class="px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 font-mono font-bold text-xs text-indigo-800">Online Portal</span>
+                <span class="px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 font-mono font-bold text-xs text-amber-900">Festival Office</span>
                 <span class="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-[#be1e2d] font-mono font-bold text-xs">144 Events</span>
             </div>
         </div>
@@ -57,12 +58,15 @@
                 @endif
             </div>
 
-            <!-- Stage Filter -->
+            <!-- Stage / Submission Venue Filter -->
             <div class="sm:col-span-3">
                 <select name="stage" onchange="this.form.submit()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/20 focus:border-[#be1e2d]">
                     <option value="">All Stages & Desks</option>
-                    <option value="submissions" {{ (string) $selectedStage === 'submissions' ? 'selected' : '' }} class="font-bold text-indigo-700">
-                        സബ്മിഷൻ ഡെസ്ക് (Submission Desk / Online)
+                    <option value="online" {{ (string) $selectedStage === 'online' ? 'selected' : '' }} class="font-bold text-indigo-700">
+                        ഓൺലൈൻ സബ്മിഷൻ (Online Portal)
+                    </option>
+                    <option value="office" {{ (string) $selectedStage === 'office' ? 'selected' : '' }} class="font-bold text-amber-800">
+                        ഓഫീസ് സബ്മിഷൻ (Festival Office)
                     </option>
                     @foreach($stages as $stg)
                         @php
@@ -112,19 +116,27 @@
             <div class="space-y-4">
                 @foreach($schedules as $item)
                     @php
-                        $isSub = $item->program?->isSubmissionProgram();
+                        $isOnline = $item->program?->isOnlineSubmission();
+                        $isOffice = $item->program?->isOfficeSubmission();
+                        $isSub = $isOnline || $isOffice;
                         $status = $item->computed_status;
                         $deadline = $item->program?->getSubmissionDeadline() ?? $item->end_time;
                         $isSubOpen = $item->program?->isSubmissionOpen() ?? true;
                         $isCompleted = ($status === 'completed' || ($isSub && ! $isSubOpen));
                         $isLive = ($status === 'live' || $status === 'in_progress');
                     @endphp
-                    <div class="rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : ($isSub ? 'bg-gradient-to-br from-white via-indigo-50/20 to-amber-50/20 border-indigo-200/80 shadow-2xs hover:shadow-md' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md')) }}">
+                    <div class="rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : ($isOnline ? 'bg-gradient-to-br from-white via-indigo-50/20 to-amber-50/20 border-indigo-200/80 shadow-2xs hover:shadow-md' : ($isOffice ? 'bg-gradient-to-br from-white via-amber-50/25 to-rose-50/20 border-amber-200/80 shadow-2xs hover:shadow-md' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md'))) }}">
                         <div class="flex items-start gap-4">
                             <!-- Time / Deadline Badge -->
-                            @if($isSub)
+                            @if($isOnline)
                                 <div class="p-3 rounded-xl bg-indigo-50/80 border border-indigo-200 text-center font-mono shrink-0 min-w-28">
-                                    <div class="text-[9px] font-bold tracking-wider uppercase text-indigo-700">DEADLINE</div>
+                                    <div class="text-[9px] font-bold tracking-wider uppercase text-indigo-700">ONLINE DEADLINE</div>
+                                    <div class="text-xs font-bold text-slate-900 mt-0.5">{{ $deadline?->format('h:i A') ?? '11:59 PM' }}</div>
+                                    <div class="text-[10px] font-bold text-[#be1e2d]">{{ $deadline?->format('d M Y') ?? '31 Oct 2026' }}</div>
+                                </div>
+                            @elseif($isOffice)
+                                <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-300 text-center font-mono shrink-0 min-w-28">
+                                    <div class="text-[9px] font-bold tracking-wider uppercase text-amber-800">OFFICE DEADLINE</div>
                                     <div class="text-xs font-bold text-slate-900 mt-0.5">{{ $deadline?->format('h:i A') ?? '11:59 PM' }}</div>
                                     <div class="text-[10px] font-bold text-[#be1e2d]">{{ $deadline?->format('d M Y') ?? '31 Oct 2026' }}</div>
                                 </div>
@@ -141,9 +153,13 @@
                                     <span class="font-mono text-xs font-bold text-[#be1e2d]">{{ $item->program?->code }}</span>
                                     <span class="text-slate-300">•</span>
                                     <span class="text-xs font-mono text-slate-500">{{ $item->program?->eligibility ?? 'All Zones' }}</span>
-                                    @if($isSub)
+                                    @if($isOnline)
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 uppercase tracking-wide">
-                                            Digital Submission
+                                            Online Submission
+                                        </span>
+                                    @elseif($isOffice)
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 uppercase tracking-wide">
+                                            Office Submission
                                         </span>
                                     @endif
                                 </div>
@@ -151,13 +167,21 @@
                                     {{ $item->program?->name }}
                                 </h3>
                                 <div class="flex items-center gap-2 mt-2 text-xs text-slate-500 flex-wrap">
-                                    @if($isSub)
+                                    @if($isOnline)
                                         <span class="inline-flex items-center gap-1.5 font-medium text-indigo-800 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
                                             <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                            വേദി: <strong>സബ്മിഷൻ ഡെസ്ക് (Submission Desk)</strong>
+                                            വേദി: <strong>ഓൺലൈൻ സബ്മിഷൻ (Online Portal)</strong>
                                         </span>
                                         <span class="text-slate-400 font-mono text-[11px]">
                                             അവസാന സമയം: <strong class="text-red-700">{{ $deadline?->format('d M, h:i A') }}</strong>
+                                        </span>
+                                    @elseif($isOffice)
+                                        <span class="inline-flex items-center gap-1.5 font-medium text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                                            <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                            വേദി: <strong>ഫെസ്റ്റിവൽ ഓഫീസ് (Festival Office)</strong>
+                                        </span>
+                                        <span class="text-slate-400 font-mono text-[11px]">
+                                            ഓഫീസിൽ നൽകേണ്ട അവസാന സമയം: <strong class="text-red-700">{{ $deadline?->format('d M, h:i A') }}</strong>
                                         </span>
                                     @else
                                         <span>Venue: <strong class="text-slate-700">{{ $item->stage?->name ?? 'Main Arena' }}</strong></span>
@@ -176,24 +200,35 @@
 
                         <!-- Status Badge & Action -->
                         <div class="flex items-center justify-between md:flex-col md:items-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                            @if($isSub)
+                            @if($isOnline)
                                 @if($isSubOpen)
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
                                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            <span>ഓപ്പൺ</span>
+                                            <span>പോർട്ടൽ ഓപ്പൺ</span>
                                         </span>
                                         @if($item->program_id)
                                             <a href="{{ route('online-submission.by-program', $item->program_id) }}" 
                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#be1e2d] to-amber-600 hover:from-[#a01824] hover:to-amber-700 text-white font-sora font-bold text-xs shadow-xs hover:shadow-md transition-all">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                                <span>സബ്മിറ്റ് ചെയ്യുക</span>
+                                                <span>ഓൺലൈനിൽ സബ്മിറ്റ് ചെയ്യുക</span>
                                             </a>
                                         @endif
                                     </div>
                                 @else
                                     <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                         സബ്മിഷൻ അവസാനിച്ചു
+                                    </span>
+                                @endif
+                            @elseif($isOffice)
+                                @if($isSubOpen)
+                                    <span class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-sora font-bold text-xs shadow-xs">
+                                        <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                        <span>ഓഫീസിൽ നേരിട്ട് സമർപ്പിക്കുക</span>
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                        സമയം അവസാനിച്ചു
                                     </span>
                                 @endif
                             @else
@@ -225,7 +260,7 @@
         @elseif($stagePrograms->isNotEmpty())
             <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-center justify-between gap-4">
                 <div>
-                    <strong>Festival Program Lineup:</strong> Showing official stage competitions and digital submission desks.
+                    <strong>Festival Program Lineup:</strong> Showing official stage competitions, online submission portals, and festival office desks.
                 </div>
                 <span class="font-mono text-xs font-bold shrink-0">{{ $stagePrograms->count() }} Competitions</span>
             </div>
@@ -233,20 +268,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach($stagePrograms as $prog)
                     @php
-                        $isSub = $prog->isSubmissionProgram();
+                        $isOnline = $prog->isOnlineSubmission();
+                        $isOffice = $prog->isOfficeSubmission();
+                        $isSub = $isOnline || $isOffice;
                         $progStatus = ($prog->status === 'completed' || $prog->result) ? 'completed' : ($prog->status === 'in_progress' ? 'in_progress' : 'upcoming');
                         $deadline = $prog->getSubmissionDeadline();
                         $isSubOpen = $prog->isSubmissionOpen();
                         $isCompleted = ($progStatus === 'completed' || ($isSub && ! $isSubOpen));
                         $isLive = ($progStatus === 'in_progress');
                     @endphp
-                    <div class="rounded-2xl border p-5 transition-all flex flex-col justify-between {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : ($isSub ? 'bg-gradient-to-br from-white via-indigo-50/20 to-amber-50/20 border-indigo-200 shadow-2xs hover:shadow-md' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md')) }}">
+                    <div class="rounded-2xl border p-5 transition-all flex flex-col justify-between {{ $isCompleted ? 'bg-slate-100/70 border-slate-200/70 opacity-60 hover:opacity-100 shadow-2xs' : ($isLive ? 'bg-emerald-50/30 border-emerald-300 ring-2 ring-emerald-200 shadow-sm' : ($isOnline ? 'bg-gradient-to-br from-white via-indigo-50/20 to-amber-50/20 border-indigo-200 shadow-2xs hover:shadow-md' : ($isOffice ? 'bg-gradient-to-br from-white via-amber-50/25 to-rose-50/20 border-amber-200 shadow-2xs hover:shadow-md' : 'bg-white border-slate-200 shadow-2xs hover:shadow-md'))) }}">
                         <div>
                             <div class="flex items-center justify-between text-xs font-mono mb-2">
                                 <span class="font-bold text-[#be1e2d]">{{ $prog->code }}</span>
-                                @if($isSub)
-                                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $isSubOpen ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600' }}">
-                                        {{ $isSubOpen ? 'സബ്മിഷൻ ഓപ്പൺ' : 'സബ്മിഷൻ ക്ലോസ്ഡ്' }}
+                                @if($isOnline)
+                                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $isSubOpen ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $isSubOpen ? 'ഓൺലൈൻ സബ്മിഷൻ' : 'സബ്മിഷൻ ക്ലോസ്ഡ്' }}
+                                    </span>
+                                @elseif($isOffice)
+                                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $isSubOpen ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $isSubOpen ? 'ഓഫീസ് സബ്മിഷൻ' : 'സമയം അവസാനിച്ചു' }}
                                     </span>
                                 @else
                                     <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold {{ $progStatus === 'completed' ? 'bg-slate-100 text-slate-600' : ($progStatus === 'in_progress' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-blue-700') }}">
@@ -265,16 +306,28 @@
                                     <strong class="text-slate-800">{{ $prog->eligibility ?? 'All Zones' }}</strong>
                                 </div>
 
-                                @if($isSub)
+                                @if($isOnline)
                                     <div class="flex items-center justify-between">
                                         <span class="text-slate-500">വേദി:</span>
                                         <span class="inline-flex items-center gap-1 font-bold text-indigo-700">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                            സബ്മിഷൻ ഡെസ്ക്
+                                            ഓൺലൈൻ പോർട്ടൽ
                                         </span>
                                     </div>
                                     <div class="flex items-center justify-between pt-1 border-t border-slate-100/60">
                                         <span class="text-slate-500">അവസാന സമയം:</span>
+                                        <strong class="text-[#be1e2d]">{{ $deadline?->format('d M, h:i A') ?? '31 Oct, 06:00 PM' }}</strong>
+                                    </div>
+                                @elseif($isOffice)
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-500">വേദി:</span>
+                                        <span class="inline-flex items-center gap-1 font-bold text-amber-900">
+                                            <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                            ഫെസ്റ്റിവൽ ഓഫീസ്
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between pt-1 border-t border-slate-100/60">
+                                        <span class="text-slate-500">ഓഫീസ് ഡെഡ്‌ലൈൻ:</span>
                                         <strong class="text-[#be1e2d]">{{ $deadline?->format('d M, h:i A') ?? '31 Oct, 06:00 PM' }}</strong>
                                     </div>
                                 @else
@@ -295,7 +348,7 @@
                         <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                             <span class="text-slate-400 font-mono">{{ $prog->type === 'group' ? 'Group Event' : 'Individual' }}</span>
 
-                            @if($isSub)
+                            @if($isOnline)
                                 @if($isSubOpen)
                                     <a href="{{ route('online-submission.by-program', $prog->id) }}"
                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#be1e2d] to-amber-600 hover:from-[#a01824] hover:to-amber-700 text-white font-sora font-bold text-xs transition-all shadow-xs">
@@ -305,6 +358,17 @@
                                 @else
                                     <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 font-mono text-[11px]">
                                         ക്ലോസ്ഡ്
+                                    </span>
+                                @endif
+                            @elseif($isOffice)
+                                @if($isSubOpen)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 font-sora font-semibold text-[11px]">
+                                        <svg class="w-3 h-3 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                        <span>ഓഫീസിൽ നേരിട്ട് നൽകുക</span>
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 font-mono text-[11px]">
+                                        സമയം അവസാനിച്ചു
                                     </span>
                                 @endif
                             @endif
