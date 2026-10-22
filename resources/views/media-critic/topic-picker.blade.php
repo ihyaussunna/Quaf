@@ -27,51 +27,12 @@
         .font-mono {
             font-family: 'JetBrains Mono', monospace !important;
         }
-        .gold-gradient {
-            background: linear-gradient(135deg, #fce072 0%, #dfa528 50%, #b8860b 100%);
-        }
-        .gold-border {
-            border-image: linear-gradient(to bottom right, #fce072, #dfa528, #996515) 1;
-        }
-        .card-perspective {
-            perspective: 1000px;
-        }
-        .card-inner {
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
-        }
-        .card-flipped .card-inner {
-            transform: rotateY(180deg);
-        }
-        .card-front, .card-back {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        .card-back {
-            transform: rotateY(180deg);
-        }
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 25px rgba(223, 165, 40, 0.3), inset 0 0 15px rgba(223, 165, 40, 0.2); }
-            50% { box-shadow: 0 0 45px rgba(223, 165, 40, 0.6), inset 0 0 25px rgba(223, 165, 40, 0.4); }
+            0%, 100% { box-shadow: 0 0 25px rgba(223, 165, 40, 0.4), inset 0 0 15px rgba(223, 165, 40, 0.2); }
+            50% { box-shadow: 0 0 50px rgba(223, 165, 40, 0.7), inset 0 0 25px rgba(223, 165, 40, 0.4); }
         }
         .animate-glow {
             animation: pulseGlow 2.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
-        }
-        .shimmer-effect {
-            position: relative;
-            overflow: hidden;
-        }
-        .shimmer-effect::after {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
-            transform: translateX(-100%);
-            animation: shimmer 3s infinite;
         }
         @media print {
             body {
@@ -189,7 +150,7 @@
                         മീഡിയ ക്രിറ്റിക് വിഷയം തിരഞ്ഞെടുക്കൽ
                     </p>
                     <p class="text-xs text-slate-400 mt-2 font-mono">
-                        Program Code: Q9-183 &bull; 5 Official Stage Topics
+                        Program Code: Q9-183 &bull; Lucky Spin Wheel
                     </p>
                 </div>
 
@@ -204,7 +165,7 @@
                             <span>ഗ്രൂപ്പ് ലീഡർ ലോഗിൻ</span>
                         </h2>
                         <p class="text-xs text-slate-400 font-malayalam mt-1">
-                            വിഷയം തിരഞ്ഞെടുക്കാൻ നിങ്ങളുടെ ടീം ക്രഡൻഷ്യലുകൾ നൽകുക.
+                            വിഷയം തിരഞ്ഞെടുക്കാൻ നിങ്ങളുടെ യൂസർനെയിമും പാസ്‌വേഡും നൽകുക.
                         </p>
                     </div>
 
@@ -262,7 +223,7 @@
                     <!-- Seal / Badge -->
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold mb-4 shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>TOPIC CONFIRMED & LOCKED &bull; വിഷയം സ്ഥിരീകരിച്ചു</span>
+                        <span>TOPIC CONFIRMED &bull; വിഷയം സ്ഥിരീകരിച്ചു</span>
                     </div>
 
                     <div class="mb-4">
@@ -295,7 +256,7 @@
                         </div>
                         <div class="p-3 rounded-xl bg-white/5 border border-white/5">
                             <span class="text-slate-400 block text-[10px]">Selection Mode</span>
-                            <span class="font-bold text-amber-300 uppercase">{{ ucfirst($myTopic->selection_method) }}</span>
+                            <span class="font-bold text-amber-300 uppercase">Lucky Spin Wheel</span>
                         </div>
                         <div class="p-3 rounded-xl bg-white/5 border border-white/5 col-span-2 sm:col-span-1">
                             <span class="text-slate-400 block text-[10px]">Locked At</span>
@@ -340,184 +301,156 @@
 
         @else
             <!-- ========================================== -->
-            <!-- 3. TOPIC PICKER SELECTION SCREEN           -->
+            <!-- 3. TOPIC PICKER: DEDICATED SPIN WHEEL      -->
             <!-- ========================================== -->
             <div class="max-w-4xl mx-auto w-full">
                 <!-- Header -->
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold uppercase tracking-wider mb-3">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold uppercase tracking-wider mb-2">
                         Team: {{ $group->name }} &bull; Q9-183 Media Critic
                     </div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight font-sora">
-                        Pick Your Competition Topic
+                        Spin to Pick Your Topic
                     </h1>
-                    <p class="text-base sm:text-lg text-amber-400 font-bold font-malayalam mt-2">
-                        നിങ്ങളുടെ ടീമിനുള്ള മീഡിയ ക്രിറ്റിക് വിഷയം തിരഞ്ഞെടുക്കുക
+                    <p class="text-base sm:text-lg text-amber-400 font-bold font-malayalam mt-1">
+                        ചക്രം കറക്കി നിങ്ങളുടെ ടീമിനുള്ള വിഷയം തിരഞ്ഞെടുക്കുക
                     </p>
                     <p class="text-xs text-slate-400 mt-1 max-w-xl mx-auto font-malayalam">
-                        താഴെ നൽകിയിട്ടുള്ള കാർഡുകളിൽ നിന്നോ സ്പിൻ വീലിൽ നിന്നോ ഒരെണ്ണം തിരഞ്ഞെടുക്കുക. തിരഞ്ഞെടുത്ത ഉടൻ ആ വിഷയം നിങ്ങളുടെ ടീമിനായി ലോക്ക് ചെയ്യപ്പെടും.
+                        'SPIN' ബട്ടൺ ക്ലിക്ക് ചെയ്യുമ്പോൾ ചക്രം കറങ്ങി അവശേഷിക്കുന്ന ഏതെങ്കിലും ഒരു വിഷയത്തിൽ നിൽക്കുകയും അത് നിങ്ങളുടെ ടീമിനായി ലോക്ക് ചെയ്യപ്പെടുകയും ചെയ്യും.
                     </p>
-
-                    <!-- Interactive Mode Tabs -->
-                    <div class="inline-flex p-1.5 rounded-2xl bg-slate-900 border border-white/10 mt-6 gap-1 shadow-md">
-                        <button id="tabCardsBtn" onclick="switchMode('cards')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-500 text-slate-950 shadow-xs font-mono">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                            <span>1. മിസ്റ്ററി കാർഡുകൾ (Cards A-E)</span>
-                        </button>
-                        <button id="tabWheelBtn" onclick="switchMode('wheel')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white font-mono">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            <span>2. ലക്കി സ്പിൻ വീൽ (Spin Wheel)</span>
-                        </button>
-                    </div>
                 </div>
 
-                <!-- MODE 1: MYSTERY CARDS -->
-                <div id="modeCards" class="block">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                        @foreach($topics as $topic)
-                            @php
-                                $isClaimed = $topic->isClaimed();
-                            @endphp
+                <!-- Main Grid: Wheel + Live Status Board -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- Left: Spin Wheel Stage -->
+                    <div class="lg:col-span-7 flex flex-col items-center">
+                        <div class="relative p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-white/10 shadow-2xl relative w-full flex flex-col items-center overflow-hidden">
+                            <!-- Background Light Glow -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                            <div class="card-perspective h-64 sm:h-72">
-                                <div id="cardItem-{{ $topic->id }}" class="card-inner w-full h-full relative rounded-2xl {{ $isClaimed ? 'card-flipped' : '' }}">
-                                    <!-- FRONT (Available Mystery Card) -->
-                                    <div onclick="{{ ! $isClaimed ? "openConfirmModal({$topic->id}, '{$topic->code_letter}', {$topic->topic_number})" : '' }}"
-                                        class="card-front absolute inset-0 w-full h-full rounded-2xl bg-linear-to-b from-slate-900 via-slate-900 to-black border-2 {{ $isClaimed ? 'border-slate-800 opacity-60' : 'border-amber-400/50 hover:border-amber-300 cursor-pointer shadow-lg hover:shadow-amber-500/20 hover:-translate-y-1.5 transition-all duration-300' }} p-4 flex flex-col items-center justify-between text-center select-none">
+                            <!-- Wheel Canvas Wrapper -->
+                            <div class="relative w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] mx-auto">
+                                <!-- Top Pointer Arrow -->
+                                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[26px] border-t-amber-400 drop-shadow-[0_4px_10px_rgba(245,158,11,0.6)]"></div>
 
-                                        <!-- Top Pill -->
-                                        <div class="w-full flex items-center justify-between">
-                                            <span class="text-[10px] font-mono font-bold text-amber-400">QUAF 9.0</span>
-                                            <span class="w-6 h-6 rounded-full bg-white/5 border border-white/10 text-amber-300 font-mono font-black text-xs flex items-center justify-center">
-                                                #{{ $topic->topic_number }}
-                                            </span>
-                                        </div>
+                                <!-- HTML5 Canvas -->
+                                <canvas id="wheelCanvas" width="340" height="340" class="w-full h-full rounded-full shadow-2xl"></canvas>
 
-                                        <!-- Center Big Letter -->
-                                        <div class="my-auto text-center">
-                                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-3xl sm:text-4xl flex items-center justify-center shadow-md font-sora mx-auto">
-                                                {{ $topic->code_letter }}
-                                            </div>
-                                            <span class="text-[11px] font-mono text-slate-400 font-bold tracking-wider uppercase block mt-2">
-                                                Card {{ $topic->code_letter }}
-                                            </span>
-                                        </div>
-
-                                        <!-- Bottom Action -->
-                                        <div class="w-full pt-2 border-t border-white/5">
-                                            @if($isClaimed)
-                                                <span class="text-[10px] font-mono font-bold text-rose-400 flex items-center justify-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                                    <span>ലോക്ക് ചെയ്തു</span>
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] font-mono font-bold text-amber-300 flex items-center justify-center gap-1 group-hover:underline">
-                                                    <span>തുറക്കുക / Pick</span>
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK (Revealed / Locked by Team) -->
-                                    <div class="card-back absolute inset-0 w-full h-full rounded-2xl bg-linear-to-b from-slate-900 via-black to-slate-950 border-2 border-rose-500/50 p-4 flex flex-col items-center justify-between text-center select-none shadow-xl">
-                                        <div class="w-full flex items-center justify-between">
-                                            <span class="text-[10px] font-mono font-bold text-rose-400 uppercase">CLAIMED</span>
-                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300">
-                                                Card {{ $topic->code_letter }}
-                                            </span>
-                                        </div>
-
-                                        <div class="my-auto w-full px-1">
-                                            <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-2">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                            </div>
-                                            <div class="text-xs font-bold text-white truncate">
-                                                {{ $topic->group?->name ?? 'Another Team' }}
-                                            </div>
-                                            <div class="text-[10px] font-mono text-slate-400 mt-1">
-                                                വേറെ ടീം തിരഞ്ഞെടുത്തു
-                                            </div>
-                                        </div>
-
-                                        <div class="w-full text-[10px] font-mono text-slate-500 pt-2 border-t border-white/5">
-                                            Not Available
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- Center Circular Spin Button -->
+                                <button id="spinCenterBtn" onclick="spinWheel()"
+                                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-slate-950 border-4 border-amber-400 text-amber-400 font-black text-sm font-mono flex flex-col items-center justify-center shadow-2xl active:scale-95 transition cursor-pointer z-20 hover:bg-amber-400 hover:text-slate-950 group">
+                                    <span class="tracking-wider">SPIN</span>
+                                    <span class="text-[9px] font-normal font-malayalam group-hover:text-slate-900">കറക്കുക</span>
+                                </button>
                             </div>
-                        @endforeach
-                    </div>
-                </div>
 
-                <!-- MODE 2: SPIN WHEEL -->
-                <div id="modeWheel" class="hidden text-center">
-                    <div class="max-w-md mx-auto p-6 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl relative">
-                        <!-- Canvas Wheel Container -->
-                        <div class="relative w-72 h-72 sm:w-80 sm:h-80 mx-auto my-4">
-                            <!-- Pointer Arrow -->
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-amber-400 drop-shadow-md"></div>
-
-                            <canvas id="wheelCanvas" width="320" height="320" class="w-full h-full rounded-full shadow-2xl"></canvas>
-
-                            <!-- Center Spin Button -->
-                            <button id="spinBtn" onclick="spinWheel()"
-                                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-950 border-4 border-amber-400 text-amber-400 font-black text-xs sm:text-sm font-mono flex flex-col items-center justify-center shadow-2xl active:scale-95 transition cursor-pointer z-10 hover:bg-amber-400 hover:text-slate-950">
-                                <span>SPIN</span>
-                                <span class="text-[8px] font-normal">കറക്കുക</span>
+                            <!-- Big Bottom CTA Button -->
+                            <button id="spinBottomBtn" onclick="spinWheel()"
+                                class="mt-6 w-full max-w-xs py-3.5 px-6 rounded-2xl font-sora font-black text-sm bg-linear-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 transition duration-200 shadow-xl shadow-amber-500/25 active:scale-95 flex items-center justify-center gap-2 cursor-pointer z-10 font-mono">
+                                <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span id="spinBtnLabel">SPIN WHEEL NOW &bull; കറക്കുക</span>
                             </button>
                         </div>
+                    </div>
 
-                        <p class="text-xs text-slate-400 font-malayalam mt-2">
-                            'SPIN' ബട്ടൺ ക്ലിക്ക് ചെയ്താൽ ചക്രം കറങ്ങി അവശേഷിക്കുന്ന ഏതെങ്കിലും ഒരു വിഷയത്തിൽ നിൽക്കുകയും അത് നിങ്ങളുടെ ടീമിനായി ലോക്ക് ചെയ്യപ്പെടുകയും ചെയ്യും.
-                        </p>
+                    <!-- Right: Live Topics Status Board -->
+                    <div class="lg:col-span-5 space-y-3">
+                        <div class="p-5 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+                                <div>
+                                    <h3 class="font-sora font-bold text-sm text-white">Live Topics Status</h3>
+                                    <span class="text-[11px] font-mono text-slate-400">5 Official Competition Cards</span>
+                                </div>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    {{ $topics->where('is_locked', false)->count() }} Remaining
+                                </span>
+                            </div>
+
+                            <!-- Topics List -->
+                            <div class="space-y-2">
+                                @foreach($topics as $t)
+                                    @php
+                                        $claimed = $t->isClaimed();
+                                    @endphp
+                                    <div class="p-3 rounded-2xl border transition {{ $claimed ? 'bg-black/50 border-rose-500/30 opacity-75' : 'bg-slate-950/80 border-amber-400/30 hover:border-amber-400' }}">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="w-7 h-7 rounded-lg {{ $claimed ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500 text-slate-950 font-black' }} font-bold text-xs flex items-center justify-center shrink-0 font-sora">
+                                                    {{ $t->code_letter }}
+                                                </span>
+                                                <div class="min-w-0">
+                                                    <div class="text-xs font-bold text-white truncate">
+                                                        Card {{ $t->code_letter }} (വിഷയം #{{ $t->topic_number }})
+                                                    </div>
+                                                    <div class="text-[10px] font-mono text-slate-400 truncate">
+                                                        @if($claimed)
+                                                            Taken by <strong class="text-rose-300">{{ $t->group?->name }}</strong>
+                                                        @else
+                                                            <span class="text-emerald-400 font-bold">Available on Wheel &bull; ലഭ്യമാണ്</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                @if($claimed)
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                                        LOCKED
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                                        OPEN
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="pt-3 mt-3 border-t border-white/5 text-center">
+                                <span class="text-[10px] font-mono text-slate-500">
+                                    A topic once claimed is locked and excluded from other teams.
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- MODAL: CONFIRM / SCRATCH REVEAL DIALOG     -->
-            <!-- ========================================== -->
-            <div id="confirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-                <div class="max-w-md w-full rounded-3xl bg-slate-900 border border-amber-500/40 p-6 sm:p-8 shadow-2xl text-center relative animate-glow">
-                    <!-- Close Button -->
-                    <button onclick="closeConfirmModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+            <!-- Reveal Animation Modal -->
+            <div id="revealModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+                <div class="max-w-md w-full rounded-3xl bg-slate-900 border-2 border-amber-400 p-8 shadow-2xl text-center relative animate-glow">
+                    <div class="w-20 h-20 rounded-2xl bg-amber-500 text-slate-950 font-black text-4xl flex items-center justify-center mx-auto mb-4 font-sora shadow-lg">
+                        <span id="revealCodeLetter">?</span>
+                    </div>
 
-                    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 font-black text-3xl flex items-center justify-center mx-auto mb-3 font-sora">
-                        <span id="modalCodeLetter">A</span>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold mb-3">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>TOPIC ALLOTTED &bull; വിഷയം ലഭിച്ചു</span>
                     </div>
 
                     <h3 class="text-xl font-black text-white font-sora">
-                        Confirm Topic Selection
+                        Congratulations {{ $group->name }}!
                     </h3>
-                    <p class="text-sm font-bold text-amber-400 font-malayalam mt-1">
-                        കാർഡ് <span id="modalCardLabel">A</span> തിരഞ്ഞെടുത്ത് വിഷയം ലോക്ക് ചെയ്യണോ?
+
+                    <div class="p-6 rounded-2xl bg-black/60 border border-amber-400/50 shadow-inner my-5">
+                        <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block mb-1">
+                            Your Official Topic
+                        </span>
+                        <div id="revealTopicTitle" class="text-lg sm:text-xl font-bold font-malayalam text-white leading-relaxed">
+                            Loading topic...
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-400 font-malayalam mb-5">
+                        വിഷയം നിങ്ങളുടെ ടീമിനായി സിസ്റ്റത്തിൽ സ്ഥിരീകരിച്ച് ലോക്ക് ചെയ്തിരിക്കുന്നു.
                     </p>
 
-                    <div class="p-3.5 rounded-xl bg-black/40 border border-white/10 text-xs text-slate-300 font-malayalam my-5 text-left leading-relaxed">
-                        <ul class="list-disc list-inside space-y-1">
-                            <li>ഈ കാർഡ് തിരഞ്ഞെടുത്താൽ നിങ്ങളുടെ ടീമിനുള്ള വിഷയം ഇതിൽ ലോക്കാകും.</li>
-                            <li>മറ്റ് ടീമുകൾക്ക് ഈ വിഷയം ഇനി ലഭിക്കില്ല.</li>
-                            <li>ഒരിക്കൽ ലോക്ക് ചെയ്താൽ ടീമിന് സ്വന്തമായി മാറ്റാൻ സാധിക്കില്ല.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Scratch Card Foil Option -->
-                    <div id="scratchContainer" class="hidden my-4">
-                        <p class="text-xs text-amber-300 font-mono mb-2">Scratch below to reveal:</p>
-                        <canvas id="scratchCanvas" width="280" height="80" class="mx-auto rounded-xl border-2 border-amber-400 cursor-crosshair shadow-inner"></canvas>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <button onclick="closeConfirmModal()" class="flex-1 py-3 px-4 rounded-xl border border-white/15 text-slate-300 hover:bg-white/5 font-mono text-xs font-bold transition">
-                            Cancel / വേണ്ട
-                        </button>
-                        <button id="modalConfirmBtn" onclick="confirmCardSelection()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-sora text-xs font-black transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5">
-                            <span id="modalBtnText">ലോക്ക് ചെയ്യുക &rarr;</span>
-                        </button>
-                    </div>
+                    <button onclick="window.location.reload()"
+                        class="w-full py-3.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-sora text-xs font-black transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer font-mono">
+                        <span>VIEW OFFICIAL SLIP &bull; സ്ലിപ്പ് കാണുക &rarr;</span>
+                    </button>
                 </div>
             </div>
         @endif
@@ -531,107 +464,15 @@
 
     <!-- Client-side Logic (Vanilla JS) -->
     <script>
-        let selectedTopicId = null;
-        let selectedCodeLetter = null;
-        let selectedTopicNumber = null;
-        let isSpinning = false;
-
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Topics data injected from server
         const allTopics = @json($topics ?? []);
         const groupId = {{ $group ? $group->id : 'null' }};
 
-        function switchMode(mode) {
-            const cardsTab = document.getElementById('modeCards');
-            const wheelTab = document.getElementById('modeWheel');
-            const tabCardsBtn = document.getElementById('tabCardsBtn');
-            const tabWheelBtn = document.getElementById('tabWheelBtn');
-
-            if (mode === 'cards') {
-                cardsTab.classList.remove('hidden');
-                wheelTab.classList.add('hidden');
-                tabCardsBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-500 text-slate-950 shadow-xs font-mono';
-                tabWheelBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white font-mono';
-            } else {
-                cardsTab.classList.add('hidden');
-                wheelTab.classList.remove('hidden');
-                tabCardsBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white font-mono';
-                tabWheelBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-500 text-slate-950 shadow-xs font-mono';
-                drawWheel();
-            }
-        }
-
-        function openConfirmModal(id, letter, num) {
-            selectedTopicId = id;
-            selectedCodeLetter = letter;
-            selectedTopicNumber = num;
-
-            document.getElementById('modalCodeLetter').innerText = letter;
-            document.getElementById('modalCardLabel').innerText = `${letter} (വിഷയം #${num})`;
-            document.getElementById('confirmModal').classList.remove('hidden');
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').classList.add('hidden');
-            selectedTopicId = null;
-        }
-
-        async function confirmCardSelection() {
-            if (!selectedTopicId) return;
-
-            const btn = document.getElementById('modalConfirmBtn');
-            const btnText = document.getElementById('modalBtnText');
-            btn.disabled = true;
-            btnText.innerText = 'Locking... ദയവായി കാത്തിരിക്കുക';
-
-            try {
-                const response = await fetch('{{ route('topic-picker.select') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        topic_id: selectedTopicId,
-                        group_id: groupId,
-                        method: 'card'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    playSuccessChime();
-                    triggerConfetti();
-                    // Flip the selected card visually
-                    const cardInner = document.getElementById('cardItem-' + selectedTopicId);
-                    if (cardInner) {
-                        cardInner.classList.add('card-flipped');
-                    }
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1200);
-                } else {
-                    alert(data.message || 'Error picking topic');
-                    btn.disabled = false;
-                    btnText.innerText = 'ലോക്ക് ചെയ്യുക →';
-                    closeConfirmModal();
-                    window.location.reload();
-                }
-            } catch (err) {
-                alert('Connection error: ' + err.message);
-                btn.disabled = false;
-                btnText.innerText = 'ലോക്ക് ചെയ്യുക →';
-            }
-        }
-
-        // ==========================================
-        // SPIN WHEEL CANVAS IMPLEMENTATION
-        // ==========================================
+        let isSpinning = false;
         let wheelAngle = 0;
-        const wheelColors = ['#f59e0b', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6'];
+
+        // Vivid stage palette for 5 segments
+        const segmentColors = ['#f59e0b', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6'];
 
         function getAvailableTopics() {
             return allTopics.filter(t => !t.is_locked && !t.group_id);
@@ -642,74 +483,108 @@
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const center = canvas.width / 2;
-            const radius = center - 8;
+            const radius = center - 12;
 
             const available = getAvailableTopics();
-            const segments = available.length > 0 ? available : allTopics;
-            const numSegments = segments.length;
+            // Show all 5 segments with claimed ones styled differently
+            const numSegments = allTopics.length;
             const arc = (2 * Math.PI) / numSegments;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw segments
+            // Draw Segments
             for (let i = 0; i < numSegments; i++) {
+                const topic = allTopics[i];
                 const angle = wheelAngle + i * arc;
+                const isClaimed = topic.is_locked || topic.group_id;
+
                 ctx.beginPath();
-                ctx.fillStyle = wheelColors[i % wheelColors.length];
+                ctx.fillStyle = isClaimed ? '#1e293b' : segmentColors[i % segmentColors.length];
                 ctx.moveTo(center, center);
                 ctx.arc(center, center, radius, angle, angle + arc);
                 ctx.lineTo(center, center);
                 ctx.fill();
+
+                // Segment Border
                 ctx.strokeStyle = '#07090e';
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
                 // Draw Text
                 ctx.save();
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 16px Sora, sans-serif';
+                ctx.fillStyle = isClaimed ? '#64748b' : '#ffffff';
+                ctx.font = 'bold 15px Sora, sans-serif';
                 ctx.translate(center, center);
                 ctx.rotate(angle + arc / 2);
                 ctx.textAlign = 'right';
-                ctx.fillText(`Card ${segments[i].code_letter}`, radius - 20, 6);
+                const label = isClaimed ? `Card ${topic.code_letter} (X)` : `Card ${topic.code_letter}`;
+                ctx.fillText(label, radius - 24, 5);
                 ctx.restore();
             }
 
-            // Outer ring
+            // Outer Golden Rim with 24 Glowing Pegs
             ctx.beginPath();
             ctx.arc(center, center, radius, 0, 2 * Math.PI);
             ctx.strokeStyle = '#dfa528';
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 8;
             ctx.stroke();
+
+            // Pegs
+            const totalPegs = 20;
+            for (let p = 0; p < totalPegs; p++) {
+                const pAngle = wheelAngle + (p * 2 * Math.PI) / totalPegs;
+                const px = center + (radius + 2) * Math.cos(pAngle);
+                const py = center + (radius + 2) * Math.sin(pAngle);
+
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+            }
         }
+
+        // Initialize wheel draw on load
+        window.addEventListener('DOMContentLoaded', () => {
+            drawWheel();
+        });
 
         async function spinWheel() {
             if (isSpinning) return;
             const available = getAvailableTopics();
             if (available.length === 0) {
-                alert('No remaining topics available to spin!');
+                alert('എല്ലാ വിഷയങ്ങളും മറ്റ് ടീമുകൾ തിരഞ്ഞെടുത്തു കഴിഞ്ഞു (No remaining topics available)!');
                 return;
             }
 
             isSpinning = true;
-            const spinBtn = document.getElementById('spinBtn');
-            spinBtn.disabled = true;
+            const centerBtn = document.getElementById('spinCenterBtn');
+            const bottomBtn = document.getElementById('spinBottomBtn');
+            const btnLabel = document.getElementById('spinBtnLabel');
 
-            // Random winner among available
+            if (centerBtn) centerBtn.disabled = true;
+            if (bottomBtn) bottomBtn.disabled = true;
+            if (btnLabel) btnLabel.innerText = 'SPINNING... കറങ്ങുന്നു';
+
+            // Pick a random available topic as winner
             const randomIndex = Math.floor(Math.random() * available.length);
             const winner = available[randomIndex];
 
-            const numSegments = available.length;
+            // Find winner's index in the full allTopics array
+            const winnerGlobalIndex = allTopics.findIndex(t => t.id === winner.id);
+
+            const numSegments = allTopics.length;
             const arc = (2 * Math.PI) / numSegments;
 
             // Target pointer is at top (-PI/2)
-            const targetSegmentAngle = randomIndex * arc + arc / 2;
-            const fullSpins = 5 + Math.floor(Math.random() * 3);
+            const targetSegmentAngle = winnerGlobalIndex * arc + arc / 2;
+            const fullSpins = 6 + Math.floor(Math.random() * 3);
             const targetAngle = fullSpins * 2 * Math.PI + (1.5 * Math.PI - targetSegmentAngle);
 
-            const duration = 4000;
+            const duration = 4800; // 4.8 seconds
             const start = performance.now();
             const initialAngle = wheelAngle;
+
+            let lastTickSegment = -1;
 
             function animate(now) {
                 const elapsed = now - start;
@@ -720,6 +595,16 @@
                 wheelAngle = initialAngle + ease * targetAngle;
                 drawWheel();
 
+                // Calculate current segment for tick sound
+                const currentPointerAngle = (1.5 * Math.PI - wheelAngle) % (2 * Math.PI);
+                const normalizedAngle = (currentPointerAngle + 2 * Math.PI) % (2 * Math.PI);
+                const currentSegment = Math.floor(normalizedAngle / arc);
+
+                if (currentSegment !== lastTickSegment) {
+                    playTick();
+                    lastTickSegment = currentSegment;
+                }
+
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
@@ -728,31 +613,36 @@
                     triggerConfetti();
 
                     // Lock topic on server
-                    setTimeout(() => {
-                        fetch('{{ route('topic-picker.select') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                topic_id: winner.id,
-                                group_id: groupId,
-                                method: 'wheel'
-                            })
-                        }).then(r => r.json()).then(data => {
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Error locking topic');
-                                window.location.reload();
-                            }
-                        }).catch(e => {
-                            alert('Network error');
+                    fetch('{{ route('topic-picker.select') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            topic_id: winner.id,
+                            group_id: groupId,
+                            method: 'wheel'
+                        })
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) {
+                            // Show reveal modal with the allotted topic
+                            const modal = document.getElementById('revealModal');
+                            const letterEl = document.getElementById('revealCodeLetter');
+                            const titleEl = document.getElementById('revealTopicTitle');
+
+                            if (letterEl) letterEl.innerText = winner.code_letter;
+                            if (titleEl) titleEl.innerText = data.topic ? data.topic.title : winner.title;
+                            if (modal) modal.classList.remove('hidden');
+                        } else {
+                            alert(data.message || 'Error locking topic');
                             window.location.reload();
-                        });
-                    }, 800);
+                        }
+                    }).catch(e => {
+                        alert('Network error');
+                        window.location.reload();
+                    });
                 }
             }
 
@@ -762,11 +652,39 @@
         // ==========================================
         // AUDIO & CONFETTI CELEBRATION EFFECTS
         // ==========================================
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playTick() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.04);
+            } catch (e) {}
+        }
+
         function playSuccessChime() {
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
+                const ctx = getAudioContext();
+                if (!ctx) return;
                 const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
                 notes.forEach((freq, idx) => {
                     const osc = ctx.createOscillator();
@@ -774,11 +692,11 @@
                     osc.type = 'triangle';
                     osc.frequency.value = freq;
                     gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 0.5);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 0.6);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
                     osc.start(ctx.currentTime + idx * 0.1);
-                    osc.stop(ctx.currentTime + idx * 0.1 + 0.5);
+                    osc.stop(ctx.currentTime + idx * 0.1 + 0.6);
                 });
             } catch (e) {}
         }
@@ -793,12 +711,12 @@
             const particles = [];
             const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#ffffff', '#eab308'];
 
-            for (let i = 0; i < 120; i++) {
+            for (let i = 0; i < 150; i++) {
                 particles.push({
                     x: canvas.width / 2,
                     y: canvas.height / 2,
-                    vx: (Math.random() - 0.5) * 16,
-                    vy: (Math.random() - 0.8) * 18,
+                    vx: (Math.random() - 0.5) * 18,
+                    vy: (Math.random() - 0.8) * 20,
                     size: Math.random() * 8 + 4,
                     color: colors[Math.floor(Math.random() * colors.length)],
                     rotation: Math.random() * 360,
@@ -848,10 +766,11 @@
                 const res = await fetch('{{ route('topic-picker.status') }}');
                 const data = await res.json();
                 if (data.success && data.topics) {
-                    data.topics.forEach(t => {
-                        const card = document.getElementById('cardItem-' + t.id);
-                        if (card && t.is_claimed && !card.classList.contains('card-flipped')) {
-                            card.classList.add('card-flipped');
+                    data.topics.forEach(updated => {
+                        const local = allTopics.find(t => t.id === updated.id);
+                        if (local && updated.is_claimed && !local.is_locked) {
+                            local.is_locked = true;
+                            drawWheel();
                         }
                     });
                 }
