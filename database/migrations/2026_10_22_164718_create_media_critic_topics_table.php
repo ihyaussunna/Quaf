@@ -39,7 +39,7 @@ return new class extends Migration
             [
                 'topic_number' => 2,
                 'code_letter' => 'B',
-                'title' => 'സി ജെ പി സമരം: ജനകീയ അവശ്യങ്ങളോടുള്ള കേന്ദ്ര സമീപനം.',
+                'title' => 'സി ജെ പി സമരം: ജനകീയ ആവശ്യങ്ങളോടുള്ള കേന്ദ്ര സമീപനം.',
                 'is_locked' => false,
                 'created_at' => $now,
                 'updated_at' => $now,

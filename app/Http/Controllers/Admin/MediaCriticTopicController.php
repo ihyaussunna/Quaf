@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\TopicPickerController;
 use App\Models\Group;
 use App\Models\MediaCriticTopic;
 use App\Services\AuditLogger;
@@ -18,6 +19,8 @@ class MediaCriticTopicController extends Controller
      */
     public function index(): View
     {
+        TopicPickerController::ensureTableAndData();
+
         $topics = MediaCriticTopic::with(['group', 'pickedBy'])
             ->orderBy('topic_number')
             ->get();

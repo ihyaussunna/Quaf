@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\TopicPickerController;
 use App\Models\Group;
 use App\Models\MediaCriticTopic;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class MediaCriticTopicPickerTest extends TestCase
@@ -241,5 +243,16 @@ class MediaCriticTopicPickerTest extends TestCase
             'claimed_count' => 1,
             'remaining_count' => 4,
         ]);
+    }
+
+    public function test_ensure_table_and_data_auto_creates_table_if_missing(): void
+    {
+        Schema::dropIfExists('media_critic_topics');
+        $this->assertFalse(Schema::hasTable('media_critic_topics'));
+
+        TopicPickerController::ensureTableAndData();
+
+        $this->assertTrue(Schema::hasTable('media_critic_topics'));
+        $this->assertEquals(5, MediaCriticTopic::count());
     }
 }

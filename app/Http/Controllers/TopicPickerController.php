@@ -8,18 +8,75 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class TopicPickerController extends Controller
 {
     /**
+     * Automatically ensure media_critic_topics table and official topics exist.
+     */
+    public static function ensureTableAndData(): void
+    {
+        if (! Schema::hasTable('media_critic_topics')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                // Ignore and proceed with fallback
+            }
+
+            if (! Schema::hasTable('media_critic_topics')) {
+                Schema::create('media_critic_topics', function ($table) {
+                    $table->id();
+                    $table->unsignedTinyInteger('topic_number')->unique();
+                    $table->string('code_letter', 5)->unique();
+                    $table->text('title');
+                    $table->unsignedBigInteger('group_id')->nullable()->unique();
+                    $table->unsignedBigInteger('picked_by_user_id')->nullable();
+                    $table->dateTime('picked_at')->nullable();
+                    $table->string('selection_method', 50)->default('card');
+                    $table->boolean('is_locked')->default(false);
+                    $table->timestamps();
+                });
+            }
+        }
+
+        $officialTopics = [
+            1 => ['A', 'വഖ്ഫ് ബോർഡ് പുനഃസംഘടനയും പ്രാതിനിധ്യ പ്രശ്നങ്ങളും.'],
+            2 => ['B', 'സി ജെ പി സമരം: ജനകീയ ആവശ്യങ്ങളോടുള്ള കേന്ദ്ര സമീപനം.'],
+            3 => ['C', 'സമസ്ത സർക്കുലറും സ്ത്രീ വിവാദവും'],
+            4 => ['D', 'ഫലസ്തീൻ ജനതയോടുള്ള ഇസ്രായേൽ വംശഹത്യ'],
+            5 => ['E', 'സഊദിയിൽ ഹൂത്തി ആക്രമണം'],
+        ];
+
+        foreach ($officialTopics as $num => [$letter, $title]) {
+            $topic = MediaCriticTopic::where('topic_number', $num)->first();
+            if (! $topic) {
+                MediaCriticTopic::create([
+                    'topic_number' => $num,
+                    'code_letter' => $letter,
+                    'title' => $title,
+                    'is_locked' => false,
+                ]);
+            } else {
+                if (! $topic->is_locked && ! $topic->group_id) {
+                    $topic->update(['title' => $title, 'code_letter' => $letter]);
+                }
+            }
+        }
+    }
+
+    /**
      * Show the Media Critic Topic Picker or Leader Login.
      */
     public function index(Request $request): View|RedirectResponse
     {
+        self::ensureTableAndData();
+
         $user = Auth::user();
         $group = null;
         $myTopic = null;
@@ -131,6 +188,8 @@ class TopicPickerController extends Controller
      */
     public function select(Request $request): JsonResponse
     {
+        self::ensureTableAndData();
+
         $user = Auth::user();
         if (! $user) {
             return response()->json([
@@ -237,6 +296,8 @@ class TopicPickerController extends Controller
      */
     public function status(): JsonResponse
     {
+        self::ensureTableAndData();
+
         $topics = MediaCriticTopic::with('group:id,name,code,color_hex')
             ->orderBy('topic_number')
             ->get()
