@@ -101,6 +101,47 @@
         } finally {
             this.bulkLoading = false;
         }
+    },
+    showBulkModeModal: false,
+    bulkModeChoice: 'online',
+    bulkDeadline: '',
+    bulkModeLoading: false,
+    async submitBulkMode() {
+        if (this.bulkModeLoading) return;
+        if (this.selectedIds.length === 0) {
+            alert('Please select at least one competition.');
+            return;
+        }
+        this.bulkModeLoading = true;
+        try {
+            const token = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const payload = {
+                mode: this.bulkModeChoice,
+                program_ids: this.selectedIds,
+                deadline: this.bulkDeadline || null
+            };
+            const res = await fetch('{{ route('admin.programs.bulk-set-submission-mode') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Error updating competition mode.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error updating competition mode.');
+        } finally {
+            this.bulkModeLoading = false;
+        }
     }
 }">
     <!-- Header -->
@@ -121,91 +162,114 @@
     </div>
 
     <!-- Program Summary Counts & Quick Filter Metrics -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
         <!-- Total Competitions -->
         <a href="{{ route('admin.programs.index') }}"
-           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ empty($status) && ($isStage === null || $isStage === '') ? 'bg-slate-900 border-slate-900 text-white ring-2 ring-slate-900/10' : 'bg-white border-slate-200 text-slate-800 hover:border-slate-300 hover:bg-slate-50/50' }}">
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ empty($status) && ($isStage === null || $isStage === '') && empty($submissionType) ? 'bg-slate-900 border-slate-900 text-white ring-2 ring-slate-900/10' : 'bg-white border-slate-200 text-slate-800 hover:border-slate-300 hover:bg-slate-50/50' }}">
             <div class="flex items-center justify-between">
-                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-slate-300' : 'text-slate-500' }}">Total</span>
-                <span class="text-[10px] font-mono font-semibold {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-slate-300' : 'text-slate-400' }}">All</span>
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ empty($status) && ($isStage === null || $isStage === '') && empty($submissionType) ? 'text-slate-300' : 'text-slate-500' }}">Total</span>
+                <span class="text-[10px] font-mono font-semibold {{ empty($status) && ($isStage === null || $isStage === '') && empty($submissionType) ? 'text-slate-300' : 'text-slate-400' }}">All</span>
             </div>
             <div class="mt-2">
-                <span class="text-2xl font-black font-sora {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-white' : 'text-slate-900' }}">{{ $counts['total'] }}</span>
-                <span class="block text-[10px] {{ empty($status) && ($isStage === null || $isStage === '') ? 'text-slate-300' : 'text-slate-400' }} font-sora mt-0.5">Competitions</span>
+                <span class="text-xl font-black font-sora {{ empty($status) && ($isStage === null || $isStage === '') && empty($submissionType) ? 'text-white' : 'text-slate-900' }}">{{ $counts['total'] }}</span>
+                <span class="block text-[9px] {{ empty($status) && ($isStage === null || $isStage === '') && empty($submissionType) ? 'text-slate-300' : 'text-slate-400' }} font-sora mt-0.5">Competitions</span>
             </div>
         </a>
 
         <!-- Upcoming -->
         <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['status' => 'upcoming'])) }}"
-           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'upcoming' ? 'bg-amber-500 border-amber-600 text-white ring-2 ring-amber-500/20' : 'bg-white border-slate-200 text-slate-800 hover:border-amber-300 hover:bg-amber-50/20' }}">
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'upcoming' ? 'bg-amber-500 border-amber-600 text-white ring-2 ring-amber-500/20' : 'bg-white border-slate-200 text-slate-800 hover:border-amber-300 hover:bg-amber-50/20' }}">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full {{ $status === 'upcoming' ? 'bg-white' : 'bg-amber-500' }}"></span>
+                <div class="flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $status === 'upcoming' ? 'bg-white' : 'bg-amber-500' }}"></span>
                     <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'upcoming' ? 'text-amber-100' : 'text-amber-800' }}">Upcoming</span>
                 </div>
-                <span class="text-[10px] font-mono font-semibold {{ $status === 'upcoming' ? 'text-amber-100' : 'text-amber-600' }}">Pending</span>
             </div>
             <div class="mt-2">
-                <span class="text-2xl font-black font-sora {{ $status === 'upcoming' ? 'text-white' : 'text-amber-700' }}">{{ $counts['upcoming'] }}</span>
-                <span class="block text-[10px] {{ $status === 'upcoming' ? 'text-amber-100' : 'text-slate-400' }} font-sora mt-0.5">To be held</span>
+                <span class="text-xl font-black font-sora {{ $status === 'upcoming' ? 'text-white' : 'text-amber-700' }}">{{ $counts['upcoming'] }}</span>
+                <span class="block text-[9px] {{ $status === 'upcoming' ? 'text-amber-100' : 'text-slate-400' }} font-sora mt-0.5">To be held</span>
             </div>
         </a>
 
         <!-- In Progress -->
         <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['status' => 'in_progress'])) }}"
-           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'in_progress' ? 'bg-blue-600 border-blue-700 text-white ring-2 ring-blue-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-blue-300 hover:bg-blue-50/20' }}">
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'in_progress' ? 'bg-blue-600 border-blue-700 text-white ring-2 ring-blue-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-blue-300 hover:bg-blue-50/20' }}">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full {{ $status === 'in_progress' ? 'bg-white animate-pulse' : 'bg-blue-500 animate-pulse' }}"></span>
+                <div class="flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $status === 'in_progress' ? 'bg-white animate-pulse' : 'bg-blue-500 animate-pulse' }}"></span>
                     <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'in_progress' ? 'text-blue-100' : 'text-blue-800' }}">Ongoing</span>
                 </div>
-                <span class="text-[10px] font-mono font-semibold {{ $status === 'in_progress' ? 'text-blue-100' : 'text-blue-600' }}">Live</span>
             </div>
             <div class="mt-2">
-                <span class="text-2xl font-black font-sora {{ $status === 'in_progress' ? 'text-white' : 'text-blue-700' }}">{{ $counts['in_progress'] }}</span>
-                <span class="block text-[10px] {{ $status === 'in_progress' ? 'text-blue-100' : 'text-slate-400' }} font-sora mt-0.5">In Progress</span>
+                <span class="text-xl font-black font-sora {{ $status === 'in_progress' ? 'text-white' : 'text-blue-700' }}">{{ $counts['in_progress'] }}</span>
+                <span class="block text-[9px] {{ $status === 'in_progress' ? 'text-blue-100' : 'text-slate-400' }} font-sora mt-0.5">In Progress</span>
             </div>
         </a>
 
         <!-- Completed -->
         <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['status' => 'completed'])) }}"
-           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'completed' ? 'bg-emerald-600 border-emerald-700 text-white ring-2 ring-emerald-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/20' }}">
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ $status === 'completed' ? 'bg-emerald-600 border-emerald-700 text-white ring-2 ring-emerald-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/20' }}">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full {{ $status === 'completed' ? 'bg-white' : 'bg-emerald-500' }}"></span>
-                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'completed' ? 'text-emerald-100' : 'text-emerald-800' }}">Completed</span>
+                <div class="flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $status === 'completed' ? 'bg-white' : 'bg-emerald-500' }}"></span>
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ $status === 'completed' ? 'text-emerald-100' : 'text-emerald-800' }}">Done</span>
                 </div>
-                <span class="text-[10px] font-mono font-semibold {{ $status === 'completed' ? 'text-emerald-100' : 'text-emerald-600' }}">Done</span>
             </div>
             <div class="mt-2">
-                <span class="text-2xl font-black font-sora {{ $status === 'completed' ? 'text-white' : 'text-emerald-700' }}">{{ $counts['completed'] }}</span>
-                <span class="block text-[10px] {{ $status === 'completed' ? 'text-emerald-100' : 'text-slate-400' }} font-sora mt-0.5">Evaluated</span>
+                <span class="text-xl font-black font-sora {{ $status === 'completed' ? 'text-white' : 'text-emerald-700' }}">{{ $counts['completed'] }}</span>
+                <span class="block text-[9px] {{ $status === 'completed' ? 'text-emerald-100' : 'text-slate-400' }} font-sora mt-0.5">Evaluated</span>
             </div>
         </a>
 
         <!-- Stage Events -->
-        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['is_stage' => '1'])) }}"
-           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($isStage ?? '') === '1' ? 'bg-[#be1e2d] border-[#be1e2d] text-white ring-2 ring-[#be1e2d]/20' : 'bg-white border-slate-200 text-slate-800 hover:border-rose-300 hover:bg-rose-50/20' }}">
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page', 'submission_type']), ['is_stage' => '1'])) }}"
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($isStage ?? '') === '1' ? 'bg-[#be1e2d] border-[#be1e2d] text-white ring-2 ring-[#be1e2d]/20' : 'bg-white border-slate-200 text-slate-800 hover:border-rose-300 hover:bg-rose-50/20' }}">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-500' }}">Stage</span>
-                <span class="text-[10px] font-mono font-semibold {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-400' }}">Venues</span>
+                <span class="text-[10px] font-mono font-semibold {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-400' }}">Live</span>
             </div>
             <div class="mt-2">
-                <span class="text-2xl font-black font-sora {{ ($isStage ?? '') === '1' ? 'text-white' : 'text-slate-900' }}">{{ $counts['stage'] }}</span>
-                <span class="block text-[10px] {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-400' }} font-sora mt-0.5">Stage Programs</span>
+                <span class="text-xl font-black font-sora {{ ($isStage ?? '') === '1' ? 'text-white' : 'text-slate-900' }}">{{ $counts['stage'] }}</span>
+                <span class="block text-[9px] {{ ($isStage ?? '') === '1' ? 'text-rose-100' : 'text-slate-400' }} font-sora mt-0.5">Venues</span>
             </div>
         </a>
 
         <!-- Off-Stage Events -->
-        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page']), ['is_stage' => '0'])) }}"
-           class="p-3 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($isStage ?? '') === '0' ? 'bg-indigo-600 border-indigo-700 text-white ring-2 ring-indigo-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/20' }}">
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page', 'submission_type']), ['is_stage' => '0'])) }}"
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($isStage ?? '') === '0' && empty($submissionType) ? 'bg-indigo-600 border-indigo-700 text-white ring-2 ring-indigo-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/20' }}">
             <div class="flex items-center justify-between">
-                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($isStage ?? '') === '0' ? 'text-indigo-100' : 'text-slate-500' }}">Off-Stage</span>
-                <span class="text-[10px] font-mono font-semibold {{ ($isStage ?? '') === '0' ? 'text-indigo-100' : 'text-slate-400' }}">Non-Stage</span>
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($isStage ?? '') === '0' && empty($submissionType) ? 'text-indigo-100' : 'text-slate-500' }}">Off-Stage</span>
+                <span class="text-[10px] font-mono font-semibold {{ ($isStage ?? '') === '0' && empty($submissionType) ? 'text-indigo-100' : 'text-slate-400' }}">Exams</span>
             </div>
             <div class="mt-2">
-                <span class="text-2xl font-black font-sora {{ ($isStage ?? '') === '0' ? 'text-white' : 'text-slate-900' }}">{{ $counts['off_stage'] }}</span>
-                <span class="block text-[10px] {{ ($isStage ?? '') === '0' ? 'text-indigo-100' : 'text-slate-400' }} font-sora mt-0.5">Written / Studio</span>
+                <span class="text-xl font-black font-sora {{ ($isStage ?? '') === '0' && empty($submissionType) ? 'text-white' : 'text-slate-900' }}">{{ $counts['off_stage'] }}</span>
+                <span class="block text-[9px] {{ ($isStage ?? '') === '0' && empty($submissionType) ? 'text-indigo-100' : 'text-slate-400' }} font-sora mt-0.5">Non-Stage</span>
+            </div>
+        </a>
+
+        <!-- Online Submissions -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page', 'is_stage']), ['submission_type' => 'online'])) }}"
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($submissionType ?? '') === 'online' ? 'bg-blue-600 border-blue-700 text-white ring-2 ring-blue-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-blue-300 hover:bg-blue-50/20' }}">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($submissionType ?? '') === 'online' ? 'text-blue-100' : 'text-blue-700' }}">Online</span>
+                <span class="text-[10px] font-mono font-semibold {{ ($submissionType ?? '') === 'online' ? 'text-blue-100' : 'text-blue-500' }}">Portal</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-xl font-black font-sora {{ ($submissionType ?? '') === 'online' ? 'text-white' : 'text-blue-900' }}">{{ $counts['online_submission'] }}</span>
+                <span class="block text-[9px] {{ ($submissionType ?? '') === 'online' ? 'text-blue-100' : 'text-slate-400' }} font-sora mt-0.5">Uploads</span>
+            </div>
+        </a>
+
+        <!-- Office Submissions -->
+        <a href="{{ route('admin.programs.index', array_merge(request()->except(['page', 'is_stage']), ['submission_type' => 'office'])) }}"
+           class="p-2.5 rounded-xl border transition-all shadow-xs flex flex-col justify-between {{ ($submissionType ?? '') === 'office' ? 'bg-amber-600 border-amber-700 text-white ring-2 ring-amber-600/20' : 'bg-white border-slate-200 text-slate-800 hover:border-amber-300 hover:bg-amber-50/20' }}">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider {{ ($submissionType ?? '') === 'office' ? 'text-amber-100' : 'text-amber-700' }}">Office</span>
+                <span class="text-[10px] font-mono font-semibold {{ ($submissionType ?? '') === 'office' ? 'text-amber-100' : 'text-amber-500' }}">Direct</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-xl font-black font-sora {{ ($submissionType ?? '') === 'office' ? 'text-white' : 'text-amber-900' }}">{{ $counts['office_submission'] }}</span>
+                <span class="block text-[9px] {{ ($submissionType ?? '') === 'office' ? 'text-amber-100' : 'text-slate-400' }} font-sora mt-0.5">Physical</span>
             </div>
         </a>
     </div>
@@ -299,6 +363,13 @@
                     <option value="0" {{ ($isStage ?? '') === '0' ? 'selected' : '' }}>Non-Stage (Off-Stage)</option>
                 </select>
 
+                <select name="submission_type" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Submission Modes</option>
+                    <option value="online" {{ ($submissionType ?? '') === 'online' ? 'selected' : '' }}>Online Portal Submissions</option>
+                    <option value="office" {{ ($submissionType ?? '') === 'office' ? 'selected' : '' }}>Festival Office Submissions</option>
+                    <option value="none" {{ ($submissionType ?? '') === 'none' ? 'selected' : '' }}>Standard Off-Stage (No Submission)</option>
+                </select>
+
                 <select name="type" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-[#be1e2d]">
                     <option value="">All Types</option>
                     <option value="individual" {{ ($type ?? '') === 'individual' ? 'selected' : '' }}>Individual</option>
@@ -316,7 +387,7 @@
                     @endforeach
                 </select>
 
-                @if($search || $status || $zone || ($type ?? '') || ($regStatus ?? '') || ($isStage !== null && $isStage !== ''))
+                @if($search || $status || $zone || ($type ?? '') || ($regStatus ?? '') || ($isStage !== null && $isStage !== '') || ($submissionType ?? ''))
                     <a href="{{ route('admin.programs.index') }}" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800 bg-slate-100 rounded-lg">Reset</a>
                 @endif
             </div>
@@ -338,13 +409,21 @@
             </button>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Set Submission Mode Button -->
+            <button type="button"
+                    @click="showBulkModeModal = true"
+                    :disabled="bulkLoading || bulkModeLoading"
+                    class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm cursor-pointer">
+                <span>Set Mode / Deadline (രീതി മാറ്റുക)</span>
+            </button>
+
             <!-- Open Registration Button -->
             <button type="button"
                     @click.prevent="bulkToggle('selected', 'open')"
                     :disabled="bulkLoading"
                     class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm cursor-pointer">
-                <span>Open Registration for Selected</span>
+                <span>Open Registration</span>
             </button>
 
             <!-- Close Registration Button -->
@@ -352,8 +431,89 @@
                     @click.prevent="bulkToggle('selected', 'close')"
                     :disabled="bulkLoading"
                     class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm cursor-pointer">
-                <span>Close Registration for Selected</span>
+                <span>Close Registration</span>
             </button>
+        </div>
+    </div>
+
+    <!-- Bulk Submission Mode Modal -->
+    <div x-show="showBulkModeModal"
+         x-transition
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs"
+         style="display: none;">
+        <div @click.away="showBulkModeModal = false"
+             class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-base font-bold font-sora text-slate-900">Set Competition & Submission Mode</h3>
+                    <p class="text-xs text-slate-500 font-sora mt-0.5">
+                        Update mode for <span class="font-bold text-amber-600 font-mono" x-text="selectedIds.length"></span> selected competitions
+                    </p>
+                </div>
+                <button type="button" @click="showBulkModeModal = false" class="text-slate-400 hover:text-slate-700 text-lg font-bold">×</button>
+            </div>
+
+            <div class="space-y-3">
+                <label class="block text-xs font-mono uppercase font-bold text-slate-700">Select Mode (രീതി തിരഞ്ഞെടുക്കുക)</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50"
+                           :class="bulkModeChoice === 'online' ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500' : ''">
+                        <input type="radio" name="bulk_mode" value="online" x-model="bulkModeChoice" class="text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <span class="text-xs font-bold font-sora text-slate-900 block">Online Portal Submission</span>
+                            <span class="text-[11px] text-blue-700 font-ml block">വെബ്സൈറ്റ് ഓൺലൈൻ പോർട്ടൽ വഴി ഫയലുകൾ സബ്മിറ്റ് ചെയ്യുന്നത്</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50"
+                           :class="bulkModeChoice === 'office' ? 'border-amber-500 bg-amber-50/40 ring-1 ring-amber-500' : ''">
+                        <input type="radio" name="bulk_mode" value="office" x-model="bulkModeChoice" class="text-amber-600 focus:ring-amber-500">
+                        <div>
+                            <span class="text-xs font-bold font-sora text-slate-900 block">Festival Office Submission</span>
+                            <span class="text-[11px] text-amber-800 font-ml block">ഫെസ്റ്റിവൽ ഓഫീസിൽ നേരിട്ട് സമർപ്പിക്കുന്നത്</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50"
+                           :class="bulkModeChoice === 'stage' ? 'border-[#be1e2d] bg-rose-50/40 ring-1 ring-[#be1e2d]' : ''">
+                        <input type="radio" name="bulk_mode" value="stage" x-model="bulkModeChoice" class="text-[#be1e2d] focus:ring-[#be1e2d]">
+                        <div>
+                            <span class="text-xs font-bold font-sora text-slate-900 block">Stage Competition</span>
+                            <span class="text-[11px] text-[#be1e2d] font-ml block">വേദിയിൽ നടക്കുന്ന സ്റ്റേജ് മത്സരം</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50"
+                           :class="bulkModeChoice === 'offstage' ? 'border-slate-600 bg-slate-50 ring-1 ring-slate-600' : ''">
+                        <input type="radio" name="bulk_mode" value="offstage" x-model="bulkModeChoice" class="text-slate-700 focus:ring-slate-600">
+                        <div>
+                            <span class="text-xs font-bold font-sora text-slate-900 block">Standard Off-Stage / Exam</span>
+                            <span class="text-[11px] text-slate-700 font-ml block">ക്ലാസ്സ് റൂം / ഹാൾ പരീക്ഷകൾ / ജനറൽ ഓഫ്-സ്റ്റേജ്</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="pt-2">
+                    <label class="block text-xs font-mono uppercase font-bold text-slate-700 mb-1">
+                        Deadline / Scheduled Time (ഓപ്ഷണൽ)
+                    </label>
+                    <input type="datetime-local" x-model="bulkDeadline"
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <span class="text-[10px] text-slate-500 font-sora mt-0.5 block">Leave empty to keep existing scheduled time intact.</span>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button type="button" @click="showBulkModeModal = false"
+                        class="px-4 py-2 rounded-xl text-xs font-mono text-slate-600 hover:text-slate-900 bg-slate-100">
+                    Cancel
+                </button>
+                <button type="button" @click="submitBulkMode()"
+                        :disabled="bulkModeLoading"
+                        class="px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 flex items-center gap-1.5">
+                    <span x-text="bulkModeLoading ? 'Updating...' : 'Apply Mode to Selected'">Apply Mode to Selected</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -372,7 +532,7 @@
                         <th class="px-4 py-3.5">Prog ID</th>
                         <th class="px-5 py-3.5">Programme Name</th>
                         <th class="px-4 py-3.5">Type</th>
-                        <th class="px-4 py-3.5">Stage / Off Stage</th>
+                        <th class="px-4 py-3.5">Mode & Schedule</th>
                         <th class="px-4 py-3.5">Zone</th>
                         <th class="px-4 py-3.5 text-center">Status</th>
                         <th class="px-4 py-3.5">Limit</th>
@@ -419,12 +579,25 @@
                             </td>
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 @if($p->is_stage)
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                        Stage
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 inline-block">
+                                        Stage (വേദി)
+                                    </span>
+                                @elseif($p->submission_type === 'online' || $p->onlineSubmissionForm)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 inline-block">
+                                        Online Portal
+                                    </span>
+                                @elseif($p->submission_type === 'office')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 inline-block">
+                                        Office Submit
                                     </span>
                                 @else
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                        Non Stage
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 inline-block">
+                                        Off-Stage
+                                    </span>
+                                @endif
+                                @if($p->scheduled_time)
+                                    <span class="block text-[10px] font-mono text-slate-500 mt-1">
+                                        {{ $p->scheduled_time->format('d M, h:i A') }}
                                     </span>
                                 @endif
                             </td>

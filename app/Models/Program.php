@@ -302,10 +302,6 @@ class Program extends Model
             return $explicit;
         }
 
-        if ((bool) ($this->is_stage ?? false)) {
-            return 'stage';
-        }
-
         if ($this->relationLoaded('onlineSubmissionForm')) {
             if ($this->onlineSubmissionForm !== null) {
                 return 'online';
@@ -314,47 +310,8 @@ class Program extends Model
             return 'online';
         }
 
-        $name = strtolower($this->name ?? '');
-
-        // Office / Physical submissions (e.g. Project, Wall Magazine, Spot Magazine, Master Plan, Catalogue, Book Writing)
-        $officeKeywords = [
-            'project',
-            'wall magazine',
-            'spot magazine',
-            'master plan',
-            'catalogue',
-            'book writing',
-            'craft',
-            'model',
-            'album',
-        ];
-        foreach ($officeKeywords as $kw) {
-            if (str_contains($name, $kw)) {
-                return 'office';
-            }
-        }
-
-        // Online portal submissions (e.g. Vlog, Reel, Podcast, Documentary, Short Video, Digital Designing, E-Poster, Photography, Typography)
-        $onlineKeywords = [
-            'vlog',
-            'reel',
-            'podcast',
-            'documentary',
-            'short video',
-            'digital designing',
-            'poster designing',
-            'e-poster',
-            'portfolio design',
-            'visual story',
-            'photo feature',
-            'photography',
-            'typography',
-            'capture the flag',
-        ];
-        foreach ($onlineKeywords as $kw) {
-            if (str_contains($name, $kw)) {
-                return 'online';
-            }
+        if ((bool) ($this->is_stage ?? false)) {
+            return 'stage';
         }
 
         return 'none';

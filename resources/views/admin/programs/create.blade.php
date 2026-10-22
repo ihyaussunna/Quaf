@@ -103,6 +103,100 @@
             </label>
         </div>
 
+        @php
+            $currentMode = old('submission_mode', 'stage');
+        @endphp
+
+        <!-- Competition & Submission Mode -->
+        <div class="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/70 space-y-4">
+            <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 block">Competition & Submission Mode (മത്സര രീതി)</span>
+                <p class="text-[11px] text-slate-500 font-sora mt-0.5">Select how this competition will be conducted and submitted.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="submission-mode-selector">
+                <!-- Option 1: Stage -->
+                <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all bg-white hover:border-[#be1e2d]/50 {{ $currentMode === 'stage' ? 'border-[#be1e2d] ring-2 ring-[#be1e2d]/10' : 'border-slate-200' }}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold font-sora text-slate-900">Stage Competition</span>
+                        <input type="radio" name="submission_mode" value="stage" {{ $currentMode === 'stage' ? 'checked' : '' }}
+                               onchange="updateSubmissionModeUI('stage')"
+                               class="text-[#be1e2d] focus:ring-[#be1e2d]">
+                    </div>
+                    <span class="text-[11px] text-[#005c94] font-medium font-ml">വേദിയിൽ അവതരിപ്പിക്കപ്പെടുന്ന സ്റ്റേജ് മത്സരം</span>
+                    <span class="text-[10px] text-slate-500 font-sora mt-1">Has stage venue, stage manager, and live performance.</span>
+                </label>
+
+                <!-- Option 2: Online Submission -->
+                <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all bg-white hover:border-blue-500/50 {{ $currentMode === 'online' ? 'border-blue-600 ring-2 ring-blue-500/10' : 'border-slate-200' }}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold font-sora text-slate-900">Online Submission</span>
+                        <input type="radio" name="submission_mode" value="online" {{ $currentMode === 'online' ? 'checked' : '' }}
+                               onchange="updateSubmissionModeUI('online')"
+                               class="text-blue-600 focus:ring-blue-500">
+                    </div>
+                    <span class="text-[11px] text-blue-700 font-medium font-ml">വെബ്സൈറ്റ് ഓൺലൈൻ പോർട്ടൽ വഴി സമർപ്പിക്കുന്നത്</span>
+                    <span class="text-[10px] text-slate-500 font-sora mt-1">Reels, Podcast, Documentary, Digital Design, etc.</span>
+                </label>
+
+                <!-- Option 3: Festival Office Submission -->
+                <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all bg-white hover:border-amber-500/50 {{ $currentMode === 'office' ? 'border-amber-600 ring-2 ring-amber-500/10' : 'border-slate-200' }}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold font-sora text-slate-900">Festival Office Submission</span>
+                        <input type="radio" name="submission_mode" value="office" {{ $currentMode === 'office' ? 'checked' : '' }}
+                               onchange="updateSubmissionModeUI('office')"
+                               class="text-amber-600 focus:ring-amber-500">
+                    </div>
+                    <span class="text-[11px] text-amber-800 font-medium font-ml">ഫെസ്റ്റിവൽ ഓഫീസിൽ നേരിട്ട് സമർപ്പിക്കുന്നത്</span>
+                    <span class="text-[10px] text-slate-500 font-sora mt-1">Handmade crafts, projects, physical submissions.</span>
+                </label>
+
+                <!-- Option 4: Standard Off-Stage -->
+                <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all bg-white hover:border-slate-400 {{ $currentMode === 'offstage' ? 'border-slate-700 ring-2 ring-slate-700/10' : 'border-slate-200' }}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold font-sora text-slate-900">Standard Off-Stage</span>
+                        <input type="radio" name="submission_mode" value="offstage" {{ $currentMode === 'offstage' ? 'checked' : '' }}
+                               onchange="updateSubmissionModeUI('offstage')"
+                               class="text-slate-700 focus:ring-slate-600">
+                    </div>
+                    <span class="text-[11px] text-slate-700 font-medium font-ml">ക്ലാസ്സ് റൂം / ഹാൾ പരീക്ഷകൾ / മറ്റ് മത്സരങ്ങൾ</span>
+                    <span class="text-[10px] text-slate-500 font-sora mt-1">Written exam, essay writing, quiz, pencil drawing, etc.</span>
+                </label>
+            </div>
+
+            <!-- Scheduled Time / Submission Deadline -->
+            <div class="pt-3 border-t border-slate-200/80">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                    <label id="deadline-label" class="block text-xs font-mono uppercase text-slate-700 font-bold">
+                        {{ in_array($currentMode, ['online', 'office']) ? 'Submission Deadline / അവസാന സമയം' : 'Scheduled Start Time / ഷെഡ്യൂൾ സമയം' }}
+                    </label>
+                    <span id="deadline-hint" class="text-[11px] font-mono text-slate-500">
+                        {{ in_array($currentMode, ['online', 'office']) ? 'Shown in public schedule as the final deadline to submit files/items' : 'Used for public festival schedule time slots' }}
+                    </span>
+                </div>
+                <input type="datetime-local" name="scheduled_time" 
+                       value="{{ old('scheduled_time') }}"
+                       class="w-full sm:w-80 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] transition-colors">
+            </div>
+        </div>
+
+        <script>
+            function updateSubmissionModeUI(mode) {
+                const label = document.getElementById('deadline-label');
+                const hint = document.getElementById('deadline-hint');
+                if (mode === 'online') {
+                    if (label) label.textContent = 'Submission Deadline / അവസാന സമയം (Online Portal)';
+                    if (hint) hint.textContent = 'Students must upload their files/links before this deadline';
+                } else if (mode === 'office') {
+                    if (label) label.textContent = 'Submission Deadline / അവസാന സമയം (Festival Office)';
+                    if (hint) hint.textContent = 'Items must be delivered to festival office before this deadline';
+                } else {
+                    if (label) label.textContent = 'Scheduled Start Time / ഷെഡ്യൂൾ സമയം';
+                    if (hint) hint.textContent = 'Competition scheduled date and time slot';
+                }
+            }
+        </script>
+
         <div>
             <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Rules & Evaluation Guidelines</label>
             <textarea name="rules" rows="3" placeholder="Specify performance timing, allowed props, and rules..."

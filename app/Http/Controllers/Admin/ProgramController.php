@@ -9,6 +9,7 @@ use App\Models\ProgramCategory;
 use App\Models\Stage;
 use App\Models\Zone;
 use App\Services\AuditLogger;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class ProgramController extends Controller
         $stageId = $request->query('stage');
         $status = $request->query('status');
         $isStage = $request->query('is_stage');
+        $submissionType = $request->query('submission_type');
         $gender = $request->query('gender');
         $search = $request->query('search');
 
@@ -59,6 +61,16 @@ class ProgramController extends Controller
 
         if ($isStage !== null && $isStage !== '') {
             $query->where('is_stage', (bool) $isStage);
+        }
+
+        if ($submissionType === 'online') {
+            $query->where(function ($q) {
+                $q->where('submission_type', 'online')->orWhereHas('onlineSubmissionForm');
+            });
+        } elseif ($submissionType === 'office') {
+            $query->where('submission_type', 'office');
+        } elseif ($submissionType === 'none') {
+            $query->where('is_stage', false)->whereNull('submission_type');
         }
 
         if ($gender && in_array($gender, ['all', 'male', 'female'])) {
@@ -97,6 +109,8 @@ class ProgramController extends Controller
             'in_progress' => Program::whereIn('status', ['in_progress', 'ongoing'])->count(),
             'stage' => Program::where('is_stage', true)->count(),
             'off_stage' => Program::where('is_stage', false)->count(),
+            'online_submission' => Program::where('submission_type', 'online')->count(),
+            'office_submission' => Program::where('submission_type', 'office')->count(),
         ];
 
         $isStageRegOpen = (FestivalSetting::get('stage_registration_open', '1') == '1');
@@ -114,6 +128,7 @@ class ProgramController extends Controller
             'stageId',
             'status',
             'isStage',
+            'submissionType',
             'gender',
             'type',
             'search',
@@ -236,10 +251,34 @@ class ProgramController extends Controller
             'points_weight' => ['required', 'numeric', 'min:0.5', 'max:10'],
             'status' => ['required', 'in:upcoming,in_progress,completed,cancelled'],
             'is_stage' => ['nullable', 'boolean'],
+            'submission_mode' => ['nullable', 'string', 'in:stage,online,office,offstage'],
+            'submission_type' => ['nullable', 'string', 'in:online,office,none'],
             'gender_restriction' => ['nullable', 'in:all,male,female'],
         ]);
 
-        $validated['is_stage'] = $request->boolean('is_stage');
+        if ($request->has('submission_mode')) {
+            $mode = $request->input('submission_mode');
+            if ($mode === 'stage') {
+                $validated['is_stage'] = true;
+                $validated['submission_type'] = null;
+            } elseif ($mode === 'online') {
+                $validated['is_stage'] = false;
+                $validated['submission_type'] = 'online';
+            } elseif ($mode === 'office') {
+                $validated['is_stage'] = false;
+                $validated['submission_type'] = 'office';
+            } elseif ($mode === 'offstage') {
+                $validated['is_stage'] = false;
+                $validated['submission_type'] = null;
+            }
+        } else {
+            $validated['is_stage'] = $request->boolean('is_stage');
+            if ($request->filled('submission_type')) {
+                $subType = $request->input('submission_type');
+                $validated['submission_type'] = $subType === 'none' ? null : $subType;
+            }
+        }
+
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
@@ -372,10 +411,34 @@ class ProgramController extends Controller
             'points_weight' => ['required', 'numeric', 'min:0.5', 'max:10'],
             'status' => ['required', 'in:upcoming,in_progress,completed,cancelled'],
             'is_stage' => ['nullable', 'boolean'],
+            'submission_mode' => ['nullable', 'string', 'in:stage,online,office,offstage'],
+            'submission_type' => ['nullable', 'string', 'in:online,office,none'],
             'gender_restriction' => ['nullable', 'in:all,male,female'],
         ]);
 
-        $validated['is_stage'] = $request->boolean('is_stage');
+        if ($request->has('submission_mode')) {
+            $mode = $request->input('submission_mode');
+            if ($mode === 'stage') {
+                $validated['is_stage'] = true;
+                $validated['submission_type'] = null;
+            } elseif ($mode === 'online') {
+                $validated['is_stage'] = false;
+                $validated['submission_type'] = 'online';
+            } elseif ($mode === 'office') {
+                $validated['is_stage'] = false;
+                $validated['submission_type'] = 'office';
+            } elseif ($mode === 'offstage') {
+                $validated['is_stage'] = false;
+                $validated['submission_type'] = null;
+            }
+        } else {
+            $validated['is_stage'] = $request->boolean('is_stage');
+            if ($request->filled('submission_type')) {
+                $subType = $request->input('submission_type');
+                $validated['submission_type'] = $subType === 'none' ? null : $subType;
+            }
+        }
+
         $validated['gender_restriction'] = $request->input('gender_restriction', 'all');
         $validated['individual_limit_counted'] = $request->boolean('individual_limit_counted', $validated['type'] === 'individual');
         $validated['mix_zone_open_to_all'] = $request->boolean('mix_zone_open_to_all', true);
@@ -583,6 +646,77 @@ class ProgramController extends Controller
                 'success' => true,
                 'affected_count' => $affectedCount,
                 'is_registration_open' => $isOpen,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function bulkSetSubmissionMode(Request $request): JsonResponse|RedirectResponse
+    {
+        Program::ensureSchema();
+
+        $validated = $request->validate([
+            'mode' => ['required', 'in:stage,online,office,offstage'],
+            'program_ids' => ['required', 'array'],
+            'program_ids.*' => ['integer', 'exists:programs,id'],
+            'deadline' => ['nullable', 'date'],
+        ]);
+
+        $mode = $validated['mode'];
+        $programIds = array_filter(array_map('intval', (array) ($validated['program_ids'] ?? [])));
+
+        if (empty($programIds)) {
+            $msg = 'Please select at least one competition.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        $updates = [];
+        if ($mode === 'stage') {
+            $updates['is_stage'] = true;
+            $updates['submission_type'] = null;
+        } elseif ($mode === 'online') {
+            $updates['is_stage'] = false;
+            $updates['submission_type'] = 'online';
+        } elseif ($mode === 'office') {
+            $updates['is_stage'] = false;
+            $updates['submission_type'] = 'office';
+        } elseif ($mode === 'offstage') {
+            $updates['is_stage'] = false;
+            $updates['submission_type'] = null;
+        }
+
+        if (! empty($validated['deadline'])) {
+            $updates['scheduled_time'] = Carbon::parse($validated['deadline']);
+        }
+
+        $affectedCount = Program::whereIn('id', $programIds)->update($updates);
+
+        Cache::flush();
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable) {
+        }
+
+        $modeLabels = [
+            'stage' => 'Stage Competitions (സ്റ്റേജ് മത്സരങ്ങൾ)',
+            'online' => 'Online Submissions (ഓൺലൈൻ സബ്മിഷൻ)',
+            'office' => 'Festival Office Submissions (ഓഫീസ് സബ്മിഷൻ)',
+            'offstage' => 'Standard Offstage (ഓഫ്-സ്റ്റേജ്)',
+        ];
+        $modeDesc = $modeLabels[$mode] ?? $mode;
+        $message = "Successfully updated {$affectedCount} competitions to {$modeDesc}.";
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'affected_count' => $affectedCount,
+                'mode' => $mode,
                 'message' => $message,
             ]);
         }

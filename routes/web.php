@@ -449,6 +449,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Programs & Categories
     Route::get('programs-wise', [AdminProgramController::class, 'programWise'])->name('programs.program-wise');
     Route::post('programs/bulk-toggle-registration', [AdminProgramController::class, 'bulkToggleRegistration'])->name('programs.bulk-toggle-registration');
+    Route::post('programs/bulk-set-submission-mode', [AdminProgramController::class, 'bulkSetSubmissionMode'])->name('programs.bulk-set-submission-mode');
     Route::post('programs/{program}/toggle-registration', [AdminProgramController::class, 'toggleRegistration'])->name('programs.toggle-registration');
     Route::post('programs/{program}/criteria', [AdminProgramController::class, 'updateCriteria'])->name('programs.criteria.update');
     Route::resource('programs', AdminProgramController::class);

@@ -81,47 +81,19 @@ class ScheduleController extends Controller
             $scheduleQuery->whereDate('start_time', $selectedDay);
         }
 
-        $onlineKeywords = ['vlog', 'reel', 'podcast', 'documentary', 'short video', 'digital designing', 'poster designing', 'e-poster', 'portfolio design', 'visual story', 'photo feature', 'photography', 'typography'];
-        $officeKeywords = ['project', 'wall magazine', 'spot magazine', 'master plan', 'catalogue', 'book writing', 'craft', 'model', 'album'];
-
-        $applyOnlineScope = function ($q) use ($onlineKeywords) {
-            $q->where('submission_type', 'online')
-                ->orWhere(function ($sq) use ($onlineKeywords) {
-                    $sq->where('is_stage', false)
-                        ->where(function ($nq) use ($onlineKeywords) {
-                            $nq->has('onlineSubmissionForm');
-                            foreach ($onlineKeywords as $kw) {
-                                $nq->orWhere('name', 'like', "%{$kw}%");
-                            }
-                        });
-                });
-        };
-
-        $applyOfficeScope = function ($q) use ($officeKeywords) {
-            $q->where('submission_type', 'office')
-                ->orWhere(function ($sq) use ($officeKeywords) {
-                    $sq->where('is_stage', false)
-                        ->where(function ($nq) use ($officeKeywords) {
-                            $isFirst = true;
-                            foreach ($officeKeywords as $kw) {
-                                if ($isFirst) {
-                                    $nq->where('name', 'like', "%{$kw}%");
-                                    $isFirst = false;
-                                } else {
-                                    $nq->orWhere('name', 'like', "%{$kw}%");
-                                }
-                            }
-                        });
-                });
-        };
-
         if ($selectedStage === 'online') {
-            $scheduleQuery->whereHas('program', $applyOnlineScope);
+            $scheduleQuery->whereHas('program', function ($q) {
+                $q->where('submission_type', 'online')
+                    ->orWhereHas('onlineSubmissionForm');
+            });
         } elseif ($selectedStage === 'office') {
-            $scheduleQuery->whereHas('program', $applyOfficeScope);
+            $scheduleQuery->whereHas('program', function ($q) {
+                $q->where('submission_type', 'office');
+            });
         } elseif ($selectedStage === 'submissions') {
-            $scheduleQuery->whereHas('program', function ($q) use ($applyOnlineScope, $applyOfficeScope) {
-                $q->where($applyOnlineScope)->orWhere($applyOfficeScope);
+            $scheduleQuery->whereHas('program', function ($q) {
+                $q->whereIn('submission_type', ['online', 'office'])
+                    ->orWhereHas('onlineSubmissionForm');
             });
         } elseif ($selectedStage) {
             $scheduleQuery->where('stage_id', $selectedStage);
@@ -152,20 +124,24 @@ class ScheduleController extends Controller
         $stageProgramsQuery = Program::with(['category', 'stage', 'result', 'onlineSubmissionForm']);
 
         if ($selectedStage === 'online') {
-            $stageProgramsQuery->where($applyOnlineScope);
+            $stageProgramsQuery->where(function ($q) {
+                $q->where('submission_type', 'online')
+                    ->orWhereHas('onlineSubmissionForm');
+            });
         } elseif ($selectedStage === 'office') {
-            $stageProgramsQuery->where($applyOfficeScope);
+            $stageProgramsQuery->where('submission_type', 'office');
         } elseif ($selectedStage === 'submissions') {
-            $stageProgramsQuery->where(function ($q) use ($applyOnlineScope, $applyOfficeScope) {
-                $q->where($applyOnlineScope)->orWhere($applyOfficeScope);
+            $stageProgramsQuery->where(function ($q) {
+                $q->whereIn('submission_type', ['online', 'office'])
+                    ->orWhereHas('onlineSubmissionForm');
             });
         } elseif ($selectedStage) {
             $stageProgramsQuery->where('stage_id', $selectedStage)->where('is_stage', true);
         } else {
-            $stageProgramsQuery->where(function ($q) use ($applyOnlineScope, $applyOfficeScope) {
+            $stageProgramsQuery->where(function ($q) {
                 $q->where('is_stage', true)
-                    ->orWhere($applyOnlineScope)
-                    ->orWhere($applyOfficeScope);
+                    ->orWhereIn('submission_type', ['online', 'office'])
+                    ->orWhereHas('onlineSubmissionForm');
             });
         }
 
