@@ -30,9 +30,15 @@ class FundController extends Controller
         FundReceipt::ensureSchema();
         self::ensureOfficeAccount();
 
-        // 1. Top Collected Students (Order by total collected desc)
+        // 1. Top Collected Students (Order by total collected desc - Excludes special OFFICE account)
         $topStudents = Student::query()
             ->with('group')
+            ->where('student_id', '!=', 'OFFICE')
+            ->where(function ($q) {
+                $q->whereNull('class_level')
+                    ->orWhereRaw('UPPER(class_level) != ?', ['OFFICE']);
+            })
+            ->whereRaw('UPPER(name) != ?', ['OFFICE'])
             ->whereHas('fundReceipts', function ($q) {
                 $q->where('is_cancelled', false);
             })

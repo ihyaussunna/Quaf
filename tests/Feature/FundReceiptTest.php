@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Fund\FundController;
 use App\Models\FundReceipt;
 use App\Models\FundReceiptSetting;
 use App\Models\Group;
@@ -9,6 +10,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\ReceiptImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FundReceiptTest extends TestCase
@@ -868,5 +870,61 @@ class FundReceiptTest extends TestCase
         $publicViewResponse = $this->get(route('fund.receipts.show', $receipt->id));
         $publicViewResponse->assertOk();
         $publicViewResponse->assertSee('QFR-26-075');
+    }
+
+    public function test_office_collected_data_is_never_shown_in_top_students_list(): void
+    {
+        $group = Group::create([
+            'name' => 'Lumo Fikric',
+            'code' => 'LUMO',
+            'slug' => 'lumo-fikric-top',
+            'color_hex' => '#56286b',
+        ]);
+
+        $realStudent = Student::create([
+            'student_id' => 'STU991',
+            'name' => 'Real Top Student',
+            'group_id' => $group->id,
+            'admission_number' => 'ADM991',
+            'class_level' => 'D4',
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        FundReceipt::create([
+            'receipt_number' => 'QFR-26-991',
+            'donor_name' => 'Donor For Real Student',
+            'amount' => 5000,
+            'payment_method' => 'cash',
+            'student_id' => $realStudent->id,
+            'is_cancelled' => false,
+        ]);
+
+        // Ensure OFFICE account exists
+        FundController::ensureOfficeAccount();
+        $officeStudent = Student::where('student_id', 'OFFICE')->first();
+        $this->assertNotNull($officeStudent);
+
+        // Office collects a huge amount
+        FundReceipt::create([
+            'receipt_number' => 'QFR-26-999',
+            'donor_name' => 'Donor For Office',
+            'amount' => 50000,
+            'payment_method' => 'upi',
+            'student_id' => $officeStudent->id,
+            'is_cancelled' => false,
+        ]);
+
+        $response = $this->get(route('fund.home'));
+
+        $response->assertOk();
+        $response->assertSee('Real Top Student');
+        $response->assertSee('5,000');
+
+        // Verify topStudents collection passed to the view does not contain OFFICE
+        $topStudents = $response->viewData('topStudents');
+        $this->assertTrue($topStudents->pluck('name')->contains('Real Top Student'));
+        $this->assertFalse($topStudents->pluck('student_id')->contains('OFFICE'));
+        $this->assertFalse($topStudents->pluck('name')->contains('OFFICE'));
     }
 }
