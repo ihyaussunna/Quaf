@@ -336,4 +336,21 @@ class GreenRoomShuffleAndJudgeTwoModesTest extends TestCase
             'total_score' => 63.0,
         ]);
     }
+
+    public function test_judge_evaluation_page_opens_in_simple_mode_by_default(): void
+    {
+        ScoringCriteria::create([
+            'program_id' => $this->program->id,
+            'criterion_name' => 'Fluency',
+            'max_marks' => 30,
+        ]);
+
+        $response = $this->actingAs($this->judgeUser)
+            ->get(route('judge.evaluate', $this->program));
+
+        $response->assertOk();
+        $response->assertSee("evaluationMode: 'simple'", false);
+        $response->assertSee('1. Simple Mode (100-ൽ നേരിട്ടുള്ള മാർക്ക്)');
+        $response->assertSee('2. Criteria Mode (മാനദണ്ഡങ്ങൾ തിരിച്ചുള്ള മാർക്ക്)');
+    }
 }

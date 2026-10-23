@@ -8,7 +8,7 @@
     lightboxOpen: false,
     lightboxSrc: '',
     lightboxCode: '',
-    evaluationMode: localStorage.getItem('quaf_judge_mode_{{ $program->id }}') || '{{ $program->has_criteria && $program->scoringCriteria->isNotEmpty() ? 'criteria' : 'simple' }}',
+    evaluationMode: 'simple',
     openTextReader(code, text) {
         this.textReaderCode = code;
         this.textReaderContent = text;
@@ -85,29 +85,58 @@
         <div>
             <div class="flex items-center gap-2">
                 <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">Scoring Mode / മാർക്ക് നൽകുന്ന രീതി:</span>
-                <span class="text-[11px] font-mono text-slate-400 font-semibold">(ഇഷ്ടമുള്ള രീതി തിരഞ്ഞെടുക്കാം)</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase"
+                      :class="evaluationMode === 'simple' ? 'bg-blue-100 text-[#005c94] border border-blue-200' : 'bg-rose-100 text-[#be1e2d] border border-rose-200'"
+                      x-text="evaluationMode === 'simple' ? 'Simple Mode (Active)' : 'Criteria Mode (Active)'"></span>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">
-                വിധികർത്താവിന് നേരിട്ട് 100-ൽ മാർക്ക് നൽകുകയോ (Simple Mode), അല്ലെങ്കിൽ മാനദണ്ഡങ്ങൾ തിരിച്ച് നൽകുകയോ (Criteria Mode) ചെയ്യാം.
+            <p class="text-xs text-slate-500 mt-1">
+                ഡിഫോൾട്ടായി <strong class="text-slate-800">Simple Mode</strong> ഓട്ടോമാറ്റിക്കായി ലഭ്യമാക്കിയിരിക്കുന്നു. ആവശ്യമെങ്കിൽ താഴെ നിന്നും <strong class="text-slate-800">Criteria Mode</strong> തിരഞ്ഞെടുക്കാവുന്നതാണ്.
             </p>
         </div>
 
-        <div class="flex flex-col sm:flex-row p-1.5 bg-slate-100 rounded-2xl border border-slate-200 gap-1.5 shrink-0">
-            <button type="button"
-                    @click="evaluationMode = 'simple'; localStorage.setItem('quaf_judge_mode_{{ $program->id }}', 'simple')"
-                    :class="evaluationMode === 'simple' ? 'bg-[#005c94] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                    class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-mono transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                <span>1. Simple Mode (100-ൽ മാർക്ക്)</span>
-            </button>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+            <!-- Mode Selection Dropdown -->
+            <div class="relative min-w-[270px] sm:min-w-[310px]">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none transition-colors"
+                     :class="evaluationMode === 'simple' ? 'text-[#005c94]' : 'text-[#be1e2d]'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <select x-model="evaluationMode"
+                        class="w-full pl-10 pr-10 py-2.5 rounded-xl border-2 font-mono text-xs sm:text-sm font-bold appearance-none transition-all cursor-pointer shadow-xs focus:outline-none"
+                        :class="evaluationMode === 'simple'
+                            ? 'bg-blue-50/80 border-[#005c94]/40 text-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20'
+                            : 'bg-rose-50/80 border-[#be1e2d]/40 text-[#be1e2d] focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/20'">
+                    <option value="simple">1. Simple Mode (100-ൽ നേരിട്ടുള്ള മാർക്ക്)</option>
+                    @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
+                        <option value="criteria">2. Criteria Mode (മാനദണ്ഡങ്ങൾ തിരിച്ചുള്ള മാർക്ക്)</option>
+                    @endif
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </div>
 
-            <button type="button"
-                    @click="evaluationMode = 'criteria'; localStorage.setItem('quaf_judge_mode_{{ $program->id }}', 'criteria')"
-                    :class="evaluationMode === 'criteria' ? 'bg-[#be1e2d] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                    class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-mono transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                <span>2. Criteria Mode (മാനദണ്ഡങ്ങൾ)</span>
-            </button>
+            <!-- Quick Pill Buttons Switcher (Synced with Dropdown) -->
+            @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
+                <div class="hidden lg:flex p-1 bg-slate-100 rounded-xl border border-slate-200 gap-1 shrink-0">
+                    <button type="button"
+                            @click="evaluationMode = 'simple'"
+                            :class="evaluationMode === 'simple' ? 'bg-[#005c94] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
+                        <span>Simple</span>
+                    </button>
+                    <button type="button"
+                            @click="evaluationMode = 'criteria'"
+                            :class="evaluationMode === 'criteria' ? 'bg-[#be1e2d] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
+                        <span>Criteria</span>
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
 
