@@ -536,4 +536,107 @@ class FundReceiptTest extends TestCase
         $englishStream->assertOk();
         $englishStream->assertHeader('Content-Type', 'image/jpeg');
     }
+
+    public function test_student_can_update_their_own_receipt_donor_name_and_payment_method(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Furqan',
+            'slug' => 'al-furqan-2',
+            'code' => 'AF2',
+            'color_hex' => '#be1e2d',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Faris Ameen',
+            'student_id' => '404',
+            'qr_token' => 'token_404',
+            'class_level' => 'Thanawiyya',
+            'group_id' => $group->id,
+        ]);
+
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-404',
+            'donor_name' => 'Original Name',
+            'amount' => 1500,
+            'payment_method' => 'cash',
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+        ]);
+
+        // Student updates the receipt to Malayalam name and UPI payment method
+        $response = $this->withSession(['fund_student_id' => $student->id])
+            ->put(route('fund.student.receipts.update', $receipt), [
+                'donor_name' => 'മുഹമ്മദ് സാലിഹ്',
+                'payment_method' => 'upi',
+                'transaction_reference' => 'UPI-REF-998877',
+                'donor_phone' => '9847000111',
+                'donor_place' => 'Calicut',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('success');
+
+        $receipt->refresh();
+        $this->assertEquals('മുഹമ്മദ് സാലിഹ്', $receipt->donor_name);
+        $this->assertEquals('upi', $receipt->payment_method);
+        $this->assertEquals('UPI-REF-998877', $receipt->transaction_reference);
+        $this->assertEquals('9847000111', $receipt->donor_phone);
+        $this->assertEquals('Calicut', $receipt->donor_place);
+
+        // Also check receipt view shows the Edit button and updated values
+        $viewResponse = $this->withSession(['fund_student_id' => $student->id])
+            ->get(route('fund.receipts.show', $receipt));
+        $viewResponse->assertOk();
+        $viewResponse->assertSee('Edit Details');
+        $viewResponse->assertSee('മുഹമ്മദ് സാലിഹ്');
+        $viewResponse->assertSee('UPI');
+    }
+
+    public function test_student_cannot_update_another_students_receipt(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Bayan',
+            'slug' => 'al-bayan-2',
+            'code' => 'AB2',
+            'color_hex' => '#10b981',
+        ]);
+
+        $studentA = Student::create([
+            'name' => 'Student A',
+            'student_id' => '501',
+            'qr_token' => 'token_501',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $studentB = Student::create([
+            'name' => 'Student B',
+            'student_id' => '502',
+            'qr_token' => 'token_502',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $receiptA = FundReceipt::create([
+            'receipt_number' => 'QFR-26-501',
+            'donor_name' => 'Owner Name',
+            'amount' => 500,
+            'payment_method' => 'cash',
+            'student_id' => $studentA->id,
+            'group_id' => $group->id,
+        ]);
+
+        // Student B attempts to edit Student A's receipt
+        $response = $this->withSession(['fund_student_id' => $studentB->id])
+            ->put(route('fund.student.receipts.update', $receiptA), [
+                'donor_name' => 'Hacked Name',
+                'payment_method' => 'upi',
+            ]);
+
+        $response->assertSessionHas('error');
+
+        $receiptA->refresh();
+        $this->assertEquals('Owner Name', $receiptA->donor_name);
+        $this->assertEquals('cash', $receiptA->payment_method);
+    }
 }

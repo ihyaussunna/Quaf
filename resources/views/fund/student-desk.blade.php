@@ -82,6 +82,30 @@ function studentFundDesk() {
             a.click();
             document.body.removeChild(a);
             window.open('https://api.whatsapp.com/', '_blank');
+        },
+        showEditModal: false,
+        editingReceipt: {
+            id: null,
+            receipt_number: '',
+            donor_name: '',
+            payment_method: 'cash',
+            transaction_reference: '',
+            donor_phone: '',
+            donor_place: '',
+            update_url: ''
+        },
+        openEditModal(rcp, updateUrl) {
+            this.editingReceipt = {
+                id: rcp.id,
+                receipt_number: rcp.receipt_number,
+                donor_name: rcp.donor_name || '',
+                payment_method: rcp.payment_method || 'cash',
+                transaction_reference: rcp.transaction_reference || '',
+                donor_phone: rcp.donor_phone || '',
+                donor_place: rcp.donor_place || '',
+                update_url: updateUrl
+            };
+            this.showEditModal = true;
         }
     };
 }
@@ -410,6 +434,22 @@ function studentFundDesk() {
                                     </td>
                                     <td class="px-5 py-4 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
+                                            <!-- Edit Receipt Button -->
+                                            <button type="button" 
+                                                    @click="openEditModal({
+                                                        id: {{ $rcp->id }},
+                                                        receipt_number: '{{ $rcp->receipt_number }}',
+                                                        donor_name: @js($rcp->donor_name),
+                                                        payment_method: '{{ $rcp->payment_method }}',
+                                                        transaction_reference: @js($rcp->transaction_reference ?? ''),
+                                                        donor_phone: @js($rcp->donor_phone ?? ''),
+                                                        donor_place: @js($rcp->donor_place ?? '')
+                                                    }, '{{ route('fund.student.receipts.update', $rcp) }}')"
+                                                    class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] border border-blue-200 transition-all shadow-2xs cursor-pointer flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                <span>Edit</span>
+                                            </button>
+
                                             <!-- View Voucher -->
                                             <a href="{{ route('fund.receipts.show', $rcp) }}" 
                                                class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] border border-slate-200 transition-all shadow-2xs">
@@ -447,6 +487,152 @@ function studentFundDesk() {
             @endif
         </div>
 
+    </div>
+
+    <!-- =====================================================================
+         STUDENT RECEIPT EDIT MODAL (DONOR NAME & PAYMENT METHOD)
+         ===================================================================== -->
+    <div x-show="showEditModal" 
+         x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md"
+         style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important; z-index: 99999 !important; display: flex !important; align-items: center !important; justify-content: center !important; background-color: rgba(10, 15, 30, 0.8) !important; -webkit-backdrop-filter: blur(8px) !important; backdrop-filter: blur(8px) !important;"
+         @keydown.escape.window="showEditModal = false">
+        
+        <!-- Backdrop Click to Close -->
+        <div class="fixed inset-0" style="position: absolute; inset: 0; width: 100%; height: 100%;" @click="showEditModal = false"></div>
+
+        <!-- Pure White Apple-Style Dialog Card -->
+        <div x-show="showEditModal"
+             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-300"
+             x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-6 scale-95"
+             class="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 z-10 text-slate-900 space-y-5"
+             style="position: relative !important; z-index: 100000 !important; background-color: #ffffff !important; color: #0f172a !important; border-radius: 24px !important; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45) !important; max-height: calc(100dvh - 32px) !important; overflow-y: auto !important;"
+             @click.stop>
+            
+            <!-- Apple-Style Circular Close Button -->
+            <button type="button" 
+                    @click="showEditModal = false"
+                    class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Modal Header -->
+            <div class="flex items-center gap-3.5 pr-8">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200 shadow-xs">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-blue-50 text-blue-800 border border-blue-200">
+                            Edit Receipt
+                        </span>
+                        <span class="text-xs font-mono font-bold text-slate-500" x-text="'#' + editingReceipt.receipt_number"></span>
+                    </div>
+                    <h3 class="font-sora text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+                        രസീത് വിവരങ്ങൾ തിരുത്തുക
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form method="POST" :action="editingReceipt.update_url" class="space-y-4 pt-1">
+                @csrf
+                @method('PUT')
+
+                <!-- 1. Donor Name (Malayalam / English) -->
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
+                        Donor Name / ദാതാവിന്റെ പേര് <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="donor_name" 
+                           x-model="editingReceipt.donor_name" 
+                           required
+                           placeholder="Enter name (e.g. മുഹമ്മദ് ഷാഫി / Mohammed Shafi)"
+                           style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
+                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                    <p class="text-[11px] text-slate-500 font-anek">
+                        ഇംഗ്ലീഷിൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ Anek Malayalam ഫോണ്ടിലും ഓട്ടോമാറ്റിക്കായി പ്രിന്റ് ചെയ്യപ്പെടും.
+                    </p>
+                </div>
+
+                <!-- 2. Payment Method (Cash, UPI, etc.) -->
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
+                        Payment Mode / പേയ്മെന്റ് രീതി <span class="text-rose-500">*</span>
+                    </label>
+                    <select name="payment_method" 
+                            x-model="editingReceipt.payment_method" 
+                            required
+                            class="w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                        <option value="upi">UPI / GPay / PhonePe (യു.പി.ഐ)</option>
+                        <option value="cash">Cash (പണം)</option>
+                        <option value="bank_transfer">Bank Transfer / NEFT</option>
+                        <option value="card">Debit / Credit Card</option>
+                        <option value="other">Other Mode (മറ്റുള്ളവ)</option>
+                    </select>
+                </div>
+
+                <!-- 3. Transaction Reference (Shown prominently if UPI or other non-cash) -->
+                <div class="space-y-1" x-show="editingReceipt.payment_method !== 'cash'">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
+                        UPI Reference / Transaction ID
+                    </label>
+                    <input type="text" 
+                           name="transaction_reference" 
+                           x-model="editingReceipt.transaction_reference" 
+                           placeholder="e.g. UPI Ref, GPay Txn ID, UTR"
+                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                </div>
+
+                <!-- 4. Phone & Place (Optional) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
+                            Mobile Number
+                        </label>
+                        <input type="tel" 
+                               name="donor_phone" 
+                               x-model="editingReceipt.donor_phone" 
+                               placeholder="Phone number"
+                               class="w-full px-3.5 py-2 rounded-xl bg-slate-50 focus:bg-white border border-slate-200 text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
+                            Place / സ്ഥലം
+                        </label>
+                        <input type="text" 
+                               name="donor_place" 
+                               x-model="editingReceipt.donor_place" 
+                               placeholder="e.g. Kozhikode"
+                               class="w-full px-3.5 py-2 rounded-xl bg-slate-50 focus:bg-white border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                    <button type="button" 
+                            @click="showEditModal = false"
+                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-600/20 cursor-pointer active:scale-98">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

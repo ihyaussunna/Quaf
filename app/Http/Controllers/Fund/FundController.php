@@ -290,6 +290,71 @@ class FundController extends Controller
     }
 
     /**
+     * Update an existing receipt (donor name, payment mode, etc.) by student or admin.
+     */
+    public function studentUpdateReceipt(Request $request, FundReceipt $receipt): RedirectResponse|JsonResponse
+    {
+        FundReceipt::ensureSchema();
+
+        $studentId = session('fund_student_id');
+        $isAdmin = Auth::check() && (
+            (method_exists(Auth::user(), 'isAdmin') && Auth::user()->isAdmin()) ||
+            in_array(Auth::user()->role, ['admin', 'super_admin', 'fund_manager', 'fund_collector'])
+        );
+
+        if (! $isAdmin && (! $studentId || (int) $receipt->student_id !== (int) $studentId)) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'ഈ രസീത് എഡിറ്റ് ചെയ്യാനുള്ള അനുമതിയില്ല.'], 403);
+            }
+
+            return redirect()->back()->with('error', 'ഈ രസീത് എഡിറ്റ് ചെയ്യാനുള്ള അനുമതിയില്ല.');
+        }
+
+        if ($receipt->is_cancelled) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'റദ്ദാക്കിയ രസീത് എഡിറ്റ് ചെയ്യാൻ സാധ്യമല്ല.'], 422);
+            }
+
+            return redirect()->back()->with('error', 'റദ്ദാക്കിയ രസീത് എഡിറ്റ് ചെയ്യാൻ സാധ്യമല്ല.');
+        }
+
+        $validated = $request->validate([
+            'donor_name' => ['required', 'string', 'max:150'],
+            'payment_method' => ['required', 'string', 'in:cash,upi,gpay,bank_transfer,card,other'],
+            'transaction_reference' => ['nullable', 'string', 'max:100'],
+            'donor_phone' => ['nullable', 'string', 'max:25'],
+            'donor_place' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $before = $receipt->only(['donor_name', 'payment_method', 'transaction_reference', 'donor_phone', 'donor_place']);
+
+        $receipt->donor_name = trim($validated['donor_name']);
+        $receipt->payment_method = $validated['payment_method'];
+        $receipt->transaction_reference = ! empty($validated['transaction_reference']) ? trim($validated['transaction_reference']) : null;
+
+        if (array_key_exists('donor_phone', $validated)) {
+            $receipt->donor_phone = trim((string) $validated['donor_phone']);
+        }
+        if (array_key_exists('donor_place', $validated)) {
+            $receipt->donor_place = trim((string) $validated['donor_place']);
+        }
+
+        $receipt->save();
+
+        AuditLogger::log('update_fund_receipt_by_student', $receipt, $before, $receipt->toArray());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "രസീത് #{$receipt->receipt_number} വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു!",
+                'receipt' => $receipt,
+            ]);
+        }
+
+        return redirect()->back()->with('success', "രസീത് #{$receipt->receipt_number} വിവരങ്ങൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു!");
+    }
+
+    /**
      * Display the Central Fund Collection Panel Dashboard (Staff / Admin).
      */
     public function dashboard(Request $request): View
