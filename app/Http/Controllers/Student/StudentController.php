@@ -130,7 +130,6 @@ class StudentController extends Controller
         $qrCodeSvg = QrCodeService::svg(route('verify.student', $student->qr_token), 200);
 
         $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student);
-        $studentAchievements = app(CoinRewardService::class)->getStudentAchievements($student);
         $coinTransactions = CoinTransaction::where('student_id', $student->id)
             ->latest()
             ->take(15)
@@ -149,7 +148,6 @@ class StudentController extends Controller
             'remainingSlots',
             'maxSlots',
             'coinSummary',
-            'studentAchievements',
             'coinTransactions',
             'isQrVerifiedSession'
         ));
