@@ -79,6 +79,8 @@
           activeTab: 'poster',
           sharing: false,
           showEditModal: false,
+          showDeleteModal: false,
+          deleteReason: '',
           editForm: {
               donor_name: @js($receipt->donor_name),
               payment_method: @js($receipt->payment_method),
@@ -163,6 +165,11 @@
                             class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-98">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         <span>Edit Details</span>
+                    </button>
+                    <button type="button" @click="showDeleteModal = true"
+                            class="px-3 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-98">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <span>Delete</span>
                     </button>
                 @endif
 
@@ -526,6 +533,93 @@
                         <button type="submit" 
                                 class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-600/20 cursor-pointer active:scale-98">
                             Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Apple-Style Delete Receipt Modal -->
+        <div x-show="showDeleteModal" 
+             x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md"
+             style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important; z-index: 99999 !important; display: flex !important; align-items: center !important; justify-content: center !important; background-color: rgba(10, 15, 30, 0.8) !important; -webkit-backdrop-filter: blur(8px) !important; backdrop-filter: blur(8px) !important;"
+             @keydown.escape.window="showDeleteModal = false">
+            
+            <!-- Backdrop Click to Close -->
+            <div class="fixed inset-0" style="position: absolute; inset: 0; width: 100%; height: 100%;" @click="showDeleteModal = false"></div>
+
+            <!-- Apple-Style Modal Dialog -->
+            <div x-show="showDeleteModal"
+                 x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-6 scale-95"
+                 class="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 z-10 text-slate-900 space-y-4"
+                 style="position: relative !important; z-index: 100000 !important; background-color: #ffffff !important; color: #0f172a !important; border-radius: 24px !important; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45) !important;"
+                 @click.stop>
+                
+                <button type="button" 
+                        @click="showDeleteModal = false"
+                        class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="flex items-center gap-3 pr-8">
+                    <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-sora text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                            രസീത് റദ്ദാക്കുക / ഡിലീറ്റ് ചെയ്യുക
+                        </h3>
+                        <p class="text-xs text-slate-500 font-anek">ഈ രസീത് സിസ്റ്റത്തിൽ നിന്നും റദ്ദാക്കപ്പെടുന്നു.</p>
+                    </div>
+                </div>
+
+                <!-- Receipt Info Card -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1 font-mono">
+                    <div>Receipt: <strong class="text-amber-800">#{{ $receipt->receipt_number }}</strong></div>
+                    <div>Donor: <strong class="text-slate-900">{{ $receipt->donor_name }}</strong></div>
+                    <div>Amount: <strong class="text-emerald-700">₹{{ number_format($receipt->amount, 2) }}</strong></div>
+                </div>
+
+                <!-- Delete Form -->
+                <form method="POST" action="{{ route('fund.receipts.destroy', $receipt) }}" class="space-y-4 pt-1">
+                    @csrf
+                    @method('DELETE')
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1 font-mono">
+                            Reason for Cancellation / റദ്ദാക്കാനുള്ള കാരണം <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="reason" 
+                               x-model="deleteReason" 
+                               required
+                               placeholder="ഉദാ: തുക തെറ്റായി രേഖപ്പെടുത്തി, ഡ്യൂപ്ലിക്കേറ്റ്, ദാതാവ് റദ്ദാക്കി..."
+                               class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 font-medium">
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                        <button type="button" 
+                                @click="showDeleteModal = false" 
+                                class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                :disabled="!deleteReason.trim()"
+                                :class="deleteReason.trim() ? 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-rose-600/20' : 'bg-rose-300 text-white cursor-not-allowed'"
+                                class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-98">
+                            Confirm & Delete Receipt
                         </button>
                     </div>
                 </form>

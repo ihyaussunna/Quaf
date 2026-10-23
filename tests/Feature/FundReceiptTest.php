@@ -657,4 +657,174 @@ class FundReceiptTest extends TestCase
         $response->assertSee('ഖാഫ് അദബിക് എഡിഷനിൽ ഞങ്ങളോടൊപ്പം ചേരാൻ മർകസിലേക്ക് നിങ്ങൾക്കും ഹൃദ്യമായ സ്വാഗതം');
         $response->assertDontSee('QUAF 09 Official Receipt - QFR-26-777');
     }
+
+    public function test_student_can_delete_own_receipt_with_cancellation_reason(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Bayan',
+            'slug' => 'al-bayan-del-1',
+            'code' => 'ABD1',
+            'color_hex' => '#10b981',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Test Student Del',
+            'student_id' => '601',
+            'qr_token' => 'token_601',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-601',
+            'donor_name' => 'Musthafa',
+            'amount' => 1000,
+            'payment_method' => 'upi',
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+        ]);
+
+        $response = $this->withSession(['fund_student_id' => $student->id])
+            ->delete(route('fund.student.receipts.destroy', $receipt), [
+                'reason' => 'തുക തെറ്റായി രേഖപ്പെടുത്തി',
+            ]);
+
+        $response->assertSessionHas('success');
+
+        $this->assertSoftDeleted('fund_receipts', [
+            'id' => $receipt->id,
+            'is_cancelled' => true,
+            'cancelled_reason' => 'തുക തെറ്റായി രേഖപ്പെടുത്തി',
+        ]);
+    }
+
+    public function test_student_cannot_delete_receipt_without_reason(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Bayan',
+            'slug' => 'al-bayan-del-2',
+            'code' => 'ABD2',
+            'color_hex' => '#10b981',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Test Student Del 2',
+            'student_id' => '602',
+            'qr_token' => 'token_602',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-602',
+            'donor_name' => 'Musthafa 2',
+            'amount' => 500,
+            'payment_method' => 'cash',
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+        ]);
+
+        $response = $this->withSession(['fund_student_id' => $student->id])
+            ->delete(route('fund.student.receipts.destroy', $receipt), [
+                'reason' => '',
+            ]);
+
+        $response->assertSessionHasErrors(['reason']);
+
+        $this->assertDatabaseHas('fund_receipts', [
+            'id' => $receipt->id,
+            'deleted_at' => null,
+            'is_cancelled' => false,
+        ]);
+    }
+
+    public function test_student_cannot_delete_another_students_receipt(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Bayan',
+            'slug' => 'al-bayan-del-3',
+            'code' => 'ABD3',
+            'color_hex' => '#10b981',
+        ]);
+
+        $studentA = Student::create([
+            'name' => 'Student A Del',
+            'student_id' => '603',
+            'qr_token' => 'token_603',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $studentB = Student::create([
+            'name' => 'Student B Del',
+            'student_id' => '604',
+            'qr_token' => 'token_604',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $receiptA = FundReceipt::create([
+            'receipt_number' => 'QFR-26-603',
+            'donor_name' => 'Original Donor',
+            'amount' => 1500,
+            'payment_method' => 'cash',
+            'student_id' => $studentA->id,
+            'group_id' => $group->id,
+        ]);
+
+        // Student B tries to delete Student A's receipt
+        $response = $this->withSession(['fund_student_id' => $studentB->id])
+            ->delete(route('fund.student.receipts.destroy', $receiptA), [
+                'reason' => 'Unauthorized attempt',
+            ]);
+
+        $response->assertSessionHas('error');
+
+        $this->assertDatabaseHas('fund_receipts', [
+            'id' => $receiptA->id,
+            'deleted_at' => null,
+            'is_cancelled' => false,
+        ]);
+    }
+
+    public function test_student_can_delete_from_receipt_view_page_and_redirects_to_desk(): void
+    {
+        $group = Group::create([
+            'name' => 'Al Bayan',
+            'slug' => 'al-bayan-del-4',
+            'code' => 'ABD4',
+            'color_hex' => '#10b981',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Student Desk Del',
+            'student_id' => '605',
+            'qr_token' => 'token_605',
+            'class_level' => 'Aliya',
+            'group_id' => $group->id,
+        ]);
+
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-605',
+            'donor_name' => 'Donor from Page',
+            'amount' => 2000,
+            'payment_method' => 'cash',
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+        ]);
+
+        $response = $this->withSession(['fund_student_id' => $student->id])
+            ->from(route('fund.receipts.show', $receipt))
+            ->delete(route('fund.receipts.destroy', $receipt), [
+                'reason' => 'ദാതാവ് പേയ്മെന്റ് റദ്ദാക്കി',
+            ]);
+
+        $response->assertRedirect(route('fund.student.desk'));
+        $response->assertSessionHas('success');
+
+        $this->assertSoftDeleted('fund_receipts', [
+            'id' => $receipt->id,
+            'is_cancelled' => true,
+        ]);
+    }
 }

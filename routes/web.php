@@ -856,6 +856,7 @@ Route::prefix('fund')->name('fund.')->group(function () {
     Route::get('/my-desk', [FundController::class, 'studentDesk'])->name('student.desk');
     Route::post('/my-desk/receipts', [FundController::class, 'studentStoreReceipt'])->name('student.receipts.store');
     Route::match(['put', 'patch', 'post'], '/my-desk/receipts/{receipt}', [FundController::class, 'studentUpdateReceipt'])->name('student.receipts.update');
+    Route::delete('/my-desk/receipts/{receipt}', [FundController::class, 'studentDestroyReceipt'])->name('student.receipts.destroy');
 
     // 3. Central Collector / Auth Desk (for legacy tests & staff)
     Route::get('/desk', [FundController::class, 'dashboard'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('dashboard');
@@ -864,6 +865,7 @@ Route::prefix('fund')->name('fund.')->group(function () {
     // 4. Public Receipt View, Image & Download (Accessible for donors & WhatsApp sharing)
     Route::get('/receipts/{receipt}', [FundController::class, 'show'])->name('receipts.show');
     Route::match(['put', 'patch', 'post'], '/receipts/{receipt}/update', [FundController::class, 'studentUpdateReceipt'])->name('receipts.update');
+    Route::delete('/receipts/{receipt}', [FundController::class, 'studentDestroyReceipt'])->name('receipts.destroy');
     Route::get('/receipts/{receipt}/image', [FundController::class, 'image'])->name('receipts.image');
     Route::get('/receipts/{receipt}/download', [FundController::class, 'download'])->name('receipts.download');
 });

@@ -355,6 +355,74 @@ class FundController extends Controller
     }
 
     /**
+     * Cancel / delete a receipt issued by a student (with mandatory reason).
+     */
+    public function studentDestroyReceipt(Request $request, FundReceipt $receipt): RedirectResponse|JsonResponse
+    {
+        FundReceipt::ensureSchema();
+
+        $studentId = session('fund_student_id');
+        $isAdmin = Auth::check() && (
+            (method_exists(Auth::user(), 'isAdmin') && Auth::user()->isAdmin()) ||
+            in_array(Auth::user()->role, ['admin', 'super_admin', 'fund_manager', 'fund_collector'])
+        );
+
+        if (! $isAdmin && (! $studentId || (int) $receipt->student_id !== (int) $studentId)) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'ഈ രസീത് ഡിലീറ്റ് ചെയ്യാനുള്ള അനുമതിയില്ല.'], 403);
+            }
+
+            return redirect()->back()->with('error', 'ഈ രസീത് ഡിലീറ്റ് ചെയ്യാനുള്ള അനുമതിയില്ല.');
+        }
+
+        if ($receipt->is_cancelled || $receipt->trashed()) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'ഈ രസീത് ഇതിനകം റദ്ദാക്കപ്പെട്ടതാണ്.'], 422);
+            }
+
+            return redirect()->back()->with('error', 'ഈ രസീത് ഇതിനകം റദ്ദാക്കപ്പെട്ടതാണ്.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:500'],
+        ]);
+
+        $reason = trim($validated['reason']);
+
+        $receipt->update([
+            'is_cancelled' => true,
+            'cancelled_reason' => $reason,
+            'cancelled_at' => now(),
+            'cancelled_by' => Auth::id() ?: null,
+        ]);
+
+        $receipt->delete(); // Soft delete
+
+        AuditLogger::log('delete_fund_receipt_by_student', $receipt, ['reason' => $reason], ['is_cancelled' => true]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "രസീത് #{$receipt->receipt_number} വിജയകരമായി റദ്ദാക്കി / ഡിലീറ്റ് ചെയ്തു.",
+            ]);
+        }
+
+        // If deleted from receipt view page, redirect to student desk or home
+        if ($request->header('referer') && str_contains($request->header('referer'), '/fund/receipts/')) {
+            if ($studentId) {
+                return redirect()->route('fund.student.desk')
+                    ->with('success', "രസീത് #{$receipt->receipt_number} വിജയകരമായി റദ്ദാക്കി / ഡിലീറ്റ് ചെയ്തു.");
+            }
+
+            return redirect()->route('fund.home')
+                ->with('success', "രസീത് #{$receipt->receipt_number} വിജയകരമായി റദ്ദാക്കി / ഡിലീറ്റ് ചെയ്തു.");
+        }
+
+        return redirect()->back()
+            ->with('success', "രസീത് #{$receipt->receipt_number} വിജയകരമായി റദ്ദാക്കി / ഡിലീറ്റ് ചെയ്തു.");
+    }
+
+    /**
      * Display the Central Fund Collection Panel Dashboard (Staff / Admin).
      */
     public function dashboard(Request $request): View
