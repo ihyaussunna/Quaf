@@ -162,4 +162,43 @@ class AdminFormsPrintTest extends TestCase
         $response->assertSee('QF1001');
         $response->assertSee('Faris Test');
     }
+
+    public function test_chest_slips_renders_successfully_when_student_has_no_group(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'QF1002',
+            'name' => 'General Student',
+            'group_id' => null,
+            'admission_number' => 'ADM002',
+            'class_level' => 'D4',
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.idcards.chest-slips'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Contestant Chest Number Slips');
+        $response->assertSee('QF1002');
+        $response->assertSee('General Student');
+        $response->assertSee('General');
+    }
+
+    public function test_admin_can_view_templates_page_with_badge_only(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.templates.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Participant Badge Template');
+        $response->assertSee('Group');
+        $response->assertDontSee('MERIT CERTIFICATE');
+    }
 }

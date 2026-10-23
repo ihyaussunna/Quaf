@@ -90,8 +90,8 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-sm" style="background-color: {{ $student->group->color_hex ?? '#f3bd2e' }};">
-                            {{ $student->group->name }}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-sm" style="background-color: {{ $student->group?->color_hex ?? '#005c94' }};">
+                            {{ $student->group?->name ?? 'General' }}
                         </span>
                         <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[9px] font-mono font-bold">
                             {{ $student->category }}
@@ -119,7 +119,7 @@
                             <div class="mt-1 flex flex-wrap gap-1">
                                 @foreach($student->entries->take(2) as $entry)
                                     <span class="px-1.5 py-0.5 rounded bg-slate-100 text-[8px] font-mono text-slate-600 truncate max-w-[140px]">
-                                        {{ $entry->program->name }}
+                                        {{ $entry->program?->name ?? '---' }}
                                     </span>
                                 @endforeach
                             </div>

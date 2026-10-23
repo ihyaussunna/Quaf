@@ -62,8 +62,8 @@
                             <p class="text-[7px] font-mono text-slate-500 uppercase">Ihyaussunna • Markaz</p>
                         </div>
                     </div>
-                    <div class="px-2 py-0.5 rounded font-mono font-bold text-[10px] text-white" style="background-color: {{ $student->group->color_hex ?? '#f3bd2e' }}">
-                        {{ $student->group->name }}
+                    <div class="px-2 py-0.5 rounded font-mono font-bold text-[10px] text-white" style="background-color: {{ $student->group?->color_hex ?? '#005c94' }}">
+                        {{ $student->group?->name ?? 'General' }}
                     </div>
                 </div>
 
