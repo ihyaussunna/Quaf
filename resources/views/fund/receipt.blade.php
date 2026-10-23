@@ -93,6 +93,15 @@
           },
           async shareWhatsAppImage() {
               this.sharing = true;
+              const donorName = @js($receipt->donor_name);
+              const donorPlace = @js($receipt->donor_place ?? '');
+              const donorDisplayName = donorPlace ? `${donorName}, ${donorPlace}` : donorName;
+              const shareMessage = `ജസാഖല്ലാഹു ഖൈർ...
+*${donorDisplayName}*
+നിങ്ങളുടെ ഈ ഹദിയ അല്ലാഹു സ്വീകരിക്കട്ടെ... 
+
+ഖാഫ് അദബിക് എഡിഷനിൽ ഞങ്ങളോടൊപ്പം ചേരാൻ മർകസിലേക്ക് നിങ്ങൾക്കും ഹൃദ്യമായ സ്വാഗതം`;
+
               try {
                   if (navigator.share) {
                       const response = await fetch('{{ $imageUrl }}');
@@ -102,7 +111,7 @@
                           await navigator.share({
                               files: [file],
                               title: 'QUAF Receipt #{{ $receipt->receipt_number }}',
-                              text: 'QUAF 09 Official Receipt - {{ $receipt->receipt_number }}'
+                              text: shareMessage
                           });
                           this.sharing = false;
                           return;
@@ -119,7 +128,8 @@
               document.body.appendChild(a);
               a.click();
               document.body.removeChild(a);
-              window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('QUAF 09 Receipt #{{ $receipt->receipt_number }}: ' + window.location.href), '_blank');
+              const fallbackUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareMessage + '\n\n' + window.location.href);
+              window.open(fallbackUrl, '_blank');
               this.sharing = false;
           }
       }">

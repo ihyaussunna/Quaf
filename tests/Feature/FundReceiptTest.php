@@ -639,4 +639,22 @@ class FundReceiptTest extends TestCase
         $this->assertEquals('Owner Name', $receiptA->donor_name);
         $this->assertEquals('cash', $receiptA->payment_method);
     }
+
+    public function test_receipt_view_contains_customized_malayalam_whatsapp_share_message(): void
+    {
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-777',
+            'donor_name' => 'ഉസ്മാൻ ഹാജി',
+            'donor_place' => 'കോഴിക്കോട്',
+            'amount' => 5000,
+            'payment_method' => 'cash',
+        ]);
+
+        $response = $this->get(route('fund.receipts.show', $receipt));
+        $response->assertOk();
+        $response->assertSee('ജസാഖല്ലാഹു ഖൈർ...');
+        $response->assertSee('നിങ്ങളുടെ ഈ ഹദിയ അല്ലാഹു സ്വീകരിക്കട്ടെ...');
+        $response->assertSee('ഖാഫ് അദബിക് എഡിഷനിൽ ഞങ്ങളോടൊപ്പം ചേരാൻ മർകസിലേക്ക് നിങ്ങൾക്കും ഹൃദ്യമായ സ്വാഗതം');
+        $response->assertDontSee('QUAF 09 Official Receipt - QFR-26-777');
+    }
 }
