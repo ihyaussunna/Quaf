@@ -134,47 +134,47 @@
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <!-- A+ Excellence -->
-                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                            <div class="rounded-2xl p-4 bg-white border-2 border-amber-300 text-center shadow-2xs hover:border-amber-400 transition-all">
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-2xl font-black font-sora text-amber-400">A+</span>
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                                    <span class="text-2xl font-black font-sora text-amber-600">A+</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-900 border border-amber-200">
                                         {{ $studentAchievements['grade_counts']['A+'] ?? 0 }}
                                     </span>
                                 </div>
-                                <span class="text-xs text-slate-400 font-medium block mt-1">Excellence</span>
+                                <span class="text-xs text-slate-700 font-bold block mt-1.5">Excellence</span>
                             </div>
 
                             <!-- A Proficient -->
-                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                            <div class="rounded-2xl p-4 bg-white border-2 border-emerald-300 text-center shadow-2xs hover:border-emerald-400 transition-all">
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-2xl font-black font-sora text-emerald-400">A</span>
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                                    <span class="text-2xl font-black font-sora text-emerald-600">A</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
                                         {{ $studentAchievements['grade_counts']['A'] ?? 0 }}
                                     </span>
                                 </div>
-                                <span class="text-xs text-slate-400 font-medium block mt-1">Proficient</span>
+                                <span class="text-xs text-slate-700 font-bold block mt-1.5">Proficient</span>
                             </div>
 
                             <!-- B Adequate -->
-                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                            <div class="rounded-2xl p-4 bg-white border-2 border-blue-300 text-center shadow-2xs hover:border-blue-400 transition-all">
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-2xl font-black font-sora text-blue-400">B</span>
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-400/20 text-blue-300 border border-blue-400/30">
+                                    <span class="text-2xl font-black font-sora text-blue-600">B</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-100 text-blue-900 border border-blue-200">
                                         {{ $studentAchievements['grade_counts']['B'] ?? 0 }}
                                     </span>
                                 </div>
-                                <span class="text-xs text-slate-400 font-medium block mt-1">Adequate</span>
+                                <span class="text-xs text-slate-700 font-bold block mt-1.5">Adequate</span>
                             </div>
 
                             <!-- C Satisfactory -->
-                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                            <div class="rounded-2xl p-4 bg-white border-2 border-slate-300 text-center shadow-2xs hover:border-slate-400 transition-all">
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-2xl font-black font-sora text-slate-300">C</span>
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-700/50 text-slate-300 border border-slate-600/30">
+                                    <span class="text-2xl font-black font-sora text-slate-700">C</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200">
                                         {{ $studentAchievements['grade_counts']['C'] ?? 0 }}
                                     </span>
                                 </div>
-                                <span class="text-xs text-slate-400 font-medium block mt-1">Satisfactory</span>
+                                <span class="text-xs text-slate-700 font-bold block mt-1.5">Satisfactory</span>
                             </div>
                         </div>
                     </div>

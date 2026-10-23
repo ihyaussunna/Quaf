@@ -207,47 +207,47 @@
                             <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Grade Achievements</div>
                             <div class="grid grid-cols-4 gap-2">
                                 <!-- A+ Excellence -->
-                                <div class="rounded-xl p-2.5 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-xs">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <span class="text-sm sm:text-base font-black font-sora text-amber-400">A+</span>
-                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                                <div class="rounded-xl p-2.5 bg-white border-2 border-amber-300 text-center shadow-2xs">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-base sm:text-lg font-black font-sora text-amber-600">A+</span>
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-200">
                                             {{ $studentAchievements['grade_counts']['A+'] ?? 0 }}
                                         </span>
                                     </div>
-                                    <span class="text-[9px] text-slate-400 font-medium block mt-0.5 truncate">Excellence</span>
+                                    <span class="text-[10px] text-slate-700 font-bold block mt-1 truncate">Excellence</span>
                                 </div>
 
                                 <!-- A Proficient -->
-                                <div class="rounded-xl p-2.5 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-xs">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <span class="text-sm sm:text-base font-black font-sora text-emerald-400">A</span>
-                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                                <div class="rounded-xl p-2.5 bg-white border-2 border-emerald-300 text-center shadow-2xs">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-base sm:text-lg font-black font-sora text-emerald-600">A</span>
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
                                             {{ $studentAchievements['grade_counts']['A'] ?? 0 }}
                                         </span>
                                     </div>
-                                    <span class="text-[9px] text-slate-400 font-medium block mt-0.5 truncate">Proficient</span>
+                                    <span class="text-[10px] text-slate-700 font-bold block mt-1 truncate">Proficient</span>
                                 </div>
 
                                 <!-- B Adequate -->
-                                <div class="rounded-xl p-2.5 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-xs">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <span class="text-sm sm:text-base font-black font-sora text-blue-400">B</span>
-                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-blue-400/20 text-blue-300 border border-blue-400/30">
+                                <div class="rounded-xl p-2.5 bg-white border-2 border-blue-300 text-center shadow-2xs">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-base sm:text-lg font-black font-sora text-blue-600">B</span>
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-100 text-blue-900 border border-blue-200">
                                             {{ $studentAchievements['grade_counts']['B'] ?? 0 }}
                                         </span>
                                     </div>
-                                    <span class="text-[9px] text-slate-400 font-medium block mt-0.5 truncate">Adequate</span>
+                                    <span class="text-[10px] text-slate-700 font-bold block mt-1 truncate">Adequate</span>
                                 </div>
 
                                 <!-- C Satisfactory -->
-                                <div class="rounded-xl p-2.5 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-xs">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <span class="text-sm sm:text-base font-black font-sora text-slate-300">C</span>
-                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-slate-700/50 text-slate-300 border border-slate-600/30">
+                                <div class="rounded-xl p-2.5 bg-white border-2 border-slate-300 text-center shadow-2xs">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-base sm:text-lg font-black font-sora text-slate-700">C</span>
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200">
                                             {{ $studentAchievements['grade_counts']['C'] ?? 0 }}
                                         </span>
                                     </div>
-                                    <span class="text-[9px] text-slate-400 font-medium block mt-0.5 truncate">Satisfactory</span>
+                                    <span class="text-[10px] text-slate-700 font-bold block mt-1 truncate">Satisfactory</span>
                                 </div>
                             </div>
                         </div>
@@ -410,12 +410,12 @@
                     </div>
                     <div class="space-y-1.5 max-h-64 overflow-y-auto pr-1">
                         @forelse($studentTransactions as $index => $stx)
-                            <div x-show="showAll || {{ $index }} < 5" class="p-3 rounded-xl bg-[#0f1d36] text-white flex items-center justify-between gap-3 text-xs border border-slate-800">
+                            <div x-show="showAll || {{ $index }} < 5" class="p-3 rounded-xl bg-slate-50 text-slate-900 flex items-center justify-between gap-3 text-xs border border-slate-200/80">
                                 <div class="min-w-0">
-                                    <div class="font-bold text-slate-100 truncate text-[11px]">{{ $stx->description }}</div>
+                                    <div class="font-bold text-slate-900 truncate text-[11px]">{{ $stx->description }}</div>
                                     <div class="text-[9px] font-mono text-slate-400">{{ $stx->created_at?->format('d M, h:i A') }}</div>
                                 </div>
-                                <div class="font-mono font-black text-xs flex-shrink-0 {{ $stx->coins > 0 ? 'text-emerald-400' : 'text-rose-400' }}">
+                                <div class="font-mono font-black text-xs flex-shrink-0 {{ $stx->coins > 0 ? 'text-emerald-700' : 'text-rose-700' }}">
                                     {{ $stx->coins > 0 ? '+' : '-' }} {{ abs($stx->coins) }} Coins
                                 </div>
                             </div>
