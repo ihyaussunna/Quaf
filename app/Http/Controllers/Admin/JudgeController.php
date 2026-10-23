@@ -32,14 +32,14 @@ class JudgeController extends Controller
         }
 
         $judges = $query->orderBy('name')->get();
-        $programs = Program::with('category')->orderBy('name')->get();
+        $programs = Program::with(['zone', 'category'])->orderBy('name')->get();
 
         return view('admin.judges.index', compact('judges', 'programs', 'search'));
     }
 
     public function create(): View
     {
-        $programs = Program::orderBy('name')->get();
+        $programs = Program::with(['zone', 'category'])->orderBy('name')->get();
 
         return view('admin.judges.create', compact('programs'));
     }
@@ -103,7 +103,7 @@ class JudgeController extends Controller
 
     public function edit(Judge $judge): View
     {
-        $programs = Program::orderBy('name')->get();
+        $programs = Program::with(['zone', 'category'])->orderBy('name')->get();
         $judge->load(['programs', 'user']);
 
         return view('admin.judges.edit', compact('judge', 'programs'));

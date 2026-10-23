@@ -286,4 +286,46 @@ class JudgePasswordManagementTest extends TestCase
         $response->assertRedirect(route('judge.dashboard'));
         $this->assertAuthenticatedAs($user);
     }
+
+    public function test_admin_judge_edit_and_create_pages_display_program_zones(): void
+    {
+        $program = Program::create([
+            'name' => 'Arabic Elocution',
+            'code' => 'Q9-129',
+            'category' => 'stage',
+            'type' => 'individual',
+            'eligibility' => 'Senior',
+            'points_first' => 10,
+            'points_second' => 7,
+            'points_third' => 5,
+        ]);
+
+        $user = User::create([
+            'name' => 'Judge Example',
+            'email' => 'judge_ex@quaf.fest',
+            'password' => Hash::make('secret'),
+            'role' => 'judge',
+            'is_active' => true,
+        ]);
+
+        $judge = Judge::create([
+            'user_id' => $user->id,
+            'name' => 'Judge Example',
+            'access_code' => '8899',
+        ]);
+
+        // Edit page
+        $editResponse = $this->actingAs($this->admin)->get(route('admin.judges.edit', $judge));
+        $editResponse->assertOk();
+        $editResponse->assertSee('Q9-129');
+        $editResponse->assertSee('Arabic Elocution');
+        $editResponse->assertSee('Senior');
+
+        // Create page
+        $createResponse = $this->actingAs($this->admin)->get(route('admin.judges.create'));
+        $createResponse->assertOk();
+        $createResponse->assertSee('Q9-129');
+        $createResponse->assertSee('Arabic Elocution');
+        $createResponse->assertSee('Senior');
+    }
 }

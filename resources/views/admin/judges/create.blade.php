@@ -71,14 +71,29 @@
             </div>
         </div>
 
-        <div>
-            <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Assign Programs to Judge</label>
-            <div class="max-h-48 overflow-y-auto space-y-2 p-3 rounded-xl bg-slate-50 border border-slate-300 text-xs font-mono">
+        <div x-data="{ searchProg: '' }">
+            <div class="flex items-center justify-between gap-3 mb-1.5">
+                <label class="block text-xs font-mono uppercase text-slate-600 font-bold">Assign Programs to Judge</label>
+                <div class="relative w-48 sm:w-64">
+                    <input type="text" x-model="searchProg" placeholder="Search program or zone..."
+                           class="w-full px-3 py-1 text-xs rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-[#005c94] font-mono">
+                </div>
+            </div>
+            <div class="max-h-60 overflow-y-auto space-y-1.5 p-3 rounded-xl bg-slate-50 border border-slate-300 text-xs font-mono">
                 @foreach($programs as $prog)
-                    <label class="flex items-center gap-2 text-slate-700 hover:text-slate-900 cursor-pointer">
-                        <input type="checkbox" name="program_ids[]" value="{{ $prog->id }}"
-                               class="rounded border-slate-300 text-[#f3bd2e] focus:ring-0">
-                        <span>[{{ $prog->code }}] {{ $prog->name }}</span>
+                    @php $zoneName = $prog->zone?->name ?: $prog->zone_name; @endphp
+                    <label class="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-slate-200/70 cursor-pointer text-slate-700 hover:text-slate-900 transition-colors"
+                           x-show="!searchProg || '{{ strtolower($prog->code . ' ' . $prog->name . ' ' . $zoneName) }}'.includes(searchProg.toLowerCase())">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <input type="checkbox" name="program_ids[]" value="{{ $prog->id }}"
+                                   class="rounded border-slate-300 text-[#005c94] focus:ring-0 shrink-0">
+                            <span class="truncate">
+                                <span class="font-bold text-slate-900">[{{ $prog->code }}]</span> {{ $prog->name }}
+                            </span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-md bg-blue-50 text-[#005c94] border border-blue-200 text-[10px] font-bold uppercase shrink-0">
+                            {{ $zoneName }}
+                        </span>
                     </label>
                 @endforeach
             </div>

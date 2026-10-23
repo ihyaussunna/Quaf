@@ -296,11 +296,17 @@
                             <!-- Checklist -->
                             <div class="max-h-48 overflow-y-auto space-y-1 pr-1">
                                 @foreach($programs as $prog)
-                                    <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-100 cursor-pointer text-xs"
-                                           x-show="!compSearch || '{{ strtolower(($prog->eligibility ?? 'A Zone') . ' ' . $prog->name) }}'.includes(compSearch.toLowerCase())">
-                                        <input type="checkbox" name="program_ids[]" value="{{ $prog->id }}" class="rounded text-[#be1e2d] focus:ring-[#be1e2d]">
-                                        <span class="text-slate-800">
-                                            <span class="text-slate-400">{{ $prog->eligibility ?? 'A Zone' }} -</span> {{ $prog->name }}
+                                    @php $zoneName = $prog->zone?->name ?: $prog->zone_name; @endphp
+                                    <label class="flex items-center justify-between gap-2 p-1.5 rounded hover:bg-slate-100 cursor-pointer text-xs"
+                                           x-show="!compSearch || '{{ strtolower($prog->code . ' ' . $prog->name . ' ' . $zoneName) }}'.includes(compSearch.toLowerCase())">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <input type="checkbox" name="program_ids[]" value="{{ $prog->id }}" class="rounded text-[#005c94] focus:ring-[#005c94] shrink-0">
+                                            <span class="truncate text-slate-800">
+                                                <span class="font-bold text-slate-900">[{{ $prog->code }}]</span> {{ $prog->name }}
+                                            </span>
+                                        </div>
+                                        <span class="px-1.5 py-0.5 rounded bg-blue-50 text-[#005c94] border border-blue-200 text-[10px] font-bold uppercase shrink-0">
+                                            {{ $zoneName }}
                                         </span>
                                     </label>
                                 @endforeach
