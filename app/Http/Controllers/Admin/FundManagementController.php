@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FundReceipt;
 use App\Models\FundReceiptSetting;
+use App\Models\Group;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\ReceiptImageGenerator;
@@ -75,6 +76,17 @@ class FundManagementController extends Controller
         $receipts = $query->paginate(25)->withQueryString();
         $collectors = User::whereIn('role', ['fund_collector', 'fund_manager', 'admin', 'super_admin'])->orderBy('name')->get();
 
+        // Top Collected Groups leaderboard
+        $topGroups = Group::query()
+            ->withSum(['fundReceipts as total_collected' => function ($q) {
+                $q->where('is_cancelled', false);
+            }], 'amount')
+            ->withCount(['fundReceipts as receipts_count' => function ($q) {
+                $q->where('is_cancelled', false);
+            }])
+            ->orderByDesc('total_collected')
+            ->get();
+
         return view('admin.fund.index', compact(
             'receipts',
             'collectors',
@@ -82,7 +94,8 @@ class FundManagementController extends Controller
             'totalAmount',
             'todayAmount',
             'cancelledCount',
-            'cancelledAmount'
+            'cancelledAmount',
+            'topGroups'
         ));
     }
 

@@ -165,6 +165,8 @@ class FundReceiptTest extends TestCase
         $response->assertSee('Receipts Ledger');
         $response->assertSee('Musthafa Moulavi');
         $response->assertSee('15,000.00');
+        $response->assertSee('Top Collected Groups');
+        $response->assertSee('Group Standings');
     }
 
     public function test_admin_can_delete_and_cancel_receipt(): void
@@ -339,7 +341,7 @@ class FundReceiptTest extends TestCase
         $this->assertEquals('image/jpeg', $downloadResponse->headers->get('Content-Type'));
     }
 
-    public function test_public_fund_home_displays_top_students_and_groups(): void
+    public function test_public_fund_home_displays_top_students_and_hides_top_groups(): void
     {
         $group = Group::create([
             'name' => 'Subulul Huda',
@@ -374,6 +376,7 @@ class FundReceiptTest extends TestCase
         $response->assertSee('Muhammad Rashid');
         $response->assertSee('Subulul Huda');
         $response->assertSee('10,000');
+        $response->assertDontSee('Top Collected Groups');
     }
 
     public function test_api_search_students_returns_filtered_results(): void

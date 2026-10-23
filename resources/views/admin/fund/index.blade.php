@@ -86,6 +86,107 @@
         </div>
     </div>
 
+    <!-- Top Collected Groups Standings -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-slate-100">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                        Group Standings
+                    </span>
+                    <h2 class="text-base font-black text-slate-900 tracking-tight font-sora">
+                        Top Collected Groups
+                    </h2>
+                </div>
+                <p class="text-xs text-slate-500 font-anek mt-0.5">
+                    ഫെസ്റ്റിവൽ ഗ്രൂപ്പുകളുടെ അടിസ്ഥാനത്തിലുള്ള ആകെ ഫണ്ട് കളക്ഷൻ റാങ്കിംഗ്.
+                </p>
+            </div>
+            <div class="text-xs font-mono text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 self-start sm:self-auto">
+                Total {{ $topGroups->count() }} Groups
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+            @forelse($topGroups as $index => $grp)
+                @php
+                    $rank = $index + 1;
+                    $collected = (float) ($grp->total_collected ?? 0);
+                    $count = (int) ($grp->receipts_count ?? 0);
+                    $percentage = $totalAmount > 0 ? round(($collected / $totalAmount) * 100, 1) : 0;
+
+                    $isGold = ($rank === 1);
+                    $isSilver = ($rank === 2);
+                    $isBronze = ($rank === 3);
+
+                    $rankBadge = match($rank) {
+                        1 => 'bg-amber-400 text-amber-950 font-black shadow-xs shadow-amber-400/50',
+                        2 => 'bg-slate-300 text-slate-900 font-black shadow-xs',
+                        3 => 'bg-amber-700 text-white font-black shadow-xs',
+                        default => 'bg-slate-100 text-slate-600 font-bold border border-slate-200'
+                    };
+
+                    $cardBorder = match($rank) {
+                        1 => 'border-amber-300 bg-gradient-to-b from-amber-50/40 to-white ring-1 ring-amber-300/40',
+                        2 => 'border-slate-300 bg-gradient-to-b from-slate-50/60 to-white',
+                        3 => 'border-amber-700/30 bg-gradient-to-b from-amber-700/5 to-white',
+                        default => 'border-slate-200 bg-white'
+                    };
+                @endphp
+
+                <div class="relative p-4 rounded-xl border {{ $cardBorder }} flex flex-col justify-between overflow-hidden shadow-2xs hover:shadow-xs transition-all">
+                    <!-- Left Accent Bar with Group Color -->
+                    <div class="absolute top-0 bottom-0 left-0 w-1.5" style="background-color: {{ $grp->color_hex ?? '#be1e2d' }};"></div>
+
+                    <div class="pl-1">
+                        <!-- Top Row: Rank & Code -->
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-mono {{ $rankBadge }}">
+                                #{{ $rank }}
+                            </span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-black"
+                                  style="background-color: {{ $grp->color_hex ?? '#be1e2d' }}18; color: {{ $grp->color_hex ?? '#be1e2d' }};">
+                                {{ $grp->code }}
+                            </span>
+                        </div>
+
+                        <!-- Group Name -->
+                        <h3 class="text-sm font-bold text-slate-900 tracking-tight truncate" title="{{ $grp->name }}">
+                            {{ $grp->name }}
+                        </h3>
+
+                        <!-- Receipts count -->
+                        <div class="text-[11px] font-mono text-slate-500 mt-0.5">
+                            {{ number_format($count) }} {{ \Illuminate\Support\Str::plural('receipt', $count) }}
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Amount & Progress -->
+                    <div class="pl-1 mt-3 pt-3 border-t border-slate-100">
+                        <div class="flex items-baseline justify-between gap-1">
+                            <span class="text-base sm:text-lg font-black font-mono text-slate-900">
+                                ₹{{ number_format($collected, 0) }}
+                            </span>
+                            <span class="text-[10px] font-mono text-slate-400 font-semibold">
+                                {{ $percentage }}%
+                            </span>
+                        </div>
+                        
+                        <!-- Progress bar relative to total -->
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                            <div class="h-1.5 rounded-full transition-all duration-500"
+                                 style="width: {{ min(100, max(0, $percentage)) }}%; background-color: {{ $grp->color_hex ?? '#be1e2d' }};"></div>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full py-6 text-center text-slate-400 text-xs">
+                    No group standings available.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
     <!-- Filter & Search Toolbar -->
     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
         <form method="GET" action="{{ route('admin.fund.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">

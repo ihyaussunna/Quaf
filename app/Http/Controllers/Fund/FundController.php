@@ -52,17 +52,6 @@ class FundController extends Controller
             ->take(10)
             ->get();
 
-        // 2. Top Collected Groups
-        $topGroups = Group::query()
-            ->withSum(['fundReceipts as total_collected' => function ($q) {
-                $q->where('is_cancelled', false);
-            }], 'amount')
-            ->withCount(['fundReceipts as receipts_count' => function ($q) {
-                $q->where('is_cancelled', false);
-            }])
-            ->orderByDesc('total_collected')
-            ->get();
-
         // Overall Fund Stats
         $overallQuery = FundReceipt::where('is_cancelled', false);
         $totalCollected = (clone $overallQuery)->sum('amount');
@@ -90,7 +79,6 @@ class FundController extends Controller
 
         return view('fund.home', compact(
             'topStudents',
-            'topGroups',
             'totalCollected',
             'totalReceiptsCount',
             'classes',
