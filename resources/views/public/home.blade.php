@@ -721,18 +721,12 @@
                 <!-- Spotlight Video Description Card -->
                 <div class="lg:col-span-4 rounded-3xl p-6 sm:p-8 bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center gap-2 mb-3">
-                            @if($featuredVideo->is_live)
+                        @if($featuredVideo->is_live)
+                            <div class="flex items-center gap-2 mb-3">
                                 <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
                                 <span class="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">Live Broadcast</span>
-                            @elseif($featuredVideo->is_featured)
-                                <span class="text-amber-400 font-bold text-sm">★</span>
-                                <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Featured Spotlight Video</span>
-                            @else
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-                                <span class="text-xs font-mono uppercase tracking-widest text-red-400 font-bold">Featured Video</span>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                         <h3 class="font-sora text-xl sm:text-2xl font-bold text-white mb-3 leading-snug">
                             {{ $featuredVideo->title }}
                         </h3>
