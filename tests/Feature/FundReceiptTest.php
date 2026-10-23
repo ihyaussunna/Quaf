@@ -7,6 +7,7 @@ use App\Models\FundReceiptSetting;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\ReceiptImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -469,5 +470,70 @@ class FundReceiptTest extends TestCase
         $logoutResponse = $this->withSession(['fund_student_id' => $student->id])->get(route('fund.student.logout'));
         $logoutResponse->assertRedirect(route('fund.home'));
         $this->assertNull(session('fund_student_id'));
+    }
+
+    public function test_office_student_account_can_be_selected_and_has_no_group(): void
+    {
+        $response = $this->getJson(route('fund.api.search-students', ['class_level' => 'OFFICE']));
+
+        $response->assertOk();
+        $response->assertJsonFragment([
+            'name' => 'OFFICE',
+            'chest_number' => 'OFFICE',
+            'class_level' => 'OFFICE',
+            'group_name' => '',
+            'group_code' => '',
+        ]);
+
+        $officeStudent = Student::where('student_id', 'OFFICE')->first();
+        $this->assertNotNull($officeStudent);
+        $this->assertNull($officeStudent->group_id);
+
+        // Desk login as office
+        $loginResponse = $this->post(route('fund.student.login'), [
+            'student_id' => $officeStudent->id,
+        ]);
+        $loginResponse->assertRedirect(route('fund.student.desk'));
+
+        // View desk
+        $deskResponse = $this->withSession(['fund_student_id' => $officeStudent->id])->get(route('fund.student.desk'));
+        $deskResponse->assertOk();
+        $deskResponse->assertSee('OFFICE');
+
+        // Home page contains OFFICE in classes dropdown
+        $homeResponse = $this->get(route('fund.home'));
+        $homeResponse->assertOk();
+        $homeResponse->assertSee('<option value="OFFICE">OFFICE</option>', false);
+    }
+
+    public function test_dual_font_receipt_rendering_for_malayalam_and_english(): void
+    {
+        $malayalamReceipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-991',
+            'donor_name' => 'മുഹമ്മദ് ഷാഫി',
+            'amount' => 1000,
+            'payment_method' => 'cash',
+        ]);
+
+        $englishReceipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-992',
+            'donor_name' => 'Mohammed Shafi',
+            'amount' => 2000,
+            'payment_method' => 'upi',
+        ]);
+
+        $malayalamImage = ReceiptImageGenerator::generate($malayalamReceipt);
+        $this->assertInstanceOf(\GdImage::class, $malayalamImage);
+
+        $englishImage = ReceiptImageGenerator::generate($englishReceipt);
+        $this->assertInstanceOf(\GdImage::class, $englishImage);
+
+        $malayalamStream = $this->get(route('fund.receipts.image', $malayalamReceipt));
+        $malayalamStream->assertOk();
+        $malayalamStream->assertHeader('Content-Type', 'image/jpeg');
+
+        $englishStream = $this->get(route('fund.receipts.image', $englishReceipt));
+        $englishStream->assertOk();
+        $englishStream->assertHeader('Content-Type', 'image/jpeg');
     }
 }

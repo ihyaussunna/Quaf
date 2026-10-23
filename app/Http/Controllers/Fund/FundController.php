@@ -12,7 +12,11 @@ use App\Services\ReceiptImageGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -24,6 +28,7 @@ class FundController extends Controller
     public function index(Request $request): View
     {
         FundReceipt::ensureSchema();
+        self::ensureOfficeAccount();
 
         // 1. Top Collected Students (Order by total collected desc)
         $topStudents = Student::query()
@@ -57,12 +62,16 @@ class FundController extends Controller
         $totalCollected = (clone $overallQuery)->sum('amount');
         $totalReceiptsCount = (clone $overallQuery)->count();
 
-        // Distinct Classes for Student Selection dropdown
+        // Distinct Classes for Student Selection dropdown (includes OFFICE)
         $classes = Student::whereNotNull('class_level')
             ->where('class_level', '!=', '')
             ->distinct()
             ->orderBy('class_level')
             ->pluck('class_level');
+
+        if (! $classes->contains('OFFICE')) {
+            $classes->push('OFFICE');
+        }
 
         // All Groups for Student Selection dropdown (optional selection)
         $groups = Group::orderBy('name')->get();
@@ -85,10 +94,45 @@ class FundController extends Controller
     }
 
     /**
+     * Ensure the special OFFICE student account exists.
+     */
+    public static function ensureOfficeAccount(): void
+    {
+        try {
+            if (Schema::hasTable('students')) {
+                if (! DB::table('students')->where('student_id', 'OFFICE')->exists()) {
+                    try {
+                        Artisan::call('migrate', ['--force' => true]);
+                    } catch (\Throwable) {
+                    }
+
+                    DB::table('students')->updateOrInsert(
+                        ['student_id' => 'OFFICE'],
+                        [
+                            'name' => 'OFFICE',
+                            'class_level' => 'OFFICE',
+                            'group_id' => null,
+                            'category' => 'Office',
+                            'gender' => 'Other',
+                            'qr_token' => Str::random(40),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]
+                    );
+                }
+            }
+        } catch (\Throwable) {
+            // Fail gracefully if schema constraints prevent null before migration
+        }
+    }
+
+    /**
      * API to search and filter students dynamically.
      */
     public function searchStudents(Request $request): JsonResponse
     {
+        self::ensureOfficeAccount();
+
         $classLevel = trim((string) $request->input('class_level'));
         $groupId = $request->input('group_id');
         $search = trim((string) $request->input('query', $request->input('search')));
@@ -115,8 +159,8 @@ class FundController extends Controller
         $students = $query->orderBy('name')->take($limit)->get();
 
         return response()->json($students->map(function ($s) {
-            $groupName = $s->group?->name ?? 'No Group';
-            $groupCode = $s->group?->code ?: (strtok($groupName, ' ') ?: $groupName);
+            $groupName = $s->group?->name ?? '';
+            $groupCode = $s->group ? ($s->group->code ?: (strtok($groupName, ' ') ?: $groupName)) : '';
 
             return [
                 'id' => $s->id,

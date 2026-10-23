@@ -40,6 +40,11 @@ class ReceiptImageGenerator
             $soraBold = $rockwellBold;
         }
 
+        $anekMalayalamBold = public_path('fonts/AnekMalayalam-Bold.ttf');
+        if (! file_exists($anekMalayalamBold)) {
+            $anekMalayalamBold = $soraBold;
+        }
+
         $rockwellRegular = public_path('fonts/Rockwell-Regular.otf');
         if (! file_exists($rockwellRegular)) {
             $rockwellRegular = $rockwellBold;
@@ -84,7 +89,11 @@ class ReceiptImageGenerator
         @imagettftext($img, $dateSize, 0, $dateX, $dateTargetY, $dateColor, $rockwellBold, $dateText);
 
         // 3. Donor Name
-        $donorName = strtoupper((string) $receipt->donor_name);
+        $rawDonorName = trim((string) $receipt->donor_name);
+        $isMalayalam = (bool) preg_match('/[\x{0D00}-\x{0D7F}]/u', $rawDonorName);
+        $donorName = mb_strtoupper($rawDonorName, 'UTF-8');
+        $donorFont = $isMalayalam ? $anekMalayalamBold : $soraBold;
+
         $donorBaseSize = (int) ($settings->donor_font_size ?? 40);
         $donorColor = self::allocateHexColor($img, $settings->donor_color ?? '#ffffff', [255, 255, 255]);
         $donorTargetX = (int) ($settings->donor_x ?? 563);
@@ -95,7 +104,7 @@ class ReceiptImageGenerator
         $maxNameWidth = $w - 220; // safe margin
 
         while ($donorSize > 14) {
-            $bbox = @imagettfbbox($donorSize, 0, $soraBold, $donorName);
+            $bbox = @imagettfbbox($donorSize, 0, $donorFont, $donorName);
             if (! $bbox) {
                 break;
             }
@@ -106,7 +115,7 @@ class ReceiptImageGenerator
             $donorSize -= 2;
         }
 
-        $bbox = @imagettfbbox($donorSize, 0, $soraBold, $donorName);
+        $bbox = @imagettfbbox($donorSize, 0, $donorFont, $donorName);
         $donorX = $donorTargetX;
         if ($bbox) {
             $textW = abs($bbox[4] - $bbox[0]);
@@ -116,7 +125,7 @@ class ReceiptImageGenerator
                 $donorX = (int) ($donorTargetX - $textW);
             }
         }
-        @imagettftext($img, $donorSize, 0, $donorX, $donorTargetY, $donorColor, $soraBold, $donorName);
+        @imagettftext($img, $donorSize, 0, $donorX, $donorTargetY, $donorColor, $donorFont, $donorName);
 
         // 4. Amount
         $amountFormatted = number_format($receipt->amount, 0, '.', ',');

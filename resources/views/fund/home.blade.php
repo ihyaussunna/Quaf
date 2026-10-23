@@ -554,7 +554,8 @@ function fundHomePage() {
                                 </div>
                             </div>
 
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 uppercase tracking-wide"
+                            <span x-show="s.group_code || s.group_name"
+                                  class="px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 uppercase tracking-wide"
                                   :style="'background-color: ' + (s.group_color || '#be1e2d') + '15; color: ' + (s.group_color || '#be1e2d') + '; border: 1px solid ' + (s.group_color || '#be1e2d') + '30;'"
                                   x-text="s.group_code || s.group_name">
                             </span>

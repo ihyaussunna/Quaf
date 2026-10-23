@@ -165,8 +165,12 @@ function fundDesk() {
                         Donor Name / ദാതാവിന്റെ പേര് <span class="text-rose-500">*</span>
                     </label>
                     <input type="text" name="donor_name" value="{{ old('donor_name') }}" required
-                           placeholder="Enter full name of donor / contributor"
+                           placeholder="ദാതാവിന്റെ പേര് (ഇംഗ്ലീഷിലോ മലയാളത്തിലോ നൽകാം)"
+                           style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
                            class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm font-semibold text-slate-900 placeholder-slate-400">
+                    <p class="text-[11px] text-slate-500 font-anek mt-1">
+                        ഇംഗ്ലീഷിൽ ടൈപ്പ് ചെയ്താൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ ടൈപ്പ് ചെയ്താൽ Anek Malayalam ഫോണ്ടിലും രസീതിൽ പ്രിന്റ് ചെയ്യപ്പെടും.
+                    </p>
                     @error('donor_name')
                         <p class="text-xs text-rose-600 font-medium mt-1">{{ $message }}</p>
                     @enderror

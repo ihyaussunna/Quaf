@@ -237,8 +237,12 @@ function studentFundDesk() {
                             Donor Name / ദാതാവിന്റെ പേര് <span class="text-rose-500">*</span>
                         </label>
                         <input type="text" name="donor_name" value="{{ old('donor_name') }}" required
-                               placeholder="Enter contributor / donor full name"
+                               placeholder="ദാതാവിന്റെ പേര് (ഇംഗ്ലീഷിലോ മലയാളത്തിലോ നൽകാം)"
+                               style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
                                class="w-full px-4 py-3 rounded-xl bg-slate-50/80 hover:bg-slate-100/70 focus:bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+                        <p class="text-[11px] text-slate-500 font-anek mt-1">
+                            ഇംഗ്ലീഷിൽ ടൈപ്പ് ചെയ്താൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ ടൈപ്പ് ചെയ്താൽ Anek Malayalam ഫോണ്ടിലും രസീതിൽ നൽകപ്പെടും.
+                        </p>
                         @error('donor_name')
                             <p class="text-xs text-rose-500 font-mono mt-1">{{ $message }}</p>
                         @enderror
