@@ -31,21 +31,30 @@
         }
     }
 }">
-    <!-- Top Bar (Light Theme) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+    <!-- Top Bar (Clean & Professional) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
         <div class="flex items-center gap-3">
-            <a href="{{ route('judge.dashboard') }}" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-semibold">
+            <a href="{{ route('judge.dashboard') }}" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-bold transition-colors">
                 &larr; Back to Schedule
             </a>
             <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="text-base font-sora font-bold text-slate-900">{{ $program->name }}</h1>
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-base sm:text-lg font-sora font-bold text-slate-900">{{ $program->name }}</h1>
                     @if($program->malayalam_name)
                         <span class="text-xs font-ml text-slate-500">({{ $program->malayalam_name }})</span>
                     @endif
+                    <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-[#005c94] border border-blue-200 text-[10px] font-mono font-bold uppercase tracking-wider">
+                        {{ $program->zone?->name ?: $program->zone_name }}
+                    </span>
                 </div>
-                <p class="text-[11px] font-mono text-slate-500">
-                    Code: {{ $program->code }} • Stage: {{ $program->stage->name ?? 'TBA' }} • Duration: {{ $program->duration_minutes }} Mins
+                <p class="text-[11px] font-mono text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                    <span>Code: <strong class="text-slate-800">{{ $program->code }}</strong></span>
+                    <span>•</span>
+                    <span>Zone: <strong class="text-[#005c94]">{{ $program->zone?->name ?: $program->zone_name }}</strong></span>
+                    <span>•</span>
+                    <span>Stage: <strong class="text-slate-800">{{ $program->stage->name ?? 'TBA' }}</strong></span>
+                    <span>•</span>
+                    <span>Duration: <strong class="text-slate-800">{{ $program->duration_minutes }} Mins</strong></span>
                 </p>
             </div>
         </div>
@@ -55,15 +64,15 @@
                    target="_blank" 
                    class="px-3.5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white border border-[#be1e2d] text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                    <span>Print / Download Answers (PDF)</span>
+                    <span>Print Answers (PDF)</span>
                 </a>
             @endif
 
-            <!-- Rules Button -->
+            <!-- Rules Button (Clean Blue Theme with high contrast) -->
             <button type="button" @click="rulesModalOpen = true"
-                    class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#f3bd2e] border border-amber-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>View Rules & Guidelines</span>
+                    class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005c94] border border-blue-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+                <svg class="w-4 h-4 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Rules & Guidelines</span>
             </button>
 
             <!-- Reset Drafts Button -->
@@ -74,46 +83,41 @@
                 <span>Reset Drafts</span>
             </button>
 
-            <span class="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-bold">
+            <span class="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-xs font-mono font-bold">
                 {{ $entries->count() }} Candidates
             </span>
         </div>
     </div>
 
-    <!-- 2 Evaluation Modes Switcher (Simple 100-Mark Scale vs Criteria Breakdown) -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
-        <div>
-            <div class="flex items-center gap-2">
-                <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">Scoring Mode / മാർക്ക് നൽകുന്ന രീതി:</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase"
-                      :class="evaluationMode === 'simple' ? 'bg-blue-100 text-[#005c94] border border-blue-200' : 'bg-rose-100 text-[#be1e2d] border border-rose-200'"
-                      x-text="evaluationMode === 'simple' ? 'Simple Mode (Active)' : 'Criteria Mode (Active)'"></span>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">
-                ഡിഫോൾട്ടായി <strong class="text-slate-800">Simple Mode</strong> ഓട്ടോമാറ്റിക്കായി ലഭ്യമാക്കിയിരിക്കുന്നു. ആവശ്യമെങ്കിൽ താഴെ നിന്നും <strong class="text-slate-800">Criteria Mode</strong> തിരഞ്ഞെടുക്കാവുന്നതാണ്.
-            </p>
+    <!-- Scoring Mode Switcher (Clean & Minimal) -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-700">Scoring Mode:</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wide"
+                  :class="evaluationMode === 'simple' ? 'bg-blue-100 text-[#005c94] border border-blue-200' : 'bg-rose-100 text-[#be1e2d] border border-rose-200'"
+                  x-text="evaluationMode === 'simple' ? 'Simple Mode' : 'Criteria Mode'"></span>
         </div>
 
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
             <!-- Mode Selection Dropdown -->
-            <div class="relative min-w-[270px] sm:min-w-[310px]">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none transition-colors"
+            <div class="relative min-w-[220px] sm:min-w-[260px]">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors"
                      :class="evaluationMode === 'simple' ? 'text-[#005c94]' : 'text-[#be1e2d]'">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
                 </div>
                 <select x-model="evaluationMode"
-                        class="w-full pl-10 pr-10 py-2.5 rounded-xl border-2 font-mono text-xs sm:text-sm font-bold appearance-none transition-all cursor-pointer shadow-xs focus:outline-none"
+                        class="w-full pl-9 pr-9 py-2 rounded-xl border-2 font-mono text-xs font-bold appearance-none transition-all cursor-pointer shadow-2xs focus:outline-none"
                         :class="evaluationMode === 'simple'
                             ? 'bg-blue-50/80 border-[#005c94]/40 text-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20'
                             : 'bg-rose-50/80 border-[#be1e2d]/40 text-[#be1e2d] focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/20'">
-                    <option value="simple">1. Simple Mode (100-ൽ നേരിട്ടുള്ള മാർക്ക്)</option>
+                    <option value="simple">Simple Mode (100 Mark)</option>
                     @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
-                        <option value="criteria">2. Criteria Mode (മാനദണ്ഡങ്ങൾ തിരിച്ചുള്ള മാർക്ക്)</option>
+                        <option value="criteria">Criteria Mode</option>
                     @endif
                 </select>
-                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-500">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                     </svg>
@@ -122,17 +126,17 @@
 
             <!-- Quick Pill Buttons Switcher (Synced with Dropdown) -->
             @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
-                <div class="hidden lg:flex p-1 bg-slate-100 rounded-xl border border-slate-200 gap-1 shrink-0">
+                <div class="hidden sm:flex p-1 bg-slate-100 rounded-xl border border-slate-200 gap-1 shrink-0">
                     <button type="button"
                             @click="evaluationMode = 'simple'"
                             :class="evaluationMode === 'simple' ? 'bg-[#005c94] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
+                            class="px-3 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 cursor-pointer">
                         <span>Simple</span>
                     </button>
                     <button type="button"
                             @click="evaluationMode = 'criteria'"
                             :class="evaluationMode === 'criteria' ? 'bg-[#be1e2d] text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer">
+                            class="px-3 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 cursor-pointer">
                         <span>Criteria</span>
                     </button>
                 </div>
@@ -145,12 +149,12 @@
          x-show="evaluationMode === 'criteria'">
         <span class="text-slate-500 font-bold uppercase tracking-wider">Evaluation Rubric:</span>
         @if(!$program->has_criteria || $program->scoringCriteria->isEmpty())
-            <span class="px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold">Total Mark Only (100-Point Scale)</span>
+            <span class="px-3 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 font-bold">Total Mark Only (100-Point Scale)</span>
         @else
             @foreach($program->scoringCriteria as $criterion)
                 <div class="px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
                     <span class="text-slate-800 font-medium">{{ $criterion->criterion_name }}</span>
-                    <span class="text-[#f3bd2e] font-bold">({{ $criterion->max_marks }} pts)</span>
+                    <span class="text-[#005c94] font-bold">({{ $criterion->max_marks }} pts)</span>
                 </div>
             @endforeach
         @endif
@@ -159,13 +163,13 @@
     <div x-data="{ online: navigator.onLine }"
          x-init="window.addEventListener('online', () => online = true); window.addEventListener('offline', () => online = false)"
          x-show="!online" 
-         class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono flex items-center justify-between shadow-xs"
+         class="p-3.5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs font-mono flex items-center justify-between shadow-xs"
          style="display: none;">
         <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
             <span class="font-bold">Offline Mode: Internet connection is unavailable. Your scores are saved locally in this browser and will sync when reconnected.</span>
         </div>
-        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-800">Local Draft Active</span>
+        <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-lg bg-rose-200 text-rose-900">Local Draft Active</span>
     </div>
     <!-- Anonymous Participants Evaluation Cards (Strict Confidentiality: Code Letters Only) -->
     <div class="space-y-6">
@@ -296,45 +300,40 @@
                     @csrf
                     <!-- Anonymous Header (No Name, No Group, No Photo) -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center justify-center font-mono font-black text-xl text-[#f3bd2e] shadow-xs">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 border-2 border-blue-200 flex items-center justify-center font-mono font-black text-xl text-[#005c94] shadow-xs">
                                 {{ $entry->code_letter ?? chr(65 + $index) }}
                             </div>
                             <div>
-                                <div class="flex items-center gap-2">
-                                    <h3 class="text-lg font-sora font-black text-slate-900 tracking-wide">{{ $displayCode }}</h3>
-                                    <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-semibold">
-                                        Anonymous Entry #{{ $index + 1 }}
-                                    </span>
-                                </div>
+                                <h3 class="text-lg font-sora font-black text-slate-900 tracking-wide">{{ $displayCode }}</h3>
                                 <p class="text-[11px] font-mono text-slate-400 mt-0.5">
                                     Confidential evaluation • Adjudicate by code letter only
                                 </p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                             <template x-if="isSubmitted">
                                 <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    <span>Submitted (Score: <span x-text="submittedScore"></span>)</span>
+                                    <span>Submitted (<span x-text="submittedScore"></span>)</span>
                                 </span>
                             </template>
                             <template x-if="!isSubmitted">
-                                <span class="px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-mono text-xs font-bold">
+                                <span class="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-mono text-xs font-bold">
                                     Pending Evaluation
                                 </span>
                             </template>
-                            <div class="px-4 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[80px]">
-                                <span class="text-[9px] text-slate-400 block uppercase font-semibold">Total Score</span>
-                                <span class="text-xl font-bold text-[#f3bd2e]" x-text="total">0</span>
+                            <div class="px-4 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[75px]">
+                                <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-wider">Score</span>
+                                <span class="text-xl font-black text-[#005c94]" x-text="total">0</span>
                             </div>
-                            <div class="px-3.5 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[65px]">
-                                <span class="text-[9px] text-slate-400 block uppercase font-semibold">Grade</span>
+                            <div class="px-3.5 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[60px]">
+                                <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-wider">Grade</span>
                                 <span class="text-sm font-black px-2 py-0.5 rounded-lg inline-block transition-colors"
                                       :class="{
                                           'bg-emerald-100 text-emerald-800': computedGrade === 'A+' || computedGrade === 'A',
                                           'bg-blue-100 text-blue-800': computedGrade === 'B',
-                                          'bg-amber-100 text-amber-800': computedGrade === 'C',
+                                          'bg-slate-200 text-slate-800': computedGrade === 'C',
                                           'bg-slate-100 text-slate-400': computedGrade === '-'
                                       }"
                                       x-text="computedGrade">-</span>
@@ -516,7 +515,7 @@
                     @elseif(!empty($hasOnlineSubmissions))
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-500 flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                                 <span>ഈ കോഡ് ലെറ്ററിൽ ഓൺലൈൻ സബ്മിഷൻ ഇതുവരെ ലഭിച്ചിട്ടില്ല (No online submission received yet for Code {{ $entry->code_letter }}).</span>
                             </div>
                         </div>
@@ -525,26 +524,22 @@
                     <!-- Scoring Mode Hidden Input -->
                     <input type="hidden" name="scoring_mode" :value="evaluationMode">
 
-                    <!-- Mode 1: Simple 100-Point Score Input (Tablet & Mobile Optimized) -->
-                    <div x-show="evaluationMode === 'simple'" class="space-y-3">
-                        <div class="bg-blue-50/50 border-2 border-blue-200 rounded-2xl p-5 sm:p-6 max-w-md space-y-3 shadow-2xs">
+                    <!-- Mode 1: Simple 100-Point Score Input (Clean & Touch-Friendly) -->
+                    <div x-show="evaluationMode === 'simple'">
+                        <div class="bg-slate-50/70 border-2 border-blue-200 rounded-2xl p-4 max-w-xs space-y-2 shadow-2xs">
                             <div class="flex items-center justify-between text-xs font-mono">
-                                <span class="text-blue-950 font-bold uppercase tracking-wider">Total Score (നേരിട്ടുള്ള മാർക്ക്)</span>
-                                <span class="text-[#005c94] font-black bg-blue-100 border border-blue-200 px-3 py-1 rounded-xl">/ 100 max</span>
+                                <span class="text-slate-800 font-bold uppercase tracking-wider">Score</span>
+                                <span class="text-[#005c94] font-bold bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-lg text-[11px]">/ 100</span>
                             </div>
-                            <div class="flex items-center gap-3">
+                            <div>
                                 <input type="number" step="0.5" min="0" max="100"
                                        inputmode="decimal"
                                        name="total_score"
                                        x-model="directScore"
                                        :required="evaluationMode === 'simple'"
-                                       placeholder="0 - 100"
+                                       placeholder="0"
                                        @input="if (directScore > 100) directScore = 100; if (directScore < 0) directScore = 0; saveDraftLocal();"
-                                       class="w-36 sm:w-44 h-14 sm:h-16 bg-white border-2 border-blue-300 rounded-xl px-4 text-3xl sm:text-4xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-xs transition-all">
-                                <div class="text-xs font-mono text-slate-500 space-y-1">
-                                    <p class="font-bold text-slate-800">100-ൽ എത്ര മാർക്ക് എന്ന് നൽകുക</p>
-                                    <p class="text-[11px] text-slate-400">ഉദാഹരണത്തിന്: 85, 92.5, 78</p>
-                                </div>
+                                       class="w-full h-13 sm:h-14 bg-white border-2 border-blue-300 rounded-xl px-4 text-3xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-xs transition-all">
                             </div>
                         </div>
                     </div>
@@ -555,18 +550,18 @@
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between px-1 text-xs font-mono">
                                     <span class="font-bold uppercase tracking-wider text-slate-700">
-                                        Criteria Breakdown / മാനദണ്ഡങ്ങളുടെ പട്ടിക ({{ $program->scoringCriteria->count() }} ഇനങ്ങൾ):
+                                        Criteria Breakdown ({{ $program->scoringCriteria->count() }}):
                                     </span>
                                     <span class="text-slate-500 font-semibold">
-                                        ആകെ പരമാവധി: <strong class="text-slate-900">{{ $program->scoringCriteria->sum('max_marks') }}</strong> മാർക്ക്
+                                        Max: <strong class="text-slate-900">{{ $program->scoringCriteria->sum('max_marks') }}</strong> pts
                                     </span>
                                 </div>
 
                                 <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100 shadow-2xs">
                                     @foreach($program->scoringCriteria as $critIndex => $criterion)
                                         <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
-                                             :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-amber-50/20' : 'hover:bg-slate-50/70'">
-                                            <!-- Criterion Title, Index & Max Marks -->
+                                             :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-blue-50/20' : 'hover:bg-slate-50/70'">
+                                             <!-- Criterion Title, Index & Max Marks -->
                                             <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
                                                 <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-mono font-black text-sm shrink-0 shadow-2xs transition-colors"
                                                      :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-[#be1e2d] text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'">
@@ -577,12 +572,12 @@
                                                         <h4 class="text-base font-sora font-bold text-slate-900 leading-snug">
                                                             {{ $criterion->criterion_name }}
                                                         </h4>
-                                                        <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-[#be1e2d] font-mono text-xs font-bold shrink-0">
+                                                        <span class="px-2.5 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-[#be1e2d] font-mono text-xs font-bold shrink-0">
                                                             Max: {{ $criterion->max_marks }} Pts
                                                         </span>
                                                     </div>
                                                     <p class="text-xs font-mono text-slate-500 mt-1">
-                                                        മാർക്ക് പരിധി: 0 മുതൽ {{ $criterion->max_marks }} വരെ
+                                                        0 - {{ $criterion->max_marks }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -613,16 +608,15 @@
                                 </div>
                             </div>
                         @else
-                            <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-mono text-amber-900">
-                                ഈ പ്രോഗ്രാമിന് മാനദണ്ഡങ്ങൾ ലഭ്യമല്ല. ദയവായി മുകളിൽ 'Simple Mode (100-ൽ മാർക്ക്)' ഉപയോഗിക്കുക.
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-xs font-mono text-blue-900">
+                                ഈ പ്രോഗ്രാമിന് മാനദണ്ഡങ്ങൾ ലഭ്യമല്ല. Simple Mode ഉപയോഗിക്കുക.
                             </div>
                         @endif
                     </div>
-                    <!-- Grade Selector Buttons (A+, A, B, C) - Touch Friendly for Tablets -->
-                    <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <!-- Grade Selector Buttons (A+, A, B, C) - Clean & Touch-Friendly -->
+                    <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="text-xs font-mono">
-                            <span class="font-bold text-slate-800 uppercase tracking-wider">Grade Option / ഗ്രേഡ്:</span>
-                            <span class="text-slate-400 block sm:inline mt-0.5 sm:mt-0 sm:ml-1.5">(Score അനുസരിച്ച് ഓട്ടോമാറ്റിക് ആയി കണക്കാക്കും)</span>
+                            <span class="font-bold text-slate-800 uppercase tracking-wider">Grade:</span>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <input type="hidden" name="grade" :value="selectedGrade || (computedGrade !== '-' ? computedGrade : '')">
@@ -630,14 +624,14 @@
                                 <button type="button" 
                                         @click="setGrade(g)"
                                         :class="(selectedGrade === g || (!selectedGrade && computedGrade === g))
-                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600 scale-102 font-black' : (g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600 scale-102 font-black' : 'bg-amber-600 text-white shadow-xs border-amber-600 scale-102 font-black'))
+                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600 scale-102 font-black' : (g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600 scale-102 font-black' : 'bg-slate-700 text-white shadow-xs border-slate-700 scale-102 font-black'))
                                             : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 font-bold'"
-                                        class="h-11 sm:h-12 min-w-12 sm:min-w-14 px-3 sm:px-4 rounded-xl border text-sm sm:text-base font-mono transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95">
+                                        class="h-10 sm:h-11 min-w-11 sm:min-w-12 px-3 sm:px-4 rounded-xl border text-sm font-mono transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95">
                                     <span x-text="g"></span>
                                 </button>
                             </template>
                             <button type="button" x-show="selectedGrade" @click="selectedGrade = ''; saveDraftLocal();" 
-                                    class="px-3 py-2 text-xs font-mono text-slate-400 hover:text-slate-700 underline cursor-pointer">
+                                    class="px-2.5 py-1 text-xs font-mono text-slate-500 hover:text-slate-800 underline cursor-pointer">
                                 Reset Auto
                             </button>
                         </div>
@@ -692,7 +686,7 @@
              @click.away="rulesModalOpen = false">
             <div class="flex items-start justify-between pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-[10px] font-mono uppercase tracking-widest text-[#f3bd2e] font-bold">Program Guidelines</span>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-[#005c94] font-bold">Program Guidelines</span>
                     <h2 class="text-xl font-sora font-black text-slate-900 mt-1">{{ $program->name }}</h2>
                     @if($program->malayalam_name)
                         <p class="text-xs font-ml text-slate-500 mt-0.5">{{ $program->malayalam_name }}</p>
@@ -714,7 +708,7 @@
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Duration</span>
-                    <span class="text-[#f3bd2e] font-bold">{{ $program->duration_minutes }} Mins</span>
+                    <span class="text-[#005c94] font-bold">{{ $program->duration_minutes }} Mins</span>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Eligibility</span>
@@ -737,9 +731,9 @@
                 <h3 class="text-sm font-mono font-bold text-slate-800 uppercase tracking-wider">Scoring Rubric</h3>
                 <div class="space-y-2">
                     @foreach($program->scoringCriteria as $criterion)
-                        <div class="flex items-center justify-between p-3 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-mono">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono">
                             <span class="text-slate-800 font-semibold">{{ $criterion->criterion_name }}</span>
-                            <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-[#be1e2d] font-bold">Max: {{ $criterion->max_marks }} Marks</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-[#be1e2d] border border-rose-200 font-bold">Max: {{ $criterion->max_marks }} Marks</span>
                         </div>
                     @endforeach
                 </div>

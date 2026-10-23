@@ -350,7 +350,11 @@ class GreenRoomShuffleAndJudgeTwoModesTest extends TestCase
 
         $response->assertOk();
         $response->assertSee("evaluationMode: 'simple'", false);
-        $response->assertSee('1. Simple Mode (100-ൽ നേരിട്ടുള്ള മാർക്ക്)');
-        $response->assertSee('2. Criteria Mode (മാനദണ്ഡങ്ങൾ തിരിച്ചുള്ള മാർക്ക്)');
+        $response->assertSee('Simple Mode (100 Mark)');
+        $response->assertSee('Criteria Mode');
+        $response->assertSee('Zone:');
+        $response->assertDontSee('Anonymous Entry #1');
+        $response->assertDontSee('100-ൽ എത്ര മാർക്ക് എന്ന് നൽകുക');
+        $response->assertDontSee('ഉദാഹരണത്തിന്: 85, 92.5, 78');
     }
 }

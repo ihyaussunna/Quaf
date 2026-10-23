@@ -179,6 +179,7 @@ class JudgeController extends Controller
         $program->load([
             'category',
             'stage',
+            'zone',
             'schedule',
             'scoringCriteria',
             'onlineSubmissionForm',
