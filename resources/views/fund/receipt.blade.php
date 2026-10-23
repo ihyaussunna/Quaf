@@ -225,6 +225,16 @@
                 <span class="text-[11px] font-mono text-emerald-300">#{{ $receipt->receipt_number }}</span>
             </div>
         @endif
+
+        @if($receipt->is_cancelled || $receipt->trashed())
+            <div class="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 no-print">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] uppercase font-mono font-black tracking-wider">VOID / CANCELLED</span>
+                    <span>ഈ രസീത് റദ്ദാക്കിയതാണ്: {{ $receipt->cancelled_reason ?? 'Cancelled by Admin' }}</span>
+                </div>
+                <span class="font-mono text-[11px] text-rose-300/80">{{ $receipt->cancelled_at?->format('d M Y, h:i A') }}</span>
+            </div>
+        @endif
     </div>
 
     <!-- MAIN RECEIPT DISPLAY CONTAINER -->
@@ -242,6 +252,14 @@
                     <img src="{{ $imageUrl }}" 
                          alt="QUAF Official Receipt {{ $receipt->receipt_number }}" 
                          class="receipt-graphic-poster w-full h-auto block select-none">
+
+                    @if($receipt->is_cancelled || $receipt->trashed())
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10 bg-black/40">
+                            <div class="transform -rotate-12 px-6 sm:px-10 py-3 sm:py-4 rounded-2xl bg-rose-600/90 text-white font-black font-mono text-2xl sm:text-4xl tracking-widest border-4 border-white shadow-2xl uppercase">
+                                VOID / CANCELLED
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Footer Hint in Dark Mode (hidden in print) -->

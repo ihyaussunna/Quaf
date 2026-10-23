@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,6 +57,26 @@ class FundReceipt extends Model
             'is_cancelled' => 'boolean',
             'cancelled_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Retrieve the model for a bound value, including trashed receipts so vouchers remain viewable.
+     *
+     * @param  Builder  $query
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return Builder
+     */
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        $field = $field ?? $this->getRouteKeyName();
+
+        return $query->withTrashed()->where(function ($q) use ($field, $value) {
+            $q->where($field, $value);
+            if ($field === 'id' && ! is_numeric($value)) {
+                $q->orWhere('receipt_number', $value);
+            }
+        });
     }
 
     public function collector(): BelongsTo

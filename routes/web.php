@@ -643,10 +643,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Fund Collection Ledger & Settings (Admin Exclusive Delete & Customizer)
     Route::prefix('fund')->name('fund.')->group(function () {
         Route::get('/', [AdminFundManagementController::class, 'index'])->name('index');
-        Route::get('/receipts/{receipt}', [AdminFundManagementController::class, 'show'])->name('receipts.show');
-        Route::get('/receipts/{receipt}/image', [AdminFundManagementController::class, 'image'])->name('receipts.image');
-        Route::get('/receipts/{receipt}/download', [AdminFundManagementController::class, 'download'])->name('receipts.download');
-        Route::delete('/receipts/{receipt}', [AdminFundManagementController::class, 'destroy'])->name('receipts.destroy');
+        Route::get('/receipts/{receipt}', [AdminFundManagementController::class, 'show'])->name('receipts.show')->withTrashed();
+        Route::get('/receipts/{receipt}/image', [AdminFundManagementController::class, 'image'])->name('receipts.image')->withTrashed();
+        Route::get('/receipts/{receipt}/download', [AdminFundManagementController::class, 'download'])->name('receipts.download')->withTrashed();
+        Route::delete('/receipts/{receipt}', [AdminFundManagementController::class, 'destroy'])->name('receipts.destroy')->withTrashed();
         Route::get('/settings', [AdminFundManagementController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminFundManagementController::class, 'updateSettings'])->name('settings.update');
     });
@@ -863,9 +863,9 @@ Route::prefix('fund')->name('fund.')->group(function () {
     Route::post('/receipts', [FundController::class, 'store'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('receipts.store');
 
     // 4. Public Receipt View, Image & Download (Accessible for donors & WhatsApp sharing)
-    Route::get('/receipts/{receipt}', [FundController::class, 'show'])->name('receipts.show');
-    Route::match(['put', 'patch', 'post'], '/receipts/{receipt}/update', [FundController::class, 'studentUpdateReceipt'])->name('receipts.update');
-    Route::delete('/receipts/{receipt}', [FundController::class, 'studentDestroyReceipt'])->name('receipts.destroy');
-    Route::get('/receipts/{receipt}/image', [FundController::class, 'image'])->name('receipts.image');
-    Route::get('/receipts/{receipt}/download', [FundController::class, 'download'])->name('receipts.download');
+    Route::get('/receipts/{receipt}', [FundController::class, 'show'])->name('receipts.show')->withTrashed();
+    Route::match(['put', 'patch', 'post'], '/receipts/{receipt}/update', [FundController::class, 'studentUpdateReceipt'])->name('receipts.update')->withTrashed();
+    Route::delete('/receipts/{receipt}', [FundController::class, 'studentDestroyReceipt'])->name('receipts.destroy')->withTrashed();
+    Route::get('/receipts/{receipt}/image', [FundController::class, 'image'])->name('receipts.image')->withTrashed();
+    Route::get('/receipts/{receipt}/download', [FundController::class, 'download'])->name('receipts.download')->withTrashed();
 });

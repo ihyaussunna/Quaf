@@ -827,4 +827,46 @@ class FundReceiptTest extends TestCase
             'is_cancelled' => true,
         ]);
     }
+
+    public function test_cancelled_or_soft_deleted_receipt_voucher_can_be_viewed_by_admin_without_404(): void
+    {
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-075',
+            'donor_name' => 'Abubakker Jouhari',
+            'amount' => 500,
+            'payment_method' => 'upi',
+            'is_cancelled' => true,
+            'cancelled_reason' => 'റദ്ദാക്കപ്പെട്ടു',
+            'cancelled_at' => now(),
+        ]);
+        $receipt->delete(); // Soft delete
+
+        $this->assertTrue($receipt->trashed());
+
+        // 1. Admin can view the voucher without 404
+        $adminViewResponse = $this->actingAs($this->admin)
+            ->get(route('admin.fund.receipts.show', $receipt->id));
+
+        $adminViewResponse->assertOk();
+        $adminViewResponse->assertSee('QFR-26-075');
+        $adminViewResponse->assertSee('Abubakker Jouhari');
+        $adminViewResponse->assertSee('VOID / CANCELLED');
+
+        // 2. Admin can stream image without 404
+        $adminImageResponse = $this->actingAs($this->admin)
+            ->get(route('admin.fund.receipts.image', $receipt->id));
+
+        $adminImageResponse->assertOk();
+
+        // 3. Admin can download voucher without 404
+        $adminDownloadResponse = $this->actingAs($this->admin)
+            ->get(route('admin.fund.receipts.download', $receipt->id));
+
+        $adminDownloadResponse->assertOk();
+
+        // 4. Public route also resolves soft-deleted receipt
+        $publicViewResponse = $this->get(route('fund.receipts.show', $receipt->id));
+        $publicViewResponse->assertOk();
+        $publicViewResponse->assertSee('QFR-26-075');
+    }
 }
