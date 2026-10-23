@@ -1,4 +1,18 @@
 @extends('layouts.judge', ['title' => 'Evaluation: ' . $program->name])
+
+@php
+    $circlePalettes = [
+        ['bg' => 'bg-indigo-50', 'text' => 'text-indigo-700', 'border' => 'border-indigo-100'],
+        ['bg' => 'bg-rose-50', 'text' => 'text-[#be1e2d]', 'border' => 'border-rose-100'],
+        ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-100'],
+        ['bg' => 'bg-sky-50', 'text' => 'text-[#005c94]', 'border' => 'border-sky-100'],
+        ['bg' => 'bg-purple-50', 'text' => 'text-purple-700', 'border' => 'border-purple-100'],
+        ['bg' => 'bg-amber-50', 'text' => 'text-amber-800', 'border' => 'border-amber-100'],
+        ['bg' => 'bg-teal-50', 'text' => 'text-teal-700', 'border' => 'border-teal-100'],
+        ['bg' => 'bg-orange-50', 'text' => 'text-orange-700', 'border' => 'border-orange-100'],
+    ];
+@endphp
+
 @section('content')
 <div class="space-y-6" x-data="{
     rulesModalOpen: false,
@@ -31,7 +45,7 @@
         }
     }
 }">
-    <!-- Top Bar (Clean & Professional) -->
+    <!-- Top Bar (Clean & Harmonious with Festival Theme) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
         <div class="flex items-center gap-3">
             <a href="{{ route('judge.dashboard') }}" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-mono font-bold transition-colors">
@@ -43,14 +57,14 @@
                     @if($program->malayalam_name)
                         <span class="text-xs font-ml text-slate-500">({{ $program->malayalam_name }})</span>
                     @endif
-                    <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-[#005c94] border border-blue-200 text-[10px] font-mono font-bold uppercase tracking-wider">
+                    <span class="px-2.5 py-0.5 rounded-lg bg-rose-50 text-[#be1e2d] border border-rose-200 text-[10px] font-mono font-bold uppercase tracking-wider">
                         {{ $program->zone?->name ?: $program->zone_name }}
                     </span>
                 </div>
                 <p class="text-[11px] font-mono text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                     <span>Code: <strong class="text-slate-800">{{ $program->code }}</strong></span>
                     <span>•</span>
-                    <span>Zone: <strong class="text-[#005c94]">{{ $program->zone?->name ?: $program->zone_name }}</strong></span>
+                    <span>Zone: <strong class="text-[#be1e2d]">{{ $program->zone?->name ?: $program->zone_name }}</strong></span>
                     <span>•</span>
                     <span>Stage: <strong class="text-slate-800">{{ $program->stage->name ?? 'TBA' }}</strong></span>
                     <span>•</span>
@@ -68,10 +82,10 @@
                 </a>
             @endif
 
-            <!-- Rules Button (Clean Blue Theme with high contrast) -->
+            <!-- Rules Button -->
             <button type="button" @click="rulesModalOpen = true"
-                    class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005c94] border border-blue-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
-                <svg class="w-4 h-4 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>Rules & Guidelines</span>
             </button>
 
@@ -89,43 +103,39 @@
         </div>
     </div>
 
-    <!-- Scoring Mode Switcher (Clean & Minimal) -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-700">Scoring Mode:</span>
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wide"
-                  :class="evaluationMode === 'simple' ? 'bg-blue-100 text-[#005c94] border border-blue-200' : 'bg-rose-100 text-[#be1e2d] border border-rose-200'"
-                  x-text="evaluationMode === 'simple' ? 'Simple Mode' : 'Criteria Mode'"></span>
-        </div>
-
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-            <!-- Mode Selection Dropdown -->
-            <div class="relative min-w-[220px] sm:min-w-[260px]">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors"
-                     :class="evaluationMode === 'simple' ? 'text-[#005c94]' : 'text-[#be1e2d]'">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <select x-model="evaluationMode"
-                        class="w-full pl-9 pr-9 py-2 rounded-xl border-2 font-mono text-xs font-bold appearance-none transition-all cursor-pointer shadow-2xs focus:outline-none"
-                        :class="evaluationMode === 'simple'
-                            ? 'bg-blue-50/80 border-[#005c94]/40 text-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20'
-                            : 'bg-rose-50/80 border-[#be1e2d]/40 text-[#be1e2d] focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/20'">
-                    <option value="simple">Simple Mode (100 Mark)</option>
-                    @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
-                        <option value="criteria">Criteria Mode</option>
-                    @endif
-                </select>
-                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </div>
+    <!-- Scoring Mode Switcher (If Program has Criteria) -->
+    @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
+        <div class="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-700">Scoring Mode:</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wide"
+                      :class="evaluationMode === 'simple' ? 'bg-blue-100 text-[#005c94] border border-blue-200' : 'bg-rose-100 text-[#be1e2d] border border-rose-200'"
+                      x-text="evaluationMode === 'simple' ? 'Simple Mode' : 'Criteria Mode'"></span>
             </div>
 
-            <!-- Quick Pill Buttons Switcher (Synced with Dropdown) -->
-            @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+                <div class="relative min-w-[200px] sm:min-w-[240px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                         :class="evaluationMode === 'simple' ? 'text-[#005c94]' : 'text-[#be1e2d]'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <select x-model="evaluationMode"
+                            class="w-full pl-9 pr-9 py-2 rounded-xl border-2 font-mono text-xs font-bold appearance-none transition-all cursor-pointer shadow-2xs focus:outline-none"
+                            :class="evaluationMode === 'simple'
+                                ? 'bg-blue-50/80 border-[#005c94]/40 text-[#005c94] focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20'
+                                : 'bg-rose-50/80 border-[#be1e2d]/40 text-[#be1e2d] focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/20'">
+                        <option value="simple">Simple Mode (100 Mark)</option>
+                        <option value="criteria">Criteria Mode</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+
                 <div class="hidden sm:flex p-1 bg-slate-100 rounded-xl border border-slate-200 gap-1 shrink-0">
                     <button type="button"
                             @click="evaluationMode = 'simple'"
@@ -140,25 +150,10 @@
                         <span>Criteria</span>
                     </button>
                 </div>
-            @endif
+            </div>
         </div>
-    </div>
+    @endif
 
-    <!-- Scoring Rules & Criteria Overview Banner (Light Theme) -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono shadow-2xs"
-         x-show="evaluationMode === 'criteria'">
-        <span class="text-slate-500 font-bold uppercase tracking-wider">Evaluation Rubric:</span>
-        @if(!$program->has_criteria || $program->scoringCriteria->isEmpty())
-            <span class="px-3 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 font-bold">Total Mark Only (100-Point Scale)</span>
-        @else
-            @foreach($program->scoringCriteria as $criterion)
-                <div class="px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-                    <span class="text-slate-800 font-medium">{{ $criterion->criterion_name }}</span>
-                    <span class="text-[#005c94] font-bold">({{ $criterion->max_marks }} pts)</span>
-                </div>
-            @endforeach
-        @endif
-    </div>
     <!-- Network Connectivity Status Indicator -->
     <div x-data="{ online: navigator.onLine }"
          x-init="window.addEventListener('online', () => online = true); window.addEventListener('offline', () => online = false)"
@@ -167,512 +162,472 @@
          style="display: none;">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-            <span class="font-bold">Offline Mode: Internet connection is unavailable. Your scores are saved locally in this browser and will sync when reconnected.</span>
+            <span class="font-bold">Offline Mode: Internet connection is unavailable. Scores are saved locally and will sync when reconnected.</span>
         </div>
         <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-lg bg-rose-200 text-rose-900">Local Draft Active</span>
     </div>
-    <!-- Anonymous Participants Evaluation Cards (Strict Confidentiality: Code Letters Only) -->
-    <div class="space-y-6">
-        @forelse($entries as $index => $entry)
-            @php
-                $sheet = $scoreSheets->get($entry->id);
-                $isSubmitted = $sheet && $sheet->is_submitted;
-                $savedScores = $sheet ? ($sheet->criteria_scores ?? []) : [];
-                $displayCode = $entry->code_letter ? 'Code ' . $entry->code_letter : 'Participant ' . ($index + 1);
-            @endphp
-            <div class="bg-white border {{ $isSubmitted ? 'border-emerald-300' : 'border-slate-200' }} rounded-3xl p-6 transition-all relative overflow-hidden shadow-sm hover:shadow-md"
-                 x-data="{
-                     scores: {
-                         @foreach($program->scoringCriteria as $criterion)
-                             '{{ $criterion->id }}': {{ $savedScores[$criterion->criterion_name] ?? 0 }},
-                         @endforeach
-                     },
-                     maxMarks: {
-                         @foreach($program->scoringCriteria as $criterion)
-                             '{{ $criterion->id }}': {{ $criterion->max_marks }},
-                         @endforeach
-                     },
-                     hasCriteria: {{ ($program->has_criteria && $program->scoringCriteria->isNotEmpty()) ? 'true' : 'false' }},
-                     directScore: {{ $sheet ? ($sheet->total_score ?? 0) : 0 }},
-                     selectedGrade: '{{ $savedScores['grade'] ?? '' }}',
-                     remarks: '{{ addslashes($sheet->remarks ?? '') }}',
-                     isSubmitted: {{ $isSubmitted ? 'true' : 'false' }},
-                     submittedScore: {{ $sheet ? ($sheet->total_score ?? 0) : 0 }},
-                     isSaving: false,
-                     saveSuccess: false,
-                     errorMessage: '',
-                     storageKey: 'quaf_draft_{{ $program->id }}_{{ $entry->id }}',
-                     init() {
-                         try {
-                             const draft = localStorage.getItem(this.storageKey);
-                             if (draft && !this.isSubmitted) {
-                                 const parsed = JSON.parse(draft);
-                                 if (parsed.scores) this.scores = Object.assign(this.scores, parsed.scores);
-                                 if (parsed.directScore) this.directScore = parsed.directScore;
-                                 if (parsed.selectedGrade) this.selectedGrade = parsed.selectedGrade;
-                                 if (parsed.remarks) this.remarks = parsed.remarks;
+
+    <!-- ========================================================================= -->
+    <!-- MODE 1: SIMPLE MODE EVALUATION TABLE (Minimalist, Compact & Elegant)        -->
+    <!-- Matches User Design: CODE (left), GRADE (center auto), MARK (right)       -->
+    <!-- ========================================================================= -->
+    <div x-show="evaluationMode === 'simple'" class="max-w-2xl mx-auto w-full space-y-4">
+        <div class="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden">
+            <!-- Table Header -->
+            <div class="grid grid-cols-12 items-center px-4 sm:px-6 py-3.5 bg-slate-50/70 border-b border-slate-200/80 text-[11px] font-mono font-bold tracking-wider text-slate-500 uppercase">
+                <div class="col-span-4 flex items-center">
+                    <span>CODE</span>
+                </div>
+                <div class="col-span-4 text-center">
+                    <span>GRADE</span>
+                </div>
+                <div class="col-span-4 text-right pr-2 sm:pr-4">
+                    <span>MARK</span>
+                </div>
+            </div>
+
+            <!-- Participant Rows -->
+            <div class="divide-y divide-slate-100">
+                @forelse($entries as $index => $entry)
+                    @php
+                        $sheet = $scoreSheets->get($entry->id);
+                        $isSubmitted = $sheet && $sheet->is_submitted;
+                        $savedScores = $sheet ? ($sheet->criteria_scores ?? []) : [];
+                        $savedTotal = $sheet ? ($sheet->total_score ?? null) : null;
+                        $entrySubmission = ($submissionsByEntryId ?? collect())->get($entry->id) 
+                            ?? ($submissionsByCodeLetter ?? collect())->get(strtoupper(trim($entry->code_letter ?? '')));
+                        $palette = $circlePalettes[$index % count($circlePalettes)];
+                        $codeLetter = $entry->code_letter ?? chr(65 + $index);
+                    @endphp
+                    <div x-data="{
+                             id: {{ $entry->id }},
+                             code: '{{ $codeLetter }}',
+                             directScore: '{{ $savedTotal !== null ? $savedTotal : '' }}',
+                             remarks: '{{ addslashes($sheet->remarks ?? '') }}',
+                             isSubmitted: {{ $isSubmitted ? 'true' : 'false' }},
+                             isSaving: false,
+                             saveSuccess: false,
+                             isFocused: false,
+                             expanded: false,
+                             storageKey: 'quaf_draft_{{ $program->id }}_{{ $entry->id }}',
+                             saveUrl: '{{ route('judge.evaluate.save', [$program, $entry]) }}',
+                             init() {
+                                 try {
+                                     const draft = localStorage.getItem(this.storageKey);
+                                     if (draft && !this.isSubmitted) {
+                                         const parsed = JSON.parse(draft);
+                                         if (parsed.directScore !== undefined && parsed.directScore !== '') this.directScore = parsed.directScore;
+                                         if (parsed.remarks) this.remarks = parsed.remarks;
+                                     }
+                                 } catch (e) {}
+                             },
+                             get computedGrade() {
+                                 const t = parseFloat(this.directScore);
+                                 if (isNaN(t) || t <= 0) return '-';
+                                 if (t >= 90) return 'A+';
+                                 if (t >= 70) return 'A';
+                                 if (t >= 60) return 'B';
+                                 if (t >= 50) return 'C';
+                                 return '-';
+                             },
+                             handleInput() {
+                                 let val = parseFloat(this.directScore);
+                                 if (val > 100) this.directScore = 100;
+                                 if (val < 0) this.directScore = 0;
+                                 try {
+                                     localStorage.setItem(this.storageKey, JSON.stringify({
+                                         directScore: this.directScore,
+                                         remarks: this.remarks
+                                     }));
+                                 } catch (e) {}
+                             },
+                             saveScore() {
+                                 if (this.isSaving) return;
+                                 const scoreVal = parseFloat(this.directScore);
+                                 if (this.directScore === '' || this.directScore === null || isNaN(scoreVal)) {
+                                     return;
+                                 }
+                                 this.isSaving = true;
+                                 this.saveSuccess = false;
+                                 const formData = new FormData();
+                                 formData.append('_token', '{{ csrf_token() }}');
+                                 formData.append('scoring_mode', 'simple');
+                                 formData.append('total_score', this.directScore);
+                                 const gr = this.computedGrade;
+                                 formData.append('grade', gr !== '-' ? gr : '');
+                                 if (this.remarks) formData.append('remarks', this.remarks);
+
+                                 fetch(this.saveUrl, {
+                                     method: 'POST',
+                                     body: formData,
+                                     headers: {
+                                         'X-Requested-With': 'XMLHttpRequest',
+                                         'Accept': 'application/json'
+                                     }
+                                 })
+                                 .then(async res => {
+                                     if (!res.ok) {
+                                         const err = await res.json().catch(() => ({}));
+                                         throw new Error(err.message || 'Error saving score.');
+                                     }
+                                     return res.json();
+                                 })
+                                 .then(data => {
+                                     this.isSubmitted = true;
+                                     this.saveSuccess = true;
+                                     try { localStorage.removeItem(this.storageKey); } catch (e) {}
+                                     setTimeout(() => { this.saveSuccess = false; }, 3000);
+                                 })
+                                 .catch(err => {
+                                     // Score remains safely preserved in localStorage draft
+                                 })
+                                 .finally(() => {
+                                     this.isSaving = false;
+                                 });
                              }
-                         } catch (e) {}
-                     },
-                     saveDraftLocal() {
-                         try {
-                             localStorage.setItem(this.storageKey, JSON.stringify({
-                                 scores: this.scores,
-                                 directScore: this.directScore,
-                                 selectedGrade: this.selectedGrade,
-                                 remarks: this.remarks
-                             }));
-                         } catch (e) {}
-                     },
-                     clearDraftLocal() {
-                         try {
-                             localStorage.removeItem(this.storageKey);
-                         } catch (e) {}
-                     },
-                     get total() {
-                         if (evaluationMode === 'criteria' && this.hasCriteria) {
-                             let sum = 0;
-                             for (let key in this.scores) {
-                                 sum += parseFloat(this.scores[key]) || 0;
-                             }
-                             return Math.round(sum * 10) / 10;
-                         }
-                         return Math.round((parseFloat(this.directScore) || 0) * 10) / 10;
-                     },
-                     get computedGrade() {
-                         if (this.selectedGrade) return this.selectedGrade;
-                         const t = this.total;
-                         if (t >= 90) return 'A+';
-                         if (t >= 70) return 'A';
-                         if (t >= 60) return 'B';
-                         if (t >= 50) return 'C';
-                         return '-';
-                     },
-                     setGrade(g) {
-                         this.selectedGrade = g;
-                         if (evaluationMode === 'simple' && (!this.directScore || this.directScore == 0)) {
-                             if (g === 'A+') this.directScore = 95;
-                             else if (g === 'A') this.directScore = 80;
-                             else if (g === 'B') this.directScore = 65;
-                             else if (g === 'C') this.directScore = 55;
-                         }
-                         this.saveDraftLocal();
-                     },
-                     submitEvaluation(e) {
-                         if (this.isSaving) return;
-                         this.isSaving = true;
-                         this.saveSuccess = false;
-                         this.errorMessage = '';
-                         const form = e.target;
-                         const formData = new FormData(form);
-                         fetch(form.action, {
-                             method: 'POST',
-                             body: formData,
-                             headers: {
-                                 'X-Requested-With': 'XMLHttpRequest',
-                                 'Accept': 'application/json'
-                             }
-                         })
-                         .then(async res => {
-                             if (!res.ok) {
-                                 const err = await res.json().catch(() => ({}));
-                                 throw new Error(err.message || 'Server returned an error.');
-                             }
-                             return res.json();
-                         })
-                         .then(data => {
-                             this.isSubmitted = true;
-                             this.submittedScore = data.total_score || this.total;
-                             this.saveSuccess = true;
-                             this.clearDraftLocal();
-                             setTimeout(() => { this.saveSuccess = false; }, 4000);
-                         })
-                         .catch(err => {
-                             this.saveDraftLocal();
-                             this.errorMessage = 'Connection error: Scores saved locally in browser. Please try again.';
-                         })
-                         .finally(() => {
-                             this.isSaving = false;
-                         });
-                     }
-                 }">
-                <form method="POST" action="{{ route('judge.evaluate.save', [$program, $entry]) }}" @submit.prevent="submitEvaluation($event)" class="space-y-6">
-                    @csrf
-                    <!-- Anonymous Header (No Name, No Group, No Photo) -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                        <div class="flex items-center gap-3.5">
-                            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 border-2 border-blue-200 flex items-center justify-center font-mono font-black text-xl text-[#005c94] shadow-xs">
-                                {{ $entry->code_letter ?? chr(65 + $index) }}
+                         }"
+                         :class="isFocused ? 'bg-indigo-50/40' : (isSubmitted ? 'bg-white' : 'hover:bg-slate-50/50')"
+                         class="transition-colors"
+                    >
+                        <!-- Main Entry Row -->
+                        <div class="grid grid-cols-12 items-center px-4 sm:px-6 py-3">
+                            <!-- CODE (Left) -->
+                            <div class="col-span-4 flex items-center gap-2 sm:gap-3">
+                                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $palette['bg'] }} {{ $palette['text'] }} {{ $palette['border'] }} border-2 flex items-center justify-center font-mono font-bold text-base sm:text-lg shadow-2xs shrink-0">
+                                    {{ $codeLetter }}
+                                </div>
+
+                                <!-- Collapsible Work / Remarks Toggle Button -->
+                                @if($entrySubmission)
+                                    <button type="button" @click="expanded = !expanded" 
+                                            class="p-1 px-1.5 rounded-lg text-indigo-700 hover:bg-indigo-50 border border-indigo-200/80 text-[10px] font-mono font-bold flex items-center gap-1 transition shadow-2xs"
+                                            title="View Candidate Submission">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                        <span>Work</span>
+                                    </button>
+                                @else
+                                    <button type="button" @click="expanded = !expanded"
+                                            class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition hidden sm:inline-flex"
+                                            title="Add remarks / note">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </button>
+                                @endif
                             </div>
-                            <div>
-                                <h3 class="text-lg font-sora font-black text-slate-900 tracking-wide">{{ $displayCode }}</h3>
-                                <p class="text-[11px] font-mono text-slate-400 mt-0.5">
-                                    Confidential evaluation • Adjudicate by code letter only
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                            <template x-if="isSubmitted">
-                                <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    <span>Submitted (<span x-text="submittedScore"></span>)</span>
-                                </span>
-                            </template>
-                            <template x-if="!isSubmitted">
-                                <span class="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-mono text-xs font-bold">
-                                    Pending Evaluation
-                                </span>
-                            </template>
-                            <div class="px-4 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[75px]">
-                                <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-wider">Score</span>
-                                <span class="text-xl font-black text-[#005c94]" x-text="total">0</span>
-                            </div>
-                            <div class="px-3.5 py-1.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-center min-w-[60px]">
-                                <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-wider">Grade</span>
-                                <span class="text-sm font-black px-2 py-0.5 rounded-lg inline-block transition-colors"
+
+                            <!-- GRADE (Center - Automatically Calculated) -->
+                            <div class="col-span-4 text-center flex items-center justify-center">
+                                <span class="inline-flex items-center justify-center min-w-[42px] px-2.5 py-1 rounded-full text-xs font-mono font-black transition-all shadow-2xs"
                                       :class="{
-                                          'bg-emerald-100 text-emerald-800': computedGrade === 'A+' || computedGrade === 'A',
-                                          'bg-blue-100 text-blue-800': computedGrade === 'B',
-                                          'bg-slate-200 text-slate-800': computedGrade === 'C',
-                                          'bg-slate-100 text-slate-400': computedGrade === '-'
+                                          'bg-emerald-100 text-emerald-800 border border-emerald-300': computedGrade === 'A+',
+                                          'bg-emerald-50 text-emerald-700 border border-emerald-200': computedGrade === 'A',
+                                          'bg-blue-50 text-[#005c94] border border-blue-200': computedGrade === 'B',
+                                          'bg-amber-50 text-amber-800 border border-amber-200': computedGrade === 'C',
+                                          'text-slate-300 font-bold': computedGrade === '-'
                                       }"
                                       x-text="computedGrade">-</span>
                             </div>
-                        </div>
-                    </div>
 
-                    @php
-                        $entrySubmission = ($submissionsByEntryId ?? collect())->get($entry->id) 
-                            ?? ($submissionsByCodeLetter ?? collect())->get(strtoupper(trim($entry->code_letter ?? '')));
-                    @endphp
+                            <!-- MARK (Right - Simple Input Box with 0 Placeholder) -->
+                            <div class="col-span-4 flex items-center justify-end gap-1.5 sm:gap-2">
+                                <input type="number"
+                                       step="0.5"
+                                       min="0"
+                                       max="100"
+                                       inputmode="decimal"
+                                       x-model="directScore"
+                                       placeholder="0"
+                                       id="simple_mark_{{ $index }}"
+                                       @focus="isFocused = true"
+                                       @blur="isFocused = false; saveScore()"
+                                       @input="handleInput()"
+                                       @keydown.enter.prevent="saveScore(); const next = document.getElementById('simple_mark_{{ $index + 1 }}'); if (next) { next.focus(); next.select(); }"
+                                       class="w-20 sm:w-28 h-10 sm:h-11 bg-slate-50/80 hover:bg-white focus:bg-white border-2 border-slate-200 focus:border-[#be1e2d] rounded-xl text-center font-mono font-black text-base sm:text-lg text-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/15 shadow-2xs">
 
-                    @if($entrySubmission)
-                        @php
-                            $isImageFile = $entrySubmission->isImage();
-                            $subWordCount = $entrySubmission->text_content ? str_word_count(strip_tags($entrySubmission->text_content)) : 0;
-                        @endphp
-                        <div class="rounded-2xl border-2 border-indigo-200/90 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 p-4 sm:p-5 shadow-xs space-y-4"
-                             x-data="{ submissionExpanded: true }">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-100">
-                                <div class="flex items-center gap-3">
-                                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white font-mono font-bold text-sm shadow-2xs">
-                                        {{ $entry->code_letter ?? chr(65 + $index) }}
-                                    </span>
-                                    <div>
-                                        <h4 class="font-sora font-bold text-sm text-slate-900 flex items-center gap-2">
-                                            <span>Candidate Submission (ഉത്തരങ്ങൾ)</span>
-                                            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-semibold">
-                                                Submitted
-                                            </span>
-                                        </h4>
-                                        <p class="text-[11px] font-mono text-slate-500">
-                                            Received: {{ $entrySubmission->submitted_at?->format('d M, h:i A') ?? $entrySubmission->created_at->format('d M, h:i A') }}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <a href="{{ route('judge.evaluate.submissions-pdf', $program->id) }}" 
-                                       target="_blank"
-                                       class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-2xs"
-                                       title="Print evaluation sheet">
-                                        <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                        <span>PDF</span>
-                                    </a>
-
-                                    @if($entrySubmission->file_path)
-                                        <a href="{{ $entrySubmission->file_url }}" target="_blank"
-                                           class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-2xs">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                            <span>Open File</span>
-                                        </a>
-                                    @endif
-
-                                    <button type="button" 
-                                            @click="submissionExpanded = !submissionExpanded"
-                                            class="px-3 py-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer">
-                                        <span x-text="submissionExpanded ? 'Minimize' : 'View Content'"></span>
-                                        <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': !submissionExpanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    </button>
+                                <!-- Row Status Indicator (Spinning loader / Saved checkmark) -->
+                                <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                                    <template x-if="isSaving">
+                                        <svg class="w-4 h-4 text-[#be1e2d] animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                    </template>
+                                    <template x-if="!isSaving && saveSuccess">
+                                        <span class="text-emerald-600 animate-bounce" title="Saved">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                        </span>
+                                    </template>
+                                    <template x-if="!isSaving && !saveSuccess && isSubmitted">
+                                        <span class="text-emerald-500 opacity-80" title="Submitted">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        </span>
+                                    </template>
                                 </div>
                             </div>
+                        </div>
 
-                            <div x-show="submissionExpanded" class="space-y-4">
-                                <!-- 1. Text Submission Content -->
-                                @if($entrySubmission->text_content)
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-xs font-mono">
-                                            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                <span>Written Content / രചന</span>
-                                            </span>
-                                            <div class="flex items-center gap-2 text-[11px] text-slate-500">
-                                                <span>{{ $subWordCount }} words</span>
-                                                <span>•</span>
+                        <!-- Collapsible Drawer: Remarks and Online Submission (if any) -->
+                        <div x-show="expanded" x-collapse class="px-4 sm:px-6 py-3.5 bg-slate-50/90 border-t border-slate-100 space-y-3 text-xs" style="display: none;">
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <span class="font-mono text-slate-500 font-bold shrink-0">Remarks:</span>
+                                <input type="text" x-model="remarks" @blur="saveScore()" placeholder="Confidential note for Code {{ $codeLetter }}..."
+                                       class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-800 text-xs focus:outline-none focus:border-[#be1e2d]">
+                                <button type="button" @click="saveScore()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white font-mono font-bold text-xs hover:bg-slate-900 transition">Save Note</button>
+                            </div>
+
+                            @if($entrySubmission)
+                                @php
+                                    $isImageFile = $entrySubmission->isImage();
+                                    $subWordCount = $entrySubmission->text_content ? str_word_count(strip_tags($entrySubmission->text_content)) : 0;
+                                @endphp
+                                <div class="rounded-xl border border-indigo-200 bg-white p-3 space-y-3">
+                                    <div class="flex items-center justify-between font-mono text-[11px] text-slate-600">
+                                        <span class="font-bold text-indigo-700">Code {{ $codeLetter }} Submission Content:</span>
+                                        <div class="flex items-center gap-2">
+                                            @if($entrySubmission->file_path)
+                                                <a href="{{ $entrySubmission->file_url }}" target="_blank" class="text-indigo-600 hover:underline font-bold">Open File</a>
+                                            @endif
+                                            @if($entrySubmission->text_content)
                                                 <button type="button" 
-                                                        @click="openTextReader('Code {{ $entry->code_letter }}', {{ json_encode($entrySubmission->text_content) }})"
-                                                        class="text-indigo-600 hover:text-indigo-800 font-bold hover:underline cursor-pointer">
+                                                        @click="openTextReader('Code {{ $codeLetter }}', {{ json_encode($entrySubmission->text_content) }})"
+                                                        class="text-indigo-600 hover:underline font-bold">
                                                     Read Fullscreen
                                                 </button>
-                                            </div>
+                                            @endif
                                         </div>
+                                    </div>
 
-                                        <div class="bg-white border border-slate-200 rounded-xl p-4 max-h-72 overflow-y-auto text-sm leading-relaxed text-slate-800 whitespace-pre-wrap font-serif shadow-2xs">
+                                    @if($entrySubmission->text_content)
+                                        <div class="max-h-40 overflow-y-auto text-xs text-slate-800 leading-relaxed font-serif bg-slate-50 p-2.5 rounded-lg border border-slate-100 whitespace-pre-wrap">
                                             {{ $entrySubmission->text_content }}
                                         </div>
-                                    </div>
-                                @endif
+                                    @endif
 
-                                <!-- 2. Image / Artwork / Document Upload -->
-                                @if($entrySubmission->file_path && $isImageFile)
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-xs font-mono">
-                                            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                <span>Artwork / Drawing (ചിത്രം)</span>
-                                            </span>
-                                            <span class="text-[11px] text-slate-500 font-mono">
-                                                {{ $entrySubmission->file_name ?? 'Image' }} ({{ $entrySubmission->formatted_file_size }})
-                                            </span>
+                                    @if($entrySubmission->file_path && $isImageFile)
+                                        <div class="flex items-center justify-center p-2 bg-slate-50 rounded-lg border border-slate-100">
+                                            <img src="{{ $entrySubmission->file_url }}" alt="Work" class="max-h-48 object-contain rounded cursor-pointer"
+                                                 @click="openLightbox('Code {{ $codeLetter }}', '{{ $entrySubmission->file_url }}')">
                                         </div>
+                                    @endif
 
-                                        <div class="relative group rounded-2xl border border-slate-200 overflow-hidden bg-slate-900/5 flex items-center justify-center p-2">
-                                            <img src="{{ $entrySubmission->file_url }}" 
-                                                 alt="Submission Code {{ $entry->code_letter }}" 
-                                                 class="max-h-80 w-auto rounded-xl object-contain shadow-xs">
-                                            <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                                                <button type="button" 
-                                                        @click="openLightbox('Code {{ $entry->code_letter }}', '{{ $entrySubmission->file_url }}')"
-                                                        class="px-4 py-2 rounded-xl bg-white text-slate-900 font-mono font-bold text-xs shadow-lg hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                                                    <span>Zoom / വലുതായി കാണുക</span>
-                                                </button>
-                                                <a href="{{ $entrySubmission->file_url }}" target="_blank" 
-                                                   class="px-4 py-2 rounded-xl bg-slate-900 text-white font-mono font-bold text-xs shadow-lg hover:bg-slate-800 flex items-center gap-2">
-                                                    <span>Download</span>
-                                                </a>
-                                            </div>
+                                    @if($entrySubmission->video_url)
+                                        <div class="text-xs font-mono">
+                                            <a href="{{ $entrySubmission->video_url }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold inline-flex items-center gap-1.5">
+                                                <span>Watch Video Submission</span>
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                            </a>
                                         </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-12 text-center text-slate-500 font-mono text-xs space-y-2">
+                        <svg class="w-8 h-8 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <div class="font-bold text-slate-800">No Candidates Marked PRESENT Yet</div>
+                        <p class="text-slate-400 max-w-sm mx-auto">Only contestants with attendance marked "PRESENT" appear here for evaluation.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Table Footer: Fast Navigation Help & Save All Action -->
+            @if($entries->isNotEmpty())
+                <div class="px-4 sm:px-6 py-3.5 bg-slate-50/80 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
+                    <div class="flex items-center gap-2 text-slate-500">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Auto-saves on blur • Enter or Tab jumps to next mark</span>
+                    </div>
+                    <button type="button" @click="document.querySelectorAll('[id^=simple_mark_]').forEach(el => el.dispatchEvent(new Event('blur')))"
+                            class="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono font-bold text-xs uppercase shadow-sm shadow-[#be1e2d]/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Save All Scores</span>
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODE 2: CRITERIA BREAKDOWN MODE (When Detailed Criteria Evaluation Needed)-->
+    <!-- ========================================================================= -->
+    @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
+        <div x-show="evaluationMode === 'criteria'" class="space-y-6" style="display: none;">
+            <!-- Criteria Rubric Banner -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs font-mono shadow-2xs">
+                <span class="text-slate-500 font-bold uppercase tracking-wider">Evaluation Rubric:</span>
+                @foreach($program->scoringCriteria as $criterion)
+                    <div class="px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+                        <span class="text-slate-800 font-medium">{{ $criterion->criterion_name }}</span>
+                        <span class="text-[#be1e2d] font-bold">({{ $criterion->max_marks }} pts)</span>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Criteria Mode Cards -->
+            <div class="space-y-6">
+                @foreach($entries as $index => $entry)
+                    @php
+                        $sheet = $scoreSheets->get($entry->id);
+                        $isSubmitted = $sheet && $sheet->is_submitted;
+                        $savedScores = $sheet ? ($sheet->criteria_scores ?? []) : [];
+                        $palette = $circlePalettes[$index % count($circlePalettes)];
+                        $codeLetter = $entry->code_letter ?? chr(65 + $index);
+                    @endphp
+                    <div class="bg-white border {{ $isSubmitted ? 'border-emerald-300' : 'border-slate-200' }} rounded-3xl p-6 transition-all relative overflow-hidden shadow-sm"
+                         x-data="{
+                             scores: {
+                                 @foreach($program->scoringCriteria as $criterion)
+                                     '{{ $criterion->id }}': {{ $savedScores[$criterion->criterion_name] ?? 0 }},
+                                 @endforeach
+                             },
+                             maxMarks: {
+                                 @foreach($program->scoringCriteria as $criterion)
+                                     '{{ $criterion->id }}': {{ $criterion->max_marks }},
+                                 @endforeach
+                             },
+                             remarks: '{{ addslashes($sheet->remarks ?? '') }}',
+                             isSubmitted: {{ $isSubmitted ? 'true' : 'false' }},
+                             submittedScore: {{ $sheet ? ($sheet->total_score ?? 0) : 0 }},
+                             isSaving: false,
+                             saveSuccess: false,
+                             errorMessage: '',
+                             get total() {
+                                 let sum = 0;
+                                 for (let key in this.scores) {
+                                     sum += parseFloat(this.scores[key]) || 0;
+                                 }
+                                 return Math.round(sum * 10) / 10;
+                             },
+                             get computedGrade() {
+                                 const t = this.total;
+                                 if (t >= 90) return 'A+';
+                                 if (t >= 70) return 'A';
+                                 if (t >= 60) return 'B';
+                                 if (t >= 50) return 'C';
+                                 return '-';
+                             },
+                             submitEvaluation(e) {
+                                 if (this.isSaving) return;
+                                 this.isSaving = true;
+                                 this.saveSuccess = false;
+                                 this.errorMessage = '';
+                                 const form = e.target;
+                                 const formData = new FormData(form);
+                                 fetch(form.action, {
+                                     method: 'POST',
+                                     body: formData,
+                                     headers: {
+                                         'X-Requested-With': 'XMLHttpRequest',
+                                         'Accept': 'application/json'
+                                     }
+                                 })
+                                 .then(async res => {
+                                     if (!res.ok) {
+                                         const err = await res.json().catch(() => ({}));
+                                         throw new Error(err.message || 'Server error.');
+                                     }
+                                     return res.json();
+                                 })
+                                 .then(data => {
+                                     this.isSubmitted = true;
+                                     this.submittedScore = data.total_score || this.total;
+                                     this.saveSuccess = true;
+                                     setTimeout(() => { this.saveSuccess = false; }, 3000);
+                                 })
+                                 .catch(err => {
+                                     this.errorMessage = err.message || 'Error saving score.';
+                                 })
+                                 .finally(() => {
+                                     this.isSaving = false;
+                                 });
+                             }
+                         }">
+                        <form method="POST" action="{{ route('judge.evaluate.save', [$program, $entry]) }}" @submit.prevent="submitEvaluation($event)" class="space-y-6">
+                            @csrf
+                            <input type="hidden" name="scoring_mode" value="criteria">
+
+                            <!-- Header -->
+                            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full {{ $palette['bg'] }} {{ $palette['text'] }} {{ $palette['border'] }} border-2 flex items-center justify-center font-mono font-bold text-lg shadow-2xs">
+                                        {{ $codeLetter }}
                                     </div>
-                                @elseif($entrySubmission->file_path)
-                                    <!-- PDF / Document file -->
-                                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-mono font-black text-xs">
-                                                PDF
+                                    <div>
+                                        <h3 class="text-base font-sora font-bold text-slate-900">Code {{ $codeLetter }}</h3>
+                                        <p class="text-[11px] font-mono text-slate-400">Strictly Anonymous Evaluation</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center font-mono">
+                                        <span class="text-[9px] text-slate-400 block uppercase font-bold">Total</span>
+                                        <span class="text-lg font-black text-slate-900" x-text="total">0</span>
+                                    </div>
+                                    <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center font-mono">
+                                        <span class="text-[9px] text-slate-400 block uppercase font-bold">Grade</span>
+                                        <span class="text-xs font-black inline-block px-2 py-0.5 rounded-full"
+                                              :class="{
+                                                  'bg-emerald-100 text-emerald-800 border border-emerald-300': computedGrade === 'A+',
+                                                  'bg-emerald-50 text-emerald-700 border border-emerald-200': computedGrade === 'A',
+                                                  'bg-blue-50 text-[#005c94] border border-blue-200': computedGrade === 'B',
+                                                  'bg-amber-50 text-amber-800 border border-amber-200': computedGrade === 'C',
+                                                  'text-slate-300': computedGrade === '-'
+                                              }"
+                                              x-text="computedGrade">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criteria Breakdown Inputs -->
+                            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                                @foreach($program->scoringCriteria as $critIndex => $criterion)
+                                    <div class="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs bg-slate-100 text-slate-700 shrink-0">
+                                                {{ $critIndex + 1 }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-sm text-slate-900">{{ $entrySubmission->file_name ?? 'Document' }}</div>
-                                                <div class="text-[11px] font-mono text-slate-500">{{ $entrySubmission->formatted_file_size }} • Attached Document</div>
+                                                <h4 class="text-sm font-sora font-semibold text-slate-900">{{ $criterion->criterion_name }}</h4>
+                                                <span class="text-[11px] font-mono text-[#be1e2d] font-bold">Max: {{ $criterion->max_marks }} pts</span>
                                             </div>
                                         </div>
-                                        <a href="{{ $entrySubmission->file_url }}" target="_blank"
-                                           class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-mono font-bold text-xs flex items-center gap-1.5 shadow-2xs transition">
-                                            <span>Open & Read PDF</span>
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                        </a>
+
+                                        <div class="flex items-center gap-2 self-end sm:self-center">
+                                            <input type="number"
+                                                   step="0.5"
+                                                   min="0"
+                                                   max="{{ $criterion->max_marks }}"
+                                                   inputmode="decimal"
+                                                   name="scores[{{ $criterion->id }}]"
+                                                   x-model="scores['{{ $criterion->id }}']"
+                                                   @input="if (scores['{{ $criterion->id }}'] > maxMarks['{{ $criterion->id }}']) scores['{{ $criterion->id }}'] = maxMarks['{{ $criterion->id }}']; if (scores['{{ $criterion->id }}'] < 0) scores['{{ $criterion->id }}'] = 0;"
+                                                   class="w-20 sm:w-24 h-10 bg-slate-50 border-2 border-slate-200 focus:border-[#be1e2d] rounded-xl text-center font-mono font-black text-base text-slate-900 focus:outline-none focus:bg-white transition-all">
+                                            <span class="text-xs font-mono text-slate-400 font-bold">/ {{ $criterion->max_marks }}</span>
+                                        </div>
                                     </div>
-                                @endif
-
-                                <!-- 3. Video Submission -->
-                                @if($entrySubmission->video_url)
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-xs font-mono">
-                                            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                                <span>Video Submission (വീഡിയോ)</span>
-                                            </span>
-                                        </div>
-
-                                        @php
-                                            $isVideoFile = Str::contains($entrySubmission->video_url, ['.mp4', '.webm', '.ogg', '/storage/submissions']);
-                                        @endphp
-
-                                        @if($isVideoFile)
-                                            <div class="rounded-2xl overflow-hidden bg-black aspect-video max-h-96">
-                                                <video controls class="w-full h-full object-contain">
-                                                    <source src="{{ $entrySubmission->video_url }}">
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            </div>
-                                        @else
-                                            <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                                <div class="space-y-1">
-                                                    <div class="font-bold text-sm text-slate-900">External Video Performance Link</div>
-                                                    <div class="text-xs font-mono text-indigo-600 truncate max-w-md">{{ $entrySubmission->video_url }}</div>
-                                                </div>
-                                                <a href="{{ $entrySubmission->video_url }}" target="_blank"
-                                                   class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-mono font-bold text-xs inline-flex items-center gap-1.5 shadow-2xs transition self-start sm:self-auto">
-                                                    <span>Watch Video Submission</span>
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                                </a>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endif
+                                @endforeach
                             </div>
-                        </div>
-                    @elseif(!empty($hasOnlineSubmissions))
-                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-500 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                                <span>ഈ കോഡ് ലെറ്ററിൽ ഓൺലൈൻ സബ്മിഷൻ ഇതുവരെ ലഭിച്ചിട്ടില്ല (No online submission received yet for Code {{ $entry->code_letter }}).</span>
-                            </div>
-                        </div>
-                    @endif
 
-                    <!-- Scoring Mode Hidden Input -->
-                    <input type="hidden" name="scoring_mode" :value="evaluationMode">
-
-                    <!-- Mode 1: Simple 100-Point Score Input (Clean & Touch-Friendly) -->
-                    <div x-show="evaluationMode === 'simple'">
-                        <div class="bg-slate-50/70 border-2 border-blue-200 rounded-2xl p-4 max-w-xs space-y-2 shadow-2xs">
-                            <div class="flex items-center justify-between text-xs font-mono">
-                                <span class="text-slate-800 font-bold uppercase tracking-wider">Score</span>
-                                <span class="text-[#005c94] font-bold bg-blue-100 border border-blue-200 px-2.5 py-0.5 rounded-lg text-[11px]">/ 100</span>
-                            </div>
-                            <div>
-                                <input type="number" step="0.5" min="0" max="100"
-                                       inputmode="decimal"
-                                       name="total_score"
-                                       x-model="directScore"
-                                       :required="evaluationMode === 'simple'"
-                                       placeholder="0"
-                                       @input="if (directScore > 100) directScore = 100; if (directScore < 0) directScore = 0; saveDraftLocal();"
-                                       class="w-full h-13 sm:h-14 bg-white border-2 border-blue-300 rounded-xl px-4 text-3xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#005c94] focus:ring-2 focus:ring-[#005c94]/20 shadow-xs transition-all">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mode 2: Criteria Breakdown Inputs (Tablet & Mobile Friendly Vertical List) -->
-                    <div x-show="evaluationMode === 'criteria'" class="space-y-3">
-                        @if($program->has_criteria && $program->scoringCriteria->isNotEmpty())
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between px-1 text-xs font-mono">
-                                    <span class="font-bold uppercase tracking-wider text-slate-700">
-                                        Criteria Breakdown ({{ $program->scoringCriteria->count() }}):
-                                    </span>
-                                    <span class="text-slate-500 font-semibold">
-                                        Max: <strong class="text-slate-900">{{ $program->scoringCriteria->sum('max_marks') }}</strong> pts
-                                    </span>
-                                </div>
-
-                                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100 shadow-2xs">
-                                    @foreach($program->scoringCriteria as $critIndex => $criterion)
-                                        <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
-                                             :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-blue-50/20' : 'hover:bg-slate-50/70'">
-                                             <!-- Criterion Title, Index & Max Marks -->
-                                            <div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-                                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-mono font-black text-sm shrink-0 shadow-2xs transition-colors"
-                                                     :class="(scores['{{ $criterion->id }}'] > 0) ? 'bg-[#be1e2d] text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'">
-                                                    {{ $critIndex + 1 }}
-                                                </div>
-                                                <div class="min-w-0 flex-1">
-                                                    <div class="flex flex-wrap items-center gap-2">
-                                                        <h4 class="text-base font-sora font-bold text-slate-900 leading-snug">
-                                                            {{ $criterion->criterion_name }}
-                                                        </h4>
-                                                        <span class="px-2.5 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-[#be1e2d] font-mono text-xs font-bold shrink-0">
-                                                            Max: {{ $criterion->max_marks }} Pts
-                                                        </span>
-                                                    </div>
-                                                    <p class="text-xs font-mono text-slate-500 mt-1">
-                                                        0 - {{ $criterion->max_marks }}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <!-- Touch-Friendly Score Input (Tablet & Mobile Optimized) -->
-                                            <div class="flex items-center justify-end gap-2 shrink-0 self-end sm:self-center">
-                                                <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-2xs">
-                                                    <input type="number"
-                                                           step="0.5"
-                                                           min="0"
-                                                           max="{{ $criterion->max_marks }}"
-                                                           inputmode="decimal"
-                                                           name="scores[{{ $criterion->id }}]"
-                                                           x-model="scores['{{ $criterion->id }}']"
-                                                           :required="evaluationMode === 'criteria'"
-                                                           placeholder="0"
-                                                           @input="if (scores['{{ $criterion->id }}'] > maxMarks['{{ $criterion->id }}']) scores['{{ $criterion->id }}'] = maxMarks['{{ $criterion->id }}']; if (scores['{{ $criterion->id }}'] < 0) scores['{{ $criterion->id }}'] = 0; saveDraftLocal();"
-                                                           class="w-24 sm:w-28 h-12 sm:h-13 bg-white border-2 border-slate-300 rounded-xl px-2 text-xl sm:text-2xl font-mono text-slate-900 text-center font-black focus:outline-none focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/20 shadow-xs transition-all">
-
-                                                    <div class="px-2.5 py-1 text-center font-mono">
-                                                        <span class="text-[10px] text-slate-400 block uppercase font-bold leading-none">Max</span>
-                                                        <span class="text-sm font-bold text-slate-700 font-mono leading-tight">/ {{ $criterion->max_marks }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @else
-                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-xs font-mono text-blue-900">
-                                ഈ പ്രോഗ്രാമിന് മാനദണ്ഡങ്ങൾ ലഭ്യമല്ല. Simple Mode ഉപയോഗിക്കുക.
-                            </div>
-                        @endif
-                    </div>
-                    <!-- Grade Selector Buttons (A+, A, B, C) - Clean & Touch-Friendly -->
-                    <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="text-xs font-mono">
-                            <span class="font-bold text-slate-800 uppercase tracking-wider">Grade:</span>
-                        </div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <input type="hidden" name="grade" :value="selectedGrade || (computedGrade !== '-' ? computedGrade : '')">
-                            <template x-for="g in ['A+', 'A', 'B', 'C']" :key="g">
-                                <button type="button" 
-                                        @click="setGrade(g)"
-                                        :class="(selectedGrade === g || (!selectedGrade && computedGrade === g))
-                                            ? (g === 'A+' || g === 'A' ? 'bg-emerald-600 text-white shadow-xs border-emerald-600 scale-102 font-black' : (g === 'B' ? 'bg-blue-600 text-white shadow-xs border-blue-600 scale-102 font-black' : 'bg-slate-700 text-white shadow-xs border-slate-700 scale-102 font-black'))
-                                            : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 font-bold'"
-                                        class="h-10 sm:h-11 min-w-11 sm:min-w-12 px-3 sm:px-4 rounded-xl border text-sm font-mono transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95">
-                                    <span x-text="g"></span>
+                            <!-- Remarks & Submit -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                                <input type="text" name="remarks" x-model="remarks" placeholder="Confidential remarks for Code {{ $codeLetter }}..."
+                                       class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 h-11 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white font-sora transition-all">
+                                <button type="submit"
+                                        :disabled="isSaving"
+                                        class="h-11 px-6 bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono font-bold text-xs uppercase rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                    <template x-if="isSaving">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                    </template>
+                                    <template x-if="!isSaving">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    </template>
+                                    <span x-text="isSaving ? 'Saving...' : (isSubmitted ? 'Update Score' : 'Save Score')"></span>
                                 </button>
-                            </template>
-                            <button type="button" x-show="selectedGrade" @click="selectedGrade = ''; saveDraftLocal();" 
-                                    class="px-2.5 py-1 text-xs font-mono text-slate-500 hover:text-slate-800 underline cursor-pointer">
-                                Reset Auto
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Remarks & Submit Action -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                        <div class="flex-1">
-                            <input type="text" name="remarks" x-model="remarks" @input="saveDraftLocal()" placeholder="Confidential remarks for this performance..."
-                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 h-12 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#005c94] focus:bg-white font-sora shadow-2xs transition-all">
-                            <div x-show="errorMessage" class="text-xs font-mono font-bold text-red-600 mt-1" x-text="errorMessage"></div>
-                            <div x-show="saveSuccess" class="text-xs font-mono font-bold text-emerald-600 mt-1 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span>Scores saved successfully (Total: <span x-text="submittedScore"></span>)</span>
                             </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button type="submit" 
-                                    :disabled="isSaving"
-                                    :class="isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:brightness-105 active:scale-95'"
-                                    class="w-full sm:w-auto h-12 sm:h-13 px-6 sm:px-8 bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs sm:text-sm uppercase rounded-xl shadow-md shadow-[#005c94]/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
-                                <template x-if="isSaving">
-                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                                </template>
-                                <template x-if="!isSaving">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                </template>
-                                <span x-text="isSaving ? 'Saving...' : (isSubmitted ? 'Update Evaluation' : 'Lock & Submit Score')"></span>
-                            </button>
-                        </div>
+                        </form>
                     </div>
-                </form>
+                @endforeach
             </div>
-        @empty
-            <div class="py-16 text-center text-slate-500 font-mono text-xs bg-white rounded-3xl border border-slate-200 shadow-sm space-y-2">
-                <svg class="w-8 h-8 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <div class="font-bold text-slate-800">No Candidates Marked PRESENT Yet</div>
-                <p class="text-slate-400 max-w-md mx-auto">Only candidates marked "PRESENT" by the Green Room desk become eligible and appear here for jury evaluation. Absent candidates are strictly excluded.</p>
-            </div>
-        @endforelse
-    </div>
-    <!-- Rules & Niyamavali Modal (Light Theme) -->
+        </div>
+    @endif
+
+    <!-- Rules & Guidelines Modal -->
     <div x-show="rulesModalOpen"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
@@ -686,7 +641,7 @@
              @click.away="rulesModalOpen = false">
             <div class="flex items-start justify-between pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-[10px] font-mono uppercase tracking-widest text-[#005c94] font-bold">Program Guidelines</span>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-[#be1e2d] font-bold">Program Guidelines</span>
                     <h2 class="text-xl font-sora font-black text-slate-900 mt-1">{{ $program->name }}</h2>
                     @if($program->malayalam_name)
                         <p class="text-xs font-ml text-slate-500 mt-0.5">{{ $program->malayalam_name }}</p>
@@ -700,7 +655,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Zone</span>
-                    <span class="text-slate-800 font-bold">{{ $program->zone?->name ?? $program->eligibility ?? 'All' }}</span>
+                    <span class="text-[#be1e2d] font-bold">{{ $program->zone?->name ?? $program->eligibility ?? 'All' }}</span>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Type</span>
@@ -708,7 +663,7 @@
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Duration</span>
-                    <span class="text-[#005c94] font-bold">{{ $program->duration_minutes }} Mins</span>
+                    <span class="text-slate-800 font-bold">{{ $program->duration_minutes }} Mins</span>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
                     <span class="text-[10px] text-slate-400 block uppercase">Eligibility</span>
@@ -727,20 +682,22 @@
                 </div>
             </div>
             <!-- Scoring Criteria List -->
-            <div class="space-y-3">
-                <h3 class="text-sm font-mono font-bold text-slate-800 uppercase tracking-wider">Scoring Rubric</h3>
-                <div class="space-y-2">
-                    @foreach($program->scoringCriteria as $criterion)
-                        <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono">
-                            <span class="text-slate-800 font-semibold">{{ $criterion->criterion_name }}</span>
-                            <span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-[#be1e2d] border border-rose-200 font-bold">Max: {{ $criterion->max_marks }} Marks</span>
-                        </div>
-                    @endforeach
+            @if($program->scoringCriteria->isNotEmpty())
+                <div class="space-y-3">
+                    <h3 class="text-sm font-mono font-bold text-slate-800 uppercase tracking-wider">Scoring Rubric</h3>
+                    <div class="space-y-2">
+                        @foreach($program->scoringCriteria as $criterion)
+                            <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono">
+                                <span class="text-slate-800 font-semibold">{{ $criterion->criterion_name }}</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-[#be1e2d] border border-rose-200 font-bold">Max: {{ $criterion->max_marks }} Marks</span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
             <div class="pt-2 text-right">
                 <button type="button" @click="rulesModalOpen = false"
-                        class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-all">
+                        class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-all cursor-pointer">
                     Close
                 </button>
             </div>

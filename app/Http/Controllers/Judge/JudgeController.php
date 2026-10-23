@@ -294,9 +294,10 @@ class JudgeController extends Controller
         $criteria = $program->scoringCriteria;
         $criteriaScores = [];
         $total = 0;
-        $scoringMode = $request->input('scoring_mode', 'simple'); // 'simple' or 'criteria'
+        $scoringMode = $request->input('scoring_mode');
+        $useCriteria = ($scoringMode === 'criteria' || ($request->has('scores') && ! $request->has('total_score'))) && $criteria->isNotEmpty();
 
-        if ($scoringMode === 'simple' || $criteria->isEmpty() || (! $request->has('scores') && $request->has('total_score'))) {
+        if (! $useCriteria) {
             $total = (float) $request->input('total_score', $request->input('score', 0));
             if ($total > 100) {
                 $total = 100;
