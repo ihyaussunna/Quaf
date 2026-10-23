@@ -19,9 +19,7 @@
     <!-- Header -->
     <header class="h-20 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#f3bd2e] to-[#be1e2d] flex items-center justify-center p-0.5 shadow-sm">
-                <div class="w-full h-full bg-white rounded-[9px] flex items-center justify-center font-sora font-black text-sm text-[#f3bd2e]">Q9</div>
-            </div>
+            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-10 w-auto object-contain">
             <div>
                 <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF</span>
                 <span class="text-[10px] font-mono tracking-widest text-slate-500 block uppercase">Judges Portal</span>

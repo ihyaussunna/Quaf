@@ -48,18 +48,20 @@ class VerificationController extends Controller
 
         $isValid = (bool) $student;
         $coinSummary = null;
+        $studentAchievements = null;
         $purchaseHistory = collect();
         $coinTransactions = collect();
 
         if ($student) {
             $coinSummary = $coinRewardService->getStudentCoinSummary($student);
+            $studentAchievements = $coinRewardService->getStudentAchievements($student);
             $purchaseHistory = CoinTransaction::where('student_id', $student->id)
                 ->where('transaction_type', 'debit')
                 ->latest()
                 ->get();
             $coinTransactions = CoinTransaction::where('student_id', $student->id)
                 ->latest()
-                ->take(10)
+                ->take(15)
                 ->get();
         }
 
@@ -68,6 +70,7 @@ class VerificationController extends Controller
             'isValid',
             'qrToken',
             'coinSummary',
+            'studentAchievements',
             'purchaseHistory',
             'coinTransactions'
         ));

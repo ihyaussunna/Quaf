@@ -490,6 +490,150 @@ class CoinRewardService
     }
 
     /**
+     * Get student achievements including grade breakdown and prize positions.
+     *
+     * @return array{
+     *     grade_counts: array<string, int>,
+     *     prizes: array<int, array{count: int, title: string, rank: string, message: string, programs: array}>
+     * }
+     */
+    public function getStudentAchievements(Student $student): array
+    {
+        CoinTransaction::ensureSchema();
+
+        $achievements = [
+            'grade_counts' => [
+                'A+' => 0,
+                'A' => 0,
+                'B' => 0,
+                'C' => 0,
+            ],
+            'prizes' => [
+                1 => [
+                    'count' => 0,
+                    'title' => 'First Prize',
+                    'rank' => 'Pinnacle',
+                    'message' => "You've secured the First Prize with excellence!",
+                    'programs' => [],
+                ],
+                2 => [
+                    'count' => 0,
+                    'title' => 'Second Prize',
+                    'rank' => 'Eminent',
+                    'message' => 'Great achievement securing Second Prize!',
+                    'programs' => [],
+                ],
+                3 => [
+                    'count' => 0,
+                    'title' => 'Third Prize',
+                    'rank' => 'Competent',
+                    'message' => 'Proud moment! You earned the Third Prize.',
+                    'programs' => [],
+                ],
+            ],
+        ];
+
+        $processedPrograms = [];
+
+        // 1. Scan completed positive coin transactions
+        $credits = CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'credit')
+            ->where('coins', '>', 0)
+            ->with(['program.category'])
+            ->get();
+
+        foreach ($credits as $credit) {
+            $progId = $credit->program_id;
+            $pos = (int) $credit->prize_position;
+            $grade = self::normalizeGrade($credit->grade);
+            $progName = $credit->program?->name ?? ($credit->metadata['program_name'] ?? 'Competition');
+
+            if ($progId) {
+                $processedPrograms[$progId] = true;
+            }
+
+            if (isset($achievements['prizes'][$pos])) {
+                $achievements['prizes'][$pos]['count']++;
+                $achievements['prizes'][$pos]['programs'][] = [
+                    'name' => $progName,
+                    'grade' => $grade,
+                    'coins' => $credit->coins,
+                ];
+            }
+
+            if ($grade && isset($achievements['grade_counts'][$grade])) {
+                $achievements['grade_counts'][$grade]++;
+            }
+        }
+
+        // 2. Scan verified program entries (individual and group) that may not yet have coin transactions
+        $entries = ProgramEntry::where('student_id', $student->id)
+            ->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']))
+            ->with(['program.result', 'scoreSheets'])
+            ->get();
+
+        $groupEntries = $student->participations()
+            ->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']))
+            ->with(['program.result', 'scoreSheets'])
+            ->get();
+
+        $allEntries = $entries->merge($groupEntries)->unique('id');
+
+        foreach ($allEntries as $entry) {
+            $program = $entry->program;
+            if (! $program || isset($processedPrograms[$program->id])) {
+                continue;
+            }
+            $result = $program->result;
+            if (! $result) {
+                continue;
+            }
+
+            $pos = 0;
+            $grade = null;
+
+            if ($result->first_entry_id === $entry->id) {
+                $pos = 1;
+                $grade = self::normalizeGrade($result->first_grade);
+            } elseif ($result->second_entry_id === $entry->id) {
+                $pos = 2;
+                $grade = self::normalizeGrade($result->second_grade);
+            } elseif ($result->third_entry_id === $entry->id) {
+                $pos = 3;
+                $grade = self::normalizeGrade($result->third_grade);
+            }
+
+            if (! $grade && ! empty($entry->computed_grade)) {
+                $grade = self::normalizeGrade($entry->computed_grade);
+            }
+
+            if (! $grade) {
+                $judgeGrade = $entry->scoreSheets->where('is_submitted', true)->pluck('criteria_scores.grade')->filter()->first();
+                if ($judgeGrade) {
+                    $grade = self::normalizeGrade($judgeGrade);
+                }
+            }
+
+            $processedPrograms[$program->id] = true;
+
+            if (isset($achievements['prizes'][$pos])) {
+                $achievements['prizes'][$pos]['count']++;
+                $achievements['prizes'][$pos]['programs'][] = [
+                    'name' => $program->name,
+                    'grade' => $grade,
+                    'coins' => 0,
+                ];
+            }
+
+            if ($grade && isset($achievements['grade_counts'][$grade])) {
+                $achievements['grade_counts'][$grade]++;
+            }
+        }
+
+        return $achievements;
+    }
+
+    /**
      * Record a coin redemption / purchase for a student at the Presentation Desk.
      *
      * @param array{

@@ -123,6 +123,158 @@
                 </div>
             @endif
 
+            <!-- GRADE ACHIEVEMENTS & COMPETITION PRIZES -->
+            @if(isset($studentAchievements))
+                <div class="space-y-6 pt-2">
+                    <!-- Grade Breakdown Row (A+ Excellence, A Proficient, B Adequate, C Satisfactory) -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Grade Achievements</span>
+                            <span class="text-xs font-mono text-slate-500">Official Evaluation</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- A+ Excellence -->
+                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span class="text-2xl font-black font-sora text-amber-400">A+</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                                        {{ $studentAchievements['grade_counts']['A+'] ?? 0 }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-slate-400 font-medium block mt-1">Excellence</span>
+                            </div>
+
+                            <!-- A Proficient -->
+                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span class="text-2xl font-black font-sora text-emerald-400">A</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                                        {{ $studentAchievements['grade_counts']['A'] ?? 0 }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-slate-400 font-medium block mt-1">Proficient</span>
+                            </div>
+
+                            <!-- B Adequate -->
+                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span class="text-2xl font-black font-sora text-blue-400">B</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-400/20 text-blue-300 border border-blue-400/30">
+                                        {{ $studentAchievements['grade_counts']['B'] ?? 0 }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-slate-400 font-medium block mt-1">Adequate</span>
+                            </div>
+
+                            <!-- C Satisfactory -->
+                            <div class="rounded-2xl p-4 bg-gradient-to-b from-slate-900 to-slate-950 text-white border border-slate-800 text-center shadow-sm">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span class="text-2xl font-black font-sora text-slate-300">C</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-700/50 text-slate-300 border border-slate-600/30">
+                                        {{ $studentAchievements['grade_counts']['C'] ?? 0 }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-slate-400 font-medium block mt-1">Satisfactory</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Competition Prizes (First Prize Pinnacle, Second Prize Eminent, Third Prize Competent) -->
+                    <div class="space-y-3">
+                        <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 block">Competition Prizes</span>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- First Prize -->
+                            @php $p1 = $studentAchievements['prizes'][1] ?? ['count' => 0, 'programs' => []]; @endphp
+                            <div class="rounded-2xl p-4 border transition-all {{ $p1['count'] > 0 ? 'bg-[#0f1d36] text-white border-amber-400/60 shadow-md' : 'bg-slate-50 text-slate-700 border-slate-200' }}" x-data="{ open: false }">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold {{ $p1['count'] > 0 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-600' }}">
+                                        <svg class="w-3.5 h-3.5 text-current shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>{{ $p1['count'] }} Pinnacle</span>
+                                    </span>
+                                    @if(!empty($p1['programs']))
+                                        <button type="button" @click="open = !open" class="text-xs font-mono font-bold text-amber-300 hover:text-amber-200 underline cursor-pointer">
+                                            <span x-text="open ? 'Hide Details' : 'View Details'"></span>
+                                        </button>
+                                    @endif
+                                </div>
+                                <h4 class="text-base font-black font-sora mt-2 {{ $p1['count'] > 0 ? 'text-white' : 'text-slate-800' }}">First Prize</h4>
+                                <p class="text-xs mt-0.5 {{ $p1['count'] > 0 ? 'text-slate-300' : 'text-slate-500' }}">You've secured the First Prize with excellence!</p>
+
+                                @if(!empty($p1['programs']))
+                                    <div x-show="open" x-cloak class="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+                                        @foreach($p1['programs'] as $prog)
+                                            <div class="flex items-center justify-between text-xs bg-white/5 rounded-lg px-2.5 py-1.5">
+                                                <span class="font-medium truncate">{{ $prog['name'] }}</span>
+                                                <span class="text-[11px] font-mono font-bold text-amber-300 shrink-0 ml-2">{{ $prog['grade'] ? 'Grade '.$prog['grade'] : '' }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Second Prize -->
+                            @php $p2 = $studentAchievements['prizes'][2] ?? ['count' => 0, 'programs' => []]; @endphp
+                            <div class="rounded-2xl p-4 border transition-all {{ $p2['count'] > 0 ? 'bg-[#0f1d36] text-white border-blue-400/60 shadow-md' : 'bg-slate-50 text-slate-700 border-slate-200' }}" x-data="{ open: false }">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold {{ $p2['count'] > 0 ? 'bg-blue-400 text-slate-950' : 'bg-slate-200 text-slate-600' }}">
+                                        <svg class="w-3.5 h-3.5 text-current shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>{{ $p2['count'] }} Eminent</span>
+                                    </span>
+                                    @if(!empty($p2['programs']))
+                                        <button type="button" @click="open = !open" class="text-xs font-mono font-bold text-blue-300 hover:text-blue-200 underline cursor-pointer">
+                                            <span x-text="open ? 'Hide Details' : 'View Details'"></span>
+                                        </button>
+                                    @endif
+                                </div>
+                                <h4 class="text-base font-black font-sora mt-2 {{ $p2['count'] > 0 ? 'text-white' : 'text-slate-800' }}">Second Prize</h4>
+                                <p class="text-xs mt-0.5 {{ $p2['count'] > 0 ? 'text-slate-300' : 'text-slate-500' }}">Great achievement securing Second Prize!</p>
+
+                                @if(!empty($p2['programs']))
+                                    <div x-show="open" x-cloak class="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+                                        @foreach($p2['programs'] as $prog)
+                                            <div class="flex items-center justify-between text-xs bg-white/5 rounded-lg px-2.5 py-1.5">
+                                                <span class="font-medium truncate">{{ $prog['name'] }}</span>
+                                                <span class="text-[11px] font-mono font-bold text-blue-300 shrink-0 ml-2">{{ $prog['grade'] ? 'Grade '.$prog['grade'] : '' }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Third Prize -->
+                            @php $p3 = $studentAchievements['prizes'][3] ?? ['count' => 0, 'programs' => []]; @endphp
+                            <div class="rounded-2xl p-4 border transition-all {{ $p3['count'] > 0 ? 'bg-[#0f1d36] text-white border-amber-600/60 shadow-md' : 'bg-slate-50 text-slate-700 border-slate-200' }}" x-data="{ open: false }">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold {{ $p3['count'] > 0 ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600' }}">
+                                        <svg class="w-3.5 h-3.5 text-current shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>{{ $p3['count'] }} Competent</span>
+                                    </span>
+                                    @if(!empty($p3['programs']))
+                                        <button type="button" @click="open = !open" class="text-xs font-mono font-bold text-amber-300 hover:text-amber-200 underline cursor-pointer">
+                                            <span x-text="open ? 'Hide Details' : 'View Details'"></span>
+                                        </button>
+                                    @endif
+                                </div>
+                                <h4 class="text-base font-black font-sora mt-2 {{ $p3['count'] > 0 ? 'text-white' : 'text-slate-800' }}">Third Prize</h4>
+                                <p class="text-xs mt-0.5 {{ $p3['count'] > 0 ? 'text-slate-300' : 'text-slate-500' }}">Proud moment! You earned the Third Prize.</p>
+
+                                @if(!empty($p3['programs']))
+                                    <div x-show="open" x-cloak class="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+                                        @foreach($p3['programs'] as $prog)
+                                            <div class="flex items-center justify-between text-xs bg-white/5 rounded-lg px-2.5 py-1.5">
+                                                <span class="font-medium truncate">{{ $prog['name'] }}</span>
+                                                <span class="text-[11px] font-mono font-bold text-amber-300 shrink-0 ml-2">{{ $prog['grade'] ? 'Grade '.$prog['grade'] : '' }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- QUAF RECOGNITION GIFT STATUS -->
             @if(!$student->isCompetitionParticipant())
                 <div class="p-5 sm:p-6 rounded-2xl border bg-slate-50 border-slate-200 text-slate-700">

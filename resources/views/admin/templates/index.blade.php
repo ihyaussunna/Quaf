@@ -89,7 +89,7 @@
             <!-- Badges Preview -->
             <div class="w-72 bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-md flex flex-col text-center transition-all">
                 <div class="bg-gradient-to-r from-[#be1e2d] to-[#a01624] text-white py-4 px-3">
-                    <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center mx-auto text-white font-black text-sm mb-1">Q</div>
+                    <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF" class="h-7 w-auto object-contain brightness-0 invert mx-auto mb-1.5">
                     <h4 class="font-black text-sm tracking-wide">QUAF FESTIVAL</h4>
                     <p class="text-[10px] text-white/80 uppercase">Official Participant Pass</p>
                 </div>

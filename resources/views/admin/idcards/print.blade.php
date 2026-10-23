@@ -54,9 +54,7 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-[#f3bd2e] text-white flex items-center justify-center font-sora font-black text-[10px]">
-                            Q9
-                        </div>
+                        <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF" class="h-6 w-auto object-contain">
                         <div>
                             <h4 class="font-sora font-black text-xs uppercase tracking-wider text-slate-900">QUAF</h4>
                             <p class="text-[7px] font-mono text-slate-500 uppercase">Ihyaussunna • Markaz</p>

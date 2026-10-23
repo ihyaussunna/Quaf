@@ -43,8 +43,8 @@
     <!-- Top Header Bar -->
     <header class="bg-white border-b border-slate-200 px-6 lg:px-10 py-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20 font-sora font-black text-xl tracking-wider">
-                Q9
+            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 text-white shadow-xs">
+                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="w-full h-full object-contain">
             </div>
             <div>
                 <div class="flex items-center gap-2">
@@ -198,8 +198,8 @@
                     @else
                         <!-- Standby State -->
                         <div class="bg-white rounded-3xl border border-slate-200 p-12 shadow-sm flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                            <div class="w-20 h-20 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 text-3xl font-sora font-black animate-pulse-slow">
-                                Q9
+                            <div class="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center border border-amber-200 p-4 shadow-xs">
+                                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="w-full h-full object-contain">
                             </div>
                             <div class="space-y-1">
                                 <h3 class="text-2xl lg:text-3xl font-bold text-slate-900 font-sora">Awaiting Next Performer</h3>
@@ -284,8 +284,8 @@
         @else
             <!-- Stage Idle -->
             <div class="bg-white rounded-3xl border border-slate-200 p-16 shadow-sm flex-1 flex flex-col items-center justify-center text-center space-y-6">
-                <div class="w-24 h-24 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 text-4xl font-sora font-black shadow-md">
-                    Q9
+                <div class="w-24 h-24 rounded-3xl bg-amber-50 flex items-center justify-center border border-amber-200 p-4 shadow-md">
+                    <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="w-full h-full object-contain">
                 </div>
                 <div class="space-y-2 max-w-lg">
                     <h2 class="text-3xl lg:text-4xl font-black text-slate-900 font-sora tracking-tight">Stage Currently Idle</h2>

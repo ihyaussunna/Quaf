@@ -377,4 +377,41 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $dashResponse->assertSee('Scan QR to View');
         $dashResponse->assertDontSee($this->student->purchase_pin);
     }
+
+    public function test_presentation_desk_shows_student_grade_counts_and_prize_achievements(): void
+    {
+        CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->student->group_id,
+            'prize_position' => 1,
+            'grade' => 'A+',
+            'coins' => 200,
+            'transaction_type' => 'credit',
+            'transaction_reference' => 'COIN-TEST-ACHIEVE-01',
+            'status' => 'completed',
+            'description' => 'First Prize Qawwali - Grade A+',
+        ]);
+
+        $response = $this->actingAs($this->presentationUser)->get(route('presentation.dashboard', [
+            'student' => $this->student->student_id,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Grade Achievements');
+        $response->assertSee('Excellence');
+        $response->assertSee('Proficient');
+        $response->assertSee('Pinnacle');
+        $response->assertSee('First Prize');
+        $response->assertSee('Transaction History');
+
+        $ajaxResponse = $this->actingAs($this->presentationUser)->getJson(route('presentation.search-student', [
+            'query' => $this->student->student_id,
+        ]));
+
+        $ajaxResponse->assertOk();
+        $ajaxResponse->assertJsonPath('found', true);
+        $ajaxResponse->assertJsonPath('student.grade_counts.A+', 1);
+        $ajaxResponse->assertJsonPath('student.prizes.1.count', 1);
+        $ajaxResponse->assertJsonPath('student.prizes.1.rank', 'Pinnacle');
+    }
 }

@@ -57,6 +57,7 @@ class PresentationController extends Controller
 
         $selectedStudent = null;
         $studentSummary = null;
+        $studentAchievements = null;
         $studentTransactions = collect();
 
         $queryStr = trim((string) ($request->query('student') ?? $request->query('query') ?? ''));
@@ -64,9 +65,10 @@ class PresentationController extends Controller
             $selectedStudent = $this->resolveStudent($queryStr);
             if ($selectedStudent) {
                 $studentSummary = $this->coinRewardService->getStudentCoinSummary($selectedStudent);
+                $studentAchievements = $this->coinRewardService->getStudentAchievements($selectedStudent);
                 $studentTransactions = CoinTransaction::where('student_id', $selectedStudent->id)
                     ->latest()
-                    ->take(10)
+                    ->take(20)
                     ->get();
             }
         }
@@ -100,6 +102,7 @@ class PresentationController extends Controller
             'presets',
             'selectedStudent',
             'studentSummary',
+            'studentAchievements',
             'studentTransactions',
             'recentTransactions',
             'queryStr',
@@ -131,9 +134,10 @@ class PresentationController extends Controller
         }
 
         $summary = $this->coinRewardService->getStudentCoinSummary($student);
+        $achievements = $this->coinRewardService->getStudentAchievements($student);
         $recent = CoinTransaction::where('student_id', $student->id)
             ->latest()
-            ->take(5)
+            ->take(15)
             ->get()
             ->map(function ($tx) {
                 return [
@@ -162,6 +166,8 @@ class PresentationController extends Controller
                 'total_spent' => $summary['total_spent'],
                 'recognition_gift_delivered' => (bool) $student->recognition_gift_delivered,
                 'recognition_gift_delivered_at' => $student->recognition_gift_delivered_at?->format('d M, h:i A'),
+                'grade_counts' => $achievements['grade_counts'],
+                'prizes' => $achievements['prizes'],
                 'recent_transactions' => $recent,
             ],
         ]);
