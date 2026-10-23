@@ -171,17 +171,18 @@
     <!-- MODE 1: SIMPLE MODE EVALUATION TABLE (Minimalist, Compact & Elegant)        -->
     <!-- Matches User Design: CODE (left), GRADE (center auto), MARK (right)       -->
     <!-- ========================================================================= -->
-    <div x-show="evaluationMode === 'simple'" class="max-w-2xl mx-auto w-full space-y-4">
+    <div x-show="evaluationMode === 'simple'" class="max-w-xl mx-auto w-full space-y-4">
         <div class="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden">
-            <!-- Table Header -->
-            <div class="grid grid-cols-12 items-center px-4 sm:px-6 py-3.5 bg-slate-50/70 border-b border-slate-200/80 text-[11px] font-mono font-bold tracking-wider text-slate-500 uppercase">
-                <div class="col-span-4 flex items-center">
+            <!-- Table Header (Strict Single Horizontal Line) -->
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-mono font-bold tracking-wider text-slate-500 uppercase"
+                 style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="flex: 1; text-align: left; display: flex; align-items: center;">
                     <span>CODE</span>
                 </div>
-                <div class="col-span-4 text-center">
+                <div style="flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;">
                     <span>GRADE</span>
                 </div>
-                <div class="col-span-4 text-right pr-2 sm:pr-4">
+                <div style="flex: 1; text-align: right; display: flex; align-items: center; justify-content: flex-end; padding-right: 32px;">
                     <span>MARK</span>
                 </div>
             </div>
@@ -289,34 +290,37 @@
                          :class="isFocused ? 'bg-indigo-50/40' : (isSubmitted ? 'bg-white' : 'hover:bg-slate-50/50')"
                          class="transition-colors"
                     >
-                        <!-- Main Entry Row -->
-                        <div class="grid grid-cols-12 items-center px-4 sm:px-6 py-3">
-                            <!-- CODE (Left) -->
-                            <div class="col-span-4 flex items-center gap-2 sm:gap-3">
-                                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $palette['bg'] }} {{ $palette['text'] }} {{ $palette['border'] }} border-2 flex items-center justify-center font-mono font-bold text-base sm:text-lg shadow-2xs shrink-0">
+                        <!-- Main Entry Row (Strict Single Horizontal Line) -->
+                        <div class="flex items-center justify-between px-4 sm:px-6 py-3"
+                             style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 58px;">
+                            <!-- 1. CODE (Left) -->
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
+                                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full {{ $palette['bg'] }} {{ $palette['text'] }} {{ $palette['border'] }} border-2 flex items-center justify-center font-mono font-bold text-base sm:text-lg shadow-2xs shrink-0"
+                                     style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px;">
                                     {{ $codeLetter }}
                                 </div>
 
                                 <!-- Collapsible Work / Remarks Toggle Button -->
                                 @if($entrySubmission)
                                     <button type="button" @click="expanded = !expanded" 
-                                            class="p-1 px-1.5 rounded-lg text-indigo-700 hover:bg-indigo-50 border border-indigo-200/80 text-[10px] font-mono font-bold flex items-center gap-1 transition shadow-2xs"
+                                            class="p-1 px-1.5 rounded-lg text-indigo-700 hover:bg-indigo-50 border border-indigo-200/80 text-[10px] font-mono font-bold flex items-center gap-1 transition shadow-2xs shrink-0"
                                             title="View Candidate Submission">
                                         <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                                         <span>Work</span>
                                     </button>
                                 @else
                                     <button type="button" @click="expanded = !expanded"
-                                            class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition hidden sm:inline-flex"
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition shrink-0"
                                             title="Add remarks / note">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
                                 @endif
                             </div>
 
-                            <!-- GRADE (Center - Automatically Calculated) -->
-                            <div class="col-span-4 text-center flex items-center justify-center">
+                            <!-- 2. GRADE (Center - Perfectly on same line) -->
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;">
                                 <span class="inline-flex items-center justify-center min-w-[42px] px-2.5 py-1 rounded-full text-xs font-mono font-black transition-all shadow-2xs"
+                                      style="display: inline-flex; align-items: center; justify-content: center;"
                                       :class="{
                                           'bg-emerald-100 text-emerald-800 border border-emerald-300': computedGrade === 'A+',
                                           'bg-emerald-50 text-emerald-700 border border-emerald-200': computedGrade === 'A',
@@ -327,8 +331,8 @@
                                       x-text="computedGrade">-</span>
                             </div>
 
-                            <!-- MARK (Right - Simple Input Box with 0 Placeholder) -->
-                            <div class="col-span-4 flex items-center justify-end gap-1.5 sm:gap-2">
+                            <!-- 3. MARK (Right - Perfectly on same line) -->
+                            <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
                                 <input type="number"
                                        step="0.5"
                                        min="0"
@@ -341,10 +345,10 @@
                                        @blur="isFocused = false; saveScore()"
                                        @input="handleInput()"
                                        @keydown.enter.prevent="saveScore(); const next = document.getElementById('simple_mark_{{ $index + 1 }}'); if (next) { next.focus(); next.select(); }"
-                                       class="w-20 sm:w-28 h-10 sm:h-11 bg-slate-50/80 hover:bg-white focus:bg-white border-2 border-slate-200 focus:border-[#be1e2d] rounded-xl text-center font-mono font-black text-base sm:text-lg text-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/15 shadow-2xs">
+                                       class="w-20 sm:w-24 h-10 sm:h-11 bg-slate-50/80 hover:bg-white focus:bg-white border-2 border-slate-200 focus:border-[#be1e2d] rounded-xl text-center font-mono font-black text-base sm:text-lg text-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-[#be1e2d]/15 shadow-2xs">
 
                                 <!-- Row Status Indicator (Spinning loader / Saved checkmark) -->
-                                <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                                <div class="w-6 h-6 flex items-center justify-center shrink-0" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
                                     <template x-if="isSaving">
                                         <svg class="w-4 h-4 text-[#be1e2d] animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                     </template>
