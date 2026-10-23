@@ -187,7 +187,7 @@ function studentFundDesk() {
         @endif
 
         <!-- Personal Metric Cards (Pure White Cards) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Total Collected -->
             <div class="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs flex items-center justify-between">
                 <div>
@@ -215,20 +215,6 @@ function studentFundDesk() {
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 </div>
             </div>
-
-            <!-- Next Receipt Sequence -->
-            <div class="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs flex items-center justify-between">
-                <div>
-                    <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">Next Receipt Number</div>
-                    <div class="text-xl sm:text-2xl font-black font-mono text-slate-900 mt-1 tracking-wider">
-                        {{ $nextReceiptNumber }}
-                    </div>
-                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">Automated Global Sequence</div>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold border border-blue-100 shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
-                </div>
-            </div>
         </div>
 
         <!-- Issue Receipt Form Card (Clean White Design) -->
@@ -243,10 +229,6 @@ function studentFundDesk() {
                         <h2 class="text-lg font-black text-slate-900 tracking-tight">Issue New Receipt (പുതിയ രസീത് നൽകുക)</h2>
                         <p class="text-xs text-slate-500 font-anek">വിവരങ്ങൾ പൂരിപ്പിച്ച് രസീത് ജനറേറ്റ് ചെയ്യുക</p>
                     </div>
-                </div>
-
-                <div class="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-white text-amber-700 border border-slate-200 shadow-2xs self-start sm:self-auto">
-                    Sequence: {{ $nextReceiptNumber }}
                 </div>
             </div>
 
@@ -264,9 +246,6 @@ function studentFundDesk() {
                                placeholder="ദാതാവിന്റെ പേര് (ഇംഗ്ലീഷിലോ മലയാളത്തിലോ നൽകാം)"
                                style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
                                class="w-full px-4 py-3 rounded-xl bg-slate-50/80 hover:bg-slate-100/70 focus:bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
-                        <p class="text-[11px] text-slate-500 font-anek mt-1">
-                            ഇംഗ്ലീഷിൽ ടൈപ്പ് ചെയ്താൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ ടൈപ്പ് ചെയ്താൽ Anek Malayalam ഫോണ്ടിലും രസീതിൽ നൽകപ്പെടും.
-                        </p>
                         @error('donor_name')
                             <p class="text-xs text-rose-500 font-mono mt-1">{{ $message }}</p>
                         @enderror
@@ -561,9 +540,6 @@ function studentFundDesk() {
                            placeholder="Enter name (e.g. മുഹമ്മദ് ഷാഫി / Mohammed Shafi)"
                            style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
                            class="w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-                    <p class="text-[11px] text-slate-500 font-anek">
-                        ഇംഗ്ലീഷിൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ Anek Malayalam ഫോണ്ടിലും ഓട്ടോമാറ്റിക്കായി പ്രിന്റ് ചെയ്യപ്പെടും.
-                    </p>
                 </div>
 
                 <!-- 2. Payment Method (Cash, UPI, etc.) -->

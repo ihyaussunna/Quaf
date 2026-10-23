@@ -77,13 +77,6 @@ function fundDesk() {
                 ഫെസ്റ്റിവൽ ഫണ്ട് സംഭാവനകൾ സ്വീകരിക്കുകയും ഡിജിറ്റൽ രസീത് നൽകുകയും ചെയ്യുക (Mahabba & Festival Fund Receipts).
             </p>
         </div>
-
-        <div class="flex items-center gap-3">
-            <div class="px-4 py-2.5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-xs text-left">
-                <div class="text-[10px] font-mono font-bold uppercase text-slate-400">Next Receipt Number</div>
-                <div class="text-sm font-black font-mono text-emerald-400 tracking-wider">{{ $nextReceiptNumber }}</div>
-            </div>
-        </div>
     </div>
 
     <!-- Quick Stats Grid -->
@@ -147,10 +140,6 @@ function fundDesk() {
                     <p class="text-xs text-slate-500 font-anek">ദായകന്റെ വിവരങ്ങളും തുകയും രേഖപ്പെടുത്തി ഉടൻ രസീത് പ്രിന്റ് ചെയ്യുക</p>
                 </div>
             </div>
-
-            <div class="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Receipt Auto-Seq: {{ $nextReceiptNumber }}
-            </div>
         </div>
 
         <form method="POST" action="{{ route('fund.receipts.store') }}" class="p-6 sm:p-8 space-y-6">
@@ -168,9 +157,6 @@ function fundDesk() {
                            placeholder="ദാതാവിന്റെ പേര് (ഇംഗ്ലീഷിലോ മലയാളത്തിലോ നൽകാം)"
                            style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
                            class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm font-semibold text-slate-900 placeholder-slate-400">
-                    <p class="text-[11px] text-slate-500 font-anek mt-1">
-                        ഇംഗ്ലീഷിൽ ടൈപ്പ് ചെയ്താൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ ടൈപ്പ് ചെയ്താൽ Anek Malayalam ഫോണ്ടിലും രസീതിൽ പ്രിന്റ് ചെയ്യപ്പെടും.
-                    </p>
                     @error('donor_name')
                         <p class="text-xs text-rose-600 font-medium mt-1">{{ $message }}</p>
                     @enderror

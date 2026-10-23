@@ -451,9 +451,6 @@
                                placeholder="Enter name (e.g. മുഹമ്മദ് ഷാഫി / Mohammed Shafi)"
                                style="font-family: 'Sora', 'Anek Malayalam', sans-serif;"
                                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-                        <p class="text-[11px] text-slate-500 font-anek">
-                            ഇംഗ്ലീഷിൽ Sora ഫോണ്ടിലും, മലയാളത്തിൽ Anek Malayalam ഫോണ്ടിലും ഓട്ടോമാറ്റിക്കായി പ്രിന്റ് ചെയ്യപ്പെടും.
-                        </p>
                     </div>
 
                     <!-- 2. Payment Method (Cash, UPI, etc.) -->
