@@ -46,10 +46,11 @@ class IdCardController extends Controller
         $groupId = $request->query('group');
         $students = Student::with('group')
             ->when($groupId, fn ($q) => $q->where('group_id', $groupId))
-            ->orderBy('name')
+            ->orderBy('student_id')
             ->get();
+        $groups = Group::all();
 
-        return view('admin.idcards.print', compact('students'));
+        return view('admin.idcards.print', compact('students', 'groups', 'groupId'));
     }
 
     public function chestSlips(Request $request): View

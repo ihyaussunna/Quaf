@@ -15,8 +15,10 @@ class TemplateController extends Controller
         $sampleStudent = Student::with('group')->first();
         $sampleGroup = Group::first();
         $sampleCertificate = Certificate::with(['student.group', 'program'])->first();
+        $groups = Group::all();
+        $students = Student::with('group')->orderBy('student_id')->take(100)->get();
 
-        return view('admin.templates.index', compact('sampleStudent', 'sampleGroup', 'sampleCertificate'));
+        return view('admin.templates.index', compact('sampleStudent', 'sampleGroup', 'sampleCertificate', 'groups', 'students'));
     }
 
     public function show(string $type): View
