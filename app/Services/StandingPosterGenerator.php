@@ -49,9 +49,13 @@ class StandingPosterGenerator
             $soraRegular = $soraBold;
         }
 
-        $rockwellBold = public_path('fonts/Rockwell-Bold.otf');
-        if (! file_exists($rockwellBold)) {
-            $rockwellBold = $soraBold;
+        // Amount Font with native Indian Rupee sign (U+20B9) support
+        $amountFont = public_path('fonts/arialbd.ttf');
+        if (! file_exists($amountFont)) {
+            $amountFont = public_path('fonts/AnekMalayalam-Bold.ttf');
+        }
+        if (! file_exists($amountFont)) {
+            $amountFont = $soraBold;
         }
 
         // 1. Festive Crimson Background Gradient
@@ -83,50 +87,57 @@ class StandingPosterGenerator
 
         // Decorative background geometric curves / circles
         $subtleRing1 = imagecolorallocatealpha($img, 255, 255, 255, 122);
-        imageellipse($img, 100, 100, 500, 500, $subtleRing1);
-        imageellipse($img, $width - 50, $height - 100, 600, 600, $subtleRing1);
+        imageellipse($img, 100, 120, 500, 500, $subtleRing1);
+        imageellipse($img, $width - 80, $height - 120, 600, 600, $subtleRing1);
 
-        // 2. Header Area
+        // 2. Poster Header Graphic (from poster header.svg)
+        $headerPngPath = public_path('images/poster-header.png');
+        if (file_exists($headerPngPath)) {
+            $headerImg = @imagecreatefrompng($headerPngPath);
+            if ($headerImg) {
+                $origW = imagesx($headerImg);
+                $origH = imagesy($headerImg);
+                $targetW = 460;
+                $targetH = (int) round(($origH / $origW) * $targetW);
+                $targetX = (int) (($width - $targetW) / 2);
+                $targetY = 40;
+
+                imagecopyresampled($img, $headerImg, $targetX, $targetY, 0, 0, $targetW, $targetH, $origW, $origH);
+                imagedestroy($headerImg);
+            }
+        }
+
         // Amber Capsule Badge: "Group Standings"
         $badgeText = 'Group Standings';
-        $badgeFontSize = 18;
-        $badgeW = 280;
-        $badgeH = 54;
+        $badgeFontSize = 15;
+        $badgeW = 250;
+        $badgeH = 46;
         $badgeX = (int) (($width - $badgeW) / 2);
-        $badgeY = 90;
+        $badgeY = 245;
 
-        self::drawRoundedRectangle($img, $badgeX, $badgeY, $badgeX + $badgeW, $badgeY + $badgeH, 27, imagecolorallocate($img, 247, 177, 51));
+        self::drawRoundedRectangle($img, $badgeX, $badgeY, $badgeX + $badgeW, $badgeY + $badgeH, 23, imagecolorallocate($img, 247, 177, 51));
 
         // Badge Text (Dark Brown / Black)
         $badgeTextColor = imagecolorallocate($img, 20, 20, 20);
-        self::drawCenteredText($img, $badgeFontSize, $badgeY + 36, $soraBold, $badgeText, $badgeTextColor, $width);
+        self::drawCenteredText($img, $badgeFontSize, $badgeY + 31, $soraBold, $badgeText, $badgeTextColor, $width);
 
         // Main Title: "Top Collected Groups"
         $titleText = 'Top Collected Groups';
-        $titleFontSize = 46;
-        $titleY = 220;
+        $titleFontSize = 42;
+        $titleY = 345;
         $whiteColor = imagecolorallocate($img, 255, 255, 255);
         self::drawCenteredText($img, $titleFontSize, $titleY, $soraBold, $titleText, $whiteColor, $width);
 
-        // Festival Subtitle / Total Collection summary
-        $subText = 'QUAF FESTIVAL FUND 2026 • TOTAL COLLECTION: ₹'.number_format($totalAmount, 0);
-        $subFontSize = 15;
-        $subY = 275;
-        $subColor = imagecolorallocate($img, 254, 215, 170); // Soft amber-cream
-        self::drawCenteredText($img, $subFontSize, $subY, $soraRegular, $subText, $subColor, $width);
-
-        // Thin decorative gold line under header
-        $lineColor = imagecolorallocatealpha($img, 255, 255, 255, 100);
-        imageline($img, 140, 315, $width - 140, 315, $lineColor);
+        // Note: Total collection is removed from poster as requested
 
         // 3. Five Standing Capsule Bars (Rows)
         $capsuleW = 960;
-        $capsuleH = 150;
+        $capsuleH = 142;
         $capsuleX1 = (int) (($width - $capsuleW) / 2); // 60
         $capsuleX2 = $capsuleX1 + $capsuleW;           // 1020
-        $startY = 350;
-        $gap = 36;
-        $radius = 75; // Pill radius (half height)
+        $startY = 390;
+        $gap = 26;
+        $radius = 71; // Pill radius (half height)
 
         $goldCircle = imagecolorallocate($img, 245, 197, 24);    // Rank 1 Gold
         $silverCircle = imagecolorallocate($img, 203, 213, 225); // Rank 2 Silver
@@ -203,22 +214,22 @@ class StandingPosterGenerator
             $nameY = $centerY - 6;
             imagettftext($img, $nameFontSize, 0, $nameX, $nameY, $nameColor, $soraBold, $grpName);
 
-            // Subtitle Details: Code & Receipts Count
-            $detailText = "CODE: {$grp->code}  •  ".number_format($receiptsCount)." RECEIPTS ISSUED  •  {$percentage}% OF TOTAL";
+            // Subtitle Details: Code & Receipts Count (Total collection % excluded as requested)
+            $detailText = "CODE: {$grp->code}  •  ".number_format($receiptsCount).' '.($receiptsCount === 1 ? 'RECEIPT' : 'RECEIPTS').' ISSUED';
             $detailFontSize = 11;
             $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
             $detailY = $centerY + 24;
             imagettftext($img, $detailFontSize, 0, $nameX - 20, $detailY, $detailColor, $soraRegular, $detailText);
 
-            // Right side: Total Amount Collected
+            // Right side: Total Amount Collected with authentic Rupee symbol (Arial Bold/Anek)
             $amountText = '₹'.number_format($collected, 0);
             $amountFontSize = 28;
             $amountColor = imagecolorallocate($img, 15, 23, 42); // Bold dark
-            $bboxAmount = @imagettfbbox($amountFontSize, 0, $rockwellBold, $amountText);
+            $bboxAmount = @imagettfbbox($amountFontSize, 0, $amountFont, $amountText);
             $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 180;
             $amountX = $capsuleX2 - $amountW - 40;
-            $amountY = $centerY - 4;
-            imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $rockwellBold, $amountText);
+            $amountY = $centerY - 3;
+            imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $amountFont, $amountText);
 
             // Right side sublabel: "Total Collection"
             $colLabel = 'COLLECTED';
