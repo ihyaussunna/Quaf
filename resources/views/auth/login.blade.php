@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Login to Festival | QUAF</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -17,9 +18,9 @@
         <!-- Circular Festival Emblem -->
         <div class="mb-6 flex justify-center">
             <a href="{{ route('home') }}" class="inline-block transition-transform hover:scale-105" title="QUAF 2026 Home">
-                <img src="{{ asset('images/festival-round-logo.png') }}" 
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" 
                      alt="QUAF Festival Emblem" 
-                     class="w-28 h-28 object-contain mx-auto drop-shadow-xl">
+                     class="w-24 h-24 sm:w-28 sm:h-28 object-contain mx-auto drop-shadow-xl">
             </a>
         </div>
 

@@ -930,4 +930,54 @@ class FundReceiptTest extends TestCase
         $this->assertFalse($topStudents->pluck('student_id')->contains('OFFICE'));
         $this->assertFalse($topStudents->pluck('name')->contains('OFFICE'));
     }
+
+    public function test_fund_collector_can_access_fund_ledger_desk_page(): void
+    {
+        $group = Group::firstOrCreate(
+            ['code' => 'TESTGRP'],
+            ['name' => 'Test Festival Group', 'slug' => 'test-festival-group', 'color_hex' => '#be1e2d']
+        );
+
+        $receipt = FundReceipt::create([
+            'receipt_number' => 'QFR-26-LDG01',
+            'donor_name' => 'Ledger Test Donor',
+            'donor_phone' => '9847000099',
+            'amount' => 12500.00,
+            'amount_in_words' => 'Twelve Thousand Five Hundred Rupees Only',
+            'payment_method' => 'upi',
+            'group_id' => $group->id,
+            'collector_name' => 'Fund Counter',
+            'is_cancelled' => false,
+        ]);
+
+        $response = $this->actingAs($this->fundCollector)->get(route('fund.ledger'));
+
+        $response->assertOk();
+        $response->assertSee('Fund Collection & Receipts Ledger', false);
+        $response->assertSee('Ledger Test Donor');
+        $response->assertSee('12,500.00');
+        $response->assertSee('Top Collected Groups');
+        $response->assertSee('Group Standings');
+        $response->assertSee('Test Festival Group');
+    }
+
+    public function test_fund_collector_cannot_access_admin_fund_page(): void
+    {
+        $response = $this->actingAs($this->fundCollector)->get(route('admin.fund.index'));
+
+        // RoleMiddleware logs out non-admins and redirects to login
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function test_fund_collector_can_login_with_ledger_alias(): void
+    {
+        $response = $this->post('/login', [
+            'username' => 'ledger',
+            'password' => 'Fund#2026@Quaf!',
+        ]);
+
+        $response->assertRedirect(route('fund.ledger'));
+        $this->assertAuthenticatedAs($this->fundCollector);
+    }
 }

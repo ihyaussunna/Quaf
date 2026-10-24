@@ -7,6 +7,7 @@
     <title>QUAF 2026 — Official Website Launch</title>
     <meta name="description" content="Official Website Launch for QUAF Markaz Cultural Festival 2026. Confluence of eloquence, arts, and intellectual heritage.">
 
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 

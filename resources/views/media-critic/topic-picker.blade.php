@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Sora:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -64,7 +65,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF" class="h-8 sm:h-9 w-auto">
+                    <img src="{{ asset('images/quaf-logo-favicon.svg') }}" alt="QUAF" class="h-8 sm:h-9 w-auto">
                 </a>
                 <span class="text-slate-300">|</span>
                 <span class="text-xs font-mono font-bold tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">

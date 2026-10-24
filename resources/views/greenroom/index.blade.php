@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Welcome to Green Room Desk | QUAF</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -199,7 +200,7 @@
     <header class="h-20 bg-white/95 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-40 shadow-xs gap-4">
         <div class="flex items-center gap-3 sm:gap-4 shrink-0">
             <a href="{{ route('greenroom.index') }}" class="flex items-center shrink-0">
-                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-9 sm:h-10 w-auto object-contain max-h-10" style="height: 38px; width: auto; max-width: 125px; object-fit: contain;">
+                <img src="{{ asset('images/quaf-logo-favicon.svg') }}" alt="QUAF" class="h-9 sm:h-10 w-auto object-contain max-h-10" style="height: 38px; width: auto; max-width: 125px; object-fit: contain;">
             </a>
             <div class="pl-2 sm:pl-3">
                 <div class="flex items-center gap-2">

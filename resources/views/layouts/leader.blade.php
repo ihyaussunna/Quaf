@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -80,8 +81,12 @@
         <div>
             <!-- Sidebar Header / Brand -->
             <div class="h-16 sm:h-20 flex items-center justify-between px-4 border-b border-white/10">
-                <a href="{{ route('leader.dashboard') }}" class="flex items-center py-2">
-                    <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-10 sm:h-11 w-auto object-contain max-w-[180px]">
+                <a href="{{ route('leader.dashboard') }}" class="flex items-center gap-2.5 py-2">
+                    <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-10 w-auto object-contain">
+                    <div class="leading-none">
+                        <span class="font-sora font-black tracking-wider text-base text-white block">QUAF 09</span>
+                        <span class="text-[9px] font-mono tracking-widest text-amber-400 block uppercase font-bold mt-0.5">Team Portal</span>
+                    </div>
                 </a>
                 <button type="button" @click="sidebarOpen = false" class="lg:hidden text-white/60 hover:text-white p-1 rounded-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

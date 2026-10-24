@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -75,7 +76,7 @@
                 <!-- Col 1: Festival Identity -->
                 <div class="lg:col-span-2 space-y-4">
                     <a href="{{ route('home.view') }}" class="inline-block">
-                        <img src="{{ asset('images/dashboard-logo.svg') }}" 
+                        <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" 
                              alt="QUAF" 
                              style="height: 38px; max-height: 38px; width: auto; object-fit: contain;" 
                              class="h-9 sm:h-10 w-auto object-contain drop-shadow-xs">

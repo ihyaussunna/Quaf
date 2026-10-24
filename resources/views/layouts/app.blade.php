@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -24,7 +25,7 @@
     <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs">
         <div class="flex items-center gap-3">
             <a href="{{ route('home') }}" class="flex items-center gap-2.5">
-                <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF Logo" class="h-9 w-auto object-contain">
+                <img src="{{ asset('images/quaf-logo-favicon.svg') }}" alt="QUAF Logo" class="h-9 w-auto object-contain">
             </a>
             <span class="text-gray-300">|</span>
             <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">@yield('title', 'Portal')</span>

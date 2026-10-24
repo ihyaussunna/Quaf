@@ -860,6 +860,7 @@ Route::prefix('fund')->name('fund.')->group(function () {
 
     // 3. Central Collector / Auth Desk (for legacy tests & staff)
     Route::get('/desk', [FundController::class, 'dashboard'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('dashboard');
+    Route::get('/ledger', [FundController::class, 'ledger'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('ledger');
     Route::post('/receipts', [FundController::class, 'store'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('receipts.store');
 
     // 4. Public Receipt View, Image & Download (Accessible for donors & WhatsApp sharing)

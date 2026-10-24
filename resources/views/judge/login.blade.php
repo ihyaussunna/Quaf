@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Judge Access PIN | QUAF</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +22,7 @@
     <!-- Header -->
     <header class="h-20 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-3 group">
-            <img src="{{ asset('images/dashboard-logo-dark.svg') }}" alt="QUAF" class="h-10 w-auto object-contain">
+            <img src="{{ asset('images/quaf-logo-favicon.svg') }}" alt="QUAF" class="h-10 w-auto object-contain">
             <div>
                 <span class="font-sora font-black tracking-wider text-base text-slate-900 group-hover:text-[#f3bd2e] transition-colors">QUAF</span>
                 <span class="text-[10px] font-mono tracking-widest text-slate-500 block uppercase">Judges Portal</span>

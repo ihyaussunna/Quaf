@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -45,8 +46,12 @@
         
         <!-- Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0">
-            <a href="{{ route('presentation.dashboard') }}" class="flex items-center group py-2">
-                <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px]">
+            <a href="{{ route('presentation.dashboard') }}" class="flex items-center gap-3 group py-2">
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-10 w-auto object-contain">
+                <div class="leading-none">
+                    <span class="font-sora font-black tracking-wider text-base text-white block">QUAF</span>
+                    <span class="text-[9px] font-mono tracking-widest text-amber-400 block uppercase font-bold mt-0.5">Presentation Desk</span>
+                </div>
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -96,8 +101,8 @@
         <div class="p-3 border-t border-slate-800 bg-[#16181c]">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        {{ strtoupper(substr(auth()->user()?->name ?? 'P', 0, 1)) }}
+                    <div class="w-8 h-8 rounded-lg bg-white/5 border border-slate-700/60 p-1 flex items-center justify-center flex-shrink-0">
+                        <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="User" class="w-full h-full object-contain">
                     </div>
                     <div class="min-w-0">
                         <div class="text-xs font-semibold text-slate-200 truncate">{{ auth()->user()?->name ?? 'Presentation Desk' }}</div>

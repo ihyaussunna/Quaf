@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>403 - Access Restricted | QUAF</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +18,7 @@
         <!-- Logo -->
         <div class="flex justify-center">
             <a href="{{ route('home') }}" class="inline-block transition-transform hover:scale-105">
-                <img src="{{ asset('images/festival-round-logo.png') }}" alt="QUAF Emblem" class="w-24 h-24 object-contain mx-auto drop-shadow-2xl">
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Emblem" class="w-24 h-24 object-contain mx-auto drop-shadow-2xl">
             </a>
         </div>
 

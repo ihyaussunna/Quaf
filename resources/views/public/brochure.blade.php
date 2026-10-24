@@ -7,6 +7,7 @@
     <title>QUAF Official Theme Note & Brochure — Digital Book Experience</title>
     <meta name="description" content="QUAF OFFICIAL PUBLICATION Digital Brochure Experience. Official Theme Note and Digital Brochure for QUAF Markaz Cultural Festival 2026.">
 
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 

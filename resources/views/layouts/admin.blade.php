@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -211,8 +212,12 @@
 
         <!-- Sidebar Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0 overflow-hidden">
-            <a href="{{ $isPcView ? route('program-committee.dashboard') : route('admin.dashboard') }}" class="flex items-center group py-2 min-w-0">
-                <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px] drop-shadow-xs">
+            <a href="{{ $isPcView ? route('program-committee.dashboard') : route('admin.dashboard') }}" class="flex items-center gap-3 group py-2 min-w-0">
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-10 w-auto object-contain shrink-0">
+                <div class="min-w-0 leading-none">
+                    <span class="font-sora font-black tracking-wider text-base text-white block">QUAF 09</span>
+                    <span class="text-[9px] font-mono tracking-widest text-slate-400 block uppercase font-bold mt-1 truncate">{{ $isPcView ? 'Samithi Control' : 'Central Admin' }}</span>
+                </div>
             </a>
             <!-- Close button on mobile -->
             <button type="button" 

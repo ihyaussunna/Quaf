@@ -7,6 +7,7 @@ use App\Models\FundReceipt;
 use App\Models\FundReceiptSetting;
 use App\Models\Group;
 use App\Models\Student;
+use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\ReceiptImageGenerator;
 use Illuminate\Http\JsonResponse;
@@ -467,6 +468,88 @@ class FundController extends Controller
             'receipts',
             'nextReceiptNumber',
             'settings'
+        ));
+    }
+
+    /**
+     * Display the Fund Collection & Receipts Ledger Desk.
+     * Dedicated desk interface for viewing central ledger records and group standings without admin access.
+     */
+    public function ledger(Request $request): View
+    {
+        FundReceipt::ensureSchema();
+
+        $today = now()->startOfDay();
+        $baseQuery = FundReceipt::query();
+
+        // Overall stats
+        $totalCount = (clone $baseQuery)->where('is_cancelled', false)->count();
+        $totalAmount = (clone $baseQuery)->where('is_cancelled', false)->sum('amount');
+        $todayAmount = (clone $baseQuery)->where('is_cancelled', false)->where('created_at', '>=', $today)->sum('amount');
+        $cancelledCount = (clone $baseQuery)->where('is_cancelled', true)->count();
+        $cancelledAmount = (clone $baseQuery)->where('is_cancelled', true)->sum('amount');
+
+        // Filtered listing
+        $query = FundReceipt::withTrashed()->with(['collector', 'cancelledBy', 'student.group', 'group'])->latest();
+
+        if ($search = trim((string) $request->input('search'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('donor_name', 'like', "%{$search}%")
+                    ->orWhere('donor_phone', 'like', "%{$search}%")
+                    ->orWhere('receipt_number', 'like', "%{$search}%")
+                    ->orWhere('transaction_reference', 'like', "%{$search}%");
+            });
+        }
+
+        if ($method = $request->input('payment_method')) {
+            $query->where('payment_method', $method);
+        }
+
+        if ($collectorId = $request->input('collector_id')) {
+            $query->where('collector_id', $collectorId);
+        }
+
+        if ($status = $request->input('status')) {
+            if ($status === 'active') {
+                $query->where('is_cancelled', false)->whereNull('deleted_at');
+            } elseif ($status === 'cancelled') {
+                $query->where(function ($q) {
+                    $q->where('is_cancelled', true)->orWhereNotNull('deleted_at');
+                });
+            }
+        }
+
+        if ($dateFrom = $request->input('date_from')) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo = $request->input('date_to')) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $receipts = $query->paginate(25)->withQueryString();
+        $collectors = User::whereIn('role', ['fund_collector', 'fund_manager', 'admin', 'super_admin'])->orderBy('name')->get();
+
+        // Top Collected Groups leaderboard
+        $topGroups = Group::query()
+            ->withSum(['fundReceipts as total_collected' => function ($q) {
+                $q->where('is_cancelled', false);
+            }], 'amount')
+            ->withCount(['fundReceipts as receipts_count' => function ($q) {
+                $q->where('is_cancelled', false);
+            }])
+            ->orderByDesc('total_collected')
+            ->get();
+
+        return view('fund.ledger', compact(
+            'receipts',
+            'collectors',
+            'totalCount',
+            'totalAmount',
+            'todayAmount',
+            'cancelledCount',
+            'cancelledAmount',
+            'topGroups'
         ));
     }
 

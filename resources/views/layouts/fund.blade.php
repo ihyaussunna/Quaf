@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -35,8 +36,12 @@
         
         <!-- Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0">
-            <a href="{{ route('fund.dashboard') }}" class="flex items-center group py-2">
-                <img src="{{ asset('images/dashboard-logo.svg') }}" alt="QUAF Logo" class="h-11 w-auto object-contain max-w-[180px]">
+            <a href="{{ route('fund.dashboard') }}" class="flex items-center gap-3 group py-2">
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-10 w-auto object-contain">
+                <div class="leading-none">
+                    <span class="font-sora font-black tracking-wider text-base text-white block">QUAF</span>
+                    <span class="text-[9px] font-mono tracking-widest text-emerald-400 block uppercase font-bold mt-0.5">Fund Desk</span>
+                </div>
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -61,6 +66,12 @@
                 <span>Receipts Desk</span>
             </a>
 
+            <a href="{{ route('fund.ledger') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('fund.ledger') ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>Collection Ledger</span>
+            </a>
+
             <a href="{{ route('home') }}" target="_blank"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 text-slate-400">
                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
@@ -71,8 +82,8 @@
         <!-- Current User & Sign Out -->
         <div class="p-4 border-t border-slate-800/80 bg-[#15181c]">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs font-mono">
-                    {{ strtoupper(substr(Auth::user()->name ?? 'FC', 0, 2)) }}
+                <div class="w-9 h-9 rounded-xl bg-white/5 border border-slate-700/60 p-1.5 flex items-center justify-center flex-shrink-0">
+                    <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="Fund Desk" class="w-full h-full object-contain">
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-xs font-bold text-slate-200 truncate">{{ Auth::user()->name ?? 'Fund Desk' }}</div>

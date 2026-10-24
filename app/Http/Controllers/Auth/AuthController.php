@@ -59,7 +59,7 @@ class AuthController extends Controller
             );
         }
 
-        if (in_array(strtolower(trim($login)), ['fund@quaf.fest', 'fund', 'fund_collector'])) {
+        if (in_array(strtolower(trim($login)), ['fund@quaf.fest', 'fund', 'fund_collector', 'fund_manager', 'funddesk', 'ledger', 'fund ledger'])) {
             User::firstOrCreate(
                 ['email' => 'fund@quaf.fest'],
                 [
@@ -133,7 +133,7 @@ class AuthController extends Controller
                 }
             }
 
-            if (! $user && in_array(strtolower(trim($login)), ['fund@quaf.fest', 'fund', 'fund_collector', 'receipt', 'receipts', 'collection', 'fund collection'])) {
+            if (! $user && in_array(strtolower(trim($login)), ['fund@quaf.fest', 'fund', 'fund_collector', 'fund_manager', 'funddesk', 'ledger', 'fund ledger', 'receipt', 'receipts', 'collection', 'fund collection'])) {
                 $user = User::where('email', 'fund@quaf.fest')->first();
                 if (! $user) {
                     $user = User::create([
@@ -199,7 +199,7 @@ class AuthController extends Controller
                 return back()->withErrors(['username' => 'Locked: ഈ അക്കൗണ്ട് അഡ്മിൻ ലോക്ക് ചെയ്തിരിക്കുന്നു. ലോഗിൻ ചെയ്യാൻ സാധ്യമല്ല (Account Locked).']);
             }
 
-            return $this->redirectBasedOnRole($user);
+            return $this->redirectBasedOnRole($user, $login);
         }
 
         return back()->withErrors([
@@ -222,8 +222,10 @@ class AuthController extends Controller
         return $response;
     }
 
-    protected function redirectBasedOnRole($user): RedirectResponse
+    protected function redirectBasedOnRole($user, ?string $login = null): RedirectResponse
     {
+        $loginStr = strtolower(trim((string) ($login ?? request('username', request('email', '')))));
+
         // Never redirect a non-admin to an admin intended URL
         if (! $user->isAdmin()) {
             $intended = session()->get('url.intended');
@@ -241,6 +243,10 @@ class AuthController extends Controller
         }
 
         if ($user->role === 'fund_collector' || $user->role === 'fund_manager') {
+            if (in_array($loginStr, ['ledger', 'fund ledger'])) {
+                return redirect()->intended(route('fund.ledger'));
+            }
+
             return redirect()->intended(route('fund.dashboard'));
         }
 
