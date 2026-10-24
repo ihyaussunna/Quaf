@@ -214,32 +214,22 @@ class StandingPosterGenerator
             $nameY = $centerY - 6;
             imagettftext($img, $nameFontSize, 0, $nameX, $nameY, $nameColor, $soraBold, $grpName);
 
-            // Subtitle Details: Code & Receipts Count (Total collection % excluded as requested)
-            $detailText = "CODE: {$grp->code}  •  ".number_format($receiptsCount).' '.($receiptsCount === 1 ? 'RECEIPT' : 'RECEIPTS').' ISSUED';
+            // Subtitle Details: Receipts Count (Team code excluded as requested)
+            $detailText = number_format($receiptsCount).' '.($receiptsCount === 1 ? 'RECEIPT' : 'RECEIPTS').' ISSUED';
             $detailFontSize = 11;
             $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
             $detailY = $centerY + 24;
-            imagettftext($img, $detailFontSize, 0, $nameX - 20, $detailY, $detailColor, $soraRegular, $detailText);
+            imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
 
-            // Right side: Total Amount Collected with authentic Rupee symbol (Arial Bold/Anek)
+            // Right side: Total Amount Collected with authentic Rupee symbol (Arial Bold/Anek), vertically centered
             $amountText = '₹'.number_format($collected, 0);
-            $amountFontSize = 28;
+            $amountFontSize = 30;
             $amountColor = imagecolorallocate($img, 15, 23, 42); // Bold dark
             $bboxAmount = @imagettfbbox($amountFontSize, 0, $amountFont, $amountText);
             $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 180;
             $amountX = $capsuleX2 - $amountW - 40;
-            $amountY = $centerY - 3;
+            $amountY = $centerY + 10;
             imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $amountFont, $amountText);
-
-            // Right side sublabel: "Total Collection"
-            $colLabel = 'COLLECTED';
-            $colLabelFontSize = 10;
-            $colLabelColor = imagecolorallocate($img, 148, 163, 184); // Slate-400
-            $bboxCol = @imagettfbbox($colLabelFontSize, 0, $soraRegular, $colLabel);
-            $colW = $bboxCol ? abs($bboxCol[4] - $bboxCol[0]) : 60;
-            $colX = $capsuleX2 - $colW - 40;
-            $colY = $centerY + 22;
-            imagettftext($img, $colLabelFontSize, 0, $colX, $colY, $colLabelColor, $soraRegular, $colLabel);
 
             $rankIndex++;
         }

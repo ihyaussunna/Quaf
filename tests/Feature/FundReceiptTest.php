@@ -1008,7 +1008,8 @@ class FundReceiptTest extends TestCase
         $response->assertSee('Al-Hikma Warriors');
         $response->assertSee('TOP1');
         $response->assertSee('GOLD');
-        $response->assertSee('Total Collection');
+        $response->assertDontSee('Total Collection');
+        $response->assertDontSee('Total Issued:');
         $response->assertSee('Download Standing Poster');
         $response->assertSee('Preview Poster');
         $response->assertSee(route('fund.standings.download'));

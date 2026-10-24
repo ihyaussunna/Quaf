@@ -181,7 +181,7 @@
                                 </h3>
                             </div>
                             <div class="text-[10px] sm:text-xs font-mono text-slate-500 mt-0.5">
-                                <span>Total Issued: <strong class="text-slate-700">{{ $count }}</strong> receipts</span>
+                                <span><strong class="text-slate-700">{{ $count }}</strong> {{ \Illuminate\Support\Str::plural('receipt', $count) }}</span>
                             </div>
                         </div>
 
@@ -191,9 +191,6 @@
                     <div class="text-right shrink-0 font-mono">
                         <div class="text-base sm:text-2xl font-black {{ $isGold ? 'text-amber-800' : ($isSilver ? 'text-slate-900' : ($isBronze ? 'text-amber-900' : 'text-slate-900')) }}">
                             ₹{{ number_format($collected, 0) }}
-                        </div>
-                        <div class="text-[10px] sm:text-[11px] text-slate-400">
-                            Total Collection
                         </div>
                     </div>
 
