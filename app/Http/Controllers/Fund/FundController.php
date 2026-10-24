@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\ReceiptImageGenerator;
+use App\Services\StandingPosterGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -620,5 +621,25 @@ class FundController extends Controller
     public function download(FundReceipt $receipt): StreamedResponse
     {
         return ReceiptImageGenerator::streamResponse($receipt, true);
+    }
+
+    /**
+     * Stream the generated Group Standings Poster inline.
+     */
+    public function standingPoster(): StreamedResponse
+    {
+        $img = StandingPosterGenerator::generate();
+
+        return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Top-Collected-Groups.jpg', false);
+    }
+
+    /**
+     * Download the generated Group Standings Poster as a JPEG file.
+     */
+    public function downloadStandingPoster(): StreamedResponse
+    {
+        $img = StandingPosterGenerator::generate();
+
+        return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Top-Collected-Groups.jpg', true);
     }
 }

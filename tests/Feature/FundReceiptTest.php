@@ -980,4 +980,98 @@ class FundReceiptTest extends TestCase
         $response->assertRedirect(route('fund.ledger'));
         $this->assertAuthenticatedAs($this->fundCollector);
     }
+
+    public function test_fund_ledger_shows_group_standings_in_list_format_with_poster_buttons(): void
+    {
+        $group = Group::firstOrCreate(
+            ['code' => 'TOP1'],
+            ['name' => 'Al-Hikma Warriors', 'slug' => 'al-hikma-warriors', 'color_hex' => '#f59e0b']
+        );
+
+        FundReceipt::create([
+            'receipt_number' => 'QFR-26-TOP01',
+            'donor_name' => 'Major Sponsor',
+            'donor_phone' => '9847111222',
+            'amount' => 50000.00,
+            'amount_in_words' => 'Fifty Thousand Rupees Only',
+            'payment_method' => 'upi',
+            'group_id' => $group->id,
+            'collector_name' => 'Fund Counter',
+            'is_cancelled' => false,
+        ]);
+
+        $response = $this->actingAs($this->fundCollector)->get(route('fund.ledger'));
+
+        $response->assertOk();
+        $response->assertSee('Top Collected Groups');
+        $response->assertSee('Group Standings');
+        $response->assertSee('Al-Hikma Warriors');
+        $response->assertSee('TOP1');
+        $response->assertSee('GOLD');
+        $response->assertSee('Total Collection');
+        $response->assertSee('Download Standing Poster');
+        $response->assertSee('Preview Poster');
+        $response->assertSee(route('fund.standings.download'));
+        $response->assertSee(route('fund.standings.poster'));
+    }
+
+    public function test_standing_poster_can_be_previewed_and_downloaded(): void
+    {
+        $group = Group::firstOrCreate(
+            ['code' => 'PSTGRP'],
+            ['name' => 'Poster Test Group', 'slug' => 'poster-test-group', 'color_hex' => '#10b981']
+        );
+
+        FundReceipt::create([
+            'receipt_number' => 'QFR-26-PST01',
+            'donor_name' => 'Poster Donor',
+            'donor_phone' => '9847222333',
+            'amount' => 15000.00,
+            'amount_in_words' => 'Fifteen Thousand Rupees Only',
+            'payment_method' => 'cash',
+            'group_id' => $group->id,
+            'collector_name' => 'Fund Counter',
+            'is_cancelled' => false,
+        ]);
+
+        // Preview stream
+        $previewResponse = $this->get(route('fund.standings.poster'));
+        $previewResponse->assertOk();
+        $previewResponse->assertHeader('Content-Type', 'image/jpeg');
+        $this->assertStringContainsString('inline; filename="QUAF-09-Top-Collected-Groups.jpg"', (string) $previewResponse->headers->get('Content-Disposition'));
+
+        // Download stream
+        $downloadResponse = $this->get(route('fund.standings.download'));
+        $downloadResponse->assertOk();
+        $downloadResponse->assertHeader('Content-Type', 'image/jpeg');
+        $this->assertStringContainsString('attachment; filename="QUAF-09-Top-Collected-Groups.jpg"', (string) $downloadResponse->headers->get('Content-Disposition'));
+    }
+
+    public function test_admin_fund_page_shows_list_style_standings_and_poster_buttons(): void
+    {
+        $group = Group::firstOrCreate(
+            ['code' => 'ADMGRP'],
+            ['name' => 'Admin Test Group', 'slug' => 'admin-test-group', 'color_hex' => '#6366f1']
+        );
+
+        FundReceipt::create([
+            'receipt_number' => 'QFR-26-ADM01',
+            'donor_name' => 'Admin Donor',
+            'amount' => 8000.00,
+            'amount_in_words' => 'Eight Thousand Rupees Only',
+            'payment_method' => 'cash',
+            'group_id' => $group->id,
+            'is_cancelled' => false,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.fund.index'));
+
+        $response->assertOk();
+        $response->assertSee('Top Collected Groups');
+        $response->assertSee('Admin Test Group');
+        $response->assertSee('Download Standing Poster');
+        $response->assertSee('Preview Poster');
+        $response->assertSee(route('fund.standings.download'));
+        $response->assertSee(route('fund.standings.poster'));
+    }
 }

@@ -869,4 +869,8 @@ Route::prefix('fund')->name('fund.')->group(function () {
     Route::delete('/receipts/{receipt}', [FundController::class, 'studentDestroyReceipt'])->name('receipts.destroy')->withTrashed();
     Route::get('/receipts/{receipt}/image', [FundController::class, 'image'])->name('receipts.image')->withTrashed();
     Route::get('/receipts/{receipt}/download', [FundController::class, 'download'])->name('receipts.download')->withTrashed();
+
+    // 5. Group Standings Poster Generation & High-Resolution Download
+    Route::get('/standings/poster', [FundController::class, 'standingPoster'])->name('standings.poster');
+    Route::get('/standings/download', [FundController::class, 'downloadStandingPoster'])->name('standings.download');
 });
