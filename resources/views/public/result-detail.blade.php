@@ -60,13 +60,6 @@
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-amber-200 text-xs font-mono text-slate-700 mb-3 shadow-2xs">
                     <span class="font-bold text-[#be1e2d]">{{ $result->firstEntry?->group?->name }}</span>
                 </div>
-                @if($result->firstEntry?->certificate)
-                    <div class="pt-2">
-                        <a href="{{ route('verify.certificate', $result->firstEntry->certificate->certificate_number) }}" class="text-xs font-mono text-amber-700 hover:underline font-semibold">
-                            Verify Certificate #{{ $result->firstEntry->certificate->certificate_number }} →
-                        </a>
-                    </div>
-                @endif
             </div>
 
             <!-- 2nd Place -->
