@@ -9,8 +9,10 @@
          images: [
              @foreach($items as $idx => $item)
                  {
+                     id: {{ $item->id }},
                      src: '{{ $item->image_path }}',
-                     title: '{{ addslashes($item->title) }}',
+                     downloadUrl: '{{ route('gallery.download', $item->id) }}',
+                     title: '{{ addslashes($item->title ?: 'QUAF Festival Photo') }}',
                      category: '{{ $item->category }}',
                      group: '{{ $item->group?->name }}'
                  }{{ !$loop->last ? ',' : '' }}
@@ -20,18 +22,60 @@
              this.currentIndex = idx;
              this.lightboxOpen = true;
          },
-         sharePhoto(url) {
+         async sharePhoto(url, title = 'QUAF Festival Photo') {
              const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+
              if (navigator.share) {
-                 navigator.share({
-                     title: 'QUAF Festival Photo',
-                     url: fullUrl
-                 }).catch(() => {});
-             } else {
-                 navigator.clipboard.writeText(fullUrl).then(() => {
-                     this.toastMessage = 'Link copied to clipboard!';
-                     setTimeout(() => { this.toastMessage = ''; }, 2500);
-                 }).catch(() => {});
+                 try {
+                     this.toastMessage = 'Opening photo sharing...';
+                     const response = await fetch(fullUrl, { cache: 'no-cache' });
+                     if (response.ok) {
+                         const blob = await response.blob();
+                         const mimeType = blob.type || 'image/jpeg';
+                         const ext = mimeType.includes('/') ? mimeType.split('/')[1].replace('jpeg', 'jpg') : 'jpg';
+                         const fileName = `quaf-festival-photo-${Date.now()}.${ext}`;
+                         const file = new File([blob], fileName, { type: mimeType });
+
+                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                             this.toastMessage = '';
+                             await navigator.share({
+                                 files: [file],
+                                 title: title,
+                             });
+                             return;
+                         }
+                     }
+                 } catch (err) {
+                     this.toastMessage = '';
+                     if (err.name === 'AbortError') {
+                         return;
+                     }
+                     console.warn('Direct image file share failed, trying URL share:', err);
+                 }
+
+                 // Fallback to URL sharing if file sharing not supported
+                 try {
+                     this.toastMessage = '';
+                     await navigator.share({
+                         title: title,
+                         url: fullUrl
+                     });
+                     return;
+                 } catch (err) {
+                     this.toastMessage = '';
+                     if (err.name === 'AbortError') {
+                         return;
+                     }
+                 }
+             }
+
+             // Fallback for browsers without Web Share API
+             try {
+                 await navigator.clipboard.writeText(fullUrl);
+                 this.toastMessage = 'Photo link copied to clipboard!';
+                 setTimeout(() => { this.toastMessage = ''; }, 2500);
+             } catch (e) {
+                 this.toastMessage = '';
              }
          },
          next() {
@@ -90,44 +134,46 @@
     <!-- Photos Masonry Grid (Supports 16:9 horizontal, 9:16 vertical, and all dimensions) -->
     <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 sm:gap-6 space-y-4 sm:space-y-6">
         @forelse($items as $index => $item)
-            <div @click="openLightbox({{ $index }})"
-                 class="break-inside-avoid group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 cursor-pointer border border-slate-200/80 hover:border-slate-300 transition-all duration-500 shadow-2xs hover:shadow-2xl hover:-translate-y-1">
-                <!-- Clean Photo (No overlaid text) -->
+            <div class="break-inside-avoid group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 border border-slate-200/80 hover:border-slate-300 transition-all duration-500 shadow-2xs hover:shadow-2xl hover:-translate-y-1">
+                <!-- Clean Photo (No overlaid text, clicking opens lightbox) -->
                 <img src="{{ $item->image_path }}" 
-                     alt="QUAF Festival" 
-                     class="w-full h-auto block rounded-2xl sm:rounded-3xl object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                     alt="{{ $item->title ?: 'QUAF Festival Photo' }}" 
+                     @click="openLightbox({{ $index }})"
+                     class="w-full h-auto block rounded-2xl sm:rounded-3xl object-cover cursor-pointer transition-transform duration-700 ease-out group-hover:scale-105" 
                      loading="lazy">
                 
-                <!-- Hover Overlay with Glassy Action Buttons (Matching Sahityotsav model screenshot) -->
-                <div class="absolute inset-0 bg-black/45 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 p-4 z-10">
-                    <!-- 1. Download Button -->
-                    <a href="{{ $item->image_path }}" 
-                       download="QUAF-Photo-{{ $item->id }}" 
-                       target="_blank"
+                <!-- Action Bar with Beautiful Download & Share buttons -->
+                <!-- Mobile: Always visible at bottom; Desktop: smooth hover fade up -->
+                <div class="absolute bottom-0 inset-x-0 p-3 sm:p-4 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex items-center justify-between gap-2.5 transition-all duration-300 sm:opacity-0 sm:group-hover:opacity-100 pointer-events-auto z-10">
+                    <!-- Beautiful Download Button -->
+                    <a href="{{ route('gallery.download', $item->id) }}" 
+                       download
                        @click.stop
-                       class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center transition-all transform hover:scale-110 shadow-lg cursor-pointer"
+                       class="app-tap flex-1 py-2 sm:py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sora font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
                        title="Download Photo">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
+                        <span>Download</span>
                     </a>
 
-                    <!-- 2. Share Button -->
+                    <!-- Direct Photo Share Button -->
                     <button type="button" 
-                            @click.stop="sharePhoto('{{ $item->image_path }}')"
-                            class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center transition-all transform hover:scale-110 shadow-lg cursor-pointer"
-                            title="Share Photo">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            @click.stop="sharePhoto('{{ $item->image_path }}', '{{ addslashes($item->title ?: 'QUAF Festival Photo') }}')"
+                            class="app-tap py-2 sm:py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-[#be1e2d] via-[#f58220] to-[#f3bd2e] hover:brightness-110 text-white font-sora font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer shrink-0"
+                            title="Share Photo directly">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                         </svg>
+                        <span>Share</span>
                     </button>
 
-                    <!-- 3. Full View / Expand Button -->
+                    <!-- Full View / Expand Button -->
                     <button type="button" 
                             @click.stop="openLightbox({{ $index }})"
-                            class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/25 hover:bg-white/40 text-white backdrop-blur-md border border-white/40 flex items-center justify-center transition-all transform hover:scale-110 shadow-lg cursor-pointer"
-                            title="Full View">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="app-tap w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/20 hover:bg-white/35 text-white backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer shrink-0"
+                            title="Full Screen View">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
                         </svg>
                     </button>
@@ -155,18 +201,32 @@
          class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-between p-4 sm:p-8"
          style="display: none;">
 
-        <!-- Top Right Actions: Download & Close -->
-        <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
-            <a :href="images[currentIndex]?.src" 
+        <!-- Top Right Actions: Download, Share & Close -->
+        <div class="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-2 sm:gap-3 z-50">
+            <!-- Download Button in Lightbox -->
+            <a :href="images[currentIndex]?.downloadUrl" 
                download 
-               target="_blank"
-               class="text-slate-300 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+               class="app-tap inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sora font-bold text-xs shadow-xl active:scale-95 transition-all cursor-pointer"
                title="Download Full Resolution">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
+                <span>Download</span>
             </a>
-            <button @click="lightboxOpen = false" class="text-slate-300 hover:text-white p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+
+            <!-- Direct Share Button in Lightbox -->
+            <button type="button"
+                    @click="sharePhoto(images[currentIndex]?.src, images[currentIndex]?.title)"
+                    class="app-tap inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#be1e2d] via-[#f58220] to-[#f3bd2e] hover:brightness-110 text-white font-sora font-bold text-xs shadow-xl active:scale-95 transition-all cursor-pointer"
+                    title="Share Photo directly">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                </svg>
+                <span>Share</span>
+            </button>
+
+            <!-- Close Button -->
+            <button @click="lightboxOpen = false" class="text-slate-300 hover:text-white p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>

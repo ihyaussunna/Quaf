@@ -107,11 +107,17 @@
             @endphp
             <div class="rounded-2xl bg-white border border-slate-200 hover:border-[#be1e2d]/40 p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md">
                 <div>
-                    <!-- Result No in Publishing Order -->
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="px-2.5 py-1 rounded-lg bg-red-50 text-[#be1e2d] border border-red-200 font-mono font-bold uppercase tracking-wider text-[11px]">
-                            Result No ({{ $resultNo }})
-                        </span>
+                    <!-- Header: Round Red-Yellow Gradient Badge (01, 02...) & Zone / Type -->
+                    <div class="flex items-center justify-between gap-3 mb-3.5">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-[#be1e2d] via-[#f58220] to-[#f3bd2e] text-white flex items-center justify-center font-sora font-black text-sm sm:text-base shadow-md ring-2 ring-amber-200/60 shrink-0">
+                            {{ sprintf('%02d', $resultNo) }}
+                        </div>
+
+                        <div class="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-600 bg-slate-100/90 px-3 py-1.5 rounded-xl border border-slate-200/80">
+                            <span class="text-slate-800">{{ $result->program->eligibility ?? 'All Zones' }}</span>
+                            <span class="text-slate-300">•</span>
+                            <span class="text-[#be1e2d] uppercase tracking-wider text-[11px]">{{ ucfirst($result->program->type ?? 'Individual') }}</span>
+                        </div>
                     </div>
 
                     <!-- Program Name -->

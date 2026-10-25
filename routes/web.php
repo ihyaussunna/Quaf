@@ -114,6 +114,7 @@ Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
 
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
+Route::get('/gallery/{item}/download', [GalleryController::class, 'download'])->name('gallery.download');
 Route::get('/media', [VideoController::class, 'mediaHub'])->name('media.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.index');

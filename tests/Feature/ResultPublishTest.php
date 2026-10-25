@@ -237,7 +237,9 @@ class ResultPublishTest extends TestCase
 
         $response = $this->get(route('results.index'));
         $response->assertOk();
-        $response->assertSee('Result No (1)');
+        $response->assertSee('01');
+        $response->assertSee('Mix Zone');
+        $response->assertSee('Individual');
         $response->assertSee('Singer Student');
         $response->assertSee('Conco Majdic');
         // Chest number and full breakdown link must NOT be visible on public results card

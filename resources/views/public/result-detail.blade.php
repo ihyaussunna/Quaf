@@ -8,10 +8,17 @@
         <a href="{{ route('results.index') }}" class="text-xs font-mono text-[#be1e2d] hover:underline flex items-center gap-1.5 mb-3 font-semibold">
             <span>← Back to All Results</span>
         </a>
-        <div class="flex flex-wrap items-center gap-2 mb-2">
+        <div class="flex items-center gap-3 mb-3">
             @if(isset($resultNo) && $resultNo)
-                <span class="px-2.5 py-1 rounded bg-red-50 border border-red-200 text-[#be1e2d] font-mono text-xs font-bold">Result No ({{ $resultNo }})</span>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#be1e2d] via-[#f58220] to-[#f3bd2e] text-white flex items-center justify-center font-sora font-black text-sm shadow-md ring-2 ring-amber-200/60 shrink-0">
+                    {{ sprintf('%02d', $resultNo) }}
+                </div>
             @endif
+            <div class="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                <span class="text-slate-800">{{ $program->eligibility ?? 'All Zones' }}</span>
+                <span class="text-slate-300">•</span>
+                <span class="text-[#be1e2d] uppercase tracking-wider text-[11px]">{{ ucfirst($program->type ?? 'Individual') }}</span>
+            </div>
         </div>
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

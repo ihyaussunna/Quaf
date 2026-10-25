@@ -192,6 +192,26 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertViewIs('public.gallery');
         $response->assertSee('Festival Photo Gallery');
         $response->assertSee('Inauguration Ceremony');
+        $response->assertSee('Download');
+        $response->assertSee('Share');
+    }
+
+    public function test_gallery_download_route(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('gallery/download_test.jpg', 'fake-image-content');
+
+        $item = GalleryItem::create([
+            'title' => 'Downloadable Photo',
+            'image_path' => 'gallery/download_test.jpg',
+            'category' => 'Inauguration',
+            'is_featured' => true,
+            'display_order' => 1,
+        ]);
+
+        $response = $this->get(route('gallery.download', $item->id));
+        $response->assertOk();
+        $this->assertTrue(str_contains((string) $response->headers->get('content-disposition'), 'downloadable-photo-'.$item->id.'.jpg'));
     }
 
     public function test_news_page_and_news_detail_render(): void
