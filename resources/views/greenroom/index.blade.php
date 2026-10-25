@@ -286,45 +286,93 @@
         </div>
 
         @if($stage)
-            <!-- Stage Schedule Lineup Ribbon -->
+            <!-- Stage Schedule Lineup Ribbon (Auto-scrolls to Latest / Current Slot with Horizontal Navigation) -->
             @if($stageSchedules->isNotEmpty())
-                <div class="p-3 rounded-2xl bg-white shadow-xs flex items-center gap-2 overflow-x-auto scrollbar-none text-xs font-mono">
-                    <span class="text-slate-500 font-bold uppercase text-[10px] shrink-0 flex items-center gap-1 pl-1">
-                        <svg class="w-3.5 h-3.5 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Stage Schedule:</span>
-                    </span>
-                    @foreach($stageSchedules as $sch)
-                        @php
-                            $isCurrentSlot = ($currentProgram && $sch->program_id === $currentProgram->id);
-                            $isNextSlot = ($nextProgram && $sch->program_id === $nextProgram->id);
-                            $isSelectedSlot = ($activeProgram && $sch->program_id === $activeProgram->id);
-                            $schStart = \Carbon\Carbon::parse($sch->getRawOriginal('start_time') ?? $sch->start_time, 'Asia/Kolkata');
-                            $schZoneName = $sch->program?->zone?->name ?? $sch->program?->eligibility;
-                            $schZoneColor = $sch->program?->zone?->color_hex ?? '#005c94';
-                        @endphp
-                        <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $sch->program_id]) }}"
-                           class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold shadow-xs' : 'bg-slate-100/70 hover:bg-slate-200/70 text-slate-700' }}">
-                            <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('d M, h:i A') }}</span>
-                            <span>{{ Str::limit($sch->program?->name, 22) }}</span>
-                            @if($schZoneName)
-                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="background-color: {{ $schZoneColor }}20; color: {{ $isSelectedSlot ? '#f8fafc' : $schZoneColor }};">
-                                    {{ $schZoneName }}
-                                </span>
-                            @endif
-                            @if($isCurrentSlot)
-                                <span class="px-1.5 py-0.5 rounded text-[9px] bg-red-100 text-red-800 font-bold uppercase flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                                    <span>LIVE</span>
-                                </span>
-                            @elseif($isNextSlot)
-                                <span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold uppercase flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
-                                    <span>NEXT</span>
-                                </span>
-                            @endif
-                        </a>
-                    @endforeach
+                @php
+                    $targetScheduleId = null;
+                    if ($activeProgram) {
+                        $targetScheduleId = $stageSchedules->firstWhere('program_id', $activeProgram->id)?->id;
+                    }
+                    if (!$targetScheduleId && $currentProgram) {
+                        $targetScheduleId = $stageSchedules->firstWhere('program_id', $currentProgram->id)?->id;
+                    }
+                    if (!$targetScheduleId && $nextProgram) {
+                        $targetScheduleId = $stageSchedules->firstWhere('program_id', $nextProgram->id)?->id;
+                    }
+                    if (!$targetScheduleId) {
+                        $now = now('Asia/Kolkata');
+                        $futureSlot = $stageSchedules->first(function($s) use ($now) {
+                            $st = \Carbon\Carbon::parse($s->getRawOriginal('start_time') ?? $s->start_time, 'Asia/Kolkata');
+                            return $st->gte($now);
+                        });
+                        $targetScheduleId = $futureSlot?->id ?? $stageSchedules->last()?->id;
+                    }
+                @endphp
+                <div class="relative group/ticker">
+                    <!-- Scroll Left Button -->
+                    <button type="button" 
+                            onclick="document.getElementById('stage-schedule-ticker').scrollBy({ left: -260, behavior: 'smooth' })"
+                            class="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/95 border border-slate-300 shadow-md text-slate-700 hover:text-black flex items-center justify-center transition opacity-90 hover:opacity-100 cursor-pointer"
+                            title="Scroll left to earlier events">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+
+                    <div id="stage-schedule-ticker" class="p-3 pl-9 pr-9 rounded-2xl bg-white shadow-xs flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar text-xs font-mono">
+                        <span class="text-slate-500 font-bold uppercase text-[10px] shrink-0 flex items-center gap-1 pl-1">
+                            <svg class="w-3.5 h-3.5 text-[#005c94]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Stage Schedule:</span>
+                        </span>
+                        @foreach($stageSchedules as $sch)
+                            @php
+                                $isCurrentSlot = ($currentProgram && $sch->program_id === $currentProgram->id);
+                                $isNextSlot = ($nextProgram && $sch->program_id === $nextProgram->id);
+                                $isSelectedSlot = ($activeProgram && $sch->program_id === $activeProgram->id);
+                                $isActiveTarget = ($sch->id === $targetScheduleId);
+                                $schStart = \Carbon\Carbon::parse($sch->getRawOriginal('start_time') ?? $sch->start_time, 'Asia/Kolkata');
+                                $schZoneName = $sch->program?->zone?->name ?? $sch->program?->eligibility;
+                                $schZoneColor = $sch->program?->zone?->color_hex ?? '#005c94';
+                            @endphp
+                            <a href="{{ route('greenroom.index', ['stage_id' => $stage->id, 'program_id' => $sch->program_id]) }}"
+                               @if($isActiveTarget) id="active-stage-schedule-slot" @endif
+                               class="px-3 py-1.5 rounded-xl shrink-0 transition flex items-center gap-2 {{ $isSelectedSlot ? 'bg-slate-900 text-white font-bold shadow-xs ring-2 ring-[#be1e2d]' : ($isActiveTarget ? 'bg-slate-200 text-slate-900 font-bold' : 'bg-slate-100/70 hover:bg-slate-200/70 text-slate-700') }}">
+                                <span class="text-[10px] font-bold {{ $isSelectedSlot ? 'text-amber-300' : 'text-slate-500' }}">{{ $schStart->format('d M, h:i A') }}</span>
+                                <span>{{ Str::limit($sch->program?->name, 22) }}</span>
+                                @if($schZoneName)
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style="background-color: {{ $schZoneColor }}20; color: {{ $isSelectedSlot ? '#f8fafc' : $schZoneColor }};">
+                                        {{ $schZoneName }}
+                                    </span>
+                                @endif
+                                @if($isCurrentSlot)
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] bg-red-100 text-red-800 font-bold uppercase flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                        <span>LIVE</span>
+                                    </span>
+                                @elseif($isNextSlot)
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold uppercase flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                        <span>NEXT</span>
+                                    </span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <!-- Scroll Right Button -->
+                    <button type="button" 
+                            onclick="document.getElementById('stage-schedule-ticker').scrollBy({ left: 260, behavior: 'smooth' })"
+                            class="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/95 border border-slate-300 shadow-md text-slate-700 hover:text-black flex items-center justify-center transition opacity-90 hover:opacity-100 cursor-pointer"
+                            title="Scroll right to later events">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </button>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const activeSlot = document.getElementById('active-stage-schedule-slot');
+                        if (activeSlot) {
+                            activeSlot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
+                    });
+                </script>
             @endif
 
             <!-- Selected Stage Overview: NOW ON STAGE & UP NEXT IN LINE & STAGE CONTROLS -->

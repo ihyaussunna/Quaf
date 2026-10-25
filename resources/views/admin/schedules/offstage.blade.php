@@ -229,29 +229,57 @@
         </div>
     </div>
 
-    <!-- Date Navigation Chips (Horizontal Scrollable for Mobile) -->
-    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+    <!-- Date Navigation Chips (Horizontal Scrollable with Smooth Navigation) -->
+    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs relative group/dates">
         <div class="flex items-center justify-between gap-3 mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">Festival Dates</span>
             <span class="text-xs text-slate-400">Festival Dates: Oct 06 – Nov 01 • Mainstage Oct 31 & Nov 01</span>
         </div>
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            @foreach($defaultDates as $dateVal => $dateLabel)
-                @php
-                    $dayCount = $scheduleCountsByDate[$dateVal] ?? 0;
-                @endphp
-                <a href="{{ route($routePrefix . 'offstage', ['date' => $dateVal]) }}"
-                   class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ $selectedDate === $dateVal ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200' }}">
-                    <span>{{ $dateLabel }}</span>
-                    @if($dayCount > 0)
-                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono {{ $selectedDate === $dateVal ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700' }}">
-                            {{ $dayCount }}
-                        </span>
-                    @endif
-                </a>
-            @endforeach
+        <div class="relative">
+            <!-- Left Scroll Button -->
+            <button type="button" 
+                    onclick="document.getElementById('festival-dates-scroller').scrollBy({ left: -240, behavior: 'smooth' })"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-slate-300 shadow-md text-slate-700 hover:text-black flex items-center justify-center transition opacity-90 hover:opacity-100 cursor-pointer"
+                    title="Scroll left to earlier dates">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <div id="festival-dates-scroller" class="flex items-center gap-2 overflow-x-auto px-7 pb-1 no-scrollbar scroll-smooth">
+                @foreach($defaultDates as $dateVal => $dateLabel)
+                    @php
+                        $dayCount = $scheduleCountsByDate[$dateVal] ?? 0;
+                        $isSelected = ($selectedDate === $dateVal);
+                    @endphp
+                    <a href="{{ route($routePrefix . 'offstage', ['date' => $dateVal]) }}"
+                       @if($isSelected) id="active-festival-date-chip" @endif
+                       class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ $isSelected ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200' }}">
+                        <span>{{ $dateLabel }}</span>
+                        @if($dayCount > 0)
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono {{ $isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700' }}">
+                                {{ $dayCount }}
+                            </span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+
+            <!-- Right Scroll Button -->
+            <button type="button" 
+                    onclick="document.getElementById('festival-dates-scroller').scrollBy({ left: 240, behavior: 'smooth' })"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-slate-300 shadow-md text-slate-700 hover:text-black flex items-center justify-center transition opacity-90 hover:opacity-100 cursor-pointer"
+                    title="Scroll right to later dates">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const activeChip = document.getElementById('active-festival-date-chip');
+            if (activeChip) {
+                activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        });
+    </script>
 
     <!-- Conflict Warning Banner (if conflicts exist) -->
     @if($conflicts['total_conflicts'] > 0)

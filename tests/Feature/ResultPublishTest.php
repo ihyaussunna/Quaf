@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
+use App\Models\Result;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\PointCalculationService;
@@ -110,5 +111,135 @@ class ResultPublishTest extends TestCase
         $leaderResponse->assertSee('Performance Over Time');
         $leaderResponse->assertSee($groupA->name);
         $leaderResponse->assertSee('Result 1 (Now)');
+    }
+
+    public function test_admin_can_unpublish_result_to_draft_and_hide_from_public(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $group = Group::create([
+            'name' => 'Pacto Hikmic',
+            'code' => 'PACTO',
+            'slug' => 'pacto-hikmic',
+            'color_hex' => '#2e3192',
+        ]);
+
+        $category = ProgramCategory::create([
+            'name' => 'General Stage Arts',
+            'slug' => 'general-stage-arts',
+        ]);
+
+        $program = Program::create([
+            'category_id' => $category->id,
+            'name' => 'Arabic Speech',
+            'code' => 'Q9-105',
+            'type' => 'individual',
+            'eligibility' => 'Mix Zone',
+            'participant_count' => 1,
+            'status' => 'completed',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'QF2001',
+            'chest_number' => 'QF2001',
+            'name' => 'Talented Student',
+            'group_id' => $group->id,
+            'admission_number' => 'ADM201',
+            'class' => 'D4',
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+            'chest_number' => '2001',
+            'status' => 'verified',
+        ]);
+
+        $result = Result::create([
+            'program_id' => $program->id,
+            'first_entry_id' => $entry->id,
+            'first_grade' => 'A+',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        // Unpublish via POST route
+        $response = $this->actingAs($admin)
+            ->post(route('admin.results.unpublish', $result));
+
+        $response->assertSessionHas('success');
+
+        $result->refresh();
+        $this->assertEquals('draft', $result->status);
+        $this->assertNull($result->published_at);
+
+        // Check that public results page does NOT list this drafted/hidden result
+        $publicResponse = $this->get(route('results.index'));
+        $publicResponse->assertOk();
+        $publicResponse->assertDontSee('Talented Student');
+    }
+
+    public function test_public_results_only_shows_podium_and_not_full_breakdown(): void
+    {
+        $group = Group::create([
+            'name' => 'Conco Majdic',
+            'code' => 'CONCO',
+            'slug' => 'conco-majdic',
+            'color_hex' => '#f8e709',
+        ]);
+
+        $category = ProgramCategory::create([
+            'name' => 'Music Category',
+            'slug' => 'music-category',
+        ]);
+
+        $program = Program::create([
+            'category_id' => $category->id,
+            'name' => 'Qawwali',
+            'code' => 'Q9-301',
+            'type' => 'individual',
+            'eligibility' => 'Mix Zone',
+            'participant_count' => 1,
+            'status' => 'completed',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'QF3001',
+            'chest_number' => 'QF3001',
+            'name' => 'Singer Student',
+            'group_id' => $group->id,
+            'admission_number' => 'ADM301',
+            'class' => 'D4',
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+            'chest_number' => '3001',
+            'status' => 'verified',
+        ]);
+
+        Result::create([
+            'program_id' => $program->id,
+            'first_entry_id' => $entry->id,
+            'first_grade' => 'A+',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->get(route('results.index'));
+        $response->assertOk();
+        $response->assertSee('Singer Student');
+        $response->assertSee('CONCO');
+        // Full Breakdown link must NOT be visible
+        $response->assertDontSee('Full Breakdown →');
     }
 }

@@ -204,7 +204,14 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        @if($res->status !== 'published')
+                                        @if($res->status === 'published')
+                                            <form method="POST" action="{{ route('admin.results.unpublish', $res) }}" class="inline" onsubmit="return confirm('Do you want to hide/draft this published result? It will be removed from public view and points will be recalculated.')">
+                                                @csrf
+                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-[11px] transition-colors shadow-2xs" title="Hide result from public and revert to draft">
+                                                    Hide / Draft
+                                                </button>
+                                            </form>
+                                        @else
                                             @if($res->program && $res->program->isGroup())
                                                 <button type="button"
                                                         @click="openPreview({{ $res->id }}, '{{ route('admin.results.publish', $res) }}')"

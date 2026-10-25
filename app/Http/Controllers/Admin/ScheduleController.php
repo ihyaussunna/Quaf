@@ -191,8 +191,6 @@ class ScheduleController extends Controller
         $layout = $isProgramCommittee ? 'layouts.program-committee' : 'layouts.admin';
         $routePrefix = $isProgramCommittee ? 'program-committee.schedules.' : 'admin.schedules.';
 
-        $selectedDate = $request->query('date', '2026-10-06');
-
         // All festival dates from Oct 06 to Nov 01
         $startDate = Carbon::parse('2026-10-06');
         $endDate = Carbon::parse('2026-11-01');
@@ -220,6 +218,20 @@ class ScheduleController extends Controller
             ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
             ->filter()
             ->values();
+
+        $today = Carbon::today('Asia/Kolkata')->format('Y-m-d');
+        if (! $request->has('date')) {
+            if (isset($milestoneLabels[$today])) {
+                $selectedDate = $today;
+            } elseif ($distinctDates->isNotEmpty()) {
+                $latestUpToToday = $distinctDates->filter(fn ($d) => $d <= $today)->last();
+                $selectedDate = $latestUpToToday ?? $distinctDates->last() ?? '2026-10-06';
+            } else {
+                $selectedDate = '2026-10-06';
+            }
+        } else {
+            $selectedDate = $request->query('date');
+        }
 
         $allUniqueDates = collect(array_keys($milestoneLabels))
             ->merge($distinctDates)

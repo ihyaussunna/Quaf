@@ -562,6 +562,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('results/specified', [AdminResultController::class, 'specified'])->name('results.specified');
     Route::get('results/all', [AdminResultController::class, 'allResults'])->name('results.all');
     Route::post('results/{result}/publish', [AdminResultController::class, 'publish'])->name('results.publish');
+    Route::post('results/{result}/unpublish', [AdminResultController::class, 'unpublish'])->name('results.unpublish');
     Route::get('results/{result}/coin-preview', [AdminResultController::class, 'coinPreview'])->name('results.coin-preview');
     Route::post('results/{result}/send-to-announcer', [AdminResultController::class, 'sendToAnnouncer'])->name('results.send-to-announcer');
     Route::post('results/{program}/auto-determine', [AdminResultController::class, 'autoDetermine'])->name('results.auto-determine');

@@ -16,7 +16,14 @@
         </div>
 
         <div class="flex items-center gap-3">
-            @if($result->status !== 'published')
+            @if($result->status === 'published')
+                <form method="POST" action="{{ route('admin.results.unpublish', $result) }}" onsubmit="return confirm('Do you want to hide/draft this published result? It will be removed from public view and points will be recalculated.')">
+                    @csrf
+                    <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-md">
+                        Hide / Revert to Draft
+                    </button>
+                </form>
+            @else
                 <form method="POST" action="{{ route('admin.results.publish', $result) }}">
                     @csrf
                     <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-600 text-white hover:bg-emerald-700 shadow-md">

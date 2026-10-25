@@ -173,12 +173,9 @@
                 <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
                     <span class="text-slate-400 text-[10px] sm:text-xs">{{ $result->published_at?->format('h:i A, M d') }}</span>
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('media.results.public-poster', $result->id) }}" class="text-slate-600 hover:text-[#be1e2d] font-bold flex items-center gap-1">
+                        <a href="{{ route('media.results.public-poster', $result->id) }}" class="text-slate-600 hover:text-[#be1e2d] font-bold flex items-center gap-1 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <span>Poster</span>
-                        </a>
-                        <a href="{{ route('results.show', $result->program->id) }}" class="text-[#be1e2d] font-bold hover:underline">
-                            Full Breakdown →
                         </a>
                     </div>
                 </div>

@@ -242,6 +242,25 @@ class ResultController extends Controller
         return back()->with('success', "Result for '{$result->program->name}' is now PUBLISHED and points and coins have been calculated.");
     }
 
+    public function unpublish(Result $result): RedirectResponse
+    {
+        $old = $result->toArray();
+        $programName = $result->program?->name ?? 'Program';
+
+        $result->update([
+            'status' => 'draft',
+            'published_at' => null,
+        ]);
+
+        // Reverse coin distribution and recalculate team points
+        $this->coinService->reverseCoinDistributionForResult($result, 'Result unpublished / reverted to draft');
+        $this->pointService->recalculateAllPoints();
+
+        AuditLogger::log('unpublish_result', $result, $old, $result->toArray());
+
+        return back()->with('success', "Result for '{$programName}' has been reverted to DRAFT and hidden from public view. Points have been recalculated.");
+    }
+
     public function sendToAnnouncer(Result $result): RedirectResponse
     {
         $old = $result->status;
