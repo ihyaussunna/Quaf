@@ -282,6 +282,10 @@ class HomeController extends Controller
             'zones' => count($zones),
         ];
 
+        $totalProgramsCount = $stats['programs'] ?? Program::count();
+        $publishedResultsCount = Result::where('status', 'published')->count();
+        $isFullResultsPublished = ($totalProgramsCount > 0 && $publishedResultsCount >= $totalProgramsCount);
+
         return view('public.home', compact(
             'liveFestMode',
             'groups',
@@ -295,7 +299,8 @@ class HomeController extends Controller
             'highlightVideos',
             'categories',
             'zones',
-            'stats'
+            'stats',
+            'isFullResultsPublished'
         ));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
+use App\Models\Program;
 use App\Models\Result;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -19,7 +20,11 @@ class GroupController extends Controller
             ->withCount(['students', 'entries'])
             ->get();
 
-        return view('public.groups', compact('groups'));
+        $totalPrograms = Program::count();
+        $publishedCount = Result::where('status', 'published')->count();
+        $isFullResultsPublished = ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
+
+        return view('public.groups', compact('groups', 'isFullResultsPublished'));
     }
 
     public function show(Group $group): View

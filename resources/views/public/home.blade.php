@@ -506,11 +506,11 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10">
             
-            <!-- Left Column: Team Standings (5 Cols) Matching User Template -->
+            <!-- Left Column: Team Standings (5 Cols) Matching User Template (Light Theme) -->
             <div class="lg:col-span-5 flex flex-col justify-between">
                 <div>
-                    <!-- Outer Dark Container matching template -->
-                    <div class="rounded-3xl bg-[#120f18] border border-white/5 p-4 sm:p-5 shadow-2xl">
+                    <!-- Outer Light Card Container matching template -->
+                    <div class="rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-5 shadow-sm">
                         <!-- Table Header: RANK & TEAM | TOTAL POINTS -->
                         <div class="flex items-center justify-between px-2 mb-3 sm:mb-4">
                             <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
@@ -527,59 +527,69 @@
                                 @php
                                     $rank = $loop->iteration;
                                     $isWinner = $rank === 1;
+                                    $showWinnerBadge = $isWinner && (!empty($isFullResultsPublished) && $isFullResultsPublished === true);
                                 @endphp
 
                                 @if($isWinner)
-                                    <!-- Rank 1 Winner Row -->
-                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-[#191522] border border-amber-500/80 flex items-center justify-between gap-3 shadow-lg shadow-amber-500/5 transition-all">
+                                    <!-- Rank 1 Row (Light Theme) -->
+                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-gradient-to-r from-amber-50/80 via-yellow-50/40 to-white border border-amber-300/80 flex items-center justify-between gap-3 shadow-xs transition-all">
                                         <div class="flex items-center gap-3 min-w-0">
-                                            <!-- Trophy Box -->
-                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A5.25 5.25 0 0012 3.75a5.25 5.25 0 00-2.25 10.5m4.5 0h-4.5" />
-                                                </svg>
-                                            </div>
+                                            @if($showWinnerBadge)
+                                                <!-- Trophy Box when Full Results Published -->
+                                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-400 text-slate-950 font-black shadow-xs flex items-center justify-center shrink-0">
+                                                    <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A5.25 5.25 0 0012 3.75a5.25 5.25 0 00-2.25 10.5m4.5 0h-4.5" />
+                                                    </svg>
+                                                </div>
+                                            @else
+                                                <!-- Rank 1 Number Box during Live Festival -->
+                                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-400 text-slate-950 font-sora font-black text-sm flex items-center justify-center shadow-xs shrink-0">
+                                                    1
+                                                </div>
+                                            @endif
 
                                             <div class="flex items-center gap-2 min-w-0 flex-wrap">
-                                                <span class="font-sora font-black text-white text-sm sm:text-base tracking-tight truncate">
+                                                <span class="font-sora font-black text-slate-900 text-sm sm:text-base tracking-tight truncate">
                                                     {{ $group->name }}
                                                 </span>
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider shrink-0">
-                                                    <span>WINNER</span>
-                                                    <svg class="w-3 h-3 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                    </svg>
-                                                </span>
+                                                @if($showWinnerBadge)
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-200/90 text-amber-950 border border-amber-400/60 uppercase tracking-wider shrink-0">
+                                                        <span>WINNER</span>
+                                                        <svg class="w-3 h-3 text-amber-800" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
 
                                         <!-- Points -->
                                         <div class="flex items-baseline gap-1 shrink-0 text-right">
-                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-400 leading-none">
+                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-600 leading-none">
                                                 {{ number_format($group->points_cache) }}
                                             </span>
-                                            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-semibold">
+                                            <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-semibold">
                                                 PTS
                                             </span>
                                         </div>
                                     </div>
                                 @else
-                                    <!-- Subsequent Rows (Rank 2, 3, 4, 5...) -->
-                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-[#17141f] border border-white/5 hover:border-white/10 flex items-center justify-between gap-3 transition-colors">
+                                    <!-- Subsequent Rows (Rank 2, 3, 4, 5...) in Light Theme -->
+                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-slate-50/80 border border-slate-200/80 hover:bg-slate-100/70 flex items-center justify-between gap-3 transition-colors">
                                         <div class="flex items-center gap-3 min-w-0">
                                             <!-- Rank Number Box -->
-                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-sora font-black text-sm sm:text-base text-slate-300 shrink-0">
+                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-200 text-slate-700 font-sora font-black text-sm flex items-center justify-center shrink-0">
                                                 {{ $rank }}
                                             </div>
 
-                                            <span class="font-sora font-bold text-white text-sm sm:text-base tracking-tight truncate">
+                                            <span class="font-sora font-bold text-slate-800 text-sm sm:text-base tracking-tight truncate">
                                                 {{ $group->name }}
                                             </span>
                                         </div>
 
                                         <!-- Points -->
                                         <div class="flex items-baseline gap-1 shrink-0 text-right">
-                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-400 leading-none">
+                                            <span class="font-sora font-black text-xl sm:text-2xl text-slate-900 leading-none">
                                                 {{ number_format($group->points_cache) }}
                                             </span>
                                             <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-semibold">
