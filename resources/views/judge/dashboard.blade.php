@@ -43,7 +43,7 @@
                 @php
                     $eval = $evaluationStatus[$prog->id] ?? ['total' => 0, 'submitted' => 0, 'is_complete' => false, 'present' => 0, 'pending' => 0];
                     $percent = $eval['total'] > 0 ? round(($eval['submitted'] / $eval['total']) * 100) : 0;
-                    $isComplete = $eval['is_complete'] || $prog->status === 'completed' || $prog->result !== null;
+                    $isComplete = (bool) ($eval['is_complete'] ?? false);
                     $isLive = ($prog->status === 'in_progress');
                     $isPartial = (!$isComplete && $eval['submitted'] > 0);
                     $scheduledTime = $prog->scheduled_time ?? $prog->schedule?->start_time;
@@ -141,7 +141,7 @@
                         <a href="{{ route('judge.evaluate', $prog) }}" 
                            class="w-full lg:w-auto px-6 py-3.5 min-h-[46px] bg-[#005c94] hover:bg-[#004875] text-white font-mono font-bold text-xs uppercase rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-[#005c94]/20 transition-all cursor-pointer active:scale-98">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            <span>{{ $eval['is_complete'] ? 'Review / Edit Scores' : 'Evaluate Participants Now' }}</span>
+                            <span>{{ $isComplete ? 'Review / Edit Scores' : ($isPartial ? 'Continue Scoring' : 'Evaluate Participants Now') }}</span>
                         </a>
                     </div>
                 </div>

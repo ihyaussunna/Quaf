@@ -135,7 +135,7 @@ class JudgeController extends Controller
             $present = (int) ($presentCounts[$prog->id] ?? 0);
             $submittedScores = (int) ($submittedCounts[$prog->id] ?? 0);
             $pending = max(0, $present - $submittedScores);
-            $isComplete = ($present > 0 && $submittedScores >= $present) || $prog->status === 'completed' || $prog->result !== null;
+            $isComplete = ($present > 0 && $submittedScores >= $present);
 
             $evaluationStatus[$prog->id] = [
                 'total' => $present,

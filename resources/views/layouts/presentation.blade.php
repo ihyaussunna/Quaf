@@ -47,10 +47,9 @@
         <!-- Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0">
             <a href="{{ route('presentation.dashboard') }}" class="flex items-center gap-3 group py-2">
-                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-10 w-auto object-contain">
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-[30px] max-h-[30px] w-auto object-contain shrink-0" style="height: 30px; width: auto;">
                 <div class="leading-none">
-                    <span class="font-sora font-black tracking-wider text-base text-white block">QUAF</span>
-                    <span class="text-[9px] font-mono tracking-widest text-amber-400 block uppercase font-bold mt-0.5">Presentation Desk</span>
+                    <span class="text-[11px] font-mono tracking-wider text-amber-400 block uppercase font-bold">Presentation Desk</span>
                 </div>
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">

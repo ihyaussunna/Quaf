@@ -213,10 +213,9 @@
         <!-- Sidebar Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0 overflow-hidden">
             <a href="{{ $isPcView ? route('program-committee.dashboard') : route('admin.dashboard') }}" class="flex items-center gap-3 group py-2 min-w-0">
-                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-10 w-auto object-contain shrink-0">
+                <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-[30px] max-h-[30px] w-auto object-contain shrink-0" style="height: 30px; width: auto;">
                 <div class="min-w-0 leading-none">
-                    <span class="font-sora font-black tracking-wider text-base text-white block">QUAF 09</span>
-                    <span class="text-[9px] font-mono tracking-widest text-slate-400 block uppercase font-bold mt-1 truncate">{{ $isPcView ? 'Samithi Control' : 'Central Admin' }}</span>
+                    <span class="text-[11px] font-mono tracking-wider text-slate-300 block uppercase font-bold truncate">{{ $isPcView ? 'Samithi Control' : 'Central Admin' }}</span>
                 </div>
             </a>
             <!-- Close button on mobile -->

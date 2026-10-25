@@ -71,7 +71,7 @@
             <!-- Sidebar Header / Brand -->
             <div class="h-20 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0 overflow-hidden">
                 <a href="{{ route('program-committee.dashboard') }}" class="flex items-center gap-2.5 min-w-0 group py-1">
-                    <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-9 w-auto object-contain shrink-0">
+                    <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-[30px] max-h-[30px] w-auto object-contain shrink-0" style="height: 30px; width: auto;">
                     <div class="min-w-0 border-l border-white/15 pl-2 leading-none">
                         <div class="text-[10px] font-bold uppercase tracking-wider text-amber-400 font-mono leading-none">SAMITHI</div>
                         <div class="text-[11px] font-bold text-slate-200 truncate mt-1">Program Hub</div>

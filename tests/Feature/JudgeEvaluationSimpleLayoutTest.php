@@ -7,6 +7,7 @@ use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
+use App\Models\ScoreSheet;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -127,5 +128,40 @@ class JudgeEvaluationSimpleLayoutTest extends TestCase
             'total_score' => 88.5,
             'is_submitted' => true,
         ]);
+    }
+
+    public function test_judge_dashboard_shows_pending_evaluation_when_candidates_are_not_evaluated(): void
+    {
+        // Program has status completed in DB, but judge has NOT submitted any scores for present candidate
+        $this->program->update(['status' => 'completed']);
+
+        $response = $this->actingAs($this->judgeUser)
+            ->get(route('judge.dashboard'));
+
+        $response->assertOk();
+        // Completed count should be 0, and Pending Evaluation count should be 1
+        $response->assertSee('Evaluation Pending');
+        $response->assertSee('Evaluate Participants Now');
+        $response->assertDontSee('Review / Edit Scores');
+    }
+
+    public function test_judge_dashboard_shows_completed_only_when_judge_submits_all_scores(): void
+    {
+        // Judge submits scores for the candidate
+        ScoreSheet::create([
+            'judge_id' => $this->judge->id,
+            'program_id' => $this->program->id,
+            'entry_id' => $this->entry->id,
+            'total_score' => 90,
+            'is_submitted' => true,
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->judgeUser)
+            ->get(route('judge.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Review / Edit Scores');
+        $response->assertDontSee('Evaluate Participants Now');
     }
 }
