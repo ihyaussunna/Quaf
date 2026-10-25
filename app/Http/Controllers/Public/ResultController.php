@@ -67,6 +67,14 @@ class ResultController extends Controller
 
         $results = $query->latest('published_at')->paginate(12)->withQueryString();
 
+        $allPublishedOrder = Result::where('status', 'published')
+            ->orderBy('published_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->pluck('id')
+            ->flip()
+            ->map(fn ($idx) => $idx + 1)
+            ->toArray();
+
         Cache::forget('public_results_categories');
         Cache::forget('public_results_groups');
         Cache::forget('public_results_stages');
@@ -79,6 +87,7 @@ class ResultController extends Controller
 
         return view('public.results', compact(
             'results',
+            'allPublishedOrder',
             'zones',
             'categories',
             'groups',
@@ -120,6 +129,19 @@ class ResultController extends Controller
             $program->load(['entries.student.group']);
         }
 
-        return view('public.result-detail', compact('program', 'result'));
+        $resultNo = null;
+        if ($result) {
+            $resultNo = Result::where('status', 'published')
+                ->where(function ($q) use ($result) {
+                    $q->where('published_at', '<', $result->published_at)
+                        ->orWhere(function ($sub) use ($result) {
+                            $sub->where('published_at', '=', $result->published_at)
+                                ->where('id', '<=', $result->id);
+                        });
+                })
+                ->count();
+        }
+
+        return view('public.result-detail', compact('program', 'result', 'resultNo'));
     }
 }

@@ -9,11 +9,9 @@
             <span>← Back to All Results</span>
         </a>
         <div class="flex flex-wrap items-center gap-2 mb-2">
-            <span class="px-2.5 py-1 rounded bg-red-50 border border-red-200 text-[#be1e2d] font-mono text-xs font-bold">{{ $program->code }}</span>
-            <span class="text-slate-500 text-xs font-mono">{{ $program->eligibility ?? 'All Zones' }}</span>
-            
-            <span class="text-slate-300">•</span>
-            <span class="text-slate-500 text-xs font-mono">Stage: {{ $program->stage?->name ?? 'Designated Arena' }}</span>
+            @if(isset($resultNo) && $resultNo)
+                <span class="px-2.5 py-1 rounded bg-red-50 border border-red-200 text-[#be1e2d] font-mono text-xs font-bold">Result No ({{ $resultNo }})</span>
+            @endif
         </div>
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -49,8 +47,6 @@
                     {{ $result->firstEntry?->student?->name ?? 'Team ' . $result->firstEntry?->group?->name }}
                 </h3>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-amber-200 text-xs font-mono text-slate-700 mb-3 shadow-2xs">
-                    <span>Chest #{{ $result->firstEntry?->chest_number }}</span>
-                    <span>•</span>
                     <span class="font-bold text-[#be1e2d]">{{ $result->firstEntry?->group?->name }}</span>
                 </div>
                 @if($result->firstEntry?->certificate)
@@ -73,8 +69,6 @@
                         </h3>
                     </div>
                     <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-xs font-mono text-slate-700 mt-2">
-                        <span>Chest #{{ $result->secondEntry?->chest_number }}</span>
-                        <span>•</span>
                         <span class="font-bold text-slate-800">{{ $result->secondEntry?->group?->name }}</span>
                     </div>
                 </div>
@@ -91,8 +85,6 @@
                         </h3>
                     </div>
                     <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-xs font-mono text-slate-700 mt-2">
-                        <span>Chest #{{ $result->thirdEntry?->chest_number }}</span>
-                        <span>•</span>
                         <span class="font-bold text-amber-900">{{ $result->thirdEntry?->group?->name }}</span>
                     </div>
                 </div>
@@ -102,16 +94,16 @@
         <!-- Social Share & Print Bar (Section 36) -->
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
             <div class="text-slate-600">
-                Official verdict declared on <strong class="text-slate-900">{{ $result->published_at?->format('M d, Y • h:i A') ?? 'Verified' }}</strong>
+                Official Result • <strong class="text-slate-900">{{ $program->name }}</strong>
             </div>
 
             <div class="flex items-center gap-2">
                 <span class="text-slate-400">Share:</span>
-                <a href="https://api.whatsapp.com/send?text={{ urlencode('QUAF Result: ' . $program->code . ' ' . $program->name . ' - ' . url()->current()) }}"
+                <a href="https://api.whatsapp.com/send?text={{ urlencode('QUAF Result: ' . $program->name . ' - ' . url()->current()) }}"
                    target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold hover:bg-emerald-100 transition-colors">
                     WhatsApp
                 </a>
-                <a href="https://twitter.com/intent/tweet?text={{ urlencode('QUAF Result: ' . $program->code . ' ' . $program->name) }}&url={{ urlencode(url()->current()) }}"
+                <a href="https://twitter.com/intent/tweet?text={{ urlencode('QUAF Result: ' . $program->name) }}&url={{ urlencode(url()->current()) }}"
                    target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
                     X / Twitter
                 </a>

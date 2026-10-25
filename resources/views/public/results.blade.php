@@ -102,82 +102,78 @@
     <!-- Results Grid (Light Theme) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         @forelse($results as $result)
-            <div class="app-tap rounded-2xl bg-white border border-slate-200 hover:border-[#be1e2d]/40 p-4 sm:p-6 transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md">
+            @php
+                $resultNo = $allPublishedOrder[$result->id] ?? $loop->iteration;
+            @endphp
+            <div class="rounded-2xl bg-white border border-slate-200 hover:border-[#be1e2d]/40 p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md">
                 <div>
-                    <div class="flex items-center justify-between text-xs font-mono text-slate-500 mb-2">
-                        <span class="text-[#be1e2d] font-bold">{{ $result->program->code }}</span>
-                        <span class="truncate max-w-[160px]">Stage: {{ $result->program->stage?->name ?? 'Main Arena' }}</span>
+                    <!-- Result No in Publishing Order -->
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-red-50 text-[#be1e2d] border border-red-200 font-mono font-bold uppercase tracking-wider text-[11px]">
+                            Result No ({{ $resultNo }})
+                        </span>
                     </div>
 
-                    <h3 class="text-lg sm:text-2xl font-sora font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors mb-1 leading-snug break-words">
+                    <!-- Program Name -->
+                    <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors mb-4 leading-tight break-words">
                         {{ $result->program->name }}
                     </h3>
-                    <span class="text-xs text-slate-500 block mb-3 sm:mb-5 font-medium font-sora">{{ $result->program->eligibility ?? 'A Zone' }} • {{ ucfirst($result->program->type) }}</span>
 
-                    <!-- Placements Cards -->
+                    <!-- Placements Cards (Matching Winner & Team layout) -->
                     <div class="space-y-2 sm:space-y-2.5">
-                        <!-- 1st -->
-                        <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-amber-50/80 border border-amber-300/80 gap-2">
-                            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                                <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-sora shadow-xs shrink-0">1</span>
+                        <!-- 1st Place -->
+                        @if($result->firstEntry)
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50/70 border border-amber-300/80">
+                                <span class="w-7 h-7 rounded-lg bg-[#f3bd2e] text-white font-black text-xs flex items-center justify-center font-sora shadow-xs shrink-0">1</span>
                                 <div class="min-w-0 flex-1">
-                                    <div class="font-bold text-xs sm:text-sm text-slate-900 line-clamp-1 font-sora">
-                                        {{ $result->firstEntry?->student?->name ?? 'Team ' . $result->firstEntry?->group?->name }}
+                                    <div class="font-bold text-sm text-slate-900 font-sora truncate">
+                                        {{ $result->firstEntry->student?->name ?? 'Team ' . $result->firstEntry->group?->name }}
                                     </div>
-                                    <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest {{ $result->firstEntry?->chest_number }}</span>
-                                </div>
-                            </div>
-                            <span class="text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white text-[#be1e2d] border border-amber-200 shrink-0 uppercase" title="{{ $result->firstEntry?->group?->name }}">
-                                {{ $result->firstEntry?->group?->code ?? $result->firstEntry?->group?->name }}
-                            </span>
-                        </div>
-
-                        <!-- 2nd -->
-                        @if($result->secondEntry)
-                            <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 gap-2">
-                                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-400 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">2</span>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="font-medium text-xs sm:text-sm text-slate-800 line-clamp-1 font-sora">
-                                            {{ $result->secondEntry?->student?->name ?? 'Team ' . $result->secondEntry?->group?->name }}
-                                        </div>
-                                        <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest {{ $result->secondEntry?->chest_number }}</span>
+                                    <div class="text-[11px] font-mono font-bold tracking-wider uppercase text-slate-600 truncate mt-0.5">
+                                        {{ $result->firstEntry->group?->name }}
                                     </div>
                                 </div>
-                                <span class="text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white text-slate-700 border border-slate-200 shrink-0 uppercase" title="{{ $result->secondEntry?->group?->name }}">
-                                    {{ $result->secondEntry?->group?->code ?? $result->secondEntry?->group?->name }}
-                                </span>
                             </div>
                         @endif
 
-                        <!-- 3rd -->
-                        @if($result->thirdEntry)
-                            <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-amber-50/40 border border-amber-200/60 gap-2">
-                                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">3</span>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="font-medium text-xs sm:text-sm text-slate-800 line-clamp-1 font-sora">
-                                            {{ $result->thirdEntry?->student?->name ?? 'Team ' . $result->thirdEntry?->group?->name }}
-                                        </div>
-                                        <span class="text-[10px] sm:text-[11px] text-slate-500 font-mono">Chest {{ $result->thirdEntry?->chest_number }}</span>
+                        <!-- 2nd Place -->
+                        @if($result->secondEntry)
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                                <span class="w-7 h-7 rounded-lg bg-slate-400 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">2</span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-bold text-sm text-slate-900 font-sora truncate">
+                                        {{ $result->secondEntry->student?->name ?? 'Team ' . $result->secondEntry->group?->name }}
+                                    </div>
+                                    <div class="text-[11px] font-mono font-bold tracking-wider uppercase text-slate-600 truncate mt-0.5">
+                                        {{ $result->secondEntry->group?->name }}
                                     </div>
                                 </div>
-                                <span class="text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-white text-slate-700 border border-slate-200 shrink-0 uppercase" title="{{ $result->thirdEntry?->group?->name }}">
-                                    {{ $result->thirdEntry?->group?->code ?? $result->thirdEntry?->group?->name }}
-                                </span>
+                            </div>
+                        @endif
+
+                        <!-- 3rd Place -->
+                        @if($result->thirdEntry)
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50/40 border border-amber-200/60">
+                                <span class="w-7 h-7 rounded-lg bg-amber-700 text-white font-black text-xs flex items-center justify-center font-sora shrink-0">3</span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-bold text-sm text-slate-900 font-sora truncate">
+                                        {{ $result->thirdEntry->student?->name ?? 'Team ' . $result->thirdEntry->group?->name }}
+                                    </div>
+                                    <div class="text-[11px] font-mono font-bold tracking-wider uppercase text-slate-600 truncate mt-0.5">
+                                        {{ $result->thirdEntry->group?->name }}
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     </div>
                 </div>
 
-                <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
-                    <span class="text-slate-400 text-[10px] sm:text-xs">{{ $result->published_at?->format('h:i A, M d') }}</span>
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('media.results.public-poster', $result->id) }}" class="text-slate-600 hover:text-[#be1e2d] font-bold flex items-center gap-1 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <span>Poster</span>
-                        </a>
-                    </div>
+                <!-- Footer: Poster Button Only -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end text-xs font-mono">
+                    <a href="{{ route('media.results.public-poster', $result->id) }}" class="text-slate-600 hover:text-[#be1e2d] font-bold flex items-center gap-1.5 transition-colors">
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Poster</span>
+                    </a>
                 </div>
             </div>
         @empty
