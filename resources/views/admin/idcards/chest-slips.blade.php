@@ -7,22 +7,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     <style>
+        @font-face {
+            font-family: 'Rockwell Std';
+            src: url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Rockwell Std';
+            src: url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .font-rockwell {
+            font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', 'DejaVu Serif', Georgia, serif;
+        }
+
         @page {
-            size: A4 portrait;
+            size: auto;
             margin: 8mm;
         }
+
         @media print {
             body {
                 background: white !important;
                 color: black !important;
                 padding: 0 !important;
+                margin: 0 !important;
             }
             .no-print {
                 display: none !important;
             }
+            .slips-grid {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+                gap: 4mm !important;
+            }
             .slip-card {
-                break-inside: avoid;
-                page-break-inside: avoid;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                border: 0.25pt dashed #999999 !important;
+                box-shadow: none !important;
+                margin: 2mm !important;
             }
         }
     </style>
@@ -30,24 +57,29 @@
 <body class="bg-slate-100 text-slate-900 font-sora p-6 min-h-screen">
 
     <!-- Action & Filter Bar (Hidden on Print) -->
-    <div class="no-print max-w-5xl mx-auto mb-6 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
+    <div class="no-print max-w-7xl mx-auto mb-6 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-amber-100 text-[#f3bd2e] border border-amber-200">
-                        FestPro Operational Feature
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-amber-100 text-[#be1e2d] border border-amber-200">
+                        Official Production Template
                     </span>
                     <span class="text-xs font-mono text-slate-500">• {{ $students->count() }} Contestant Slips</span>
                 </div>
-                <h1 class="font-sora font-black text-xl text-slate-900 mt-1">Printable Chest Number Slips</h1>
-                <p class="text-xs font-mono text-slate-500">Standard A4 grid with high-visibility chest badges for contestant chest pinning & green room check-in.</p>
+                <h1 class="font-sora font-black text-xl text-slate-900 mt-1">Contestant Chest Number Slips</h1>
+                <p class="text-xs font-mono text-slate-500">Official 60mm × 100mm badge templates with dynamic QR verification, chest pill, and Rockwell Std typography.</p>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="window.print()" class="px-5 py-2.5 bg-[#f3bd2e] text-white font-mono font-bold text-xs uppercase rounded-xl hover:brightness-110 flex items-center gap-2 shadow-lg shadow-[#f3bd2e]/20">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a href="{{ asset('downloads/badges/QUAF_Badges_ALL_TEAMS_A3.pdf') }}" download
+                   class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Master A3 PDF</span>
+                </a>
+                <button onclick="window.print()" class="px-5 py-2.5 bg-[#be1e2d] text-white font-mono font-bold text-xs uppercase rounded-xl hover:bg-[#a01624] flex items-center gap-2 shadow-lg shadow-[#be1e2d]/20 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     <span>Print All Slips</span>
                 </button>
-                <button onclick="window.close()" class="px-4 py-2.5 bg-slate-100 text-slate-700 font-mono text-xs rounded-xl hover:bg-slate-200 font-semibold">
+                <button onclick="window.close()" class="px-4 py-2.5 bg-slate-100 text-slate-700 font-mono text-xs rounded-xl hover:bg-slate-200 font-semibold transition">
                     Close
                 </button>
             </div>
@@ -56,90 +88,98 @@
         <!-- Filter form -->
         <form method="GET" action="{{ route('admin.idcards.chest-slips') }}" class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 text-xs font-mono">
             <span class="text-slate-500 font-semibold">Filter:</span>
-            <select name="group" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800">
+            <select name="group" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#be1e2d]">
                 <option value="">All Groups</option>
                 @foreach($groups as $g)
                     <option value="{{ $g->id }}" {{ $groupId == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
                 @endforeach
             </select>
-            <select name="category" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800">
+            <select name="category" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#be1e2d]">
                 <option value="">All Zones</option>
                 @foreach($zones as $val => $label)
                     <option value="{{ $val }}" {{ $category == $val ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-semibold">Apply</button>
+            <button type="submit" class="px-3.5 py-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-semibold transition">Apply</button>
             <a href="{{ route('admin.idcards.chest-slips') }}" class="text-slate-500 hover:text-slate-800 underline">Reset</a>
         </form>
     </div>
 
-    <!-- Slips Container (Grid: 2 Columns on A4, 4-6 slips per page) -->
-    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2 print:gap-3">
+    <!-- Slips Container (Rendered with the Official 5-Team Badge Templates) -->
+    <div class="slips-grid max-w-7xl mx-auto flex flex-wrap justify-center gap-4">
         @forelse($students as $student)
-            <div class="slip-card bg-white text-slate-900 rounded-2xl border-2 border-dashed border-slate-300 print:border-black p-4 flex flex-col justify-between shadow-sm relative overflow-hidden h-[240px]">
+            @php
+                $groupCode = strtoupper($student->group?->code ?? '');
+                $groupName = strtoupper($student->group?->name ?? '');
+
+                if ($groupCode === 'CONCO' || str_contains($groupName, 'CONCO')) {
+                    $badgeSvg = 'conco-badge.svg';
+                    $isConco = true;
+                } elseif ($groupCode === 'PACTO' || str_contains($groupName, 'PACTO')) {
+                    $badgeSvg = 'pacto-badge.svg';
+                    $isConco = false;
+                } elseif ($groupCode === 'UNIO' || str_contains($groupName, 'UNIO')) {
+                    $badgeSvg = 'unio-badge.svg';
+                    $isConco = false;
+                } elseif ($groupCode === 'YUGO' || str_contains($groupName, 'YUGO')) {
+                    $badgeSvg = 'yugo-badge.svg';
+                    $isConco = false;
+                } else {
+                    $badgeSvg = 'lumo-badge.svg';
+                    $isConco = false;
+                }
+
+                $chest = $student->chest_number ?? $student->student_id;
+                $textColor = $isConco ? '#000000' : '#ffffff';
+                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" . urlencode(route('verify.student', $student->qr_token ?? $chest));
+                $displayName = $student->group?->name ?? 'General';
+                $nameLen = strlen($student->name);
+            @endphp
+
+            <div class="slip-card relative overflow-hidden bg-white shadow-md rounded-lg border border-dashed border-slate-300"
+                 style="width: 60mm; height: 100mm; flex-shrink: 0;">
                 
-                <!-- Cut-line Guideline indicator -->
-                <div class="no-print absolute top-1 right-2 text-[8px] font-mono text-slate-400">✂ Cut Along Border</div>
+                <!-- Cut-line Guideline indicator (Screen Only) -->
+                <div class="no-print absolute top-1 right-1.5 text-[7px] font-mono text-slate-400 z-20">✂ Cut</div>
 
-                <!-- Top Header -->
-                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <div class="flex items-center gap-2">
-                        <img src="{{ asset('images/dashboard-logo.png') }}" alt="QUAF" class="h-6 w-auto object-contain">
-                        <div>
-                            <p class="text-[8px] font-mono text-slate-500 uppercase">Ihyaussunna • Markaz</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-white shadow-sm" style="background-color: {{ $student->group?->color_hex ?? '#005c94' }};">
-                            {{ $student->group?->name ?? 'General' }}
-                        </span>
-                        <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[9px] font-mono font-bold">
-                            {{ $student->category }}
-                        </span>
+                <!-- Hidden span for group name verification and automated testing -->
+                <span class="sr-only">{{ $displayName }}</span>
+
+                <!-- Vector SVG Template Background -->
+                <img src="{{ asset('images/badges/' . $badgeSvg) }}"
+                     alt="{{ $displayName }}"
+                     style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0; pointer-events: none;">
+
+                <!-- QR Code Container inside the official White Rounded Box (centered horizontally at Y ~ 50.1%) -->
+                <div style="position: absolute; top: 50.1%; left: 50%; transform: translateX(-50%); width: 25.7mm; height: 25.7mm; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                    <img src="{{ $qrUrl }}"
+                         alt="QR Code"
+                         style="width: 25mm; height: 25mm; object-fit: contain;">
+                </div>
+
+                <!-- Chest Number Text (Rockwell 12pt bold, centered inside Red Pill at Y ~ 80.4%) -->
+                <div style="position: absolute; top: 80.4%; left: 50%; transform: translateX(-50%); width: 22mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: #ffffff; font-weight: bold; font-size: 11pt; letter-spacing: 0.4px; text-transform: uppercase; line-height: 1;">
+                        {{ $chest }}
                     </div>
                 </div>
 
-                <!-- Middle: Huge Chest Number & Details -->
-                <div class="flex items-center justify-between py-2">
-                    <!-- Left: Large Chest Number Badge -->
-                    <div class="flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 min-w-[120px] text-center">
-                        <span class="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">CHEST NO.</span>
-                        <span class="font-mono font-black text-4xl text-slate-900 tracking-tight">
-                            {{ $student->chest_number ?? '---' }}
-                        </span>
-                    </div>
-
-                    <!-- Center: Student Name & Reg Info -->
-                    <div class="flex-1 px-4 min-w-0">
-                        <h4 class="font-sora font-bold text-base text-slate-900 truncate">
-                            {{ $student->name }}
-                        </h4>
-                        <p class="text-[10px] font-mono text-slate-500">ID: {{ $student->student_id }}</p>
-                        @if($student->entries->isNotEmpty())
-                            <div class="mt-1 flex flex-wrap gap-1">
-                                @foreach($student->entries->take(2) as $entry)
-                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-[8px] font-mono text-slate-600 truncate max-w-[140px]">
-                                        {{ $entry->program?->name ?? '---' }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Right: QR Code for Verification -->
-                    <div class="w-20 h-20 bg-white p-1 border border-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner">
-                        {!! \App\Services\QrCodeService::svg(route('verify.student', $student->qr_token), 72) !!}
+                <!-- Student Full Name (Rockwell 10pt, centered below pill at Y ~ 86.2%) -->
+                <div style="position: absolute; top: 86.2%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: {{ $nameLen > 25 ? '8pt' : '9.5pt' }}; font-weight: {{ $isConco ? 'bold' : '600' }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1;">
+                        {{ $student->name }}
                     </div>
                 </div>
 
-                <!-- Bottom Footer -->
-                <div class="border-t border-slate-100 pt-2 flex items-center justify-between text-[8px] font-mono text-slate-500">
-                    <span>PIN ON CHEST • PRESENT AT GREEN ROOM</span>
-                    <span>OCT 2026 • KARANTHUR</span>
+                <!-- Class / Category (Rockwell 8pt, centered at Y ~ 91.2%) -->
+                <div style="position: absolute; top: 91.2%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: 7.5pt; font-weight: {{ $isConco ? 'bold' : 'normal' }}; text-transform: uppercase; line-height: 1;">
+                        {{ $student->category }}
+                    </div>
                 </div>
             </div>
         @empty
-            <div class="col-span-2 py-16 text-center text-slate-500 font-mono text-xs bg-white rounded-2xl border border-slate-200">
+            <div class="col-span-full py-16 text-center text-slate-500 font-mono text-xs bg-white rounded-2xl border border-slate-200">
                 No students found for chest number slips.
             </div>
         @endforelse

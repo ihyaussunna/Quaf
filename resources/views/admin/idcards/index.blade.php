@@ -50,23 +50,35 @@
     <!-- Student Badges Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($students as $student)
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#f3bd2e]/40 transition-all group flex flex-col justify-between shadow-sm hover:shadow-md">
+            @php
+                $groupCode = strtoupper($student->group?->code ?? '');
+                $groupName = strtoupper($student->group?->name ?? '');
+
+                if ($groupCode === 'CONCO' || str_contains($groupName, 'CONCO')) {
+                    $badgeSvg = 'conco-badge.svg';
+                } elseif ($groupCode === 'PACTO' || str_contains($groupName, 'PACTO')) {
+                    $badgeSvg = 'pacto-badge.svg';
+                } elseif ($groupCode === 'UNIO' || str_contains($groupName, 'UNIO')) {
+                    $badgeSvg = 'unio-badge.svg';
+                } elseif ($groupCode === 'YUGO' || str_contains($groupName, 'YUGO')) {
+                    $badgeSvg = 'yugo-badge.svg';
+                } else {
+                    $badgeSvg = 'lumo-badge.svg';
+                }
+            @endphp
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#be1e2d]/40 transition-all group flex flex-col justify-between shadow-sm hover:shadow-md">
                 <div class="flex items-start gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-sora text-2xl font-bold text-[#f3bd2e] overflow-hidden flex-shrink-0">
-                        @if($student->photo_path)
-                            <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
-                        @else
-                            {{ substr($student->name, 0, 1) }}
-                        @endif
+                    <div class="w-14 h-22 rounded-xl border border-slate-200/80 overflow-hidden relative flex-shrink-0 shadow-2xs bg-slate-50 group-hover:scale-105 transition-transform">
+                        <img src="{{ asset('images/badges/' . $badgeSvg) }}" alt="Badge" class="w-full h-full object-cover">
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" style="background-color: {{ $student->group->color_hex }}15; color: {{ $student->group->color_hex }}">
-                                {{ $student->group->name }}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold" style="background-color: {{ $student->group?->color_hex ?? '#005c94' }}15; color: {{ $student->group?->color_hex ?? '#005c94' }}">
+                                {{ $student->group?->name ?? 'General' }}
                             </span>
                             <span class="text-[10px] font-mono text-slate-500">{{ $student->category }}</span>
                         </div>
-                        <h3 class="text-base font-sora font-bold text-slate-900 truncate mt-1 group-hover:text-[#f3bd2e] transition-colors">
+                        <h3 class="text-base font-sora font-bold text-slate-900 truncate mt-1 group-hover:text-[#be1e2d] transition-colors">
                             {{ $student->name }}
                         </h3>
                         <p class="text-xs font-mono text-slate-500">ID: {{ $student->student_id }}</p>
@@ -74,9 +86,9 @@
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span class="text-[11px] font-mono text-slate-600">Chest: <strong class="text-slate-900">{{ $student->chest_number ?? 'N/A' }}</strong></span>
+                    <span class="text-[11px] font-mono text-slate-600">Chest: <strong class="text-slate-900 font-sora">{{ $student->chest_number ?? $student->student_id ?? 'N/A' }}</strong></span>
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('admin.idcards.show', $student) }}" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-[#f3bd2e] border border-[#f3bd2e]/30 rounded-lg text-xs font-mono font-semibold">
+                        <a href="{{ route('admin.idcards.show', $student) }}" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-[#be1e2d] border border-red-200/80 rounded-lg text-xs font-mono font-bold transition">
                             View Badge &rarr;
                         </a>
                     </div>
