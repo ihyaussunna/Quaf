@@ -104,6 +104,7 @@ Route::post('/donatetoquaf/upload-receipt', [HomeController::class, 'uploadRecei
 Route::get('/results', [ResultController::class, 'index'])->name('results.index');
 Route::get('/results/{program}', [ResultController::class, 'show'])->name('results.show');
 Route::get('/results/{result}/poster', [MediaResultController::class, 'publicPoster'])->name('media.results.public-poster');
+Route::get('/results/{result}/download-poster', [MediaResultController::class, 'downloadPoster'])->name('media.results.download-poster');
 
 Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
 Route::get('/schedule/offstage-pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedule.offstage-pdf');

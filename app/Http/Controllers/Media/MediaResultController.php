@@ -10,6 +10,7 @@ use App\Models\Result;
 use App\Models\ResultTemplate;
 use App\Services\AuditLogger;
 use App\Services\PointCalculationService;
+use App\Services\ResultPosterGenerator;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaResultController extends Controller
 {
@@ -332,6 +335,56 @@ class MediaResultController extends Controller
         $winners = $result->getPosterWinners();
 
         return view('public.poster-view', compact('result', 'winners'));
+    }
+
+    /**
+     * Download Result Poster directly as an image file.
+     */
+    public function downloadPoster(Result $result): Response|StreamedResponse
+    {
+        $result->loadMissing([
+            'program.category',
+            'program.stage',
+            'firstEntry.student.group',
+            'secondEntry.student.group',
+            'thirdEntry.student.group',
+        ]);
+
+        // 1. If static canvas poster already saved & published, download that image file
+        if (! empty($result->poster_image)) {
+            $rawPath = $result->getRawOriginal('poster_image') ?? $result->poster_image;
+            $parsed = parse_url($rawPath, PHP_URL_PATH) ?? $rawPath;
+            $cleanPath = ltrim($parsed, '/');
+
+            $diskPath = $cleanPath;
+            if (str_starts_with($diskPath, 'storage/')) {
+                $diskPath = substr($diskPath, strlen('storage/'));
+            }
+
+            $ext = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: 'png';
+            $downloadFilename = 'QUAF-Result-'.Str::slug($result->program->name ?? 'result').'-'.$result->id.'.'.$ext;
+
+            if (Storage::disk('public')->exists($diskPath)) {
+                $fullPath = Storage::disk('public')->path($diskPath);
+
+                return response()->download($fullPath, $downloadFilename, [
+                    'Content-Type' => mime_content_type($fullPath) ?: 'image/png',
+                ]);
+            }
+
+            $publicPath = public_path($cleanPath);
+            if (file_exists($publicPath)) {
+                return response()->download($publicPath, $downloadFilename, [
+                    'Content-Type' => mime_content_type($publicPath) ?: 'image/png',
+                ]);
+            }
+        }
+
+        // 2. Otherwise generate dynamic high-resolution poster using ResultPosterGenerator
+        $img = ResultPosterGenerator::generate($result);
+        $downloadFilename = 'QUAF-Result-'.Str::slug($result->program->name ?? 'result').'-'.$result->id.'.jpg';
+
+        return ResultPosterGenerator::streamResponse($img, $downloadFilename, true);
     }
 
     /**

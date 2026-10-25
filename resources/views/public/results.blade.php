@@ -176,9 +176,10 @@
 
                 <!-- Footer: Download Icon with Poster Button -->
                 <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-end">
-                    <a href="{{ route('media.results.public-poster', $result->id) }}" 
+                    <a href="{{ route('media.results.download-poster', $result->id) }}" 
+                       download
                        class="app-tap inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-red-50 hover:bg-[#be1e2d] text-[#be1e2d] hover:text-white border border-red-200/80 hover:border-[#be1e2d] font-sora font-bold text-xs shadow-2xs hover:shadow-xs active:scale-95 transition-all duration-200 group/btn"
-                       title="Download / View Poster">
+                       title="Download Poster">
                         <svg class="w-4 h-4 text-[#be1e2d] group-hover/btn:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>

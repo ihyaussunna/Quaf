@@ -246,4 +246,40 @@ class ResultPublishTest extends TestCase
         $response->assertDontSee('Chest 3001');
         $response->assertDontSee('Full Breakdown →');
     }
+
+    public function test_result_poster_download_route_streams_image(): void
+    {
+        $group = Group::create([
+            'name' => 'Lumo Fikric',
+            'code' => 'LUMO',
+            'slug' => 'lumo-fikric',
+            'color_hex' => '#005c94',
+        ]);
+
+        $category = ProgramCategory::create([
+            'name' => 'Arts Category',
+            'slug' => 'arts-category',
+        ]);
+
+        $program = Program::create([
+            'category_id' => $category->id,
+            'name' => 'Elocution Arabic',
+            'code' => 'Q9-401',
+            'type' => 'individual',
+            'eligibility' => 'A Zone',
+            'participant_count' => 1,
+            'status' => 'completed',
+        ]);
+
+        $result = Result::create([
+            'program_id' => $program->id,
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->get(route('media.results.download-poster', $result->id));
+        $response->assertOk();
+        $this->assertTrue(str_contains((string) $response->headers->get('content-type'), 'image/'));
+        $this->assertTrue(str_contains((string) $response->headers->get('content-disposition'), 'attachment'));
+    }
 }
