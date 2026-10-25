@@ -15,12 +15,15 @@
     <meta name="keywords" content="QUAF, Markaz Cultural Festival, Ihyaussunna Students Union, QUAF 2026, Jamia Markaz, Arts Festival, Live Results, Adabic Inheritance">
 
     <!-- Open Graph & Social Cards -->
-    <meta property="og:title" content="{{ $title ?? 'QUAF — Markaz Cultural Festival 2026' }}">
-    <meta property="og:description" content="Official Festival Platform of QUAF organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ asset('images/quaf-title-logo.png') }}">
+    <meta property="og:title" content="{{ $ogTitle ?? $title ?? 'QUAF — Markaz Cultural Festival 2026' }}">
+    <meta property="og:description" content="{{ $ogDescription ?? 'Official Festival Platform of QUAF organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.' }}">
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    <meta property="og:url" content="{{ $ogUrl ?? url()->current() }}">
+    <meta property="og:image" content="{{ $ogImage ?? asset('images/quaf-title-logo.png') }}">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? 'QUAF — Markaz Cultural Festival 2026' }}">
+    <meta name="twitter:description" content="{{ $ogDescription ?? 'Official Festival Platform of QUAF organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.' }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? asset('images/quaf-title-logo.png') }}">
 
     <!-- Google Fonts (Multilingual: Sora, Anek Malayalam, Amiri, JetBrains Mono) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
