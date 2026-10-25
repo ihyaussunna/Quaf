@@ -506,77 +506,95 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10">
             
-            <!-- Left Column: Team Standings (5 Cols) -->
+            <!-- Left Column: Team Standings (5 Cols) Matching User Template -->
             <div class="lg:col-span-5 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-5">
-                        <span class="text-xs font-mono uppercase tracking-widest text-slate-500 font-bold">
-                            House Standings
-                        </span>
-                        <span class="text-xs font-mono text-slate-400">
-                            Rank & Points
-                        </span>
-                    </div>
+                    <!-- Outer Dark Container matching template -->
+                    <div class="rounded-3xl bg-[#120f18] border border-white/5 p-4 sm:p-5 shadow-2xl">
+                        <!-- Table Header: RANK & TEAM | TOTAL POINTS -->
+                        <div class="flex items-center justify-between px-2 mb-3 sm:mb-4">
+                            <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+                                RANK &amp; TEAM
+                            </span>
+                            <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+                                TOTAL POINTS
+                            </span>
+                        </div>
 
-                    <div class="space-y-3.5">
-                        @foreach($groups->take(4) as $group)
-                            @php
-                                $isLeader = $loop->iteration === 1;
-                                $maxPoints = $groups->first()->points_cache > 0 ? $groups->first()->points_cache : 100;
-                                $percentage = min(100, round(($group->points_cache / $maxPoints) * 100));
-                            @endphp
-                            <a href="{{ route('groups.show', $group->id) }}" 
-                               class="group block p-4 sm:p-5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 transition-all shadow-2xs hover:shadow-md relative overflow-hidden">
-                                
-                                <div class="flex items-center justify-between relative z-10">
-                                    <div class="flex items-center gap-3.5">
-                                        <!-- Rank Badge -->
-                                        @if($isLeader)
-                                            <span class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 font-sora font-black text-sm flex items-center justify-center shadow-sm">
-                                                #1
-                                            </span>
-                                        @else
-                                            <span class="w-9 h-9 rounded-xl bg-slate-200 text-slate-700 font-sora font-bold text-sm flex items-center justify-center">
-                                                #{{ $loop->iteration }}
-                                            </span>
-                                        @endif
+                        <!-- Rows: Only Rank Number, Team Name, Points -->
+                        <div class="space-y-2.5 sm:space-y-3">
+                            @foreach($groups as $group)
+                                @php
+                                    $rank = $loop->iteration;
+                                    $isWinner = $rank === 1;
+                                @endphp
 
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ $group->color_hex ?: '#be1e2d' }}"></span>
-                                                <h3 class="font-sora font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors text-base">
-                                                    {{ $group->name }}
-                                                </h3>
+                                @if($isWinner)
+                                    <!-- Rank 1 Winner Row -->
+                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-[#191522] border border-amber-500/80 flex items-center justify-between gap-3 shadow-lg shadow-amber-500/5 transition-all">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <!-- Trophy Box -->
+                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A5.25 5.25 0 0012 3.75a5.25 5.25 0 00-2.25 10.5m4.5 0h-4.5" />
+                                                </svg>
                                             </div>
-                                            <span class="text-[11px] font-mono text-slate-400 block mt-0.5 uppercase tracking-wide">
-                                                {{ $group->code }}
+
+                                            <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                                                <span class="font-sora font-black text-white text-sm sm:text-base tracking-tight truncate">
+                                                    {{ $group->name }}
+                                                </span>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider shrink-0">
+                                                    <span>WINNER</span>
+                                                    <svg class="w-3 h-3 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Points -->
+                                        <div class="flex items-baseline gap-1 shrink-0 text-right">
+                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-400 leading-none">
+                                                {{ number_format($group->points_cache) }}
+                                            </span>
+                                            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-semibold">
+                                                PTS
                                             </span>
                                         </div>
                                     </div>
+                                @else
+                                    <!-- Subsequent Rows (Rank 2, 3, 4, 5...) -->
+                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-[#17141f] border border-white/5 hover:border-white/10 flex items-center justify-between gap-3 transition-colors">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <!-- Rank Number Box -->
+                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-sora font-black text-sm sm:text-base text-slate-300 shrink-0">
+                                                {{ $rank }}
+                                            </div>
 
-                                    <!-- Points -->
-                                    <div class="text-right">
-                                        <span class="font-sora font-black text-2xl text-slate-900 block leading-none">
-                                            {{ number_format($group->points_cache) }}
-                                        </span>
-                                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
-                                            PTS
-                                        </span>
+                                            <span class="font-sora font-bold text-white text-sm sm:text-base tracking-tight truncate">
+                                                {{ $group->name }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Points -->
+                                        <div class="flex items-baseline gap-1 shrink-0 text-right">
+                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-400 leading-none">
+                                                {{ number_format($group->points_cache) }}
+                                            </span>
+                                            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-semibold">
+                                                PTS
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <!-- Subtle Progress Indicator -->
-                                <div class="mt-3.5 w-full bg-slate-200/70 h-1.5 rounded-full overflow-hidden">
-                                    <div class="h-full rounded-full transition-all duration-700" 
-                                         style="width: {{ $percentage }}%; background-color: {{ $group->color_hex ?: '#be1e2d' }};"></div>
-                                </div>
-                            </a>
-                        @endforeach
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
                 <!-- Full Standings Link Button -->
-                <div class="mt-6 pt-4 border-t border-slate-100">
+                <div class="mt-4 pt-2">
                     <a href="{{ route('groups.index') }}" 
                        class="w-full py-3 px-5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition hover:border-[#be1e2d]">
                         <span>Full Standings</span>
