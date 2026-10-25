@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\PointSetting;
+use App\Services\PointCalculationService;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
@@ -16,6 +17,12 @@ return new class extends Migration
             'third_place_points' => 1,
             'participation_points' => 0,
         ]);
+
+        try {
+            app(PointCalculationService::class)->recalculateAllPoints();
+        } catch (Throwable $e) {
+            // Safe fallback if called before full data readiness
+        }
     }
 
     /**
