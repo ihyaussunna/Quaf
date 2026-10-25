@@ -34,9 +34,12 @@
             @if($result)
                 <div class="flex items-center gap-2 shrink-0">
                     <a href="{{ route('media.results.public-poster', $result->id) }}"
-                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#991522] text-white font-bold text-xs shadow-xs transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span>Result Poster</span>
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#991522] text-white font-bold text-xs shadow-xs transition-colors"
+                       title="Download / View Result Poster">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span>Poster</span>
                     </a>
                 </div>
             @endif
