@@ -12,7 +12,7 @@
             News &amp; Updates
         </h1>
         <p class="text-xs sm:text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-            Real-time reports, declarations, and administrative briefs from QUAF Season 09.
+            Real-time reports, declarations, and administrative briefs from QUAF.
         </p>
     </div>
 
@@ -62,15 +62,15 @@
                             <span>{{ $article->published_at?->format('M d, Y') ?? 'October 2026' }}</span>
                         </div>
 
-                        <!-- Title in Bold Uppercase -->
+                        <!-- Title in MLU-Revathi Bold -->
                         <a href="{{ route('news.show', $article->slug) }}" class="block">
-                            <h3 class="text-base sm:text-lg font-sora font-black text-slate-900 group-hover:text-[#be1e2d] transition-colors leading-snug uppercase tracking-tight line-clamp-2 mb-2.5">
+                            <h3 class="text-base sm:text-lg font-revathi-bold font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors leading-snug line-clamp-2 mb-2.5">
                                 {{ $article->title }}
                             </h3>
                         </a>
 
-                        <!-- Excerpt -->
-                        <p class="text-xs sm:text-sm font-anek text-slate-600 font-normal line-clamp-3 leading-relaxed">
+                        <!-- Excerpt in MLU-Revathi Regular -->
+                        <p class="text-xs sm:text-sm font-revathi text-slate-600 font-normal line-clamp-3 leading-relaxed">
                             {{ $article->excerpt }}
                         </p>
                     </div>
