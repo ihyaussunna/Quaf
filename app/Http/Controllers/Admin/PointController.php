@@ -24,10 +24,10 @@ class PointController extends Controller
         $sourceType = $request->query('source_type');
 
         $settings = PointSetting::first() ?? PointSetting::create([
-            'first_place_points' => 10,
-            'second_place_points' => 7,
-            'third_place_points' => 5,
-            'participation_points' => 1,
+            'first_place_points' => 5,
+            'second_place_points' => 3,
+            'third_place_points' => 1,
+            'participation_points' => 0,
             'group_multiplier' => 2.00,
         ]);
 

@@ -532,4 +532,90 @@ class ProgramPointsAndAutoPodiumTest extends TestCase
         $resDetail->assertSee('History Student');
         $resDetail->assertSee('Code A');
     }
+
+    public function test_rule_11_points_and_grades_matrix_conformance(): void
+    {
+        // 1. Individual: 1st => 5, 2nd => 3, 3rd => 1
+        $indProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-IND-R11',
+            'name' => 'Speech Malayalam',
+            'type' => 'individual',
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+        $this->assertSame([1 => 5, 2 => 3, 3 => 1], PointCalculationService::getPositionPointsForProgram($indProg));
+
+        // 2. Group with 2 members: 1st => 7, 2nd => 5, 3rd => 3
+        $grp2Prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-GRP2-R11',
+            'name' => 'Podcast',
+            'type' => 'group',
+            'participant_count' => 2,
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+        $this->assertSame([1 => 7, 2 => 5, 3 => 3], PointCalculationService::getPositionPointsForProgram($grp2Prog));
+
+        // 3. Group with 3 members: 1st => 10, 2nd => 7, 3rd => 4
+        $grp3Prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-GRP3-R11',
+            'name' => 'Hadith Musabaka',
+            'type' => 'group',
+            'participant_count' => 3,
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+        $this->assertSame([1 => 10, 2 => 7, 3 => 4], PointCalculationService::getPositionPointsForProgram($grp3Prog));
+
+        // 4. Group with 4 or 5 members: 1st => 15, 2nd => 10, 3rd => 5
+        $grp4Prog = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-GRP4-R11',
+            'name' => 'Qawwali',
+            'type' => 'group',
+            'participant_count' => 5,
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+        $this->assertSame([1 => 15, 2 => 10, 3 => 5], PointCalculationService::getPositionPointsForProgram($grp4Prog));
+
+        // 5. Special Programs (Insight / Centenary Footprint): 1st => 20, 2nd => 15, 3rd => 10
+        $insightProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-INSIGHT-R11',
+            'name' => 'Insight',
+            'malayalam_name' => 'ഇൻസൈറ്റ്',
+            'type' => 'group',
+            'participant_count' => 1,
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+        $this->assertSame([1 => 20, 2 => 15, 3 => 10], PointCalculationService::getPositionPointsForProgram($insightProg));
+
+        $centenaryProg = Program::create([
+            'category_id' => $this->category->id,
+            'code' => 'Q9-CENT-R11',
+            'name' => 'Centenary Footprint',
+            'malayalam_name' => 'സെന്റിനറി ഫുട്പ്രിന്റ്',
+            'type' => 'group',
+            'participant_count' => 1,
+            'zone_id' => $this->zone->id,
+            'status' => 'completed',
+        ]);
+        $this->assertSame([1 => 20, 2 => 15, 3 => 10], PointCalculationService::getPositionPointsForProgram($centenaryProg));
+
+        // 6. Grades & Marks (Rule 11: A+ = 6, A = 5, B = 3, C = 1, Below 50% = 0)
+        $this->assertSame(['grade' => 'A+', 'points' => 6], PointCalculationService::getGradeFromScore(95.0));
+        $this->assertSame(['grade' => 'A+', 'points' => 6], PointCalculationService::getGradeFromScore(90.0));
+        $this->assertSame(['grade' => 'A', 'points' => 5], PointCalculationService::getGradeFromScore(89.0));
+        $this->assertSame(['grade' => 'A', 'points' => 5], PointCalculationService::getGradeFromScore(70.0));
+        $this->assertSame(['grade' => 'B', 'points' => 3], PointCalculationService::getGradeFromScore(69.0));
+        $this->assertSame(['grade' => 'B', 'points' => 3], PointCalculationService::getGradeFromScore(60.0));
+        $this->assertSame(['grade' => 'C', 'points' => 1], PointCalculationService::getGradeFromScore(59.0));
+        $this->assertSame(['grade' => 'C', 'points' => 1], PointCalculationService::getGradeFromScore(50.0));
+        $this->assertSame(['grade' => null, 'points' => 0], PointCalculationService::getGradeFromScore(49.9));
+    }
 }

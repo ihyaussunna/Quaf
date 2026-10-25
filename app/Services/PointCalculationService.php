@@ -72,19 +72,47 @@ class PointCalculationService
     }
 
     /**
-     * Get position points (1st, 2nd, 3rd) based on Program type, member count, and General Shifting rules.
+     * Get position points (1st, 2nd, 3rd) strictly based on Rule 11 (പോയിന്റ്സ് & ഗ്രേഡ്സ്):
      *
-     * Official Rulebook (Rule 11):
-     * - Individual: 1st = 5, 2nd = 3, 3rd = 1
-     * - Group (2 members): 1st = 7, 2nd = 5, 3rd = 3
-     * - Group (3 members): 1st = 10, 2nd = 7, 3rd = 4
-     * - Group (4, 5 members): 1st = 15, 2nd = 10, 3rd = 5
-     * - General Shifting (>5 members or General Shifting): 1st = 20, 2nd = 15, 3rd = 10
+     * 1. Individual Competitions:
+     *    1st = 5, 2nd = 3, 3rd = 1
+     *
+     * 2. Group Competitions:
+     *    - 2 members: 1st = 7, 2nd = 5, 3rd = 3
+     *    - 3 members: 1st = 10, 2nd = 7, 3rd = 4
+     *    - 4, 5 members: 1st = 15, 2nd = 10, 3rd = 5
+     *    - ഇൻസെറ്റ് / ഇൻസൈറ്റ് (Inset/Insight), സെന്റിനറി ഫുട്പ്രിന്റ് (Centenary Footprint), General Shifting (>5 members):
+     *      1st = 20, 2nd = 15, 3rd = 10
      *
      * @return array<int, int> [1 => 1st_pts, 2 => 2nd_pts, 3 => 3rd_pts]
      */
     public static function getPositionPointsForProgram(Program $program): array
     {
+        // 1. Check for Special High-Value Group Competitions:
+        // Rule 11: ഇൻസെറ്റ് / ഇൻസൈറ്റ് (Insight/Inset), സെന്റിനറി ഫുട്പ്രിന്റ് (Centenary Footprint), General Shifting
+        $nameLower = strtolower($program->name.' '.($program->malayalam_name ?? '').' '.($program->rules ?? ''));
+        $isSpecialHighGroup = str_contains($nameLower, 'inset')
+            || str_contains($nameLower, 'insight')
+            || str_contains($nameLower, 'ഇൻസെറ്റ്')
+            || str_contains($nameLower, 'ഇൻസൈറ്റ്')
+            || str_contains($nameLower, 'centenary')
+            || str_contains($nameLower, 'footprint')
+            || str_contains($nameLower, 'സെന്റിനറി')
+            || str_contains($nameLower, 'ഫുട്പ്രിന്റ്')
+            || str_contains($nameLower, 'shift')
+            || str_contains($nameLower, 'general')
+            || str_contains($nameLower, 'ഷിഫ്റ്റ്')
+            || str_contains($nameLower, 'ജനറൽ');
+
+        if ($isSpecialHighGroup) {
+            return [
+                1 => 20,
+                2 => 15,
+                3 => 10,
+            ];
+        }
+
+        // 2. Individual Competitions (Rule 11: 1st = 5, 2nd = 3, 3rd = 1)
         if ($program->isIndividual()) {
             return [
                 1 => 5,
@@ -93,16 +121,10 @@ class PointCalculationService
             ];
         }
 
-        // Check for General Shifting (ജനറൽ ഷിഫ്റ്റിങ്)
-        $nameLower = strtolower($program->name.' '.($program->malayalam_name ?? '').' '.($program->rules ?? ''));
-        $isGeneralShifting = str_contains($nameLower, 'shift')
-            || str_contains($nameLower, 'general')
-            || str_contains($nameLower, 'ഷിഫ്റ്റ്')
-            || str_contains($nameLower, 'ജനറൽ');
-
+        // 3. Group Competitions based on member count
         $members = max(1, (int) ($program->participant_count ?: $program->max_participants_per_group ?: 2));
 
-        if ($isGeneralShifting || $members > 5) {
+        if ($members > 5) {
             return [
                 1 => 20,
                 2 => 15,
@@ -126,7 +148,7 @@ class PointCalculationService
             ];
         }
 
-        // 2 members (or 1 member group)
+        // 2 members (or 1-2 members group)
         return [
             1 => 7,
             2 => 5,

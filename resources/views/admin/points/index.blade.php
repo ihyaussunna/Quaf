@@ -15,42 +15,170 @@
         </form>
     </div>
 
+    <!-- Official Festival Rule 11: Points & Grades Matrix Showcase -->
+    <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm font-sora">
+        <div class="border-b border-slate-200 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">OFFICIAL FESTIVAL RULEBOOK</span>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">11. പോയിന്റ്സ് & ഗ്രേഡ്സ്</h2>
+            </div>
+            <span class="text-xs font-mono text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                Official Rulebook Matrix
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 1. Individual Competitions -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between">
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">മത്സരങ്ങളിൽ സ്ഥാനങ്ങൾ നേടിയവർക്ക്</h4>
+                    <p class="text-[11px] font-mono text-slate-500 mb-3">Individual / Single Participant</p>
+                    <table class="w-full text-xs font-mono border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white text-center">
+                                <th class="p-2 border border-slate-800">സ്ഥാനം</th>
+                                <th class="p-2 border border-slate-800">ലഭിക്കുന്ന പോയിന്റ്</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center divide-y divide-slate-200 bg-white">
+                            <tr>
+                                <td class="p-2 font-bold border border-slate-200 text-amber-700 bg-amber-50/30">1st</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">05</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-bold border border-slate-200 text-slate-700">2nd</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">03</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-bold border border-slate-200 text-amber-900">3rd</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">01</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Group Competitions -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between">
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">ഗ്രൂപ്പ് മത്സരങ്ങളിൽ സ്ഥാനങ്ങൾ</h4>
+                    <p class="text-[11px] font-mono text-slate-500 mb-3">Group Competitions by Member Count</p>
+                    <table class="w-full text-xs font-mono border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white text-center">
+                                <th class="p-2 border border-slate-800 text-[10px]">അംഗങ്ങൾ</th>
+                                <th class="p-2 border border-slate-800 text-[10px] text-amber-300">Ist</th>
+                                <th class="p-2 border border-slate-800 text-[10px]">IInd</th>
+                                <th class="p-2 border border-slate-800 text-[10px]">IIIrd</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center divide-y divide-slate-200 bg-white">
+                            <tr>
+                                <td class="p-2 font-bold border border-slate-200 bg-slate-50">2</td>
+                                <td class="p-2 font-bold border border-slate-200">07</td>
+                                <td class="p-2 font-bold border border-slate-200">05</td>
+                                <td class="p-2 font-bold border border-slate-200">03</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-bold border border-slate-200 bg-slate-50">3</td>
+                                <td class="p-2 font-bold border border-slate-200">10</td>
+                                <td class="p-2 font-bold border border-slate-200">07</td>
+                                <td class="p-2 font-bold border border-slate-200">04</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-bold border border-slate-200 bg-slate-50">4, 5</td>
+                                <td class="p-2 font-bold border border-slate-200">15</td>
+                                <td class="p-2 font-bold border border-slate-200">10</td>
+                                <td class="p-2 font-bold border border-slate-200">05</td>
+                            </tr>
+                            <tr class="bg-red-50/50">
+                                <td class="p-2 font-bold border border-slate-200 text-slate-900 text-[11px]">ഇൻസെറ്റ്, സെന്റിനറി ഫുട്പ്രിന്റ്</td>
+                                <td class="p-2 font-black border border-slate-200 text-[#be1e2d] text-sm">20</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">15</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Grades & Marks -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between">
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">ഓരോ ഗ്രേഡിനും ലഭിക്കുന്ന പോയിന്റ്</h4>
+                    <p class="text-[11px] font-mono text-slate-500 mb-3">Grade & Score Percentage Matrix</p>
+                    <table class="w-full text-xs font-mono border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white text-center">
+                                <th class="p-2 border border-slate-800">ഗ്രേഡ്</th>
+                                <th class="p-2 border border-slate-800">മാർക്ക് ശതമാനം</th>
+                                <th class="p-2 border border-slate-800">പോയിന്റ്</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center divide-y divide-slate-200 bg-white">
+                            <tr>
+                                <td class="p-2 font-black border border-slate-200 text-emerald-700 bg-emerald-50/40">A+</td>
+                                <td class="p-2 font-medium border border-slate-200">90% മുതൽ 100% വരെ</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">06</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-black border border-slate-200 text-blue-700 bg-blue-50/40">A</td>
+                                <td class="p-2 font-medium border border-slate-200">70% മുതൽ 89% വരെ</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">05</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-black border border-slate-200 text-amber-700 bg-amber-50/40">B</td>
+                                <td class="p-2 font-medium border border-slate-200">60% മുതൽ 69% വരെ</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">03</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-black border border-slate-200 text-slate-700 bg-slate-50">C</td>
+                                <td class="p-2 font-medium border border-slate-200">50% മുതൽ 59% വരെ</td>
+                                <td class="p-2 font-black border border-slate-200 text-slate-900 text-sm">01</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Point Configuration Matrix Form -->
     <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm">
-        <h3 class="font-sora font-bold text-lg text-slate-900 mb-2">Scoring Rules Matrix</h3>
-        <p class="text-xs font-mono text-slate-500 mb-6">These parameters govern point allocation whenever an official program result is published.</p>
+        <h3 class="font-sora font-bold text-lg text-slate-900 mb-2">Base Scoring Parameters</h3>
+        <p class="text-xs font-mono text-slate-500 mb-6">These parameters govern base individual placement weights and participation points.</p>
 
         <form method="POST" action="{{ route('admin.points.update') }}" class="grid grid-cols-1 sm:grid-cols-5 gap-4">
             @csrf
 
             <div>
-                <label class="block text-xs font-mono uppercase text-[#f3bd2e] mb-1.5 font-bold">1st Place Points</label>
+                <label class="block text-xs font-mono uppercase text-[#be1e2d] mb-1.5 font-bold">1st Place Points</label>
                 <input type="number" name="first_place_points" value="{{ old('first_place_points', $settings->first_place_points) }}" required min="1"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
             </div>
 
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-700 mb-1.5 font-bold">2nd Place Points</label>
                 <input type="number" name="second_place_points" value="{{ old('second_place_points', $settings->second_place_points) }}" required min="1"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
             </div>
 
             <div>
                 <label class="block text-xs font-mono uppercase text-amber-700 mb-1.5 font-bold">3rd Place Points</label>
                 <input type="number" name="third_place_points" value="{{ old('third_place_points', $settings->third_place_points) }}" required min="1"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
             </div>
 
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Participation Pts</label>
                 <input type="number" name="participation_points" value="{{ old('participation_points', $settings->participation_points) }}" required min="0"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
             </div>
 
             <div>
                 <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Group Multiplier</label>
                 <input type="number" step="0.5" name="group_multiplier" value="{{ old('group_multiplier', $settings->group_multiplier) }}" required min="1"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#f3bd2e] focus:bg-white transition-colors">
+                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
             </div>
 
             <div class="sm:col-span-5 flex justify-end pt-2">
