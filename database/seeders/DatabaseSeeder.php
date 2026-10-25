@@ -30,12 +30,12 @@ class DatabaseSeeder extends Seeder
         FestivalSetting::set('organizer', 'Ihyaussunna Students Union, Markazu Saquafathi Sunniyya');
         FestivalSetting::set('registration_open', '1');
 
-        // 2. Point Settings
+        // 2. Point Settings (Official Rule 11)
         $pointSetting = PointSetting::firstOrCreate([], [
-            'first_place_points' => 10,
-            'second_place_points' => 7,
-            'third_place_points' => 5,
-            'participation_points' => 1,
+            'first_place_points' => 5,
+            'second_place_points' => 3,
+            'third_place_points' => 1,
+            'participation_points' => 0,
             'group_multiplier' => 2.00,
         ]);
 
