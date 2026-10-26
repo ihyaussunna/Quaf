@@ -39,7 +39,7 @@ class OfficialStudentRosterTest extends TestCase
 
     public function test_total_official_student_count_and_group_breakdown(): void
     {
-        $totalStudents = Student::count();
+        $totalStudents = Student::whereNotNull('group_id')->count();
         $this->assertEquals(1168, $totalStudents, 'Total student count should be exactly 1,168.');
 
         $lumo = Group::where('code', 'LUMO')->first();

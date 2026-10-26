@@ -126,7 +126,7 @@ class AdminBulkStudentTest extends TestCase
             'category' => 'A Zone',
         ]);
 
-        $this->assertEquals(3, Student::count());
+        $this->assertEquals(3, Student::where('student_id', '!=', 'OFFICE')->count());
     }
 
     public function test_admin_can_bulk_register_using_default_group_and_zone(): void

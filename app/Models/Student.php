@@ -58,6 +58,90 @@ class Student extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function (Student $student) {
+            $chest = (string) ($student->chest_number ?: $student->student_id);
+
+            if ($student->wasChanged('name')) {
+                if ($student->user_id) {
+                    User::where('id', $student->user_id)->update([
+                        'name' => $student->name,
+                    ]);
+                }
+
+                OnlineSubmission::where('student_id', $student->id)->update([
+                    'student_name' => $student->name,
+                ]);
+
+                FundReceipt::where('student_id', $student->id)->update([
+                    'collector_name' => $student->name.' ('.$chest.')',
+                ]);
+
+                self::syncDirectoryJson($student);
+            }
+
+            if ($student->wasChanged('student_id')) {
+                OnlineSubmission::where('student_id', $student->id)->update([
+                    'chest_number' => $chest,
+                ]);
+
+                FundReceipt::where('student_id', $student->id)->update([
+                    'collector_name' => $student->name.' ('.$chest.')',
+                ]);
+
+                self::syncDirectoryJson($student);
+            }
+        });
+    }
+
+    public static function syncDirectoryJson(Student $student): void
+    {
+        try {
+            $jsonPath = public_path('data/qf-directory.json');
+            if (! file_exists($jsonPath) || ! is_writable($jsonPath)) {
+                return;
+            }
+
+            $raw = json_decode(file_get_contents($jsonPath), true);
+            if (! is_array($raw)) {
+                return;
+            }
+
+            $chest = (string) ($student->chest_number ?: $student->student_id);
+            $newName = (string) $student->name;
+            $newClass = (string) ($student->class_level ?: ($student->category ?: ''));
+            $newZone = (string) ($student->zone?->name ?: ($student->category ?: ''));
+
+            $updated = false;
+            foreach ($raw as $teamName => &$teamData) {
+                if (! isset($teamData['members']) || ! is_array($teamData['members'])) {
+                    continue;
+                }
+                foreach ($teamData['members'] as &$member) {
+                    if (strcasecmp((string) ($member['qf'] ?? ''), $chest) === 0) {
+                        $member['name'] = $newName;
+                        if ($newClass) {
+                            $member['class'] = $newClass;
+                        }
+                        if ($newZone) {
+                            $member['zone'] = $newZone;
+                        }
+                        $updated = true;
+                        break 2;
+                    }
+                }
+            }
+            unset($member, $teamData);
+
+            if ($updated) {
+                file_put_contents($jsonPath, json_encode($raw, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
+        } catch (\Throwable $e) {
+            // Silently ignore static JSON sync failures
+        }
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

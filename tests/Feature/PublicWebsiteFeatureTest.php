@@ -12,12 +12,14 @@ use App\Models\ProgramCategory;
 use App\Models\Result;
 use App\Models\Schedule;
 use App\Models\Stage;
+use App\Models\Student;
 use App\Models\User;
 use App\Models\VideoItem;
 use App\Models\Zone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PublicWebsiteFeatureTest extends TestCase
@@ -591,5 +593,32 @@ class PublicWebsiteFeatureTest extends TestCase
 
         $response2 = $this->get('/chest-directory');
         $response2->assertRedirect(route('qf.directory'));
+    }
+
+    public function test_qf_directory_reflects_updated_student_name_from_database(): void
+    {
+        $student = Student::create([
+            'student_id' => 'QF9999',
+            'name' => 'Original Name Test',
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zone->id,
+            'class_level' => 'TQS',
+            'category' => 'A Zone',
+            'gender' => 'Male',
+            'qr_token' => Str::random(40),
+        ]);
+
+        $response = $this->get(route('qf.directory'));
+        $response->assertStatus(200);
+        $response->assertSee('Original Name Test');
+        $response->assertSee('QF9999');
+
+        // Update student name
+        $student->update(['name' => 'Updated Unique Student Name']);
+
+        $responseAfter = $this->get(route('qf.directory'));
+        $responseAfter->assertStatus(200);
+        $responseAfter->assertSee('Updated Unique Student Name');
+        $responseAfter->assertDontSee('Original Name Test');
     }
 }
