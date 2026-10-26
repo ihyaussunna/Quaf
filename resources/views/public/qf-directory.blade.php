@@ -33,7 +33,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-[#be1e2d]"></span>
                     <h2 class="text-sm sm:text-base font-bold text-slate-900 uppercase tracking-wider font-sora">Team Flags & Leadership</h2>
                 </div>
-                <span class="text-xs text-slate-500 font-mono">5 Teams • {{ number_format($totalCount) }} Participants</span>
+                <span class="text-xs text-slate-500 font-mono">5 Academic Groups</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
@@ -42,14 +42,11 @@
                      id="team-card-{{ Str::slug($tName) }}"
                      class="team-card group bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1">
                     
-                    <!-- Flag Header (Clean image without duplicate text overlay) -->
+                    <!-- Flag Header (Clean authentic flag without overlays) -->
                     <div class="h-24 sm:h-28 w-full relative bg-slate-900 overflow-hidden">
                         <img src="{{ $t['flag'] }}" 
                              alt="{{ $tName }} Flag" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute top-2 right-2">
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-bold border border-white/20 shadow-xs">{{ $t['count'] }}</span>
-                        </div>
                     </div>
 
                     <!-- Leadership Info -->
