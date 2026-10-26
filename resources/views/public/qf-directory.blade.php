@@ -42,15 +42,13 @@
                      id="team-card-{{ Str::slug($tName) }}"
                      class="team-card group bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1">
                     
-                    <!-- Flag Header -->
+                    <!-- Flag Header (Clean image without duplicate text overlay) -->
                     <div class="h-24 sm:h-28 w-full relative bg-slate-900 overflow-hidden">
                         <img src="{{ $t['flag'] }}" 
                              alt="{{ $tName }} Flag" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                        <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between">
-                            <span class="text-white font-extrabold text-sm sm:text-base tracking-wide drop-shadow-md font-sora">{{ $tName }}</span>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-white font-bold border border-white/30">{{ $t['count'] }}</span>
+                        <div class="absolute top-2 right-2">
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-bold border border-white/20 shadow-xs">{{ $t['count'] }}</span>
                         </div>
                     </div>
 
