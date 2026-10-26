@@ -318,11 +318,11 @@
                 <!-- Col 1: Festival Identity (2 cols on large) -->
                 <div class="lg:col-span-2 space-y-4">
                     <a href="{{ route('home.view') }}" class="inline-block">
-                        <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" 
-                             alt="QUAF" 
-                             height="44" 
-                             style="height: 44px; max-height: 44px; width: auto; object-fit: contain;" 
-                             class="h-11 sm:h-12 w-auto object-contain drop-shadow-xs">
+                        <img src="{{ asset('images/quaf-logo-for-dashboard.svg') }}" 
+                             alt="QUAF Markaz Cultural Festival" 
+                             height="48" 
+                             style="height: 48px; max-height: 48px; width: auto; object-fit: contain;" 
+                             class="h-12 w-auto object-contain drop-shadow-xs">
                     </a>
                     <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
                         QUAF Markaz Cultural Festival 2026. The grand confluence of eloquence, arts, and intellectual heritage uniting premier collegiate groups across 140+ cultural and literary disciplines.
