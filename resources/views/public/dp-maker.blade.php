@@ -18,12 +18,9 @@
                 <span class="block bg-gradient-to-r from-[#be1e2d] via-[#f58220] to-[#005c94] bg-clip-text text-transparent dp-title-animated font-black tracking-tight mt-1">YOUR DP</span>
             </h1>
 
-            <!-- Descriptive Malayalam & English Text -->
-            <p class="text-sm sm:text-base text-slate-700 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
-                ക്വാഫ് ഒമ്പതാം എഡിഷന്റെ ഭാഗമാകൂ! നിങ്ങളുടെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്ത്, കൃത്യമായി അഡ്ജസ്റ്റ് ചെയ്ത് ഒഫീഷ്യൽ ഫെസ്റ്റിവൽ ഫ്രെയിമിൽ ഹൈ-റെസലൂഷൻ ഡി.പി ഡൗൺലോഡ് ചെയ്യുകയോ വാട്സാപ്പിൽ പങ്കുവെക്കുകയോ ചെയ്യാം.
-            </p>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1.5 font-light">
-                Celebrate Ādabīc Inheritance! Upload your photo, scale and adjust inside the official festival frame, download high-res DP, and share directly to WhatsApp.
+            <!-- Descriptive English Text -->
+            <p class="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed mt-4 font-normal">
+                Be part of the grand celebration of QUAF 9.0! Upload your photo, adjust it inside the official Ādabīc Inheritance frame, download your high-resolution DP, and share directly to WhatsApp.
             </p>
         </div>
 
@@ -45,7 +42,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
-                            <span class="text-sm font-semibold text-slate-800">ക്ലിക്ക് ചെയ്ത് ഫോട്ടോ തിരഞ്ഞെടുക്കൂ</span>
+                            <span class="text-base font-semibold text-slate-800 font-revathi">ക്ലിക്ക് ചെയ്ത് ഫോട്ടോ തിരഞ്ഞെടുക്കൂ</span>
                             <span class="text-xs text-slate-500 mt-0.5">Click or drag image to upload</span>
                         </div>
 
@@ -56,7 +53,7 @@
 
                         <!-- Gesture Hint (Visible only when photo is uploaded) -->
                         <div id="gestureHint" class="hidden absolute bottom-3 inset-x-3 pointer-events-none text-center">
-                            <span class="inline-block px-3 py-1 rounded-full text-[11px] font-medium bg-slate-900/75 backdrop-blur-md text-white shadow-xs">
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-slate-900/75 backdrop-blur-md text-white shadow-xs font-revathi">
                                 ഡ്രാഗ് ചെയ്ത് ഫോട്ടോ നീക്കുക • Pinch / Scroll ചെയ്യുക
                             </span>
                         </div>
@@ -71,7 +68,7 @@
                             <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                             </svg>
-                            <span id="uploadBtnText">ഫോട്ടോ തിരഞ്ഞെടുക്കുക (Choose Photo)</span>
+                            <span id="uploadBtnText"><span class="font-revathi text-sm">ഫോട്ടോ തിരഞ്ഞെടുക്കുക</span> <span class="font-sans text-xs text-slate-500">(Choose Photo)</span></span>
                         </button>
                         <button type="button" id="btnResetPhoto" title="റീസെറ്റ് ചെയ്യുക" class="p-2.5 rounded-xl text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +89,7 @@
                         <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                         </svg>
-                        <span>ഫോട്ടോ ക്രമീകരിക്കുക (Adjust Photo)</span>
+                        <span><span class="font-revathi text-base">ഫോട്ടോ ക്രമീകരിക്കുക</span> <span class="font-sans text-xs text-slate-500 font-normal">(Adjust Photo)</span></span>
                     </h3>
 
                     <!-- Zoom Slider -->
@@ -102,7 +99,7 @@
                                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
                                 </svg>
-                                <span>സൂം / വലുപ്പം (Zoom)</span>
+                                <span><span class="font-revathi text-sm">സൂം / വലുപ്പം</span> <span class="font-sans text-xs text-slate-400 font-normal">(Zoom)</span></span>
                             </span>
                             <span id="zoomValText" class="font-mono text-slate-500">100%</span>
                         </div>
@@ -132,7 +129,9 @@
 
                     <!-- Fine-tune Nudge Arrows -->
                     <div class="pt-2 border-t border-slate-100">
-                        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">സ്ഥാനം മാറ്റാൻ (Nudge Position):</div>
+                        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                            <span class="font-revathi text-xs">സ്ഥാനം മാറ്റാൻ</span> <span class="font-sans text-[10px] text-slate-400 font-normal">(Nudge Position):</span>
+                        </div>
                         <div class="flex items-center justify-center gap-1.5">
                             <button type="button" id="btnNudgeLeft" class="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition cursor-pointer" title="Left">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -166,7 +165,7 @@
                             </div>
                             <div>
                                 <div class="text-sm font-bold uppercase tracking-wider">Download High-Res DP</div>
-                                <div class="text-[11px] text-white/80 font-normal">ഡി.പി ഡൗൺലോഡ് ചെയ്യുക (1024×1024)</div>
+                                <div class="text-[11px] text-white/80 font-normal"><span class="font-revathi text-xs">ഡി.പി ഡൗൺലോഡ് ചെയ്യുക</span> <span class="font-sans">(1024×1024)</span></div>
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +183,7 @@
                             </div>
                             <div>
                                 <div class="text-sm font-bold uppercase tracking-wider">Share to WhatsApp</div>
-                                <div class="text-[11px] text-white/80 font-normal">വാട്സാപ്പിൽ പങ്കുവെക്കുക</div>
+                                <div class="text-[11px] text-white/80 font-normal font-revathi text-xs">വാട്സാപ്പിൽ പങ്കുവെക്കുക</div>
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,20 +193,33 @@
 
                 </div>
 
-                <!-- Simple Step Instructions -->
-                <div class="bg-white/80 rounded-2xl p-4 border border-slate-200/70 text-xs text-slate-600 space-y-2">
-                    <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">ഉപയോഗിക്കേണ്ട വിധം (How to Use):</div>
-                    <div class="flex items-start gap-2">
-                        <span class="w-4 h-4 rounded-full bg-red-100 text-[#be1e2d] font-bold text-[10px] flex items-center justify-center shrink-0">1</span>
-                        <span>നിങ്ങളുടെ ഫോട്ടോ തിരഞ്ഞെടുക്കുക (Choose Photo).</span>
+                <!-- Simple Step Instructions (with MLU-Revathi font) -->
+                <div class="bg-white/80 rounded-2xl p-4 border border-slate-200/70 text-xs text-slate-600 space-y-2.5">
+                    <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1">
+                        <span class="font-revathi-bold text-xs">ഉപയോഗിക്കേണ്ട വിധം</span>
+                        <span class="font-sans text-[10px] text-slate-500 font-medium">(How to Use):</span>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <span class="w-4 h-4 rounded-full bg-red-100 text-[#be1e2d] font-bold text-[10px] flex items-center justify-center shrink-0">2</span>
-                        <span>ഫ്രെയിമിൽ പാകമാകുന്ന വിധം ഡ്രാഗ് ചെയ്തോ സൂം ചെയ്തോ ക്രമീകരിക്കുക (Drag & Zoom).</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-4 h-4 rounded-full bg-red-100 text-[#be1e2d] font-bold text-[10px] flex items-center justify-center shrink-0 font-sans mt-0.5">1</span>
+                        <div class="text-xs text-slate-700 leading-snug">
+                            <span class="font-revathi text-sm">നിങ്ങളുടെ ഫോട്ടോ തിരഞ്ഞെടുക്കുക</span>
+                            <span class="font-sans text-[11px] text-slate-500"> (Choose Photo).</span>
+                        </div>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <span class="w-4 h-4 rounded-full bg-red-100 text-[#be1e2d] font-bold text-[10px] flex items-center justify-center shrink-0">3</span>
-                        <span>Download ചെയ്ത് WhatsApp-ൽ സ്റ്റാറ്റസ് അല്ലെങ്കിൽ പ്രൊഫൈൽ ഫോട്ടോയാക്കുക!</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-4 h-4 rounded-full bg-red-100 text-[#be1e2d] font-bold text-[10px] flex items-center justify-center shrink-0 font-sans mt-0.5">2</span>
+                        <div class="text-xs text-slate-700 leading-snug">
+                            <span class="font-revathi text-sm">ഫ്രെയിമിൽ പാകമാകുന്ന വിധം ഡ്രാഗ് ചെയ്തോ സൂം ചെയ്തോ ക്രമീകരിക്കുക</span>
+                            <span class="font-sans text-[11px] text-slate-500"> (Drag & Zoom).</span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-4 h-4 rounded-full bg-red-100 text-[#be1e2d] font-bold text-[10px] flex items-center justify-center shrink-0 font-sans mt-0.5">3</span>
+                        <div class="text-xs text-slate-700 leading-snug">
+                            <span class="font-sans text-[11px] font-semibold">Download</span>
+                            <span class="font-revathi text-sm">ചെയ്ത്</span>
+                            <span class="font-sans text-[11px] font-semibold">WhatsApp</span><span class="font-revathi text-sm">-ൽ സ്റ്റാറ്റസ് അല്ലെങ്കിൽ പ്രൊഫൈൽ ഫോട്ടോയാക്കുക!</span>
+                        </div>
                     </div>
                 </div>
 
@@ -376,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 emptyCue.classList.add('opacity-0', 'pointer-events-none');
                 gestureHint.classList.remove('hidden');
-                uploadBtnText.textContent = 'മറ്റൊരു ഫോട്ടോ മാറ്റുക (Change Photo)';
+                uploadBtnText.innerHTML = '<span class="font-revathi text-sm">മറ്റൊരു ഫോട്ടോ മാറ്റുക</span> <span class="font-sans text-xs text-slate-500">(Change Photo)</span>';
 
                 render();
             };
