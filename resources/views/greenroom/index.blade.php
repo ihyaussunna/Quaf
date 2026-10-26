@@ -18,387 +18,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex flex-col"
-      x-data="{
-          showRulesModal: false,
-          showCriteriaModal: false,
-          showSubmitLockModal: false,
-          showQrModal: false,
-          isSubmittingLock: false,
-          modalProgramName: '',
-          modalProgramCode: '',
-          modalRules: '',
-          modalCriteria: [],
-          searchQuery: '',
-          attendanceFilter: 'all',
-          loadingEntryId: null,
-
-          // Scratch & Lottery Modal State
-          showScratchModal: false,
-          scratchEntryId: null,
-          scratchChestNumber: '',
-          scratchCandidateName: '',
-          scratchUpdateUrl: '',
-          scratchCurrentLetter: '',
-          scratchMode: 'scratch',
-          scratchAvailableLetters: [],
-          scratchSelectedLetter: null,
-          scratchRevealed: false,
-          isScratching: false,
-          isSavingScratch: false,
-          mysteryChits: [],
-
-          entriesStatus: {
-              @if(isset($entries))
-                  @foreach($entries as $e)
-                      {{ $e->id }}: '{{ $e->attendance_status ?? 'waiting' }}',
-                  @endforeach
-              @endif
-          },
-          entriesCode: {
-              @if(isset($entries))
-                  @foreach($entries as $e)
-                      {{ $e->id }}: '{{ $e->code_letter ?? '' }}',
-                  @endforeach
-              @endif
-          },
-          stats: {
-              total: {{ $stats['total'] ?? 0 }},
-              present: {{ $stats['present'] ?? 0 }},
-              absent: {{ $stats['absent'] ?? 0 }},
-              waiting: {{ $stats['waiting'] ?? 0 }}
-          },
-
-          openSubmitLockModal() {
-              this.showSubmitLockModal = true;
-          },
-
-          openRules(name, code, rules) {
-              this.modalProgramName = name;
-              this.modalProgramCode = code;
-              this.modalRules = rules || 'ഈ പ്രോഗ്രാമിന് പ്രത്യേകം നിയമാവലികൾ രേഖപ്പെടുത്തിയിട്ടില്ല (No specific guidelines recorded).';
-              this.showRulesModal = true;
-          },
-
-          openCriteria(name, code, criteria) {
-              this.modalProgramName = name;
-              this.modalProgramCode = code;
-              this.modalCriteria = criteria || [];
-              this.showCriteriaModal = true;
-          },
-
-          async submitAttendance(url, entryId, newStatus) {
-              this.loadingEntryId = entryId;
-              try {
-                  const res = await fetch(url, {
-                      method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'Accept': 'application/json',
-                          'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-                      },
-                      body: JSON.stringify({ status: newStatus })
-                  });
-                  const data = await res.json();
-                  if (res.ok && data.success) {
-                      this.entriesStatus[entryId] = data.attendance_status || newStatus;
-                      if (data.code_letter !== undefined && data.code_letter !== null) {
-                          this.entriesCode[entryId] = data.code_letter;
-                      } else if (newStatus === 'absent') {
-                          this.entriesCode[entryId] = '';
-                      }
-                      if (data.stats) {
-                          this.stats.total = data.stats.total;
-                          this.stats.present = data.stats.present;
-                          this.stats.absent = data.stats.absent;
-                          this.stats.waiting = data.stats.waiting;
-                      }
-                      this.triggerToast(data.message || 'ഹാജർ രേഖപ്പെടുത്തി.');
-                  } else {
-                      alert(data.message || 'ഹാജർ രേഖപ്പെടുത്താൻ സാധിച്ചില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.');
-                  }
-              } catch (err) {
-                  alert('Error updating attendance: ' + err.message);
-              } finally {
-                  this.loadingEntryId = null;
-              }
-          },
-
-          toastMessage: '',
-          showToast: false,
-          toastTimeout: null,
-          savingAllCodes: false,
-
-          triggerToast(msg) {
-              this.toastMessage = msg;
-              this.showToast = true;
-              if (this.toastTimeout) clearTimeout(this.toastTimeout);
-              this.toastTimeout = setTimeout(() => { this.showToast = false; }, 3500);
-          },
-
-          async updateCodeLetter(url, newCode, entryId) {
-              try {
-                  const res = await fetch(url, {
-                      method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'Accept': 'application/json',
-                          'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-                      },
-                      body: JSON.stringify({ code_letter: newCode })
-                  });
-                  const data = await res.json();
-                  if (!res.ok || !data.success) {
-                      alert(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
-                      return false;
-                  }
-                  this.entriesCode[entryId] = newCode;
-                  this.triggerToast(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്തു.');
-                  return true;
-              } catch (err) {
-                  alert('Error updating code letter: ' + err.message);
-                  return false;
-              }
-          },
-
-          formatCodeLetter(index) {
-              const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-              if (index < 26) return alphabet[index];
-              const first = alphabet[Math.floor(index / 26) - 1];
-              const second = alphabet[index % 26];
-              return first + second;
-          },
-
-          calculateAvailableLetters(excludeEntryId) {
-              const taken = new Set();
-              Object.entries(this.entriesCode).forEach(([id, code]) => {
-                  if (parseInt(id) !== parseInt(excludeEntryId) && code && code.trim()) {
-                      taken.add(code.trim().toUpperCase());
-                  }
-              });
-
-              const totalEntries = Math.max(Object.keys(this.entriesCode).length, 6);
-              const available = [];
-              for (let i = 0; i < Math.max(totalEntries + 6, 26); i++) {
-                  const letter = this.formatCodeLetter(i);
-                  if (!taken.has(letter)) {
-                      available.push(letter);
-                      if (available.length >= Math.max(totalEntries, 5)) break;
-                  }
-              }
-              if (available.length === 0) {
-                  available.push('A', 'B', 'C');
-              }
-              this.scratchAvailableLetters = available;
-          },
-
-          prepareMysteryChits() {
-              const shuffled = [...this.scratchAvailableLetters].sort(() => 0.5 - Math.random());
-              this.mysteryChits = shuffled.map((letter, idx) => ({
-                  id: idx + 1,
-                  letter: letter,
-                  isOpened: false,
-                  isChosen: false
-              }));
-          },
-
-          openScratchModal(entryId, chestNumber, candidateName, updateUrl) {
-              this.scratchEntryId = entryId;
-              this.scratchChestNumber = chestNumber;
-              this.scratchCandidateName = candidateName;
-              this.scratchUpdateUrl = updateUrl;
-              this.scratchCurrentLetter = (this.entriesCode[entryId] || '').trim().toUpperCase();
-              this.scratchSelectedLetter = null;
-              this.scratchRevealed = false;
-              this.isScratching = false;
-              this.scratchMode = 'scratch';
-
-              this.calculateAvailableLetters(entryId);
-
-              // Pick random secret letter for scratch canvas
-              if (this.scratchAvailableLetters.length > 0) {
-                  const randomIndex = Math.floor(Math.random() * this.scratchAvailableLetters.length);
-                  this.scratchSelectedLetter = this.scratchAvailableLetters[randomIndex];
-              } else {
-                  this.scratchSelectedLetter = 'A';
-              }
-
-              this.prepareMysteryChits();
-              this.showScratchModal = true;
-
-              this.$nextTick(() => {
-                  this.initScratchCanvas();
-              });
-          },
-
-          pickChit(chit) {
-              if (this.scratchRevealed) return;
-              chit.isOpened = true;
-              chit.isChosen = true;
-              this.scratchSelectedLetter = chit.letter;
-              this.scratchRevealed = true;
-              setTimeout(() => {
-                  this.mysteryChits.forEach(c => c.isOpened = true);
-              }, 400);
-          },
-
-          spinQuickDraw() {
-              if (this.scratchRevealed || this.isScratching) return;
-              this.isScratching = true;
-              let counter = 0;
-              const interval = setInterval(() => {
-                  const randomPick = this.scratchAvailableLetters[Math.floor(Math.random() * this.scratchAvailableLetters.length)];
-                  this.scratchSelectedLetter = randomPick;
-                  counter++;
-                  if (counter >= 14) {
-                      clearInterval(interval);
-                      this.isScratching = false;
-                      this.scratchRevealed = true;
-                  }
-              }, 50);
-          },
-
-          initScratchCanvas() {
-              const canvas = document.getElementById('greenroomScratchCanvas');
-              if (!canvas) return;
-              const ctx = canvas.getContext('2d');
-              const width = canvas.width;
-              const height = canvas.height;
-
-              // Shimmering Golden Gradient Foil
-              const grad = ctx.createLinearGradient(0, 0, width, height);
-              grad.addColorStop(0, '#eab308');
-              grad.addColorStop(0.2, '#fef08a');
-              grad.addColorStop(0.5, '#eab308');
-              grad.addColorStop(0.8, '#ca8a04');
-              grad.addColorStop(1, '#854d0e');
-              ctx.fillStyle = grad;
-              ctx.fillRect(0, 0, width, height);
-
-              // Foil pattern stripes
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-              for (let i = 0; i < width; i += 24) {
-                  ctx.fillRect(i, 0, 12, height);
-              }
-
-              // Text
-              ctx.fillStyle = '#713f12';
-              ctx.font = 'bold 16px sans-serif';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText('SCRATCH TO REVEAL', width / 2, height / 2 - 12);
-              ctx.font = 'bold 12px sans-serif';
-              ctx.fillText('ഇവിടെ ഉരയ്ക്കുക', width / 2, height / 2 + 12);
-
-              let isDrawing = false;
-              let scratchPoints = 0;
-
-              const scratch = (x, y) => {
-                  ctx.globalCompositeOperation = 'destination-out';
-                  ctx.beginPath();
-                  ctx.arc(x, y, 22, 0, Math.PI * 2, false);
-                  ctx.fill();
-                  scratchPoints++;
-                  if (scratchPoints > 20 && !this.scratchRevealed) {
-                      this.scratchRevealed = true;
-                  }
-              };
-
-              const getPos = (e) => {
-                  const rect = canvas.getBoundingClientRect();
-                  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                  return {
-                      x: (clientX - rect.left) * (canvas.width / rect.width),
-                      y: (clientY - rect.top) * (canvas.height / rect.height)
-                  };
-              };
-
-              canvas.onmousedown = (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); };
-              canvas.onmousemove = (e) => { if (!isDrawing) return; const p = getPos(e); scratch(p.x, p.y); };
-              window.addEventListener('mouseup', () => { isDrawing = false; }, { once: true });
-
-              canvas.ontouchstart = (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); e.preventDefault(); };
-              canvas.ontouchmove = (e) => { if (!isDrawing) return; const p = getPos(e); scratch(p.x, p.y); e.preventDefault(); };
-              canvas.ontouchend = () => { isDrawing = false; };
-          },
-
-          revealAllScratch() {
-              this.scratchRevealed = true;
-              const canvas = document.getElementById('greenroomScratchCanvas');
-              if (canvas) {
-                  const ctx = canvas.getContext('2d');
-                  ctx.clearRect(0, 0, canvas.width, canvas.height);
-              }
-          },
-
-          resetScratchCard() {
-              this.scratchRevealed = false;
-              this.calculateAvailableLetters(this.scratchEntryId);
-              if (this.scratchAvailableLetters.length > 0) {
-                  const randomIndex = Math.floor(Math.random() * this.scratchAvailableLetters.length);
-                  this.scratchSelectedLetter = this.scratchAvailableLetters[randomIndex];
-              }
-              this.prepareMysteryChits();
-              this.$nextTick(() => {
-                  this.initScratchCanvas();
-              });
-          },
-
-          async confirmAndSaveScratch() {
-              if (!this.scratchSelectedLetter || !this.scratchEntryId || this.isSavingScratch) return;
-              this.isSavingScratch = true;
-              try {
-                  const ok = await this.updateCodeLetter(this.scratchUpdateUrl, this.scratchSelectedLetter, this.scratchEntryId);
-                  if (ok) {
-                      this.showScratchModal = false;
-                      const input = document.querySelector(`.code-letter-input[data-entry-id="${this.scratchEntryId}"]`);
-                      if (input) {
-                          input.value = this.scratchSelectedLetter;
-                          input.dispatchEvent(new Event('input', { bubbles: true }));
-                          input.dispatchEvent(new Event('change', { bubbles: true }));
-                      }
-                  }
-              } finally {
-                  this.isSavingScratch = false;
-              }
-          },
-
-          async saveAllCodeLetters(url) {
-              if (this.savingAllCodes) return;
-              this.savingAllCodes = true;
-              try {
-                  const inputs = document.querySelectorAll('.code-letter-input');
-                  const codes = {};
-                  inputs.forEach(input => {
-                      const id = input.getAttribute('data-entry-id');
-                      if (id) {
-                          codes[id] = input.value;
-                          this.entriesCode[id] = input.value;
-                      }
-                  });
-
-                  const res = await fetch(url, {
-                      method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'Accept': 'application/json',
-                          'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-                      },
-                      body: JSON.stringify({ codes: codes })
-                  });
-                  const data = await res.json();
-                  if (!res.ok || !data.success) {
-                      alert(data.message || 'കോഡുകൾ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
-                  } else {
-                      this.triggerToast(data.message || 'എല്ലാ കോഡ് ലെറ്ററുകളും സേവ് ചെയ്തു.');
-                  }
-              } catch (err) {
-                  alert('Error saving codes: ' + err.message);
-              } finally {
-                  this.savingAllCodes = false;
-              }
-          }
-      }">
+      x-data="greenroomConsoleManager()">
 
     <!-- Floating Live Toast Notification -->
     <div x-show="showToast"
@@ -1714,5 +1334,391 @@
         </div>
     </div>
 
+    <!-- Alpine.js Green Room Console Manager Script -->
+    <script>
+        function greenroomConsoleManager() {
+            return {
+                showRulesModal: false,
+                showCriteriaModal: false,
+                showSubmitLockModal: false,
+                showQrModal: false,
+                isSubmittingLock: false,
+                modalProgramName: '',
+                modalProgramCode: '',
+                modalRules: '',
+                modalCriteria: [],
+                searchQuery: '',
+                attendanceFilter: 'all',
+                loadingEntryId: null,
+
+                // Scratch & Lottery Modal State
+                showScratchModal: false,
+                scratchEntryId: null,
+                scratchChestNumber: '',
+                scratchCandidateName: '',
+                scratchUpdateUrl: '',
+                scratchCurrentLetter: '',
+                scratchMode: 'scratch',
+                scratchAvailableLetters: [],
+                scratchSelectedLetter: null,
+                scratchRevealed: false,
+                isScratching: false,
+                isSavingScratch: false,
+                mysteryChits: [],
+
+                entriesStatus: {
+                    @if(isset($entries))
+                        @foreach($entries as $e)
+                            {{ $e->id }}: '{{ $e->attendance_status ?? 'waiting' }}',
+                        @endforeach
+                    @endif
+                },
+                entriesCode: {
+                    @if(isset($entries))
+                        @foreach($entries as $e)
+                            {{ $e->id }}: '{{ $e->code_letter ?? '' }}',
+                        @endforeach
+                    @endif
+                },
+                stats: {
+                    total: {{ $stats['total'] ?? 0 }},
+                    present: {{ $stats['present'] ?? 0 }},
+                    absent: {{ $stats['absent'] ?? 0 }},
+                    waiting: {{ $stats['waiting'] ?? 0 }}
+                },
+
+                openSubmitLockModal() {
+                    this.showSubmitLockModal = true;
+                },
+
+                openRules(name, code, rules) {
+                    this.modalProgramName = name;
+                    this.modalProgramCode = code;
+                    this.modalRules = rules || 'ഈ പ്രോഗ്രാമിന് പ്രത്യേകം നിയമാവലികൾ രേഖപ്പെടുത്തിയിട്ടില്ല (No specific guidelines recorded).';
+                    this.showRulesModal = true;
+                },
+
+                openCriteria(name, code, criteria) {
+                    this.modalProgramName = name;
+                    this.modalProgramCode = code;
+                    this.modalCriteria = criteria || [];
+                    this.showCriteriaModal = true;
+                },
+
+                async submitAttendance(url, entryId, newStatus) {
+                    this.loadingEntryId = entryId;
+                    try {
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.success) {
+                            this.entriesStatus[entryId] = data.attendance_status || newStatus;
+                            if (data.code_letter !== undefined && data.code_letter !== null) {
+                                this.entriesCode[entryId] = data.code_letter;
+                            } else if (newStatus === 'absent') {
+                                this.entriesCode[entryId] = '';
+                            }
+                            if (data.stats) {
+                                this.stats.total = data.stats.total;
+                                this.stats.present = data.stats.present;
+                                this.stats.absent = data.stats.absent;
+                                this.stats.waiting = data.stats.waiting;
+                            }
+                            this.triggerToast(data.message || 'ഹാജർ രേഖപ്പെടുത്തി.');
+                        } else {
+                            alert(data.message || 'ഹാജർ രേഖപ്പെടുത്താൻ സാധിച്ചില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.');
+                        }
+                    } catch (err) {
+                        alert('Error updating attendance: ' + err.message);
+                    } finally {
+                        this.loadingEntryId = null;
+                    }
+                },
+
+                toastMessage: '',
+                showToast: false,
+                toastTimeout: null,
+                savingAllCodes: false,
+
+                triggerToast(msg) {
+                    this.toastMessage = msg;
+                    this.showToast = true;
+                    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+                    this.toastTimeout = setTimeout(() => { this.showToast = false; }, 3500);
+                },
+
+                async updateCodeLetter(url, newCode, entryId) {
+                    try {
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ code_letter: newCode })
+                        });
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                            alert(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
+                            return false;
+                        }
+                        this.entriesCode[entryId] = newCode;
+                        this.triggerToast(data.message || 'കോഡ് ലെറ്റർ സേവ് ചെയ്തു.');
+                        return true;
+                    } catch (err) {
+                        alert('Error updating code letter: ' + err.message);
+                        return false;
+                    }
+                },
+
+                formatCodeLetter(index) {
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                    if (index < 26) return alphabet[index];
+                    const first = alphabet[Math.floor(index / 26) - 1];
+                    const second = alphabet[index % 26];
+                    return first + second;
+                },
+
+                calculateAvailableLetters(excludeEntryId) {
+                    const taken = new Set();
+                    Object.entries(this.entriesCode).forEach(([id, code]) => {
+                        if (parseInt(id) !== parseInt(excludeEntryId) && code && code.trim()) {
+                            taken.add(code.trim().toUpperCase());
+                        }
+                    });
+
+                    const totalEntries = Math.max(Object.keys(this.entriesCode).length, 6);
+                    const available = [];
+                    for (let i = 0; i < Math.max(totalEntries + 6, 26); i++) {
+                        const letter = this.formatCodeLetter(i);
+                        if (!taken.has(letter)) {
+                            available.push(letter);
+                            if (available.length >= Math.max(totalEntries, 5)) break;
+                        }
+                    }
+                    if (available.length === 0) {
+                        available.push('A', 'B', 'C');
+                    }
+                    this.scratchAvailableLetters = available;
+                },
+
+                prepareMysteryChits() {
+                    const shuffled = [...this.scratchAvailableLetters].sort(() => 0.5 - Math.random());
+                    this.mysteryChits = shuffled.map((letter, idx) => ({
+                        id: idx + 1,
+                        letter: letter,
+                        isOpened: false,
+                        isChosen: false
+                    }));
+                },
+
+                openScratchModal(entryId, chestNumber, candidateName, updateUrl) {
+                    this.scratchEntryId = entryId;
+                    this.scratchChestNumber = chestNumber;
+                    this.scratchCandidateName = candidateName;
+                    this.scratchUpdateUrl = updateUrl;
+                    this.scratchCurrentLetter = (this.entriesCode[entryId] || '').trim().toUpperCase();
+                    this.scratchSelectedLetter = null;
+                    this.scratchRevealed = false;
+                    this.isScratching = false;
+                    this.scratchMode = 'scratch';
+
+                    this.calculateAvailableLetters(entryId);
+
+                    // Pick random secret letter for scratch canvas
+                    if (this.scratchAvailableLetters.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * this.scratchAvailableLetters.length);
+                        this.scratchSelectedLetter = this.scratchAvailableLetters[randomIndex];
+                    } else {
+                        this.scratchSelectedLetter = 'A';
+                    }
+
+                    this.prepareMysteryChits();
+                    this.showScratchModal = true;
+
+                    this.$nextTick(() => {
+                        this.initScratchCanvas();
+                    });
+                },
+
+                pickChit(chit) {
+                    if (this.scratchRevealed) return;
+                    chit.isOpened = true;
+                    chit.isChosen = true;
+                    this.scratchSelectedLetter = chit.letter;
+                    this.scratchRevealed = true;
+                    setTimeout(() => {
+                        this.mysteryChits.forEach(c => c.isOpened = true);
+                    }, 400);
+                },
+
+                spinQuickDraw() {
+                    if (this.scratchRevealed || this.isScratching) return;
+                    this.isScratching = true;
+                    let counter = 0;
+                    const interval = setInterval(() => {
+                        const randomPick = this.scratchAvailableLetters[Math.floor(Math.random() * this.scratchAvailableLetters.length)];
+                        this.scratchSelectedLetter = randomPick;
+                        counter++;
+                        if (counter >= 14) {
+                            clearInterval(interval);
+                            this.isScratching = false;
+                            this.scratchRevealed = true;
+                        }
+                    }, 50);
+                },
+
+                initScratchCanvas() {
+                    const canvas = document.getElementById('greenroomScratchCanvas');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    const width = canvas.width;
+                    const height = canvas.height;
+
+                    // Shimmering Golden Gradient Foil
+                    const grad = ctx.createLinearGradient(0, 0, width, height);
+                    grad.addColorStop(0, '#eab308');
+                    grad.addColorStop(0.2, '#fef08a');
+                    grad.addColorStop(0.5, '#eab308');
+                    grad.addColorStop(0.8, '#ca8a04');
+                    grad.addColorStop(1, '#854d0e');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, width, height);
+
+                    // Foil pattern stripes
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                    for (let i = 0; i < width; i += 24) {
+                        ctx.fillRect(i, 0, 12, height);
+                    }
+
+                    // Text
+                    ctx.fillStyle = '#713f12';
+                    ctx.font = 'bold 16px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('SCRATCH TO REVEAL', width / 2, height / 2 - 12);
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillText('ഇവിടെ ഉരയ്ക്കുക', width / 2, height / 2 + 12);
+
+                    let isDrawing = false;
+                    let scratchPoints = 0;
+
+                    const scratch = (x, y) => {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.beginPath();
+                        ctx.arc(x, y, 22, 0, Math.PI * 2, false);
+                        ctx.fill();
+                        scratchPoints++;
+                        if (scratchPoints > 20 && !this.scratchRevealed) {
+                            this.scratchRevealed = true;
+                        }
+                    };
+
+                    const getPos = (e) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                        return {
+                            x: (clientX - rect.left) * (canvas.width / rect.width),
+                            y: (clientY - rect.top) * (canvas.height / rect.height)
+                        };
+                    };
+
+                    canvas.onmousedown = (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); };
+                    canvas.onmousemove = (e) => { if (!isDrawing) return; const p = getPos(e); scratch(p.x, p.y); };
+                    window.addEventListener('mouseup', () => { isDrawing = false; }, { once: true });
+
+                    canvas.ontouchstart = (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); e.preventDefault(); };
+                    canvas.ontouchmove = (e) => { if (!isDrawing) return; const p = getPos(e); scratch(p.x, p.y); e.preventDefault(); };
+                    canvas.ontouchend = () => { isDrawing = false; };
+                },
+
+                revealAllScratch() {
+                    this.scratchRevealed = true;
+                    const canvas = document.getElementById('greenroomScratchCanvas');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                },
+
+                resetScratchCard() {
+                    this.scratchRevealed = false;
+                    this.calculateAvailableLetters(this.scratchEntryId);
+                    if (this.scratchAvailableLetters.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * this.scratchAvailableLetters.length);
+                        this.scratchSelectedLetter = this.scratchAvailableLetters[randomIndex];
+                    }
+                    this.prepareMysteryChits();
+                    this.$nextTick(() => {
+                        this.initScratchCanvas();
+                    });
+                },
+
+                async confirmAndSaveScratch() {
+                    if (!this.scratchSelectedLetter || !this.scratchEntryId || this.isSavingScratch) return;
+                    this.isSavingScratch = true;
+                    try {
+                        const ok = await this.updateCodeLetter(this.scratchUpdateUrl, this.scratchSelectedLetter, this.scratchEntryId);
+                        if (ok) {
+                            this.showScratchModal = false;
+                            const input = document.querySelector(`.code-letter-input[data-entry-id="${this.scratchEntryId}"]`);
+                            if (input) {
+                                input.value = this.scratchSelectedLetter;
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    } finally {
+                        this.isSavingScratch = false;
+                    }
+                },
+
+                async saveAllCodeLetters(url) {
+                    if (this.savingAllCodes) return;
+                    this.savingAllCodes = true;
+                    try {
+                        const inputs = document.querySelectorAll('.code-letter-input');
+                        const codes = {};
+                        inputs.forEach(input => {
+                            const id = input.getAttribute('data-entry-id');
+                            if (id) {
+                                codes[id] = input.value;
+                                this.entriesCode[id] = input.value;
+                            }
+                        });
+
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ codes: codes })
+                        });
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                            alert(data.message || 'കോഡുകൾ സേവ് ചെയ്യാൻ സാധിച്ചില്ല.');
+                        } else {
+                            this.triggerToast(data.message || 'എല്ലാ കോഡ് ലെറ്ററുകളും സേവ് ചെയ്തു.');
+                        }
+                    } catch (err) {
+                        alert('Error saving codes: ' + err.message);
+                    } finally {
+                        this.savingAllCodes = false;
+                    }
+                }
+            };
+        }
+    </script>
 </body>
 </html>
