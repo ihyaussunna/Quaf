@@ -967,10 +967,10 @@
                             <span class="text-xs font-mono text-slate-400 block mb-2 font-medium">
                                 {{ $article->published_at?->format('M d, Y') ?? 'Recent' }}
                             </span>
-                            <h3 class="text-lg font-revathi-bold font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors leading-snug mb-2">
+                            <h3 class="text-lg font-revathi-bold font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors mb-2" style="line-height: 1.18;">
                                 {{ $article->title }}
                             </h3>
-                            <p class="text-xs sm:text-sm font-revathi text-slate-600 line-clamp-2 leading-relaxed">
+                            <p class="text-xs sm:text-sm font-revathi text-slate-600 line-clamp-2" style="line-height: 1.24;">
                                 {{ $article->excerpt }}
                             </p>
                         </div>

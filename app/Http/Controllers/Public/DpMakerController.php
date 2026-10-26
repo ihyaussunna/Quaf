@@ -14,8 +14,8 @@ class DpMakerController extends Controller
             'width' => 1024,
             'height' => 1024,
             'circle_center_x' => 512,
-            'circle_center_y' => 450,
-            'circle_radius' => 310,
+            'circle_center_y' => 488,
+            'circle_radius' => 410,
         ];
 
         return view('public.dp-maker', [

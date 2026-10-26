@@ -64,13 +64,13 @@
 
                         <!-- Title in MLU-Revathi Bold -->
                         <a href="{{ route('news.show', $article->slug) }}" class="block">
-                            <h3 class="text-base sm:text-lg font-revathi-bold font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors leading-snug line-clamp-2 mb-2.5">
+                            <h3 class="text-base sm:text-lg font-revathi-bold font-bold text-slate-900 group-hover:text-[#be1e2d] transition-colors line-clamp-2 mb-2" style="line-height: 1.18;">
                                 {{ $article->title }}
                             </h3>
                         </a>
 
                         <!-- Excerpt in MLU-Revathi Regular -->
-                        <p class="text-xs sm:text-sm font-revathi text-slate-600 font-normal line-clamp-3 leading-relaxed">
+                        <p class="text-xs sm:text-sm font-revathi text-slate-600 font-normal line-clamp-3" style="line-height: 1.24;">
                             {{ $article->excerpt }}
                         </p>
                     </div>

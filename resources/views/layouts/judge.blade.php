@@ -49,10 +49,18 @@
         .font-revathi {
             font-family: 'MLU-Revathi', sans-serif !important;
             font-weight: 400;
+            line-height: 1.25 !important;
         }
         .font-revathi-bold {
             font-family: 'MLU-Revathi Bold', 'MLU-Revathi', sans-serif !important;
             font-weight: 700 !important;
+            line-height: 1.18 !important;
+        }
+        [class*="font-revathi"] {
+            line-height: 1.25 !important;
+        }
+        h1[class*="font-revathi"], h2[class*="font-revathi"], h3[class*="font-revathi"], h4[class*="font-revathi"] {
+            line-height: 1.18 !important;
         }
     </style>
 </head>

@@ -18,8 +18,8 @@
             </h1>
 
             <!-- Descriptive Text -->
-            <p class="text-sm sm:text-base text-slate-700 font-medium max-w-2xl mx-auto leading-relaxed">
-                <span class="font-revathi text-base sm:text-lg">ക്വാഫ് ഒമ്പതാം എഡിഷനിലെ മത്സരാർത്ഥികൾക്ക് അവരുടെ പേര്, QF ചെസ്റ്റ് നമ്പർ, ഗ്രൂപ്പ്, ടീം ലീഡർ എന്നിവ എളുപ്പത്തിൽ കണ്ടെത്താം.</span>
+            <p class="text-base sm:text-lg text-slate-700 font-medium max-w-2xl mx-auto font-revathi" style="line-height: 1.22;">
+                ക്വാഫ് ഒമ്പതാം എഡിഷനിലെ മത്സരാർത്ഥികൾക്ക് അവരുടെ പേര്, QF ചെസ്റ്റ് നമ്പർ, ഗ്രൂപ്പ്, ടീം ലീഡർ എന്നിവ എളുപ്പത്തിൽ കണ്ടെത്താം.
             </p>
             <p class="text-xs sm:text-sm text-slate-500 mt-1 font-light">
                 Search participant name, QF chest number, academic group, class, or zone across all {{ number_format($totalCount) }} records.
