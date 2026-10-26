@@ -42,8 +42,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
-                            <span class="text-base font-semibold text-slate-800 font-revathi">ക്ലിക്ക് ചെയ്ത് ഫോട്ടോ തിരഞ്ഞെടുക്കൂ</span>
-                            <span class="text-xs text-slate-500 mt-0.5">Click or drag image to upload</span>
+                            <span class="text-base font-semibold text-slate-800 font-revathi">ഫോട്ടോ തിരഞ്ഞെടുക്കുക / ക്യാമറയിൽ എടുക്കുക</span>
+                            <span class="text-xs text-slate-500 mt-0.5">Click below to upload from gallery or use camera</span>
                         </div>
 
                         <!-- Top Right Badge -->
@@ -59,21 +59,33 @@
                         </div>
                     </div>
 
-                    <!-- Hidden File Input -->
+                    <!-- Hidden File & Camera Inputs -->
                     <input type="file" id="photoInput" accept="image/*" class="sr-only">
+                    <input type="file" id="cameraInput" accept="image/*" capture="user" class="sr-only">
 
                     <!-- Mobile / Quick Upload Action Under Canvas -->
-                    <div class="mt-4 flex items-center justify-between gap-3">
-                        <button type="button" id="btnUploadTrigger" class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 flex items-center justify-center gap-2 transition cursor-pointer">
-                            <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button type="button" id="btnUploadTrigger" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/90 flex items-center justify-center gap-2 transition cursor-pointer shadow-xs">
+                            <svg class="w-4 h-4 text-[#be1e2d] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                             </svg>
-                            <span id="uploadBtnText"><span class="font-revathi text-sm">ഫോട്ടോ തിരഞ്ഞെടുക്കുക</span> <span class="font-sans text-xs text-slate-500">(Choose Photo)</span></span>
+                            <span id="uploadBtnText"><span class="font-revathi text-sm">ഗാലറിയിൽ നിന്ന്</span> <span class="font-sans text-xs text-slate-500">(Gallery)</span></span>
                         </button>
-                        <button type="button" id="btnResetPhoto" title="റീസെറ്റ് ചെയ്യുക" class="p-2.5 rounded-xl text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button type="button" id="btnCameraTrigger" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/90 flex items-center justify-center gap-2 transition cursor-pointer shadow-xs">
+                            <svg class="w-4 h-4 text-[#be1e2d] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span><span class="font-revathi text-sm">ക്യാമറയിൽ എടുക്കുക</span> <span class="font-sans text-xs text-slate-500">(Camera)</span></span>
+                        </button>
+                    </div>
+
+                    <div class="mt-2 flex items-center justify-end">
+                        <button type="button" id="btnResetPhoto" title="റീസെറ്റ് ചെയ്യുക" class="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
+                            <span class="font-revathi text-xs">റീസെറ്റ്</span> <span class="font-sans text-[10px] text-slate-400">(Reset)</span>
                         </button>
                     </div>
 
@@ -230,6 +242,73 @@
     </div>
 </div>
 
+<!-- Live Camera Modal -->
+<div id="cameraModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
+        <!-- Modal Header -->
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between text-white">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="font-semibold text-sm">
+                    <span class="font-revathi text-base">ക്യാമറയിൽ ഫോട്ടോ എടുക്കുക</span>
+                    <span class="font-sans text-xs text-slate-400 font-normal ml-1">(Live Camera)</span>
+                </span>
+            </div>
+            <button type="button" id="btnCloseCamera" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Video Viewport with Circular DP Guide Overlay -->
+        <div class="relative w-full aspect-square bg-black overflow-hidden flex items-center justify-center">
+            <video id="cameraVideo" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+            
+            <!-- Circular Framing Guide Overlay -->
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                <div class="w-[78%] aspect-square rounded-full border-2 border-dashed border-white/70 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"></div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="cameraLoading" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 text-white gap-3">
+                <svg class="animate-spin w-8 h-8 text-[#be1e2d]" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-xs text-slate-300 font-revathi">ക്യാമറ ഓപ്പൺ ചെയ്യുന്നു...</span>
+            </div>
+        </div>
+
+        <!-- Camera Controls -->
+        <div class="p-5 flex items-center justify-around bg-slate-900 border-t border-slate-800">
+            <!-- Flip / Switch Camera Button -->
+            <button type="button" id="btnFlipCamera" title="ക്യാമറ മാറ്റുക (Flip)" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </button>
+
+            <!-- Shutter Capture Button -->
+            <button type="button" id="btnCapturePhoto" title="ഫോട്ടോ എടുക്കുക" class="w-16 h-16 rounded-full bg-white hover:bg-slate-100 p-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-white/10 flex items-center justify-center">
+                <div class="w-full h-full rounded-full border-4 border-[#be1e2d] bg-white flex items-center justify-center">
+                    <div class="w-4 h-4 rounded-full bg-[#be1e2d]"></div>
+                </div>
+            </button>
+
+            <!-- Cancel Button -->
+            <button type="button" id="btnCancelCamera" title="ക്യാൻസൽ" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
 .btn-whatsapp-green {
     background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
@@ -261,11 +340,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('dpCanvas');
     const ctx = canvas.getContext('2d');
     const photoInput = document.getElementById('photoInput');
+    const cameraInput = document.getElementById('cameraInput');
     const btnUploadTrigger = document.getElementById('btnUploadTrigger');
+    const btnCameraTrigger = document.getElementById('btnCameraTrigger');
     const uploadBtnText = document.getElementById('uploadBtnText');
     const canvasWrapper = document.getElementById('canvasWrapper');
     const emptyCue = document.getElementById('emptyCue');
     const gestureHint = document.getElementById('gestureHint');
+    const cameraModal = document.getElementById('cameraModal');
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraLoading = document.getElementById('cameraLoading');
+    const btnCloseCamera = document.getElementById('btnCloseCamera');
+    const btnCancelCamera = document.getElementById('btnCancelCamera');
+    const btnCapturePhoto = document.getElementById('btnCapturePhoto');
+    const btnFlipCamera = document.getElementById('btnFlipCamera');
     const zoomSlider = document.getElementById('zoomSlider');
     const zoomValText = document.getElementById('zoomValText');
     const btnZoomIn = document.getElementById('btnZoomIn');
@@ -404,6 +492,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 gestureHint.classList.remove('hidden');
                 uploadBtnText.innerHTML = '<span class="font-revathi text-sm">മറ്റൊരു ഫോട്ടോ മാറ്റുക</span> <span class="font-sans text-xs text-slate-500">(Change Photo)</span>';
 
+                photoInput.value = '';
+                cameraInput.value = '';
+
                 render();
             };
             img.src = e.target.result;
@@ -416,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function () {
         zoomValText.textContent = percent + '%';
     }
 
-    // File Input Triggers
+    // File & Camera Input Triggers
     btnUploadTrigger.addEventListener('click', () => photoInput.click());
     canvasWrapper.addEventListener('click', (e) => {
         if (!hasPhoto) {
@@ -429,6 +520,111 @@ document.addEventListener('DOMContentLoaded', function () {
             handleFile(e.target.files[0]);
         }
     });
+
+    // Native Camera Input Fallback (for devices where getUserMedia is restricted)
+    cameraInput.addEventListener('change', function (e) {
+        if (e.target.files && e.target.files[0]) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    // --- Live Camera Implementation ---
+    let cameraStream = null;
+    let currentFacingMode = 'user'; // 'user' for selfie / front camera, 'environment' for rear camera
+
+    async function openCameraModal() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            cameraInput.click();
+            return;
+        }
+        cameraModal.classList.remove('hidden');
+        await startCameraStream(currentFacingMode);
+    }
+
+    async function startCameraStream(facing) {
+        stopCameraStream();
+        cameraLoading.classList.remove('hidden');
+
+        // Apply mirror effect for front camera, unmirror for back camera
+        if (facing === 'user') {
+            cameraVideo.classList.add('-scale-x-100');
+        } else {
+            cameraVideo.classList.remove('-scale-x-100');
+        }
+
+        try {
+            const constraints = {
+                audio: false,
+                video: {
+                    facingMode: facing,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            };
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            cameraVideo.srcObject = cameraStream;
+            await cameraVideo.play();
+            cameraLoading.classList.add('hidden');
+        } catch (err) {
+            console.warn('getUserMedia error, falling back to camera input:', err);
+            cameraLoading.classList.add('hidden');
+            closeCameraModal();
+            // Fallback directly to native device camera
+            cameraInput.click();
+        }
+    }
+
+    function stopCameraStream() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        if (cameraVideo) {
+            cameraVideo.srcObject = null;
+        }
+    }
+
+    function closeCameraModal() {
+        stopCameraStream();
+        cameraModal.classList.add('hidden');
+    }
+
+    function capturePhoto() {
+        if (!cameraVideo || !cameraStream) return;
+
+        const videoW = cameraVideo.videoWidth || 1280;
+        const videoH = cameraVideo.videoHeight || 720;
+        const captureCanvas = document.createElement('canvas');
+        captureCanvas.width = videoW;
+        captureCanvas.height = videoH;
+        const cCtx = captureCanvas.getContext('2d');
+
+        if (currentFacingMode === 'user') {
+            // Mirror image horizontally to match what user sees in the selfie preview
+            cCtx.translate(videoW, 0);
+            cCtx.scale(-1, 1);
+        }
+
+        cCtx.drawImage(cameraVideo, 0, 0, videoW, videoH);
+
+        captureCanvas.toBlob(function (blob) {
+            if (blob) {
+                handleFile(blob);
+            }
+            closeCameraModal();
+        }, 'image/jpeg', 0.95);
+    }
+
+    async function flipCamera() {
+        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+        await startCameraStream(currentFacingMode);
+    }
+
+    btnCameraTrigger.addEventListener('click', openCameraModal);
+    btnCloseCamera.addEventListener('click', closeCameraModal);
+    btnCancelCamera.addEventListener('click', closeCameraModal);
+    btnCapturePhoto.addEventListener('click', capturePhoto);
+    btnFlipCamera.addEventListener('click', flipCamera);
 
     // Drag and Drop files onto canvas
     canvasWrapper.addEventListener('dragover', (e) => {
