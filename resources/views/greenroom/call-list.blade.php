@@ -387,13 +387,13 @@
                                                     <span class="text-[10px] uppercase font-bold" x-text="isSaving ? '...' : (isSaved ? 'Saved' : 'Save')"></span>
                                                 </button>
 
-                                                <!-- Code Letter Picker Button -->
+                                                <!-- Code Letter Picker Button (Yellow to Red Gradient with High Contrast) -->
                                                 <button type="button"
                                                         @click="openScratchModal({{ $entry->id }}, '{{ addslashes($entry->chest_number) }}', '{{ addslashes($entry->student?->name ?: 'Chest #'.$entry->chest_number) }}', '{{ route('greenroom.update-code-letter', $entry) }}')"
                                                         title="Code Letter Picker"
-                                                        class="h-9 px-2 sm:px-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0">
-                                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                                                    <span>Code Picker</span>
+                                                        class="h-9 px-2 sm:px-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-red-600 hover:from-amber-500 hover:to-red-700 text-white text-[11px] font-mono font-black flex items-center gap-1.5 shadow-sm border border-red-400/30 transition-all cursor-pointer active:scale-95 shrink-0 drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.6)]">
+                                                    <svg class="w-3.5 h-3.5 text-white shrink-0 drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                                    <span class="tracking-wide">Code Picker</span>
                                                 </button>
                                             </div>
                                         @else
@@ -547,7 +547,7 @@
                                 ? 'bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-700 border-white text-white scale-105 shadow-xl ring-4 ring-emerald-400/50'
                                 : (scratchRevealed 
                                     ? 'bg-gradient-to-br from-slate-100 to-slate-200 border-slate-200 text-slate-300 opacity-40 cursor-not-allowed pointer-events-none'
-                                    : 'bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 border-amber-300 hover:border-white text-white hover:scale-105 hover:shadow-lg active:scale-95')">
+                                    : 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 border-amber-300 hover:border-white text-white hover:scale-105 hover:shadow-lg active:scale-95')">
                         
                         <!-- Chosen Card: Reveals Code Letter -->
                         <template x-if="chit.isChosen && chit.isOpened">
