@@ -44,6 +44,7 @@ use App\Http\Controllers\Media\MediaResultController;
 use App\Http\Controllers\Presentation\PresentationController;
 use App\Http\Controllers\ProgramCommittee\ProgramCommitteeController;
 use App\Http\Controllers\Public\BrochureController;
+use App\Http\Controllers\Public\DpMakerController;
 use App\Http\Controllers\Public\GalleryController;
 use App\Http\Controllers\Public\GroupController as PublicGroupController;
 use App\Http\Controllers\Public\HomeController;
@@ -119,6 +120,9 @@ Route::get('/gallery/{item}/download', [GalleryController::class, 'download'])->
 Route::get('/media', [VideoController::class, 'mediaHub'])->name('media.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.index');
+Route::get('/dp', [DpMakerController::class, 'index'])->name('dp.index');
+Route::get('/dp-maker', fn () => redirect()->route('dp.index'))->name('dp.maker');
+Route::get('/be-quaf', fn () => redirect()->route('dp.index'))->name('dp.be-quaf');
 
 // Public Student Online Submissions
 Route::get('/submit/{slug}', [PublicOnlineSubmissionController::class, 'show'])->name('online-submission.show');

@@ -546,4 +546,26 @@ class PublicWebsiteFeatureTest extends TestCase
             ],
         ]);
     }
+
+    public function test_dp_maker_page_loads_successfully_with_frame_config(): void
+    {
+        $response = $this->get(route('dp.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('BE QUAF,');
+        $response->assertSee('YOUR DP');
+        $response->assertSee('dpCanvas');
+        $response->assertSee('Download High-Res DP');
+        $response->assertSee('Share to WhatsApp');
+        $response->assertViewHas('frameConfig');
+    }
+
+    public function test_dp_maker_aliases_redirect_to_dp_route(): void
+    {
+        $response1 = $this->get('/dp-maker');
+        $response1->assertRedirect(route('dp.index'));
+
+        $response2 = $this->get('/be-quaf');
+        $response2->assertRedirect(route('dp.index'));
+    }
 }
