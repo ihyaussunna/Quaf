@@ -42,11 +42,11 @@
                      id="team-card-{{ Str::slug($tName) }}"
                      class="team-card group bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1">
                     
-                    <!-- Flag Header (Clean authentic flag without overlays) -->
-                    <div class="h-24 sm:h-28 w-full relative bg-slate-900 overflow-hidden">
+                    <!-- Flag Header (Full authentic flag without cropping) -->
+                    <div class="w-full relative overflow-hidden" style="aspect-ratio: 514 / 360; background-color: {{ $t['color'] }};">
                         <img src="{{ $t['flag'] }}" 
                              alt="{{ $tName }} Flag" 
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
                     </div>
 
                     <!-- Leadership Info -->
