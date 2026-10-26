@@ -62,34 +62,76 @@ class Student extends Model
     {
         static::saved(function (Student $student) {
             $chest = (string) ($student->chest_number ?: $student->student_id);
+            $originalChest = (string) ($student->getOriginal('student_id') ?: $chest);
 
-            if ($student->wasChanged('name')) {
-                if ($student->user_id) {
+            // 1. Sync User table if user exists
+            if ($student->wasChanged('name') && $student->user_id) {
+                try {
                     User::where('id', $student->user_id)->update([
                         'name' => $student->name,
                     ]);
+                } catch (\Throwable $e) {
+                    // Silently ignore user sync issue
                 }
-
-                OnlineSubmission::where('student_id', $student->id)->update([
-                    'student_name' => $student->name,
-                ]);
-
-                FundReceipt::where('student_id', $student->id)->update([
-                    'collector_name' => $student->name.' ('.$chest.')',
-                ]);
-
-                self::syncDirectoryJson($student);
             }
 
-            if ($student->wasChanged('student_id')) {
-                OnlineSubmission::where('student_id', $student->id)->update([
-                    'chest_number' => $chest,
-                ]);
+            // 2. Sync OnlineSubmission table (identified by entry IDs or chest number string)
+            if ($student->wasChanged('name') || $student->wasChanged('student_id')) {
+                try {
+                    $entryIds = ProgramEntry::where('student_id', $student->id)->pluck('id')->all();
 
-                FundReceipt::where('student_id', $student->id)->update([
-                    'collector_name' => $student->name.' ('.$chest.')',
-                ]);
+                    $submissionQuery = OnlineSubmission::where(function ($q) use ($chest, $originalChest, $entryIds) {
+                        $hasCond = false;
+                        if (! empty($entryIds)) {
+                            $q->whereIn('program_entry_id', $entryIds);
+                            $hasCond = true;
+                        }
+                        if ($chest !== '') {
+                            if ($hasCond) {
+                                $q->orWhere('chest_number', $chest)
+                                    ->orWhere('student_id', $chest);
+                            } else {
+                                $q->where('chest_number', $chest)
+                                    ->orWhere('student_id', $chest);
+                                $hasCond = true;
+                            }
+                        }
+                        if ($originalChest !== '' && $originalChest !== $chest) {
+                            $q->orWhere('chest_number', $originalChest)
+                                ->orWhere('student_id', $originalChest);
+                        }
+                    });
 
+                    $submissionUpdates = [];
+                    if ($student->wasChanged('name')) {
+                        $submissionUpdates['student_name'] = $student->name;
+                    }
+                    if ($student->wasChanged('student_id') && $chest !== '') {
+                        $submissionUpdates['chest_number'] = $chest;
+                        $submissionUpdates['student_id'] = $chest;
+                    }
+
+                    if (! empty($submissionUpdates)) {
+                        $submissionQuery->update($submissionUpdates);
+                    }
+                } catch (\Throwable $e) {
+                    // Silently ignore online submission sync issue
+                }
+            }
+
+            // 3. Sync FundReceipt collector_name if linked to student
+            if ($student->wasChanged('name') || $student->wasChanged('student_id')) {
+                try {
+                    FundReceipt::where('student_id', $student->id)->update([
+                        'collector_name' => $student->name.' ('.$chest.')',
+                    ]);
+                } catch (\Throwable $e) {
+                    // Silently ignore fund receipt sync issue
+                }
+            }
+
+            // 4. Sync static qf-directory.json if present
+            if ($student->wasChanged('name') || $student->wasChanged('student_id')) {
                 self::syncDirectoryJson($student);
             }
         });

@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\FestivalSetting;
 use App\Models\Group;
+use App\Models\OnlineSubmission;
+use App\Models\OnlineSubmissionForm;
 use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Models\Student;
@@ -227,6 +229,66 @@ class AdminSettingAndStudentEditingTest extends TestCase
         $response->assertRedirect();
         $this->assertDatabaseMissing('program_entries', [
             'id' => $entry->id,
+        ]);
+    }
+
+    public function test_admin_student_update_syncs_with_online_submission_without_type_cast_errors(): void
+    {
+        $program = Program::create([
+            'name' => 'Painting Competition',
+            'code' => 'PNT01',
+            'type' => 'individual',
+            'eligibility' => 'A Zone',
+            'zone_id' => $this->zone->id,
+            'status' => 'upcoming',
+        ]);
+
+        $form = OnlineSubmissionForm::create([
+            'program_id' => $program->id,
+            'title' => 'Painting Form',
+            'is_open' => true,
+        ]);
+
+        // Create an online submission for this student with chest number QF2004
+        $submission = OnlineSubmission::create([
+            'online_submission_form_id' => $form->id,
+            'program_id' => $program->id,
+            'code_letter' => 'A',
+            'chest_number' => $this->student->student_id,
+            'student_name' => $this->student->name,
+            'student_id' => $this->student->student_id,
+            'group_id' => $this->group->id,
+        ]);
+
+        // Create another online submission for another chest string QF3064
+        OnlineSubmission::create([
+            'online_submission_form_id' => $form->id,
+            'program_id' => $program->id,
+            'code_letter' => 'B',
+            'chest_number' => 'QF3064',
+            'student_name' => 'Other Participant',
+            'student_id' => 'QF3064',
+            'group_id' => $this->group->id,
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->put(route('admin.students.update', $this->student), [
+            'name' => 'MUHAMMED SINAN VAZHAKKAD',
+            'student_id' => $this->student->student_id,
+            'group_id' => $this->group->id,
+            'zone_id' => $this->zone->id,
+            'category' => 'A Zone',
+            'class_level' => 'TQS',
+        ]);
+
+        $response->assertRedirect(route('admin.students.index'));
+        $this->assertDatabaseHas('students', [
+            'id' => $this->student->id,
+            'name' => 'MUHAMMED SINAN VAZHAKKAD',
+        ]);
+
+        $this->assertDatabaseHas('online_submissions', [
+            'id' => $submission->id,
+            'student_name' => 'MUHAMMED SINAN VAZHAKKAD',
         ]);
     }
 }
