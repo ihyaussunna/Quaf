@@ -19,8 +19,9 @@ class DpMakerController extends Controller
         ];
 
         return view('public.dp-maker', [
-            'title' => 'Be QUAF, Your DP — Official Festival DP Maker',
+            'title' => 'Be QUAF, Your DP — Official Profile Frame | QUAF 2026 Markaz Art Fest',
             'ogTitle' => 'Be QUAF, Your DP — Official QUAF 2026 Profile Frame Maker',
+            'metaDescription' => 'Create and customize your official QUAF Markaz Cultural Festival 2026 DP with the Ādabic Inheritance frame, and share directly to WhatsApp.',
             'ogDescription' => 'Create and customize your official QUAF Markaz Cultural Festival 2026 DP with the Ādabic Inheritance frame, and share directly to WhatsApp.',
             'ogImage' => asset('images/frames/quaf-adabic-dp-frame.jpg'),
             'frameConfig' => $frameConfig,

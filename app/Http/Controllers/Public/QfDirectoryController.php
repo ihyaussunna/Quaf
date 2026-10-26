@@ -111,8 +111,9 @@ class QfDirectoryController extends Controller
         }
 
         return view('public.qf-directory', [
-            'title' => 'QF Chest Directory — QUAF 2026',
-            'ogTitle' => 'QF Chest Directory — QUAF 2026 Markaz Cultural Festival',
+            'title' => 'QF Chest Directory & Participants — QUAF 2026 | Markaz Art Fest',
+            'ogTitle' => 'QF Chest Directory & Participants — QUAF 2026 Markaz Cultural Festival',
+            'metaDescription' => 'Search participant names, QF chest numbers, academic groups, categories, zones, and leadership for QUAF 2026 Markaz Art Festival.',
             'ogDescription' => 'Search and identify participant QF numbers, academic groups, categories, zones, and leadership across all five collegiate teams.',
             'teams' => $teams,
             'members' => $allMembers,

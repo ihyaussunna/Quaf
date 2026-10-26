@@ -1,4 +1,7 @@
-@extends('layouts.public', ['title' => 'Venue & Contact — QUAF'])
+@extends('layouts.public', [
+    'title' => 'Venue & Contact — Jamia Markaz Karanthur | QUAF 2026 Art Fest',
+    'metaDescription' => 'Get venue directions, campus maps, official helplines, and contact details for QUAF 2026 Markaz Cultural Festival at Jamia Markaz, Karanthur, Calicut.',
+])
 
 @section('content')
 

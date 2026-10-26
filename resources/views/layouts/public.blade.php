@@ -10,20 +10,138 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'QUAF — Markaz Cultural Festival 2026' }} | Ihyaussunna Students Union</title>
-    <meta name="description" content="Official Public Platform for QUAF Markaz Cultural Festival 2026. Confluence of eloquence, arts, and intellectual heritage organized by Ihyaussunna Students Union, Jamia Markaz.">
-    <meta name="keywords" content="QUAF, Markaz Cultural Festival, Ihyaussunna Students Union, QUAF 2026, Jamia Markaz, Arts Festival, Live Results, Adabic Inheritance">
+    @php
+        $defaultPageTitle = 'QUAF 2026 — Official Art Festival & Markaz Cultural Fest | Ihyaussunna';
+        $fullTitle = isset($title) && !str_contains($title, 'Ihyaussunna')
+            ? ($title . ' | Ihyaussunna Students Union')
+            : ($title ?? $defaultPageTitle);
+
+        $defaultMetaDescription = 'QUAF is the official 9th edition Art Festival and Markaz Cultural Fest held at Jamia Markaz, Karanthur by Ihyaussunna Students Union (ISU). Explore live festival results, schedule, point table, news, and participant directory.';
+        $resolvedMetaDesc = $metaDescription ?? $ogDescription ?? $defaultMetaDescription;
+
+        $defaultKeywords = 'QUAF, QUAF 2026, quaf fest, quaf festival, quaf art festival, quaf arts fest, markaz cultural festival, markazfestival, markaz festival, jamia markaz, markaz karanthoor, ihyaussunna, ihyaussunna students union, isu markaz, arts fest, art fest, festival, live results, point table, schedule, adabic inheritance, ക്വാഫ്, മർകസ് ആർട്സ് ഫെസ്റ്റ്, മർകസ് കൾച്ചറൽ ഫെസ്റ്റിവൽ, ഇഹ്‌യാഉസ്സുന്ന';
+        $resolvedKeywords = $metaKeywords ?? $defaultKeywords;
+
+        $currentUrl = url()->current();
+        $ogImageUrl = $ogImage ?? asset('images/quaf-title-logo.png');
+
+        $schemaData = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebSite',
+                    '@id' => url('/').'#website',
+                    'url' => url('/'),
+                    'name' => 'QUAF 2026 — Markaz Cultural Festival & Art Fest',
+                    'alternateName' => [
+                        'QUAF',
+                        'QUAF Fest',
+                        'QUAF Art Festival',
+                        'Markaz Cultural Festival',
+                        'Markaz Festival',
+                        'Markaz Arts Fest',
+                        'Ihyaussunna QUAF',
+                        'ക്വാഫ്',
+                        'മർകസ് ആർട്സ് ഫെസ്റ്റ്',
+                        'ഇഹ്‌യാഉസ്സുന്ന',
+                    ],
+                    'description' => 'Official Website of QUAF Markaz Cultural Festival & Art Fest 2026, organized by Ihyaussunna Students Union, Jamia Markaz.',
+                    'publisher' => [
+                        '@id' => url('/').'#organization',
+                    ],
+                    'inLanguage' => 'en-US',
+                ],
+                [
+                    '@type' => 'Organization',
+                    '@id' => url('/').'#organization',
+                    'name' => 'Ihyaussunna Students Union',
+                    'alternateName' => ['ISU', 'Ihyaussunna', 'ISU Jamia Markaz'],
+                    'url' => url('/'),
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => asset('images/quaf-title-logo.png'),
+                        'caption' => 'QUAF Logo',
+                    ],
+                    'parentOrganization' => [
+                        '@type' => 'EducationalOrganization',
+                        'name' => 'Jamia Markaz (Markazu Saquafathi Sunniyya)',
+                        'alternateName' => ['Markaz', 'Markaz Karanthur', 'Jamia Markaz Kozhikode'],
+                        'url' => 'https://markaz.in',
+                        'address' => [
+                            '@type' => 'PostalAddress',
+                            'streetAddress' => 'Karanthur',
+                            'addressLocality' => 'Kozhikode',
+                            'addressRegion' => 'Kerala',
+                            'postalCode' => '673571',
+                            'addressCountry' => 'IN',
+                        ],
+                    ],
+                ],
+                [
+                    '@type' => 'Festival',
+                    '@id' => url('/').'#festival',
+                    'name' => 'QUAF 2026 — 9th Markaz Cultural Festival & Art Fest',
+                    'alternateName' => ['QUAF', 'QUAF Fest', 'Markaz Arts Fest', 'Markaz Cultural Festival 2026', 'ക്വാഫ്'],
+                    'description' => 'The 9th edition of QUAF Markaz Cultural Festival & Arts Fest, organized by Ihyaussunna Students Union at Jamia Markaz, Karanthur. Featuring 1,168 participants across five collegiate academic groups in literary, artistic, and cultural events under the theme Ādabīc Inheritance.',
+                    'startDate' => '2026-10-31T09:00:00+05:30',
+                    'endDate' => '2026-11-01T23:00:00+05:30',
+                    'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+                    'eventStatus' => 'https://schema.org/EventScheduled',
+                    'location' => [
+                        '@type' => 'Place',
+                        'name' => 'Jamia Markaz Campus',
+                        'address' => [
+                            '@type' => 'PostalAddress',
+                            'streetAddress' => 'Karanthur',
+                            'addressLocality' => 'Kozhikode',
+                            'addressRegion' => 'Kerala',
+                            'postalCode' => '673571',
+                            'addressCountry' => 'IN',
+                        ],
+                    ],
+                    'image' => [
+                        asset('images/quaf-title-logo.png'),
+                        asset('images/adabic-inheritance-web.svg'),
+                    ],
+                    'organizer' => [
+                        '@id' => url('/').'#organization',
+                    ],
+                ],
+            ],
+        ];
+    @endphp
+
+    <title>{{ $fullTitle }}</title>
+    <meta name="description" content="{{ $resolvedMetaDesc }}">
+    <meta name="keywords" content="{{ $resolvedKeywords }}">
+    <meta name="author" content="Ihyaussunna Students Union, Jamia Markaz">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+    <link rel="canonical" href="{{ $canonicalUrl ?? $currentUrl }}">
 
     <!-- Open Graph & Social Cards -->
-    <meta property="og:title" content="{{ $ogTitle ?? $title ?? 'QUAF — Markaz Cultural Festival 2026' }}">
-    <meta property="og:description" content="{{ $ogDescription ?? 'Official Festival Platform of QUAF organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.' }}">
+    <meta property="og:site_name" content="QUAF — Markaz Cultural Festival & Art Fest">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="{{ $ogTitle ?? $title ?? 'QUAF 2026 — Official Art Festival & Markaz Cultural Fest' }}">
+    <meta property="og:description" content="{{ $resolvedMetaDesc }}">
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
-    <meta property="og:url" content="{{ $ogUrl ?? url()->current() }}">
-    <meta property="og:image" content="{{ $ogImage ?? asset('images/quaf-title-logo.png') }}">
+    <meta property="og:url" content="{{ $ogUrl ?? $currentUrl }}">
+    <meta property="og:image" content="{{ $ogImageUrl }}">
+    <meta property="og:image:alt" content="QUAF 2026 Markaz Cultural Festival and Art Fest">
+
+    <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? 'QUAF — Markaz Cultural Festival 2026' }}">
-    <meta name="twitter:description" content="{{ $ogDescription ?? 'Official Festival Platform of QUAF organized by Ihyaussunna Students Union, Markazu Saquafathi Sunniyya.' }}">
-    <meta name="twitter:image" content="{{ $ogImage ?? asset('images/quaf-title-logo.png') }}">
+    <meta name="twitter:site" content="@ihyaussunna">
+    <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? 'QUAF 2026 — Official Art Festival & Markaz Cultural Fest' }}">
+    <meta name="twitter:description" content="{{ $resolvedMetaDesc }}">
+    <meta name="twitter:image" content="{{ $ogImageUrl }}">
+
+    <!-- Schema.org Structured Data (JSON-LD) for Search Engine Authority & Rich Snippets -->
+    <script type="application/ld+json">
+    {!! json_encode($schemaData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
 
     <!-- Google Fonts (Multilingual: Sora, Anek Malayalam, Amiri, JetBrains Mono) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

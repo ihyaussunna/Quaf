@@ -1,4 +1,7 @@
-@extends('layouts.public', ['title' => 'News & Updates — QUAF'])
+@extends('layouts.public', [
+    'title' => 'Official Festival News & Journal — QUAF 2026 | Markaz Art Fest',
+    'metaDescription' => 'Latest news, press releases, daily dispatches, and updates from QUAF 2026 Markaz Cultural Festival organized by Ihyaussunna Students Union.',
+])
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">

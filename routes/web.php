@@ -54,6 +54,7 @@ use App\Http\Controllers\Public\PublicApiController;
 use App\Http\Controllers\Public\QfDirectoryController;
 use App\Http\Controllers\Public\ResultController;
 use App\Http\Controllers\Public\ScheduleController;
+use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Public\VerificationController;
 use App\Http\Controllers\Public\VideoController;
 use App\Http\Controllers\Student\StudentController;
@@ -91,6 +92,8 @@ Route::get('/storage/{path}', function (string $path) {
         'Access-Control-Allow-Origin' => '*',
     ]);
 })->where('path', '.*')->name('storage.fallback');
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/home', [HomeController::class, 'homeView'])->name('home.view');

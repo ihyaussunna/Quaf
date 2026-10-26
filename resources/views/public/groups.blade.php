@@ -1,4 +1,7 @@
-@extends('layouts.public', ['title' => 'Academic Groups & Standings — QUAF'])
+@extends('layouts.public', [
+    'title' => 'Collegiate Teams & Academic Houses — QUAF 2026 | Markaz Art Fest',
+    'metaDescription' => 'The 5 official collegiate teams of QUAF 2026: Lumo Fikric, Pacto Hikmic, Conco Majdic, Yugo Rushdic, and Unio Hilmic at Jamia Markaz.',
+])
 
 @section('content')
 

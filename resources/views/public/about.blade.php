@@ -1,4 +1,7 @@
-@extends('layouts.public', ['title' => 'About QUAF — Markaz Cultural Festival 2026'])
+@extends('layouts.public', [
+    'title' => 'About QUAF — Official Markaz Cultural Festival & Art Fest | Ihyaussunna',
+    'metaDescription' => 'Discover the legacy, philosophical vision, and academic heritage of QUAF (ക്വാഫ്), the premier collegiate cultural festival organized by Ihyaussunna Students Union, Jamia Markaz.',
+])
 
 @section('content')
 

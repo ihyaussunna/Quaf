@@ -621,4 +621,34 @@ class PublicWebsiteFeatureTest extends TestCase
         $responseAfter->assertSee('Updated Unique Student Name');
         $responseAfter->assertDontSee('Original Name Test');
     }
+
+    public function test_sitemap_xml_generates_valid_urls(): void
+    {
+        $response = $this->get('/sitemap.xml');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
+        $response->assertSee('<urlset', false);
+        $response->assertSee(route('home.view'), false);
+        $response->assertSee(route('results.index'), false);
+        $response->assertSee(route('schedule.index'), false);
+        $response->assertSee(route('qf.directory'), false);
+        $response->assertSee(route('dp.index'), false);
+    }
+
+    public function test_homepage_has_seo_meta_tags_h1_and_schema_markup(): void
+    {
+        $response = $this->get(route('home.view'));
+
+        $response->assertStatus(200);
+        $response->assertSee('QUAF 2026 — Official Art Festival', false);
+        $response->assertSee('QUAF 2026 • Official Markaz Cultural Festival', false);
+        $response->assertSee('<link rel="canonical"', false);
+        $response->assertSee('application/ld+json', false);
+        $response->assertSee('"@type": "Festival"', false);
+        $response->assertSee('"@type": "WebSite"', false);
+        $response->assertSee('"@type": "Organization"', false);
+        $response->assertSee('Ihyaussunna Students Union', false);
+        $response->assertSee('Jamia Markaz', false);
+    }
 }

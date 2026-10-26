@@ -1,4 +1,7 @@
-@extends('layouts.public', ['title' => 'Festival Schedule — QUAF'])
+@extends('layouts.public', [
+    'title' => 'Festival Stage Schedule & Timeline — QUAF 2026 | Markaz Cultural Fest',
+    'metaDescription' => 'Comprehensive stage schedule, program timings, venue locations, and call lists for QUAF 2026 Markaz Art Festival at Jamia Markaz.',
+])
 
 @section('content')
 
