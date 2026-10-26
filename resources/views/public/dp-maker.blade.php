@@ -156,7 +156,7 @@
                 <div class="space-y-3">
                     
                     <!-- Download High-Res DP Button -->
-                    <button type="button" id="btnDownloadDP" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] text-white shadow-xl shadow-red-900/25 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between group">
+                    <button type="button" id="btnDownloadDP" class="btn-download-crimson w-full py-4 px-6 rounded-2xl text-white shadow-xl shadow-red-900/25 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between group" style="background: linear-gradient(135deg, #be1e2d 0%, #991522 100%) !important; color: #ffffff !important;">
                         <div class="flex items-center gap-3 text-left">
                             <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
                                 <svg class="w-5 h-5 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,8 +164,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-sm font-bold uppercase tracking-wider">Download High-Res DP</div>
-                                <div class="text-[11px] text-white/80 font-normal"><span class="font-revathi text-xs">ഡി.പി ഡൗൺലോഡ് ചെയ്യുക</span> <span class="font-sans">(1024×1024)</span></div>
+                                <div class="text-sm font-bold uppercase tracking-wider text-white">Download High-Res DP</div>
+                                <div class="text-[11px] text-white/90 font-normal"><span class="font-revathi text-xs">ഡി.പി ഡൗൺലോഡ് ചെയ്യുക</span> <span class="font-sans">(1024×1024)</span></div>
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,16 +174,16 @@
                     </button>
 
                     <!-- Share to WhatsApp Button -->
-                    <button type="button" id="btnShareWhatsApp" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white shadow-xl shadow-emerald-900/25 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between group">
+                    <button type="button" id="btnShareWhatsApp" class="btn-whatsapp-green w-full py-4 px-6 rounded-2xl text-white shadow-xl shadow-emerald-900/25 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between group" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important; color: #ffffff !important;">
                         <div class="flex items-center gap-3 text-left">
                             <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.983.565 1.77.87 2.796.87 3.183 0 5.769-2.587 5.77-5.767.001-3.181-2.585-5.756-5.77-5.756zm0-1.872c4.214 0 7.636 3.421 7.636 7.637 0 4.215-3.422 7.637-7.636 7.637-1.328 0-2.576-.345-3.665-.951l-4.366 1.144 1.164-4.254c-.689-1.142-1.07-2.477-1.07-3.876 0-4.216 3.422-7.637 7.637-7.637zm3.873 9.404c-.161-.08-.953-.47-1.101-.524-.148-.053-.255-.08-.363.08-.107.161-.418.524-.512.632-.094.107-.188.12-.349.04-.161-.08-.68-.25-1.295-.799-.479-.427-.802-.955-.896-1.116-.094-.161-.01-.248.07-.328.073-.072.161-.188.242-.282.08-.094.107-.161.161-.269.054-.107.027-.201-.013-.282-.04-.08-.363-.873-.497-1.196-.131-.314-.264-.271-.363-.276l-.309-.005c-.107 0-.282.04-.43.201-.148.161-.564.551-.564 1.344s.578 1.56 1.383 2.628c.805 1.069 1.838 1.487 2.923 1.802.946.275 1.543.226 2.003.157.514-.077 1.579-.645 1.801-1.269.222-.624.222-1.159.155-1.269-.067-.11-.242-.175-.403-.255z"/>
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-sm font-bold uppercase tracking-wider">Share to WhatsApp</div>
-                                <div class="text-[11px] text-white/80 font-normal font-revathi text-xs">വാട്സാപ്പിൽ പങ്കുവെക്കുക</div>
+                                <div class="text-sm font-bold uppercase tracking-wider text-white">Share to WhatsApp</div>
+                                <div class="text-[11px] text-white/90 font-normal font-revathi text-xs">വാട്സാപ്പിൽ പങ്കുവെക്കുക</div>
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,6 +231,20 @@
 </div>
 
 <style>
+.btn-whatsapp-green {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+    color: #ffffff !important;
+}
+.btn-whatsapp-green:hover {
+    filter: brightness(1.08);
+}
+.btn-download-crimson {
+    background: linear-gradient(135deg, #be1e2d 0%, #991522 100%) !important;
+    color: #ffffff !important;
+}
+.btn-download-crimson:hover {
+    filter: brightness(1.08);
+}
 @keyframes dpTitleFlow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
