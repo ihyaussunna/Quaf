@@ -15,6 +15,7 @@
 
 @section('content')
 <div class="space-y-6" x-data="{
+    topicModalOpen: false,
     rulesModalOpen: false,
     textReaderOpen: false,
     textReaderCode: '',
@@ -81,6 +82,13 @@
                     <span>Print / Download Answers (PDF)</span>
                 </a>
             @endif
+
+            <!-- Topic Button -->
+            <button type="button" @click="topicModalOpen = true"
+                    class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                <span>Topic / വിഷയം</span>
+            </button>
 
             <!-- Rules Button -->
             <button type="button" @click="rulesModalOpen = true"
@@ -165,6 +173,39 @@
             <span class="font-bold">Offline Mode: Internet connection is unavailable. Scores are saved locally and will sync when reconnected.</span>
         </div>
         <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-lg bg-rose-200 text-rose-900">Local Draft Active</span>
+    </div>
+
+    <!-- Program Topic Bar (Immediately above evaluation mark entry section) -->
+    <div class="bg-gradient-to-r from-amber-50 via-amber-50/70 to-orange-50/50 border border-amber-200/90 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="flex items-center gap-3 min-w-0">
+            <span class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+            </span>
+            <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-800">
+                        Competition Topic / മത്സര വിഷയം
+                    </span>
+                    @if(!empty($program->topic))
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    @endif
+                </div>
+                @if(!empty($program->topic))
+                    <p class="text-xs sm:text-sm font-revathi-bold font-bold text-slate-900 truncate mt-0.5">
+                        {{ Str::limit(strip_tags($program->topic), 95) }}
+                    </p>
+                @else
+                    <p class="text-xs font-mono text-slate-500 italic mt-0.5">
+                        ഈ മത്സരത്തിന് വിഷയം ചേർത്തിട്ടില്ല (Click to view)
+                    </p>
+                @endif
+            </div>
+        </div>
+        <button type="button" @click="topicModalOpen = true"
+                class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-mono text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
+            <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <span>View Topic / വിഷയം കാണുക</span>
+        </button>
     </div>
 
     <!-- ========================================================================= -->
@@ -630,6 +671,85 @@
             </div>
         </div>
     @endif
+
+    <!-- Program Topic Modal -->
+    <div x-show="topicModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+         style="display: none;"
+         @keydown.escape.window="topicModalOpen = false">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative"
+             @click.away="topicModalOpen = false">
+            <div class="flex items-start justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-amber-700 font-bold">Competition Topic / മത്സര വിഷയം</span>
+                        <h2 class="text-xl font-sora font-black text-slate-900 mt-0.5">{{ $program->name }}</h2>
+                        @if($program->malayalam_name)
+                            <p class="text-xs font-ml text-slate-500">{{ $program->malayalam_name }}</p>
+                        @endif
+                    </div>
+                </div>
+                <button type="button" @click="topicModalOpen = false" class="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Program Meta Badges -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block uppercase">Code</span>
+                    <span class="text-slate-900 font-bold">{{ $program->code }}</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block uppercase">Zone</span>
+                    <span class="text-[#be1e2d] font-bold">{{ $program->zone?->name ?? $program->eligibility ?? 'All' }}</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block uppercase">Stage</span>
+                    <span class="text-slate-800 font-bold">{{ $program->stage->name ?? 'TBA' }}</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block uppercase">Duration</span>
+                    <span class="text-slate-800 font-bold">{{ $program->duration_minutes }} Mins</span>
+                </div>
+            </div>
+
+            <!-- Topic Content Box -->
+            <div class="space-y-2">
+                <span class="text-xs font-mono uppercase tracking-wider text-slate-600 font-bold">Official Topic / വിഷയം:</span>
+                <div class="p-6 rounded-2xl bg-amber-50/70 border-2 border-amber-200/90 text-slate-900 leading-relaxed max-h-80 overflow-y-auto shadow-inner">
+                    @if(!empty($program->topic))
+                        <div class="text-base sm:text-xl font-revathi-bold font-bold text-slate-900 whitespace-pre-line leading-relaxed">
+                            {!! nl2br(e($program->topic)) !!}
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <svg class="w-10 h-10 mx-auto text-slate-300 mb-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <p class="font-mono text-sm font-semibold text-slate-600">ഈ മത്സരത്തിന് വിഷയം ചേർത്തിട്ടില്ല.</p>
+                            <p class="font-mono text-xs text-slate-400 mt-1">(No specific topic has been configured for this competition yet.)</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-between border-t border-slate-100">
+                <span class="text-[11px] font-mono text-slate-400">QUAF Adjudication Console</span>
+                <button type="button" @click="topicModalOpen = false"
+                        class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-all cursor-pointer shadow-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Rules & Guidelines Modal -->
     <div x-show="rulesModalOpen"

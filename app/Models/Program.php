@@ -43,6 +43,7 @@ class Program extends Model
         'gender_restriction',
         'eligibility',
         'rules',
+        'topic',
         'has_time_limit',
         'duration_minutes',
         'has_criteria',
@@ -90,6 +91,9 @@ class Program extends Model
             }
             if (! Schema::hasColumn('programs', 'is_registration_open')) {
                 unset($program->attributes['is_registration_open']);
+            }
+            if (! Schema::hasColumn('programs', 'topic')) {
+                unset($program->attributes['topic']);
             }
 
             // Keep participant limits synchronized across all columns
@@ -165,6 +169,11 @@ class Program extends Model
             if (! Schema::hasColumn('programs', 'submission_type')) {
                 Schema::table('programs', function (Blueprint $table) {
                     $table->string('submission_type', 20)->nullable()->default(null)->after('is_stage');
+                });
+            }
+            if (! Schema::hasColumn('programs', 'topic')) {
+                Schema::table('programs', function (Blueprint $table) {
+                    $table->text('topic')->nullable()->default(null)->after('rules');
                 });
             }
             OnlineSubmissionForm::ensureSchema();

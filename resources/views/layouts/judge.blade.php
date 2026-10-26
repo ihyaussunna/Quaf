@@ -23,6 +23,38 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        @font-face {
+            font-family: 'MLU-Revathi';
+            src: url('{{ asset('fonts/MLU-Revathi.ttf') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'MLU-Revathi';
+            src: url('{{ asset('fonts/MLU-Revathi-Bold.ttf') }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'MLU-Revathi Bold';
+            src: url('{{ asset('fonts/MLU-Revathi-Bold.ttf') }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        .font-revathi {
+            font-family: 'MLU-Revathi', sans-serif !important;
+            font-weight: 400;
+        }
+        .font-revathi-bold {
+            font-family: 'MLU-Revathi Bold', 'MLU-Revathi', sans-serif !important;
+            font-weight: 700 !important;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sora antialiased min-h-[100dvh] flex flex-col w-full overflow-x-clip">
 

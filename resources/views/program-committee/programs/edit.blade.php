@@ -245,6 +245,26 @@
                 </div>
             </div>
 
+            <!-- SECTION: PROGRAM TOPIC -->
+            <div class="space-y-3 pt-4 border-t border-slate-100">
+                <div class="p-5 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-mono uppercase text-amber-900 font-bold">
+                            Competition Topic / മത്സര വിഷയം
+                        </label>
+                        <span class="text-[10px] font-mono text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-semibold">
+                            Judges Evaluation Popup
+                        </span>
+                    </div>
+                    <textarea name="topic" rows="3"
+                              placeholder="Specify official competition topic / prompt (e.g. മത്സര വിഷയം)..."
+                              class="w-full bg-white border border-amber-300 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-brand-burgundy font-revathi">{{ old('topic', $program->topic) }}</textarea>
+                    <p class="text-[11px] font-mono text-slate-500">
+                        This topic will be visible to adjudicators in their live evaluation console via a popup modal.
+                    </p>
+                </div>
+            </div>
+
             <!-- SECTION 3: NIYAMAVALI (RULES & GUIDELINES) -->
             <div class="space-y-4 pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">

@@ -169,6 +169,24 @@
                 </div>
             </div>
 
+            <!-- SECTION: PROGRAM TOPIC -->
+            <div class="space-y-2 p-5 rounded-2xl bg-amber-50/50 border border-amber-200">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-sora uppercase text-amber-900 font-bold">
+                        Competition Topic / മത്സര വിഷയം
+                    </label>
+                    <span class="text-[10px] font-mono text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md font-semibold">
+                        Judges Evaluation Popup
+                    </span>
+                </div>
+                <textarea name="topic" rows="3"
+                          placeholder="മത്സര വിഷയം ഇവിടെ നൽകാം (Specify official competition topic / prompt)..."
+                          class="w-full bg-white border border-amber-300 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-brand-burgundy font-revathi">{{ old('topic', $program->topic) }}</textarea>
+                <p class="text-[11px] font-sora text-slate-500">
+                    മൂല്യനിർണ്ണയ സമയത്ത് ജഡ്ജസ് പാനലിൽ വിഷയം പോപ്പ്-അപ്പായി കാണുന്നതിനായി ഈ ഫീൽഡ് ഉപയോഗിക്കാം.
+                </p>
+            </div>
+
             <!-- SECTION 2: NIYAMAVALI RULES TEXTAREA -->
             <div class="space-y-2">
                 <label class="block text-xs font-sora uppercase text-slate-700 font-bold">

@@ -201,6 +201,7 @@ class ProgramCommitteeController extends Controller
             'mix_zone_open_to_all' => ['nullable', 'boolean'],
             'eligibility' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
+            'topic' => ['nullable', 'string'],
             'has_time_limit' => ['nullable', 'boolean'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
             'has_criteria' => ['nullable', 'boolean'],
@@ -358,6 +359,7 @@ class ProgramCommitteeController extends Controller
             'mix_zone_open_to_all' => ['nullable', 'boolean'],
             'eligibility' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
+            'topic' => ['nullable', 'string'],
             'has_time_limit' => ['nullable', 'boolean'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
             'has_criteria' => ['nullable', 'boolean'],
@@ -549,6 +551,7 @@ class ProgramCommitteeController extends Controller
     public function updateRules(Request $request, Program $program): RedirectResponse
     {
         $validated = $request->validate([
+            'topic' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
             'has_time_limit' => ['nullable', 'boolean'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
@@ -564,6 +567,7 @@ class ProgramCommitteeController extends Controller
         $hasCriteria = $request->boolean('has_criteria', true);
 
         $programData = [
+            'topic' => $validated['topic'] ?? null,
             'rules' => $validated['rules'] ?? null,
         ];
 

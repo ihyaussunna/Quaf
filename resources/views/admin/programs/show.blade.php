@@ -53,6 +53,19 @@
         </div>
     </div>
 
+    @if($program->topic)
+        <!-- Competition Topic -->
+        <div class="rounded-2xl bg-amber-50/60 border border-amber-200 p-6 shadow-xs">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <h3 class="font-mono text-xs font-bold uppercase tracking-wider text-amber-900">Program Topic / മത്സര വിഷയം</h3>
+            </div>
+            <div class="text-base sm:text-lg font-revathi-bold font-bold text-slate-900 whitespace-pre-line leading-relaxed">
+                {!! nl2br(e($program->topic)) !!}
+            </div>
+        </div>
+    @endif
+
     <!-- Scoring Criteria Rubric Section -->
     <div class="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm" x-data="{
         criteria: [

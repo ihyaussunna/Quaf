@@ -236,6 +236,24 @@
             }
         </script>
 
+        <!-- Program Topic -->
+        <div class="p-5 rounded-2xl border-2 border-amber-200 bg-amber-50/40 space-y-2">
+            <div class="flex items-center justify-between">
+                <label class="block text-xs font-mono uppercase text-amber-900 font-bold">
+                    Program Topic / മത്സര വിഷയം
+                </label>
+                <span class="text-[10px] font-mono text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-md">
+                    Judges Evaluation Popup
+                </span>
+            </div>
+            <textarea name="topic" rows="3"
+                      placeholder="Specify the official topic or prompt for this competition (e.g. മത്സര വിഷയം അല്ലെങ്കിൽ നിർദ്ദേശങ്ങൾ)..."
+                      class="w-full bg-white border border-amber-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:ring-2 focus:ring-[#be1e2d]/10 transition-colors font-revathi">{{ old('topic', $program->topic) }}</textarea>
+            <p class="text-[11px] text-slate-500 font-mono">
+                This topic will be visible to adjudicators in their live evaluation console via a popup modal when scoring candidates.
+            </p>
+        </div>
+
         <!-- Rules & Guidelines -->
         <div>
             <label class="block text-xs font-mono uppercase text-slate-600 mb-1.5 font-bold">Rules & Evaluation Guidelines</label>
