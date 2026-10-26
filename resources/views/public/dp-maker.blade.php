@@ -31,8 +31,8 @@
             <div class="lg:col-span-7 flex flex-col items-center">
                 <div class="w-full max-w-[480px] bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xl shadow-slate-200/50">
                     
-                    <!-- Canvas Box Container -->
-                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-100 ring-1 ring-slate-900/5 shadow-inner select-none" id="canvasWrapper">
+                    <!-- Canvas Box Container (Pure clean template, no inner shadow or extra effects) -->
+                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-white select-none border border-slate-200" id="canvasWrapper">
                         <canvas id="dpCanvas" width="1024" height="1024" class="w-full h-full object-contain cursor-grab active:cursor-grabbing touch-none block"></canvas>
 
                         <!-- Empty State Overlay Cue -->
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.save();
             // 1. Clip strictly to the circular frame window
             ctx.beginPath();
-            ctx.arc(CIRCLE_X, CIRCLE_Y, CIRCLE_RADIUS + 1.5, 0, Math.PI * 2);
+            ctx.arc(CIRCLE_X, CIRCLE_Y, CIRCLE_RADIUS, 0, Math.PI * 2);
             ctx.closePath();
             ctx.clip();
 

@@ -179,7 +179,7 @@ const teamColors = {
     'Yugo Rushdic': '#ac1553',
     'Conco Majdic': '#d97706',
     'Lumo Fikric': '#4d2469',
-    'Unio Hilmic': '#451a03'
+    'Unio Hilmic': '#7F1518'
 };
 
 const PAGE_SIZE = 48;

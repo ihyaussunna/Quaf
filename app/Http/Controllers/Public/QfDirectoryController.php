@@ -48,11 +48,11 @@ class QfDirectoryController extends Controller
             ],
             'Unio Hilmic' => [
                 'name' => 'Unio Hilmic',
-                'color' => '#451a03',
+                'color' => '#7F1518',
                 'leader' => $raw['Unio Hilmic']['leader'] ?? 'ANAS ADANY',
                 'assistants' => $raw['Unio Hilmic']['assistants'] ?? ['HASEEB VENNIYUR', 'THWAYYIB IRITTY'],
                 'count' => isset($raw['Unio Hilmic']['members']) ? count($raw['Unio Hilmic']['members']) : 232,
-                'flag' => asset('images/teams/flag-unio-hilmic.jpg'),
+                'flag' => asset('images/teams/flag-unio-hilmic.png'),
             ],
         ];
 
