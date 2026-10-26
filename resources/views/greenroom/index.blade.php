@@ -682,7 +682,7 @@
                                 <thead>
                                     <tr class="bg-slate-50/80 text-slate-500 font-mono text-[11px] uppercase tracking-wider font-bold">
                                         <th class="py-3.5 px-4 w-12 text-center">#</th>
-                                        <th class="py-3.5 px-4 w-52 sm:w-64 text-center">Code Letter</th>
+                                        <th class="py-3.5 px-4 w-56 sm:w-72 text-center">Code Letter</th>
                                         <th class="py-3.5 px-4 w-24">Chest #</th>
                                         <th class="py-3.5 px-4">Student Name</th>
                                         <th class="py-3.5 px-4">Group / Team</th>
@@ -754,13 +754,13 @@
                                                             <span class="text-[10px] uppercase font-bold" x-text="isSaving ? '...' : (isSaved ? 'Saved' : 'Save')"></span>
                                                         </button>
 
-                                                        <!-- Scratch / Lottery Draw Button -->
+                                                        <!-- Code Letter Picker Button -->
                                                         <button type="button"
                                                                 @click="openScratchModal({{ $entry->id }}, '{{ addslashes($entry->chest_number) }}', '{{ addslashes($entry->student?->name ?: 'Chest #'.$entry->chest_number) }}', '{{ route('greenroom.update-code-letter', $entry) }}')"
-                                                                title="Scratch Card / നറുക്കെടുപ്പ് (Scratch or Draw Lucky Code Letter)"
-                                                                class="h-10 px-2 sm:px-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-amber-900 border border-amber-300 text-[11px] font-mono font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0">
-                                                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                            <span>Scratch</span>
+                                                                title="Code Letter Picker"
+                                                                class="h-10 px-2 sm:px-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0">
+                                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                                            <span>Code Picker</span>
                                                         </button>
                                                     </div>
                                                 @else
@@ -1146,7 +1146,7 @@
     </div>
     @endif
 
-    <!-- Scratch Card & Lucky Draw Modal -->
+    <!-- Code Letter Picker Modal -->
     <div x-show="showScratchModal"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
@@ -1165,13 +1165,13 @@
             <!-- Modal Header -->
             <div class="flex items-start justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
                     <div>
-                        <span class="text-[10px] font-mono uppercase tracking-widest text-amber-700 font-bold block">Lucky Draw / നറുക്കെടുപ്പ്</span>
-                        <h3 class="text-lg font-sora font-black text-slate-900">
-                            Code Letter Allocation
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-amber-700 font-bold block">Code Assignment</span>
+                        <h3 class="text-xl font-sora font-black text-slate-900">
+                            Code Letter Picker
                         </h3>
                     </div>
                 </div>
@@ -1193,123 +1193,63 @@
                 </div>
             </div>
 
-            <!-- Mode Selector Tabs: Scratch Card vs Mystery Chits vs Quick Spin -->
-            <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl text-xs font-mono font-bold">
-                <button type="button"
-                        @click="scratchMode = 'scratch'; $nextTick(() => initScratchCanvas())"
-                        :class="scratchMode === 'scratch' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                        class="flex-1 py-2 px-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5">
-                    <span>🎫 Scratch Card</span>
-                </button>
-                <button type="button"
-                        @click="scratchMode = 'lottery'"
-                        :class="scratchMode === 'lottery' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                        class="flex-1 py-2 px-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5">
-                    <span>🗳️ Mystery Lots</span>
-                </button>
-                <button type="button"
-                        @click="scratchMode = 'quick'"
-                        :class="scratchMode === 'quick' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                        class="flex-1 py-2 px-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5">
-                    <span>⚡ Quick Pick</span>
-                </button>
+            <!-- Available Pool & Instructions -->
+            <div class="space-y-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-[10px] font-mono uppercase font-bold text-slate-400 mr-1">Available Lots:</span>
+                    <template x-for="letter in scratchAvailableLetters" :key="letter">
+                        <span class="px-2 py-0.5 rounded-lg text-xs font-mono font-bold border transition-all"
+                              :class="scratchRevealed && scratchSelectedLetter === letter ? 'bg-amber-400 text-slate-950 border-amber-500 scale-110 shadow-xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                              x-text="letter">
+                        </span>
+                    </template>
+                </div>
+                <p class="text-xs font-mono text-slate-500">
+                    Tap any card to draw candidate's secret code letter:
+                </p>
             </div>
 
-            <!-- AVAILABLE POOL PILLS -->
-            <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] font-mono uppercase font-bold text-slate-400 mr-1">Available Lots:</span>
-                <template x-for="letter in scratchAvailableLetters" :key="letter">
-                    <span class="px-2 py-0.5 rounded-lg text-xs font-mono font-bold border transition-all"
-                          :class="scratchRevealed && scratchSelectedLetter === letter ? 'bg-amber-400 text-slate-950 border-amber-500 scale-110 shadow-xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
-                          x-text="letter">
-                    </span>
+            <!-- Beautiful Gradient Lot Cards Grid -->
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-72 overflow-y-auto p-1.5">
+                <template x-for="chit in mysteryChits" :key="chit.id">
+                    <button type="button"
+                            @click="pickChit(chit)"
+                            :disabled="scratchRevealed"
+                            class="relative p-3 rounded-2xl sm:rounded-3xl border-2 transition-all duration-200 flex flex-col items-center justify-center aspect-square select-none shadow-md group cursor-pointer"
+                            :class="chit.isChosen
+                                ? 'bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-700 border-white text-white scale-105 shadow-xl ring-4 ring-emerald-400/50'
+                                : (scratchRevealed 
+                                    ? 'bg-gradient-to-br from-slate-100 to-slate-200 border-slate-200 text-slate-300 opacity-40 cursor-not-allowed pointer-events-none'
+                                    : 'bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 border-amber-300 hover:border-white text-white hover:scale-105 hover:shadow-lg active:scale-95')">
+                        
+                        <!-- Chosen Card: Reveals Code Letter -->
+                        <template x-if="chit.isChosen && chit.isOpened">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-[9px] font-mono uppercase tracking-widest font-black text-emerald-100 mb-0.5">CODE</span>
+                                <span class="text-3xl sm:text-4xl font-sora font-black text-white drop-shadow-md" x-text="chit.letter"></span>
+                            </div>
+                        </template>
+
+                        <!-- Unopened Cards: ONLY '?' in center, strictly no other text -->
+                        <template x-if="!chit.isChosen">
+                            <span class="text-3xl sm:text-4xl font-sora font-black drop-shadow-sm transition-transform group-hover:scale-110"
+                                  :class="scratchRevealed ? 'text-slate-400' : 'text-white'">?</span>
+                        </template>
+                    </button>
                 </template>
             </div>
 
-            <!-- TAB 1: INTERACTIVE SCRATCH CARD -->
-            <div x-show="scratchMode === 'scratch'" class="space-y-4">
-                <div class="relative w-full max-w-[320px] h-[160px] mx-auto rounded-3xl overflow-hidden shadow-lg border-4 border-amber-300/80 bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 select-none">
-                    <!-- Hidden Card Layer (Underneath Canvas) -->
-                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-white p-4">
-                        <span class="text-[11px] font-mono tracking-widest text-amber-300 uppercase font-bold">LUCKY CODE LETTER</span>
-                        <div class="text-6xl font-sora font-black text-white tracking-wider my-1 drop-shadow-md"
-                             x-text="scratchSelectedLetter">
-                        </div>
-                        <span class="text-[10px] font-mono text-emerald-400 font-semibold">QUAF 2026 FESTIVAL</span>
-                    </div>
-
-                    <!-- Scratchable Canvas Layer -->
-                    <canvas id="greenroomScratchCanvas"
-                            width="320"
-                            height="160"
-                            class="absolute inset-0 w-full h-full cursor-crosshair touch-none transition-opacity duration-300"
-                            :class="scratchRevealed ? 'opacity-0 pointer-events-none' : 'opacity-100'">
-                    </canvas>
-                </div>
-
-                <div class="flex items-center justify-center gap-3">
-                    <button type="button"
-                            @click="revealAllScratch()"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        <span>Reveal All / തുറക്കുക</span>
-                    </button>
-                    <button type="button"
-                            @click="resetScratchCard()"
-                            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        <span>Re-Scratch / വീണ്ടും</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB 2: MYSTERY CHITS LOTTERY -->
-            <div x-show="scratchMode === 'lottery'" class="space-y-4">
-                <p class="text-xs font-mono text-slate-500 text-center">
-                    താഴെയുള്ള നറുക്കുകളിൽ ഒരെണ്ണം തിരഞ്ഞെടുക്കുക (Tap any lot to pick):
-                </p>
-                <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-56 overflow-y-auto p-1">
-                    <template x-for="chit in mysteryChits" :key="chit.id">
-                        <button type="button"
-                                @click="pickChit(chit)"
-                                :disabled="scratchRevealed"
-                                class="p-3 rounded-2xl border-2 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 aspect-square select-none shadow-xs"
-                                :class="chit.isChosen
-                                    ? 'bg-amber-400 border-amber-500 text-slate-950 scale-105 shadow-md ring-2 ring-amber-400/50'
-                                    : (chit.isOpened ? 'bg-slate-100 border-slate-200 text-slate-400 opacity-60' : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:border-amber-400 hover:scale-105 text-amber-900')">
-                            <span class="text-[10px] font-mono uppercase font-bold" x-text="'നറുക്ക് ' + chit.id"></span>
-                            <span class="text-2xl font-sora font-black" x-text="chit.isOpened ? chit.letter : '?'"></span>
-                        </button>
-                    </template>
-                </div>
-            </div>
-
-            <!-- TAB 3: QUICK PICK -->
-            <div x-show="scratchMode === 'quick'" class="text-center py-4 space-y-4">
-                <div class="w-28 h-28 mx-auto rounded-3xl bg-slate-900 text-white flex flex-col items-center justify-center border-4 border-amber-400 shadow-xl">
-                    <span class="text-[10px] font-mono text-amber-400 uppercase font-bold">CODE</span>
-                    <span class="text-5xl font-sora font-black text-white" x-text="scratchSelectedLetter || '?'"></span>
-                </div>
-                <button type="button"
-                        @click="spinQuickDraw()"
-                        :disabled="isScratching"
-                        class="px-6 py-3 rounded-2xl bg-[#005c94] hover:bg-[#004875] text-white font-mono text-xs font-bold transition shadow-md flex items-center justify-center gap-2 mx-auto cursor-pointer">
-                    <svg class="w-4 h-4" :class="isScratching ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span x-text="isScratching ? 'Spinning...' : 'Spin Random Pick (നറുക്കെടുപ്പ്)'"></span>
-                </button>
-            </div>
-
-            <!-- FOOTER: REVEAL STATUS & CONFIRM BUTTON -->
+            <!-- Modal Footer -->
             <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
                 <div class="min-w-0">
                     <template x-if="scratchRevealed && scratchSelectedLetter">
                         <div class="flex items-center gap-1.5 text-xs font-mono text-emerald-700 font-bold">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
                             <span>Selected: Code <strong class="text-base text-slate-900" x-text="scratchSelectedLetter"></strong></span>
                         </div>
                     </template>
                     <template x-if="!scratchRevealed">
-                        <span class="text-[11px] font-mono text-slate-400 italic">ഉരച്ച് നറുക്കെടുക്കുക (Scratch to reveal)</span>
+                        <span class="text-[11px] font-mono text-slate-400">Tap 1 card to pick code letter</span>
                     </template>
                 </div>
 
@@ -1327,7 +1267,7 @@
                         <template x-if="isSavingScratch">
                             <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                         </template>
-                        <span x-text="isSavingScratch ? 'Saving...' : 'Confirm & Save (രേഖപ്പെടുത്തുക)'"></span>
+                        <span x-text="isSavingScratch ? 'Saving...' : 'Confirm & Save Code'"></span>
                     </button>
                 </div>
             </div>
@@ -1351,18 +1291,16 @@
                 attendanceFilter: 'all',
                 loadingEntryId: null,
 
-                // Scratch & Lottery Modal State
+                // Code Letter Picker Modal State
                 showScratchModal: false,
                 scratchEntryId: null,
                 scratchChestNumber: '',
                 scratchCandidateName: '',
                 scratchUpdateUrl: '',
                 scratchCurrentLetter: '',
-                scratchMode: 'scratch',
                 scratchAvailableLetters: [],
                 scratchSelectedLetter: null,
                 scratchRevealed: false,
-                isScratching: false,
                 isSavingScratch: false,
                 mysteryChits: [],
 
@@ -1489,23 +1427,26 @@
 
                 calculateAvailableLetters(excludeEntryId) {
                     const taken = new Set();
+                    let unassignedCount = 0;
                     Object.entries(this.entriesCode).forEach(([id, code]) => {
                         if (parseInt(id) !== parseInt(excludeEntryId) && code && code.trim()) {
                             taken.add(code.trim().toUpperCase());
+                        } else {
+                            unassignedCount++;
                         }
                     });
 
-                    const totalEntries = Math.max(Object.keys(this.entriesCode).length, 6);
+                    const poolSize = Math.max(unassignedCount, 1);
                     const available = [];
-                    for (let i = 0; i < Math.max(totalEntries + 6, 26); i++) {
+                    for (let i = 0; i < 200; i++) {
                         const letter = this.formatCodeLetter(i);
                         if (!taken.has(letter)) {
                             available.push(letter);
-                            if (available.length >= Math.max(totalEntries, 5)) break;
+                            if (available.length >= poolSize) break;
                         }
                     }
                     if (available.length === 0) {
-                        available.push('A', 'B', 'C');
+                        available.push('A');
                     }
                     this.scratchAvailableLetters = available;
                 },
@@ -1528,25 +1469,11 @@
                     this.scratchCurrentLetter = (this.entriesCode[entryId] || '').trim().toUpperCase();
                     this.scratchSelectedLetter = null;
                     this.scratchRevealed = false;
-                    this.isScratching = false;
-                    this.scratchMode = 'scratch';
+                    this.isSavingScratch = false;
 
                     this.calculateAvailableLetters(entryId);
-
-                    // Pick random secret letter for scratch canvas
-                    if (this.scratchAvailableLetters.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * this.scratchAvailableLetters.length);
-                        this.scratchSelectedLetter = this.scratchAvailableLetters[randomIndex];
-                    } else {
-                        this.scratchSelectedLetter = 'A';
-                    }
-
                     this.prepareMysteryChits();
                     this.showScratchModal = true;
-
-                    this.$nextTick(() => {
-                        this.initScratchCanvas();
-                    });
                 },
 
                 pickChit(chit) {
@@ -1555,112 +1482,7 @@
                     chit.isChosen = true;
                     this.scratchSelectedLetter = chit.letter;
                     this.scratchRevealed = true;
-                    setTimeout(() => {
-                        this.mysteryChits.forEach(c => c.isOpened = true);
-                    }, 400);
-                },
-
-                spinQuickDraw() {
-                    if (this.scratchRevealed || this.isScratching) return;
-                    this.isScratching = true;
-                    let counter = 0;
-                    const interval = setInterval(() => {
-                        const randomPick = this.scratchAvailableLetters[Math.floor(Math.random() * this.scratchAvailableLetters.length)];
-                        this.scratchSelectedLetter = randomPick;
-                        counter++;
-                        if (counter >= 14) {
-                            clearInterval(interval);
-                            this.isScratching = false;
-                            this.scratchRevealed = true;
-                        }
-                    }, 50);
-                },
-
-                initScratchCanvas() {
-                    const canvas = document.getElementById('greenroomScratchCanvas');
-                    if (!canvas) return;
-                    const ctx = canvas.getContext('2d');
-                    const width = canvas.width;
-                    const height = canvas.height;
-
-                    // Shimmering Golden Gradient Foil
-                    const grad = ctx.createLinearGradient(0, 0, width, height);
-                    grad.addColorStop(0, '#eab308');
-                    grad.addColorStop(0.2, '#fef08a');
-                    grad.addColorStop(0.5, '#eab308');
-                    grad.addColorStop(0.8, '#ca8a04');
-                    grad.addColorStop(1, '#854d0e');
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(0, 0, width, height);
-
-                    // Foil pattern stripes
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-                    for (let i = 0; i < width; i += 24) {
-                        ctx.fillRect(i, 0, 12, height);
-                    }
-
-                    // Text
-                    ctx.fillStyle = '#713f12';
-                    ctx.font = 'bold 16px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('SCRATCH TO REVEAL', width / 2, height / 2 - 12);
-                    ctx.font = 'bold 12px sans-serif';
-                    ctx.fillText('ഇവിടെ ഉരയ്ക്കുക', width / 2, height / 2 + 12);
-
-                    let isDrawing = false;
-                    let scratchPoints = 0;
-
-                    const scratch = (x, y) => {
-                        ctx.globalCompositeOperation = 'destination-out';
-                        ctx.beginPath();
-                        ctx.arc(x, y, 22, 0, Math.PI * 2, false);
-                        ctx.fill();
-                        scratchPoints++;
-                        if (scratchPoints > 20 && !this.scratchRevealed) {
-                            this.scratchRevealed = true;
-                        }
-                    };
-
-                    const getPos = (e) => {
-                        const rect = canvas.getBoundingClientRect();
-                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                        return {
-                            x: (clientX - rect.left) * (canvas.width / rect.width),
-                            y: (clientY - rect.top) * (canvas.height / rect.height)
-                        };
-                    };
-
-                    canvas.onmousedown = (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); };
-                    canvas.onmousemove = (e) => { if (!isDrawing) return; const p = getPos(e); scratch(p.x, p.y); };
-                    window.addEventListener('mouseup', () => { isDrawing = false; }, { once: true });
-
-                    canvas.ontouchstart = (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); e.preventDefault(); };
-                    canvas.ontouchmove = (e) => { if (!isDrawing) return; const p = getPos(e); scratch(p.x, p.y); e.preventDefault(); };
-                    canvas.ontouchend = () => { isDrawing = false; };
-                },
-
-                revealAllScratch() {
-                    this.scratchRevealed = true;
-                    const canvas = document.getElementById('greenroomScratchCanvas');
-                    if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                },
-
-                resetScratchCard() {
-                    this.scratchRevealed = false;
-                    this.calculateAvailableLetters(this.scratchEntryId);
-                    if (this.scratchAvailableLetters.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * this.scratchAvailableLetters.length);
-                        this.scratchSelectedLetter = this.scratchAvailableLetters[randomIndex];
-                    }
-                    this.prepareMysteryChits();
-                    this.$nextTick(() => {
-                        this.initScratchCanvas();
-                    });
+                    // Only this card opens; all other cards remain unopened with '?'
                 },
 
                 async confirmAndSaveScratch() {

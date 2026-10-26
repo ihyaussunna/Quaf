@@ -221,7 +221,7 @@ class CallListAndEvaluationWorkflowTest extends TestCase
 
     public function test_green_room_and_admin_can_mark_attendance_with_automatic_code_assignment(): void
     {
-        // Mark entry 1 as PRESENT via Green Room AJAX
+        // Mark entry 1 as PRESENT via Green Room AJAX - code letter is NOT auto-assigned on present
         $response1 = $this->actingAs($this->greenRoomUser)
             ->postJson(route('greenroom.mark-attendance', $this->entry1), [
                 'status' => 'present',
@@ -231,15 +231,14 @@ class CallListAndEvaluationWorkflowTest extends TestCase
         $response1->assertJson([
             'success' => true,
             'attendance_status' => 'present',
-            'code_letter' => 'A',
-            'display_code' => 'Code A',
+            'code_letter' => null,
         ]);
 
         $this->entry1->refresh();
         $this->assertEquals('present', $this->entry1->attendance_status);
-        $this->assertEquals('A', $this->entry1->code_letter);
+        $this->assertNull($this->entry1->code_letter);
 
-        // Mark entry 2 as PRESENT via Admin AJAX - should receive next sequential code letter 'B'
+        // Mark entry 2 as PRESENT via Admin AJAX - should receive next sequential code letter 'A'
         $response2 = $this->actingAs($this->admin)
             ->postJson(route('admin.call-list.attendance', $this->entry2), [
                 'status' => 'present',
@@ -249,13 +248,13 @@ class CallListAndEvaluationWorkflowTest extends TestCase
         $response2->assertJson([
             'success' => true,
             'attendance_status' => 'present',
-            'code_letter' => 'B',
-            'display_code' => 'Code B',
+            'code_letter' => 'A',
+            'display_code' => 'Code A',
         ]);
 
         $this->entry2->refresh();
         $this->assertEquals('present', $this->entry2->attendance_status);
-        $this->assertEquals('B', $this->entry2->code_letter);
+        $this->assertEquals('A', $this->entry2->code_letter);
 
         // Mark entry 3 as ABSENT - code letter should remain null
         $response3 = $this->actingAs($this->admin)

@@ -302,22 +302,8 @@ class GreenRoomController extends Controller
 
         $entry->attendance_status = $newStatus;
 
-        // Auto-assign next code letter if marked present and code letter is missing
-        if ($newStatus === 'present' && empty($entry->code_letter)) {
-            $assignedCodes = ProgramEntry::where('program_id', $entry->program_id)
-                ->whereNotNull('code_letter')
-                ->pluck('code_letter')
-                ->all();
-
-            for ($i = 0; $i < 500; $i++) {
-                $candidate = ProgramEntry::formatCodeLetter($i);
-                if (! in_array($candidate, $assignedCodes, true)) {
-                    $entry->code_letter = $candidate;
-                    break;
-                }
-            }
-        } elseif ($newStatus === 'absent') {
-            // If marked absent, clear code letter automatically
+        // If marked absent, clear code letter automatically (code letter should not be auto-assigned on present)
+        if ($newStatus === 'absent') {
             $entry->code_letter = null;
         }
 

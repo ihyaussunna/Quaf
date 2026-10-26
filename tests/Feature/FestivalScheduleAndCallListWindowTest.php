@@ -135,12 +135,10 @@ class FestivalScheduleAndCallListWindowTest extends TestCase
         $response->assertJson([
             'success' => true,
             'attendance_status' => 'present',
-            'code_letter' => 'A',
         ]);
 
         $this->entry->refresh();
         $this->assertEquals('present', $this->entry->attendance_status);
-        $this->assertEquals('A', $this->entry->code_letter);
     }
 
     public function test_green_room_can_mark_attendance_for_upcoming_program(): void
