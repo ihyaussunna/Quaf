@@ -651,4 +651,22 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('Ihyaussunna Students Union', false);
         $response->assertSee('Jamia Markaz', false);
     }
+
+    public function test_header_navigation_does_not_contain_dp_or_qf_directory(): void
+    {
+        $response = $this->get(route('home.view'));
+
+        $response->assertOk();
+        // Assert header does not have Be QUAF DP or QF Directory in the <nav> block
+        $html = $response->getContent();
+        preg_match('/<header[\s\S]*?<\/header>/', $html, $matches);
+        $headerHtml = $matches[0] ?? '';
+        $this->assertStringNotContainsString('Be QUAF DP', $headerHtml);
+        $this->assertStringNotContainsString('QF Directory', $headerHtml);
+        $this->assertStringNotContainsString(route('dp.index'), $headerHtml);
+        $this->assertStringNotContainsString(route('qf.directory'), $headerHtml);
+
+        // But footer still provides the links
+        $response->assertSee('QF Chest Directory');
+    }
 }

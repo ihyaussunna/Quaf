@@ -10,11 +10,39 @@
                 Upload Gallery Photo
             </h1>
             <p class="text-xs text-slate-500 mt-1">
-                Upload photo files or provide direct image links.
+                Upload single photo files or provide direct image links.
             </p>
         </div>
-        <a href="{{ route('media.gallery.index') }}" class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs">
-            Back to Gallery
+        <div class="flex items-center gap-2">
+            <a href="{{ route('media.gallery.bulk') }}" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm shadow-purple-600/30 flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Bulk Upload</span>
+            </a>
+            <a href="{{ route('media.gallery.index') }}" class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors">
+                Back to Gallery
+            </a>
+        </div>
+    </div>
+
+    <!-- Mode Switcher Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-3">
+        <a href="{{ route('media.gallery.create') }}" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#be1e2d] text-white shadow-sm shadow-[#be1e2d]/30">
+            Single Photo Upload
+        </a>
+        <a href="{{ route('media.gallery.bulk') }}" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span>Bulk Photos Upload (Multi)</span>
+        </a>
+    </div>
+
+    <!-- Bulk Upload Suggestion Banner -->
+    <div class="p-3.5 rounded-xl bg-purple-50/80 border border-purple-200/80 flex items-center justify-between gap-3 text-xs text-purple-900">
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Need to upload multiple stage/event photos in one go?</span>
+        </div>
+        <a href="{{ route('media.gallery.bulk') }}" class="shrink-0 font-bold text-purple-700 hover:text-purple-900 underline flex items-center gap-1">
+            <span>Use Bulk Uploader &rarr;</span>
         </a>
     </div>
 

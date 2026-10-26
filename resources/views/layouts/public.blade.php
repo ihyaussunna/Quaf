@@ -410,8 +410,6 @@
                     <a href="{{ route('news.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('news.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">News</a>
                     <a href="{{ route('media.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Media</a>
                     <a href="{{ route('brochure.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('brochure.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Brochure</a>
-                    <a href="{{ route('dp.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('dp.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Be QUAF DP</a>
-                    <a href="{{ route('qf.directory') }}" class="transition-colors hover:text-white {{ request()->routeIs('qf.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">QF Directory</a>
                 </nav>
 
                 <!-- Right Action CTAs: Student Portal Button -->
@@ -645,16 +643,6 @@
                    @click="mobileOpen = false" 
                    class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('brochure.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Official Brochure
-                </a>
-                <a href="{{ route('dp.index') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('dp.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
-                    Be QUAF DP
-                </a>
-                <a href="{{ route('qf.directory') }}" 
-                   @click="mobileOpen = false" 
-                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('qf.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
-                    QF Chest Directory
                 </a>
             </nav>
 

@@ -825,6 +825,9 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     // Gallery Photos
     Route::get('/gallery', [MediaController::class, 'galleryIndex'])->name('gallery.index');
     Route::get('/gallery/create', [MediaController::class, 'galleryCreate'])->name('gallery.create');
+    Route::get('/gallery/bulk', [MediaController::class, 'galleryBulkCreate'])->name('gallery.bulk');
+    Route::post('/gallery/bulk', [MediaController::class, 'galleryBulkStore'])->name('gallery.bulk.store');
+    Route::post('/gallery/bulk-item', [MediaController::class, 'galleryBulkUploadItem'])->name('gallery.bulk.item');
     Route::post('/gallery', [MediaController::class, 'galleryStore'])->name('gallery.store');
     Route::get('/gallery/{gallery}/edit', [MediaController::class, 'galleryEdit'])->name('gallery.edit');
     Route::put('/gallery/{gallery}', [MediaController::class, 'galleryUpdate'])->name('gallery.update');

@@ -149,9 +149,12 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
                 <a href="{{ route('media.news.create') }}" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors">
                     + Add News
+                </a>
+                <a href="{{ route('media.gallery.bulk') }}" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors shadow-xs items-center gap-1">
+                    + Bulk Photos
                 </a>
                 <a href="{{ route('media.gallery.create') }}" class="px-3 py-1.5 rounded-lg bg-[#be1e2d] hover:bg-[#a01624] text-white text-xs font-bold transition-colors shadow-xs">
                     + Upload Photo

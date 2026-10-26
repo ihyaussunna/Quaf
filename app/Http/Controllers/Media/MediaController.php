@@ -11,6 +11,7 @@ use App\Models\VideoItem;
 use App\Services\AuditLogger;
 use App\Services\FileStorageService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -215,12 +216,27 @@ class MediaController extends Controller
         return view('media.gallery.create', compact('groups', 'stages'));
     }
 
-    public function galleryStore(Request $request): RedirectResponse
+    public function galleryBulkCreate(): View
     {
+        $groups = Group::all();
+        $stages = Stage::all();
+
+        return view('media.gallery.bulk', compact('groups', 'stages'));
+    }
+
+    public function galleryStore(Request $request): RedirectResponse|JsonResponse
+    {
+        // If image_files array is supplied, route directly to bulk store
+        if ($request->hasFile('image_files') && is_array($request->file('image_files')) && count($request->file('image_files')) > 0) {
+            return $this->galleryBulkStore($request);
+        }
+
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
             'image_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
+            'image_files' => ['nullable', 'array'],
+            'image_files.*' => ['file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
             'category' => ['nullable', 'string', 'max:100'],
             'group_id' => ['nullable', 'exists:groups,id'],
             'stage_id' => ['nullable', 'exists:stages,id'],
@@ -249,7 +265,127 @@ class MediaController extends Controller
 
         AuditLogger::log('create_gallery_item', $item, null, $item->toArray());
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'item' => $item,
+                'message' => 'ഫോട്ടോ ഗാലറിയിലേക്ക് ചേർത്തു.',
+            ]);
+        }
+
         return redirect()->route('media.gallery.index')->with('success', 'ഫോട്ടോ ഗാലറിയിലേക്ക് ചേർത്തു.');
+    }
+
+    public function galleryBulkStore(Request $request): RedirectResponse|JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => ['nullable', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'group_id' => ['nullable', 'exists:groups,id'],
+            'stage_id' => ['nullable', 'exists:stages,id'],
+            'is_featured' => ['nullable', 'boolean'],
+            'display_order' => ['nullable', 'integer'],
+            'image_files' => ['required', 'array', 'min:1'],
+            'image_files.*' => ['file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
+        ]);
+
+        $baseTitle = trim($validated['title'] ?? '');
+        $category = ! empty($validated['category']) ? $validated['category'] : 'Moments';
+        $groupId = $validated['group_id'] ?? null;
+        $stageId = $validated['stage_id'] ?? null;
+        $isFeatured = $request->boolean('is_featured');
+        $displayOrder = (int) ($validated['display_order'] ?? 0);
+
+        $files = $request->file('image_files', []);
+        $totalFiles = count($files);
+        $count = 0;
+
+        foreach ($files as $index => $file) {
+            $imagePath = FileStorageService::storePublicFile($file, 'media/gallery');
+
+            if (! empty($baseTitle)) {
+                $itemTitle = ($totalFiles > 1) ? "{$baseTitle} #".($index + 1) : $baseTitle;
+            } else {
+                $clientName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $cleanName = trim(preg_replace('/[_\-]+/', ' ', $clientName));
+                $itemTitle = ! empty($cleanName) ? Str::headline($cleanName) : 'Festival Moment';
+            }
+
+            $item = GalleryItem::create([
+                'title' => $itemTitle,
+                'image_path' => $imagePath,
+                'category' => $category,
+                'group_id' => $groupId,
+                'stage_id' => $stageId,
+                'is_featured' => $isFeatured,
+                'display_order' => $displayOrder + $index,
+            ]);
+
+            AuditLogger::log('create_gallery_item', $item, null, $item->toArray());
+            $count++;
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'count' => $count,
+                'message' => "{$count} ഫോട്ടോകൾ വിജയകരമായി ഗാലറിയിലേക്ക് ചേർത്തു.",
+            ]);
+        }
+
+        return redirect()->route('media.gallery.index')->with('success', "{$count} ഫോട്ടോകൾ വിജയകരമായി ഗാലറിയിലേക്ക് ചേർത്തു.");
+    }
+
+    public function galleryBulkUploadItem(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'image_file' => ['required', 'file', 'mimes:jpeg,png,jpg,webp,svg,gif,bmp,avif,jfif,heic', 'max:20480'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'group_id' => ['nullable', 'exists:groups,id'],
+            'stage_id' => ['nullable', 'exists:stages,id'],
+            'is_featured' => ['nullable', 'boolean'],
+            'display_order' => ['nullable', 'integer'],
+            'index' => ['nullable', 'integer'],
+            'total' => ['nullable', 'integer'],
+        ]);
+
+        $file = $request->file('image_file');
+        $imagePath = FileStorageService::storePublicFile($file, 'media/gallery');
+
+        $baseTitle = trim($validated['title'] ?? '');
+        $index = (int) ($validated['index'] ?? 1);
+        $total = (int) ($validated['total'] ?? 1);
+
+        if (! empty($baseTitle)) {
+            $itemTitle = ($total > 1) ? "{$baseTitle} #{$index}" : $baseTitle;
+        } else {
+            $clientName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $cleanName = trim(preg_replace('/[_\-]+/', ' ', $clientName));
+            $itemTitle = ! empty($cleanName) ? Str::headline($cleanName) : 'Festival Moment';
+        }
+
+        $item = GalleryItem::create([
+            'title' => $itemTitle,
+            'image_path' => $imagePath,
+            'category' => ! empty($validated['category']) ? $validated['category'] : 'Moments',
+            'group_id' => $validated['group_id'] ?? null,
+            'stage_id' => $validated['stage_id'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
+            'display_order' => (int) ($validated['display_order'] ?? 0) + ($index - 1),
+        ]);
+
+        AuditLogger::log('create_gallery_item', $item, null, $item->toArray());
+
+        return response()->json([
+            'success' => true,
+            'item' => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'image_path' => $item->image_path,
+            ],
+            'message' => 'Uploaded',
+        ]);
     }
 
     public function galleryEdit(GalleryItem $gallery): View

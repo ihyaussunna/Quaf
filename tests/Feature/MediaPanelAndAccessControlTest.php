@@ -195,6 +195,66 @@ class MediaPanelAndAccessControlTest extends TestCase
         $this->assertDatabaseMissing('gallery_items', ['id' => $item->id]);
     }
 
+    public function test_media_user_can_access_bulk_gallery_upload_and_upload_multiple_photos(): void
+    {
+        Storage::fake('public');
+
+        // Test bulk upload page loads
+        $pageResponse = $this->actingAs($this->mediaUser)->get(route('media.gallery.bulk'));
+        $pageResponse->assertOk();
+        $pageResponse->assertSee('Bulk Upload Gallery Photos');
+        $pageResponse->assertSee('Upload All Selected Photos');
+
+        // Test standard bulk upload submission
+        $files = [
+            UploadedFile::fake()->image('photo_1.jpg'),
+            UploadedFile::fake()->image('photo_2.jpg'),
+            UploadedFile::fake()->image('photo_3.jpg'),
+        ];
+
+        $postResponse = $this->actingAs($this->mediaUser)->post(route('media.gallery.bulk.store'), [
+            'title' => 'Cultural Night Moments',
+            'category' => 'Cultural Performances',
+            'is_featured' => 1,
+            'display_order' => 10,
+            'image_files' => $files,
+        ]);
+
+        $postResponse->assertRedirect(route('media.gallery.index'));
+        $this->assertDatabaseCount('gallery_items', 3);
+        $this->assertDatabaseHas('gallery_items', [
+            'title' => 'Cultural Night Moments #1',
+            'category' => 'Cultural Performances',
+            'display_order' => 10,
+        ]);
+        $this->assertDatabaseHas('gallery_items', [
+            'title' => 'Cultural Night Moments #2',
+            'category' => 'Cultural Performances',
+            'display_order' => 11,
+        ]);
+        $this->assertDatabaseHas('gallery_items', [
+            'title' => 'Cultural Night Moments #3',
+            'category' => 'Cultural Performances',
+            'display_order' => 12,
+        ]);
+
+        // Test progressive JSON item upload endpoint
+        $itemResponse = $this->actingAs($this->mediaUser)->postJson(route('media.gallery.bulk.item'), [
+            'image_file' => UploadedFile::fake()->image('progressive_photo.jpg'),
+            'title' => 'Live Stage Coverage',
+            'category' => 'Stage Event',
+            'index' => 1,
+            'total' => 1,
+        ]);
+
+        $itemResponse->assertOk();
+        $itemResponse->assertJson(['success' => true]);
+        $this->assertDatabaseHas('gallery_items', [
+            'title' => 'Live Stage Coverage',
+            'category' => 'Stage Event',
+        ]);
+    }
+
     public function test_media_user_can_create_and_manage_videos_with_youtube_parser(): void
     {
         // YouTube URL format: https://www.youtube.com/watch?v=dQw4w9WgXcQ
