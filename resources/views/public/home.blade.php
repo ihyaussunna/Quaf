@@ -136,18 +136,11 @@
                      :class="activeLogo === 1 ? 'opacity-100 scale-100 relative z-10' : 'opacity-0 scale-95 absolute pointer-events-none z-0'">
             </div>
 
-            <!-- Official Festival Heading & Subheading (SEO & Visitor Clarity) -->
-            <div class="mt-4 sm:mt-5 text-center">
-                <h1 class="text-xs sm:text-sm font-bold tracking-[0.22em] uppercase font-sora text-[#f3bd2e]">
-                    QUAF 2026 • Official Markaz Cultural Festival & Art Fest
-                </h1>
-                <p class="text-xs sm:text-[13px] text-slate-300 font-medium max-w-lg mx-auto mt-1 leading-snug">
-                    Official 9th Edition Arts Confluence of Jamia Markaz, organized by Ihyaussunna Students Union (ISU)
-                </p>
-            </div>
+            <!-- Screen reader & search engine authoritative H1 (hidden visually to maintain pristine UI) -->
+            <h1 class="sr-only">QUAF 2026 • Official Markaz Cultural Festival & Art Fest — Organized by Ihyaussunna Students Union, Jamia Markaz</h1>
 
             <!-- Festival Info Pills -->
-            <div class="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+            <div class="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
                 <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-mono tracking-widest uppercase bg-white/10 text-white/90 border border-white/15 backdrop-blur-md">
                     Markazu Saquafathi Sunniyya
                 </span>
