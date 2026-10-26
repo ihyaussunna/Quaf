@@ -170,6 +170,11 @@
                         <div class="text-base sm:text-2xl font-black {{ $isGold ? 'text-amber-800' : ($isSilver ? 'text-slate-900' : ($isBronze ? 'text-amber-900' : 'text-slate-900')) }}">
                             ₹{{ number_format($collected, 0) }}
                         </div>
+                        <div class="mt-1 flex items-center justify-end">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold tracking-wider {{ $isGold ? 'bg-amber-200/80 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
+                                {{ \App\Services\StandingPosterGenerator::calculateFinancePoints($collected) }} PTS
+                            </span>
+                        </div>
                     </div>
 
                 </div>

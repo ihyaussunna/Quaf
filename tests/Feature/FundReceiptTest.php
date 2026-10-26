@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\ReceiptImageGenerator;
+use App\Services\StandingPosterGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -1070,9 +1071,29 @@ class FundReceiptTest extends TestCase
         $response->assertOk();
         $response->assertSee('Top Collected Groups');
         $response->assertSee('Admin Test Group');
+        $response->assertSee('2 PTS'); // 8000 collected => 2 PTS
         $response->assertSee('Download Standing Poster');
         $response->assertSee('Preview Poster');
         $response->assertSee(route('fund.standings.download'));
         $response->assertSee(route('fund.standings.poster'));
+    }
+
+    public function test_calculate_finance_support_points_matches_target_table(): void
+    {
+        $this->assertSame(0, StandingPosterGenerator::calculateFinancePoints(0));
+        $this->assertSame(0, StandingPosterGenerator::calculateFinancePoints(4999.99));
+        $this->assertSame(2, StandingPosterGenerator::calculateFinancePoints(5000));
+        $this->assertSame(2, StandingPosterGenerator::calculateFinancePoints(9999));
+        $this->assertSame(5, StandingPosterGenerator::calculateFinancePoints(10000));
+        $this->assertSame(10, StandingPosterGenerator::calculateFinancePoints(20000));
+        $this->assertSame(16, StandingPosterGenerator::calculateFinancePoints(30000));
+        $this->assertSame(22, StandingPosterGenerator::calculateFinancePoints(40000));
+        $this->assertSame(28, StandingPosterGenerator::calculateFinancePoints(50000));
+        $this->assertSame(32, StandingPosterGenerator::calculateFinancePoints(60000));
+        $this->assertSame(35, StandingPosterGenerator::calculateFinancePoints(70000));
+        $this->assertSame(37, StandingPosterGenerator::calculateFinancePoints(80000));
+        $this->assertSame(39, StandingPosterGenerator::calculateFinancePoints(90000));
+        $this->assertSame(40, StandingPosterGenerator::calculateFinancePoints(100000));
+        $this->assertSame(40, StandingPosterGenerator::calculateFinancePoints(250000));
     }
 }

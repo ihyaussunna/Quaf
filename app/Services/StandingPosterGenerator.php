@@ -221,15 +221,42 @@ class StandingPosterGenerator
             $detailY = $centerY + 24;
             imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
 
-            // Right side: Total Amount Collected with authentic Rupee symbol (Arial Bold/Anek), vertically centered
+            // Right side: Total Amount Collected & Finance Support Points
+            $points = self::calculateFinancePoints($collected);
             $amountText = '₹'.number_format($collected, 0);
-            $amountFontSize = 30;
+            $amountFontSize = 28;
             $amountColor = imagecolorallocate($img, 15, 23, 42); // Bold dark
             $bboxAmount = @imagettfbbox($amountFontSize, 0, $amountFont, $amountText);
-            $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 180;
+            $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 170;
             $amountX = $capsuleX2 - $amountW - 40;
-            $amountY = $centerY + 10;
+            $amountY = $centerY - 4;
             imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $amountFont, $amountText);
+
+            // Points Pill Badge (aligned to right, directly under the amount)
+            $ptsText = $points.' PTS';
+            $ptsFontSize = 12;
+            $bboxPts = @imagettfbbox($ptsFontSize, 0, $soraBold, $ptsText);
+            $ptsW = $bboxPts ? abs($bboxPts[4] - $bboxPts[0]) : 55;
+            $badgePadX = 14;
+            $badgeH = 26;
+            $badgeW = $ptsW + ($badgePadX * 2);
+            $badgeX2 = $capsuleX2 - 40;
+            $badgeX1 = $badgeX2 - $badgeW;
+            $badgeY1 = $centerY + 10;
+            $badgeY2 = $badgeY1 + $badgeH;
+
+            // Pill styling
+            $badgeBg = ($rank === 1)
+                ? imagecolorallocate($img, 254, 243, 199) // Amber-100 for 1st
+                : imagecolorallocate($img, 241, 245, 249); // Slate-100 for others
+            $badgeTextColor = ($rank === 1)
+                ? imagecolorallocate($img, 146, 64, 14) // Amber-800
+                : imagecolorallocate($img, 30, 41, 59); // Slate-800
+
+            self::drawRoundedRectangle($img, $badgeX1, $badgeY1, $badgeX2, $badgeY2, 13, $badgeBg);
+            $ptsX = (int) ($badgeX1 + $badgePadX);
+            $ptsY = (int) ($badgeY1 + 18);
+            imagettftext($img, $ptsFontSize, 0, $ptsX, $ptsY, $badgeTextColor, $soraBold, $ptsText);
 
             $rankIndex++;
         }
@@ -317,5 +344,59 @@ class StandingPosterGenerator
             'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
             'Cache-Control' => 'no-cache, private',
         ]);
+    }
+
+    /**
+     * Calculate Team Excellence Award - Finance Support Points (out of 40)
+     * based on the official collection target slab table:
+     *   ₹5,000   – 2 points
+     *   ₹10,000  – 5 points
+     *   ₹20,000  – 10 points
+     *   ₹30,000  – 16 points
+     *   ₹40,000  – 22 points
+     *   ₹50,000  – 28 points
+     *   ₹60,000  – 32 points
+     *   ₹70,000  – 35 points
+     *   ₹80,000  – 37 points
+     *   ₹90,000  – 39 points
+     *   ₹1,00,000 – 40 points (Max: 40)
+     */
+    public static function calculateFinancePoints(float|int $amount): int
+    {
+        if ($amount >= 100000) {
+            return 40;
+        }
+        if ($amount >= 90000) {
+            return 39;
+        }
+        if ($amount >= 80000) {
+            return 37;
+        }
+        if ($amount >= 70000) {
+            return 35;
+        }
+        if ($amount >= 60000) {
+            return 32;
+        }
+        if ($amount >= 50000) {
+            return 28;
+        }
+        if ($amount >= 40000) {
+            return 22;
+        }
+        if ($amount >= 30000) {
+            return 16;
+        }
+        if ($amount >= 20000) {
+            return 10;
+        }
+        if ($amount >= 10000) {
+            return 5;
+        }
+        if ($amount >= 5000) {
+            return 2;
+        }
+
+        return 0;
     }
 }
