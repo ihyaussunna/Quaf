@@ -568,4 +568,28 @@ class PublicWebsiteFeatureTest extends TestCase
         $response2 = $this->get('/be-quaf');
         $response2->assertRedirect(route('dp.index'));
     }
+
+    public function test_qf_directory_page_loads_successfully_with_data(): void
+    {
+        $response = $this->get(route('qf.directory'));
+
+        $response->assertStatus(200);
+        $response->assertSee('QF CHEST DIRECTORY');
+        $response->assertSee('Lumo Fikric');
+        $response->assertSee('Pacto Hikmic');
+        $response->assertSee('Conco Majdic');
+        $response->assertSee('Yugo Rushdic');
+        $response->assertSee('Unio Hilmic');
+        $response->assertViewHas('teams');
+        $response->assertViewHas('members');
+    }
+
+    public function test_qf_directory_aliases_redirect(): void
+    {
+        $response1 = $this->get('/qf');
+        $response1->assertRedirect(route('qf.directory'));
+
+        $response2 = $this->get('/chest-directory');
+        $response2->assertRedirect(route('qf.directory'));
+    }
 }

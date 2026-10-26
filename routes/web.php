@@ -51,6 +51,7 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\OnlineSubmissionController as PublicOnlineSubmissionController;
 use App\Http\Controllers\Public\PublicApiController;
+use App\Http\Controllers\Public\QfDirectoryController;
 use App\Http\Controllers\Public\ResultController;
 use App\Http\Controllers\Public\ScheduleController;
 use App\Http\Controllers\Public\VerificationController;
@@ -123,6 +124,9 @@ Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.in
 Route::get('/dp', [DpMakerController::class, 'index'])->name('dp.index');
 Route::get('/dp-maker', fn () => redirect()->route('dp.index'))->name('dp.maker');
 Route::get('/be-quaf', fn () => redirect()->route('dp.index'))->name('dp.be-quaf');
+Route::get('/qf-directory', [QfDirectoryController::class, 'index'])->name('qf.directory');
+Route::get('/qf', fn () => redirect()->route('qf.directory'))->name('qf.alias');
+Route::get('/chest-directory', fn () => redirect()->route('qf.directory'))->name('qf.chest-directory');
 
 // Public Student Online Submissions
 Route::get('/submit/{slug}', [PublicOnlineSubmissionController::class, 'show'])->name('online-submission.show');
