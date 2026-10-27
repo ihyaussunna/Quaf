@@ -138,190 +138,110 @@
                 </div>
             </section>
 
-            <!-- CARD 2: STEP 01 - SELECT AMOUNT -->
-            <section id="donate" class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative">
+            <!-- CARD 2: STEP 01 - OFFICIAL UPI QR & PAYMENT -->
+            <section id="donate" class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-4">
                     <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
                         STEP 01
                     </span>
-                    <span class="text-xs font-mono text-slate-400 font-medium">Fast Amount Selection</span>
-                </div>
-
-                <h2 class="font-anek text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-                    നിങ്ങളുടെ വിഹിതം തിരഞ്ഞെടുക്കൂ
-                </h2>
-                <p class="font-anek text-xs sm:text-sm text-slate-600 mb-5">
-                    തുക touch ചെയ്താൽ നേരിട്ട് UPI Payment സ്ക്രീനിലേക്ക് പ്രവേശിക്കാം.
-                </p>
-
-                <!-- Quick Amounts Grid (Completely Stroke-Free, High Contrast) -->
-                <div class="grid grid-cols-3 gap-2.5 sm:gap-3.5 mb-5">
-                    <template x-for="amt in [50, 100, 313, 500, 1000, 2000]" :key="amt">
-                        <button type="button"
-                                @click="selectAmount(amt)"
-                                class="py-3.5 sm:py-4 px-3 rounded-2xl font-rockwell text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-0.5 border-0"
-                                :class="selectedAmount === amt 
-                                    ? 'bg-gradient-to-r from-[#be1e2d] to-[#991522] text-white shadow-lg shadow-red-900/30 scale-[1.02]' 
-                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-900 shadow-2xs'">
-                            <span x-text="'₹' + Number(amt).toLocaleString('en-IN')"></span>
-                            <span class="text-[10px] font-anek opacity-80 font-normal" x-show="amt === 100">Standard</span>
-                            <span class="text-[10px] font-anek opacity-80 font-normal" x-show="amt === 313">Badr Special</span>
-                        </button>
-                    </template>
-                </div>
-
-                <!-- Custom Amount Input (Stroke-Free, Modern Inset) -->
-                <div class="flex gap-2.5">
-                    <div class="relative flex-1">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-rockwell text-slate-400 text-sm font-bold">₹</span>
-                        <input type="number" 
-                               x-model="customInput" 
-                               @keydown.enter.prevent="applyCustomAmount()"
-                               min="1" 
-                               step="1"
-                               inputmode="numeric"
-                               placeholder="മറ്റൊരു തുക നൽകുക (ഉദാ: 5000)" 
-                               class="w-full bg-slate-100 rounded-2xl pl-8 pr-4 py-3.5 text-sm sm:text-base font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-2 focus:ring-[#be1e2d] transition-all">
-                    </div>
-                    <button type="button" 
-                            @click="applyCustomAmount()" 
-                            style="background-color: #be1e2d; color: #ffffff;"
-                            class="px-6 rounded-2xl font-anek text-sm font-bold bg-[#be1e2d] hover:bg-red-700 text-white transition-all cursor-pointer shadow-md border-0">
-                        Apply
-                    </button>
-                </div>
-            </section>
-
-            <!-- CARD 3: STEP 02 - DIRECT UPI PAYMENT & OFFICIAL SIB QR -->
-            <section id="step-02" class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative overflow-hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
-                        STEP 02
-                    </span>
                     <span class="text-xs font-mono text-emerald-700 font-semibold flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Instant Payment Ready
+                        Official Bank Verified QR
                     </span>
                 </div>
 
-                <h2 class="font-anek text-xl sm:text-2xl font-bold text-slate-900 mb-1">
-                    GPay / UPI വഴി നൽകാം
-                </h2>
-
-                <div class="my-4 p-4 rounded-2xl bg-amber-50/80 flex items-center justify-between">
-                    <span class="font-anek text-sm text-slate-700 font-medium">തിരഞ്ഞെടുത്ത തുക:</span>
-                    <span class="font-rockwell text-xl sm:text-2xl font-bold text-[#94121b]" x-text="'₹' + Number(selectedAmount).toLocaleString('en-IN')"></span>
+                <div class="text-center max-w-md mx-auto mb-6">
+                    <h2 class="font-anek text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                        ഔദ്യോഗിക UPI QR കോഡ്
+                    </h2>
+                    <p class="font-anek text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        താഴെയുള്ള ക്യുആർ കോഡ് നിങ്ങളുടെ ഗാലറിയിലേക്ക് ഡൗൺലോഡ് ചെയ്ത് Google Pay, PhonePe, Paytm അല്ലെങ്കിൽ ഏത് UPI ആപ്പിലും 'Scan from Gallery' വഴി പണമടയ്ക്കാം.
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                    <!-- Left Action Buttons (Solid, High Visibility, Stroke-Free) -->
-                    <div class="md:col-span-7 space-y-3.5">
+                <!-- Centered QR Box -->
+                <div class="max-w-sm mx-auto flex flex-col items-center">
+                    <div class="w-full rounded-3xl bg-slate-50 p-5 text-center flex flex-col items-center shadow-inner">
+                        <div class="text-[11px] font-mono uppercase tracking-wider text-slate-600 font-bold mb-2">
+                            South Indian Bank • Jamia Markaz
+                        </div>
                         
-                        <!-- 1. Primary Direct UPI Payment Button -->
-                        <button type="button" 
-                                @click="payNow()" 
-                                style="background-color: #be1e2d; color: #ffffff;"
-                                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 text-white font-sora font-bold text-base sm:text-lg shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2.5">
-                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
-                                <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
-                            </svg>
-                            <span x-text="'Direct UPI Pay (Open in App)'"></span>
-                        </button>
-
-                        <!-- 2. Fast App Buttons: GPay, PhonePe & Paytm / Other UPI -->
-                        <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                            <button type="button" 
-                                    @click="payWithGPay()" 
-                                    style="background-color: #0f172a !important; color: #ffffff !important;"
-                                    class="py-3 px-2 sm:px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                <span>GPay</span>
-                            </button>
-                            <button type="button" 
-                                    @click="payWithPhonePe()" 
-                                    style="background-color: #5f259f !important; color: #ffffff !important;"
-                                    class="py-3 px-2 sm:px-3 rounded-2xl bg-[#5f259f] hover:bg-[#4d1d82] text-white font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="5" y="2" width="14" height="20" rx="3" stroke-width="2"/>
-                                    <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2"/>
-                                </svg>
-                                <span>PhonePe</span>
-                            </button>
-                            <button type="button" 
-                                    @click="payGenericUPI()" 
-                                    style="background-color: #f3bd2e !important; color: #020617 !important;"
-                                    class="py-3 px-2 sm:px-3 rounded-2xl bg-[#f3bd2e] hover:bg-amber-400 text-slate-950 font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                                <svg class="w-4 h-4 text-slate-950 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
-                                <span>Any UPI</span>
-                            </button>
+                        <!-- High Resolution QR Image with Pure White Padding -->
+                        <div class="relative w-64 max-w-full aspect-square rounded-2xl bg-white p-3 shadow-md flex items-center justify-center">
+                            <img src="{{ asset('images/quaf-sib-qr.jpg') }}" 
+                                 alt="QUAF 2026 South Indian Bank UPI QR Code" 
+                                 class="w-full h-full object-contain rounded-xl">
                         </div>
 
-                        <!-- 3. Copy UPI ID Button (Solid, Clear Text, Stroke-Free) -->
+                        <div class="mt-3.5 text-xs font-mono text-slate-900 font-bold uppercase tracking-tight">
+                            JAMIA MARKAZU SSAQUAFATHISSUNNIYYA
+                        </div>
+                        <div class="text-[11px] font-mono text-slate-500 mt-0.5">
+                            UPI ID: <span class="font-bold text-[#94121b] select-all">qr.9074680630@sib</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="w-full space-y-3 mt-5">
+                        <!-- 1. MAIN PRIMARY CTA: Download QR to Gallery -->
+                        <a href="{{ asset('images/quaf-sib-qr.jpg') }}" download="quaf-sib-qr.jpg" 
+                           style="background-color: #be1e2d !important; color: #ffffff !important;"
+                           class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 text-white font-sora font-bold text-base sm:text-lg shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2.5">
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>Download QR to Gallery</span>
+                        </a>
+
+                        <!-- 2. Payment Now Button (Replaces Open Official SIB QR) -->
+                        <button type="button" 
+                                @click="payNow()" 
+                                style="background-color: #0f172a !important; color: #ffffff !important;"
+                                class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora font-bold text-sm sm:text-base shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span>Payment Now</span>
+                        </button>
+
+                        <!-- 3. Copy UPI ID Button -->
                         <button type="button" 
                                 @click="copyUPI()" 
                                 style="background-color: #f1f5f9 !important; color: #0f172a !important;"
-                                class="w-full py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-sora text-xs sm:text-sm font-bold shadow-2xs border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="w-full py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-sora text-xs sm:text-sm font-semibold shadow-2xs border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
                             </svg>
                             <span x-text="copiedUPI ? 'UPI ID Copied Successfully' : 'Copy UPI ID (qr.9074680630@sib)'"></span>
                         </button>
-
-                        <!-- Informational Note -->
-                        <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed pt-1">
-                            ബട്ടൺ ക്ലിക്ക് ചെയ്താൽ സൗത്ത് ഇന്ത്യൻ ബാങ്ക് വെരിഫൈഡ് ഔദ്യോഗിക പേയ്‌മെന്റ് സ്ക്രീൻ (<strong class="text-[#94121b]">JAMIA MARKAZU SSAQUAFATHISSUNNIYYA</strong>) നേരിട്ട് തുറക്കും. തിരഞ്ഞെടുത്ത തുക നൽകി PIN അടിച്ചാൽ പെയ്‌മെന്റ് ഉടൻ പൂർത്തിയാകും.
-                        </p>
-
-                        <div class="p-3.5 rounded-2xl bg-slate-50 text-[11px] font-mono text-slate-700">
-                            Configured UPI ID: <strong class="text-[#94121b] select-all">qr.9074680630@sib</strong>
-                            <div class="text-[10px] text-slate-500 mt-0.5">South Indian Bank • Jamia Markaz</div>
-                        </div>
                     </div>
 
-                    <!-- Right Official Scan & Pay QR Code Card (Clean, Stroke-Free) -->
-                    <div class="md:col-span-5 flex flex-col items-center">
-                        <div class="w-full max-w-[240px] rounded-3xl bg-white p-4 shadow-lg border-0 text-center flex flex-col items-center">
-                            <div class="text-[10px] font-mono uppercase tracking-wider text-slate-700 font-bold mb-1.5">
-                                South Indian Bank
-                            </div>
-                            <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center p-1">
-                                <img src="{{ asset('images/quaf-sib-qr.jpg') }}" 
-                                     alt="QUAF 2026 South Indian Bank UPI QR Code" 
-                                     class="w-full h-full object-contain">
-                            </div>
-                            <div class="mt-2 text-[10px] font-mono text-slate-900 font-bold uppercase tracking-tight">
-                                JAMIA MARKAZU SSAQUAFATHISSUNNIYYA
-                            </div>
-                            <div class="text-[10px] font-mono text-slate-500">
-                                qr.9074680630@sib
-                            </div>
-                            <div class="flex flex-col gap-1.5 mt-2.5 w-full">
-                                <a :href="getOfficialQrLink()" 
-                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-sora font-bold transition-colors">
-                                    <span>Open Official SIB QR</span>
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                </a>
-                                <a href="{{ asset('images/quaf-sib-qr.jpg') }}" download="quaf-sib-qr.jpg" 
-                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-sora font-bold transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                    <span>Download QR to Gallery</span>
-                                </a>
-                            </div>
+                    <!-- Helpful Step-by-Step Payment Instructions -->
+                    <div class="w-full mt-6 p-4 rounded-2xl bg-slate-50 text-slate-700 text-left space-y-2">
+                        <div class="font-anek text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-[#94121b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>എങ്ങനെ പണമടയ്ക്കാം?</span>
                         </div>
+                        <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                            1. <strong>'Download QR to Gallery'</strong> ബട്ടൺ ക്ലിക്ക് ചെയ്ത് QR കോഡ് ഫോണിലേക്ക് സേവ് ചെയ്യുക.
+                        </p>
+                        <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                            2. <strong>Google Pay / PhonePe / Paytm</strong> തുറന്ന് QR Scanner എടുത്ത് <strong>'Upload from Gallery'</strong> വഴി ഈ QR തിരഞ്ഞെടുക്കുക.
+                        </p>
+                        <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                            3. നിങ്ങളുടെ വിഹിതം നൽകി പേയ്‌മെന്റ് പൂർത്തിയാക്കുക. തുടർന്ന് ലഭിച്ച സ്ക്രീൻഷോട്ട് താഴെ നൽകി രസീത് പോസ്റ്റർ സ്വന്തമാക്കാം.
+                        </p>
                     </div>
                 </div>
             </section>
 
-            <!-- CARD: STEP 03 - DOWNLOAD RECEIPT POSTER -->
+            <!-- CARD 3: STEP 02 - DOWNLOAD RECEIPT POSTER -->
             <section id="receipt-download" class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-4">
                     <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
-                        STEP 03
+                        STEP 02
                     </span>
                     <span class="text-xs font-mono text-slate-400">Instant Poster Download</span>
                 </div>
@@ -333,26 +253,8 @@
                     നിങ്ങൾ പണം അയച്ച ശേഷം ലഭിച്ച Transaction ID, സ്ക്രീൻഷോട്ട്, WhatsApp നമ്പർ എന്നിവ നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഇപ്പോൾ തന്നെ ഡൗൺലോഡ് ചെയ്യാം.
                 </p>
 
-                <!-- TAB SELECTOR (Stroke-Free, Modern Rounded) -->
-                <template x-if="!foundReceipt">
-                    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-100 mb-6">
-                        <button type="button" 
-                                @click="receiptTab = 'upload'" 
-                                :class="receiptTab === 'upload' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'" 
-                                class="flex-1 py-3 px-3 rounded-xl font-anek text-xs sm:text-sm transition-all border-0 cursor-pointer text-center">
-                            സ്ക്രീൻഷോട്ട് നൽകി ഡൗൺലോഡ് ചെയ്യാം
-                        </button>
-                        <button type="button" 
-                                @click="receiptTab = 'search'" 
-                                :class="receiptTab === 'search' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'" 
-                                class="flex-1 py-3 px-3 rounded-xl font-anek text-xs sm:text-sm transition-all border-0 cursor-pointer text-center">
-                            രസീത് നമ്പർ / ID തിരയുക
-                        </button>
-                    </div>
-                </template>
-
-                <!-- TAB 1: UPLOAD SCREENSHOT & GENERATE/DOWNLOAD POSTER -->
-                <div x-cloak x-show="!foundReceipt && receiptTab === 'upload'" class="space-y-4">
+                <!-- UPLOAD SCREENSHOT & GENERATE/DOWNLOAD POSTER (Direct View, No Tabs) -->
+                <div x-cloak x-show="!foundReceipt" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                         <!-- Transaction ID / UTR -->
                         <div>
@@ -493,81 +395,7 @@
                             <span x-text="isUploading ? 'സ്ക്രീൻഷോട്ട് അപ്‌ലോഡ് ചെയ്യുന്നു...' : 'വിവരങ്ങൾ നൽകി രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യുക'"></span>
                         </button>
                     </div>
-                </div>
-
-                <!-- TAB 2: SEARCH BY TRANSACTION ID / RECEIPT NUMBER -->
-                <div x-cloak x-show="!foundReceipt && receiptTab === 'search'" class="space-y-4">
-                    <div class="bg-slate-100 rounded-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-0">
-                        <div class="relative flex-1">
-                            <input type="text" 
-                                   x-model="txnQuery" 
-                                   @keydown.enter.prevent="searchReceipt()"
-                                   placeholder="UPI Transaction ID / UTR / രസീത് നമ്പർ" 
-                                   class="w-full bg-transparent px-3 sm:px-4 py-3 text-sm sm:text-base font-anek font-semibold text-slate-900 placeholder-slate-400 border-0 focus:outline-none">
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <!-- Paste Button -->
-                            <button type="button" 
-                                    @click="pasteTxnId()" 
-                                    style="background-color: #ffffff !important; color: #1e293b !important;"
-                                    class="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-white hover:bg-slate-200/80 text-slate-800 font-sora text-xs font-bold transition-all shadow-2xs border-0 cursor-pointer flex items-center justify-center gap-1.5">
-                                <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                </svg>
-                                <span>Paste</span>
-                            </button>
-
-                            <!-- Search Button -->
-                            <button type="button" 
-                                    @click="searchReceipt()" 
-                                    :disabled="isSearching || !txnQuery.trim()"
-                                    style="background-color: #be1e2d !important; color: #ffffff !important;"
-                                    class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[#be1e2d] hover:bg-red-700 disabled:opacity-50 text-white font-anek font-bold text-sm transition-all shadow-md border-0 cursor-pointer flex items-center justify-center gap-2">
-                                <template x-if="isSearching">
-                                    <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                    </svg>
-                                </template>
-                                <template x-if="!isSearching">
-                                    <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                </template>
-                                <span x-text="isSearching ? 'തിരയുന്നു...' : 'കണ്ടെത്തുക'"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Search Error Notice -->
-                    <div x-cloak x-show="searchError" class="p-3.5 rounded-xl bg-red-100 text-red-900 font-anek text-xs">
-                        <span x-text="searchError"></span>
-                    </div>
-
-                    <!-- Not Found in Search Notice -->
-                    <div x-cloak x-show="notFound" class="rounded-2xl bg-amber-50/90 p-5 space-y-3 border-0">
-                        <div class="font-anek font-bold text-amber-950 text-sm sm:text-base">
-                            ഈ Transaction ID-യിൽ രസീത് മുൻപ് കണ്ടെത്തിയിട്ടില്ല
-                        </div>
-                        <p class="font-anek text-xs sm:text-sm text-amber-900 leading-relaxed">
-                            നിങ്ങൾ പണം അയച്ചിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ പേയ്‌മെന്റ് സ്ക്രീൻഷോട്ടും WhatsApp നമ്പറും നൽകി ഇപ്പോൾ തന്നെ രസീത് പോസ്റ്റർ ലഭ്യമാക്കാം:
-                        </p>
-                        <div class="pt-1 flex flex-wrap gap-2.5">
-                            <button type="button" 
-                                    @click="receiptTab = 'upload'; uploadForm.transaction_id = txnQuery;" 
-                                    style="background-color: #be1e2d !important; color: #ffffff !important;"
-                                    class="py-2.5 px-4 rounded-xl bg-[#be1e2d] hover:bg-red-700 text-white font-anek font-bold text-xs shadow-md border-0 transition-all cursor-pointer">
-                                സ്ക്രീൻഷോട്ട് നൽകാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക
-                            </button>
-                            <button type="button" 
-                                    @click="sendWhatsAppVerification()" 
-                                    style="background-color: #25D366 !important; color: #ffffff !important;"
-                                    class="py-2.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-anek font-bold text-xs shadow-md border-0 transition-all cursor-pointer flex items-center gap-1.5">
-                                <span>WhatsApp ഹെൽപ്പ് ഡെസ്ക്</span>
-                            </button>
-                        </div>
-                    </div>
+                
                 </div>
 
                 <!-- FOUND / GENERATED RECEIPT STATE (ONE CLICK DOWNLOAD) -->
@@ -645,11 +473,11 @@
                 </div>
             </section>
 
-            <!-- CARD 4: STEP 04 - SHARE WITH OTHERS -->
+            <!-- CARD 4: STEP 03 - SHARE WITH OTHERS -->
             <section class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative">
                 <div class="flex items-center justify-between mb-4">
                     <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
-                        STEP 04
+                        STEP 03
                     </span>
                     <span class="text-xs font-mono text-slate-400">Spread The Goodness</span>
                 </div>
@@ -712,9 +540,9 @@
                             1
                         </span>
                         <div>
-                            <div class="font-anek font-bold text-slate-900 text-sm sm:text-base">ഒരു തുക തിരഞ്ഞെടുക്കുക</div>
+                            <div class="font-anek font-bold text-slate-900 text-sm sm:text-base">ഔദ്യോഗിക QR കോഡ് ഡൗൺലോഡ് ചെയ്യുക</div>
                             <div class="font-anek text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                ₹50, ₹100, ₹313, ₹500 അല്ലെങ്കിൽ നിങ്ങൾക്ക് കഴിയുന്ന മറ്റൊരു തുക.
+                                'Download QR to Gallery' വഴി QR സേവ് ചെയ്ത് Google Pay, PhonePe അല്ലെങ്കിൽ Paytm വഴി പണമടയ്ക്കുക.
                             </div>
                         </div>
                     </div>
@@ -724,9 +552,9 @@
                             2
                         </span>
                         <div>
-                            <div class="font-anek font-bold text-slate-900 text-sm sm:text-base">GPay / UPI വഴി നൽകുക</div>
+                            <div class="font-anek font-bold text-slate-900 text-sm sm:text-base">രസീത് പോസ്റ്റർ സ്വന്തമാക്കുക</div>
                             <div class="font-anek text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                Payment button അല്ലെങ്കിൽ QR code ഉപയോഗിക്കുക.
+                                പേയ്‌മെന്റ് സ്ക്രീൻഷോട്ടും വിവരങ്ങളും നൽകി ഔദ്യോഗിക രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യുക.
                             </div>
                         </div>
                     </div>
@@ -1018,32 +846,12 @@ function quafDonationPage() {
             this.removeScreenshot();
         },
 
-        applyCustomAmount() {
-            const val = Number(this.customInput);
-            if (!Number.isFinite(val) || val < 1) {
-                alert("ദയവായി ശരിയായ തുക നൽകുക.");
-                return;
-            }
-            this.selectedAmount = Math.round(val);
-            this.uploadForm.amount = Math.round(val);
-            this.customInput = '';
-            const step2 = document.getElementById('step-02');
-            if (step2) {
-                step2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        },
-
         getOfficialQrLink() {
             return "upi://pay?pa=qr.9074680630@sib&pn=JAMIA%MARKAZU%SSAQUAFATHISSUNNIYYA&mc=8661&cu=INR&orgid=159059&mode=02&sign=MEYCIQDPR9QWDEqm6Zq8M8DKyE/193h6NmYq9ieoAufr8CoevgIhANpl1HCh5O9y0zlyEeStHXQSlUfPeEnzMfCer3wgAF5v";
         },
 
         getUpiLink() {
             return this.getOfficialQrLink();
-        },
-
-        getAndroidIntentLink(pkg = 'com.google.android.apps.nbu.paisa.user') {
-            const query = this.getOfficialQrLink().replace("upi://pay?", "");
-            return `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
         },
 
         async autoCopyUpi() {
@@ -1057,37 +865,6 @@ function quafDonationPage() {
         },
 
         payNow() {
-            this.autoCopyUpi();
-            window.location.href = this.getOfficialQrLink();
-        },
-
-        payWithGPay() {
-            this.autoCopyUpi();
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            if (isAndroid) {
-                window.location.href = this.getAndroidIntentLink('com.google.android.apps.nbu.paisa.user');
-                setTimeout(() => {
-                    window.location.href = this.getOfficialQrLink();
-                }, 800);
-            } else {
-                window.location.href = this.getOfficialQrLink();
-            }
-        },
-
-        payWithPhonePe() {
-            this.autoCopyUpi();
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            if (isAndroid) {
-                window.location.href = this.getAndroidIntentLink('com.phonepe.app');
-                setTimeout(() => {
-                    window.location.href = this.getOfficialQrLink();
-                }, 800);
-            } else {
-                window.location.href = this.getOfficialQrLink();
-            }
-        },
-
-        payGenericUPI() {
             this.autoCopyUpi();
             window.location.href = this.getOfficialQrLink();
         },

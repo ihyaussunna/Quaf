@@ -427,15 +427,19 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('qr.9074680630@sib');
         $response->assertSee('JAMIA MARKAZU SSAQUAFATHISSUNNIYYA');
         $response->assertSee('quaf-sib-qr.jpg');
-        $response->assertSee('Direct UPI Pay');
-        $response->assertSee('GPay');
-        $response->assertSee('PhonePe');
+        $response->assertSee('Download QR to Gallery');
+        $response->assertSee('Payment Now');
         $response->assertSee('8661');
         $response->assertSee('159059');
         $response->assertSee('1500+');
         $response->assertSee('₹100');
         $response->assertSee('നിങ്ങളുടെ രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം');
         $response->assertSee('receipt-download');
+        $response->assertDontSee('Direct UPI Pay');
+        $response->assertDontSee('<span>PhonePe</span>', false);
+        $response->assertDontSee('payWithPhonePe', false);
+        $response->assertDontSee('നിങ്ങളുടെ വിഹിതം തിരഞ്ഞെടുക്കൂ');
+        $response->assertDontSee('രസീത് നമ്പർ / ID തിരയുക');
         $response->assertDontSee('<header class="hidden lg:block', false);
         $response->assertDontSee('ദുആ:');
     }
