@@ -194,16 +194,21 @@
                     <p class="text-[10px] text-slate-400 mt-1">Automatically auto-fits font size if name is long.</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-3 gap-2.5">
                     <div>
-                        <label class="block text-slate-600 font-semibold mb-1">Chest Number (Rockwell 12pt)</label>
+                        <label class="block text-slate-600 font-semibold mb-1">Chest No</label>
                         <input type="text" x-model="chestNo"
-                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-rockwell font-bold text-sm focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all uppercase">
+                               class="w-full px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-rockwell font-bold text-xs focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all uppercase">
                     </div>
                     <div>
-                        <label class="block text-slate-600 font-semibold mb-1">Class / Category (Rockwell 8pt)</label>
+                        <label class="block text-slate-600 font-semibold mb-1">Zone</label>
+                        <input type="text" x-model="zone"
+                               class="w-full px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-rockwell font-bold text-xs focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-semibold mb-1">Class</label>
                         <input type="text" x-model="category"
-                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-rockwell text-sm focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all uppercase">
+                               class="w-full px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-rockwell text-xs focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all uppercase">
                     </div>
                 </div>
 
@@ -265,36 +270,41 @@
                      :alt="activeTeam.name"
                      class="absolute inset-0 w-full h-full object-fill pointer-events-none z-0">
 
-                <!-- Dynamic QR Code inside the official White Rounded Box -->
-                <!-- Positioned at exact coordinates: X: centered, Y: 50.1% to 75.8% -->
-                <div class="absolute top-[50.1%] left-1/2 -translate-x-1/2 w-[128px] h-[128px] flex items-center justify-center z-10 pointer-events-none">
+                <!-- 1. White Square QR Box -->
+                <div class="absolute top-[45.6%] left-1/2 -translate-x-1/2 w-[126px] h-[126px] bg-white rounded-lg shadow-md flex items-center justify-center z-10 pointer-events-none">
                     <img :src="qrUrl"
                          alt="QR Code"
-                         class="w-[124px] h-[124px] object-contain">
+                         class="w-[114px] h-[114px] object-contain block">
                 </div>
 
-                <!-- Chest Number Text (Rockwell 12pt bold, centered inside the Red Pill at Y ~ 82.0%) -->
-                <div class="absolute top-[80.4%] left-1/2 -translate-x-1/2 w-[100px] text-center z-10 pointer-events-none">
-                    <div class="font-rockwell font-bold text-white text-[13.5px] leading-tight tracking-wider uppercase drop-shadow-xs"
+                <!-- 2. QF Number in RED BUTTON (Bigger font, red background with border) -->
+                <div class="absolute top-[72.4%] left-1/2 -translate-x-1/2 z-10 pointer-events-none w-max">
+                    <div class="font-rockwell font-extrabold text-white text-[15px] tracking-wider uppercase px-5 py-1.5 rounded-full shadow-lg border-[1.5px] border-white/50 leading-none bg-[#be1e2d] inline-flex items-center justify-center"
                          x-text="chestNo">
                     </div>
                 </div>
 
-                <!-- Student Full Name (Rockwell 10pt, centered below pill at Y ~ 87.4%) -->
-                <!-- Conco Majdic uses pure black text (#000000) for contrast on yellow background -->
-                <div class="absolute top-[86.2%] left-0 right-0 px-4 text-center z-10 pointer-events-none">
-                    <div class="font-rockwell text-[12.5px] leading-tight font-medium truncate drop-shadow-2xs"
-                         :class="activeTeam.isYellow ? 'text-black font-bold' : 'text-white'"
+                <!-- 3. Student Full Name (Compact line distance) -->
+                <div class="absolute top-[80.4%] left-0 right-0 px-3 text-center z-10 pointer-events-none">
+                    <div class="font-rockwell text-[13px] font-bold leading-tight truncate"
+                         :class="activeTeam.isYellow ? 'text-slate-900' : 'text-white'"
                          x-text="participantName">
                     </div>
                 </div>
 
-                <!-- Class / Category (Rockwell 8pt, centered at Y ~ 91.3%) -->
-                <!-- Conco Majdic uses pure black text (#000000) for contrast on yellow background -->
-                <div class="absolute top-[91.2%] left-0 right-0 text-center z-10 pointer-events-none">
-                    <div class="font-rockwell text-[9.5px] leading-tight uppercase font-normal tracking-wide drop-shadow-2xs"
-                         :class="activeTeam.isYellow ? 'text-black font-semibold' : 'text-white'"
-                         x-text="category">
+                <!-- 4. Official Team / Group Pill Button -->
+                <div class="absolute top-[86.4%] left-1/2 -translate-x-1/2 z-10 pointer-events-none w-max">
+                    <div class="font-rockwell text-[10px] font-bold uppercase tracking-wider px-3.5 py-0.5 rounded-full border leading-none inline-flex items-center justify-center"
+                         :class="activeTeam.isYellow ? 'bg-black/10 border-black/25 text-slate-900' : 'bg-white/20 border-white/45 text-white'"
+                         x-text="activeTeam.name">
+                    </div>
+                </div>
+
+                <!-- 5. Zone & Class / Category (Prominent Zone display) -->
+                <div class="absolute top-[92.0%] left-0 right-0 px-3 text-center z-10 pointer-events-none">
+                    <div class="font-rockwell text-[10px] font-bold uppercase tracking-wider leading-none"
+                         :class="activeTeam.isYellow ? 'text-slate-800' : 'text-white/90'"
+                         x-text="(zone ? zone.toUpperCase() + ' • ' : '') + category.toUpperCase()">
                     </div>
                 </div>
             </div>

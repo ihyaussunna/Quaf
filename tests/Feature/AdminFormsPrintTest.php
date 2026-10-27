@@ -228,7 +228,7 @@ class AdminFormsPrintTest extends TestCase
             $response->assertSee('Student '.$t['code']);
             $response->assertSee($t['name']);
         }
-        $response->assertSee('A Zone • TQS');
+        $response->assertSee('A ZONE • TQS');
     }
 
     public function test_single_badge_show_view_renders_correctly(): void
@@ -259,7 +259,7 @@ class AdminFormsPrintTest extends TestCase
         $response->assertSee('QF3099');
         $response->assertSee('Muhammed Sinan Unio');
         $response->assertSee('Unio Tigers');
-        $response->assertSee('Sub Junior • Class 8');
+        $response->assertSee('SUB JUNIOR • CLASS 8');
     }
 
     public function test_admin_can_view_templates_page_with_badge_only(): void
