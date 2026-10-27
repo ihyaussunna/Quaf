@@ -97,53 +97,88 @@
     <div class="print-grid max-w-7xl mx-auto flex flex-wrap justify-center gap-4">
         @foreach($students as $student)
             @php
-                $code = $student->group?->code ?? 'LUMO';
-                $svgMap = [
-                    'LUMO' => 'lumo-badge.svg',
-                    'PACTO' => 'pacto-badge.svg',
-                    'CONCO' => 'conco-badge.svg',
-                    'UNIO' => 'unio-badge.svg',
-                    'YUGO' => 'yugo-badge.svg',
-                ];
-                $badgeSvg = $svgMap[$code] ?? 'lumo-badge.svg';
-                $isConco = ($code === 'CONCO');
-                $textColor = $isConco ? '#000000' : '#ffffff';
+                $groupCode = strtoupper($student->group?->code ?? '');
+                $groupName = strtoupper($student->group?->name ?? '');
+
+                if ($groupCode === 'CONCO' || str_contains($groupName, 'CONCO')) {
+                    $badgeSvg = 'conco-badge.svg';
+                    $isConco = true;
+                    $teamColor = '#be1e2d';
+                    $qfBg = '#be1e2d';
+                    $qfColor = '#ffffff';
+                } elseif ($groupCode === 'PACTO' || str_contains($groupName, 'PACTO')) {
+                    $badgeSvg = 'pacto-badge.svg';
+                    $isConco = false;
+                    $teamColor = '#2e3192';
+                    $qfBg = '#ffffff';
+                    $qfColor = '#2e3192';
+                } elseif ($groupCode === 'UNIO' || str_contains($groupName, 'UNIO')) {
+                    $badgeSvg = 'unio-badge.svg';
+                    $isConco = false;
+                    $teamColor = '#7f1518';
+                    $qfBg = '#ffffff';
+                    $qfColor = '#7f1518';
+                } elseif ($groupCode === 'YUGO' || str_contains($groupName, 'YUGO')) {
+                    $badgeSvg = 'yugo-badge.svg';
+                    $isConco = false;
+                    $teamColor = '#ad1e56';
+                    $qfBg = '#ffffff';
+                    $qfColor = '#ad1e56';
+                } else {
+                    $badgeSvg = 'lumo-badge.svg';
+                    $isConco = false;
+                    $teamColor = '#56286b';
+                    $qfBg = '#ffffff';
+                    $qfColor = '#56286b';
+                }
+
                 $chest = $student->chest_number ?? $student->student_id;
-                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" . urlencode("https://quaf.ihyaussunna.in/verify/student/{$chest}");
+                $textColor = $isConco ? '#0f172a' : '#ffffff';
+                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" . urlencode(route('verify.student', $student->qr_token ?? $chest));
+                $displayName = $student->group?->name ?? 'General';
+                $nameLen = strlen($student->name);
+                $classDisplay = trim(($student->category ?? '') . ($student->class_level ? ' • ' . $student->class_level : ''));
             @endphp
 
             <div class="badge-card relative overflow-hidden bg-white shadow-md rounded-lg"
                  style="width: 60mm; height: 100mm; flex-shrink: 0;">
                 <!-- Vector SVG Template Background -->
                 <img src="{{ asset('images/badges/' . $badgeSvg) }}"
-                     alt="{{ $student->group?->name ?? 'Badge' }}"
+                     alt="{{ $displayName }}"
                      style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0; pointer-events: none;">
 
-                <!-- QR Code Container inside the official White Rounded Box (centered horizontally at Y ~ 50.1%) -->
-                <div style="position: absolute; top: 50.1%; left: 50%; transform: translateX(-50%); width: 25.7mm; height: 25.7mm; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                <!-- 1. QR Code inside White Square Box (Centered directly below "Scan It, Know It" at Y ~ 46.2%) -->
+                <div style="position: absolute; top: 46.2%; left: 50%; transform: translateX(-50%); width: 25mm; height: 25mm; background: #ffffff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 10;">
                     <img src="{{ $qrUrl }}"
                          alt="QR Code"
-                         style="width: 25mm; height: 25mm; object-fit: contain;">
+                         style="width: 22.8mm; height: 22.8mm; object-fit: contain; display: block;">
                 </div>
 
-                <!-- Chest Number Text (Rockwell 12pt bold, centered inside Red Pill at Y ~ 80.4%) -->
-                <div style="position: absolute; top: 80.4%; left: 50%; transform: translateX(-50%); width: 20mm; text-align: center; z-index: 10;">
-                    <div class="font-rockwell" style="color: #ffffff; font-weight: bold; font-size: 11pt; letter-spacing: 0.4px; text-transform: uppercase; line-height: 1;">
+                <!-- 2. QF Number inside Pill Button (Centered at Y ~ 73.0%) -->
+                <div style="position: absolute; top: 73.0%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
+                    <div class="font-rockwell" style="background: {{ $qfBg }}; color: {{ $qfColor }}; font-weight: 800; font-size: 10pt; letter-spacing: 0.6px; text-transform: uppercase; padding: 1.5mm 5.2mm; border-radius: 9999px; box-shadow: 0 2px 6px rgba(0,0,0,0.28); line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
                         {{ $chest }}
                     </div>
                 </div>
 
-                <!-- Student Full Name (Rockwell 10pt, centered below pill at Y ~ 86.2%) -->
-                <div style="position: absolute; top: 86.2%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
-                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: 9.5pt; font-weight: {{ $isConco ? 'bold' : '500' }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1;">
+                <!-- 3. Student Full Name (Rockwell bold, centered at Y ~ 80.8%) -->
+                <div style="position: absolute; top: 80.8%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: {{ $nameLen > 24 ? '8.5pt' : ($nameLen > 18 ? '9pt' : '10pt') }}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; padding: 0 0.5mm;">
                         {{ $student->name }}
                     </div>
                 </div>
 
-                <!-- Class / Category (Rockwell 8pt, centered at Y ~ 91.2%) -->
-                <div style="position: absolute; top: 91.2%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
-                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: 7.5pt; font-weight: {{ $isConco ? '600' : 'normal' }}; text-transform: uppercase; line-height: 1;">
-                        {{ $student->category }}
+                <!-- 4. Group inside Pill Button (Centered at Y ~ 87.0%) -->
+                <div style="position: absolute; top: 87.0%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
+                    <div class="font-rockwell" style="background: {{ $isConco ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.20)' }}; border: 0.8px solid {{ $isConco ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.45)' }}; color: {{ $textColor }}; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 1.2mm 4.2mm; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
+                        {{ $displayName }}
+                    </div>
+                </div>
+
+                <!-- 5. Class / Category (Centered at Y ~ 93.0%) -->
+                <div style="position: absolute; top: 93.0%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: {{ $isConco ? '#334155' : 'rgba(255,255,255,0.9)' }}; font-size: 7pt; font-weight: {{ $isConco ? '700' : '600' }}; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
+                        {{ $classDisplay }}
                     </div>
                 </div>
             </div>

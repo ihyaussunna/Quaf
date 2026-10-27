@@ -188,6 +188,80 @@ class AdminFormsPrintTest extends TestCase
         $response->assertSee('General');
     }
 
+    public function test_chest_slips_renders_all_5_team_templates_with_buttons_and_qr(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $teams = [
+            ['code' => 'CONCO', 'name' => 'Conco Team', 'svg' => 'conco-badge.svg'],
+            ['code' => 'PACTO', 'name' => 'Pacto Team', 'svg' => 'pacto-badge.svg'],
+            ['code' => 'LUMO', 'name' => 'Lumo Team', 'svg' => 'lumo-badge.svg'],
+            ['code' => 'UNIO', 'name' => 'Unio Team', 'svg' => 'unio-badge.svg'],
+            ['code' => 'YUGO', 'name' => 'Yugo Team', 'svg' => 'yugo-badge.svg'],
+        ];
+
+        foreach ($teams as $idx => $t) {
+            $group = Group::create([
+                'name' => $t['name'],
+                'code' => $t['code'],
+                'slug' => strtolower($t['code']),
+            ]);
+
+            Student::create([
+                'student_id' => 'QF'.(2000 + $idx),
+                'name' => 'Student '.$t['code'],
+                'group_id' => $group->id,
+                'class_level' => 'TQS',
+                'category' => 'A Zone',
+                'qr_token' => Str::random(32),
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.idcards.chest-slips'));
+
+        $response->assertStatus(200);
+        foreach ($teams as $idx => $t) {
+            $response->assertSee($t['svg']);
+            $response->assertSee('QF'.(2000 + $idx));
+            $response->assertSee('Student '.$t['code']);
+            $response->assertSee($t['name']);
+        }
+        $response->assertSee('A Zone • TQS');
+    }
+
+    public function test_single_badge_show_view_renders_correctly(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $group = Group::create([
+            'name' => 'Unio Tigers',
+            'code' => 'UNIO',
+            'slug' => 'unio-tigers',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'QF3099',
+            'name' => 'Muhammed Sinan Unio',
+            'group_id' => $group->id,
+            'class_level' => 'Class 8',
+            'category' => 'Sub Junior',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.idcards.show', $student));
+
+        $response->assertStatus(200);
+        $response->assertSee('unio-badge.svg');
+        $response->assertSee('QF3099');
+        $response->assertSee('Muhammed Sinan Unio');
+        $response->assertSee('Unio Tigers');
+        $response->assertSee('Sub Junior • Class 8');
+    }
+
     public function test_admin_can_view_templates_page_with_badge_only(): void
     {
         $admin = User::factory()->create([
