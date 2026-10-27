@@ -676,4 +676,25 @@ class MediaPanelAndAccessControlTest extends TestCase
         $this->assertTrue($result->is_media_published);
         $this->assertEquals('completed', $prog->fresh()->status);
     }
+
+    public function test_media_user_and_admin_can_access_qr_code_generator(): void
+    {
+        // Media user access
+        $mediaResponse = $this->actingAs($this->mediaUser)->get(route('media.qr.index'));
+        $mediaResponse->assertOk();
+        $mediaResponse->assertSee('QUAF QR Code Studio');
+        $mediaResponse->assertSee('Target Link / URL');
+        $mediaResponse->assertSee('Download PNG');
+        $mediaResponse->assertSee('Download SVG');
+
+        // Admin access
+        $adminResponse = $this->actingAs($this->adminUser)->get(route('admin.qr.index'));
+        $adminResponse->assertOk();
+        $adminResponse->assertSee('QUAF QR Code Studio');
+
+        // Unauthenticated access redirects to login
+        auth()->logout();
+        $guestResponse = $this->get(route('media.qr.index'));
+        $guestResponse->assertRedirect(route('login'));
+    }
 }

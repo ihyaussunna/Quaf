@@ -614,6 +614,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('templates', [AdminTemplateController::class, 'index'])->name('templates.index');
     Route::get('templates/{type}', [AdminTemplateController::class, 'show'])->name('templates.show');
 
+    // QR Code Generator
+    Route::get('qr-generator', [MediaController::class, 'qrGenerator'])->name('qr.index');
+
     // Data Exports (Participants, Judges, Competitions, Results, Teams)
     Route::get('exports', [AdminExportController::class, 'index'])->name('exports.index');
     Route::get('exports/{type}', [AdminExportController::class, 'export'])->name('exports.download');
@@ -855,6 +858,9 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::delete('/results/templates/{template}', [MediaResultController::class, 'templateDestroy'])->name('results.templates.destroy');
     Route::get('/results/templates/{template}/customize', [MediaResultController::class, 'templateCustomize'])->name('results.templates.customize');
     Route::post('/results/templates/{template}/customize', [MediaResultController::class, 'templateSaveCustomization'])->name('results.templates.save-customization');
+
+    // QR Code Generator
+    Route::get('/qr-generator', [MediaController::class, 'qrGenerator'])->name('qr.index');
 });
 
 /*

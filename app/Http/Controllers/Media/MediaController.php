@@ -606,4 +606,23 @@ class MediaController extends Controller
 
         return $urlOrId;
     }
+
+    /**
+     * Display the QR Code Generator tool.
+     */
+    public function qrGenerator(): View
+    {
+        $defaultUrl = route('home');
+        $presets = [
+            ['label' => 'Official Public Website', 'url' => route('home'), 'badge' => 'Home', 'color' => '#be1e2d'],
+            ['label' => 'Live Results Portal', 'url' => route('results.index'), 'badge' => 'Results', 'color' => '#0284c7'],
+            ['label' => 'Media & Video Hub', 'url' => route('media.index'), 'badge' => 'Media', 'color' => '#8b5cf6'],
+            ['label' => 'Festival Schedule', 'url' => route('schedule.index'), 'badge' => 'Events', 'color' => '#10b981'],
+            ['label' => 'Be QUAF DP Campaign', 'url' => route('dp.index'), 'badge' => 'Campaign', 'color' => '#f59e0b'],
+            ['label' => 'Student ID Verification Base', 'url' => url('/verify/student/'), 'badge' => 'Verify', 'color' => '#ec4899'],
+            ['label' => 'Fund Collection Portal', 'url' => route('fund.home'), 'badge' => 'Fund', 'color' => '#14b8a6'],
+        ];
+
+        return view('media.qrcode', compact('defaultUrl', 'presets'));
+    }
 }
