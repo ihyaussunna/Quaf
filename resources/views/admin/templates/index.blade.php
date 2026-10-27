@@ -101,6 +101,42 @@
     },
     get qrUrl() {
         return 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=' + encodeURIComponent('https://quaf.ihyaussunna.in/verify/student/' + this.chestNo.trim());
+    },
+    pos: {
+        qrY: 45.6,
+        qrX: 0,
+        qrSize: 126,
+        qfY: 72.4,
+        qfX: 0,
+        qfSize: 15,
+        nameY: 80.4,
+        nameX: 0,
+        nameSize: 13,
+        groupY: 86.4,
+        groupX: 0,
+        groupSize: 10,
+        zoneY: 92.0,
+        zoneX: 0,
+        zoneSize: 10
+    },
+    resetPos() {
+        this.pos = {
+            qrY: 45.6,
+            qrX: 0,
+            qrSize: 126,
+            qfY: 72.4,
+            qfX: 0,
+            qfSize: 15,
+            nameY: 80.4,
+            nameX: 0,
+            nameSize: 13,
+            groupY: 86.4,
+            groupX: 0,
+            groupSize: 10,
+            zoneY: 92.0,
+            zoneX: 0,
+            zoneSize: 10
+        };
     }
 }">
     <!-- Header -->
@@ -229,6 +265,131 @@
                         <span x-text="'https://quaf.ihyaussunna.in/verify/student/' + chestNo.trim()"></span>
                     </div>
                 </div>
+
+                <!-- Position & Size Fine-Tuning Panel (X, Y, Size) -->
+                <div class="pt-3 border-t border-slate-200" x-data="{ showAdjuster: true }">
+                    <div class="flex items-center justify-between mb-2">
+                        <button type="button" @click="showAdjuster = !showAdjuster" class="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#be1e2d] transition-colors">
+                            <svg class="w-3.5 h-3.5 transition-transform" :class="showAdjuster ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span>Live Alignment & Size Controls (X, Y, Size)</span>
+                        </button>
+                        <button type="button" @click="resetPos()" class="text-[10px] text-slate-500 hover:text-[#be1e2d] font-semibold underline">
+                            Reset Defaults
+                        </button>
+                    </div>
+
+                    <div x-show="showAdjuster" class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px]">
+                        <!-- 1. QR Code Controls -->
+                        <div>
+                            <div class="flex justify-between items-center font-semibold text-slate-700 mb-1">
+                                <span class="font-bold text-slate-900">1. QR Code</span>
+                                <span class="font-mono text-[10px] text-slate-500" x-text="`Y: ${pos.qrY}% | X: ${pos.qrX}px | Size: ${pos.qrSize}px`"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Y Position</span>
+                                    <input type="range" min="35" max="60" step="0.2" x-model.number="pos.qrY" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">X Shift</span>
+                                    <input type="range" min="-30" max="30" step="1" x-model.number="pos.qrX" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Size</span>
+                                    <input type="range" min="80" max="150" step="1" x-model.number="pos.qrSize" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. QF Red Button Controls -->
+                        <div class="pt-2 border-t border-slate-200">
+                            <div class="flex justify-between items-center font-semibold text-slate-700 mb-1">
+                                <span class="font-bold text-slate-900">2. QF Red Button</span>
+                                <span class="font-mono text-[10px] text-slate-500" x-text="`Y: ${pos.qfY}% | X: ${pos.qfX}px | Font: ${pos.qfSize}px`"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Y Position</span>
+                                    <input type="range" min="65" max="80" step="0.2" x-model.number="pos.qfY" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">X Shift</span>
+                                    <input type="range" min="-30" max="30" step="1" x-model.number="pos.qfX" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Font Size</span>
+                                    <input type="range" min="11" max="22" step="0.5" x-model.number="pos.qfSize" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Student Name Controls -->
+                        <div class="pt-2 border-t border-slate-200">
+                            <div class="flex justify-between items-center font-semibold text-slate-700 mb-1">
+                                <span class="font-bold text-slate-900">3. Student Name</span>
+                                <span class="font-mono text-[10px] text-slate-500" x-text="`Y: ${pos.nameY}% | X: ${pos.nameX}px | Font: ${pos.nameSize}px`"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Y Position</span>
+                                    <input type="range" min="74" max="88" step="0.2" x-model.number="pos.nameY" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">X Shift</span>
+                                    <input type="range" min="-30" max="30" step="1" x-model.number="pos.nameX" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Font Size</span>
+                                    <input type="range" min="9" max="18" step="0.5" x-model.number="pos.nameSize" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Group Pill Controls -->
+                        <div class="pt-2 border-t border-slate-200">
+                            <div class="flex justify-between items-center font-semibold text-slate-700 mb-1">
+                                <span class="font-bold text-slate-900">4. Group Pill</span>
+                                <span class="font-mono text-[10px] text-slate-500" x-text="`Y: ${pos.groupY}% | X: ${pos.groupX}px | Font: ${pos.groupSize}px`"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Y Position</span>
+                                    <input type="range" min="80" max="92" step="0.2" x-model.number="pos.groupY" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">X Shift</span>
+                                    <input type="range" min="-30" max="30" step="1" x-model.number="pos.groupX" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Font Size</span>
+                                    <input type="range" min="8" max="14" step="0.5" x-model.number="pos.groupSize" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Zone & Class Controls -->
+                        <div class="pt-2 border-t border-slate-200">
+                            <div class="flex justify-between items-center font-semibold text-slate-700 mb-1">
+                                <span class="font-bold text-slate-900">5. Zone & Class</span>
+                                <span class="font-mono text-[10px] text-slate-500" x-text="`Y: ${pos.zoneY}% | X: ${pos.zoneX}px | Font: ${pos.zoneSize}px`"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Y Position</span>
+                                    <input type="range" min="85" max="98" step="0.2" x-model.number="pos.zoneY" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">X Shift</span>
+                                    <input type="range" min="-30" max="30" step="1" x-model.number="pos.zoneX" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500">Font Size</span>
+                                    <input type="range" min="8" max="14" step="0.5" x-model.number="pos.zoneSize" class="w-full h-1.5 bg-slate-200 rounded accent-[#be1e2d] cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Actions & Team A3 Download -->
@@ -270,40 +431,41 @@
                      :alt="activeTeam.name"
                      class="absolute inset-0 w-full h-full object-fill pointer-events-none z-0">
 
-                <!-- 1. White Square QR Box -->
-                <div class="absolute top-[45.6%] left-1/2 -translate-x-1/2 w-[126px] h-[126px] bg-white rounded-lg shadow-md flex items-center justify-center z-10 pointer-events-none">
+                <!-- 1. White Square QR Box (Position & Size driven by reactive inline style) -->
+                <div :style="`position: absolute; top: ${pos.qrY}%; left: 50%; transform: translateX(calc(-50% + ${pos.qrX}px)); width: ${pos.qrSize}px; height: ${pos.qrSize}px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 10; pointer-events: none;`">
                     <img :src="qrUrl"
                          alt="QR Code"
-                         class="w-[114px] h-[114px] object-contain block">
+                         :style="`width: ${Math.max(pos.qrSize - 14, 40)}px; height: ${Math.max(pos.qrSize - 14, 40)}px; object-fit: contain; display: block;`">
                 </div>
 
-                <!-- 2. QF Number in RED BUTTON (Bigger font, red background with border) -->
-                <div class="absolute top-[72.4%] left-1/2 -translate-x-1/2 z-10 pointer-events-none w-max">
-                    <div class="font-rockwell font-extrabold text-white text-[15px] tracking-wider uppercase px-5 py-1.5 rounded-full shadow-lg border-[1.5px] border-white/50 leading-none bg-[#be1e2d] inline-flex items-center justify-center"
+                <!-- 2. QF Number in RED BUTTON (Position & Size driven by reactive inline style) -->
+                <div :style="`position: absolute; top: ${pos.qfY}%; left: 50%; transform: translateX(calc(-50% + ${pos.qfX}px)); z-index: 10; width: max-content; pointer-events: none;`">
+                    <div class="font-rockwell"
+                         :style="`background: #be1e2d; color: #ffffff; font-weight: 800; font-size: ${pos.qfSize}px; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 20px; border-radius: 9999px; box-shadow: 0 2px 8px rgba(0,0,0,0.35); border: 1.5px solid rgba(255,255,255,0.5); line-height: 1; display: inline-flex; align-items: center; justify-content: center;`"
                          x-text="chestNo">
                     </div>
                 </div>
 
-                <!-- 3. Student Full Name (Compact line distance) -->
-                <div class="absolute top-[80.4%] left-0 right-0 px-3 text-center z-10 pointer-events-none">
-                    <div class="font-rockwell text-[13px] font-bold leading-tight truncate"
-                         :class="activeTeam.isYellow ? 'text-slate-900' : 'text-white'"
+                <!-- 3. Student Full Name (Position & Size driven by reactive inline style) -->
+                <div :style="`position: absolute; top: ${pos.nameY}%; left: 10px; right: 10px; transform: translateX(${pos.nameX}px); text-align: center; z-index: 10; pointer-events: none;`">
+                    <div class="font-rockwell"
+                         :style="`color: ${activeTeam.isYellow ? '#0f172a' : '#ffffff'}; font-size: ${pos.nameSize}px; font-weight: bold; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px;`"
                          x-text="participantName">
                     </div>
                 </div>
 
-                <!-- 4. Official Team / Group Pill Button -->
-                <div class="absolute top-[86.4%] left-1/2 -translate-x-1/2 z-10 pointer-events-none w-max">
-                    <div class="font-rockwell text-[10px] font-bold uppercase tracking-wider px-3.5 py-0.5 rounded-full border leading-none inline-flex items-center justify-center"
-                         :class="activeTeam.isYellow ? 'bg-black/10 border-black/25 text-slate-900' : 'bg-white/20 border-white/45 text-white'"
+                <!-- 4. Official Team / Group Pill Button (Position & Size driven by reactive inline style) -->
+                <div :style="`position: absolute; top: ${pos.groupY}%; left: 50%; transform: translateX(calc(-50% + ${pos.groupX}px)); z-index: 10; width: max-content; pointer-events: none;`">
+                    <div class="font-rockwell"
+                         :style="`background: ${activeTeam.isYellow ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)'}; border: 0.8px solid ${activeTeam.isYellow ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.5)'}; color: ${activeTeam.isYellow ? '#0f172a' : '#ffffff'}; font-size: ${pos.groupSize}px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;`"
                          x-text="activeTeam.name">
                     </div>
                 </div>
 
-                <!-- 5. Zone & Class / Category (Prominent Zone display) -->
-                <div class="absolute top-[92.0%] left-0 right-0 px-3 text-center z-10 pointer-events-none">
-                    <div class="font-rockwell text-[10px] font-bold uppercase tracking-wider leading-none"
-                         :class="activeTeam.isYellow ? 'text-slate-800' : 'text-white/90'"
+                <!-- 5. Zone & Class / Category (Position & Size driven by reactive inline style) -->
+                <div :style="`position: absolute; top: ${pos.zoneY}%; left: 10px; right: 10px; transform: translateX(${pos.zoneX}px); text-align: center; z-index: 10; pointer-events: none;`">
+                    <div class="font-rockwell"
+                         :style="`color: ${activeTeam.isYellow ? '#1e293b' : 'rgba(255,255,255,0.92)'}; font-size: ${pos.zoneSize}px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;`"
                          x-text="(zone ? zone.toUpperCase() + ' • ' : '') + category.toUpperCase()">
                     </div>
                 </div>
