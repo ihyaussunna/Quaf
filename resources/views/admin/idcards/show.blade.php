@@ -4,18 +4,30 @@
 <style>
     @font-face {
         font-family: 'Rockwell Std';
-        src: url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype');
+        src: local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold'),
+             url('{{ asset('fonts/Rockwell-Extra-Bold.otf') }}') format('opentype'),
+             url('{{ asset('fonts/Rockwell-Extra-Bold.woff2') }}') format('woff2');
+        font-weight: 800;
+        font-style: normal;
+    }
+    @font-face {
+        font-family: 'Rockwell Std';
+        src: local('Rockwell Std Bold'), local('Rockwell Bold'),
+             url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype'),
+             url('{{ asset('fonts/Rockwell-Bold.woff2') }}') format('woff2');
         font-weight: bold;
         font-style: normal;
     }
     @font-face {
         font-family: 'Rockwell Std';
-        src: url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype');
+        src: local('Rockwell Std'), local('Rockwell'),
+             url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype'),
+             url('{{ asset('fonts/Rockwell-Regular.woff2') }}') format('woff2');
         font-weight: normal;
         font-style: normal;
     }
     .font-rockwell {
-        font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', 'DejaVu Serif', Georgia, serif;
+        font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', serif !important;
     }
 
     @media print {
@@ -143,15 +155,15 @@
                          style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0; pointer-events: none;">
 
                     <!-- 1. QR Code inside White Square Box (Centered directly below "Scan It, Know It" at Y ~ 45.6%) -->
-                    <div style="position: absolute; top: 45.6%; left: 50%; transform: translateX(-50%); width: 41.67%; aspect-ratio: 1 / 1; background: #ffffff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 10;">
+                    <div style="position: absolute; top: 45.6%; left: 50%; transform: translateX(-50%); width: 41.67%; aspect-ratio: 1 / 1; background: #ffffff; border-radius: 6px; box-shadow: none; display: flex; align-items: center; justify-content: center; z-index: 10;">
                         <img src="{{ $qrUrl }}"
                              alt="QR Code"
                              style="width: 90%; height: 90%; object-fit: contain; display: block;">
                     </div>
 
-                    <!-- 2. QF Number in RED BUTTON (Bigger font, red background with border, centered at Y ~ 72.4%) -->
+                    <!-- 2. QF Number in RED BUTTON (Clean no white stroke, no shadow, centered at Y ~ 72.4%) -->
                     <div style="position: absolute; top: 72.4%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
-                        <div class="font-rockwell qf-pill" style="background: #be1e2d; color: #ffffff; font-weight: 800; font-size: 15px; letter-spacing: 0.8px; text-transform: uppercase; padding: 6px 20px; border-radius: 9999px; box-shadow: 0 2px 8px rgba(0,0,0,0.35); border: 1.5px solid rgba(255,255,255,0.5); line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
+                        <div class="font-rockwell qf-pill" style="background: #be1e2d; color: #ffffff; font-weight: 800; font-size: 15px; letter-spacing: 0.8px; text-transform: uppercase; padding: 6px 20px; border-radius: 9999px; box-shadow: none; border: none; line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
                             {{ $chest }}
                         </div>
                     </div>
@@ -163,9 +175,9 @@
                         </div>
                     </div>
 
-                    <!-- 4. Group inside Pill Button (Centered at Y ~ 86.4%) -->
+                    <!-- 4. Group inside Pill Button (Clean no stroke, no shadow, centered at Y ~ 86.4%) -->
                     <div style="position: absolute; top: 86.4%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
-                        <div class="font-rockwell group-pill" style="background: {{ $isConco ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)' }}; border: 0.8px solid {{ $isConco ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.5)' }}; color: {{ $textColor }}; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
+                        <div class="font-rockwell group-pill" style="background: {{ $isConco ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)' }}; border: none; box-shadow: none; color: {{ $textColor }}; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                             {{ $displayName }}
                         </div>
                     </div>

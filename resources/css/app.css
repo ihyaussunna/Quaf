@@ -162,7 +162,7 @@ h1[class*="font-revathi"], h2[class*="font-revathi"], h3[class*="font-revathi"],
 
 @theme {
     --font-sora: 'Sora';
-    --font-rockwell: 'Rockwell', 'Rockwell Std';
+    --font-rockwell: 'Rockwell Std', 'Rockwell', serif;
     --font-mono: 'JetBrains Mono', monospace;
     --font-jetbrains: 'JetBrains Mono', monospace;
     --font-anek: 'Anek Malayalam';
@@ -219,7 +219,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .font-rockwell {
-    font-family: 'Rockwell', 'Rockwell Std' !important;
+    font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', serif !important;
 }
 
 /* Monospace font for numbers, chest numbers, codes, stats */

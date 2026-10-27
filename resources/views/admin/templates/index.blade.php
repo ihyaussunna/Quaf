@@ -4,10 +4,33 @@
 <style>
     @font-face {
         font-family: 'Rockwell Std';
-        src: local('Rockwell Std'), local('Rockwell'), local('Rockwell-Regular');
+        src: local('Rockwell Std Bold'), local('Rockwell Bold'), local('Rockwell-Bold'),
+             url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype'),
+             url('{{ asset('fonts/Rockwell-Bold.woff2') }}') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Rockwell Std';
+        src: local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold'), local('Rockwell-ExtraBold'),
+             url('{{ asset('fonts/Rockwell-Extra-Bold.otf') }}') format('opentype'),
+             url('{{ asset('fonts/Rockwell-Extra-Bold.woff2') }}') format('woff2');
+        font-weight: 800;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Rockwell Std';
+        src: local('Rockwell Std'), local('Rockwell'), local('Rockwell-Regular'),
+             url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype'),
+             url('{{ asset('fonts/Rockwell-Regular.woff2') }}') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
     }
     .font-rockwell {
-        font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', 'DejaVu Serif', Georgia, serif;
+        font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', serif !important;
     }
 </style>
 
@@ -224,7 +247,7 @@
             <!-- Inputs -->
             <div class="space-y-3.5 text-xs">
                 <div>
-                    <label class="block text-slate-600 font-semibold mb-1">Participant Full Name (Rockwell 10pt)</label>
+                    <label class="block text-slate-600 font-semibold mb-1">Participant Full Name (Rockwell Std)</label>
                     <input type="text" x-model="participantName"
                            class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 font-rockwell font-medium text-sm focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-all">
                     <p class="text-[10px] text-slate-400 mt-1">Automatically auto-fits font size if name is long.</p>
@@ -432,40 +455,40 @@
                      class="absolute inset-0 w-full h-full object-fill pointer-events-none z-0">
 
                 <!-- 1. White Square QR Box (Position & Size driven by reactive inline style) -->
-                <div :style="`position: absolute; top: ${pos.qrY}%; left: 50%; transform: translateX(calc(-50% + ${pos.qrX}px)); width: ${pos.qrSize}px; height: ${pos.qrSize}px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 10; pointer-events: none;`">
+                <div :style="`position: absolute; top: ${pos.qrY}%; left: 50%; transform: translateX(calc(-50% + ${pos.qrX}px)); width: ${pos.qrSize}px; height: ${pos.qrSize}px; background: #ffffff; border-radius: 8px; box-shadow: none; display: flex; align-items: center; justify-content: center; z-index: 10; pointer-events: none;`">
                     <img :src="qrUrl"
                          alt="QR Code"
                          :style="`width: ${Math.max(pos.qrSize - 14, 40)}px; height: ${Math.max(pos.qrSize - 14, 40)}px; object-fit: contain; display: block;`">
                 </div>
 
-                <!-- 2. QF Number in RED BUTTON (Position & Size driven by reactive inline style) -->
+                <!-- 2. QF Number in RED BUTTON (Position & Size driven by reactive inline style - Clean no white stroke, no black shadow) -->
                 <div :style="`position: absolute; top: ${pos.qfY}%; left: 50%; transform: translateX(calc(-50% + ${pos.qfX}px)); z-index: 10; width: max-content; pointer-events: none;`">
                     <div class="font-rockwell"
-                         :style="`background: #be1e2d; color: #ffffff; font-weight: 800; font-size: ${pos.qfSize}px; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 20px; border-radius: 9999px; box-shadow: 0 2px 8px rgba(0,0,0,0.35); border: 1.5px solid rgba(255,255,255,0.5); line-height: 1; display: inline-flex; align-items: center; justify-content: center;`"
+                         :style="`background: #be1e2d; color: #ffffff; font-weight: 800; font-size: ${pos.qfSize}px; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 20px; border-radius: 9999px; box-shadow: none; border: none; line-height: 1; display: inline-flex; align-items: center; justify-content: center; font-family: 'Rockwell Std', 'Rockwell', serif;`"
                          x-text="chestNo">
                     </div>
                 </div>
 
-                <!-- 3. Student Full Name (Position & Size driven by reactive inline style) -->
+                <!-- 3. Student Full Name (Rockwell Std typography, compact line height) -->
                 <div :style="`position: absolute; top: ${pos.nameY}%; left: 10px; right: 10px; transform: translateX(${pos.nameX}px); text-align: center; z-index: 10; pointer-events: none;`">
                     <div class="font-rockwell"
-                         :style="`color: ${activeTeam.isYellow ? '#0f172a' : '#ffffff'}; font-size: ${pos.nameSize}px; font-weight: bold; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px;`"
+                         :style="`color: ${activeTeam.isYellow ? '#0f172a' : '#ffffff'}; font-size: ${pos.nameSize}px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; font-family: 'Rockwell Std', 'Rockwell', serif; text-shadow: none;`"
                          x-text="participantName">
                     </div>
                 </div>
 
-                <!-- 4. Official Team / Group Pill Button (Position & Size driven by reactive inline style) -->
+                <!-- 4. Official Team / Group Pill Button (Clean no stroke, no shadow) -->
                 <div :style="`position: absolute; top: ${pos.groupY}%; left: 50%; transform: translateX(calc(-50% + ${pos.groupX}px)); z-index: 10; width: max-content; pointer-events: none;`">
                     <div class="font-rockwell"
-                         :style="`background: ${activeTeam.isYellow ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)'}; border: 0.8px solid ${activeTeam.isYellow ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.5)'}; color: ${activeTeam.isYellow ? '#0f172a' : '#ffffff'}; font-size: ${pos.groupSize}px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;`"
+                         :style="`background: ${activeTeam.isYellow ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)'}; border: none; box-shadow: none; color: ${activeTeam.isYellow ? '#0f172a' : '#ffffff'}; font-size: ${pos.groupSize}px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; font-family: 'Rockwell Std', 'Rockwell', serif;`"
                          x-text="activeTeam.name">
                     </div>
                 </div>
 
-                <!-- 5. Zone & Class / Category (Position & Size driven by reactive inline style) -->
+                <!-- 5. Zone & Class / Category (Rockwell Std typography) -->
                 <div :style="`position: absolute; top: ${pos.zoneY}%; left: 10px; right: 10px; transform: translateX(${pos.zoneX}px); text-align: center; z-index: 10; pointer-events: none;`">
                     <div class="font-rockwell"
-                         :style="`color: ${activeTeam.isYellow ? '#1e293b' : 'rgba(255,255,255,0.92)'}; font-size: ${pos.zoneSize}px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;`"
+                         :style="`color: ${activeTeam.isYellow ? '#1e293b' : 'rgba(255,255,255,0.92)'}; font-size: ${pos.zoneSize}px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1; font-family: 'Rockwell Std', 'Rockwell', serif; text-shadow: none;`"
                          x-text="(zone ? zone.toUpperCase() + ' • ' : '') + category.toUpperCase()">
                     </div>
                 </div>
