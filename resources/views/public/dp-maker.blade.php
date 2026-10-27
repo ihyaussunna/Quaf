@@ -337,6 +337,19 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Force purge of old cached frames & stored sessions for all visitors
+    const FRAME_VERSION_TAG = 'quaf_dp_v2_20261028';
+    try {
+        if (localStorage.getItem('quaf_dp_active_ver') !== FRAME_VERSION_TAG) {
+            localStorage.clear();
+            sessionStorage.clear();
+            localStorage.setItem('quaf_dp_active_ver', FRAME_VERSION_TAG);
+            if ('caches' in window) {
+                caches.keys().then(names => names.forEach(name => caches.delete(name)));
+            }
+        }
+    } catch (e) {}
+
     const canvas = document.getElementById('dpCanvas');
     const ctx = canvas.getContext('2d');
     const photoInput = document.getElementById('photoInput');
@@ -445,10 +458,10 @@ document.addEventListener('DOMContentLoaded', function () {
             // Subtle silhouette
             ctx.fillStyle = '#e2e8f0';
             ctx.beginPath();
-            ctx.arc(CIRCLE_X, CIRCLE_Y - 30, 85, 0, Math.PI * 2);
+            ctx.arc(CIRCLE_X, CIRCLE_Y - 40, 110, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(CIRCLE_X, CIRCLE_Y + 140, 140, Math.PI, 0, false);
+            ctx.arc(CIRCLE_X, CIRCLE_Y + 170, 180, Math.PI, 0, false);
             ctx.fill();
             ctx.restore();
         }
