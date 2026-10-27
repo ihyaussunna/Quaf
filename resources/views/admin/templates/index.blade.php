@@ -4,33 +4,54 @@
 <style>
     @font-face {
         font-family: 'Rockwell Std';
-        src: local('Rockwell Std Bold'), local('Rockwell Bold'), local('Rockwell-Bold'),
-             url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype'),
-             url('{{ asset('fonts/Rockwell-Bold.woff2') }}') format('woff2');
+        src: url('{{ asset('fonts/ROCK.TTF') }}') format('truetype'),
+             local('Rockwell Std'), local('Rockwell');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Rockwell Std';
+        src: url('{{ asset('fonts/ROCK.TTF') }}') format('truetype'),
+             local('Rockwell Std Bold'), local('Rockwell Bold');
         font-weight: 700;
         font-style: normal;
         font-display: swap;
     }
     @font-face {
         font-family: 'Rockwell Std';
-        src: local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold'), local('Rockwell-ExtraBold'),
-             url('{{ asset('fonts/Rockwell-Extra-Bold.otf') }}') format('opentype'),
-             url('{{ asset('fonts/Rockwell-Extra-Bold.woff2') }}') format('woff2');
+        src: url('{{ asset('fonts/ROCK.TTF') }}') format('truetype'),
+             local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold');
         font-weight: 800;
         font-style: normal;
         font-display: swap;
     }
     @font-face {
-        font-family: 'Rockwell Std';
-        src: local('Rockwell Std'), local('Rockwell'), local('Rockwell-Regular'),
-             url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype'),
-             url('{{ asset('fonts/Rockwell-Regular.woff2') }}') format('woff2');
+        font-family: 'Rockwell';
+        src: url('{{ asset('fonts/ROCK.TTF') }}') format('truetype'),
+             local('Rockwell');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
     }
+    @font-face {
+        font-family: 'Rockwell';
+        src: url('{{ asset('fonts/ROCK.TTF') }}') format('truetype'),
+             local('Rockwell Bold');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Rockwell';
+        src: url('{{ asset('fonts/ROCK.TTF') }}') format('truetype'),
+             local('Rockwell Extra Bold');
+        font-weight: 800;
+        font-style: normal;
+        font-display: swap;
+    }
     .font-rockwell {
-        font-family: 'Rockwell Std', 'Rockwell', 'Rockwell Nova', serif !important;
+        font-family: 'Rockwell Std', 'Rockwell', serif !important;
     }
 </style>
 
