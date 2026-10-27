@@ -193,7 +193,7 @@
             </section>
 
             <!-- CARD 3: STEP 02 - DIRECT UPI PAYMENT & OFFICIAL SIB QR -->
-            <section class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative overflow-hidden">
+            <section id="step-02" class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/60 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-4">
                     <span class="px-3 py-1 rounded-full bg-red-50 text-[#94121b] text-[11px] font-mono font-bold tracking-widest uppercase">
                         STEP 02
@@ -226,7 +226,7 @@
                                 <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
                                 <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
                             </svg>
-                            <span x-text="'Direct UPI Pay ₹' + Number(selectedAmount).toLocaleString('en-IN')"></span>
+                            <span x-text="'Direct UPI Pay (Open in App)'"></span>
                         </button>
 
                         <!-- 2. Fast App Buttons: GPay, PhonePe & Paytm / Other UPI -->
@@ -274,7 +274,7 @@
 
                         <!-- Informational Note -->
                         <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed pt-1">
-                            തുക touch ചെയ്താൽ <strong class="text-slate-900">Direct UPI Payment</strong> നേരിട്ട് തുറക്കും; അതേ തുക <strong class="text-[#94121b]">qr.9074680630@sib</strong> എന്ന UPI ID-യിലേക്ക് payment screen-ൽ automatically fill ചെയ്യും.
+                            ബട്ടൺ ക്ലിക്ക് ചെയ്താൽ സൗത്ത് ഇന്ത്യൻ ബാങ്ക് വെരിഫൈഡ് ഔദ്യോഗിക പേയ്‌മെന്റ് സ്ക്രീൻ (<strong class="text-[#94121b]">JAMIA MARKAZU SSAQUAFATHISSUNNIYYA</strong>) നേരിട്ട് തുറക്കും. തിരഞ്ഞെടുത്ത തുക നൽകി PIN അടിച്ചാൽ പെയ്‌മെന്റ് ഉടൻ പൂർത്തിയാകും.
                         </p>
 
                         <div class="p-3.5 rounded-2xl bg-slate-50 text-[11px] font-mono text-slate-700">
@@ -300,11 +300,18 @@
                             <div class="text-[10px] font-mono text-slate-500">
                                 qr.9074680630@sib
                             </div>
-                            <a :href="getOfficialQrLink()" 
-                               class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-mono font-bold transition-colors">
-                                <span>Open Official SIB QR</span>
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </a>
+                            <div class="flex flex-col gap-1.5 mt-2.5 w-full">
+                                <a :href="getOfficialQrLink()" 
+                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-sora font-bold transition-colors">
+                                    <span>Open Official SIB QR</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                </a>
+                                <a href="{{ asset('images/quaf-sib-qr.jpg') }}" download="quaf-sib-qr.jpg" 
+                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-sora font-bold transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Download QR to Gallery</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -825,7 +832,10 @@ function quafDonationPage() {
         selectAmount(amt) {
             this.selectedAmount = Number(amt);
             this.uploadForm.amount = Number(amt);
-            this.payNow();
+            const step2 = document.getElementById('step-02');
+            if (step2) {
+                step2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         },
 
         handleFileSelect(event) {
@@ -1015,55 +1025,71 @@ function quafDonationPage() {
                 return;
             }
             this.selectedAmount = Math.round(val);
+            this.uploadForm.amount = Math.round(val);
             this.customInput = '';
-            this.payNow();
-        },
-
-        getUpiLink() {
-            const amt = Number(this.selectedAmount).toFixed(2);
-            // CRITICAL: pa must keep literal '@' (NOT '%40') so UPI apps recognize the VPA
-            return `upi://pay?pa=${this.upiId}&pn=${encodeURIComponent(this.payeeName)}&mc=${this.merchantCode}&mode=${this.mode}&orgid=${this.orgId}&am=${amt}&cu=INR&tn=${encodeURIComponent('QUAF 2026 Donation')}`;
+            const step2 = document.getElementById('step-02');
+            if (step2) {
+                step2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         },
 
         getOfficialQrLink() {
             return "upi://pay?pa=qr.9074680630@sib&pn=JAMIA%MARKAZU%SSAQUAFATHISSUNNIYYA&mc=8661&cu=INR&orgid=159059&mode=02&sign=MEYCIQDPR9QWDEqm6Zq8M8DKyE/193h6NmYq9ieoAufr8CoevgIhANpl1HCh5O9y0zlyEeStHXQSlUfPeEnzMfCer3wgAF5v";
         },
 
+        getUpiLink() {
+            return this.getOfficialQrLink();
+        },
+
         getAndroidIntentLink(pkg = 'com.google.android.apps.nbu.paisa.user') {
-            const query = this.getUpiLink().replace("upi://pay?", "");
+            const query = this.getOfficialQrLink().replace("upi://pay?", "");
             return `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
         },
 
+        async autoCopyUpi() {
+            try {
+                await navigator.clipboard.writeText(this.upiId);
+                this.copiedUPI = true;
+                setTimeout(() => { this.copiedUPI = false; }, 3500);
+            } catch (e) {
+                // Ignore if clipboard denied
+            }
+        },
+
         payNow() {
-            window.location.href = this.getUpiLink();
+            this.autoCopyUpi();
+            window.location.href = this.getOfficialQrLink();
         },
 
         payWithGPay() {
+            this.autoCopyUpi();
             const isAndroid = /Android/i.test(navigator.userAgent);
             if (isAndroid) {
                 window.location.href = this.getAndroidIntentLink('com.google.android.apps.nbu.paisa.user');
                 setTimeout(() => {
-                    window.location.href = this.getUpiLink();
+                    window.location.href = this.getOfficialQrLink();
                 }, 800);
             } else {
-                window.location.href = this.getUpiLink();
+                window.location.href = this.getOfficialQrLink();
             }
         },
 
         payWithPhonePe() {
+            this.autoCopyUpi();
             const isAndroid = /Android/i.test(navigator.userAgent);
             if (isAndroid) {
                 window.location.href = this.getAndroidIntentLink('com.phonepe.app');
                 setTimeout(() => {
-                    window.location.href = this.getUpiLink();
+                    window.location.href = this.getOfficialQrLink();
                 }, 800);
             } else {
-                window.location.href = this.getUpiLink();
+                window.location.href = this.getOfficialQrLink();
             }
         },
 
         payGenericUPI() {
-            window.location.href = this.getUpiLink();
+            this.autoCopyUpi();
+            window.location.href = this.getOfficialQrLink();
         },
 
         async copyUPI() {
