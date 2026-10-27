@@ -152,16 +152,16 @@
         qrSize: 126,
         qfY: 72.4,
         qfX: 0,
-        qfSize: 15,
-        nameY: 80.4,
+        qfSize: 18,
+        nameY: 79.2,
         nameX: 0,
-        nameSize: 13,
-        groupY: 86.4,
+        nameSize: 15,
+        groupY: 82.6,
         groupX: 0,
-        groupSize: 10,
-        zoneY: 92.0,
+        groupSize: 14,
+        zoneY: 88.2,
         zoneX: 0,
-        zoneSize: 10
+        zoneSize: 14
     },
     resetPos() {
         this.pos = {
@@ -170,16 +170,16 @@
             qrSize: 126,
             qfY: 72.4,
             qfX: 0,
-            qfSize: 15,
-            nameY: 80.4,
+            qfSize: 18,
+            nameY: 79.2,
             nameX: 0,
-            nameSize: 13,
-            groupY: 86.4,
+            nameSize: 15,
+            groupY: 82.6,
             groupX: 0,
-            groupSize: 10,
-            zoneY: 92.0,
+            groupSize: 14,
+            zoneY: 88.2,
             zoneX: 0,
-            zoneSize: 10
+            zoneSize: 14
         };
     }
 }">

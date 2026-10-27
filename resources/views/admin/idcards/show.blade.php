@@ -181,28 +181,28 @@
 
                     <!-- 2. QF Number in RED BUTTON (Clean no white stroke, no shadow, centered at Y ~ 72.4%) -->
                     <div style="position: absolute; top: 72.4%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
-                        <div class="font-rockwell qf-pill" style="background: #be1e2d; color: #ffffff; font-weight: 800; font-size: 15px; letter-spacing: 0.8px; text-transform: uppercase; padding: 6px 20px; border-radius: 9999px; box-shadow: none; border: none; line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
+                        <div class="font-rockwell qf-pill" style="background: #be1e2d; color: #ffffff; font-weight: 800; font-size: 18px; letter-spacing: 0.8px; text-transform: uppercase; padding: 6px 20px; border-radius: 9999px; box-shadow: none; border: none; line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
                             {{ $chest }}
                         </div>
                     </div>
 
-                    <!-- 3. Student Full Name (Rockwell bold, compact line distance, centered at Y ~ 80.4%) -->
-                    <div style="position: absolute; top: 80.4%; left: 12px; right: 12px; text-align: center; z-index: 10;">
-                        <div class="font-rockwell student-name" style="color: {{ $textColor }}; font-size: {{ $nameLen > 24 ? '11.5px' : ($nameLen > 18 ? '13px' : '14px') }}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; padding: 0 2px;">
+                    <!-- 3. Student Full Name (Rockwell Std bold, compact line distance, centered at Y ~ 79.2%) -->
+                    <div style="position: absolute; top: 79.2%; left: 12px; right: 12px; text-align: center; z-index: 10;">
+                        <div class="font-rockwell student-name" style="color: {{ $textColor }}; font-size: {{ $nameLen > 24 ? '12px' : ($nameLen > 18 ? '13.5px' : '15px') }}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; padding: 0 2px;">
                             {{ $student->name }}
                         </div>
                     </div>
 
-                    <!-- 4. Group inside Pill Button (Clean no stroke, no shadow, centered at Y ~ 86.4%) -->
-                    <div style="position: absolute; top: 86.4%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
-                        <div class="font-rockwell group-pill" style="background: {{ $isConco ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)' }}; border: none; box-shadow: none; color: {{ $textColor }}; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
+                    <!-- 4. Group inside Pill Button (Clean no stroke, no shadow, centered at Y ~ 82.6%) -->
+                    <div style="position: absolute; top: 82.6%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
+                        <div class="font-rockwell group-pill" style="background: {{ $isConco ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)' }}; border: none; box-shadow: none; color: {{ $textColor }}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 14px; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                             {{ $displayName }}
                         </div>
                     </div>
 
-                    <!-- 5. Zone & Class / Category (Prominent Zone display, centered at Y ~ 92.0%) -->
-                    <div style="position: absolute; top: 92.0%; left: 12px; right: 12px; text-align: center; z-index: 10;">
-                        <div class="font-rockwell zone-text" style="color: {{ $isConco ? '#1e293b' : 'rgba(255,255,255,0.92)' }}; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
+                    <!-- 5. Zone & Class / Category (Prominent Zone display, centered at Y ~ 88.2%) -->
+                    <div style="position: absolute; top: 88.2%; left: 12px; right: 12px; text-align: center; z-index: 10;">
+                        <div class="font-rockwell zone-text" style="color: {{ $isConco ? '#1e293b' : 'rgba(255,255,255,0.92)' }}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
                             {{ $zoneClassDisplay }}
                         </div>
                     </div>

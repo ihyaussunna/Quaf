@@ -199,36 +199,36 @@
                      style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0; pointer-events: none;">
 
                 <!-- 1. QR Code inside White Square Box (Centered directly below "Scan It, Know It" at Y ~ 45.6%) -->
-                <div style="position: absolute; top: 45.6%; left: 50%; transform: translateX(-50%); width: 25mm; height: 25mm; background: #ffffff; border-radius: 6px; box-shadow: none; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                <div style="position: absolute; top: 45.6%; left: 50%; transform: translateX(-50%); width: 25.2mm; height: 25.2mm; background: #ffffff; border-radius: 6px; box-shadow: none; display: flex; align-items: center; justify-content: center; z-index: 10;">
                     <img src="{{ $qrUrl }}"
                          alt="QR Code"
-                         style="width: 22.8mm; height: 22.8mm; object-fit: contain; display: block;">
+                         style="width: 23mm; height: 23mm; object-fit: contain; display: block;">
                 </div>
 
                 <!-- 2. QF Number in RED BUTTON (Clean no white stroke, no shadow, centered at Y ~ 72.4%) -->
                 <div style="position: absolute; top: 72.4%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
-                    <div class="font-rockwell" style="background: #be1e2d; color: #ffffff; font-weight: 800; font-size: 11.5pt; letter-spacing: 0.8px; text-transform: uppercase; padding: 1.6mm 6mm; border-radius: 9999px; box-shadow: none; border: none; line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
+                    <div class="font-rockwell" style="background: #be1e2d; color: #ffffff; font-weight: 800; font-size: 11pt; letter-spacing: 0.8px; text-transform: uppercase; padding: 1.2mm 5mm; border-radius: 9999px; box-shadow: none; border: none; line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
                         {{ $chest }}
                     </div>
                 </div>
 
-                <!-- 3. Student Full Name (Rockwell bold, compact line distance, centered at Y ~ 80.4%) -->
-                <div style="position: absolute; top: 80.4%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
-                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: {{ $nameLen > 24 ? '8.5pt' : ($nameLen > 18 ? '9pt' : '10pt') }}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; padding: 0 0.5mm;">
+                <!-- 3. Student Full Name (Rockwell Std bold, compact line distance, centered at Y ~ 79.2%) -->
+                <div style="position: absolute; top: 79.2%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: {{ $textColor }}; font-size: {{ $nameLen > 24 ? '8.5pt' : ($nameLen > 18 ? '9.5pt' : '10.5pt') }}; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; padding: 0 0.5mm;">
                         {{ $student->name }}
                     </div>
                 </div>
 
-                <!-- 4. Group inside Pill Button (Clean no stroke, no shadow, centered at Y ~ 86.4%) -->
-                <div style="position: absolute; top: 86.4%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
-                    <div class="font-rockwell" style="background: {{ $isConco ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)' }}; border: none; box-shadow: none; color: {{ $textColor }}; font-size: 7.2pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 1mm 4mm; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
+                <!-- 4. Group inside Pill Button (Clean no stroke, no shadow, centered at Y ~ 82.6%) -->
+                <div style="position: absolute; top: 82.6%; left: 50%; transform: translateX(-50%); z-index: 10; width: max-content;">
+                    <div class="font-rockwell" style="background: {{ $isConco ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)' }}; border: none; box-shadow: none; color: {{ $textColor }}; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 0.8mm 3.5mm; border-radius: 9999px; line-height: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                         {{ $displayName }}
                     </div>
                 </div>
 
-                <!-- 5. Zone & Class / Category (Prominent Zone display, centered at Y ~ 92.0%) -->
-                <div style="position: absolute; top: 92.0%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
-                    <div class="font-rockwell" style="color: {{ $isConco ? '#1e293b' : 'rgba(255,255,255,0.92)' }}; font-size: 7.2pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
+                <!-- 5. Zone & Class / Category (Prominent Zone display, centered at Y ~ 88.2%) -->
+                <div style="position: absolute; top: 88.2%; left: 2.5mm; right: 2.5mm; text-align: center; z-index: 10;">
+                    <div class="font-rockwell" style="color: {{ $isConco ? '#1e293b' : 'rgba(255,255,255,0.92)' }}; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
                         {{ $zoneClassDisplay }}
                     </div>
                 </div>
