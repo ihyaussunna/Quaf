@@ -229,25 +229,35 @@
                             <span x-text="'Direct UPI Pay ₹' + Number(selectedAmount).toLocaleString('en-IN')"></span>
                         </button>
 
-                        <!-- 2. Dual App Buttons: GPay & Generic UPI (Solid & Stroke-Free) -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <!-- 2. Fast App Buttons: GPay, PhonePe & Paytm / Other UPI -->
+                        <div class="grid grid-cols-3 gap-2 sm:gap-3">
                             <button type="button" 
                                     @click="payWithGPay()" 
                                     style="background-color: #0f172a !important; color: #ffffff !important;"
-                                    class="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="py-3 px-2 sm:px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                 </svg>
-                                <span>Google Pay</span>
+                                <span>GPay</span>
+                            </button>
+                            <button type="button" 
+                                    @click="payWithPhonePe()" 
+                                    style="background-color: #5f259f !important; color: #ffffff !important;"
+                                    class="py-3 px-2 sm:px-3 rounded-2xl bg-[#5f259f] hover:bg-[#4d1d82] text-white font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="5" y="2" width="14" height="20" rx="3" stroke-width="2"/>
+                                    <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2"/>
+                                </svg>
+                                <span>PhonePe</span>
                             </button>
                             <button type="button" 
                                     @click="payGenericUPI()" 
                                     style="background-color: #f3bd2e !important; color: #020617 !important;"
-                                    class="py-3.5 px-4 rounded-2xl bg-[#f3bd2e] hover:bg-amber-400 text-slate-950 font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="py-3 px-2 sm:px-3 rounded-2xl bg-[#f3bd2e] hover:bg-amber-400 text-slate-950 font-sora text-xs sm:text-sm font-bold shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4 text-slate-950 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
-                                <span>Other UPI Apps</span>
+                                <span>Any UPI</span>
                             </button>
                         </div>
 
@@ -285,11 +295,16 @@
                                      class="w-full h-full object-contain">
                             </div>
                             <div class="mt-2 text-[10px] font-mono text-slate-900 font-bold uppercase tracking-tight">
-                                JAMIA MARKAZU SSAQUAFATHISSUNN
+                                JAMIA MARKAZU SSAQUAFATHISSUNNIYYA
                             </div>
                             <div class="text-[10px] font-mono text-slate-500">
                                 qr.9074680630@sib
                             </div>
+                            <a :href="getOfficialQrLink()" 
+                               class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-mono font-bold transition-colors">
+                                <span>Open Official SIB QR</span>
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -779,7 +794,10 @@
 function quafDonationPage() {
     return {
         upiId: "qr.9074680630@sib",
-        payeeName: "QUAF 2026",
+        payeeName: "JAMIA MARKAZU SSAQUAFATHISSUNNIYYA",
+        merchantCode: "8661",
+        orgId: "159059",
+        mode: "02",
         selectedAmount: 100,
         customInput: '',
         copiedUPI: false,
@@ -1002,31 +1020,18 @@ function quafDonationPage() {
         },
 
         getUpiLink() {
-            const params = new URLSearchParams({
-                pa: this.upiId,
-                pn: this.payeeName,
-                am: Number(this.selectedAmount).toFixed(2),
-                cu: "INR"
-            });
-            return "upi://pay?" + params.toString();
+            const amt = Number(this.selectedAmount).toFixed(2);
+            // CRITICAL: pa must keep literal '@' (NOT '%40') so UPI apps recognize the VPA
+            return `upi://pay?pa=${this.upiId}&pn=${encodeURIComponent(this.payeeName)}&mc=${this.merchantCode}&mode=${this.mode}&orgid=${this.orgId}&am=${amt}&cu=INR&tn=${encodeURIComponent('QUAF 2026 Donation')}`;
         },
 
-        getGPayLink() {
-            const params = new URLSearchParams({
-                pa: this.upiId,
-                pn: this.payeeName,
-                am: Number(this.selectedAmount).toFixed(2),
-                cu: "INR"
-            });
-            return "tez://upi/pay?" + params.toString();
+        getOfficialQrLink() {
+            return "upi://pay?pa=qr.9074680630@sib&pn=JAMIA%MARKAZU%SSAQUAFATHISSUNNIYYA&mc=8661&cu=INR&orgid=159059&mode=02&sign=MEYCIQDPR9QWDEqm6Zq8M8DKyE/193h6NmYq9ieoAufr8CoevgIhANpl1HCh5O9y0zlyEeStHXQSlUfPeEnzMfCer3wgAF5v";
         },
 
-        getAndroidIntentLink() {
+        getAndroidIntentLink(pkg = 'com.google.android.apps.nbu.paisa.user') {
             const query = this.getUpiLink().replace("upi://pay?", "");
-            return "intent://pay?" + query +
-                "#Intent;scheme=upi;" +
-                "package=com.google.android.apps.nbu.paisa.user;" +
-                "end";
+            return `intent://pay?${query}#Intent;scheme=upi;package=${pkg};end`;
         },
 
         payNow() {
@@ -1034,12 +1039,27 @@ function quafDonationPage() {
         },
 
         payWithGPay() {
-            const gpay = this.getGPayLink();
-            const intent = this.getAndroidIntentLink();
-            window.location.href = gpay;
-            setTimeout(() => {
-                window.location.href = intent;
-            }, 700);
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                window.location.href = this.getAndroidIntentLink('com.google.android.apps.nbu.paisa.user');
+                setTimeout(() => {
+                    window.location.href = this.getUpiLink();
+                }, 800);
+            } else {
+                window.location.href = this.getUpiLink();
+            }
+        },
+
+        payWithPhonePe() {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                window.location.href = this.getAndroidIntentLink('com.phonepe.app');
+                setTimeout(() => {
+                    window.location.href = this.getUpiLink();
+                }, 800);
+            } else {
+                window.location.href = this.getUpiLink();
+            }
         },
 
         payGenericUPI() {

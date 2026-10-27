@@ -425,7 +425,13 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('QUAF 2026 | ₹100 Challenge');
         $response->assertSee('qr.9074680630@sib');
+        $response->assertSee('JAMIA MARKAZU SSAQUAFATHISSUNNIYYA');
         $response->assertSee('quaf-sib-qr.jpg');
+        $response->assertSee('Direct UPI Pay');
+        $response->assertSee('GPay');
+        $response->assertSee('PhonePe');
+        $response->assertSee('8661');
+        $response->assertSee('159059');
         $response->assertSee('1500+');
         $response->assertSee('₹100');
         $response->assertSee('നിങ്ങളുടെ രസീത് പോസ്റ്റർ ഡൗൺലോഡ് ചെയ്യാം');
