@@ -97,9 +97,10 @@ class StudentPortalThemeRedDesignTest extends TestCase
 
         $response->assertStatus(200);
 
-        // 1. Verify student profile hero has theme red elements
+        // 1. Verify student profile hero has theme red elements and QR badge button is hidden
         $response->assertSee('#be1e2d');
-        $response->assertSee('View QR Badge');
+        $response->assertDontSee('View QR Badge');
+        $response->assertDontSee('Secret Purchase PIN');
         $response->assertSee('from-[#be1e2d]');
 
         // 2. Verify Coin Wallet Banner has red and yellow gradient as requested
@@ -121,7 +122,7 @@ class StudentPortalThemeRedDesignTest extends TestCase
         $response->assertSee('Stage 06');
     }
 
-    public function test_student_digital_id_card_renders_with_theme_red_design(): void
+    public function test_student_digital_id_card_redirects_to_dashboard_so_qr_code_is_not_exposed_online(): void
     {
         $group = Group::firstOrCreate(
             ['code' => 'PACTO'],
@@ -150,11 +151,6 @@ class StudentPortalThemeRedDesignTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('student.idcard'));
 
-        $response->assertStatus(200);
-
-        // Verify Theme Red accents
-        $response->assertSee('#be1e2d');
-        $response->assertSee('Dashboard');
-        $response->assertDontSee('Print / Save Badge');
+        $response->assertRedirect(route('student.dashboard'));
     }
 }

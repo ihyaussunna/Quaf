@@ -32,10 +32,6 @@
         </div>
 
         <div class="flex items-center gap-3 relative z-10">
-            <a href="{{ route('student.idcard') }}" class="app-tap px-5 py-2.5 bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:from-red-700 hover:to-red-900 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl flex items-center gap-2.5 shadow-md shadow-red-900/20 hover:shadow-lg hover:shadow-red-900/30 active:scale-95 transition-all">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                <span>View QR Badge</span>
-            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="app-tap px-4 py-2.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 text-slate-700 font-mono font-bold text-xs uppercase rounded-xl border border-slate-200 transition-all cursor-pointer">
@@ -89,42 +85,17 @@
                 </div>
             </div>
 
-            <!-- Compact 2-Column Info Row: Secret PIN & Recognition Gift -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-white/15">
-                <!-- Secret Purchase PIN -->
-                <div class="rounded-xl px-3.5 py-2.5 {{ !empty($isQrVerifiedSession) ? 'bg-amber-400 text-slate-950 border border-amber-300 shadow-sm' : 'bg-slate-950/50 backdrop-blur-sm border border-white/20 text-white' }} flex items-center justify-between gap-2">
-                    <div class="min-w-0">
-                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider {{ !empty($isQrVerifiedSession) ? 'text-slate-900' : 'text-amber-300' }}">
-                            Secret Purchase PIN
-                        </div>
-                        <div class="text-[10px] font-anek truncate {{ !empty($isQrVerifiedSession) ? 'text-slate-800 font-medium' : 'text-amber-100/80' }}">
-                            {{ !empty($isQrVerifiedSession) ? 'പ്രസന്റേഷൻ കൗണ്ടറിൽ നൽകുക' : 'കൗണ്ടറിൽ ഫിസിക്കൽ ഐഡി കാർഡ് നൽകുക' }}
-                        </div>
-                    </div>
-                    <div class="shrink-0 font-mono font-black">
-                        @if(!empty($isQrVerifiedSession))
-                            <span class="px-2 py-1 rounded-lg bg-slate-950 text-amber-300 tracking-widest text-xs font-bold shadow-xs">
-                                {{ $student->purchase_pin }}
-                            </span>
-                        @else
-                            <span class="px-2.5 py-1 rounded-lg bg-black/40 text-amber-300 tracking-widest text-xs font-bold border border-white/15">
-                                ••••
-                            </span>
-                            <span class="sr-only">Scan QR to View</span>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Recognition Gift -->
-                @php
-                    $isParticipant = $student->isCompetitionParticipant();
-                @endphp
-                <div class="rounded-xl px-3.5 py-2.5 border flex items-center justify-between gap-2 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : ($isParticipant ? 'bg-slate-950/40 border-white/20 text-white' : 'bg-slate-950/20 border-white/10 text-white/60') }}">
+            <!-- Recognition Gift Status -->
+            @php
+                $isParticipant = $student->isCompetitionParticipant();
+            @endphp
+            <div class="pt-2 border-t border-white/15">
+                <div class="rounded-xl px-4 py-2.5 border flex items-center justify-between gap-3 {{ $student->recognition_gift_delivered ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-100' : ($isParticipant ? 'bg-slate-950/40 border-white/20 text-white' : 'bg-slate-950/20 border-white/10 text-white/60') }}">
                     <div class="min-w-0">
                         <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-white/80">
                             Recognition Gift
                         </div>
-                        <div class="text-[10px] truncate {{ $student->recognition_gift_delivered ? 'text-emerald-200 font-bold' : ($isParticipant ? 'text-amber-200' : 'text-slate-400') }}">
+                        <div class="text-[11px] truncate {{ $student->recognition_gift_delivered ? 'text-emerald-200 font-bold' : ($isParticipant ? 'text-amber-200' : 'text-slate-400') }}">
                             @if($student->recognition_gift_delivered)
                                 കൈപ്പറ്റി (Delivered)
                             @elseif($isParticipant)
@@ -134,7 +105,7 @@
                             @endif
                         </div>
                     </div>
-                    <span class="shrink-0 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-md {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : ($isParticipant ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-300') }}">
+                    <span class="shrink-0 text-[10px] font-mono font-bold px-3 py-1 rounded-lg {{ $student->recognition_gift_delivered ? 'bg-emerald-400 text-slate-950' : ($isParticipant ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-300') }}">
                         {{ $student->recognition_gift_delivered ? 'Delivered' : ($isParticipant ? 'Pending' : 'N/A') }}
                     </span>
                 </div>

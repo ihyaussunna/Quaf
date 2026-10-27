@@ -374,7 +374,7 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $dashResponse = $this->get(route('student.dashboard'));
         $dashResponse->assertOk();
         $dashResponse->assertSee('Muhammad Bilal');
-        $dashResponse->assertSee('Scan QR to View');
+        $dashResponse->assertDontSee('Secret Purchase PIN');
         $dashResponse->assertDontSee($this->student->purchase_pin);
     }
 

@@ -8,7 +8,6 @@ use App\Models\CoinTransaction;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\CoinRewardService;
-use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -127,8 +126,6 @@ class StudentController extends Controller
             ->take(4)
             ->get();
 
-        $qrCodeSvg = QrCodeService::svg(route('verify.student', $student->qr_token), 200);
-
         $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student);
         $coinTransactions = CoinTransaction::where('student_id', $student->id)
             ->latest()
@@ -143,7 +140,6 @@ class StudentController extends Controller
             'myPrograms',
             'myResults',
             'announcements',
-            'qrCodeSvg',
             'individualCount',
             'remainingSlots',
             'maxSlots',
@@ -194,13 +190,9 @@ class StudentController extends Controller
             ->with('success', "സ്വാഗതം, {$student->name}! ഫിസിക്കൽ ഐഡി കാർഡ് വഴി സുരക്ഷിതമായി ലോഗിൻ ചെയ്തു.");
     }
 
-    public function idCard(): View
+    public function idCard(): RedirectResponse
     {
-        $student = $this->getStudent();
-        $student->load('group');
-        $qrCodeSvg = QrCodeService::svg(route('verify.student', $student->qr_token), 220);
-
-        return view('student.idcard', compact('student', 'qrCodeSvg'));
+        return redirect()->route('student.dashboard');
     }
 
     public function certificates()
