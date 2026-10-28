@@ -641,15 +641,41 @@ class StudentController extends Controller
         return redirect()->route('admin.students.index')->with('success', "Student '{$name}' deleted.");
     }
 
+    public function export(Request $request): StreamedResponse|JsonResponse
+    {
+        if ($request->query('format') === 'json') {
+            $data = Student::with(['group', 'zone'])
+                ->orderBy('student_id')
+                ->get()
+                ->map(fn ($s) => [
+                    'student_id' => $s->student_id,
+                    'chest_number' => $s->chest_number ?: $s->student_id,
+                    'name' => $s->name,
+                    'group_id' => $s->group_id,
+                    'group_name' => $s->group?->name,
+                    'group_code' => $s->group?->code,
+                    'category' => $s->category,
+                    'zone_name' => $s->zone?->name ?: $s->category,
+                    'class_level' => $s->class_level,
+                    'qr_token' => $s->qr_token,
+                ]);
+
+            return response()->json($data);
+        }
+
+        return $this->exportCsv();
+    }
+
     public function exportCsv(): StreamedResponse
     {
         $headers = [
-            'Content-Type' => 'text/csv',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="quaf-students-'.date('Ymd-His').'.csv"',
         ];
 
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, ['Student ID', 'Name', 'Group', 'Zone', 'Class', 'Gender', 'Contact', 'Points']);
 
             Student::with(['group', 'zone'])->orderBy('student_id')->chunk(100, function ($students) use ($handle) {
