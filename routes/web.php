@@ -669,6 +669,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     });
 });
 
+// Route name alias for legacy or cached calls
+Route::get('admin/students-export', [AdminStudentController::class, 'export'])->middleware(['auth', 'role:admin,super_admin'])->name('students.export');
+
 /*
 |--------------------------------------------------------------------------
 | Judges Panel Routes

@@ -587,4 +587,17 @@ class AdminViewsTest extends TestCase
         $stageResponse->assertDontSee('Future Off Stage Program');
         $stageResponse->assertSee('Format: Stage');
     }
+
+    public function test_admin_students_index_and_export_routes(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.students.index'));
+        $response->assertOk();
+        $response->assertSee(route('admin.students.export'));
+
+        $exportResponse = $this->actingAs($this->admin)->get(route('admin.students.export'));
+        $exportResponse->assertOk();
+
+        $legacyExportResponse = $this->actingAs($this->admin)->get(route('students.export'));
+        $legacyExportResponse->assertOk();
+    }
 }
