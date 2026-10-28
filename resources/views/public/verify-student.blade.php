@@ -1,21 +1,21 @@
 @extends('layouts.public', ['title' => 'Participant Verification — QUAF'])
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-8">
+<div class="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-16 space-y-6 sm:space-y-8 pb-28 sm:pb-16 overflow-hidden sm:overflow-visible">
     
-    <div class="text-center">
+    <div class="text-center px-2">
         <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">PARTICIPANT IDENTIFICATION & WALLET</span>
-        <h1 class="text-3xl sm:text-4xl font-sora font-black text-slate-900 mt-1">Official Delegate Profile</h1>
+        <h1 class="text-2xl sm:text-4xl font-sora font-black text-slate-900 mt-1">Official Delegate Profile</h1>
         <p class="text-xs text-slate-500 font-anek mt-1">ഐഡി കാർഡ് സ്കാൻ ചെയ്തുകൊണ്ടുള്ള ഔദ്യോഗിക വിവരങ്ങളും കോയിൻ ബാലൻസും</p>
     </div>
 
     @if($isValid && $student)
         <!-- Valid Student Profile -->
-        <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-10 shadow-lg space-y-8">
+        <div class="rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-8 md:p-10 shadow-lg space-y-6 sm:space-y-8 overflow-hidden w-full max-w-full">
             
             <!-- Student Header Profile -->
-            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-slate-200">
-                <div class="w-28 h-28 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-200 shadow-md shrink-0 flex items-center justify-center">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 pb-6 border-b border-slate-200 w-full max-w-full">
+                <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-200 shadow-md shrink-0 flex items-center justify-center">
                     @if($student->photo_url)
                         <img src="{{ $student->photo_url }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                     @elseif($student->photo_path)
@@ -27,34 +27,34 @@
                     @endif
                 </div>
 
-                <div class="flex-1 text-center sm:text-left min-w-0">
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
-                        <span class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-red-50 text-[#be1e2d] border border-red-200">
+                <div class="w-full flex-1 text-center sm:text-left min-w-0 max-w-full overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 mb-2 w-full">
+                        <span class="inline-flex items-center px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-mono font-bold bg-red-50 text-[#be1e2d] border border-red-200">
                             Chest #: {{ $student->chest_number ?? $student->student_id }}
                         </span>
-                        <span class="px-3 py-1 rounded-lg text-xs font-mono font-bold" style="background-color: {{ $student->group?->color_hex ?? '#2e3192' }}20; color: {{ $student->group?->color_hex ?? '#2e3192' }}">
+                        <span class="inline-flex items-center px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-mono font-bold" style="background-color: {{ $student->group?->color_hex ?? '#2e3192' }}20; color: {{ $student->group?->color_hex ?? '#2e3192' }}">
                             House: {{ $student->group?->name ?? 'QUAF' }}
                         </span>
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-mono bg-slate-100 text-slate-700">
+                        <span class="inline-flex items-center px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-mono bg-slate-100 text-slate-700">
                             {{ $student->zone_name }}
                         </span>
                     </div>
-                    <h2 class="text-2xl sm:text-3xl font-sora font-black text-slate-900 truncate">{{ $student->name }}</h2>
-                    <div class="text-xs font-mono text-slate-500 space-y-0.5 mt-1">
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-sora font-black text-slate-900 break-words leading-tight w-full">{{ $student->name }}</h2>
+                    <div class="text-xs font-mono text-slate-500 space-y-0.5 mt-1.5">
                         <p>Class / Category: <strong class="text-slate-700">{{ $student->class_level ?? $student->category }}</strong></p>
                         <p>Festival Contribution: <strong class="text-[#be1e2d] font-bold">{{ $student->points_cache }} Points</strong></p>
                     </div>
                 </div>
 
                 <!-- Open Full Portal Button -->
-                <div class="shrink-0 flex flex-col gap-2 w-full sm:w-auto">
+                <div class="shrink-0 flex flex-col gap-2 w-full sm:w-auto max-w-full">
                     <a href="{{ route('student.qr-login', $student->qr_token) }}" 
-                       class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md">
+                       class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md block">
                         Open Student Portal
                     </a>
                     @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
                         <a href="{{ route('presentation.dashboard', ['student' => $student->student_id]) }}" 
-                           class="px-4 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md">
+                           class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md block">
                             Open in Presentation Desk
                         </a>
                     @endif
