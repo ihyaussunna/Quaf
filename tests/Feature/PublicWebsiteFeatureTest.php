@@ -428,7 +428,7 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('JAMIA MARKAZU SSAQUAFATHISSUNNIYYA');
         $response->assertSee('quaf-sib-qr.jpg');
         $response->assertSee('Download QR to Gallery');
-        $response->assertSee('Payment Now');
+        $response->assertSee('Pay Now');
         $response->assertSee('8661');
         $response->assertSee('159059');
         $response->assertSee('1500+');

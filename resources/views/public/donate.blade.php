@@ -183,26 +183,26 @@
 
                     <!-- Action Buttons -->
                     <div class="w-full space-y-3 mt-5">
-                        <!-- 1. MAIN PRIMARY CTA: Download QR to Gallery -->
+                        <!-- 1. Pay Now Button (Top - Red) -->
+                        <button type="button" 
+                                @click="payNow()" 
+                                style="background-color: #be1e2d !important; color: #ffffff !important;"
+                                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 text-white font-sora font-bold text-base sm:text-lg shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2.5">
+                            <svg class="w-5 h-5 shrink-0 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span>Pay Now</span>
+                        </button>
+
+                        <!-- 2. Download QR to Gallery Button (Below - Black) -->
                         <a href="{{ asset('images/quaf-sib-qr.jpg') }}" download="quaf-sib-qr.jpg" 
-                           style="background-color: #be1e2d !important; color: #ffffff !important;"
-                           class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#991522] hover:brightness-105 text-white font-sora font-bold text-base sm:text-lg shadow-xl shadow-red-900/25 border-0 transition-all cursor-pointer flex items-center justify-center gap-2.5">
-                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           style="background-color: #0f172a !important; color: #ffffff !important;"
+                           class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora font-bold text-sm sm:text-base shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
                             <span>Download QR to Gallery</span>
                         </a>
-
-                        <!-- 2. Payment Now Button (Replaces Open Official SIB QR) -->
-                        <button type="button" 
-                                @click="payNow()" 
-                                style="background-color: #0f172a !important; color: #ffffff !important;"
-                                class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-sora font-bold text-sm sm:text-base shadow-md border-0 transition-all cursor-pointer flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                            <span>Payment Now</span>
-                        </button>
 
                         <!-- 3. Copy UPI ID Button -->
                         <button type="button" 
@@ -225,7 +225,7 @@
                             <span>എങ്ങനെ പണമടയ്ക്കാം?</span>
                         </div>
                         <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed">
-                            1. <strong>'Download QR to Gallery'</strong> ബട്ടൺ ക്ലിക്ക് ചെയ്ത് QR കോഡ് ഫോണിലേക്ക് സേവ് ചെയ്യുക.
+                            1. മുകളിലെ <strong>'Pay Now'</strong> ബട്ടൺ ക്ലിക്ക് ചെയ്തോ, അല്ലെങ്കിൽ <strong>'Download QR to Gallery'</strong> വഴി QR കോഡ് ഫോണിലേക്ക് സേവ് ചെയ്തോ പണമടയ്ക്കാം.
                         </p>
                         <p class="font-anek text-[11px] sm:text-xs text-slate-600 leading-relaxed">
                             2. <strong>Google Pay / PhonePe / Paytm</strong> തുറന്ന് QR Scanner എടുത്ത് <strong>'Upload from Gallery'</strong> വഴി ഈ QR തിരഞ്ഞെടുക്കുക.

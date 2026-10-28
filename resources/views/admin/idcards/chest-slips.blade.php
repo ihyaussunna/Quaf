@@ -176,7 +176,7 @@
 
                 $chest = $student->chest_number ?? $student->student_id;
                 $textColor = $isConco ? '#0f172a' : '#ffffff';
-                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" . urlencode(route('verify.student', $student->qr_token ?? $chest));
+                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" . urlencode('https://quaf.ihyaussunna.in/verify/student/' . $chest);
                 $displayName = $student->group?->name ?? 'General';
                 $nameLen = strlen($student->name);
                 $zoneText = strtoupper($student->zone_name ?? 'A Zone');
