@@ -61,35 +61,6 @@
                 </div>
             </div>
 
-            <!-- SECRET PURCHASE PIN CARD (Visible only on physical QR scan) -->
-            <div class="p-6 sm:p-7 rounded-3xl bg-slate-950 text-white border-2 border-amber-400/50 shadow-xl relative overflow-hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span class="text-xs font-mono font-bold uppercase tracking-widest text-amber-400">Secret Purchase Code (സീക്രട്ട് പർച്ചേസ് കോഡ്)</span>
-                        </div>
-                        <p class="text-xs text-slate-300 font-anek mt-1">
-                            പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും സമ്മാനങ്ങളും പുസ്തകങ്ങളും വാങ്ങുമ്പോൾ ഈ 4 അക്ക രഹസ്യ കോഡ് നൽകുക.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-2 self-start sm:self-center">
-                        <span class="sr-only">{{ $student->purchase_pin }}</span>
-                        @foreach(str_split((string) $student->purchase_pin) as $digit)
-                            <div class="w-12 h-14 rounded-2xl bg-slate-900 border-2 border-amber-400 text-amber-300 font-mono font-black text-2xl flex items-center justify-center shadow-lg">
-                                {{ $digit }}
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
-                    <span>Physical QR Badge Authentication: Verified</span>
-                    <span class="text-amber-300/80">Keep this PIN confidential</span>
-                </div>
-            </div>
-
             <!-- COIN WALLET BALANCE GRID -->
             @if($coinSummary)
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

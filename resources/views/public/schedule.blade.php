@@ -13,14 +13,6 @@
                 <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL LINEUP & TIMINGS</span>
                 <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 mt-1 animate-heading">Official Schedule</h1>
             </div>
-            
-            <!-- Quick Stats -->
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 font-mono font-bold text-xs text-slate-800">8 Stages</span>
-                <span class="px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 font-mono font-bold text-xs text-indigo-800">Online Portal</span>
-                <span class="px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 font-mono font-bold text-xs text-amber-900">Festival Office</span>
-                <span class="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-[#be1e2d] font-mono font-bold text-xs">144 Events</span>
-            </div>
         </div>
     </div>
 </section>

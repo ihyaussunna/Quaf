@@ -531,31 +531,6 @@
                                    placeholder="Bill or voucher number..."
                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:bg-white focus:border-amber-500 focus:outline-none transition-all">
                         </div>
-
-                        <!-- Secret Purchase PIN Protection Input -->
-                        <div class="sm:col-span-2 space-y-1.5 p-4 rounded-2xl bg-amber-50 border-2 border-amber-300">
-                            <div class="flex items-center justify-between">
-                                <label class="block text-xs font-mono font-bold uppercase tracking-wider text-amber-950">
-                                    Student Secret Code (സീക്രട്ട് പർച്ചേസ് കോഡ്) <span class="text-rose-600">*</span>
-                                </label>
-                                <span class="text-[10px] font-mono text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded font-bold">From ID Card QR Scan</span>
-                            </div>
-                            <div class="relative">
-                                <input :type="showPin ? 'text' : 'password'" 
-                                       name="secret_code" 
-                                       x-model="secretCode"
-                                       maxlength="10"
-                                       required 
-                                       placeholder="Enter 4-digit code from student's scanned card..."
-                                       class="w-full pl-4 pr-12 py-3 bg-white border border-amber-400 rounded-xl text-base font-mono font-black text-slate-900 tracking-widest focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all">
-                                <button type="button" @click="showPin = !showPin" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer text-xs font-mono">
-                                    <span x-text="showPin ? 'Hide' : 'Show'"></span>
-                                </button>
-                            </div>
-                            <p class="text-[11px] text-amber-900 font-anek">
-                                വിദ്യാർത്ഥി തന്റെ ഐഡി കാർഡ് സ്കാൻ ചെയ്യുമ്പോൾ ഫോണിൽ കാണിക്കുന്ന 4 അക്ക രഹസ്യ കോഡ് നൽകുക. (ചെസ്റ്റ് നമ്പർ മാത്രം വെബ്സൈറ്റിൽ അടിച്ചാൽ ഈ കോഡ് ലഭിക്കില്ല).
-                            </p>
-                        </div>
                     </div>
 
                     <!-- Dynamic Balance Calculation Breakdown -->
@@ -755,8 +730,6 @@ function presentationDesk() {
         quantity: 1,
         itemCategory: '{{ $presets[0]['category'] ?? 'book' }}',
         notes: '',
-        secretCode: '',
-        showPin: false,
 
         selectPreset(name, coins, category) {
             this.itemName = name;
@@ -781,12 +754,6 @@ function presentationDesk() {
         },
 
         confirmSubmit(event) {
-            if (!this.secretCode || this.secretCode.trim() === '') {
-                alert('വിദ്യാർത്ഥിയുടെ രഹസ്യ കോഡ് (Secret Purchase Code) നൽകുക.');
-                event.preventDefault();
-                return;
-            }
-
             let total = this.unitCoins * this.quantity;
             if (!confirm(this.itemName + ' നൽകി ' + total + ' കോയിനുകൾ കുറയ്ക്കട്ടെ?')) {
                 event.preventDefault();

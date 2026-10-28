@@ -18,7 +18,10 @@
 /public/hot
 /public/storage
 /bootstrap/cache/*.php
+bootstrap/cache/*.php
 !/bootstrap/cache/.gitignore
+/scratch/
+scratch/
 /storage/*.key
 /storage/app/*
 !/storage/app/.gitignore

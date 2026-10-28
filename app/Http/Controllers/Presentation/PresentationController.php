@@ -175,13 +175,11 @@ class PresentationController extends Controller
 
     /**
      * Record a purchase / coin deduction for the student.
-     * Requires Secret Purchase PIN.
      */
     public function redeem(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'student_id' => 'required|integer|exists:students,id',
-            'secret_code' => 'required|string|max:20',
             'item_name' => 'required|string|max:255',
             'coins' => 'required|integer|min:1',
             'quantity' => 'nullable|integer|min:1|max:100',
@@ -190,14 +188,6 @@ class PresentationController extends Controller
         ]);
 
         $student = Student::with(['group'])->findOrFail($validated['student_id']);
-
-        // Verify Secret Purchase Code
-        $enteredPin = trim((string) $validated['secret_code']);
-        if ($enteredPin !== (string) $student->purchase_pin) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'തെറ്റായ സീക്രട്ട് കോഡ് (Invalid Secret Purchase Code)! വിദ്യാർത്ഥിയുടെ ഐഡി കാർഡ് സ്കാൻ ചെയ്യുമ്പോൾ ലഭിക്കുന്ന 4 അക്ക രഹസ്യ കോഡ് നൽകുക.');
-        }
 
         try {
             $transaction = $this->coinRewardService->redeemCoins($student, [
