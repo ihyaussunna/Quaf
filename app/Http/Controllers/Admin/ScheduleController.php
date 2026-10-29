@@ -322,18 +322,41 @@ class ScheduleController extends Controller
                 ->orderBy('stage_id')
                 ->get();
 
-            // Group by Date, then by Time
-            $groupedByDate = $schedules->groupBy(function ($sch) {
-                return $sch->start_time->format('Y-m-d');
-            })->map(function ($daySchedules) {
-                return $daySchedules->groupBy(function ($sch) {
-                    return $sch->start_time->format('h:i A');
-                });
-            });
+            $groupedByDate = $schedules->groupBy(fn ($sch) => $sch->start_time->format('Y-m-d'));
+            $datesData = [];
+
+            foreach ($groupedByDate as $dateKey => $daySchedules) {
+                $stages = $daySchedules->pluck('stage')
+                    ->filter()
+                    ->unique('id')
+                    ->sortBy(fn ($s) => $s->order ?? $s->id)
+                    ->values();
+
+                $timeSlots = $daySchedules->sortBy('start_time')
+                    ->pluck('start_time')
+                    ->map(fn ($t) => $t->format('h:i A'))
+                    ->unique()
+                    ->values();
+
+                $matrix = [];
+                foreach ($daySchedules as $sch) {
+                    $t = $sch->start_time->format('h:i A');
+                    $matrix[$t][$sch->stage_id][] = $sch;
+                }
+
+                $datesData[$dateKey] = [
+                    'date' => $dateKey,
+                    'formattedDate' => Carbon::parse($dateKey)->format('Y F d l'),
+                    'stages' => $stages,
+                    'timeSlots' => $timeSlots,
+                    'matrix' => $matrix,
+                    'schedulesCount' => $daySchedules->count(),
+                ];
+            }
 
             return view('admin.schedules.offstage-pdf', [
                 'mode' => 'all',
-                'groupedByDate' => $groupedByDate,
+                'datesData' => $datesData,
                 'routePrefix' => $routePrefix,
                 'isProgramCommittee' => $isProgramCommittee,
             ]);
@@ -348,16 +371,32 @@ class ScheduleController extends Controller
             ->orderBy('stage_id')
             ->get();
 
-        // Group by Time Slot (e.g. "04:40 PM")
-        $schedulesByTime = $schedules->groupBy(function ($sch) {
-            return $sch->start_time->format('h:i A');
-        });
+        $stages = $schedules->pluck('stage')
+            ->filter()
+            ->unique('id')
+            ->sortBy(fn ($s) => $s->order ?? $s->id)
+            ->values();
+
+        $timeSlots = $schedules->sortBy('start_time')
+            ->pluck('start_time')
+            ->map(fn ($t) => $t->format('h:i A'))
+            ->unique()
+            ->values();
+
+        $matrix = [];
+        foreach ($schedules as $sch) {
+            $t = $sch->start_time->format('h:i A');
+            $matrix[$t][$sch->stage_id][] = $sch;
+        }
 
         return view('admin.schedules.offstage-pdf', [
             'mode' => 'single',
             'date' => $date,
             'formattedDate' => $formattedDate,
-            'schedulesByTime' => $schedulesByTime,
+            'stages' => $stages,
+            'timeSlots' => $timeSlots,
+            'matrix' => $matrix,
+            'schedulesCount' => $schedules->count(),
             'routePrefix' => $routePrefix,
             'isProgramCommittee' => $isProgramCommittee,
         ]);
