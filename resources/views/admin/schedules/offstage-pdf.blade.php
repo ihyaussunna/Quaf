@@ -102,6 +102,50 @@
                 page-break-after: auto;
             }
         }
+
+        /* Clean Matrix Timetable Styling - Matching user screenshot with exact alternating row shades and crisp borders */
+        .schedule-table-wrap {
+            border: 1px solid #C6C7C7 !important;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #FFFFFF;
+        }
+        .schedule-matrix-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            table-layout: fixed !important;
+        }
+        .schedule-matrix-table th,
+        .schedule-matrix-table td {
+            border-right: 1px solid #C6C7C7 !important;
+            border-bottom: 1px solid #C6C7C7 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .schedule-matrix-table th:last-child,
+        .schedule-matrix-table td:last-child {
+            border-right: none !important;
+        }
+        .schedule-matrix-table tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+        .schedule-header-th {
+            background-color: #F1F2F2 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .schedule-row-rose,
+        .schedule-row-rose td {
+            background-color: #FEF3F4 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .schedule-row-silver,
+        .schedule-row-silver td {
+            background-color: #F1F2F2 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 min-h-screen py-4 sm:py-8 px-2 sm:px-4">
@@ -133,22 +177,12 @@
         @if($mode === 'single')
             <div class="day-section">
                 <!-- Header Banner Image (Official Ādabīc Inheritance & QUAF Header) -->
-                <div class="w-full flex justify-center mb-3">
+                <div class="w-full flex justify-center mb-4">
                     <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-24 sm:max-h-28 object-contain">
                 </div>
 
-                <!-- Creative Decorative Motif Accent Bar (Light Festival Colors) -->
-                <div class="relative flex items-center justify-center my-3">
-                    <div class="w-full border-t border-[#BE1E2D]/40"></div>
-                    <div class="absolute bg-white px-5 flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                        <span class="text-[11px] font-semibold uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
-                        <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                    </div>
-                </div>
-
                 <!-- Creative Title in Rockwell Std -->
-                <h1 class="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
+                <h1 class="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[#BE1E2D] uppercase mt-1 mb-1">
                     Program Schedule
                 </h1>
 
@@ -165,18 +199,18 @@
 
                 @if($stages->isNotEmpty() && $timeSlots->isNotEmpty())
                     <!-- Timetable Matrix Table (Exact Match to User Graphic Template) -->
-                    <div class="rounded-xl overflow-hidden border border-slate-300 shadow-xs bg-white">
-                        <table class="w-full border-collapse text-left table-fixed">
-                            <thead>
-                                <tr class="bg-[#F1F2F2] border-b border-slate-300">
-                                    <th class="w-[15%] sm:w-[14%] px-3 py-3 text-center border-r border-slate-300 font-normal text-sm sm:text-base text-slate-900">
+                    <div class="schedule-table-wrap shadow-xs">
+                        <table class="schedule-matrix-table text-left">
+                            <thead class="schedule-header-row">
+                                <tr>
+                                    <th class="schedule-header-th w-[15%] sm:w-[14%] px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900">
                                         Time
                                     </th>
                                     @php
                                         $stageColWidth = round(85 / max(1, $stages->count()), 2);
                                     @endphp
                                     @foreach($stages as $stage)
-                                        <th class="px-3 py-3 text-center border-r border-slate-300 last:border-r-0 font-normal text-sm sm:text-base text-slate-900" style="width: {{ $stageColWidth }}%;">
+                                        <th class="schedule-header-th px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900" style="width: {{ $stageColWidth }}%;">
                                             <div>{{ $stage->name }}</div>
                                             @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
                                                 <div class="text-[10px] text-slate-500 font-normal mt-0.5 normal-case tracking-normal">
@@ -191,17 +225,18 @@
                                 @foreach($timeSlots as $idx => $timeSlot)
                                     @php
                                         // Exact alternating row graphics from user's template:
-                                        $rowBg = $idx % 2 === 0 ? 'bg-[#FEF3F4]' : 'bg-[#F1F2F2]';
+                                        $rowClass = $idx % 2 === 0 ? 'schedule-row-rose' : 'schedule-row-silver';
+                                        $rowHex = $idx % 2 === 0 ? '#FEF3F4' : '#F1F2F2';
                                     @endphp
-                                    <tr class="{{ $rowBg }} border-b border-slate-300/80 last:border-b-0">
+                                    <tr class="{{ $rowClass }}" style="background-color: {{ $rowHex }};">
                                         <!-- Time Column -->
-                                        <td class="px-3 py-3.5 text-center font-normal text-xs sm:text-sm text-black border-r border-slate-300 align-middle whitespace-nowrap">
+                                        <td class="px-3 py-3.5 text-center font-normal text-xs sm:text-sm text-black align-middle whitespace-nowrap">
                                             {{ $timeSlot }}
                                         </td>
 
                                         <!-- Stage Columns -->
                                         @foreach($stages as $stage)
-                                            <td class="px-3 py-3.5 text-center border-r border-slate-300 last:border-r-0 align-middle">
+                                            <td class="px-3 py-3.5 text-center align-middle">
                                                 @if(!empty($matrix[$timeSlot][$stage->id]))
                                                     <div class="flex flex-col items-center justify-center gap-1">
                                                         @foreach($matrix[$timeSlot][$stage->id] as $sch)
@@ -250,22 +285,12 @@
             @foreach($datesData as $dateKey => $data)
                 <div class="day-section {{ !$loop->last ? 'mb-12' : '' }}">
                     <!-- Header Banner Image -->
-                    <div class="w-full flex justify-center mb-3">
+                    <div class="w-full flex justify-center mb-4">
                         <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-24 sm:max-h-28 object-contain">
                     </div>
 
-                    <!-- Creative Decorative Motif Accent Bar (Light Festival Colors) -->
-                    <div class="relative flex items-center justify-center my-3">
-                        <div class="w-full border-t border-[#BE1E2D]/40"></div>
-                        <div class="absolute bg-white px-5 flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                            <span class="text-[11px] font-semibold uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
-                            <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                        </div>
-                    </div>
-
                     <!-- Creative Title in Rockwell Std -->
-                    <h1 class="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
+                    <h1 class="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[#BE1E2D] uppercase mt-1 mb-1">
                         Program Schedule
                     </h1>
 
@@ -282,18 +307,18 @@
 
                     @if($data['stages']->isNotEmpty() && $data['timeSlots']->isNotEmpty())
                         <!-- Timetable Matrix Table (Exact Match to User Graphic Template) -->
-                        <div class="rounded-xl overflow-hidden border border-slate-300 shadow-xs bg-white">
-                            <table class="w-full border-collapse text-left table-fixed">
-                                <thead>
-                                    <tr class="bg-[#F1F2F2] border-b border-slate-300">
-                                        <th class="w-[15%] sm:w-[14%] px-3 py-3 text-center border-r border-slate-300 font-normal text-sm sm:text-base text-slate-900">
+                        <div class="schedule-table-wrap shadow-xs">
+                            <table class="schedule-matrix-table text-left">
+                                <thead class="schedule-header-row">
+                                    <tr>
+                                        <th class="schedule-header-th w-[15%] sm:w-[14%] px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900">
                                             Time
                                         </th>
                                         @php
                                             $stageColWidth = round(85 / max(1, $data['stages']->count()), 2);
                                         @endphp
                                         @foreach($data['stages'] as $stage)
-                                            <th class="px-3 py-3 text-center border-r border-slate-300 last:border-r-0 font-normal text-sm sm:text-base text-slate-900" style="width: {{ $stageColWidth }}%;">
+                                            <th class="schedule-header-th px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900" style="width: {{ $stageColWidth }}%;">
                                                 <div>{{ $stage->name }}</div>
                                                 @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
                                                     <div class="text-[10px] text-slate-500 font-normal mt-0.5 normal-case tracking-normal">
@@ -308,17 +333,18 @@
                                     @foreach($data['timeSlots'] as $idx => $timeSlot)
                                         @php
                                             // Exact alternating row graphics from user's template:
-                                            $rowBg = $idx % 2 === 0 ? 'bg-[#FEF3F4]' : 'bg-[#F1F2F2]';
+                                            $rowClass = $idx % 2 === 0 ? 'schedule-row-rose' : 'schedule-row-silver';
+                                            $rowHex = $idx % 2 === 0 ? '#FEF3F4' : '#F1F2F2';
                                         @endphp
-                                        <tr class="{{ $rowBg }} border-b border-slate-300/80 last:border-b-0">
+                                        <tr class="{{ $rowClass }}" style="background-color: {{ $rowHex }};">
                                             <!-- Time Column -->
-                                            <td class="px-3 py-3.5 text-center font-normal text-xs sm:text-sm text-black border-r border-slate-300 align-middle whitespace-nowrap">
+                                            <td class="px-3 py-3.5 text-center font-normal text-xs sm:text-sm text-black align-middle whitespace-nowrap">
                                                 {{ $timeSlot }}
                                             </td>
 
                                             <!-- Stage Columns -->
                                             @foreach($data['stages'] as $stage)
-                                                <td class="px-3 py-3.5 text-center border-r border-slate-300 last:border-r-0 align-middle">
+                                                <td class="px-3 py-3.5 text-center align-middle">
                                                     @if(!empty($data['matrix'][$timeSlot][$stage->id]))
                                                         <div class="flex flex-col items-center justify-center gap-1">
                                                             @foreach($data['matrix'][$timeSlot][$stage->id] as $sch)
