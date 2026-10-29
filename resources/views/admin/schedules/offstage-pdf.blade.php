@@ -141,23 +141,23 @@
                 <div class="relative flex items-center justify-center my-3">
                     <div class="w-full border-t border-[#BE1E2D]/40"></div>
                     <div class="absolute bg-white px-5 flex items-center gap-2">
-                        <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
-                        <span class="text-[11px] font-black uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
-                        <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
+                        <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
+                        <span class="text-[11px] font-semibold uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
+                        <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
                     </div>
                 </div>
 
-                <!-- Creative Title in Bold Rockwell Std -->
-                <h1 class="text-center text-3xl sm:text-4xl font-black tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
+                <!-- Creative Title in Rockwell Std -->
+                <h1 class="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
                     Program Schedule
                 </h1>
 
                 <!-- Creative Date & Milestone Badge (Clean Light Theme) -->
                 <div class="flex justify-center mt-2 mb-5">
-                    <div class="inline-flex items-center gap-2 px-6 py-1.5 rounded-full bg-gradient-to-r from-[#FFF5F5] via-[#FFFBF2] to-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-extrabold shadow-2xs">
-                        <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
+                    <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-gradient-to-r from-[#FFF5F5] via-[#FFFBF2] to-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-medium shadow-2xs">
+                        <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
                         <span>{{ $formattedDate }}</span>
-                        <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
+                        <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
                     </div>
                 </div>
 
@@ -170,7 +170,7 @@
                             <thead>
                                 <tr class="bg-gradient-to-r from-[#FFF5F5] via-[#FFF9F2] to-[#FFF5F5] border-b-2 border-[#BE1E2D]">
                                     <th class="w-[15%] sm:w-[14%] px-3 py-3 text-center border-r border-slate-200/90">
-                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 text-white text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                                             <svg class="w-3 h-3 text-[#F2BC2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             <span>Time</span>
                                         </div>
@@ -180,12 +180,12 @@
                                     @endphp
                                     @foreach($stages as $stage)
                                         <th class="px-3 py-3 text-center border-r border-slate-200/90 last:border-r-0" style="width: {{ $stageColWidth }}%;">
-                                            <div class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#BE1E2D] text-white text-[10px] font-black uppercase tracking-wider shadow-2xs mb-0.5">
+                                            <div class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#BE1E2D] text-white text-[10px] font-semibold uppercase tracking-wider shadow-2xs mb-0.5">
                                                 <span>{{ $stage->name }}</span>
                                             </div>
                                             @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
-                                                <div class="text-[10px] text-slate-600 font-bold mt-0.5 normal-case tracking-normal">
-                                                    <span class="text-slate-400 font-semibold">Venue:</span> {{ $stage->location }}
+                                                <div class="text-[10px] text-slate-600 font-normal mt-0.5 normal-case tracking-normal">
+                                                    <span class="text-slate-400 font-normal">Venue:</span> {{ $stage->location }}
                                                 </div>
                                             @endif
                                         </th>
@@ -199,10 +199,10 @@
                                     @endphp
                                     <tr class="{{ $rowBg }} border-b border-rose-200/60 last:border-b-0 hover:bg-rose-50/40 transition-colors">
                                         <!-- Time Column with Colored Graphic Tag -->
-                                        <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
+                                        <td class="px-3 py-3.5 text-center text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
                                             <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-50 via-white to-amber-50/50 border border-rose-200/80 shadow-2xs">
-                                                <span class="w-2 h-2 rounded-full bg-[#BE1E2D] shadow-xs"></span>
-                                                <span class="font-black text-black tracking-tight">{{ $timeSlot }}</span>
+                                                <span class="w-1.5 h-1.5 rounded-full bg-[#BE1E2D] shadow-xs"></span>
+                                                <span class="font-semibold text-slate-900 tracking-tight">{{ $timeSlot }}</span>
                                             </div>
                                         </td>
 
@@ -213,7 +213,7 @@
                                                     <div class="flex flex-col items-center justify-center gap-1.5">
                                                         @foreach($matrix[$timeSlot][$stage->id] as $sch)
                                                             <div class="w-full text-center py-0.5">
-                                                                <div class="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug tracking-tight">
+                                                                <div class="font-medium text-xs sm:text-sm text-slate-800 leading-snug">
                                                                     {{ $sch->program?->name }}
                                                                 </div>
                                                                 @if($sch->program?->zone)
@@ -235,7 +235,7 @@
                                                                         };
                                                                     @endphp
                                                                     <div class="mt-1">
-                                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs {{ $zStyle }}">
+                                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border shadow-2xs {{ $zStyle }}">
                                                                             <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }}"></span>
                                                                             <span>{{ $zName }}</span>
                                                                         </span>
@@ -273,23 +273,23 @@
                     <div class="relative flex items-center justify-center my-3">
                         <div class="w-full border-t border-[#BE1E2D]/40"></div>
                         <div class="absolute bg-white px-5 flex items-center gap-2">
-                            <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
-                            <span class="text-[11px] font-black uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
-                            <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
+                            <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
+                            <span class="text-[11px] font-semibold uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
+                            <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
                         </div>
                     </div>
 
-                    <!-- Creative Title in Bold Rockwell Std -->
-                    <h1 class="text-center text-3xl sm:text-4xl font-black tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
+                    <!-- Creative Title in Rockwell Std -->
+                    <h1 class="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
                         Program Schedule
                     </h1>
 
                     <!-- Creative Date & Milestone Badge -->
                     <div class="flex justify-center mt-2 mb-5">
-                        <div class="inline-flex items-center gap-2 px-6 py-1.5 rounded-full bg-gradient-to-r from-[#FFF5F5] via-[#FFFBF2] to-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-extrabold shadow-2xs">
-                            <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
+                        <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-gradient-to-r from-[#FFF5F5] via-[#FFFBF2] to-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-medium shadow-2xs">
+                            <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
                             <span>{{ $data['formattedDate'] }}</span>
-                            <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
+                            <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
                         </div>
                     </div>
 
@@ -302,7 +302,7 @@
                                 <thead>
                                     <tr class="bg-gradient-to-r from-[#FFF5F5] via-[#FFF9F2] to-[#FFF5F5] border-b-2 border-[#BE1E2D]">
                                         <th class="w-[15%] sm:w-[14%] px-3 py-3 text-center border-r border-slate-200/90">
-                                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 text-white text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                                                 <svg class="w-3 h-3 text-[#F2BC2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 <span>Time</span>
                                             </div>
@@ -312,12 +312,12 @@
                                         @endphp
                                         @foreach($data['stages'] as $stage)
                                             <th class="px-3 py-3 text-center border-r border-slate-200/90 last:border-r-0" style="width: {{ $stageColWidth }}%;">
-                                                <div class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#BE1E2D] text-white text-[10px] font-black uppercase tracking-wider shadow-2xs mb-0.5">
+                                                <div class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#BE1E2D] text-white text-[10px] font-semibold uppercase tracking-wider shadow-2xs mb-0.5">
                                                     <span>{{ $stage->name }}</span>
                                                 </div>
                                                 @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
-                                                    <div class="text-[10px] text-slate-600 font-bold mt-0.5 normal-case tracking-normal">
-                                                        <span class="text-slate-400 font-semibold">Venue:</span> {{ $stage->location }}
+                                                    <div class="text-[10px] text-slate-600 font-normal mt-0.5 normal-case tracking-normal">
+                                                        <span class="text-slate-400 font-normal">Venue:</span> {{ $stage->location }}
                                                     </div>
                                                 @endif
                                             </th>
@@ -331,10 +331,10 @@
                                         @endphp
                                         <tr class="{{ $rowBg }} border-b border-rose-200/60 last:border-b-0 hover:bg-rose-50/40 transition-colors">
                                             <!-- Time Column with Colored Graphic Tag -->
-                                            <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
+                                            <td class="px-3 py-3.5 text-center text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
                                                 <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-50 via-white to-amber-50/50 border border-rose-200/80 shadow-2xs">
-                                                    <span class="w-2 h-2 rounded-full bg-[#BE1E2D] shadow-xs"></span>
-                                                    <span class="font-black text-black tracking-tight">{{ $timeSlot }}</span>
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#BE1E2D] shadow-xs"></span>
+                                                    <span class="font-semibold text-slate-900 tracking-tight">{{ $timeSlot }}</span>
                                                 </div>
                                             </td>
 
@@ -345,7 +345,7 @@
                                                         <div class="flex flex-col items-center justify-center gap-1.5">
                                                             @foreach($data['matrix'][$timeSlot][$stage->id] as $sch)
                                                                 <div class="w-full text-center py-0.5">
-                                                                    <div class="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug tracking-tight">
+                                                                    <div class="font-medium text-xs sm:text-sm text-slate-800 leading-snug">
                                                                         {{ $sch->program?->name }}
                                                                     </div>
                                                                     @if($sch->program?->zone)
@@ -367,7 +367,7 @@
                                                                             };
                                                                         @endphp
                                                                         <div class="mt-1">
-                                                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs {{ $zStyle }}">
+                                                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border shadow-2xs {{ $zStyle }}">
                                                                                 <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }}"></span>
                                                                                 <span>{{ $zName }}</span>
                                                                             </span>
