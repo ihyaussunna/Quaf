@@ -140,53 +140,53 @@
                 <!-- Creative Decorative Motif Accent Bar (Light Festival Colors) -->
                 <div class="relative flex items-center justify-center my-3">
                     <div class="w-full border-t border-[#BE1E2D]/40"></div>
-                    <div class="absolute bg-white px-4 flex items-center gap-2">
+                    <div class="absolute bg-white px-5 flex items-center gap-2">
                         <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
-                        <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#BE1E2D]">QUAF '26</span>
+                        <span class="text-[11px] font-black uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
                         <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                     </div>
                 </div>
 
                 <!-- Creative Title in Bold Rockwell Std -->
-                <h1 class="text-center text-3xl sm:text-4xl font-extrabold tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
+                <h1 class="text-center text-3xl sm:text-4xl font-black tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
                     Program Schedule
                 </h1>
 
                 <!-- Creative Date & Milestone Badge (Clean Light Theme) -->
-                <div class="flex justify-center mt-2 mb-4">
-                    <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-bold shadow-2xs">
-                        <span class="w-2 h-2 rounded-full bg-[#F2BC2E]"></span>
+                <div class="flex justify-center mt-2 mb-5">
+                    <div class="inline-flex items-center gap-2 px-6 py-1.5 rounded-full bg-gradient-to-r from-[#FFF5F5] via-[#FFFBF2] to-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-extrabold shadow-2xs">
+                        <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                         <span>{{ $formattedDate }}</span>
-                        <span class="w-2 h-2 rounded-full bg-[#F2BC2E]"></span>
+                        <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                     </div>
                 </div>
 
                 <div class="border-b border-slate-200 mb-6"></div>
 
                 @if($stages->isNotEmpty() && $timeSlots->isNotEmpty())
-                    <!-- Timetable Matrix Table -->
-                    <div class="rounded-xl overflow-hidden border border-slate-200/90 shadow-2xs">
+                    <!-- Timetable Matrix Table (Standard & Best Quality with Rich Colors) -->
+                    <div class="rounded-2xl overflow-hidden border border-rose-200/90 shadow-sm bg-white">
                         <table class="w-full border-collapse text-left table-fixed">
                             <thead>
                                 <tr class="bg-gradient-to-r from-[#FFF5F5] via-[#FFF9F2] to-[#FFF5F5] border-b-2 border-[#BE1E2D]">
-                                    <th class="w-[14%] sm:w-[13%] px-3 py-3.5 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-slate-200">
-                                        <div class="flex items-center justify-center gap-1 font-bold text-black">
-                                            <svg class="w-3.5 h-3.5 text-[#BE1E2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <th class="w-[15%] sm:w-[14%] px-3 py-3 text-center border-r border-slate-200/90">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                            <svg class="w-3 h-3 text-[#F2BC2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             <span>Time</span>
                                         </div>
                                     </th>
                                     @php
-                                        $stageColWidth = round(86 / max(1, $stages->count()), 2);
+                                        $stageColWidth = round(85 / max(1, $stages->count()), 2);
                                     @endphp
                                     @foreach($stages as $stage)
-                                        <th class="px-3 py-3.5 text-center border-r border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
-                                            <div class="flex items-center justify-center gap-1 mb-0.5">
-                                                <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                                                <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]"></span>
+                                        <th class="px-3 py-3 text-center border-r border-slate-200/90 last:border-r-0" style="width: {{ $stageColWidth }}%;">
+                                            <div class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#BE1E2D] text-white text-[10px] font-black uppercase tracking-wider shadow-2xs mb-0.5">
+                                                <span>{{ $stage->name }}</span>
                                             </div>
-                                            <div class="font-extrabold text-xs uppercase tracking-wide text-slate-800">{{ $stage->name }}</div>
                                             @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
-                                                <div class="text-[10px] text-slate-500 font-semibold mt-0.5 normal-case tracking-normal">Venue: {{ $stage->location }}</div>
+                                                <div class="text-[10px] text-slate-600 font-bold mt-0.5 normal-case tracking-normal">
+                                                    <span class="text-slate-400 font-semibold">Venue:</span> {{ $stage->location }}
+                                                </div>
                                             @endif
                                         </th>
                                     @endforeach
@@ -197,29 +197,47 @@
                                     @php
                                         $rowBg = $idx % 2 === 0 ? 'bg-white' : 'bg-[#FFFDF9]';
                                     @endphp
-                                    <tr class="{{ $rowBg }} border-b border-[#BE1E2D]/15 last:border-b-0 hover:bg-[#FFF8F5]/60 transition-colors">
+                                    <tr class="{{ $rowBg }} border-b border-rose-200/60 last:border-b-0 hover:bg-rose-50/40 transition-colors">
                                         <!-- Time Column with Colored Graphic Tag -->
                                         <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
-                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF5F5] border border-rose-200/70 shadow-2xs">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-[#BE1E2D]"></span>
-                                                <span class="font-bold text-black tracking-tight">{{ $timeSlot }}</span>
+                                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-50 via-white to-amber-50/50 border border-rose-200/80 shadow-2xs">
+                                                <span class="w-2 h-2 rounded-full bg-[#BE1E2D] shadow-xs"></span>
+                                                <span class="font-black text-black tracking-tight">{{ $timeSlot }}</span>
                                             </div>
                                         </td>
 
-                                        <!-- Stage Columns (Direct clean text without nested box) -->
+                                        <!-- Stage Columns (Direct clean text with color-coded zone badge) -->
                                         @foreach($stages as $stage)
                                             <td class="px-3 py-3.5 text-center border-r border-slate-200/80 last:border-r-0 align-middle">
                                                 @if(!empty($matrix[$timeSlot][$stage->id]))
                                                     <div class="flex flex-col items-center justify-center gap-1.5">
                                                         @foreach($matrix[$timeSlot][$stage->id] as $sch)
                                                             <div class="w-full text-center py-0.5">
-                                                                <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
+                                                                <div class="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug tracking-tight">
                                                                     {{ $sch->program?->name }}
                                                                 </div>
                                                                 @if($sch->program?->zone)
+                                                                    @php
+                                                                        $zName = $sch->program->zone->name;
+                                                                        $zStyle = match (true) {
+                                                                            str_contains($zName, 'A') => 'bg-emerald-50 text-emerald-800 border-emerald-300',
+                                                                            str_contains($zName, 'B') => 'bg-blue-50 text-blue-800 border-blue-300',
+                                                                            str_contains($zName, 'C') => 'bg-purple-50 text-purple-800 border-purple-300',
+                                                                            str_contains($zName, 'Mix') => 'bg-amber-50 text-amber-900 border-amber-300',
+                                                                            default => 'bg-rose-50 text-rose-900 border-rose-300',
+                                                                        };
+                                                                        $dotColor = match (true) {
+                                                                            str_contains($zName, 'A') => 'bg-emerald-500',
+                                                                            str_contains($zName, 'B') => 'bg-blue-500',
+                                                                            str_contains($zName, 'C') => 'bg-purple-500',
+                                                                            str_contains($zName, 'Mix') => 'bg-amber-500',
+                                                                            default => 'bg-rose-500',
+                                                                        };
+                                                                    @endphp
                                                                     <div class="mt-1">
-                                                                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
-                                                                            {{ $sch->program->zone->name }}
+                                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs {{ $zStyle }}">
+                                                                            <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }}"></span>
+                                                                            <span>{{ $zName }}</span>
                                                                         </span>
                                                                     </div>
                                                                 @endif
@@ -251,56 +269,56 @@
                         <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-24 sm:max-h-28 object-contain">
                     </div>
 
-                    <!-- Creative Decorative Motif Accent Bar -->
+                    <!-- Creative Decorative Motif Accent Bar (Light Festival Colors) -->
                     <div class="relative flex items-center justify-center my-3">
                         <div class="w-full border-t border-[#BE1E2D]/40"></div>
-                        <div class="absolute bg-white px-4 flex items-center gap-2">
+                        <div class="absolute bg-white px-5 flex items-center gap-2">
                             <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
-                            <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#BE1E2D]">QUAF '26</span>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-[#BE1E2D]">QUAF '26 FESTIVAL</span>
                             <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                         </div>
                     </div>
 
                     <!-- Creative Title in Bold Rockwell Std -->
-                    <h1 class="text-center text-3xl sm:text-4xl font-extrabold tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
+                    <h1 class="text-center text-3xl sm:text-4xl font-black tracking-tight text-[#BE1E2D] uppercase mt-2 mb-1">
                         Program Schedule
                     </h1>
 
                     <!-- Creative Date & Milestone Badge -->
-                    <div class="flex justify-center mt-2 mb-4">
-                        <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-bold shadow-2xs">
-                            <span class="w-2 h-2 rounded-full bg-[#F2BC2E]"></span>
+                    <div class="flex justify-center mt-2 mb-5">
+                        <div class="inline-flex items-center gap-2 px-6 py-1.5 rounded-full bg-gradient-to-r from-[#FFF5F5] via-[#FFFBF2] to-[#FFF5F5] border border-[#FECACA] text-[#991B1B] text-xs sm:text-sm font-extrabold shadow-2xs">
+                            <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                             <span>{{ $data['formattedDate'] }}</span>
-                            <span class="w-2 h-2 rounded-full bg-[#F2BC2E]"></span>
+                            <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                         </div>
                     </div>
 
                     <div class="border-b border-slate-200 mb-6"></div>
 
                     @if($data['stages']->isNotEmpty() && $data['timeSlots']->isNotEmpty())
-                        <!-- Timetable Matrix Table -->
-                        <div class="rounded-xl overflow-hidden border border-slate-200/90 shadow-2xs">
+                        <!-- Timetable Matrix Table (Standard & Best Quality with Rich Colors) -->
+                        <div class="rounded-2xl overflow-hidden border border-rose-200/90 shadow-sm bg-white">
                             <table class="w-full border-collapse text-left table-fixed">
                                 <thead>
                                     <tr class="bg-gradient-to-r from-[#FFF5F5] via-[#FFF9F2] to-[#FFF5F5] border-b-2 border-[#BE1E2D]">
-                                        <th class="w-[14%] sm:w-[13%] px-3 py-3.5 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-slate-200">
-                                            <div class="flex items-center justify-center gap-1 font-bold text-black">
-                                                <svg class="w-3.5 h-3.5 text-[#BE1E2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <th class="w-[15%] sm:w-[14%] px-3 py-3 text-center border-r border-slate-200/90">
+                                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                                <svg class="w-3 h-3 text-[#F2BC2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 <span>Time</span>
                                             </div>
                                         </th>
                                         @php
-                                            $stageColWidth = round(86 / max(1, $data['stages']->count()), 2);
+                                            $stageColWidth = round(85 / max(1, $data['stages']->count()), 2);
                                         @endphp
                                         @foreach($data['stages'] as $stage)
-                                            <th class="px-3 py-3.5 text-center border-r border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
-                                                <div class="flex items-center justify-center gap-1 mb-0.5">
-                                                    <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                                                    <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]"></span>
+                                            <th class="px-3 py-3 text-center border-r border-slate-200/90 last:border-r-0" style="width: {{ $stageColWidth }}%;">
+                                                <div class="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#BE1E2D] text-white text-[10px] font-black uppercase tracking-wider shadow-2xs mb-0.5">
+                                                    <span>{{ $stage->name }}</span>
                                                 </div>
-                                                <div class="font-extrabold text-xs uppercase tracking-wide text-slate-800">{{ $stage->name }}</div>
                                                 @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
-                                                    <div class="text-[10px] text-slate-500 font-semibold mt-0.5 normal-case tracking-normal">Venue: {{ $stage->location }}</div>
+                                                    <div class="text-[10px] text-slate-600 font-bold mt-0.5 normal-case tracking-normal">
+                                                        <span class="text-slate-400 font-semibold">Venue:</span> {{ $stage->location }}
+                                                    </div>
                                                 @endif
                                             </th>
                                         @endforeach
@@ -311,29 +329,47 @@
                                         @php
                                             $rowBg = $idx % 2 === 0 ? 'bg-white' : 'bg-[#FFFDF9]';
                                         @endphp
-                                        <tr class="{{ $rowBg }} border-b border-[#BE1E2D]/15 last:border-b-0 hover:bg-[#FFF8F5]/60 transition-colors">
+                                        <tr class="{{ $rowBg }} border-b border-rose-200/60 last:border-b-0 hover:bg-rose-50/40 transition-colors">
                                             <!-- Time Column with Colored Graphic Tag -->
                                             <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
-                                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF5F5] border border-rose-200/70 shadow-2xs">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#BE1E2D]"></span>
-                                                    <span class="font-bold text-black tracking-tight">{{ $timeSlot }}</span>
+                                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-50 via-white to-amber-50/50 border border-rose-200/80 shadow-2xs">
+                                                    <span class="w-2 h-2 rounded-full bg-[#BE1E2D] shadow-xs"></span>
+                                                    <span class="font-black text-black tracking-tight">{{ $timeSlot }}</span>
                                                 </div>
                                             </td>
 
-                                            <!-- Stage Columns (Direct clean text without nested box) -->
+                                            <!-- Stage Columns (Direct clean text with color-coded zone badge) -->
                                             @foreach($data['stages'] as $stage)
                                                 <td class="px-3 py-3.5 text-center border-r border-slate-200/80 last:border-r-0 align-middle">
                                                     @if(!empty($data['matrix'][$timeSlot][$stage->id]))
                                                         <div class="flex flex-col items-center justify-center gap-1.5">
                                                             @foreach($data['matrix'][$timeSlot][$stage->id] as $sch)
                                                                 <div class="w-full text-center py-0.5">
-                                                                    <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
+                                                                    <div class="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug tracking-tight">
                                                                         {{ $sch->program?->name }}
                                                                     </div>
                                                                     @if($sch->program?->zone)
+                                                                        @php
+                                                                            $zName = $sch->program->zone->name;
+                                                                            $zStyle = match (true) {
+                                                                                str_contains($zName, 'A') => 'bg-emerald-50 text-emerald-800 border-emerald-300',
+                                                                                str_contains($zName, 'B') => 'bg-blue-50 text-blue-800 border-blue-300',
+                                                                                str_contains($zName, 'C') => 'bg-purple-50 text-purple-800 border-purple-300',
+                                                                                str_contains($zName, 'Mix') => 'bg-amber-50 text-amber-900 border-amber-300',
+                                                                                default => 'bg-rose-50 text-rose-900 border-rose-300',
+                                                                            };
+                                                                            $dotColor = match (true) {
+                                                                                str_contains($zName, 'A') => 'bg-emerald-500',
+                                                                                str_contains($zName, 'B') => 'bg-blue-500',
+                                                                                str_contains($zName, 'C') => 'bg-purple-500',
+                                                                                str_contains($zName, 'Mix') => 'bg-amber-500',
+                                                                                default => 'bg-rose-500',
+                                                                            };
+                                                                        @endphp
                                                                         <div class="mt-1">
-                                                                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
-                                                                                {{ $sch->program->zone->name }}
+                                                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs {{ $zStyle }}">
+                                                                                <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }}"></span>
+                                                                                <span>{{ $zName }}</span>
                                                                             </span>
                                                                         </div>
                                                                     @endif
