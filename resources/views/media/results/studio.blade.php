@@ -345,8 +345,8 @@
                         <!-- First Place -->
                         <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                             <div class="flex items-center gap-2 mb-1.5">
-                                <img src="{{ asset('images/medals/first.png') }}" alt="1st" class="w-4 h-4 object-contain">
-                                <span class="font-bold text-[11px] text-slate-800">1st Prize Winner</span>
+                                <span class="w-5 h-5 rounded-md bg-amber-500 text-white font-mono font-bold text-[11px] flex items-center justify-center">01</span>
+                                <span class="font-bold text-[11px] text-slate-800">1st Place Winner (01)</span>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" x-model="data.winners.first[0].name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
@@ -357,8 +357,8 @@
                         <!-- Second Place -->
                         <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                             <div class="flex items-center gap-2 mb-1.5">
-                                <img src="{{ asset('images/medals/second.png') }}" alt="2nd" class="w-4 h-4 object-contain">
-                                <span class="font-bold text-[11px] text-slate-800">2nd Prize Winner</span>
+                                <span class="w-5 h-5 rounded-md bg-slate-500 text-white font-mono font-bold text-[11px] flex items-center justify-center">02</span>
+                                <span class="font-bold text-[11px] text-slate-800">2nd Place Winner (02)</span>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" x-model="data.winners.second[0].name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
@@ -369,8 +369,8 @@
                         <!-- Third Place -->
                         <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                             <div class="flex items-center gap-2 mb-1.5">
-                                <img src="{{ asset('images/medals/third.png') }}" alt="3rd" class="w-4 h-4 object-contain">
-                                <span class="font-bold text-[11px] text-slate-800">3rd Prize Winner</span>
+                                <span class="w-5 h-5 rounded-md bg-amber-800 text-white font-mono font-bold text-[11px] flex items-center justify-center">03</span>
+                                <span class="font-bold text-[11px] text-slate-800">3rd Place Winner (03)</span>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" x-model="data.winners.third[0].name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
@@ -582,20 +582,20 @@ function posterStudio() {
 
             if (this.settings.layout_mode === 'yellow_modern') {
                 this.settings.result_x = 740;
-                this.settings.result_y = 940;
-                this.settings.result_size = 520;
+                this.settings.result_y = 779;
+                this.settings.result_size = 480;
                 this.settings.result_weight = '400';
                 this.settings.result_color = '#D02627';
 
                 this.settings.category_x = 686;
-                this.settings.category_y = 166;
+                this.settings.category_y = 165;
                 this.settings.category_size = 45;
                 this.settings.category_weight = '400';
                 this.settings.category_color = '#FFFFFF';
                 this.settings.category_align = 'center';
 
                 this.settings.competition_x = 584;
-                this.settings.competition_y = 202;
+                this.settings.competition_y = 220;
                 this.settings.competition_size = 100;
                 this.settings.competition_weight = '400';
                 this.settings.competition_color = '#000000';
@@ -604,9 +604,9 @@ function posterStudio() {
                 this.settings.competition_max_width = 440;
                 this.settings.competition_line_height = 94;
 
-                this.settings.block_left = 201;
-                this.settings.first_top = 120;
-                this.settings.row_gap = 175;
+                this.settings.block_left = 205;
+                this.settings.first_top = 145;
+                this.settings.row_gap = 178;
                 this.settings.item_gap = 0;
                 this.settings.medal_size = 0;
 
@@ -689,11 +689,11 @@ function posterStudio() {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.8px';
-                ctx.fillText(this.data.category || '', this.settings.category_x || 686, this.settings.category_y || 166);
+                ctx.fillText(this.data.category || '', this.settings.category_x || 686, this.settings.category_y || 165);
                 ctx.restore();
 
                 // 3. Program Name (Below Capsule, Left Aligned)
-                // Rockwell Std Regular 30pt (100-112px), Leading 25pt (94px), Color #000000, Tracking -40
+                // Rockwell Std Regular 30pt (100px), Leading 25pt (94px), Color #000000, Tracking -40
                 ctx.save();
                 ctx.fillStyle = this.settings.competition_color || '#000000';
                 const compFont = this.settings.competition_font || 'Rockwell Std';
@@ -704,7 +704,7 @@ function posterStudio() {
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-4.0px';
 
                 const compLines = this.wrapText(ctx, this.data.competition || '', this.settings.competition_max_width || 440);
-                let compY = this.settings.competition_y || 202;
+                let compY = this.settings.competition_y || 220;
                 const compLineH = this.settings.competition_line_height || 94;
                 for (let line of compLines) {
                     ctx.fillText(line, this.settings.competition_x || 584, compY);
@@ -712,40 +712,29 @@ function posterStudio() {
                 }
                 ctx.restore();
 
-                // 4. Result Sequence Number (Mongolian Baiti 145pt -> 520px, Color #D02627, Tracking -40)
+                // 4. Result Sequence Number (Mongolian Baiti 145pt -> 480px, Color #D02627, Tracking -40)
                 if (this.data.result_no) {
                     ctx.save();
                     ctx.fillStyle = this.settings.result_color || '#D02627';
                     const numFont = 'Mongolian Baiti';
-                    ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 520}px "${numFont}", serif`;
+                    ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "${numFont}", serif`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'alphabetic';
                     if ('letterSpacing' in ctx) ctx.letterSpacing = '-20.8px';
-                    ctx.fillText(this.data.result_no, this.settings.result_x || 740, this.settings.result_y || 940);
-
-                    // Vertical "Result No" beside the number
-                    ctx.save();
-                    ctx.translate((this.settings.result_x || 740) - 105, (this.settings.result_y || 940) - 160);
-                    ctx.rotate(-Math.PI / 2);
-                    ctx.fillStyle = '#111111';
-                    ctx.font = '600 24px "Montserrat", sans-serif';
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
-                    ctx.fillText('Result No', 0, 0);
-                    ctx.restore();
-
+                    ctx.fillText(this.data.result_no, this.settings.result_x || 740, this.settings.result_y || 779);
                     ctx.restore();
                 }
 
-                // 5. Winners (01, 02, 03) on the left
+                // 5. Winners (01, 02, 03) on the left - NO MEDAL ICONS, ONLY NUMBERS AS IN POSTER
                 const winnerPositions = [
                     { key: 'first', rank: '01' },
                     { key: 'second', rank: '02' },
                     { key: 'third', rank: '03' }
                 ];
 
-                let currentY = this.settings.first_top || 120;
-                const blockLeft = this.settings.block_left || 201;
-                const rowGap = this.settings.row_gap || 175;
+                let currentY = this.settings.first_top || 145;
+                const blockLeft = this.settings.block_left || 205;
+                const rowGap = this.settings.row_gap || 178;
 
                 winnerPositions.forEach(pos => {
                     const item = this.data.winners[pos.key] ? this.data.winners[pos.key][0] : null;
@@ -755,22 +744,16 @@ function posterStudio() {
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'top';
 
-                    // 1. Rank Numeral: Montserrat ExtraLight 11pt (41px), Tracking -40
-                    ctx.fillStyle = '#444444';
-                    ctx.font = '200 41px "Montserrat", sans-serif';
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.6px';
-                    ctx.fillText(pos.rank, blockLeft, currentY);
-
-                    // 2. Student Name: Rockwell Std Regular 9pt (34px), Color #D02627, Tracking -40
+                    // Student Name: Rockwell Std Regular 9pt (34px), Color #D02627, Tracking -40
                     ctx.fillStyle = this.settings.winner_name_color || '#D02627';
                     const winFont = this.settings.winner_font || 'Rockwell Std';
                     const winSize = this.settings.winner_name_size || 34;
                     ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
                     if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.4px';
 
-                    // Wrap long name if 3 or more words
+                    // Two-line wrapping for student name
                     const nameParts = (item.name || '').trim().split(' ');
-                    let nameY = currentY + 44;
+                    let nameY = currentY;
                     if (nameParts.length > 2 && (item.name.length > 18)) {
                         ctx.fillText(nameParts[0], blockLeft, nameY);
                         nameY += (winSize * 0.95);
@@ -779,20 +762,12 @@ function posterStudio() {
                         ctx.fillText(item.name, blockLeft, nameY);
                     }
 
-                    // 3. Group Name: Rockwell Std Light 7pt (26px), Color #000000, Tracking -20
+                    // Group Name: Rockwell Std Light 7pt (26px), Color #000000, Tracking -20
                     ctx.fillStyle = this.settings.winner_unit_color || '#000000';
                     const unitSize = this.settings.winner_unit_size || 26;
                     ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
                     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
-                    ctx.fillText(item.unit || '', blockLeft, nameY + 36);
-
-                    // 4. Divider Line
-                    ctx.strokeStyle = 'rgba(45, 45, 45, 0.22)';
-                    ctx.lineWidth = 1.2;
-                    ctx.beginPath();
-                    ctx.moveTo(blockLeft, currentY + 125);
-                    ctx.lineTo(blockLeft + 280, currentY + 125);
-                    ctx.stroke();
+                    ctx.fillText(item.unit || '', blockLeft, currentY + 68);
 
                     ctx.restore();
 
