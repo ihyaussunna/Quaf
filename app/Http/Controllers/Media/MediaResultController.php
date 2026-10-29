@@ -99,14 +99,33 @@ class MediaResultController extends Controller
             $templateSettings = $activeTemplate->posterSetting->toArray();
         }
 
+        // Only merge custom_poster_settings if they match current template's layout mode
+        $customSettings = $result->custom_poster_settings ?? [];
+        if (! empty($customSettings) && ($customSettings['layout_mode'] ?? 'default') !== ($templateSettings['layout_mode'] ?? 'default')) {
+            $customSettings = [];
+        }
+
         $currentSettings = array_merge(
             $defaultSettings,
             $templateSettings ?? [],
-            $result->custom_poster_settings ?? []
+            $customSettings
         );
 
         // Extract ONLY 1st, 2nd, and 3rd place winners
         $winners = $result->getPosterWinners();
+
+        // Compute sequence result number (e.g. 37, 61) rather than program code
+        $resultNo = Result::where(function ($q) use ($result) {
+            if ($result->published_at) {
+                $q->where('published_at', '<', $result->published_at)
+                    ->orWhere(function ($sub) use ($result) {
+                        $sub->where('published_at', '=', $result->published_at)
+                            ->where('id', '<=', $result->id);
+                    });
+            } else {
+                $q->where('id', '<=', $result->id);
+            }
+        })->count() ?: ($result->id ?? 1);
 
         $themeColor = FestivalSetting::get('theme_color', '#be1e2d');
 
@@ -116,6 +135,7 @@ class MediaResultController extends Controller
             'activeTemplate',
             'currentSettings',
             'winners',
+            'resultNo',
             'themeColor'
         ));
     }

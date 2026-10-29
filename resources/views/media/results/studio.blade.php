@@ -81,7 +81,7 @@
                         <label class="cursor-pointer border-2 rounded-xl p-2 flex flex-col items-center text-center transition-all"
                                :class="settings.template_id == {{ $tpl->id }} ? 'border-[#be1e2d] bg-red-50/30 ring-1 ring-[#be1e2d]' : 'border-slate-200 hover:border-slate-300'">
                             <input type="radio" name="template_id" value="{{ $tpl->id }}" class="sr-only"
-                                   @change="selectTemplate({{ $tpl->id }}, '{{ asset($tpl->image_path) }}')"
+                                   @change="selectTemplate({{ $tpl->id }}, '{{ asset($tpl->image_path) }}', '{{ $tpl->posterSetting->layout_mode ?? (str_contains(strtolower($tpl->name), 'yellow') ? 'yellow_modern' : 'default') }}')"
                                    :checked="settings.template_id == {{ $tpl->id }}">
                             <div class="w-full aspect-square bg-slate-900 rounded-lg overflow-hidden mb-2">
                                 <img src="{{ asset($tpl->image_path) }}" alt="{{ $tpl->name }}" class="w-full h-full object-cover">
@@ -98,13 +98,14 @@
                 <!-- 2. Result Number / Code -->
                 <div class="p-4" x-data="{ open: true }">
                     <button type="button" @click="open = !open" class="w-full flex items-center justify-between font-bold text-slate-800">
-                        <span>Result Code / Number Settings</span>
+                        <span>Result Number (റിസൾട്ട് നമ്പർ)</span>
                         <svg class="w-4 h-4 transition-transform text-slate-400" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div x-show="open" class="mt-4 space-y-3">
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Code / Text</label>
-                            <input type="text" x-model="data.result_no" @input="render()" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 font-mono">
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Result Sequence Number</label>
+                            <input type="text" x-model="data.result_no" @input="render()" placeholder="37" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 font-mono font-bold">
+                            <p class="text-[10px] text-slate-400 mt-1">പോസ്റ്ററിലെ വലിയ നമ്പർ (ഉദാ: 37, 61, 01). പ്രോഗ്രാം കോഡ് അല്ല.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
@@ -411,9 +412,9 @@
                         <div class="h-px w-full bg-cyan-400/40 border-t border-dashed border-cyan-400 absolute"></div>
                     </div>
 
-                    <!-- The Real HTML5 Canvas (1080x1080 HD, scaled responsively via CSS) -->
-                    <canvas id="posterCanvas" width="1080" height="1080"
-                            class="w-full max-w-[540px] aspect-square object-contain shadow-2xl rounded-xl border border-slate-800 bg-black"></canvas>
+                    <!-- The Real HTML5 Canvas (HD, scaled responsively via CSS) -->
+                    <canvas id="posterCanvas" width="1080" :height="settings.layout_mode === 'yellow_modern' ? 1215 : 1080"
+                            class="w-full max-w-[540px] object-contain shadow-2xl rounded-xl border border-slate-800 bg-black"></canvas>
                 </div>
 
                 <!-- Footer Quick Share & Download -->
@@ -516,7 +517,7 @@ function posterStudio() {
 
         // Content Data
         data: {
-            result_no: '{{ $result->program->code ?? "01" }}',
+            result_no: '{{ !empty($resultNo) ? sprintf("%02d", $resultNo) : ($result->id ?? "01") }}',
             category: '{{ $result->program->zone?->name ?? $result->program->eligibility ?? "All Zones" }}',
             competition: '{{ $result->program->name }}',
             winners: {
@@ -574,12 +575,49 @@ function posterStudio() {
             };
         },
 
-        selectTemplate(id, src) {
+        selectTemplate(id, src, layoutMode) {
             this.settings.template_id = id;
             this.settings.template_image = src;
+            this.settings.layout_mode = layoutMode || (src.includes('yellow') ? 'yellow_modern' : 'default');
 
-            // Dynamically apply template-specific coordinates and colors
-            if (this.templatesMap && this.templatesMap[id]) {
+            if (this.settings.layout_mode === 'yellow_modern') {
+                this.settings.result_x = 520;
+                this.settings.result_y = 850;
+                this.settings.result_size = 240;
+                this.settings.result_weight = '800';
+                this.settings.result_color = '#D02627';
+
+                this.settings.category_x = 710;
+                this.settings.category_y = 165;
+                this.settings.category_size = 24;
+                this.settings.category_weight = '700';
+                this.settings.category_color = '#FFFFFF';
+                this.settings.category_align = 'center';
+
+                this.settings.competition_x = 580;
+                this.settings.competition_y = 225;
+                this.settings.competition_size = 54;
+                this.settings.competition_weight = '800';
+                this.settings.competition_color = '#000000';
+                this.settings.competition_align = 'left';
+                this.settings.competition_font = 'Rockwell Std';
+                this.settings.competition_max_width = 420;
+                this.settings.competition_line_height = 54;
+
+                this.settings.block_left = 200;
+                this.settings.first_top = 135;
+                this.settings.row_gap = 175;
+                this.settings.item_gap = 0;
+                this.settings.medal_size = 0;
+
+                this.settings.winner_name_size = 32;
+                this.settings.winner_name_weight = '700';
+                this.settings.winner_name_color = '#D02627';
+                this.settings.winner_unit_size = 22;
+                this.settings.winner_unit_weight = '500';
+                this.settings.winner_unit_color = '#222222';
+                this.settings.winner_font = 'Georgia';
+            } else if (this.templatesMap && this.templatesMap[id]) {
                 const tplSettings = this.templatesMap[id];
                 const numericKeys = [
                     'result_x', 'result_y', 'result_size',
@@ -617,93 +655,207 @@ function posterStudio() {
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
 
+            const isYellow = this.settings.layout_mode === 'yellow_modern' || (this.settings.template_image && this.settings.template_image.includes('yellow'));
+
+            if (isYellow) {
+                canvas.width = 1080;
+                canvas.height = 1215;
+            } else {
+                canvas.width = 1080;
+                canvas.height = 1080;
+            }
+
             // Clear
-            ctx.clearRect(0, 0, 1080, 1080);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 1. Draw Template Background
             if (this.templateImageObj && this.templateImageObj.complete && this.templateImageObj.naturalWidth > 0) {
-                ctx.drawImage(this.templateImageObj, 0, 0, 1080, 1080);
+                ctx.drawImage(this.templateImageObj, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(0, 0, 1080, 1080);
+                ctx.fillStyle = isYellow ? '#F2BC2E' : '#0f172a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            // 2. Draw Result Number / Code
-            ctx.save();
-            ctx.fillStyle = this.settings.result_color;
-            ctx.font = `${this.settings.result_weight} ${this.settings.result_size}px "JetBrains Mono", Sora, sans-serif`;
-            ctx.textBaseline = 'top';
-            ctx.fillText(this.data.result_no, this.settings.result_x, this.settings.result_y);
-            ctx.restore();
+            if (isYellow) {
+                // ============================================
+                // DEDICATED YELLOW MODERN POSTER RENDER ENGINE
+                // ============================================
 
-            // 3. Draw Category
-            ctx.save();
-            ctx.fillStyle = this.settings.category_color;
-            ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Anek Malayalam", Sora, sans-serif`;
-            ctx.textAlign = this.settings.category_align;
-            ctx.textBaseline = 'top';
-            ctx.fillText(this.data.category, this.settings.category_x, this.settings.category_y);
-            ctx.restore();
-
-            // 4. Draw Competition Name (Multi-line text wrapping support)
-            ctx.save();
-            ctx.fillStyle = this.settings.competition_color;
-            const compFont = this.settings.competition_font || 'Anek Malayalam';
-            ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "${compFont}", "Anek Malayalam", Sora, sans-serif`;
-            ctx.textAlign = this.settings.competition_align;
-            ctx.textBaseline = 'top';
-
-            const compLines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width);
-            let compY = this.settings.competition_y;
-            for (let line of compLines) {
-                ctx.fillText(line, this.settings.competition_x, compY);
-                compY += this.settings.competition_line_height;
-            }
-            ctx.restore();
-
-            // 5. Draw Winners (Podium only: 1st, 2nd, 3rd)
-            const winnerPositions = [
-                { key: 'first', medal: this.medals.first },
-                { key: 'second', medal: this.medals.second },
-                { key: 'third', medal: this.medals.third }
-            ];
-
-            let currentY = this.settings.first_top;
-            const blockLeft = this.settings.block_left;
-            const medalSize = this.settings.medal_size;
-            const itemGap = this.settings.item_gap;
-            const rowGap = this.settings.row_gap;
-
-            winnerPositions.forEach(pos => {
-                const item = this.data.winners[pos.key][0];
-                if (!item || !item.name) return;
-
-                // Draw Medal (if medalSize > 0)
-                if (medalSize > 0 && pos.medal && pos.medal.complete && pos.medal.naturalWidth > 0) {
-                    ctx.drawImage(pos.medal, blockLeft, currentY, medalSize, medalSize);
-                }
-
-                // Draw Name
-                const textX = medalSize > 0 ? (blockLeft + medalSize + itemGap) : blockLeft;
+                // 2. Zone inside Red Capsule (Top Right)
                 ctx.save();
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'top';
-
-                ctx.fillStyle = this.settings.winner_name_color;
-                const winFont = this.settings.winner_font || 'Anek Malayalam';
-                ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
-                ctx.fillText(item.name, textX, currentY);
-
-                // Draw Team / Unit below name
-                ctx.fillStyle = this.settings.winner_unit_color;
-                ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
-                const nameOffset = this.settings.winner_name_size * 1.15;
-                ctx.fillText(item.unit, textX, currentY + nameOffset);
+                ctx.fillStyle = this.settings.category_color || '#FFFFFF';
+                ctx.font = `${this.settings.category_weight || '700'} ${this.settings.category_size || 24}px "Montserrat", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.data.category || '', this.settings.category_x || 710, this.settings.category_y || 165);
                 ctx.restore();
 
-                // Increment Y by Row Gap (Line Distance)
-                currentY += rowGap;
-            });
+                // 3. Program Name (Below Capsule, Left Aligned)
+                ctx.save();
+                ctx.fillStyle = this.settings.competition_color || '#000000';
+                const compFont = this.settings.competition_font || 'Rockwell Std';
+                ctx.font = `${this.settings.competition_weight || '800'} ${this.settings.competition_size || 54}px "${compFont}", "Montserrat", sans-serif`;
+                ctx.textAlign = this.settings.competition_align || 'left';
+                ctx.textBaseline = 'top';
+
+                const compLines = this.wrapText(ctx, this.data.competition || '', this.settings.competition_max_width || 420);
+                let compY = this.settings.competition_y || 225;
+                for (let line of compLines) {
+                    ctx.fillText(line, this.settings.competition_x || 580, compY);
+                    compY += (this.settings.competition_line_height || 54);
+                }
+                ctx.restore();
+
+                // 4. Result Sequence Number (Huge Red Number e.g. 37) & Vertical "Result No"
+                if (this.data.result_no) {
+                    ctx.save();
+                    ctx.fillStyle = this.settings.result_color || '#D02627';
+                    ctx.font = `${this.settings.result_weight || '800'} ${this.settings.result_size || 240}px "Rockwell Std", "Georgia", serif`;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'alphabetic';
+                    ctx.fillText(this.data.result_no, this.settings.result_x || 520, this.settings.result_y || 850);
+
+                    // Vertical "Result No" beside the number
+                    ctx.save();
+                    ctx.translate((this.settings.result_x || 520) + 110, (this.settings.result_y || 850) - 130);
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.fillStyle = '#111111';
+                    ctx.font = '600 22px "Montserrat", sans-serif';
+                    ctx.fillText('Result No', 0, 0);
+                    ctx.restore();
+
+                    ctx.restore();
+                }
+
+                // 5. Winners (01, 02, 03) on the left
+                const winnerPositions = [
+                    { key: 'first', rank: '01' },
+                    { key: 'second', rank: '02' },
+                    { key: 'third', rank: '03' }
+                ];
+
+                let currentY = this.settings.first_top || 135;
+                const blockLeft = this.settings.block_left || 200;
+                const rowGap = this.settings.row_gap || 175;
+
+                winnerPositions.forEach(pos => {
+                    const item = this.data.winners[pos.key] ? this.data.winners[pos.key][0] : null;
+                    if (!item || !item.name) return;
+
+                    ctx.save();
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+
+                    // 1. Rank Numeral 01 / 02 / 03
+                    ctx.fillStyle = '#555555';
+                    ctx.font = '300 36px "Montserrat", sans-serif';
+                    ctx.fillText(pos.rank, blockLeft, currentY);
+
+                    // 2. Student Name in RED Serif
+                    ctx.fillStyle = this.settings.winner_name_color || '#D02627';
+                    const winFont = this.settings.winner_font || 'Georgia';
+                    ctx.font = `${this.settings.winner_name_weight || '700'} ${this.settings.winner_name_size || 32}px "${winFont}", "Georgia", serif`;
+                    ctx.fillText(item.name, blockLeft, currentY + 44);
+
+                    // 3. Group Name in BLACK
+                    ctx.fillStyle = this.settings.winner_unit_color || '#222222';
+                    ctx.font = `${this.settings.winner_unit_weight || '500'} ${this.settings.winner_unit_size || 22}px "Montserrat", sans-serif`;
+                    ctx.fillText(item.unit || '', blockLeft, currentY + 86);
+
+                    // 4. Divider Line
+                    ctx.strokeStyle = 'rgba(45, 45, 45, 0.25)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(blockLeft, currentY + 125);
+                    ctx.lineTo(blockLeft + 260, currentY + 125);
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                    currentY += rowGap;
+                });
+
+            } else {
+                // ============================================
+                // CLASSIC MAROON / DEFAULT POSTER RENDER ENGINE
+                // ============================================
+
+                // 2. Draw Result Number / Code
+                ctx.save();
+                ctx.fillStyle = this.settings.result_color;
+                ctx.font = `${this.settings.result_weight} ${this.settings.result_size}px "JetBrains Mono", Sora, sans-serif`;
+                ctx.textBaseline = 'top';
+                ctx.fillText(this.data.result_no, this.settings.result_x, this.settings.result_y);
+                ctx.restore();
+
+                // 3. Draw Category
+                ctx.save();
+                ctx.fillStyle = this.settings.category_color;
+                ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Anek Malayalam", Sora, sans-serif`;
+                ctx.textAlign = this.settings.category_align;
+                ctx.textBaseline = 'top';
+                ctx.fillText(this.data.category, this.settings.category_x, this.settings.category_y);
+                ctx.restore();
+
+                // 4. Draw Competition Name
+                ctx.save();
+                ctx.fillStyle = this.settings.competition_color;
+                const compFont = this.settings.competition_font || 'Anek Malayalam';
+                ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "${compFont}", "Anek Malayalam", Sora, sans-serif`;
+                ctx.textAlign = this.settings.competition_align;
+                ctx.textBaseline = 'top';
+
+                const compLines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width);
+                let compY = this.settings.competition_y;
+                for (let line of compLines) {
+                    ctx.fillText(line, this.settings.competition_x, compY);
+                    compY += this.settings.competition_line_height;
+                }
+                ctx.restore();
+
+                // 5. Draw Winners with Medals
+                const winnerPositions = [
+                    { key: 'first', medal: this.medals.first },
+                    { key: 'second', medal: this.medals.second },
+                    { key: 'third', medal: this.medals.third }
+                ];
+
+                let currentY = this.settings.first_top;
+                const blockLeft = this.settings.block_left;
+                const medalSize = this.settings.medal_size;
+                const itemGap = this.settings.item_gap;
+                const rowGap = this.settings.row_gap;
+
+                winnerPositions.forEach(pos => {
+                    const item = this.data.winners[pos.key] ? this.data.winners[pos.key][0] : null;
+                    if (!item || !item.name) return;
+
+                    // Draw Medal (if medalSize > 0)
+                    if (medalSize > 0 && pos.medal && pos.medal.complete && pos.medal.naturalWidth > 0) {
+                        ctx.drawImage(pos.medal, blockLeft, currentY, medalSize, medalSize);
+                    }
+
+                    // Draw Name
+                    const textX = medalSize > 0 ? (blockLeft + medalSize + itemGap) : blockLeft;
+                    ctx.save();
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+
+                    ctx.fillStyle = this.settings.winner_name_color;
+                    const winFont = this.settings.winner_font || 'Anek Malayalam';
+                    ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
+                    ctx.fillText(item.name, textX, currentY);
+
+                    // Draw Team / Unit below name
+                    ctx.fillStyle = this.settings.winner_unit_color;
+                    ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
+                    const nameOffset = this.settings.winner_name_size * 1.15;
+                    ctx.fillText(item.unit, textX, currentY + nameOffset);
+                    ctx.restore();
+
+                    currentY += rowGap;
+                });
+            }
         },
 
         wrapText(ctx, text, maxWidth) {
