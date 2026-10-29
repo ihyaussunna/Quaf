@@ -215,9 +215,10 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Font Family</label>
                                 <select x-model="settings.competition_font" @change="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
+                                    <option value="Rockwell Std">Rockwell Std</option>
+                                    <option value="Montserrat">Montserrat</option>
                                     <option value="Anek Malayalam">Anek Malayalam</option>
                                     <option value="Sora">Sora</option>
-                                    <option value="Rockwell Std">Rockwell Std</option>
                                 </select>
                             </div>
                             <div>
@@ -266,8 +267,8 @@
                                 <input type="range" min="0" max="80" step="1" x-model.number="settings.item_gap" @input="render()" class="w-full accent-[#be1e2d]">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Medal Size (<span x-text="settings.medal_size"></span>px)</label>
-                                <input type="range" min="20" max="150" step="1" x-model.number="settings.medal_size" @input="render()" class="w-full accent-[#be1e2d]">
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Medal Size (<span x-text="settings.medal_size"></span>px) (0 to hide)</label>
+                                <input type="range" min="0" max="150" step="1" x-model.number="settings.medal_size" @input="render()" class="w-full accent-[#be1e2d]">
                             </div>
                         </div>
                     </div>
@@ -284,9 +285,10 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Name Font Family</label>
                                 <select x-model="settings.winner_font" @change="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
+                                    <option value="Montserrat">Montserrat</option>
+                                    <option value="Rockwell Std">Rockwell Std</option>
                                     <option value="Anek Malayalam">Anek Malayalam</option>
                                     <option value="Sora">Sora</option>
-                                    <option value="Rockwell Std">Rockwell Std</option>
                                 </select>
                             </div>
                             <div>
@@ -589,9 +591,9 @@ function posterStudio() {
                 const stringKeys = [
                     'result_weight', 'result_color',
                     'category_weight', 'category_color', 'category_align',
-                    'competition_weight', 'competition_color', 'competition_align',
+                    'competition_weight', 'competition_color', 'competition_align', 'competition_font',
                     'winner_name_weight', 'winner_name_color',
-                    'winner_unit_weight', 'winner_unit_color'
+                    'winner_unit_weight', 'winner_unit_color', 'winner_font'
                 ];
 
                 numericKeys.forEach(k => {
@@ -676,13 +678,13 @@ function posterStudio() {
                 const item = this.data.winners[pos.key][0];
                 if (!item || !item.name) return;
 
-                // Draw Medal
-                if (pos.medal && pos.medal.complete && pos.medal.naturalWidth > 0) {
+                // Draw Medal (if medalSize > 0)
+                if (medalSize > 0 && pos.medal && pos.medal.complete && pos.medal.naturalWidth > 0) {
                     ctx.drawImage(pos.medal, blockLeft, currentY, medalSize, medalSize);
                 }
 
                 // Draw Name
-                const textX = blockLeft + medalSize + itemGap;
+                const textX = medalSize > 0 ? (blockLeft + medalSize + itemGap) : blockLeft;
                 ctx.save();
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';

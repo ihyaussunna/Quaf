@@ -213,8 +213,8 @@
                                 <input type="range" min="4" max="60" step="1" x-model.number="settings.item_gap" @input="render()" class="w-full accent-[#be1e2d]">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Medal Size (<span x-text="settings.medal_size"></span>px)</label>
-                                <input type="range" min="20" max="100" step="2" x-model.number="settings.medal_size" @input="render()" class="w-full accent-[#be1e2d]">
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Medal Size (<span x-text="settings.medal_size"></span>px) (Set 0 if frame has badges)</label>
+                                <input type="range" min="0" max="100" step="1" x-model.number="settings.medal_size" @input="render()" class="w-full accent-[#be1e2d]">
                             </div>
                         </div>
                     </div>
@@ -479,19 +479,21 @@ function templateCustomizer() {
                 const rowTop = firstTop + (index * rowGap);
 
                 // Draw Medal Image
-                const medalImg = this.medals[key];
-                if (medalImg && medalImg.complete && medalImg.naturalWidth > 0) {
-                    ctx.drawImage(medalImg, blockLeft, rowTop, medalSize, medalSize);
-                } else {
-                    ctx.save();
-                    ctx.fillStyle = index === 0 ? '#fbbf24' : (index === 1 ? '#94a3b8' : '#b45309');
-                    ctx.beginPath();
-                    ctx.arc(blockLeft + (medalSize / 2), rowTop + (medalSize / 2), medalSize / 2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
+                if (medalSize > 0) {
+                    const medalImg = this.medals[key];
+                    if (medalImg && medalImg.complete && medalImg.naturalWidth > 0) {
+                        ctx.drawImage(medalImg, blockLeft, rowTop, medalSize, medalSize);
+                    } else {
+                        ctx.save();
+                        ctx.fillStyle = index === 0 ? '#fbbf24' : (index === 1 ? '#94a3b8' : '#b45309');
+                        ctx.beginPath();
+                        ctx.arc(blockLeft + (medalSize / 2), rowTop + (medalSize / 2), medalSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
                 }
 
-                const textLeft = blockLeft + medalSize + itemGap;
+                const textLeft = medalSize > 0 ? (blockLeft + medalSize + itemGap) : blockLeft;
 
                 // Draw Winner Participant Name
                 ctx.save();
