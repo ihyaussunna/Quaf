@@ -169,9 +169,9 @@
                         <table class="w-full border-collapse text-left table-fixed">
                             <thead>
                                 <tr class="bg-[#FFF5F5] border-b-2 border-[#BE1E2D]">
-                                    <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-extrabold text-xs uppercase tracking-wider text-[#BE1E2D] border-r border-[#FECACA]">
-                                        <div class="flex items-center justify-center gap-1">
-                                            <svg class="w-3.5 h-3.5 text-[#BE1E2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-[#FECACA]">
+                                        <div class="flex items-center justify-center gap-1 font-bold text-black">
+                                            <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             <span>Time</span>
                                         </div>
                                     </th>
@@ -192,8 +192,8 @@
                                 @foreach($timeSlots as $idx => $timeSlot)
                                     <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF8F5]' }} border-b border-slate-200 last:border-b-0">
                                         <!-- Time Column -->
-                                        <td class="px-3 py-3.5 text-center font-extrabold text-xs sm:text-sm text-[#BE1E2D] bg-[#FFF9F9] border-r border-slate-200 align-middle whitespace-nowrap">
-                                            {{ $timeSlot }}
+                                        <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-slate-200 align-middle whitespace-nowrap">
+                                            <span class="font-bold text-black">{{ $timeSlot }}</span>
                                         </td>
 
                                         <!-- Stage Columns -->
@@ -205,32 +205,14 @@
                                                             <div class="w-full text-center">
                                                                 <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                                                                     {{ $sch->program?->name }}
-                                                                    @if($sch->program?->code)
-                                                                        <span class="text-[10px] text-slate-400 font-medium ml-0.5">[{{ $sch->program->code }}]</span>
-                                                                    @endif
                                                                 </div>
-                                                                <div class="flex flex-wrap items-center justify-center gap-1 mt-1">
-                                                                    @if($sch->program?->zone)
+                                                                @if($sch->program?->zone)
+                                                                    <div class="mt-1">
                                                                         <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
                                                                             {{ $sch->program->zone->name }}
                                                                         </span>
-                                                                    @endif
-                                                                    @php
-                                                                        $duration = $sch->program?->duration_minutes;
-                                                                        if ($duration >= 60) {
-                                                                            $durText = ($duration / 60) . ' hr';
-                                                                        } elseif ($duration > 0) {
-                                                                            $durText = $duration . ' min';
-                                                                        } else {
-                                                                            $durText = null;
-                                                                        }
-                                                                    @endphp
-                                                                    @if($durText)
-                                                                        <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-semibold">
-                                                                            {{ $durText }}
-                                                                        </span>
-                                                                    @endif
-                                                                </div>
+                                                                    </div>
+                                                                @endif
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -297,9 +279,9 @@
                             <table class="w-full border-collapse text-left table-fixed">
                                 <thead>
                                     <tr class="bg-[#FFF5F5] border-b-2 border-[#BE1E2D]">
-                                        <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-extrabold text-xs uppercase tracking-wider text-[#BE1E2D] border-r border-[#FECACA]">
-                                            <div class="flex items-center justify-center gap-1">
-                                                <svg class="w-3.5 h-3.5 text-[#BE1E2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-[#FECACA]">
+                                            <div class="flex items-center justify-center gap-1 font-bold text-black">
+                                                <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 <span>Time</span>
                                             </div>
                                         </th>
@@ -320,8 +302,8 @@
                                     @foreach($data['timeSlots'] as $idx => $timeSlot)
                                         <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF8F5]' }} border-b border-slate-200 last:border-b-0">
                                             <!-- Time Column -->
-                                            <td class="px-3 py-3.5 text-center font-extrabold text-xs sm:text-sm text-[#BE1E2D] bg-[#FFF9F9] border-r border-slate-200 align-middle whitespace-nowrap">
-                                                {{ $timeSlot }}
+                                            <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-slate-200 align-middle whitespace-nowrap">
+                                                <span class="font-bold text-black">{{ $timeSlot }}</span>
                                             </td>
 
                                             <!-- Stage Columns -->
@@ -333,32 +315,14 @@
                                                                 <div class="w-full text-center">
                                                                     <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                                                                         {{ $sch->program?->name }}
-                                                                        @if($sch->program?->code)
-                                                                            <span class="text-[10px] text-slate-400 font-medium ml-0.5">[{{ $sch->program->code }}]</span>
-                                                                        @endif
                                                                     </div>
-                                                                    <div class="flex flex-wrap items-center justify-center gap-1 mt-1">
-                                                                        @if($sch->program?->zone)
+                                                                    @if($sch->program?->zone)
+                                                                        <div class="mt-1">
                                                                             <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
                                                                                 {{ $sch->program->zone->name }}
                                                                             </span>
-                                                                        @endif
-                                                                        @php
-                                                                            $duration = $sch->program?->duration_minutes;
-                                                                            if ($duration >= 60) {
-                                                                                $durText = ($duration / 60) . ' hr';
-                                                                            } elseif ($duration > 0) {
-                                                                                $durText = $duration . ' min';
-                                                                            } else {
-                                                                                $durText = null;
-                                                                            }
-                                                                        @endphp
-                                                                        @if($durText)
-                                                                            <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-semibold">
-                                                                                {{ $durText }}
-                                                                            </span>
-                                                                        @endif
-                                                                    </div>
+                                                                        </div>
+                                                                    @endif
                                                                 </div>
                                                             @endforeach
                                                         </div>
