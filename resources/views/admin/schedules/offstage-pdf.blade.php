@@ -130,19 +130,31 @@
             border-bottom: none !important;
         }
         .schedule-header-th {
-            background-color: #F1F2F2 !important;
+            background-color: #FFFFFF !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
-        .schedule-row-rose,
-        .schedule-row-rose td {
-            background-color: #FEF3F4 !important;
+        .schedule-header-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background-color: rgba(15, 23, 42, 0.05) !important; /* 5% opacity grey shape */
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            color: #0f172a;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
-        .schedule-row-silver,
-        .schedule-row-silver td {
-            background-color: #F1F2F2 !important;
+        .schedule-row-blue,
+        .schedule-row-blue td {
+            background-color: #F2F6FE !important; /* 5% opacity blue */
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .schedule-row-white,
+        .schedule-row-white td {
+            background-color: #FFFFFF !important; /* white */
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
@@ -203,20 +215,24 @@
                         <table class="schedule-matrix-table text-left">
                             <thead class="schedule-header-row">
                                 <tr>
-                                    <th class="schedule-header-th w-[15%] sm:w-[14%] px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900">
-                                        Time
+                                    <th class="schedule-header-th w-[15%] sm:w-[14%] px-3 py-3 text-center align-middle">
+                                        <div class="schedule-header-pill font-medium text-xs sm:text-sm text-slate-800">
+                                            Time
+                                        </div>
                                     </th>
                                     @php
                                         $stageColWidth = round(85 / max(1, $stages->count()), 2);
                                     @endphp
                                     @foreach($stages as $stage)
-                                        <th class="schedule-header-th px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900" style="width: {{ $stageColWidth }}%;">
-                                            <div>{{ $stage->name }}</div>
-                                            @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
-                                                <div class="text-[10px] text-slate-500 font-normal mt-0.5 normal-case tracking-normal">
-                                                    Venue: {{ $stage->location }}
-                                                </div>
-                                            @endif
+                                        <th class="schedule-header-th px-3 py-3 text-center align-middle" style="width: {{ $stageColWidth }}%;">
+                                            <div class="schedule-header-pill flex-col font-medium text-xs sm:text-sm text-slate-800">
+                                                <div>{{ $stage->name }}</div>
+                                                @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
+                                                    <div class="text-[10px] text-slate-500 font-normal mt-0.5 normal-case tracking-normal">
+                                                        Venue: {{ $stage->location }}
+                                                    </div>
+                                                @endif
+                                            </div>
                                         </th>
                                     @endforeach
                                 </tr>
@@ -224,9 +240,9 @@
                             <tbody>
                                 @foreach($timeSlots as $idx => $timeSlot)
                                     @php
-                                        // Exact alternating row graphics from user's template:
-                                        $rowClass = $idx % 2 === 0 ? 'schedule-row-rose' : 'schedule-row-silver';
-                                        $rowHex = $idx % 2 === 0 ? '#FEF3F4' : '#F1F2F2';
+                                        // Alternating row graphics: 5% opacity blue & white
+                                        $rowClass = $idx % 2 === 0 ? 'schedule-row-blue' : 'schedule-row-white';
+                                        $rowHex = $idx % 2 === 0 ? '#F2F6FE' : '#FFFFFF';
                                     @endphp
                                     <tr class="{{ $rowClass }}" style="background-color: {{ $rowHex }};">
                                         <!-- Time Column -->
@@ -248,11 +264,11 @@
                                                                     @php
                                                                         $zName = $sch->program->zone->name;
                                                                         $zStyle = match (true) {
-                                                                            str_contains($zName, 'A') => 'bg-emerald-100/80 text-emerald-800 border-emerald-300',
-                                                                            str_contains($zName, 'B') => 'bg-blue-100/80 text-blue-800 border-blue-300',
-                                                                            str_contains($zName, 'C') => 'bg-purple-100/80 text-purple-800 border-purple-300',
-                                                                            str_contains($zName, 'Mix') => 'bg-amber-100/80 text-amber-900 border-amber-300',
-                                                                            default => 'bg-rose-100/80 text-rose-900 border-rose-300',
+                                                                            str_contains($zName, 'A') => 'bg-white text-slate-700 border-slate-200/90 shadow-2xs',
+                                                                            str_contains($zName, 'B') => 'bg-blue-50/80 text-blue-900 border-blue-200',
+                                                                            str_contains($zName, 'C') => 'bg-purple-50/80 text-purple-900 border-purple-200',
+                                                                            str_contains($zName, 'Mix') => 'bg-amber-50/80 text-amber-900 border-amber-200',
+                                                                            default => 'bg-blue-50/80 text-blue-900 border-blue-200',
                                                                         };
                                                                     @endphp
                                                                     <div class="mt-1">
@@ -311,20 +327,24 @@
                             <table class="schedule-matrix-table text-left">
                                 <thead class="schedule-header-row">
                                     <tr>
-                                        <th class="schedule-header-th w-[15%] sm:w-[14%] px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900">
-                                            Time
+                                        <th class="schedule-header-th w-[15%] sm:w-[14%] px-3 py-3 text-center align-middle">
+                                            <div class="schedule-header-pill font-medium text-xs sm:text-sm text-slate-800">
+                                                Time
+                                            </div>
                                         </th>
                                         @php
                                             $stageColWidth = round(85 / max(1, $data['stages']->count()), 2);
                                         @endphp
                                         @foreach($data['stages'] as $stage)
-                                            <th class="schedule-header-th px-3 py-3 text-center font-normal text-sm sm:text-base text-slate-900" style="width: {{ $stageColWidth }}%;">
-                                                <div>{{ $stage->name }}</div>
-                                                @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
-                                                    <div class="text-[10px] text-slate-500 font-normal mt-0.5 normal-case tracking-normal">
-                                                        Venue: {{ $stage->location }}
-                                                    </div>
-                                                @endif
+                                            <th class="schedule-header-th px-3 py-3 text-center align-middle" style="width: {{ $stageColWidth }}%;">
+                                                <div class="schedule-header-pill flex-col font-medium text-xs sm:text-sm text-slate-800">
+                                                    <div>{{ $stage->name }}</div>
+                                                    @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
+                                                        <div class="text-[10px] text-slate-500 font-normal mt-0.5 normal-case tracking-normal">
+                                                            Venue: {{ $stage->location }}
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </th>
                                         @endforeach
                                     </tr>
@@ -332,9 +352,9 @@
                                 <tbody>
                                     @foreach($data['timeSlots'] as $idx => $timeSlot)
                                         @php
-                                            // Exact alternating row graphics from user's template:
-                                            $rowClass = $idx % 2 === 0 ? 'schedule-row-rose' : 'schedule-row-silver';
-                                            $rowHex = $idx % 2 === 0 ? '#FEF3F4' : '#F1F2F2';
+                                            // Alternating row graphics: 5% opacity blue & white
+                                            $rowClass = $idx % 2 === 0 ? 'schedule-row-blue' : 'schedule-row-white';
+                                            $rowHex = $idx % 2 === 0 ? '#F2F6FE' : '#FFFFFF';
                                         @endphp
                                         <tr class="{{ $rowClass }}" style="background-color: {{ $rowHex }};">
                                             <!-- Time Column -->
@@ -356,11 +376,11 @@
                                                                         @php
                                                                             $zName = $sch->program->zone->name;
                                                                             $zStyle = match (true) {
-                                                                                str_contains($zName, 'A') => 'bg-emerald-100/80 text-emerald-800 border-emerald-300',
-                                                                                str_contains($zName, 'B') => 'bg-blue-100/80 text-blue-800 border-blue-300',
-                                                                                str_contains($zName, 'C') => 'bg-purple-100/80 text-purple-800 border-purple-300',
-                                                                                str_contains($zName, 'Mix') => 'bg-amber-100/80 text-amber-900 border-amber-300',
-                                                                                default => 'bg-rose-100/80 text-rose-900 border-rose-300',
+                                                                                str_contains($zName, 'A') => 'bg-white text-slate-700 border-slate-200/90 shadow-2xs',
+                                                                                str_contains($zName, 'B') => 'bg-blue-50/80 text-blue-900 border-blue-200',
+                                                                                str_contains($zName, 'C') => 'bg-purple-50/80 text-purple-900 border-purple-200',
+                                                                                str_contains($zName, 'Mix') => 'bg-amber-50/80 text-amber-900 border-amber-200',
+                                                                                default => 'bg-blue-50/80 text-blue-900 border-blue-200',
                                                                             };
                                                                         @endphp
                                                                         <div class="mt-1">
