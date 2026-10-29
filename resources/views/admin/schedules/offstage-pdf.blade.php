@@ -139,7 +139,7 @@
 
                 <!-- Creative Decorative Motif Accent Bar (Light Festival Colors) -->
                 <div class="relative flex items-center justify-center my-3">
-                    <div class="w-full border-t-2 border-[#BE1E2D]"></div>
+                    <div class="w-full border-t border-[#BE1E2D]/40"></div>
                     <div class="absolute bg-white px-4 flex items-center gap-2">
                         <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                         <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#BE1E2D]">QUAF '26</span>
@@ -165,13 +165,13 @@
 
                 @if($stages->isNotEmpty() && $timeSlots->isNotEmpty())
                     <!-- Timetable Matrix Table -->
-                    <div class="rounded-xl overflow-hidden border-2 border-[#BE1E2D]/20 shadow-xs">
+                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-2xs">
                         <table class="w-full border-collapse text-left table-fixed">
                             <thead>
-                                <tr class="bg-[#FFF5F5] border-b-2 border-[#BE1E2D]">
-                                    <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-[#FECACA]">
+                                <tr class="bg-[#FFF9F9] border-b border-slate-200">
+                                    <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-dashed border-slate-200">
                                         <div class="flex items-center justify-center gap-1 font-bold text-black">
-                                            <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             <span>Time</span>
                                         </div>
                                     </th>
@@ -179,8 +179,13 @@
                                         $stageColWidth = round(86 / max(1, $stages->count()), 2);
                                     @endphp
                                     @foreach($stages as $stage)
-                                        <th class="px-3 py-3 text-center font-extrabold text-xs uppercase tracking-wide text-slate-800 border-r border-[#FECACA] last:border-r-0" style="width: {{ $stageColWidth }}%;">
-                                            <div class="font-extrabold text-[#1E293B]">{{ $stage->name }}</div>
+                                        <th class="px-3 py-3 text-center border-r border-dashed border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
+                                            <div class="flex items-center justify-center gap-1 mb-0.5">
+                                                <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
+                                                <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
+                                                <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
+                                            </div>
+                                            <div class="font-extrabold text-xs uppercase tracking-wide text-slate-800">{{ $stage->name }}</div>
                                             @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
                                                 <div class="text-[10px] text-slate-500 font-semibold mt-0.5 normal-case tracking-normal">Venue: {{ $stage->location }}</div>
                                             @endif
@@ -190,26 +195,29 @@
                             </thead>
                             <tbody>
                                 @foreach($timeSlots as $idx => $timeSlot)
-                                    <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF8F5]' }} border-b border-slate-200 last:border-b-0">
+                                    <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF9F7]' }} border-b border-slate-200/70 last:border-b-0">
                                         <!-- Time Column -->
-                                        <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-slate-200 align-middle whitespace-nowrap">
+                                        <td class="px-3 py-3 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-dashed border-slate-200 align-middle whitespace-nowrap">
                                             <span class="font-bold text-black">{{ $timeSlot }}</span>
                                         </td>
 
                                         <!-- Stage Columns -->
                                         @foreach($stages as $stage)
-                                            <td class="px-3 py-3 text-center border-r border-slate-200 last:border-r-0 align-middle">
+                                            <td class="px-2 py-2 text-center border-r border-dashed border-slate-200 last:border-r-0 align-middle">
                                                 @if(!empty($matrix[$timeSlot][$stage->id]))
-                                                    <div class="flex flex-col items-center justify-center gap-1.5 py-0.5">
+                                                    <div class="flex flex-col items-center justify-center gap-1.5">
                                                         @foreach($matrix[$timeSlot][$stage->id] as $sch)
-                                                            <div class="w-full text-center">
+                                                            <div class="w-full relative bg-white/95 rounded-lg border border-slate-200/80 px-2.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center">
+                                                                <!-- Subtle top accent line -->
+                                                                <div class="absolute top-0 left-4 right-4 h-[1.5px] bg-gradient-to-r from-transparent via-[#BE1E2D]/40 to-transparent rounded-full"></div>
                                                                 <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                                                                     {{ $sch->program?->name }}
                                                                 </div>
                                                                 @if($sch->program?->zone)
-                                                                    <div class="mt-1">
-                                                                        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
-                                                                            {{ $sch->program->zone->name }}
+                                                                    <div class="mt-1 flex items-center justify-center">
+                                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FFF5F5] text-[#BE1E2D] border border-rose-200/80 shadow-2xs">
+                                                                            <span class="w-1 h-1 rotate-45 bg-[#F2BC2E]"></span>
+                                                                            <span>{{ $sch->program->zone->name }}</span>
                                                                         </span>
                                                                     </div>
                                                                 @endif
@@ -217,7 +225,11 @@
                                                         @endforeach
                                                     </div>
                                                 @else
-                                                    <span class="text-slate-300 font-bold text-base select-none">—</span>
+                                                    <div class="flex items-center justify-center gap-1.5 text-slate-300 select-none py-2">
+                                                        <span class="w-2 border-t border-slate-200"></span>
+                                                        <span class="w-1.5 h-1.5 rotate-45 bg-slate-200"></span>
+                                                        <span class="w-2 border-t border-slate-200"></span>
+                                                    </div>
                                                 @endif
                                             </td>
                                         @endforeach
@@ -231,12 +243,6 @@
                         No programs scheduled for this date.
                     </div>
                 @endif
-
-                <!-- Sheet Footer -->
-                <div class="pt-4 border-t border-slate-200 mt-8 flex flex-wrap items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    <span>QUAF '26 • Markaz Cultural Festival</span>
-                    <span>Jamia Markaz Karanthur • Festival Office</span>
-                </div>
             </div>
         @else
             <!-- All Dates Multi-Page Mode -->
@@ -249,7 +255,7 @@
 
                     <!-- Creative Decorative Motif Accent Bar -->
                     <div class="relative flex items-center justify-center my-3">
-                        <div class="w-full border-t-2 border-[#BE1E2D]"></div>
+                        <div class="w-full border-t border-[#BE1E2D]/40"></div>
                         <div class="absolute bg-white px-4 flex items-center gap-2">
                             <span class="w-2 h-2 rotate-45 bg-[#F2BC2E]"></span>
                             <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#BE1E2D]">QUAF '26</span>
@@ -275,13 +281,13 @@
 
                     @if($data['stages']->isNotEmpty() && $data['timeSlots']->isNotEmpty())
                         <!-- Timetable Matrix Table -->
-                        <div class="rounded-xl overflow-hidden border-2 border-[#BE1E2D]/20 shadow-xs">
+                        <div class="rounded-xl overflow-hidden border border-slate-200 shadow-2xs">
                             <table class="w-full border-collapse text-left table-fixed">
                                 <thead>
-                                    <tr class="bg-[#FFF5F5] border-b-2 border-[#BE1E2D]">
-                                        <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-[#FECACA]">
+                                    <tr class="bg-[#FFF9F9] border-b border-slate-200">
+                                        <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-dashed border-slate-200">
                                             <div class="flex items-center justify-center gap-1 font-bold text-black">
-                                                <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 <span>Time</span>
                                             </div>
                                         </th>
@@ -289,8 +295,13 @@
                                             $stageColWidth = round(86 / max(1, $data['stages']->count()), 2);
                                         @endphp
                                         @foreach($data['stages'] as $stage)
-                                            <th class="px-3 py-3 text-center font-extrabold text-xs uppercase tracking-wide text-slate-800 border-r border-[#FECACA] last:border-r-0" style="width: {{ $stageColWidth }}%;">
-                                                <div class="font-extrabold text-[#1E293B]">{{ $stage->name }}</div>
+                                            <th class="px-3 py-3 text-center border-r border-dashed border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
+                                                <div class="flex items-center justify-center gap-1 mb-0.5">
+                                                    <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
+                                                    <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
+                                                    <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
+                                                </div>
+                                                <div class="font-extrabold text-xs uppercase tracking-wide text-slate-800">{{ $stage->name }}</div>
                                                 @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
                                                     <div class="text-[10px] text-slate-500 font-semibold mt-0.5 normal-case tracking-normal">Venue: {{ $stage->location }}</div>
                                                 @endif
@@ -300,26 +311,29 @@
                                 </thead>
                                 <tbody>
                                     @foreach($data['timeSlots'] as $idx => $timeSlot)
-                                        <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF8F5]' }} border-b border-slate-200 last:border-b-0">
+                                        <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF9F7]' }} border-b border-slate-200/70 last:border-b-0">
                                             <!-- Time Column -->
-                                            <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-slate-200 align-middle whitespace-nowrap">
+                                            <td class="px-3 py-3 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-dashed border-slate-200 align-middle whitespace-nowrap">
                                                 <span class="font-bold text-black">{{ $timeSlot }}</span>
                                             </td>
 
                                             <!-- Stage Columns -->
                                             @foreach($data['stages'] as $stage)
-                                                <td class="px-3 py-3 text-center border-r border-slate-200 last:border-r-0 align-middle">
+                                                <td class="px-2 py-2 text-center border-r border-dashed border-slate-200 last:border-r-0 align-middle">
                                                     @if(!empty($data['matrix'][$timeSlot][$stage->id]))
-                                                        <div class="flex flex-col items-center justify-center gap-1.5 py-0.5">
+                                                        <div class="flex flex-col items-center justify-center gap-1.5">
                                                             @foreach($data['matrix'][$timeSlot][$stage->id] as $sch)
-                                                                <div class="w-full text-center">
+                                                                <div class="w-full relative bg-white/95 rounded-lg border border-slate-200/80 px-2.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center">
+                                                                    <!-- Subtle top accent line -->
+                                                                    <div class="absolute top-0 left-4 right-4 h-[1.5px] bg-gradient-to-r from-transparent via-[#BE1E2D]/40 to-transparent rounded-full"></div>
                                                                     <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                                                                         {{ $sch->program?->name }}
                                                                     </div>
                                                                     @if($sch->program?->zone)
-                                                                        <div class="mt-1">
-                                                                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
-                                                                                {{ $sch->program->zone->name }}
+                                                                        <div class="mt-1 flex items-center justify-center">
+                                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FFF5F5] text-[#BE1E2D] border border-rose-200/80 shadow-2xs">
+                                                                                <span class="w-1 h-1 rotate-45 bg-[#F2BC2E]"></span>
+                                                                                <span>{{ $sch->program->zone->name }}</span>
                                                                             </span>
                                                                         </div>
                                                                     @endif
@@ -327,7 +341,11 @@
                                                             @endforeach
                                                         </div>
                                                     @else
-                                                        <span class="text-slate-300 font-bold text-base select-none">—</span>
+                                                        <div class="flex items-center justify-center gap-1.5 text-slate-300 select-none py-2">
+                                                            <span class="w-2 border-t border-slate-200"></span>
+                                                            <span class="w-1.5 h-1.5 rotate-45 bg-slate-200"></span>
+                                                            <span class="w-2 border-t border-slate-200"></span>
+                                                        </div>
                                                     @endif
                                                 </td>
                                             @endforeach
@@ -341,12 +359,6 @@
                             No programs scheduled for this date.
                         </div>
                     @endif
-
-                    <!-- Sheet Footer -->
-                    <div class="pt-4 border-t border-slate-200 mt-8 flex flex-wrap items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                        <span>QUAF '26 • Markaz Cultural Festival</span>
-                        <span>Jamia Markaz Karanthur • Festival Office</span>
-                    </div>
                 </div>
             @endforeach
         @endif
