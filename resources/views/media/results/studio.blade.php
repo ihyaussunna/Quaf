@@ -581,42 +581,42 @@ function posterStudio() {
             this.settings.layout_mode = layoutMode || (src.includes('yellow') ? 'yellow_modern' : 'default');
 
             if (this.settings.layout_mode === 'yellow_modern') {
-                this.settings.result_x = 520;
-                this.settings.result_y = 850;
-                this.settings.result_size = 240;
-                this.settings.result_weight = '800';
+                this.settings.result_x = 740;
+                this.settings.result_y = 940;
+                this.settings.result_size = 520;
+                this.settings.result_weight = '400';
                 this.settings.result_color = '#D02627';
 
-                this.settings.category_x = 710;
-                this.settings.category_y = 165;
-                this.settings.category_size = 24;
-                this.settings.category_weight = '700';
+                this.settings.category_x = 686;
+                this.settings.category_y = 166;
+                this.settings.category_size = 45;
+                this.settings.category_weight = '400';
                 this.settings.category_color = '#FFFFFF';
                 this.settings.category_align = 'center';
 
-                this.settings.competition_x = 580;
-                this.settings.competition_y = 225;
-                this.settings.competition_size = 54;
-                this.settings.competition_weight = '800';
+                this.settings.competition_x = 584;
+                this.settings.competition_y = 202;
+                this.settings.competition_size = 100;
+                this.settings.competition_weight = '400';
                 this.settings.competition_color = '#000000';
                 this.settings.competition_align = 'left';
                 this.settings.competition_font = 'Rockwell Std';
-                this.settings.competition_max_width = 420;
-                this.settings.competition_line_height = 54;
+                this.settings.competition_max_width = 440;
+                this.settings.competition_line_height = 94;
 
-                this.settings.block_left = 200;
-                this.settings.first_top = 135;
+                this.settings.block_left = 201;
+                this.settings.first_top = 120;
                 this.settings.row_gap = 175;
                 this.settings.item_gap = 0;
                 this.settings.medal_size = 0;
 
-                this.settings.winner_name_size = 32;
-                this.settings.winner_name_weight = '700';
+                this.settings.winner_name_size = 34;
+                this.settings.winner_name_weight = '400';
                 this.settings.winner_name_color = '#D02627';
-                this.settings.winner_unit_size = 22;
-                this.settings.winner_unit_weight = '500';
-                this.settings.winner_unit_color = '#222222';
-                this.settings.winner_font = 'Georgia';
+                this.settings.winner_unit_size = 26;
+                this.settings.winner_unit_weight = '300';
+                this.settings.winner_unit_color = '#000000';
+                this.settings.winner_font = 'Rockwell Std';
             } else if (this.templatesMap && this.templatesMap[id]) {
                 const tplSettings = this.templatesMap[id];
                 const numericKeys = [
@@ -689,43 +689,43 @@ function posterStudio() {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.8px';
-                ctx.fillText(this.data.category || '', this.settings.category_x || 687, this.settings.category_y || 168);
+                ctx.fillText(this.data.category || '', this.settings.category_x || 686, this.settings.category_y || 166);
                 ctx.restore();
 
                 // 3. Program Name (Below Capsule, Left Aligned)
-                // Rockwell Std Bold 31.5pt (85px), Color #000000, Tracking -40
+                // Rockwell Std Regular 30pt (100-112px), Leading 25pt (94px), Color #000000, Tracking -40
                 ctx.save();
                 ctx.fillStyle = this.settings.competition_color || '#000000';
                 const compFont = this.settings.competition_font || 'Rockwell Std';
-                const compSize = this.settings.competition_size || 85;
-                ctx.font = `${this.settings.competition_weight || '700'} ${compSize}px "${compFont}", serif`;
+                const compSize = this.settings.competition_size || 100;
+                ctx.font = `${this.settings.competition_weight || '400'} ${compSize}px "${compFont}", serif`;
                 ctx.textAlign = this.settings.competition_align || 'left';
                 ctx.textBaseline = 'top';
-                if ('letterSpacing' in ctx) ctx.letterSpacing = '-3.4px';
+                if ('letterSpacing' in ctx) ctx.letterSpacing = '-4.0px';
 
-                const compLines = this.wrapText(ctx, this.data.competition || '', this.settings.competition_max_width || 420);
-                let compY = this.settings.competition_y || 245;
-                const compLineH = this.settings.competition_line_height || (compSize * 1.05);
+                const compLines = this.wrapText(ctx, this.data.competition || '', this.settings.competition_max_width || 440);
+                let compY = this.settings.competition_y || 202;
+                const compLineH = this.settings.competition_line_height || 94;
                 for (let line of compLines) {
-                    ctx.fillText(line, this.settings.competition_x || 585, compY);
+                    ctx.fillText(line, this.settings.competition_x || 584, compY);
                     compY += compLineH;
                 }
                 ctx.restore();
 
-                // 4. Result Sequence Number (Mongolian Baiti 145pt -> 480px, Color #D02627, Tracking -40)
+                // 4. Result Sequence Number (Mongolian Baiti 145pt -> 520px, Color #D02627, Tracking -40)
                 if (this.data.result_no) {
                     ctx.save();
                     ctx.fillStyle = this.settings.result_color || '#D02627';
                     const numFont = 'Mongolian Baiti';
-                    ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "${numFont}", serif`;
+                    ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 520}px "${numFont}", serif`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'alphabetic';
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-19px';
-                    ctx.fillText(this.data.result_no, this.settings.result_x || 720, this.settings.result_y || 940);
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-20.8px';
+                    ctx.fillText(this.data.result_no, this.settings.result_x || 740, this.settings.result_y || 940);
 
                     // Vertical "Result No" beside the number
                     ctx.save();
-                    ctx.translate(620, 770);
+                    ctx.translate((this.settings.result_x || 740) - 105, (this.settings.result_y || 940) - 160);
                     ctx.rotate(-Math.PI / 2);
                     ctx.fillStyle = '#111111';
                     ctx.font = '600 24px "Montserrat", sans-serif';
@@ -883,23 +883,34 @@ function posterStudio() {
         },
 
         wrapText(ctx, text, maxWidth) {
-            const words = text.split(' ');
+            if (!text) return [];
+            const paragraphs = String(text).split('\n');
             const lines = [];
-            let currentLine = words[0] || '';
 
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                const width = ctx.measureText(currentLine + ' ' + word).width;
-                if (width < maxWidth) {
-                    currentLine += ' ' + word;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
+            paragraphs.forEach(paragraph => {
+                const words = paragraph.split(' ');
+                let currentLine = '';
+
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    if (!currentLine) {
+                        currentLine = word;
+                        continue;
+                    }
+                    const testLine = currentLine + ' ' + word;
+                    const width = ctx.measureText(testLine).width;
+                    if (width <= maxWidth) {
+                        currentLine = testLine;
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    }
                 }
-            }
-            if (currentLine) {
-                lines.push(currentLine);
-            }
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+            });
+
             return lines;
         },
 
