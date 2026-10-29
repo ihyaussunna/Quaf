@@ -165,13 +165,13 @@
 
                 @if($stages->isNotEmpty() && $timeSlots->isNotEmpty())
                     <!-- Timetable Matrix Table -->
-                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-2xs">
+                    <div class="rounded-xl overflow-hidden border border-slate-200/90 shadow-2xs">
                         <table class="w-full border-collapse text-left table-fixed">
                             <thead>
-                                <tr class="bg-[#FFF9F9] border-b border-slate-200">
-                                    <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-dashed border-slate-200">
+                                <tr class="bg-gradient-to-r from-[#FFF5F5] via-[#FFF9F2] to-[#FFF5F5] border-b-2 border-[#BE1E2D]">
+                                    <th class="w-[14%] sm:w-[13%] px-3 py-3.5 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-slate-200">
                                         <div class="flex items-center justify-center gap-1 font-bold text-black">
-                                            <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <svg class="w-3.5 h-3.5 text-[#BE1E2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             <span>Time</span>
                                         </div>
                                     </th>
@@ -179,11 +179,10 @@
                                         $stageColWidth = round(86 / max(1, $stages->count()), 2);
                                     @endphp
                                     @foreach($stages as $stage)
-                                        <th class="px-3 py-3 text-center border-r border-dashed border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
+                                        <th class="px-3 py-3.5 text-center border-r border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
                                             <div class="flex items-center justify-center gap-1 mb-0.5">
-                                                <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
                                                 <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                                                <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
+                                                <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]"></span>
                                             </div>
                                             <div class="font-extrabold text-xs uppercase tracking-wide text-slate-800">{{ $stage->name }}</div>
                                             @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
@@ -195,29 +194,32 @@
                             </thead>
                             <tbody>
                                 @foreach($timeSlots as $idx => $timeSlot)
-                                    <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF9F7]' }} border-b border-slate-200/70 last:border-b-0">
-                                        <!-- Time Column -->
-                                        <td class="px-3 py-3 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-dashed border-slate-200 align-middle whitespace-nowrap">
-                                            <span class="font-bold text-black">{{ $timeSlot }}</span>
+                                    @php
+                                        $rowBg = $idx % 2 === 0 ? 'bg-white' : 'bg-[#FFFDF9]';
+                                    @endphp
+                                    <tr class="{{ $rowBg }} border-b border-[#BE1E2D]/15 last:border-b-0 hover:bg-[#FFF8F5]/60 transition-colors">
+                                        <!-- Time Column with Colored Graphic Tag -->
+                                        <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF5F5] border border-rose-200/70 shadow-2xs">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-[#BE1E2D]"></span>
+                                                <span class="font-bold text-black tracking-tight">{{ $timeSlot }}</span>
+                                            </div>
                                         </td>
 
-                                        <!-- Stage Columns -->
+                                        <!-- Stage Columns (Direct clean text without nested box) -->
                                         @foreach($stages as $stage)
-                                            <td class="px-2 py-2 text-center border-r border-dashed border-slate-200 last:border-r-0 align-middle">
+                                            <td class="px-3 py-3.5 text-center border-r border-slate-200/80 last:border-r-0 align-middle">
                                                 @if(!empty($matrix[$timeSlot][$stage->id]))
                                                     <div class="flex flex-col items-center justify-center gap-1.5">
                                                         @foreach($matrix[$timeSlot][$stage->id] as $sch)
-                                                            <div class="w-full relative bg-white/95 rounded-lg border border-slate-200/80 px-2.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center">
-                                                                <!-- Subtle top accent line -->
-                                                                <div class="absolute top-0 left-4 right-4 h-[1.5px] bg-gradient-to-r from-transparent via-[#BE1E2D]/40 to-transparent rounded-full"></div>
+                                                            <div class="w-full text-center py-0.5">
                                                                 <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                                                                     {{ $sch->program?->name }}
                                                                 </div>
                                                                 @if($sch->program?->zone)
-                                                                    <div class="mt-1 flex items-center justify-center">
-                                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FFF5F5] text-[#BE1E2D] border border-rose-200/80 shadow-2xs">
-                                                                            <span class="w-1 h-1 rotate-45 bg-[#F2BC2E]"></span>
-                                                                            <span>{{ $sch->program->zone->name }}</span>
+                                                                    <div class="mt-1">
+                                                                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
+                                                                            {{ $sch->program->zone->name }}
                                                                         </span>
                                                                     </div>
                                                                 @endif
@@ -225,11 +227,7 @@
                                                         @endforeach
                                                     </div>
                                                 @else
-                                                    <div class="flex items-center justify-center gap-1.5 text-slate-300 select-none py-2">
-                                                        <span class="w-2 border-t border-slate-200"></span>
-                                                        <span class="w-1.5 h-1.5 rotate-45 bg-slate-200"></span>
-                                                        <span class="w-2 border-t border-slate-200"></span>
-                                                    </div>
+                                                    <span class="text-slate-300 font-bold text-base select-none">—</span>
                                                 @endif
                                             </td>
                                         @endforeach
@@ -281,13 +279,13 @@
 
                     @if($data['stages']->isNotEmpty() && $data['timeSlots']->isNotEmpty())
                         <!-- Timetable Matrix Table -->
-                        <div class="rounded-xl overflow-hidden border border-slate-200 shadow-2xs">
+                        <div class="rounded-xl overflow-hidden border border-slate-200/90 shadow-2xs">
                             <table class="w-full border-collapse text-left table-fixed">
                                 <thead>
-                                    <tr class="bg-[#FFF9F9] border-b border-slate-200">
-                                        <th class="w-[14%] sm:w-[13%] px-3 py-3 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-dashed border-slate-200">
+                                    <tr class="bg-gradient-to-r from-[#FFF5F5] via-[#FFF9F2] to-[#FFF5F5] border-b-2 border-[#BE1E2D]">
+                                        <th class="w-[14%] sm:w-[13%] px-3 py-3.5 text-center font-bold text-xs uppercase tracking-wider text-black border-r border-slate-200">
                                             <div class="flex items-center justify-center gap-1 font-bold text-black">
-                                                <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <svg class="w-3.5 h-3.5 text-[#BE1E2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 <span>Time</span>
                                             </div>
                                         </th>
@@ -295,11 +293,10 @@
                                             $stageColWidth = round(86 / max(1, $data['stages']->count()), 2);
                                         @endphp
                                         @foreach($data['stages'] as $stage)
-                                            <th class="px-3 py-3 text-center border-r border-dashed border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
+                                            <th class="px-3 py-3.5 text-center border-r border-slate-200 last:border-r-0" style="width: {{ $stageColWidth }}%;">
                                                 <div class="flex items-center justify-center gap-1 mb-0.5">
-                                                    <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
                                                     <span class="w-1.5 h-1.5 rotate-45 bg-[#F2BC2E]"></span>
-                                                    <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]/40"></span>
+                                                    <span class="w-1 h-1 rotate-45 bg-[#BE1E2D]"></span>
                                                 </div>
                                                 <div class="font-extrabold text-xs uppercase tracking-wide text-slate-800">{{ $stage->name }}</div>
                                                 @if($stage->location && !str_contains(strtolower($stage->name), strtolower($stage->location)))
@@ -311,29 +308,32 @@
                                 </thead>
                                 <tbody>
                                     @foreach($data['timeSlots'] as $idx => $timeSlot)
-                                        <tr class="{{ $idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF9F7]' }} border-b border-slate-200/70 last:border-b-0">
-                                            <!-- Time Column -->
-                                            <td class="px-3 py-3 text-center font-bold text-xs sm:text-sm text-black bg-[#FAF9F6] border-r border-dashed border-slate-200 align-middle whitespace-nowrap">
-                                                <span class="font-bold text-black">{{ $timeSlot }}</span>
+                                        @php
+                                            $rowBg = $idx % 2 === 0 ? 'bg-white' : 'bg-[#FFFDF9]';
+                                        @endphp
+                                        <tr class="{{ $rowBg }} border-b border-[#BE1E2D]/15 last:border-b-0 hover:bg-[#FFF8F5]/60 transition-colors">
+                                            <!-- Time Column with Colored Graphic Tag -->
+                                            <td class="px-3 py-3.5 text-center font-bold text-xs sm:text-sm text-black border-r border-slate-200/80 align-middle whitespace-nowrap">
+                                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF5F5] border border-rose-200/70 shadow-2xs">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#BE1E2D]"></span>
+                                                    <span class="font-bold text-black tracking-tight">{{ $timeSlot }}</span>
+                                                </div>
                                             </td>
 
-                                            <!-- Stage Columns -->
+                                            <!-- Stage Columns (Direct clean text without nested box) -->
                                             @foreach($data['stages'] as $stage)
-                                                <td class="px-2 py-2 text-center border-r border-dashed border-slate-200 last:border-r-0 align-middle">
+                                                <td class="px-3 py-3.5 text-center border-r border-slate-200/80 last:border-r-0 align-middle">
                                                     @if(!empty($data['matrix'][$timeSlot][$stage->id]))
                                                         <div class="flex flex-col items-center justify-center gap-1.5">
                                                             @foreach($data['matrix'][$timeSlot][$stage->id] as $sch)
-                                                                <div class="w-full relative bg-white/95 rounded-lg border border-slate-200/80 px-2.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center">
-                                                                    <!-- Subtle top accent line -->
-                                                                    <div class="absolute top-0 left-4 right-4 h-[1.5px] bg-gradient-to-r from-transparent via-[#BE1E2D]/40 to-transparent rounded-full"></div>
+                                                                <div class="w-full text-center py-0.5">
                                                                     <div class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                                                                         {{ $sch->program?->name }}
                                                                     </div>
                                                                     @if($sch->program?->zone)
-                                                                        <div class="mt-1 flex items-center justify-center">
-                                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FFF5F5] text-[#BE1E2D] border border-rose-200/80 shadow-2xs">
-                                                                                <span class="w-1 h-1 rotate-45 bg-[#F2BC2E]"></span>
-                                                                                <span>{{ $sch->program->zone->name }}</span>
+                                                                        <div class="mt-1">
+                                                                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-[#BE1E2D] border border-rose-200 shadow-2xs">
+                                                                                {{ $sch->program->zone->name }}
                                                                             </span>
                                                                         </div>
                                                                     @endif
@@ -341,11 +341,7 @@
                                                             @endforeach
                                                         </div>
                                                     @else
-                                                        <div class="flex items-center justify-center gap-1.5 text-slate-300 select-none py-2">
-                                                            <span class="w-2 border-t border-slate-200"></span>
-                                                            <span class="w-1.5 h-1.5 rotate-45 bg-slate-200"></span>
-                                                            <span class="w-2 border-t border-slate-200"></span>
-                                                        </div>
+                                                        <span class="text-slate-300 font-bold text-base select-none">—</span>
                                                     @endif
                                                 </td>
                                             @endforeach
