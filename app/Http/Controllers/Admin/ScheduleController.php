@@ -305,7 +305,7 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Official Rockwell PDF Export & Print View for Offstage Schedule.
+     * Official Rockwell Std PDF Export & Print View for Program Schedule.
      */
     public function offstagePdf(Request $request): View
     {
