@@ -682,45 +682,54 @@ function posterStudio() {
                 // ============================================
 
                 // 2. Zone inside Red Capsule (Top Right)
+                // Rockwell Std Regular 12pt (45px), Color #FFFFFF, Tracking -40
                 ctx.save();
                 ctx.fillStyle = this.settings.category_color || '#FFFFFF';
-                ctx.font = `${this.settings.category_weight || '700'} ${this.settings.category_size || 24}px "Montserrat", sans-serif`;
+                ctx.font = `${this.settings.category_weight || '400'} ${this.settings.category_size || 45}px "Rockwell Std", serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.data.category || '', this.settings.category_x || 710, this.settings.category_y || 165);
+                if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.8px';
+                ctx.fillText(this.data.category || '', this.settings.category_x || 687, this.settings.category_y || 168);
                 ctx.restore();
 
                 // 3. Program Name (Below Capsule, Left Aligned)
+                // Rockwell Std Bold 31.5pt (85px), Color #000000, Tracking -40
                 ctx.save();
                 ctx.fillStyle = this.settings.competition_color || '#000000';
                 const compFont = this.settings.competition_font || 'Rockwell Std';
-                ctx.font = `${this.settings.competition_weight || '800'} ${this.settings.competition_size || 54}px "${compFont}", "Montserrat", sans-serif`;
+                const compSize = this.settings.competition_size || 85;
+                ctx.font = `${this.settings.competition_weight || '700'} ${compSize}px "${compFont}", serif`;
                 ctx.textAlign = this.settings.competition_align || 'left';
                 ctx.textBaseline = 'top';
+                if ('letterSpacing' in ctx) ctx.letterSpacing = '-3.4px';
 
                 const compLines = this.wrapText(ctx, this.data.competition || '', this.settings.competition_max_width || 420);
-                let compY = this.settings.competition_y || 225;
+                let compY = this.settings.competition_y || 245;
+                const compLineH = this.settings.competition_line_height || (compSize * 1.05);
                 for (let line of compLines) {
-                    ctx.fillText(line, this.settings.competition_x || 580, compY);
-                    compY += (this.settings.competition_line_height || 54);
+                    ctx.fillText(line, this.settings.competition_x || 585, compY);
+                    compY += compLineH;
                 }
                 ctx.restore();
 
-                // 4. Result Sequence Number (Huge Red Number e.g. 37) & Vertical "Result No"
+                // 4. Result Sequence Number (Mongolian Baiti 145pt -> 480px, Color #D02627, Tracking -40)
                 if (this.data.result_no) {
                     ctx.save();
                     ctx.fillStyle = this.settings.result_color || '#D02627';
-                    ctx.font = `${this.settings.result_weight || '800'} ${this.settings.result_size || 240}px "Rockwell Std", "Georgia", serif`;
-                    ctx.textAlign = 'left';
+                    const numFont = 'Mongolian Baiti';
+                    ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "${numFont}", serif`;
+                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'alphabetic';
-                    ctx.fillText(this.data.result_no, this.settings.result_x || 520, this.settings.result_y || 850);
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-19px';
+                    ctx.fillText(this.data.result_no, this.settings.result_x || 720, this.settings.result_y || 940);
 
                     // Vertical "Result No" beside the number
                     ctx.save();
-                    ctx.translate((this.settings.result_x || 520) + 110, (this.settings.result_y || 850) - 130);
+                    ctx.translate(620, 770);
                     ctx.rotate(-Math.PI / 2);
                     ctx.fillStyle = '#111111';
-                    ctx.font = '600 22px "Montserrat", sans-serif';
+                    ctx.font = '600 24px "Montserrat", sans-serif';
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
                     ctx.fillText('Result No', 0, 0);
                     ctx.restore();
 
@@ -734,8 +743,8 @@ function posterStudio() {
                     { key: 'third', rank: '03' }
                 ];
 
-                let currentY = this.settings.first_top || 135;
-                const blockLeft = this.settings.block_left || 200;
+                let currentY = this.settings.first_top || 120;
+                const blockLeft = this.settings.block_left || 201;
                 const rowGap = this.settings.row_gap || 175;
 
                 winnerPositions.forEach(pos => {
@@ -746,28 +755,43 @@ function posterStudio() {
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'top';
 
-                    // 1. Rank Numeral 01 / 02 / 03
-                    ctx.fillStyle = '#555555';
-                    ctx.font = '300 36px "Montserrat", sans-serif';
+                    // 1. Rank Numeral: Montserrat ExtraLight 11pt (41px), Tracking -40
+                    ctx.fillStyle = '#444444';
+                    ctx.font = '200 41px "Montserrat", sans-serif';
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.6px';
                     ctx.fillText(pos.rank, blockLeft, currentY);
 
-                    // 2. Student Name in RED Serif
+                    // 2. Student Name: Rockwell Std Regular 9pt (34px), Color #D02627, Tracking -40
                     ctx.fillStyle = this.settings.winner_name_color || '#D02627';
-                    const winFont = this.settings.winner_font || 'Georgia';
-                    ctx.font = `${this.settings.winner_name_weight || '700'} ${this.settings.winner_name_size || 32}px "${winFont}", "Georgia", serif`;
-                    ctx.fillText(item.name, blockLeft, currentY + 44);
+                    const winFont = this.settings.winner_font || 'Rockwell Std';
+                    const winSize = this.settings.winner_name_size || 34;
+                    ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.4px';
 
-                    // 3. Group Name in BLACK
-                    ctx.fillStyle = this.settings.winner_unit_color || '#222222';
-                    ctx.font = `${this.settings.winner_unit_weight || '500'} ${this.settings.winner_unit_size || 22}px "Montserrat", sans-serif`;
-                    ctx.fillText(item.unit || '', blockLeft, currentY + 86);
+                    // Wrap long name if 3 or more words
+                    const nameParts = (item.name || '').trim().split(' ');
+                    let nameY = currentY + 44;
+                    if (nameParts.length > 2 && (item.name.length > 18)) {
+                        ctx.fillText(nameParts[0], blockLeft, nameY);
+                        nameY += (winSize * 0.95);
+                        ctx.fillText(nameParts.slice(1).join(' '), blockLeft, nameY);
+                    } else {
+                        ctx.fillText(item.name, blockLeft, nameY);
+                    }
+
+                    // 3. Group Name: Rockwell Std Light 7pt (26px), Color #000000, Tracking -20
+                    ctx.fillStyle = this.settings.winner_unit_color || '#000000';
+                    const unitSize = this.settings.winner_unit_size || 26;
+                    ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
+                    ctx.fillText(item.unit || '', blockLeft, nameY + 36);
 
                     // 4. Divider Line
-                    ctx.strokeStyle = 'rgba(45, 45, 45, 0.25)';
-                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = 'rgba(45, 45, 45, 0.22)';
+                    ctx.lineWidth = 1.2;
                     ctx.beginPath();
                     ctx.moveTo(blockLeft, currentY + 125);
-                    ctx.lineTo(blockLeft + 260, currentY + 125);
+                    ctx.lineTo(blockLeft + 280, currentY + 125);
                     ctx.stroke();
 
                     ctx.restore();
