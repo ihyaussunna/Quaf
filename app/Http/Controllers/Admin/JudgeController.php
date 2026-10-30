@@ -315,7 +315,7 @@ class JudgeController extends Controller
         $filterStatus = $request->query('status'); // all, assigned, unassigned
 
         $allJudges = Judge::orderBy('name')->get();
-        $stages = Stage::orderBy('order')->orderBy('name')->get();
+        $stages = Stage::orderBy('code')->orderBy('name')->get();
         $categories = ProgramCategory::orderBy('name')->get();
 
         $query = Judge::with([
