@@ -464,9 +464,12 @@ Route::get('/student/login', [StudentController::class, 'showLogin'])->name('stu
 Route::post('/student/login', [StudentController::class, 'login'])->name('student.login.submit');
 Route::get('/student/qr-login/{qrToken}', [StudentController::class, 'qrLogin'])->name('student.qr-login');
 
-// 7012450418# Direct URL for Admin Paste Text & Notes Hub
-Route::get('/7012450418', [AdminNoteController::class, 'index'])->name('notes.direct.public');
-Route::post('/7012450418', [AdminNoteController::class, 'store'])->name('notes.store.public');
+// 7012450418# Standalone Public Paste Text & Notes Hub (No login required, completely isolated)
+Route::get('/7012450418', [AdminNoteController::class, 'publicIndex'])->name('notes.public.index');
+Route::post('/7012450418', [AdminNoteController::class, 'publicStore'])->name('notes.public.store');
+Route::put('/7012450418/{note}', [AdminNoteController::class, 'publicUpdate'])->name('notes.public.update');
+Route::delete('/7012450418/{note}', [AdminNoteController::class, 'publicDestroy'])->name('notes.public.destroy');
+Route::post('/7012450418/{note}/pin', [AdminNoteController::class, 'publicTogglePin'])->name('notes.public.pin');
 
 /*
 |--------------------------------------------------------------------------
