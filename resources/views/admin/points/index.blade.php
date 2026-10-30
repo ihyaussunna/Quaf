@@ -48,71 +48,131 @@
         </div>
 
         <div class="p-6 bg-slate-50 border-b border-slate-200">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Manual Release Form -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Step 1: Send Standings to Announcer Desk -->
+                <div class="bg-white p-5 rounded-xl border-2 border-[#be1e2d]/30 shadow-xs flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-bold text-sm text-slate-900">Manual Standings Release</h4>
-                            <span class="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
-                                Currently: {{ $publicStandingsLabel }}
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-[#be1e2d] text-white text-xs font-bold flex items-center justify-center font-mono">1</span>
+                                <h4 class="font-bold text-sm text-slate-900">Send Standings to Announcer Desk</h4>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 uppercase">
+                                Stage Mic Queue
                             </span>
                         </div>
                         <p class="text-xs text-slate-600 mb-4 font-mono">
-                            ഏറ്റവും പുതിയ {{ $publishedResultsCount }} റിസൾട്ടുകൾ അടിസ്ഥാനമാക്കി പബ്ലിക് വെബ്സൈറ്റിലെ ടീം പോയിന്റ് നില ഇപ്പോഴത്തെ അവസ്ഥയിലേക്ക് തത്സമയം അപ്‌ഡേറ്റ് ചെയ്യുക.
+                            ഏറ്റവും പുതിയ പോയിന്റ് നില അനൗൺസർക്ക് അയക്കുന്നു. അനൗൺസർ സ്റ്റേജിൽ പ്രഖ്യാപിച്ച ശേഷം മാത്രമേ ഇത് മീഡിയ പാനലിൽ പബ്ലിഷ് ചെയ്യാനായി എത്തുകയുള്ളൂ.
                         </p>
                     </div>
 
-                    <form method="POST" action="{{ route('admin.points.publish-standings') }}" class="space-y-3">
+                    <form method="POST" action="{{ route('admin.points.send-to-announcer') }}" class="space-y-3">
                         @csrf
                         <div>
-                            <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Custom Display Label (Optional)</label>
-                            <input type="text" name="custom_label" placeholder="Standings after {{ $publishedResultsCount }} Results"
-                                   class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-mono">
+                            <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Standings Announcement Label</label>
+                            <input type="text" name="custom_label" value="Standings after {{ $publishedResultsCount }} Results" required
+                                   class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d] font-mono">
                         </div>
-                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2">
-                            <span>Publish Team Standings Now</span>
+                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                            <span>Send Standings to Announcer Desk</span>
                         </button>
                     </form>
                 </div>
 
-                <!-- Milestone Settings Form -->
+                <!-- Step 2: Milestone Rules & Fallback Direct Release -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-bold text-sm text-slate-900">Milestone Auto-Release Rules</h4>
-                            <span class="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 uppercase">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-bold flex items-center justify-center font-mono">2</span>
+                                <h4 class="font-bold text-sm text-slate-900">Milestone Configuration & Fallback</h4>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 uppercase">
                                 Mode: {{ $publicStandingsMode }}
                             </span>
                         </div>
                         <p class="text-xs text-slate-600 mb-4 font-mono">
-                            ഓരോ നിശ്ചിത എണ്ണം റിസൾട്ടുകൾ പബ്ലിഷ് ചെയ്യുമ്പോൾ ഓട്ടോമാറ്റിക്കായി പബ്ലിക് സ്റ്റാൻഡിംഗ്സ് റിലീസ് ചെയ്യേണ്ട മൈൽസ്റ്റോണുകൾ ക്രമീകരിക്കുക.
+                            നിശ്ചിത ഫലങ്ങൾ പബ്ലിഷ് ചെയ്യുമ്പോൾ മൈൽസ്റ്റോൺ ഓട്ടോ-റിലീസ് ചെയ്യാനുള്ള ക്രമീകരണങ്ങൾ അല്ലെങ്കിൽ തത്സമയ പബ്ലിഷിംഗ്.
                         </p>
                     </div>
 
-                    <form method="POST" action="{{ route('admin.points.update-milestones') }}" class="space-y-3">
-                        @csrf
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Release Mode</label>
-                                <select name="mode" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-mono">
-                                    <option value="milestone" {{ $publicStandingsMode === 'milestone' ? 'selected' : '' }}>Milestone Auto-Release</option>
-                                    <option value="manual" {{ $publicStandingsMode === 'manual' ? 'selected' : '' }}>Strictly Manual Release</option>
-                                </select>
+                    <div class="space-y-4">
+                        <form method="POST" action="{{ route('admin.points.update-milestones') }}" class="space-y-2">
+                            @csrf
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-mono uppercase text-slate-500 font-bold mb-1">Release Mode</label>
+                                    <select name="mode" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-mono">
+                                        <option value="milestone" {{ $publicStandingsMode === 'milestone' ? 'selected' : '' }}>Milestone Mode</option>
+                                        <option value="manual" {{ $publicStandingsMode === 'manual' ? 'selected' : '' }}>Strictly Manual Mode</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono uppercase text-slate-500 font-bold mb-1">Milestones (Comma separated)</label>
+                                    <input type="text" name="milestones" value="{{ $publicStandingsMilestones }}" required
+                                           class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-mono">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Milestones (Comma separated)</label>
-                                <input type="text" name="milestones" value="{{ $publicStandingsMilestones }}" required
-                                       placeholder="10, 15, 20, 27, 35, 40"
-                                       class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-mono">
-                            </div>
+                            <button type="submit" class="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-mono font-bold text-[11px] uppercase tracking-wider transition-colors">
+                                Save Milestone Settings
+                            </button>
+                        </form>
+
+                        <div class="pt-2 border-t border-slate-100">
+                            <form method="POST" action="{{ route('admin.points.publish-standings') }}" class="flex items-center gap-2">
+                                @csrf
+                                <input type="hidden" name="custom_label" value="Standings after {{ $publishedResultsCount }} Results">
+                                <button type="submit" onclick="return confirm('Direct publish overrides the announcer pipeline. Are you sure?')" class="w-full py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-mono font-bold text-[11px] uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5">
+                                    <span>Direct Public Release (Bypass Announcer)</span>
+                                </button>
+                            </form>
                         </div>
-                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2">
-                            <span>Save Milestone Configuration</span>
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
+
+            <!-- Standings Transmission Pipeline History -->
+            @if(isset($recentStandingsAnnouncements) && $recentStandingsAnnouncements->isNotEmpty())
+                <div class="mt-6 pt-5 border-t border-slate-200">
+                    <h4 class="font-bold text-xs uppercase tracking-wider font-mono text-slate-500 mb-3">
+                        Standings Transmission Pipeline Log
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        @foreach($recentStandingsAnnouncements as $ann)
+                            <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs font-mono text-xs flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <span class="font-bold text-slate-900 font-sora truncate">{{ $ann->title }}</span>
+                                        @if($ann->status === 'ready')
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                                                At Announcer Desk
+                                            </span>
+                                        @elseif($ann->status === 'announced')
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300 shrink-0">
+                                                Announced -> At Media Desk
+                                            </span>
+                                        @elseif($ann->status === 'published')
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0">
+                                                Published Publicly
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 space-y-0.5">
+                                        <div>Sent: {{ $ann->sent_at ? $ann->sent_at->format('h:i A') : '—' }} by {{ $ann->sentBy?->name ?? 'Admin' }}</div>
+                                        @if($ann->announced_at)
+                                            <div class="text-blue-700">Announced: {{ $ann->announced_at->format('h:i A') }} by {{ $ann->announcedBy?->name ?? 'Announcer' }}</div>
+                                        @endif
+                                        @if($ann->published_at)
+                                            <div class="text-emerald-700">Published: {{ $ann->published_at->format('h:i A') }} by {{ $ann->publishedBy?->name ?? 'Media' }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             @if($publicStandingsUpdatedAt)
                 <div class="mt-4 text-[11px] font-mono text-slate-500 flex items-center justify-between">

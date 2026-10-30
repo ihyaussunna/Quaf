@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\PosterSetting;
 use App\Models\Result;
 use App\Models\ResultTemplate;
+use App\Models\StandingAnnouncement;
 use App\Services\AuditLogger;
 use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
@@ -78,7 +79,22 @@ class MediaResultController extends Controller
             'public_standings_updated_at' => FestivalSetting::get('public_standings_updated_at'),
         ];
 
-        return view('media.results.index', compact('results', 'stats', 'tab', 'search', 'standingsInfo'));
+        $incomingStandings = StandingAnnouncement::where('status', 'announced')->latest()->get();
+        $publishedStandingsHistory = StandingAnnouncement::where('status', 'published')->latest()->take(6)->get();
+
+        return view('media.results.index', compact('results', 'stats', 'tab', 'search', 'standingsInfo', 'incomingStandings', 'publishedStandingsHistory'));
+    }
+
+    /**
+     * Publish team standings announcement received from Announcer to the public website.
+     */
+    public function publishStandingAnnouncement(StandingAnnouncement $standingAnnouncement): RedirectResponse
+    {
+        $standingAnnouncement->publishPublicly(auth()->id());
+
+        AuditLogger::log('media_publish_standing', $standingAnnouncement, ['status' => 'announced'], ['status' => 'published']);
+
+        return back()->with('success', "ടീം സ്റ്റാൻഡിങ്സ് വിജയകരമായി പബ്ലിക് വെബ്സൈറ്റിൽ പ്രസിദ്ധീകരിച്ചു ({$standingAnnouncement->title}).");
     }
 
     /**

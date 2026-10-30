@@ -607,6 +607,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('points', [AdminPointController::class, 'index'])->name('points.index');
     Route::post('points', [AdminPointController::class, 'update'])->name('points.update');
     Route::post('points/recalculate', [AdminPointController::class, 'recalculate'])->name('points.recalculate');
+    Route::post('points/send-to-announcer', [AdminPointController::class, 'sendStandingsToAnnouncer'])->name('points.send-to-announcer');
     Route::post('points/publish-standings', [AdminPointController::class, 'publishPublicStandings'])->name('points.publish-standings');
     Route::post('points/milestones', [AdminPointController::class, 'updateMilestones'])->name('points.update-milestones');
 
@@ -744,6 +745,7 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
     Route::post('/enter-stage/{call}', [AnnouncerController::class, 'enterStage'])->name('enter-stage');
     Route::post('/complete-stage/{call}', [AnnouncerController::class, 'completeStage'])->name('complete-stage');
     Route::post('/{result}/announced', [AnnouncerController::class, 'markAnnounced'])->name('announced');
+    Route::post('/standings/{standingAnnouncement}/announced', [AnnouncerController::class, 'markStandingAnnounced'])->name('standings.announced');
 });
 
 /*
@@ -881,6 +883,7 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     // Results & Poster Designer
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');
     Route::post('/results/publish-standings', [MediaResultController::class, 'publishStandings'])->name('results.publish-standings');
+    Route::post('/standings/{standingAnnouncement}/publish', [MediaResultController::class, 'publishStandingAnnouncement'])->name('standings.publish');
     Route::get('/results/{result}/studio', [MediaResultController::class, 'studio'])->name('results.studio');
     Route::post('/results/{result}/save-poster', [MediaResultController::class, 'savePoster'])->name('results.save-poster');
     Route::post('/results/{result}/publish', [MediaResultController::class, 'publishPublic'])->name('results.publish');

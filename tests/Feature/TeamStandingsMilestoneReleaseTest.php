@@ -8,6 +8,7 @@ use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
+use App\Models\StandingAnnouncement;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,6 +20,8 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
+    protected User $announcer;
 
     protected User $mediaUser;
 
@@ -55,6 +58,12 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
             'role' => 'admin',
             'name' => 'Festival Administrator',
             'email' => 'admin@quaf.test',
+        ]);
+
+        $this->announcer = User::factory()->create([
+            'role' => 'announcer',
+            'name' => 'Festival Announcer',
+            'email' => 'announcer@quaf.test',
         ]);
 
         $this->mediaUser = User::factory()->create([
@@ -174,9 +183,21 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
 
         $this->assertTrue($milestoneApplied);
 
+        $announcement = StandingAnnouncement::where('results_count', 2)->first();
+        $this->assertNotNull($announcement);
+        $this->assertEquals('ready', $announcement->status);
+
+        // Announcer announces it on stage
+        $announcement->markAsAnnounced();
+        $this->assertEquals('announced', $announcement->status);
+
+        // Media panel publishes it publicly
+        $announcement->publishPublicly();
+        $this->assertEquals('published', $announcement->status);
+
         $this->groupA->refresh();
         $this->assertGreaterThan(0, $this->groupA->public_points_cache);
-        $this->assertEquals('After 2 Results', FestivalSetting::get('public_standings_label'));
+        $this->assertEquals('Standings after 2 Results', FestivalSetting::get('public_standings_label'));
     }
 
     public function test_admin_and_media_can_manually_publish_team_standings(): void
@@ -237,5 +258,86 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
 
         $this->assertEquals('5,10,15,25,30', FestivalSetting::get('public_standings_milestones'));
         $this->assertEquals('manual', FestivalSetting::get('public_standings_mode'));
+    }
+
+    public function test_admin_sends_standings_to_announcer_then_announcer_announces_then_media_publishes(): void
+    {
+        $category = ProgramCategory::create(['name' => 'General Stage', 'code' => 'GEN', 'slug' => 'gen-stage']);
+        $studentA = $this->createStudent($this->groupA, 'Top Champion', 'CH-CHAMP');
+
+        $prog = Program::create([
+            'category_id' => $category->id,
+            'name' => 'Grand Speech',
+            'code' => 'P-999',
+            'type' => 'individual',
+            'eligibility' => 'all',
+            'status' => 'completed',
+        ]);
+
+        $entry = $this->createEntry($prog, $studentA, 'CH-CHAMP');
+
+        Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry->id,
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        // 1. Admin sends standings to Announcer Desk
+        $adminResponse = $this->actingAs($this->admin)
+            ->post(route('admin.points.send-to-announcer'), [
+                'custom_label' => 'Standings after 10 Results',
+            ]);
+
+        $adminResponse->assertRedirect();
+        $adminResponse->assertSessionHas('success');
+
+        $announcement = StandingAnnouncement::latest()->first();
+        $this->assertNotNull($announcement);
+        $this->assertEquals('ready', $announcement->status);
+        $this->assertEquals('Standings after 10 Results', $announcement->title);
+        $this->assertNotEmpty($announcement->script_text);
+
+        // 2. Announcer views and marks it as announced on stage
+        $announcerConsole = $this->actingAs($this->announcer)->get(route('announcer.index'));
+        $announcerConsole->assertOk();
+        $announcerConsole->assertSee('Standings after 10 Results');
+
+        $announceResponse = $this->actingAs($this->announcer)
+            ->post(route('announcer.standings.announced', $announcement));
+
+        $announceResponse->assertRedirect();
+        $announceResponse->assertSessionHas('success');
+
+        $announcement->refresh();
+        $this->assertEquals('announced', $announcement->status);
+        $this->assertNotNull($announcement->announced_at);
+
+        // 3. Media desk receives announced standings and publishes to website
+        $mediaIndex = $this->actingAs($this->mediaUser)->get(route('media.results.index'));
+        $mediaIndex->assertOk();
+        $mediaIndex->assertSee('Standings after 10 Results');
+
+        $mediaPublishResponse = $this->actingAs($this->mediaUser)
+            ->post(route('media.standings.publish', $announcement));
+
+        $mediaPublishResponse->assertRedirect();
+        $mediaPublishResponse->assertSessionHas('success');
+
+        $announcement->refresh();
+        $this->assertEquals('published', $announcement->status);
+        $this->assertNotNull($announcement->published_at);
+
+        // 4. Verify public website and API now reflect the published standings
+        $this->assertEquals('Standings after 10 Results', FestivalSetting::get('public_standings_label'));
+
+        $this->groupA->refresh();
+        $this->assertGreaterThan(0, $this->groupA->public_points_cache);
+
+        $apiResponse = $this->getJson(route('api.public.standings'));
+        $apiResponse->assertOk();
+        $apiResponse->assertJsonFragment([
+            'milestone_label' => 'Standings after 10 Results',
+        ]);
     }
 }

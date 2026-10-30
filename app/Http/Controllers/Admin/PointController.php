@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\PointSetting;
 use App\Models\PointsTransaction;
 use App\Models\Result;
+use App\Models\StandingAnnouncement;
 use App\Services\AuditLogger;
 use App\Services\PointCalculationService;
 use Illuminate\Http\RedirectResponse;
@@ -57,6 +58,11 @@ class PointController extends Controller
         $publicStandingsMilestones = FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40');
         $publicStandingsUpdatedAt = FestivalSetting::get('public_standings_updated_at');
 
+        $recentStandingsAnnouncements = StandingAnnouncement::with(['sentBy', 'announcedBy', 'publishedBy'])
+            ->latest()
+            ->take(8)
+            ->get();
+
         return view('admin.points.index', compact(
             'settings',
             'groups',
@@ -68,7 +74,8 @@ class PointController extends Controller
             'publicStandingsLabel',
             'publicStandingsMode',
             'publicStandingsMilestones',
-            'publicStandingsUpdatedAt'
+            'publicStandingsUpdatedAt',
+            'recentStandingsAnnouncements'
         ));
     }
 
@@ -99,6 +106,19 @@ class PointController extends Controller
         $this->pointService->recalculateAllPoints();
 
         return back()->with('success', 'All group rankings, student points, and points transaction ledgers successfully recalculated.');
+    }
+
+    /**
+     * Send current team standings snapshot to the Announcer desk.
+     */
+    public function sendStandingsToAnnouncer(Request $request): RedirectResponse
+    {
+        $customLabel = $request->input('custom_label', $request->input('label'));
+        $announcement = StandingAnnouncement::createFromCurrentStandings($customLabel, auth()->id());
+
+        AuditLogger::log('admin_send_standings_to_announcer', $announcement, [], $announcement->toArray());
+
+        return back()->with('success', "ടീം പോയിന്റ് നില അനൗൺസർ കൺസോളിലേക്ക് വിജയകരമായി അയച്ചു ({$announcement->title}). അനൗൺസർ സ്റ്റേജിൽ പ്രഖ്യാപിച്ച ശേഷം ഇത് മീഡിയ പാനലിൽ ലഭ്യമാകും.");
     }
 
     /**

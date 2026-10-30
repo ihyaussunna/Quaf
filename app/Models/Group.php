@@ -198,9 +198,12 @@ class Group extends Model
         $publishedResultsCount = Result::where('status', 'published')->count();
         $lastPublishedAtCount = (int) FestivalSetting::get('public_standings_results_count', '0');
 
-        // Check if current published count hits one of the configured milestones and hasn't been published yet
+        // Check if current published count hits one of the configured milestones and hasn't been queued/published yet
         if (in_array($publishedResultsCount, $milestones, true) && $publishedResultsCount !== $lastPublishedAtCount) {
-            self::publishStandings("After {$publishedResultsCount} Results");
+            $alreadyExists = StandingAnnouncement::where('results_count', $publishedResultsCount)->exists();
+            if (! $alreadyExists) {
+                StandingAnnouncement::createFromCurrentStandings("Standings after {$publishedResultsCount} Results", auth()->id());
+            }
 
             return true;
         }

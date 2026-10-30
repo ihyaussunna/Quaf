@@ -7,6 +7,7 @@ use App\Models\GreenRoomCall;
 use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Stage;
+use App\Models\StandingAnnouncement;
 use App\Services\AuditLogger;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -55,7 +56,19 @@ class AnnouncerController extends Controller
             'total_count' => Result::whereIn('status', ['send', 'delivered', 'announced', 'published'])->count(),
         ];
 
-        return view('announcer.index', compact('results', 'stats', 'tab', 'search'));
+        $pendingStandings = StandingAnnouncement::where('status', 'ready')->latest()->get();
+        $announcedStandings = StandingAnnouncement::whereIn('status', ['announced', 'published'])->latest()->take(6)->get();
+
+        return view('announcer.index', compact('results', 'stats', 'tab', 'search', 'pendingStandings', 'announcedStandings'));
+    }
+
+    public function markStandingAnnounced(StandingAnnouncement $standingAnnouncement): RedirectResponse
+    {
+        $standingAnnouncement->markAsAnnounced(auth()->id());
+
+        AuditLogger::log('announcer_announced_standing', $standingAnnouncement, ['status' => 'ready'], ['status' => 'announced']);
+
+        return back()->with('success', "ടീം പോയിന്റ് നില സ്റ്റേജിൽ അനൗൺസ് ചെയ്തു ({$standingAnnouncement->title}). ഫലം മീഡിയ ഡെസ്കിലേക്ക് കൈമാറിയിരിക്കുന്നു.");
     }
 
     public function markAnnounced(Result $result): RedirectResponse

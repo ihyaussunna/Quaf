@@ -48,6 +48,80 @@
             </div>
         @endif
 
+        <!-- Priority: Team Standings Announcements from Admin -->
+        @if(isset($pendingStandings) && $pendingStandings->isNotEmpty())
+            <div class="space-y-4">
+                @foreach($pendingStandings as $standAnn)
+                    <div class="bg-gradient-to-r from-red-950 via-slate-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 border-2 border-red-500 shadow-xl ring-4 ring-red-500/20 font-sora">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-red-600 text-white animate-pulse flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                                        <span>MIC ANNOUNCEMENT READY</span>
+                                    </span>
+                                    <span class="text-xs font-mono text-amber-300 font-bold">
+                                        {{ $standAnn->title }}
+                                    </span>
+                                    <span class="text-xs font-mono text-slate-400">
+                                        Sent by {{ $standAnn->sentBy?->name ?? 'Admin' }} at {{ $standAnn->sent_at ? $standAnn->sent_at->format('h:i A') : '—' }}
+                                    </span>
+                                </div>
+                                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                    ടീം പോയിന്റ് നില പ്രഖ്യാപനം (Team Standings)
+                                </h2>
+                                <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
+                                    അഡ്മിൻ പാനലിൽ നിന്ന് തയ്യാറാക്കി അയച്ച നിലവിലെ ഗ്രൂപ്പ് പോയിന്റ് നിലയാണിത്. താഴെ നൽകിയിട്ടുള്ള ക്രമത്തിൽ മൈക്കിൽ അനൗൺസ് ചെയ്ത ശേഷം "അനൗൺസ് ചെയ്തു & മീഡിയയിലേക്ക് കൈമാറുക" ക്ലിക്ക് ചെയ്യുക.
+                                </p>
+                            </div>
+
+                            <form method="POST" action="{{ route('announcer.standings.announced', $standAnn->id) }}" class="shrink-0">
+                                @csrf
+                                <button type="submit" class="w-full sm:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2 font-ml uppercase tracking-wider">
+                                    <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    <span>അനൗൺസ് ചെയ്തു & മീഡിയയിലേക്ക് കൈമാറുക</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Team Standings Ranks Grid -->
+                        <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                            @foreach($standAnn->standings_data as $grpItem)
+                                <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between text-xs font-mono mb-2">
+                                        <span class="px-2 py-0.5 rounded font-black {{ $grpItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
+                                            #{{ $grpItem['rank'] }}
+                                        </span>
+                                        <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $grpItem['code'] }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-white text-sm truncate">{{ $grpItem['name'] }}</div>
+                                        <div class="mt-1 flex items-baseline gap-1">
+                                            <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($grpItem['points']) }}</span>
+                                            <span class="text-[10px] text-slate-400 uppercase font-mono font-bold">pts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Mic Speech Script Box -->
+                        @if($standAnn->script_text)
+                            <div class="mt-6 bg-black/40 rounded-2xl p-4 border border-white/10">
+                                <div class="text-[10px] font-mono uppercase tracking-wider text-amber-300 font-bold mb-1 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                                    <span>മലയാളം അനൗൺസ് സ്ക്രിപ്റ്റ് (Stage Announcement Script)</span>
+                                </div>
+                                <p class="text-sm font-medium text-slate-100 font-ml leading-relaxed">
+                                    "{{ $standAnn->script_text }}"
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
         <!-- Filter Stat Tabs -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <!-- Ready for announcement -->
