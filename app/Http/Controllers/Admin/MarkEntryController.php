@@ -13,6 +13,7 @@ use App\Services\AuditLogger;
 use App\Services\PointCalculationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -517,39 +518,7 @@ class MarkEntryController extends Controller
         if ($selectedProgramId) {
             $selectedProgram = Program::with(['category', 'stage', 'result'])->find($selectedProgramId);
             if ($selectedProgram) {
-                $entries = ProgramEntry::where('program_id', $selectedProgram->id)
-                    ->with(['student.group', 'group', 'scores'])
-                    ->get()
-                    ->map(function ($entry) {
-                        $score = (float) $entry->scores->avg('total_score');
-                        $entry->computed_score = $score;
-                        $gradeInfo = PointCalculationService::getGradeFromScore($score);
-                        $entry->computed_grade = $gradeInfo['grade'] ?? '-';
-
-                        return $entry;
-                    })
-                    ->sortByDesc('computed_score')
-                    ->values();
-
-                $currentRank = 0;
-                $prevScore = null;
-                $rankMap = [1 => 'first', 2 => 'second', 3 => 'third'];
-
-                foreach ($entries as $item) {
-                    if ($item->computed_score <= 0) {
-                        $item->computed_rank = '';
-
-                        continue;
-                    }
-
-                    if ($prevScore === null || abs($item->computed_score - $prevScore) > 0.001) {
-                        $currentRank++;
-                        $prevScore = $item->computed_score;
-                    }
-
-                    $item->computed_rank = $rankMap[$currentRank] ?? '';
-                }
-                $rankedEntries = $entries;
+                $rankedEntries = $this->computeRankedEntries($selectedProgram);
             }
         }
 
@@ -564,5 +533,105 @@ class MarkEntryController extends Controller
             'selectedProgram',
             'rankedEntries'
         ));
+    }
+
+    /**
+     * Display printable official program result sheet with QUAF header.
+     */
+    public function checkPrint(Request $request): View
+    {
+        $zones = Program::ZONES;
+        $selectedZone = $request->query('zone', $request->query('category'));
+        $selectedProgramId = $request->query('program');
+        $printAll = $request->boolean('all');
+
+        $programsQuery = Program::query();
+        if ($selectedZone) {
+            $programsQuery->where('eligibility', $selectedZone);
+        }
+        $programs = $programsQuery->orderBy('name')->get();
+
+        $programsData = collect();
+
+        if ($selectedProgramId) {
+            $program = Program::with(['category', 'stage', 'result'])->find($selectedProgramId);
+            if ($program) {
+                $rankedEntries = $this->computeRankedEntries($program);
+                $programsData->push([
+                    'program' => $program,
+                    'entries' => $rankedEntries,
+                ]);
+            }
+        } elseif ($selectedZone && $printAll) {
+            foreach ($programs as $prog) {
+                $rankedEntries = $this->computeRankedEntries($prog);
+                if ($rankedEntries->isNotEmpty()) {
+                    $programsData->push([
+                        'program' => $prog,
+                        'entries' => $rankedEntries,
+                    ]);
+                }
+            }
+        } elseif ($programs->isNotEmpty()) {
+            $firstProgram = $programs->first();
+            $rankedEntries = $this->computeRankedEntries($firstProgram);
+            $programsData->push([
+                'program' => $firstProgram,
+                'entries' => $rankedEntries,
+            ]);
+            $selectedProgramId = $firstProgram->id;
+        }
+
+        return view('admin.mark-entry.check-print', compact(
+            'programsData',
+            'programs',
+            'zones',
+            'selectedZone',
+            'selectedProgramId',
+            'printAll'
+        ));
+    }
+
+    /**
+     * Compute ranked entries for a program with computed scores, grades, and ranks.
+     *
+     * @return Collection<int, ProgramEntry>
+     */
+    protected function computeRankedEntries(Program $program): Collection
+    {
+        $entries = ProgramEntry::where('program_id', $program->id)
+            ->with(['student.group', 'group', 'scores'])
+            ->get()
+            ->map(function ($entry) {
+                $score = (float) $entry->scores->avg('total_score');
+                $entry->computed_score = $score;
+                $gradeInfo = PointCalculationService::getGradeFromScore($score);
+                $entry->computed_grade = $gradeInfo['grade'] ?? '-';
+
+                return $entry;
+            })
+            ->sortByDesc('computed_score')
+            ->values();
+
+        $currentRank = 0;
+        $prevScore = null;
+        $rankMap = [1 => 'first', 2 => 'second', 3 => 'third'];
+
+        foreach ($entries as $item) {
+            if ($item->computed_score <= 0) {
+                $item->computed_rank = '';
+
+                continue;
+            }
+
+            if ($prevScore === null || abs($item->computed_score - $prevScore) > 0.001) {
+                $currentRank++;
+                $prevScore = $item->computed_score;
+            }
+
+            $item->computed_rank = $rankMap[$currentRank] ?? '';
+        }
+
+        return $entries;
     }
 }

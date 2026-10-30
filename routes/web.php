@@ -604,8 +604,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('mark-entry/view-marks', [AdminMarkEntryController::class, 'viewMarks'])->name('mark-entry.view-marks');
     Route::get('mark-entry/handler', [AdminMarkEntryController::class, 'marksHandler'])->name('mark-entry.handler');
     Route::post('mark-entry/{program}/status-transition', [AdminMarkEntryController::class, 'updateHandlerStatus'])->name('mark-entry.status-transition');
+    Route::get('mark-entry/check/print', [AdminMarkEntryController::class, 'checkPrint'])->name('mark-entry.check.print');
+    Route::get('mark_entry/check/print', [AdminMarkEntryController::class, 'checkPrint'])->name('mark_entry.check.print');
     Route::get('mark-entry/check', [AdminMarkEntryController::class, 'markCheck'])->name('mark-entry.check');
+    Route::get('mark_entry/check', [AdminMarkEntryController::class, 'markCheck'])->name('mark_entry.check');
     Route::get('mark-entry', [AdminMarkEntryController::class, 'index'])->name('mark-entry.index');
+    Route::get('mark_entry', [AdminMarkEntryController::class, 'index'])->name('mark_entry.index');
     Route::get('mark-entry/{program}', [AdminMarkEntryController::class, 'show'])->name('mark-entry.show');
     Route::post('mark-entry/{program}/save', [AdminMarkEntryController::class, 'saveMarks'])->name('mark-entry.save');
     Route::post('mark-entry/{program}/publish', [AdminMarkEntryController::class, 'publish'])->name('mark-entry.publish');

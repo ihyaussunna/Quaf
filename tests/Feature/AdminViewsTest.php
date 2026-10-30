@@ -600,4 +600,84 @@ class AdminViewsTest extends TestCase
         $legacyExportResponse = $this->actingAs($this->admin)->get(route('students.export'));
         $legacyExportResponse->assertOk();
     }
+
+    public function test_admin_can_view_mark_check_and_print_result_sheet_with_quaf_header(): void
+    {
+        $cat = ProgramCategory::first();
+        $group = Group::first();
+
+        $prog = Program::create([
+            'name' => 'English Elocution Test',
+            'code' => 'ELOC01',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'status' => 'completed',
+            'is_stage' => 1,
+            'eligibility' => 'Mix Zone',
+        ]);
+
+        $student = Student::create([
+            'student_id' => 'STU-PRINT-01',
+            'name' => 'Zayd Rahman',
+            'group_id' => $group->id,
+            'category' => 'Mix Zone',
+            'gender' => 'Male',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $student->id,
+            'group_id' => $group->id,
+            'chest_number' => '101',
+            'code_letter' => 'A',
+            'status' => 'confirmed',
+        ]);
+
+        $judge = Judge::first() ?? Judge::create([
+            'name' => 'Judge One',
+            'code' => 'J01',
+            'status' => 'active',
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $prog->id,
+            'entry_id' => $entry->id,
+            'total_score' => 95.0,
+            'is_submitted' => true,
+        ]);
+
+        // 1. Check index
+        $res = $this->actingAs($this->admin)->get(route('admin.mark-entry.check'));
+        $res->assertOk();
+        $res->assertSee('Program Results');
+
+        // 2. Check with program selected
+        $resProg = $this->actingAs($this->admin)->get(route('admin.mark-entry.check', ['program' => $prog->id, 'zone' => 'Mix Zone']));
+        $resProg->assertOk();
+        $resProg->assertSee('Print Result');
+        $resProg->assertSee('Zayd Rahman');
+        $resProg->assertSee('English Elocution Test');
+        $resProg->assertSee('offstage-pdf-header.png');
+
+        // 3. Check print view
+        $resPrint = $this->actingAs($this->admin)->get(route('admin.mark-entry.check.print', ['program' => $prog->id]));
+        $resPrint->assertOk();
+        $resPrint->assertSee('offstage-pdf-header.png');
+        $resPrint->assertSee('Program Result Sheet');
+        $resPrint->assertSee('English Elocution Test');
+        $resPrint->assertSee('Zayd Rahman');
+        $resPrint->assertSee('FIRST');
+        $resPrint->assertSee('Judge 1');
+        $resPrint->assertSee('Chief Scrutinizer');
+
+        // 4. Underscore aliases
+        $resUnderscore = $this->actingAs($this->admin)->get('/admin/mark_entry/check');
+        $resUnderscore->assertOk();
+
+        $resUnderscorePrint = $this->actingAs($this->admin)->get('/admin/mark_entry/check/print?program='.$prog->id);
+        $resUnderscorePrint->assertOk();
+        $resUnderscorePrint->assertSee('offstage-pdf-header.png');
+    }
 }
