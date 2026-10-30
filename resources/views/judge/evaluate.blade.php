@@ -79,9 +79,6 @@
                     <h4 class="text-sm font-bold text-slate-900 mt-1 font-sora">
                         Score Saved in Database
                     </h4>
-                    <p class="text-xs text-slate-600 font-medium mt-0.5">
-                        Marks and grade recorded in system database and synced with result sheet.
-                    </p>
 
                     <div class="mt-2.5 pt-2 border-t border-emerald-100 flex flex-wrap items-center gap-2 text-xs font-mono">
                         <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 font-bold border border-emerald-200" x-text="'Code ' + (savedItem.code || '-')"></span>
