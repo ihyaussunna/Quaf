@@ -98,6 +98,8 @@ class JudgeEvaluationSimpleLayoutTest extends TestCase
         $response->assertSee('GRADE');
         $response->assertSee('MARK');
         $response->assertSee('Save All Scores');
+        $response->assertSee('ഡാറ്റാബേസിൽ ഡാറ്റ സേവ് ആയിട്ടുണ്ട്');
+        $response->assertSee('Database Synchronized');
         $response->assertSee('Elocution English');
 
         // Anonymity: real name and chest number must never be shown
@@ -119,6 +121,8 @@ class JudgeEvaluationSimpleLayoutTest extends TestCase
             'success' => true,
             'total_score' => 88.5,
             'grade' => 'A',
+            'database_saved' => true,
+            'result_sheet_synced' => true,
         ]);
 
         $this->assertDatabaseHas('score_sheets', [

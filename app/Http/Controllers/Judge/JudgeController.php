@@ -382,9 +382,12 @@ class JudgeController extends Controller
             return response()->json([
                 'success' => true,
                 'entry_id' => $entry->id,
+                'code_letter' => $entry->code_letter,
                 'total_score' => $total,
                 'grade' => $grade,
                 'message' => $message,
+                'database_saved' => true,
+                'result_sheet_synced' => true,
             ]);
         }
 

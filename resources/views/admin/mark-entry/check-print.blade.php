@@ -268,7 +268,7 @@
                                 </td>
                                 <td class="px-2.5 py-2.5 text-center font-bold">
                                     @if(($item->team_points ?? 0) > 0)
-                                        <span class="text-slate-900 font-bold">+{{ $item->team_points }}</span>
+                                        <span class="text-slate-900 font-bold">{{ $item->team_points }}</span>
                                     @else
                                         <span class="text-slate-300 font-normal">0</span>
                                     @endif

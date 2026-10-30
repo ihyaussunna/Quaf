@@ -661,7 +661,7 @@ class AdminViewsTest extends TestCase
         $resProg->assertSee('English Elocution Test');
         $resProg->assertSee('offstage-pdf-header.png');
         $resProg->assertSee('Team Point');
-        $resProg->assertSee('+11 Pts');
+        $resProg->assertSee('11 Pts');
 
         // 3. Check print view
         $resPrint = $this->actingAs($this->admin)->get(route('admin.mark-entry.check.print', ['program' => $prog->id]));
@@ -671,7 +671,7 @@ class AdminViewsTest extends TestCase
         $resPrint->assertSee('English Elocution Test');
         $resPrint->assertSee('Zayd Rahman');
         $resPrint->assertSee('FIRST');
-        $resPrint->assertSee('+11');
+        $resPrint->assertSee('11');
         $resPrint->assertDontSee('Judge 1');
         $resPrint->assertDontSee('Chief Scrutinizer');
         $resPrint->assertDontSee("QUAF '26");
@@ -687,7 +687,7 @@ class AdminViewsTest extends TestCase
         $resEval = $this->actingAs($this->admin)->get(route('admin.evaluation-monitor.show', $prog));
         $resEval->assertOk();
         $resEval->assertSee('Team Point');
-        $resEval->assertSee('+11 Pts');
+        $resEval->assertSee('11 Pts');
 
         // 5. Underscore aliases
         $resUnderscore = $this->actingAs($this->admin)->get('/admin/mark_entry/check');
@@ -700,6 +700,6 @@ class AdminViewsTest extends TestCase
         $resEvalUnderscore = $this->actingAs($this->admin)->get('/admin/evaluation_monitor/'.$prog->id);
         $resEvalUnderscore->assertOk();
         $resEvalUnderscore->assertSee('Team Point');
-        $resEvalUnderscore->assertSee('+11 Pts');
+        $resEvalUnderscore->assertSee('11 Pts');
     }
 }

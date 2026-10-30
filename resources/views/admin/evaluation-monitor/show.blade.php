@@ -202,7 +202,7 @@
                                 @if($isPresent && $entry->submitted_score_count > 0 && ($entry->team_points ?? 0) > 0)
                                     <div class="inline-flex flex-col items-center">
                                         <span class="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-black text-xs border border-amber-300 shadow-2xs">
-                                            +{{ $entry->team_points }} Pts
+                                            {{ $entry->team_points }} Pts
                                         </span>
                                         <span class="text-[9px] text-slate-500 font-normal mt-0.5 whitespace-nowrap">
                                             @if(($entry->position_points ?? 0) > 0 && ($entry->grade_points ?? 0) > 0)

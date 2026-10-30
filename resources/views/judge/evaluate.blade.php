@@ -24,6 +24,17 @@
     lightboxSrc: '',
     lightboxCode: '',
     evaluationMode: 'simple',
+    saveConfirmPopup: false,
+    savedItem: { code: '', score: '', grade: '', time: '' },
+    confirmTimeout: null,
+    triggerConfirmPopup(data) {
+        this.savedItem = data;
+        this.saveConfirmPopup = true;
+        if (this.confirmTimeout) clearTimeout(this.confirmTimeout);
+        this.confirmTimeout = setTimeout(() => {
+            this.saveConfirmPopup = false;
+        }, 5000);
+    },
     openTextReader(code, text) {
         this.textReaderCode = code;
         this.textReaderContent = text;
@@ -34,7 +45,60 @@
         this.lightboxSrc = src;
         this.lightboxOpen = true;
     }
-}">
+}" @score-saved.window="triggerConfirmPopup($event.detail)">
+    <!-- Confirmed Database Save Popup Notification -->
+    <div x-show="saveConfirmPopup"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+         class="fixed top-5 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[92%] sm:w-full pointer-events-auto shadow-2xl rounded-2xl bg-white border-2 border-emerald-500 overflow-hidden"
+         style="display: none;">
+        <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40">
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                Confirmed Save
+                            </span>
+                            <span class="text-xs font-mono font-bold text-slate-500" x-text="savedItem.time"></span>
+                        </div>
+                        <button type="button" @click="saveConfirmPopup = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <h4 class="text-sm font-bold text-slate-900 mt-1 font-sora">
+                        ഡാറ്റാബേസിൽ ഡാറ്റ സേവ് ആയിട്ടുണ്ട്
+                    </h4>
+                    <p class="text-xs text-slate-600 font-medium mt-0.5">
+                        സൈറ്റിന്റെ സിസ്റ്റം ഡാറ്റാബേസിലും റിസൾട്ട് ഷീറ്റിലും മാർക്ക് വിജയകരമായി രേഖപ്പെടുത്തി (Data Confirmed & Saved in Database).
+                    </p>
+
+                    <div class="mt-2.5 pt-2 border-t border-emerald-100 flex flex-wrap items-center gap-2 text-xs font-mono">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 font-bold border border-emerald-200" x-text="'Code ' + (savedItem.code || '-')"></span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-bold border border-slate-200" x-text="'Score: ' + savedItem.score"></span>
+                        <template x-if="savedItem.grade && savedItem.grade !== '-'">
+                            <span class="px-2.5 py-1 rounded-lg bg-[#BE1E2D] text-white font-bold" x-text="'Grade: ' + savedItem.grade"></span>
+                        </template>
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 ml-auto">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Database Synchronized</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 w-full"></div>
+    </div>
     <!-- Top Bar (Clean & Harmonious with Festival Theme) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl shadow-xs">
         <div class="flex items-center gap-3">
@@ -300,6 +364,18 @@
                                      this.saveSuccess = true;
                                      try { localStorage.removeItem(this.storageKey); } catch (e) {}
                                      setTimeout(() => { this.saveSuccess = false; }, 3000);
+
+                                     const now = new Date();
+                                     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                     const gr = this.computedGrade !== '-' ? this.computedGrade : (data.grade || '');
+                                     window.dispatchEvent(new CustomEvent('score-saved', {
+                                         detail: {
+                                             code: '{{ $codeLetter }}',
+                                             score: data.total_score !== undefined ? data.total_score : this.directScore,
+                                             grade: gr,
+                                             time: timeStr
+                                         }
+                                     }));
                                  })
                                  .catch(err => {
                                      // Score remains safely preserved in localStorage draft
@@ -556,6 +632,18 @@
                                      this.submittedScore = data.total_score || this.total;
                                      this.saveSuccess = true;
                                      setTimeout(() => { this.saveSuccess = false; }, 3000);
+
+                                     const now = new Date();
+                                     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                     const gr = this.computedGrade !== '-' ? this.computedGrade : (data.grade || '');
+                                     window.dispatchEvent(new CustomEvent('score-saved', {
+                                         detail: {
+                                             code: '{{ $codeLetter }}',
+                                             score: this.submittedScore,
+                                             grade: gr,
+                                             time: timeStr
+                                         }
+                                     }));
                                  })
                                  .catch(err => {
                                      this.errorMessage = err.message || 'Error saving score.';

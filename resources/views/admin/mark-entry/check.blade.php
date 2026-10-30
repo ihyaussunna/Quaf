@@ -145,7 +145,7 @@
                                     @if(($item->team_points ?? 0) > 0)
                                         <div class="inline-flex flex-col items-center">
                                             <span class="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-bold text-xs border border-amber-300 shadow-2xs">
-                                                +{{ $item->team_points }} Pts
+                                                {{ $item->team_points }} Pts
                                             </span>
                                             <span class="text-[10px] text-gray-500 font-medium mt-0.5 whitespace-nowrap">
                                                 @if(($item->position_points ?? 0) > 0 && ($item->grade_points ?? 0) > 0)
