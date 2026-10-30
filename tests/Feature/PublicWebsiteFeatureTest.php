@@ -353,6 +353,15 @@ class PublicWebsiteFeatureTest extends TestCase
         $publicPdf->assertStatus(200);
         $publicPdf->assertSee('Program Schedule');
 
+        // 3b. Public Stage PDF download routes
+        $stagePdf = $this->get(route('schedule.stage-pdf'));
+        $stagePdf->assertStatus(200);
+        $stagePdf->assertHeader('Content-Type', 'application/pdf');
+
+        $stagePdfDownload = $this->get(route('schedule.stage-pdf.download'));
+        $stagePdfDownload->assertStatus(200);
+        $stagePdfDownload->assertHeader('Content-Type', 'application/pdf');
+
         // 4. Conflict check API
         $checkResponse = $this->actingAs($user)->getJson(route('admin.schedules.check-conflict', [
             'program_id' => $this->program->id,

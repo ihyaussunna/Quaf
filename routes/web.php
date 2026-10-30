@@ -113,6 +113,25 @@ Route::get('/results/{result}/download-poster', [MediaResultController::class, '
 
 Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
 Route::get('/schedule/offstage-pdf', [AdminScheduleController::class, 'offstagePdf'])->name('schedule.offstage-pdf');
+Route::get('/schedule/stage-pdf', function () {
+    $filePath = public_path('documents/QUAF_2026_Stage_Program_Schedule.pdf');
+    if (! file_exists($filePath)) {
+        abort(404);
+    }
+
+    return response()->file($filePath, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="QUAF_2026_Stage_Program_Schedule.pdf"',
+    ]);
+})->name('schedule.stage-pdf');
+Route::get('/schedule/stage-pdf/download', function () {
+    $filePath = public_path('documents/QUAF_2026_Stage_Program_Schedule.pdf');
+    if (! file_exists($filePath)) {
+        abort(404);
+    }
+
+    return response()->download($filePath, 'QUAF_2026_Stage_Program_Schedule.pdf');
+})->name('schedule.stage-pdf.download');
 Route::get('/groups', [PublicGroupController::class, 'index'])->name('groups.index');
 Route::get('/groups/{group}', [PublicGroupController::class, 'show'])->name('groups.show');
 
