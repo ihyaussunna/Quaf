@@ -11,9 +11,11 @@
         <span style="font-family: 'Rockwell Std'; font-weight: 400;">Rockwell Std 400</span>
         <span style="font-family: 'Rockwell Std'; font-weight: 700;">Rockwell Std 700</span>
         <span style="font-family: 'Rockwell Std'; font-weight: 800;">Rockwell Std 800</span>
+        <span style="font-family: 'Sora'; font-weight: 700;">Sora 700</span>
+        <span style="font-family: 'Anek Malayalam'; font-weight: 700;">Anek Malayalam 700</span>
     </div>
 
-    <!-- Header Bar -->
+    <!-- Top Action & Navigation Header -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
         <div>
             <div class="flex flex-wrap items-center gap-2">
@@ -28,14 +30,13 @@
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
                     {{ ucfirst($result->status) }}
                 </span>
-                @if($result->is_media_published)
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                        Published
-                    </span>
-                @endif
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                    Pro Studio Engine
+                    Mini Poster Design Studio
                 </span>
+                <a href="{{ route('media.results.planner') }}" class="text-[10px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1 transition">
+                    <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Strategy Planner</span>
+                </a>
             </div>
 
             <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight mt-1.5 font-sora">
@@ -43,48 +44,66 @@
             </h1>
             <p class="text-xs text-slate-500">
                 Zone: <strong class="text-slate-700">{{ $result->program->zone->name ?? $result->program->eligibility ?? 'All Zones' }}</strong> &bull;
-                Stage: <strong class="text-slate-700">{{ $result->program->stage->name ?? 'Stage' }}</strong> &bull;
-                Podium: <strong class="text-slate-700">1st, 2nd, and 3rd Places</strong>
+                Result No: <strong class="text-[#be1e2d] font-mono">#{{ sprintf('%02d', $resultNo) }}</strong> &bull;
+                Selected: <strong class="text-purple-700 font-mono" x-text="selectedLabel">None</strong>
             </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-            <!-- Toggle Guidelines Button -->
+        <!-- Header Action Buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Add Text Button -->
+            <button type="button" @click="addCustomText()"
+                    class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 font-bold text-xs flex items-center gap-1.5 transition">
+                <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>+ Text</span>
+            </button>
+
+            <!-- Add Shape Button -->
+            <button type="button" @click="addCustomShape('badge')"
+                    class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs flex items-center gap-1.5 transition">
+                <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                <span>+ Badge / Shape</span>
+            </button>
+
+            <!-- Guidelines Toggle -->
             <button type="button" @click="guidelines.show = !guidelines.show; render();"
-                    class="px-3.5 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    class="px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-colors"
                     :class="guidelines.show ? 'bg-cyan-50 border-cyan-400 text-cyan-800' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'">
-                <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16M10 4v16M14 4v16"></path></svg>
-                <span x-text="guidelines.show ? 'Hide Guidelines' : 'Show Guidelines'"></span>
+                <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16M10 4v16M14 4v16"></path></svg>
+                <span x-text="guidelines.show ? 'Guides ON' : 'Guides OFF'"></span>
             </button>
 
+            <!-- Save as Default -->
             <button type="button" @click="saveAsDefault()" :disabled="savingDefault"
-                    class="px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors disabled:opacity-50">
-                <span x-text="savingDefault ? 'Saving Defaults...' : 'Save as Default'"></span>
+                    class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors disabled:opacity-50">
+                <span x-text="savingDefault ? 'Saving...' : 'Save Default'"></span>
             </button>
 
+            <!-- Download PNG -->
             <button type="button" @click="downloadPoster()"
-                    class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span>Download PNG</span>
             </button>
 
+            <!-- Save & Publish -->
             <button type="button" @click="saveAndPublish()" :disabled="publishing"
-                    class="px-5 py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-black text-xs flex items-center gap-2 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    class="px-5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 <span x-text="publishing ? 'Publishing...' : 'Save & Publish'"></span>
             </button>
         </div>
     </div>
 
-    <!-- Alert Messages -->
+    <!-- Alert Status Messages -->
     <div x-show="statusMsg" x-cloak
          :class="statusType === 'success' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-red-50 border-red-300 text-red-900'"
          class="p-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-between">
         <span x-text="statusMsg"></span>
-        <button type="button" @click="statusMsg = ''" class="text-xs opacity-60 hover:opacity-100">&times;</button>
+        <button type="button" @click="statusMsg = ''" class="text-xs opacity-60 hover:opacity-100 font-bold">&times;</button>
     </div>
 
-    <!-- Studio Layout: Controls (Left) & Canvas Preview (Right) -->
+    <!-- Studio Layout: Left Inspector Panel (5 cols) & Right Canvas Studio (7 cols) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- Controls Column (5 cols) -->
@@ -92,731 +111,666 @@
             
             <!-- Pro Navigation Tabs -->
             <div class="flex items-center gap-1.5 p-1.5 bg-slate-200/80 rounded-2xl border border-slate-300/80 overflow-x-auto">
+                <button type="button" @click="activeTab = 'design'"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        :class="activeTab === 'design' ? 'bg-white text-purple-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    <span>Design Tool</span>
+                </button>
+
                 <button type="button" @click="activeTab = 'layers'"
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
                         :class="activeTab === 'layers' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     <span>Layers</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'winners'"
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
                         :class="activeTab === 'winners' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <span>Winners & Scale</span>
                 </button>
 
-                <button type="button" @click="activeTab = 'elements'"
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
-                        :class="activeTab === 'elements' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    <span>Elements & Rotate</span>
-                </button>
-
-                <button type="button" @click="activeTab = 'overlay'"
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
-                        :class="activeTab === 'overlay' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span>Overlays</span>
+                <button type="button" @click="activeTab = 'core'"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        :class="activeTab === 'core' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>
+                    <span>Core Elements</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'guides'"
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
                         :class="activeTab === 'guides' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     <span>Guides</span>
+                </button>
+
+                <button type="button" @click="activeTab = 'templates'"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        :class="activeTab === 'templates' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Templates</span>
                 </button>
             </div>
 
             <!-- ============================================================== -->
-            <!-- TAB 1: RESULT LAYERS & PRECISION NUDGE -->
+            <!-- TAB 1: MINI POSTER DESIGN TOOL (ACTIVE ELEMENT INSPECTOR)       -->
+            <!-- ============================================================== -->
+            <div x-show="activeTab === 'design'" class="space-y-4">
+                
+                <!-- Quick Insertion Bar -->
+                <div class="bg-gradient-to-r from-purple-950 via-slate-900 to-slate-900 text-white p-4 rounded-2xl border border-purple-800 shadow-md">
+                    <div class="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-wider mb-2">Insert Elements (പുതിയ എലമെന്റുകൾ ചേർക്കുക)</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" @click="addCustomText()"
+                                class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold flex flex-col items-center justify-center gap-1 transition">
+                            <span class="text-base font-black">T</span>
+                            <span>+ Add Text</span>
+                        </button>
+                        <button type="button" @click="addCustomShape('badge')"
+                                class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold flex flex-col items-center justify-center gap-1 transition">
+                            <span class="text-base font-black text-amber-400">★</span>
+                            <span>+ Shape / Badge</span>
+                        </button>
+                        <label class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer">
+                            <span class="text-base font-black text-cyan-400">🖼</span>
+                            <span>+ Upload Image</span>
+                            <input type="file" @change="uploadCustomImage($event)" accept="image/png,image/jpeg,image/svg+xml" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Case A: Selected Element is Custom Text -->
+                <div x-show="selectedElement && selectedElement.type === 'text'" class="bg-white p-5 rounded-2xl border border-purple-300 ring-2 ring-purple-400/20 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded bg-purple-100 text-purple-900 font-black text-xs flex items-center justify-center">T</span>
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800" x-text="selectedElement ? selectedElement.label : 'Custom Text'"></h3>
+                                <p class="text-[10px] text-slate-500">Edit text content, typography, rotation, and position.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" @click="duplicateSelected()" title="Duplicate" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                            <button type="button" @click="deleteSelected()" title="Delete" class="p-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Text Content (Multiline Supported) -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Text Content (എഴുത്ത്)</label>
+                        <textarea x-model="selectedElement.text" @input="render()" rows="2"
+                                  class="w-full text-xs font-medium p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-purple-500"></textarea>
+                    </div>
+
+                    <!-- Font Family & Font Weight -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Font</label>
+                            <select x-model="selectedElement.font" @change="render()" class="w-full text-xs p-2 rounded-xl border border-slate-300 bg-white">
+                                <option value="Rockwell Std">Rockwell Std</option>
+                                <option value="Mongolian Baiti">Mongolian Baiti</option>
+                                <option value="Sora">Sora</option>
+                                <option value="Anek Malayalam">Anek Malayalam</option>
+                                <option value="Amiri">Amiri (Arabic/Urdu)</option>
+                                <option value="JetBrains Mono">JetBrains Mono</option>
+                                <option value="Montserrat">Montserrat</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Weight</label>
+                            <select x-model="selectedElement.weight" @change="render()" class="w-full text-xs p-2 rounded-xl border border-slate-300 bg-white">
+                                <option value="300">Light (300)</option>
+                                <option value="400">Regular (400)</option>
+                                <option value="700">Bold (700)</option>
+                                <option value="800">Extra Bold (800)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Font Size & Text Color -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Font Size</span>
+                                <span class="font-mono text-purple-700" x-text="selectedElement.size + 'px'"></span>
+                            </div>
+                            <input type="range" min="12" max="250" step="1" x-model.number="selectedElement.size" @input="render()" class="w-full accent-purple-600">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Text Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" x-model="selectedElement.color" @input="render()" class="w-8 h-8 rounded border border-slate-200 cursor-pointer">
+                                <input type="text" x-model="selectedElement.color" @input="render()" class="flex-1 text-xs font-mono p-1.5 rounded-lg border border-slate-300 uppercase">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alignment & Letter Spacing -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Align</label>
+                            <div class="flex rounded-xl border border-slate-300 p-0.5 bg-slate-100">
+                                <button type="button" @click="selectedElement.align = 'left'; render();" class="flex-1 py-1 text-xs font-bold rounded-lg" :class="selectedElement.align === 'left' ? 'bg-white shadow-2xs text-purple-900' : 'text-slate-600'">Left</button>
+                                <button type="button" @click="selectedElement.align = 'center'; render();" class="flex-1 py-1 text-xs font-bold rounded-lg" :class="selectedElement.align === 'center' ? 'bg-white shadow-2xs text-purple-900' : 'text-slate-600'">Center</button>
+                                <button type="button" @click="selectedElement.align = 'right'; render();" class="flex-1 py-1 text-xs font-bold rounded-lg" :class="selectedElement.align === 'right' ? 'bg-white shadow-2xs text-purple-900' : 'text-slate-600'">Right</button>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Tracking</span>
+                                <span class="font-mono text-purple-700" x-text="selectedElement.tracking + 'px'"></span>
+                            </div>
+                            <input type="range" min="-5" max="25" step="0.5" x-model.number="selectedElement.tracking" @input="render()" class="w-full accent-purple-600">
+                        </div>
+                    </div>
+
+                    <!-- Rotation & Opacity -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Rotation</span>
+                                <span class="font-mono text-purple-700" x-text="selectedElement.rotation + '°'"></span>
+                            </div>
+                            <input type="range" min="-180" max="180" step="1" x-model.number="selectedElement.rotation" @input="render()" class="w-full accent-purple-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Opacity</span>
+                                <span class="font-mono text-purple-700" x-text="selectedElement.opacity + '%'"></span>
+                            </div>
+                            <input type="range" min="0" max="100" step="1" x-model.number="selectedElement.opacity" @input="render()" class="w-full accent-purple-600">
+                        </div>
+                    </div>
+
+                    <!-- Position X & Y + Precision Nudge -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-slate-700">Position Coordinates</span>
+                            <div class="text-[10px] font-mono text-slate-500">
+                                X: <span class="font-bold text-slate-800" x-text="selectedElement.x"></span>,
+                                Y: <span class="font-bold text-slate-800" x-text="selectedElement.y"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="flex items-center gap-1.5 text-xs">
+                                <span class="font-bold text-slate-500">X:</span>
+                                <input type="number" x-model.number="selectedElement.x" @input="render()" class="w-full text-xs p-1.5 rounded-lg border border-slate-300 font-mono">
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs">
+                                <span class="font-bold text-slate-500">Y:</span>
+                                <input type="number" x-model.number="selectedElement.y" @input="render()" class="w-full text-xs p-1.5 rounded-lg border border-slate-300 font-mono">
+                            </div>
+                        </div>
+
+                        <!-- D-Pad Nudge Buttons -->
+                        <div class="flex items-center justify-center gap-1 pt-1">
+                            <button type="button" @click="nudgeSelected(-10, 0)" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">&larr; 10</button>
+                            <button type="button" @click="nudgeSelected(-1, 0)" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">&larr;</button>
+                            <button type="button" @click="nudgeSelected(0, -1)" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">&uarr;</button>
+                            <button type="button" @click="nudgeSelected(0, 1)" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">&darr;</button>
+                            <button type="button" @click="nudgeSelected(1, 0)" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">&rarr;</button>
+                            <button type="button" @click="nudgeSelected(10, 0)" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">10 &rarr;</button>
+                        </div>
+                    </div>
+
+                    <!-- Layer Depth: Top Layer vs Behind Text -->
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span class="text-[11px] font-bold text-slate-700">Z-Order (ലെയർ ക്രമം)</span>
+                        <select x-model="selectedElement.layerOrder" @change="render()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white">
+                            <option value="above">Above All Content (Top)</option>
+                            <option value="below">Behind Text (Background)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Case B: Selected Element is Custom Shape / Badge -->
+                <div x-show="selectedElement && selectedElement.type === 'shape'" class="bg-white p-5 rounded-2xl border border-amber-300 ring-2 ring-amber-400/20 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded bg-amber-100 text-amber-900 font-black text-xs flex items-center justify-center">★</span>
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800" x-text="selectedElement ? selectedElement.label : 'Shape / Badge'"></h3>
+                                <p class="text-[10px] text-slate-500">Shape geometry, fill color, and transformation.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" @click="duplicateSelected()" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                            <button type="button" @click="deleteSelected()" class="p-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Shape Type Preset -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Shape Preset</label>
+                        <select x-model="selectedElement.shapeType" @change="render()" class="w-full text-xs p-2 rounded-xl border border-slate-300 bg-white">
+                            <option value="badge">Badge with Ribbon</option>
+                            <option value="seal">Golden Award Seal</option>
+                            <option value="pill">Rounded Capsule</option>
+                            <option value="rectangle">Solid Box</option>
+                            <option value="line">Divider Line</option>
+                            <option value="star">Star Icon</option>
+                            <option value="stamp">Result Stamp</option>
+                        </select>
+                    </div>
+
+                    <!-- Dimensions Width & Height -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Width</span>
+                                <span class="font-mono text-amber-700" x-text="selectedElement.width + 'px'"></span>
+                            </div>
+                            <input type="range" min="10" max="800" step="2" x-model.number="selectedElement.width" @input="render()" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Height</span>
+                                <span class="font-mono text-amber-700" x-text="selectedElement.height + 'px'"></span>
+                            </div>
+                            <input type="range" min="4" max="400" step="2" x-model.number="selectedElement.height" @input="render()" class="w-full accent-amber-600">
+                        </div>
+                    </div>
+
+                    <!-- Colors: Fill & Stroke -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Fill Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" x-model="selectedElement.fillColor" @input="render()" class="w-8 h-8 rounded border border-slate-200 cursor-pointer">
+                                <input type="text" x-model="selectedElement.fillColor" @input="render()" class="flex-1 text-xs font-mono p-1.5 rounded-lg border border-slate-300 uppercase">
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Stroke Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" x-model="selectedElement.strokeColor" @input="render()" class="w-8 h-8 rounded border border-slate-200 cursor-pointer">
+                                <input type="text" x-model="selectedElement.strokeColor" @input="render()" class="flex-1 text-xs font-mono p-1.5 rounded-lg border border-slate-300 uppercase">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rotation & Opacity -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Rotation</span>
+                                <span class="font-mono text-amber-700" x-text="selectedElement.rotation + '°'"></span>
+                            </div>
+                            <input type="range" min="-180" max="180" step="1" x-model.number="selectedElement.rotation" @input="render()" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Opacity</span>
+                                <span class="font-mono text-amber-700" x-text="selectedElement.opacity + '%'"></span>
+                            </div>
+                            <input type="range" min="0" max="100" step="1" x-model.number="selectedElement.opacity" @input="render()" class="w-full accent-amber-600">
+                        </div>
+                    </div>
+
+                    <!-- Position X & Y -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="flex items-center gap-1.5 text-xs">
+                                <span class="font-bold text-slate-500">X:</span>
+                                <input type="number" x-model.number="selectedElement.x" @input="render()" class="w-full text-xs p-1.5 rounded-lg border border-slate-300 font-mono">
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs">
+                                <span class="font-bold text-slate-500">Y:</span>
+                                <input type="number" x-model.number="selectedElement.y" @input="render()" class="w-full text-xs p-1.5 rounded-lg border border-slate-300 font-mono">
+                            </div>
+                        </div>
+                        <!-- Nudge Buttons -->
+                        <div class="flex items-center justify-center gap-1 pt-1">
+                            <button type="button" @click="nudgeSelected(-10, 0)" class="px-2.5 py-1 rounded bg-slate-100 text-xs font-bold">&larr; 10</button>
+                            <button type="button" @click="nudgeSelected(0, -1)" class="px-2.5 py-1 rounded bg-slate-100 text-xs font-bold">&uarr;</button>
+                            <button type="button" @click="nudgeSelected(0, 1)" class="px-2.5 py-1 rounded bg-slate-100 text-xs font-bold">&darr;</button>
+                            <button type="button" @click="nudgeSelected(10, 0)" class="px-2.5 py-1 rounded bg-slate-100 text-xs font-bold">10 &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span class="text-[11px] font-bold text-slate-700">Z-Order (ലെയർ ക്രമം)</span>
+                        <select x-model="selectedElement.layerOrder" @change="render()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white">
+                            <option value="above">Above All Content (Top)</option>
+                            <option value="below">Behind Text (Background)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Case C: Selected Element is Custom Image -->
+                <div x-show="selectedElement && selectedElement.type === 'image'" class="bg-white p-5 rounded-2xl border border-cyan-300 ring-2 ring-cyan-400/20 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded bg-cyan-100 text-cyan-900 font-black text-xs flex items-center justify-center">🖼</span>
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-800" x-text="selectedElement ? selectedElement.label : 'Custom Image'"></h3>
+                                <p class="text-[10px] text-slate-500">Scale, rotate, and position graphic.</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="deleteSelected()" class="p-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Dimensions -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Width</span>
+                                <span class="font-mono text-cyan-700" x-text="selectedElement.width + 'px'"></span>
+                            </div>
+                            <input type="range" min="20" max="900" step="5" x-model.number="selectedElement.width" @input="render()" class="w-full accent-cyan-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Height</span>
+                                <span class="font-mono text-cyan-700" x-text="selectedElement.height + 'px'"></span>
+                            </div>
+                            <input type="range" min="20" max="900" step="5" x-model.number="selectedElement.height" @input="render()" class="w-full accent-cyan-600">
+                        </div>
+                    </div>
+
+                    <!-- Rotation & Opacity -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Rotation</span>
+                                <span class="font-mono text-cyan-700" x-text="selectedElement.rotation + '°'"></span>
+                            </div>
+                            <input type="range" min="-180" max="180" step="1" x-model.number="selectedElement.rotation" @input="render()" class="w-full accent-cyan-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                <span>Opacity</span>
+                                <span class="font-mono text-cyan-700" x-text="selectedElement.opacity + '%'"></span>
+                            </div>
+                            <input type="range" min="0" max="100" step="1" x-model.number="selectedElement.opacity" @input="render()" class="w-full accent-cyan-600">
+                        </div>
+                    </div>
+
+                    <!-- Position -->
+                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                        <div class="flex items-center gap-1.5 text-xs">
+                            <span class="font-bold text-slate-500">X:</span>
+                            <input type="number" x-model.number="selectedElement.x" @input="render()" class="w-full text-xs p-1.5 rounded-lg border border-slate-300 font-mono">
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs">
+                            <span class="font-bold text-slate-500">Y:</span>
+                            <input type="number" x-model.number="selectedElement.y" @input="render()" class="w-full text-xs p-1.5 rounded-lg border border-slate-300 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span class="text-[11px] font-bold text-slate-700">Z-Order (ലെയർ ക്രമം)</span>
+                        <select x-model="selectedElement.layerOrder" @change="render()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white">
+                            <option value="above">Above All Content (Top)</option>
+                            <option value="below">Behind Text (Background)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Case D: Nothing Selected or Core Element Selected -->
+                <div x-show="!selectedElement || selectedType === 'core'" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <div class="text-xs font-bold text-slate-700">എലമെന്റുകൾ സെലക്ട് ചെയ്യുക</div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        വലതുവശത്തുള്ള പോസ്റ്റർ ക്യാൻവാസിൽ ക്ലിക്ക് ചെയ്ത് ഏതൊരു എലമെന്റും സെലക്ട് ചെയ്യാം, അല്ലെങ്കിൽ മൗസ് ഉപയോഗിച്ച് ഡ്രാഗ് ചെയ്ത് സ്ഥാനം മാറ്റാം.
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <button type="button" @click="selectCoreLayer('result_no')" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50">
+                            # Result Number
+                        </button>
+                        <button type="button" @click="selectCoreLayer('competition')" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50">
+                            Program Name
+                        </button>
+                        <button type="button" @click="selectCoreLayer('category')" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50">
+                            Zone Capsule
+                        </button>
+                        <button type="button" @click="selectCoreLayer('winners')" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50">
+                            Podium Winners
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- TAB 2: LAYERS LIST (ALL CORE & CUSTOM LAYERS)                  -->
             <!-- ============================================================== -->
             <div x-show="activeTab === 'layers'" class="space-y-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                         <div>
-                            <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Result Layers (ലെയറുകൾ)</h2>
-                            <p class="text-[11px] text-slate-500">Select any layer to inspect, reposition, or toggle visibility.</p>
+                            <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Poster Layers (ലെയറുകൾ)</h2>
+                            <p class="text-[11px] text-slate-500">Click any layer to select, toggle visibility, or delete.</p>
                         </div>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">6 Layers</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
+                            <span x-text="customElements.length + 4"></span> Layers
+                        </span>
                     </div>
 
-                    <!-- Layers List (Top to Bottom Stack) -->
+                    <!-- Custom Elements Stack -->
                     <div class="space-y-2">
-                        <!-- Layer 1: Top Extra Overlay -->
-                        <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
-                             :class="activeLayer === 'overlay' ? 'bg-amber-50/70 border-amber-400 ring-1 ring-amber-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
-                             @click="activeLayer = 'overlay'">
-                            <div class="flex items-center gap-2.5">
-                                <button type="button" @click.stop="overlay.enabled = !overlay.enabled; render();"
-                                        class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="overlay.enabled ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </button>
-                                <span class="text-xs font-bold text-slate-800">1. Top Extra Overlay (മുതൽക്കൂട്ട്)</span>
+                        <template x-for="(el, idx) in customElements" :key="el.id">
+                            <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
+                                 :class="selectedElement && selectedElement.id === el.id ? 'bg-purple-50 border-purple-400 ring-1 ring-purple-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
+                                 @click="selectElement(el.id)">
+                                
+                                <div class="flex items-center gap-2.5">
+                                    <button type="button" @click.stop="el.visible = !el.visible; render();"
+                                            class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="el.visible ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </button>
+                                    <span class="text-xs font-bold text-slate-800" x-text="el.label"></span>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200" x-text="el.type"></span>
+                                    <button type="button" @click.stop="deleteElement(el.id)" class="text-red-500 hover:text-red-700 p-1">
+                                        &times;
+                                    </button>
+                                </div>
                             </div>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200" x-text="overlay.layerOrder === 'above' ? 'Top Layer' : 'Behind Text'"></span>
+                        </template>
+
+                        <!-- Core Layers -->
+                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
+                             :class="selectedId === 'result_no' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
+                             @click="selectCoreLayer('result_no')">
+                            <span class="text-xs font-bold text-slate-800">Result Number (#{{ sprintf('%02d', $resultNo) }})</span>
+                            <span class="text-[10px] font-mono text-slate-500">Core</span>
                         </div>
 
-                        <!-- Layer 2: Result Number -->
-                        <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
-                             :class="activeLayer === 'result_no' ? 'bg-red-50/70 border-red-400 ring-1 ring-red-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
-                             @click="activeLayer = 'result_no'">
-                            <div class="flex items-center gap-2.5">
-                                <button type="button" @click.stop="settings.show_result_no = !settings.show_result_no; render();"
-                                        class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="settings.show_result_no ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </button>
-                                <span class="text-xs font-bold text-slate-800">2. Result Sequence Number (റിസൾട്ട് നമ്പർ)</span>
-                            </div>
-                            <span class="text-[11px] font-mono font-bold text-red-600" x-text="data.result_no"></span>
+                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
+                             :class="selectedId === 'competition' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
+                             @click="selectCoreLayer('competition')">
+                            <span class="text-xs font-bold text-slate-800">Program Name</span>
+                            <span class="text-[10px] font-mono text-slate-500">Core</span>
                         </div>
 
-                        <!-- Layer 3: Program Name -->
-                        <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
-                             :class="activeLayer === 'competition' ? 'bg-blue-50/70 border-blue-400 ring-1 ring-blue-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
-                             @click="activeLayer = 'competition'">
-                            <div class="flex items-center gap-2.5">
-                                <button type="button" @click.stop="settings.show_competition = !settings.show_competition; render();"
-                                        class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="settings.show_competition ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </button>
-                                <span class="text-xs font-bold text-slate-800">3. Program Name (മത്സര പേര്)</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 max-w-[120px] truncate" x-text="data.competition"></span>
+                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
+                             :class="selectedId === 'category' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
+                             @click="selectCoreLayer('category')">
+                            <span class="text-xs font-bold text-slate-800">Zone Capsule</span>
+                            <span class="text-[10px] font-mono text-slate-500">Core</span>
                         </div>
 
-                        <!-- Layer 4: Zone Capsule -->
-                        <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
-                             :class="activeLayer === 'category' ? 'bg-purple-50/70 border-purple-400 ring-1 ring-purple-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
-                             @click="activeLayer = 'category'">
-                            <div class="flex items-center gap-2.5">
-                                <button type="button" @click.stop="settings.show_category = !settings.show_category; render();"
-                                        class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="settings.show_category ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </button>
-                                <span class="text-xs font-bold text-slate-800">4. Zone / Category Capsule (സോൺ)</span>
-                            </div>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200" x-text="data.category"></span>
+                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
+                             :class="selectedId === 'winners' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
+                             @click="selectCoreLayer('winners')">
+                            <span class="text-xs font-bold text-slate-800">Podium Winners (1st, 2nd, 3rd)</span>
+                            <span class="text-[10px] font-mono text-slate-500">Core</span>
                         </div>
-
-                        <!-- Layer 5: Podium Winners & Groups -->
-                        <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
-                             :class="activeLayer === 'winners' ? 'bg-emerald-50/70 border-emerald-400 ring-1 ring-emerald-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
-                             @click="activeLayer = 'winners'">
-                            <div class="flex items-center gap-2.5">
-                                <button type="button" @click.stop="settings.show_winners = !settings.show_winners; render();"
-                                        class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="settings.show_winners ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </button>
-                                <span class="text-xs font-bold text-slate-800">5. Podium Winners & Groups (വിജയികൾ)</span>
-                            </div>
-                            <span class="text-[10px] font-bold text-emerald-700">1st, 2nd, 3rd</span>
-                        </div>
-
-                        <!-- Layer 6: Background Frame Template -->
-                        <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer"
-                             @click="activeTab = 'templates'">
-                            <div class="flex items-center gap-2.5">
-                                <span class="p-1 text-slate-400">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                </span>
-                                <span class="text-xs font-bold text-slate-700">6. Background Template (ടെംപ്ലേറ്റ്)</span>
-                            </div>
-                            <span class="text-[10px] text-blue-600 font-bold hover:underline">Change &rarr;</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Precision Alignment & Nudge D-Pad -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">
-                            Precision Position & Align (<span class="text-[#be1e2d]" x-text="activeLayerLabel"></span>)
-                        </h3>
-                        <span class="text-[10px] text-slate-400 font-mono">1px step (Shift: 10px)</span>
-                    </div>
-
-                    <!-- Quick Align Row -->
-                    <div class="grid grid-cols-3 gap-2">
-                        <button type="button" @click="alignLayer('left')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center gap-1">
-                            <span>⇤ Left</span>
-                        </button>
-                        <button type="button" @click="alignLayer('center')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center gap-1">
-                            <span>↔ Center</span>
-                        </button>
-                        <button type="button" @click="alignLayer('right')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center gap-1">
-                            <span>⇥ Right</span>
-                        </button>
-                    </div>
-
-                    <!-- Nudge Arrows D-Pad -->
-                    <div class="flex items-center justify-center gap-2 pt-1">
-                        <button type="button" @click="nudgeLayer(-5, 0)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold" title="Move Left">&larr;</button>
-                        <div class="flex flex-col gap-1">
-                            <button type="button" @click="nudgeLayer(0, -5)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold" title="Move Up">&uarr;</button>
-                            <button type="button" @click="nudgeLayer(0, 5)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold" title="Move Down">&darr;</button>
-                        </div>
-                        <button type="button" @click="nudgeLayer(5, 0)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold" title="Move Right">&rarr;</button>
                     </div>
                 </div>
             </div>
 
             <!-- ============================================================== -->
-            <!-- TAB 2: WINNERS LIST, MEDALS & UNIFIED SCALING -->
+            <!-- TAB 3: WINNERS & SCALE                                         -->
             <!-- ============================================================== -->
             <div x-show="activeTab === 'winners'" class="space-y-4">
-                
-                <!-- Unified Master Scale (Illustrator Style Bounding Box Scaling) -->
-                <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-200/80 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-900 font-black block">Master Scaling</span>
-                            <h3 class="text-xs font-black text-amber-950 font-sora">Winners & Groups Unified Scale</h3>
-                        </div>
-                        <span class="font-mono font-black text-sm text-amber-900 bg-white/80 px-2.5 py-0.5 rounded-lg border border-amber-300"
-                              x-text="Math.round(settings.winners_scale * 100) + '%'"></span>
-                    </div>
-                    <input type="range" min="0.5" max="1.8" step="0.02" x-model.number="settings.winners_scale" @input="render()" class="w-full accent-amber-600">
-                    <p class="text-[11px] text-amber-900 leading-snug">
-                        ഇല്ലസ്ട്രേറ്ററിലെ പോലെ വിജയികളുടെ പേര്, ഗ്രൂപ്പ്, മെഡൽ, ലൈൻ സ്പേസിംഗ് എന്നിവയെല്ലാം ഒരുമിച്ച് ആനുപാതികമായി വലുതാക്കാനും ചെറുതാക്കാനും ഈ സ്ലൈഡർ ഉപയോഗിക്കാം.
-                    </p>
-                </div>
-
-                <!-- Medal System Selector -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Medal Style (മെഡൽ മാറ്റങ്ങൾ)</h3>
-                        <span class="text-[10px] text-slate-400">Per Template</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <label class="p-2.5 rounded-xl border cursor-pointer flex items-center gap-2"
-                               :class="settings.medal_type === 'numbers' ? 'border-[#be1e2d] bg-red-50/50 font-bold text-red-900' : 'border-slate-200 text-slate-700'">
-                            <input type="radio" name="medal_type" value="numbers" x-model="settings.medal_type" @change="render()" class="sr-only">
-                            <span class="w-5 h-5 rounded bg-[#be1e2d] text-white font-mono text-[10px] flex items-center justify-center font-bold">01</span>
-                            <span>Modern Numbers (01, 02)</span>
-                        </label>
-
-                        <label class="p-2.5 rounded-xl border cursor-pointer flex items-center gap-2"
-                               :class="settings.medal_type === 'badges' ? 'border-[#be1e2d] bg-red-50/50 font-bold text-red-900' : 'border-slate-200 text-slate-700'">
-                            <input type="radio" name="medal_type" value="badges" x-model="settings.medal_type" @change="render()" class="sr-only">
-                            <span class="w-5 h-5 rounded-full bg-[#be1e2d] text-white text-[9px] flex items-center justify-center font-bold">01</span>
-                            <span>Circle Badges</span>
-                        </label>
-
-                        <label class="p-2.5 rounded-xl border cursor-pointer flex items-center gap-2"
-                               :class="settings.medal_type === 'medals' ? 'border-[#be1e2d] bg-red-50/50 font-bold text-red-900' : 'border-slate-200 text-slate-700'">
-                            <input type="radio" name="medal_type" value="medals" x-model="settings.medal_type" @change="render()" class="sr-only">
-                            <span class="text-amber-500 font-bold text-sm">🏅</span>
-                            <span>Gold/Silver/Bronze Icons</span>
-                        </label>
-
-                        <label class="p-2.5 rounded-xl border cursor-pointer flex items-center gap-2"
-                               :class="settings.medal_type === 'none' ? 'border-[#be1e2d] bg-red-50/50 font-bold text-red-900' : 'border-slate-200 text-slate-700'">
-                            <input type="radio" name="medal_type" value="none" x-model="settings.medal_type" @change="render()" class="sr-only">
-                            <span class="text-slate-400 text-xs">&times;</span>
-                            <span>No Medals (Hide)</span>
-                        </label>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Medal / Rank Size (<span x-text="settings.medal_size"></span>px)</label>
-                            <input type="range" min="12" max="80" step="1" x-model.number="settings.medal_size" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Medal-to-Text Gap (<span x-text="settings.item_gap"></span>px)</label>
-                            <input type="range" min="0" max="60" step="1" x-model.number="settings.item_gap" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Line Distance & Spacing Controls -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Line Distances & Spacing (വരി അകലം)</h3>
-                        <span class="text-[10px] text-slate-400">Leading & Gaps</span>
-                    </div>
-
-                    <div class="space-y-3">
-                        <!-- Student Name 2-line line-height -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="text-[11px] font-bold text-slate-700">Student Name 2-Line Leading (വിദ്യാർത്ഥി പേര് 2 വരി അകലം)</label>
-                                <span class="font-mono text-xs font-bold text-slate-800" x-text="settings.winner_name_line_height + ' px'"></span>
-                            </div>
-                            <input type="range" min="16" max="70" step="1" x-model.number="settings.winner_name_line_height" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-
-                        <!-- Distance to Group Name -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="text-[11px] font-bold text-slate-700">Distance to Group Name (ഗ്രൂപ്പ് അകലം)</label>
-                                <span class="font-mono text-xs font-bold text-slate-800" x-text="settings.winner_unit_gap + ' px'"></span>
-                            </div>
-                            <input type="range" min="2" max="40" step="1" x-model.number="settings.winner_unit_gap" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-
-                        <!-- Row Gap (Between Winners) -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="text-[11px] font-bold text-slate-700">Row Gap Between Winners (വിജയികൾ തമ്മിലുള്ള അകലം)</label>
-                                <span class="font-mono text-xs font-bold text-slate-800" x-text="settings.row_gap + ' px'"></span>
-                            </div>
-                            <input type="range" min="50" max="300" step="1" x-model.number="settings.row_gap" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-
-                        <!-- Block Position (X, Y) -->
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Block Left (X: <span x-text="settings.block_left"></span>px)</label>
-                                <input type="range" min="50" max="800" step="1" x-model.number="settings.block_left" @input="render()" class="w-full accent-[#be1e2d]">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">First Winner Top (Y: <span x-text="settings.first_top"></span>px)</label>
-                                <input type="range" min="50" max="800" step="1" x-model.number="settings.first_top" @input="render()" class="w-full accent-[#be1e2d]">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Winners List Data Inputs (with 2-Line Option) -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Podium Master Scale & Spacing</h2>
+                        <p class="text-[11px] text-slate-500">വിന്നേഴ്സ് ലിസ്റ്റും ഗ്രൂപ്പും ഒരുമിച്ച് സൈസ് മാറ്റാനും ലൈൻ സ്പേസിംഗ് ക്രമീകരിക്കാനും.</p>
+                    </div>
+
+                    <!-- Master Scale Slider -->
+                    <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                            <span>Winners Master Scale (ഒരുമിച്ച് സൈസ് മാറ്റുക)</span>
+                            <span class="font-mono text-purple-700" x-text="Math.round(settings.winners_scale * 100) + '%'"></span>
+                        </div>
+                        <input type="range" min="0.5" max="1.8" step="0.02" x-model.number="settings.winners_scale" @input="render()" class="w-full accent-purple-600">
+                    </div>
+
+                    <!-- Medal Style Selector -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-700">Medal Style (മെഡൽ തരം)</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" @click="settings.medal_type = 'numbers'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'numbers' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">01 02 03</button>
+                            <button type="button" @click="settings.medal_type = 'badges'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'badges' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">Badges</button>
+                            <button type="button" @click="settings.medal_type = 'text'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'text' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">1st 2nd</button>
+                            <button type="button" @click="settings.medal_type = 'none'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'none' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">None</button>
+                        </div>
+                    </div>
+
+                    <!-- 2-Line Student Name Toggle -->
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <div>
-                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Podium Winners Editor</h3>
-                            <p class="text-[10px] text-slate-400">പേരുകൾ 2 വരിയാക്കാൻ Enter കീ അമർത്തുക അല്ലെങ്കിൽ '/' നൽകുക.</p>
+                            <span class="text-xs font-bold text-slate-800">2-Line Student Names</span>
+                            <p class="text-[10px] text-slate-500">നീളമുള്ള പേരുകൾ രണ്ട് വരിയായി മാറ്റുക (അല്ലെങ്കിൽ പേരിനിടയിൽ / ഇടുക)</p>
                         </div>
-                        <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-                            <input type="checkbox" x-model="settings.winner_name_2lines" @change="render()" class="rounded text-[#be1e2d]">
-                            <span class="text-[11px] font-bold">Auto 2-Line</span>
-                        </label>
+                        <input type="checkbox" x-model="settings.winner_name_2lines" @change="render()" class="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500">
                     </div>
 
-                    <!-- First Place (01) -->
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-md bg-[#be1e2d] text-white font-mono font-bold text-xs flex items-center justify-center">01</span>
-                                <span class="font-bold text-xs text-slate-800">1st Place / ഒന്നാം സ്ഥാനം</span>
-                            </div>
-                            <button type="button" @click="addWinner('first')" class="px-2 py-0.5 text-[10px] font-bold text-[#be1e2d] hover:bg-red-50 rounded border border-red-200 transition">
-                                + Add Tie
-                            </button>
+                    <!-- Line Spacing Sliders -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-600">Leading</span>
+                            <input type="range" min="18" max="70" step="1" x-model.number="settings.winner_name_line_height" @input="render()" class="w-full accent-purple-600">
                         </div>
-                        <template x-for="(w, idx) in data.winners.first" :key="'first-' + idx">
-                            <div class="grid grid-cols-12 gap-2 items-start bg-white p-2 rounded-lg border border-slate-200">
-                                <div class="col-span-6">
-                                    <textarea rows="2" x-model="w.name" @input="render()" placeholder="Student Name (Line 1 &#10; Line 2)" class="w-full px-2 py-1 text-xs rounded border border-slate-300 font-bold resize-none leading-snug"></textarea>
-                                </div>
-                                <div class="col-span-5">
-                                    <input type="text" x-model="w.unit" @input="render()" placeholder="Group / Unit" class="w-full px-2 py-1.5 text-xs rounded border border-slate-300">
-                                </div>
-                                <div class="col-span-1 flex items-center justify-center pt-1.5">
-                                    <button type="button" x-show="data.winners.first.length > 1" @click="removeWinner('first', idx)" class="text-red-500 hover:text-red-700 font-bold text-sm">&times;</button>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Second Place (02) -->
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-md bg-slate-800 text-white font-mono font-bold text-xs flex items-center justify-center">02</span>
-                                <span class="font-bold text-xs text-slate-800">2nd Place / രണ്ടാം സ്ഥാനം</span>
-                            </div>
-                            <button type="button" @click="addWinner('second')" class="px-2 py-0.5 text-[10px] font-bold text-[#be1e2d] hover:bg-red-50 rounded border border-red-200 transition">
-                                + Add Tie
-                            </button>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-600">Group Gap</span>
+                            <input type="range" min="2" max="30" step="1" x-model.number="settings.winner_unit_gap" @input="render()" class="w-full accent-purple-600">
                         </div>
-                        <template x-for="(w, idx) in data.winners.second" :key="'second-' + idx">
-                            <div class="grid grid-cols-12 gap-2 items-start bg-white p-2 rounded-lg border border-slate-200">
-                                <div class="col-span-6">
-                                    <textarea rows="2" x-model="w.name" @input="render()" placeholder="Student Name (Line 1 &#10; Line 2)" class="w-full px-2 py-1 text-xs rounded border border-slate-300 font-bold resize-none leading-snug"></textarea>
-                                </div>
-                                <div class="col-span-5">
-                                    <input type="text" x-model="w.unit" @input="render()" placeholder="Group / Unit" class="w-full px-2 py-1.5 text-xs rounded border border-slate-300">
-                                </div>
-                                <div class="col-span-1 flex items-center justify-center pt-1.5">
-                                    <button type="button" x-show="data.winners.second.length > 1" @click="removeWinner('second', idx)" class="text-red-500 hover:text-red-700 font-bold text-sm">&times;</button>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Third Place (03) -->
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-md bg-amber-700 text-white font-mono font-bold text-xs flex items-center justify-center">03</span>
-                                <span class="font-bold text-xs text-slate-800">3rd Place / മൂന്നാം സ്ഥാനം</span>
-                            </div>
-                            <button type="button" @click="addWinner('third')" class="px-2 py-0.5 text-[10px] font-bold text-[#be1e2d] hover:bg-red-50 rounded border border-red-200 transition">
-                                + Add Tie
-                            </button>
-                        </div>
-                        <template x-for="(w, idx) in data.winners.third" :key="'third-' + idx">
-                            <div class="grid grid-cols-12 gap-2 items-start bg-white p-2 rounded-lg border border-slate-200">
-                                <div class="col-span-6">
-                                    <textarea rows="2" x-model="w.name" @input="render()" placeholder="Student Name (Line 1 &#10; Line 2)" class="w-full px-2 py-1 text-xs rounded border border-slate-300 font-bold resize-none leading-snug"></textarea>
-                                </div>
-                                <div class="col-span-5">
-                                    <input type="text" x-model="w.unit" @input="render()" placeholder="Group / Unit" class="w-full px-2 py-1.5 text-xs rounded border border-slate-300">
-                                </div>
-                                <div class="col-span-1 flex items-center justify-center pt-1.5">
-                                    <button type="button" x-show="data.winners.third.length > 1" @click="removeWinner('third', idx)" class="text-red-500 hover:text-red-700 font-bold text-sm">&times;</button>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ============================================================== -->
-            <!-- TAB 3: ELEMENTS & ROTATION (PROGRAM, ZONE, RESULT NUMBER) -->
-            <!-- ============================================================== -->
-            <div x-show="activeTab === 'elements'" class="space-y-4">
-                
-                <!-- Result Number Inspector -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">1. Result Sequence Number (01, 37)</h3>
-                        <input type="color" x-model="settings.result_color" @input="render()" class="w-6 h-6 rounded cursor-pointer border border-slate-300 p-0.5">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Sequence Number</label>
-                            <input type="text" x-model="data.result_no" @input="render()" placeholder="37" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 font-mono font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Size (<span x-text="settings.result_size"></span>px)</label>
-                            <input type="number" min="20" max="600" x-model.number="settings.result_size" @input="render()" class="w-full px-2 py-1.5 text-xs rounded border border-slate-300">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">X Position (<span x-text="settings.result_x"></span>px)</label>
-                            <input type="range" min="0" max="1080" step="1" x-model.number="settings.result_x" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Y Position (<span x-text="settings.result_y"></span>px)</label>
-                            <input type="range" min="0" max="1350" step="1" x-model.number="settings.result_y" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                    </div>
-
-                    <!-- Rotation Slider -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="text-[11px] font-bold text-slate-700">Rotation Angle (റൊട്ടേഷൻ)</label>
-                            <span class="font-mono text-xs font-bold text-slate-800" x-text="settings.result_rotation + '&deg;'"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <input type="range" min="-180" max="180" step="1" x-model.number="settings.result_rotation" @input="render()" class="w-full accent-[#be1e2d]">
-                            <button type="button" @click="settings.result_rotation = 0; render();" class="text-[10px] text-slate-400 hover:text-slate-800 px-1 py-0.5 rounded border border-slate-200">0&deg;</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Program Name Inspector -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">2. Program Name (മത്സര പേര്)</h3>
-                        <input type="color" x-model="settings.competition_color" @input="render()" class="w-6 h-6 rounded cursor-pointer border border-slate-300 p-0.5">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Competition / Program Name</label>
-                        <textarea rows="2" x-model="data.competition" @input="render()" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 font-bold resize-none"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Font Size (<span x-text="settings.competition_size"></span>px)</label>
-                            <input type="number" min="16" max="160" x-model.number="settings.competition_size" @input="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Line Height (<span x-text="settings.competition_line_height"></span>px)</label>
-                            <input type="number" min="16" max="180" x-model.number="settings.competition_line_height" @input="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">X Position (<span x-text="settings.competition_x"></span>px)</label>
-                            <input type="range" min="0" max="1080" step="1" x-model.number="settings.competition_x" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Y Position (<span x-text="settings.competition_y"></span>px)</label>
-                            <input type="range" min="0" max="1350" step="1" x-model.number="settings.competition_y" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                    </div>
-
-                    <!-- Program Name Rotation -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="text-[11px] font-bold text-slate-700">Program Rotation Angle</label>
-                            <span class="font-mono text-xs font-bold text-slate-800" x-text="settings.competition_rotation + '&deg;'"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <input type="range" min="-180" max="180" step="1" x-model.number="settings.competition_rotation" @input="render()" class="w-full accent-[#be1e2d]">
-                            <button type="button" @click="settings.competition_rotation = 0; render();" class="text-[10px] text-slate-400 hover:text-slate-800 px-1 py-0.5 rounded border border-slate-200">0&deg;</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Zone Capsule Inspector -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">3. Zone Capsule (സോൺ ക്യാപ്സ്യൂൾ)</h3>
-                        <input type="color" x-model="settings.category_color" @input="render()" class="w-6 h-6 rounded cursor-pointer border border-slate-300 p-0.5">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Zone / Category Text</label>
-                            <input type="text" x-model="data.category" @input="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Size (<span x-text="settings.category_size"></span>px)</label>
-                            <input type="number" min="12" max="80" x-model.number="settings.category_size" @input="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">X Position (<span x-text="settings.category_x"></span>px)</label>
-                            <input type="range" min="0" max="1080" step="1" x-model.number="settings.category_x" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Y Position (<span x-text="settings.category_y"></span>px)</label>
-                            <input type="range" min="0" max="1350" step="1" x-model.number="settings.category_y" @input="render()" class="w-full accent-[#be1e2d]">
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="text-[11px] font-bold text-slate-700">Zone Rotation Angle</label>
-                            <span class="font-mono text-xs font-bold text-slate-800" x-text="settings.category_rotation + '&deg;'"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <input type="range" min="-180" max="180" step="1" x-model.number="settings.category_rotation" @input="render()" class="w-full accent-[#be1e2d]">
-                            <button type="button" @click="settings.category_rotation = 0; render();" class="text-[10px] text-slate-400 hover:text-slate-800 px-1 py-0.5 rounded border border-slate-200">0&deg;</button>
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-600">Row Gap</span>
+                            <input type="range" min="90" max="250" step="2" x-model.number="settings.row_gap" @input="render()" class="w-full accent-purple-600">
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- ============================================================== -->
-            <!-- TAB 4: EXTRA ELEMENTS & OVERLAYS (STAMPS, RIBBONS, WATERMARKS) -->
+            <!-- TAB 4: CORE ELEMENTS (PROGRAM, RESULT NO, ZONE)               -->
             <!-- ============================================================== -->
-            <div x-show="activeTab === 'overlay'" class="space-y-4">
+            <div x-show="activeTab === 'core'" class="space-y-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <div>
-                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Top Extra Overlay Element</h3>
-                            <p class="text-[11px] text-slate-500">Add stylish text art (e.g. 'Result'), stamps, or custom PNG badges above all content.</p>
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">Core Program Elements</h2>
+                    
+                    <!-- Result Number -->
+                    <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                            <span>Result Number (#{{ sprintf('%02d', $resultNo) }})</span>
+                            <span class="font-mono text-purple-700" x-text="settings.result_size + 'px'"></span>
                         </div>
-                        <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                            <input type="checkbox" x-model="overlay.enabled" @change="render()" class="rounded text-[#be1e2d]">
-                            <span>Enable</span>
-                        </label>
+                        <input type="range" min="150" max="650" step="5" x-model.number="settings.result_size" @input="render()" class="w-full accent-purple-600">
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <span>Rotation</span>
+                            <span class="font-mono" x-text="settings.result_rotation + '°'"></span>
+                        </div>
+                        <input type="range" min="-180" max="180" step="1" x-model.number="settings.result_rotation" @input="render()" class="w-full accent-purple-600">
                     </div>
 
-                    <!-- Stacking Order: Above all content or behind -->
-                    <div class="p-3 bg-purple-50/60 rounded-xl border border-purple-200/80 space-y-2">
-                        <label class="text-[11px] font-bold text-purple-900 block">Layer Stacking Order (ഓർഡർ)</label>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <label class="p-2 rounded-lg border cursor-pointer flex items-center gap-2"
-                                   :class="overlay.layerOrder === 'above' ? 'bg-purple-600 text-white font-bold border-purple-600' : 'bg-white text-slate-700 border-slate-300'">
-                                <input type="radio" value="above" x-model="overlay.layerOrder" @change="render()" class="sr-only">
-                                <span>&uarr; Above All Content (Top)</span>
-                            </label>
-                            <label class="p-2 rounded-lg border cursor-pointer flex items-center gap-2"
-                                   :class="overlay.layerOrder === 'below' ? 'bg-purple-600 text-white font-bold border-purple-600' : 'bg-white text-slate-700 border-slate-300'">
-                                <input type="radio" value="below" x-model="overlay.layerOrder" @change="render()" class="sr-only">
-                                <span>&darr; Behind Text (Middle)</span>
-                            </label>
+                    <!-- Program Name -->
+                    <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                            <span>Program Name Size</span>
+                            <span class="font-mono text-purple-700" x-text="settings.competition_size + 'px'"></span>
                         </div>
-                    </div>
-
-                    <!-- Overlay Type: Preset Typography vs Custom Upload -->
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-                            <button type="button" @click="overlay.type = 'text'; render();"
-                                    class="py-2 rounded-xl border text-center transition"
-                                    :class="overlay.type === 'text' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700 border-slate-200'">
-                                Typography Art ('Result')
-                            </button>
-                            <button type="button" @click="overlay.type = 'image'; render();"
-                                    class="py-2 rounded-xl border text-center transition"
-                                    :class="overlay.type === 'image' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700 border-slate-200'">
-                                Custom Image / Badge
-                            </button>
+                        <input type="range" min="40" max="160" step="2" x-model.number="settings.competition_size" @input="render()" class="w-full accent-purple-600">
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <span>Rotation</span>
+                            <span class="font-mono" x-text="settings.competition_rotation + '°'"></span>
                         </div>
-
-                        <!-- If Text Art -->
-                        <div x-show="overlay.type === 'text'" class="space-y-3 pt-2">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Text Content</label>
-                                    <input type="text" x-model="overlay.text" @input="render()" placeholder="Result" class="w-full px-2 py-1.5 text-xs rounded border border-slate-300 font-bold">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Font Family</label>
-                                    <select x-model="overlay.font" @change="render()" class="w-full px-2 py-1.5 text-xs rounded border border-slate-300">
-                                        <option value="Rockwell Std">Rockwell Std</option>
-                                        <option value="Mongolian Baiti">Mongolian Baiti</option>
-                                        <option value="Anek Malayalam">Anek Malayalam</option>
-                                        <option value="Sora">Sora</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Font Size (<span x-text="overlay.size"></span>px)</label>
-                                    <input type="range" min="20" max="350" step="1" x-model.number="overlay.size" @input="render()" class="w-full accent-[#be1e2d]">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Text Color</label>
-                                    <input type="color" x-model="overlay.color" @input="render()" class="w-full h-8 rounded border border-slate-300 cursor-pointer p-0.5">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- If Custom Image Upload -->
-                        <div x-show="overlay.type === 'image'" class="space-y-3 pt-2">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Upload PNG / SVG Overlay</label>
-                                <input type="file" accept="image/*" @change="handleOverlayUpload($event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800">
-                            </div>
-                        </div>
-
-                        <!-- Position (X, Y) -->
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">X Position (<span x-text="overlay.x"></span>px)</label>
-                                <input type="range" min="0" max="1080" step="1" x-model.number="overlay.x" @input="render()" class="w-full accent-[#be1e2d]">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Y Position (<span x-text="overlay.y"></span>px)</label>
-                                <input type="range" min="0" max="1350" step="1" x-model.number="overlay.y" @input="render()" class="w-full accent-[#be1e2d]">
-                            </div>
-                        </div>
-
-                        <!-- Rotation & Opacity -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="text-[11px] font-bold text-slate-700">Rotation Angle</label>
-                                    <span class="font-mono text-xs font-bold text-slate-800" x-text="overlay.rotation + '&deg;'"></span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <input type="range" min="-180" max="180" step="1" x-model.number="overlay.rotation" @input="render()" class="w-full accent-[#be1e2d]">
-                                    <button type="button" @click="overlay.rotation = 0; render();" class="text-[9px] px-1 py-0.5 rounded border border-slate-200">0&deg;</button>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="text-[11px] font-bold text-slate-700">Opacity (<span x-text="overlay.opacity"></span>%)</label>
-                                    <span class="font-mono text-xs font-bold text-slate-800" x-text="overlay.opacity + '%'"></span>
-                                </div>
-                                <input type="range" min="5" max="100" step="1" x-model.number="overlay.opacity" @input="render()" class="w-full accent-[#be1e2d]">
-                            </div>
-                        </div>
+                        <input type="range" min="-180" max="180" step="1" x-model.number="settings.competition_rotation" @input="render()" class="w-full accent-purple-600">
                     </div>
                 </div>
             </div>
 
             <!-- ============================================================== -->
-            <!-- TAB 5: ILLUSTRATOR GUIDELINES -->
+            <!-- TAB 5: GUIDELINES (CYAN ILLUSTRATOR GUIDES)                    -->
             <!-- ============================================================== -->
             <div x-show="activeTab === 'guides'" class="space-y-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <div>
-                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Illustrator Guidelines (ഗൈഡുകൾ)</h3>
-                            <p class="text-[11px] text-slate-500">Cyan magnetic lines for alignment. Never exported into the downloaded image.</p>
-                        </div>
-                        <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                            <input type="checkbox" x-model="guidelines.show" @change="render()" class="rounded text-cyan-600">
-                            <span>Show</span>
-                        </label>
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Illustrator Cyan Guidelines</h2>
+                        <button type="button" @click="guidelines.show = !guidelines.show; render();" class="px-2.5 py-1 rounded text-xs font-bold bg-cyan-100 text-cyan-800">
+                            <span x-text="guidelines.show ? 'Enabled' : 'Disabled'"></span>
+                        </button>
                     </div>
 
-                    <!-- Add Vertical Guide (X) -->
-                    <div class="p-3 bg-cyan-50/60 rounded-xl border border-cyan-200 space-y-2">
-                        <label class="text-[11px] font-bold text-cyan-950 block">Vertical Guide Lines (ലംബ വരകൾ - X)</label>
+                    <!-- Vertical Guides (X) -->
+                    <div class="space-y-2">
+                        <span class="text-xs font-bold text-slate-700">Vertical Guides (X)</span>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="(gx, idx) in guidelines.vertical" :key="'vg-' + idx">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-cyan-300 font-mono text-xs font-bold text-cyan-900 shadow-2xs">
+                            <template x-for="(gx, idx) in guidelines.vertical" :key="'vx_' + idx">
+                                <span class="px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-300 text-cyan-900 font-mono text-xs flex items-center gap-1.5">
                                     <span x-text="'X: ' + gx + 'px'"></span>
-                                    <button type="button" @click="guidelines.vertical.splice(idx, 1); render();" class="text-red-500 hover:text-red-700 font-bold text-xs">&times;</button>
+                                    <button type="button" @click="removeGuide('v', idx)" class="hover:text-red-600">&times;</button>
                                 </span>
                             </template>
                         </div>
                         <div class="flex items-center gap-2 pt-1">
-                            <input type="number" min="0" max="1080" x-model.number="guidelines.newX" class="px-2 py-1 text-xs rounded border border-cyan-300 w-24 font-mono">
-                            <button type="button" @click="addVGuide()" class="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs">
-                                + Add Guide
-                            </button>
+                            <input type="number" x-model.number="guidelines.newX" class="w-24 text-xs p-1.5 rounded-lg border border-slate-300 font-mono" placeholder="X px">
+                            <button type="button" @click="addGuide('v')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold text-xs">+ Add X Guide</button>
                         </div>
                     </div>
 
-                    <!-- Add Horizontal Guide (Y) -->
-                    <div class="p-3 bg-cyan-50/60 rounded-xl border border-cyan-200 space-y-2">
-                        <label class="text-[11px] font-bold text-cyan-950 block">Horizontal Guide Lines (തിരശ്ചീന വരകൾ - Y)</label>
+                    <!-- Horizontal Guides (Y) -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <span class="text-xs font-bold text-slate-700">Horizontal Guides (Y)</span>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="(gy, idx) in guidelines.horizontal" :key="'hg-' + idx">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-cyan-300 font-mono text-xs font-bold text-cyan-900 shadow-2xs">
+                            <template x-for="(gy, idx) in guidelines.horizontal" :key="'hy_' + idx">
+                                <span class="px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-300 text-cyan-900 font-mono text-xs flex items-center gap-1.5">
                                     <span x-text="'Y: ' + gy + 'px'"></span>
-                                    <button type="button" @click="guidelines.horizontal.splice(idx, 1); render();" class="text-red-500 hover:text-red-700 font-bold text-xs">&times;</button>
+                                    <button type="button" @click="removeGuide('h', idx)" class="hover:text-red-600">&times;</button>
                                 </span>
                             </template>
                         </div>
                         <div class="flex items-center gap-2 pt-1">
-                            <input type="number" min="0" max="1440" x-model.number="guidelines.newY" class="px-2 py-1 text-xs rounded border border-cyan-300 w-24 font-mono">
-                            <button type="button" @click="addHGuide()" class="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs">
-                                + Add Guide
-                            </button>
+                            <input type="number" x-model.number="guidelines.newY" class="w-24 text-xs p-1.5 rounded-lg border border-slate-300 font-mono" placeholder="Y px">
+                            <button type="button" @click="addGuide('h')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold text-xs">+ Add Y Guide</button>
                         </div>
-                    </div>
-
-                    <!-- Presets -->
-                    <div class="flex items-center justify-between pt-1">
-                        <button type="button" @click="resetStandardGuides()" class="text-xs text-cyan-700 hover:underline font-bold">
-                            Reset to Default Illustrator Guides
-                        </button>
-                        <button type="button" @click="guidelines.vertical = []; guidelines.horizontal = []; render();" class="text-xs text-red-600 hover:underline">
-                            Clear All
-                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- ============================================================== -->
-            <!-- TAB 6: TEMPLATES -->
+            <!-- TAB 6: TEMPLATES SELECTOR                                      -->
             <!-- ============================================================== -->
             <div x-show="activeTab === 'templates'" class="space-y-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Poster Frame Template</h2>
-                        <a href="{{ route('media.results.templates') }}" target="_blank" class="text-[11px] text-[#be1e2d] hover:underline font-bold">+ Upload New</a>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        @foreach($templates as $tpl)
-                            <label class="cursor-pointer border-2 rounded-xl p-2 flex flex-col items-center text-center transition-all"
-                                   :class="settings.template_id == {{ $tpl->id }} ? 'border-[#be1e2d] bg-red-50/30 ring-1 ring-[#be1e2d]' : 'border-slate-200 hover:border-slate-300'">
-                                <input type="radio" name="template_id" value="{{ $tpl->id }}" class="sr-only"
-                                       @change="selectTemplate({{ $tpl->id }}, '{{ asset($tpl->image_path) }}', '{{ $tpl->posterSetting->layout_mode ?? (str_contains(strtolower($tpl->name), 'yellow') ? 'yellow_modern' : 'default') }}')"
-                                       :checked="settings.template_id == {{ $tpl->id }}">
-                                <div class="w-full aspect-square bg-slate-900 rounded-lg overflow-hidden mb-2">
-                                    <img src="{{ asset($tpl->image_path) }}" alt="{{ $tpl->name }}" class="w-full h-full object-cover">
-                                </div>
-                                <span class="text-[11px] font-bold text-slate-800 line-clamp-1">{{ $tpl->name }}</span>
-                            </label>
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Select Template</h2>
+                    <div class="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                        @foreach($templates as $tmpl)
+                            <div @click="selectTemplate({{ $tmpl->id }}, '{{ asset($tmpl->image_path) }}', '{{ $tmpl->posterSetting?->layout_mode ?? "default" }}')"
+                                 class="p-2 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between"
+                                 :class="settings.template_id === {{ $tmpl->id }} ? 'border-[#be1e2d] bg-red-50/20' : 'border-slate-200 hover:border-slate-300'">
+                                <img src="{{ asset($tmpl->image_path) }}" alt="{{ $tmpl->name }}" class="w-full aspect-[4/5] object-cover rounded-lg shadow-2xs">
+                                <span class="text-[11px] font-bold text-slate-800 truncate mt-1.5">{{ $tmpl->name }}</span>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -824,71 +778,64 @@
 
         </div>
 
-        <!-- Preview Column (7 cols) -->
-        <div class="lg:col-span-7 space-y-4 sticky top-6">
-            <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                
-                <!-- Preview Header & Tools -->
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div>
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900">Live Poster Preview</h2>
-                        <p class="text-[11px] text-slate-500 font-mono">1080 &times; <span x-text="settings.layout_mode === 'yellow_modern' ? '1215' : '1080'"></span> px High Definition</p>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <label class="flex items-center gap-2 text-xs text-cyan-700 cursor-pointer font-bold">
-                            <input type="checkbox" x-model="guidelines.show" @change="render()" class="rounded text-cyan-600 focus:ring-cyan-500">
-                            <span class="text-[11px]">Illustrator Guides</span>
-                        </label>
-                    </div>
+        <!-- ============================================================== -->
+        <!-- CANVAS STUDIO PREVIEW (RIGHT COLUMN - 7 COLS)                 -->
+        <!-- ============================================================== -->
+        <div class="lg:col-span-7 space-y-3">
+            
+            <!-- Quick Floating Canvas Action Ribbon -->
+            <div class="bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="text-xs font-mono font-bold">Interactive Studio</span>
+                    <span class="text-slate-400">&bull;</span>
+                    <span class="text-xs text-amber-300 font-bold" x-text="selectedLabel"></span>
                 </div>
 
-                <!-- Live Canvas Display Area -->
-                <div class="bg-slate-950 rounded-2xl overflow-hidden p-2 sm:p-4 flex items-center justify-center relative min-h-[420px]">
-                    <!-- The Real HTML5 Canvas (HD, scaled responsively via CSS) -->
-                    <canvas id="posterCanvas" width="1080" :height="settings.layout_mode === 'yellow_modern' ? 1215 : 1080"
-                            class="w-full max-w-[540px] object-contain shadow-2xl rounded-xl border border-slate-800 bg-black"></canvas>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" @click="addCustomText()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1">+ Text</button>
+                    <button type="button" @click="addCustomShape('badge')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1">+ Badge</button>
+                    <button type="button" @click="duplicateSelected()" :disabled="!selectedElement" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold disabled:opacity-40">Duplicate</button>
+                    <button type="button" @click="deleteSelected()" :disabled="!selectedElement" class="px-2 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 text-xs font-bold disabled:opacity-40">&times; Delete</button>
                 </div>
-
-                <!-- Footer Quick Share & Download -->
-                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                    <div class="text-[11px] text-slate-500">
-                        <span class="font-bold text-slate-700">Real-Time Studio:</span> All changes, rotations, and scalings apply instantly.
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button type="button" @click="downloadPoster()"
-                                class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Download PNG</span>
-                        </button>
-
-                        <button type="button" @click="saveAndPublish()" :disabled="publishing"
-                                class="px-4 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs disabled:opacity-50">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Save & Publish</span>
-                        </button>
-                    </div>
-                </div>
-
             </div>
+
+            <!-- Canvas Container with Interactive Mouse / Touch Dragging -->
+            <div class="bg-slate-950 p-3 sm:p-5 rounded-2xl border border-slate-800 shadow-xl flex items-center justify-center relative overflow-hidden select-none">
+                <canvas id="posterCanvas" width="1080" height="1350"
+                        @mousedown="onMouseDown($event)"
+                        @mousemove="onMouseMove($event)"
+                        @mouseup="onMouseUp($event)"
+                        @mouseleave="onMouseUp($event)"
+                        @touchstart="onTouchStart($event)"
+                        @touchmove="onTouchMove($event)"
+                        @touchend="onTouchEnd($event)"
+                        class="w-full max-w-[540px] aspect-[4/5] h-auto object-contain rounded-xl shadow-2xl cursor-crosshair bg-slate-900 border border-slate-800"></canvas>
+            </div>
+
+            <!-- Bottom Control Bar -->
+            <div class="flex items-center justify-between text-xs text-slate-500 px-2 font-mono">
+                <span>Canvas Size: 1080 x 1350 px (High-Res 300 DPI)</span>
+                <span>Click & drag any element on the canvas to move</span>
+            </div>
+
         </div>
 
     </div>
 </div>
 
-@php
-    $templatesMap = [];
-    foreach ($templates as $t) {
-        $templatesMap[$t->id] = $t->posterSetting ? $t->posterSetting->toArray() : \App\Models\PosterSetting::defaultSettings();
-    }
-@endphp
-
 <script>
 function posterStudio() {
     return {
-        activeTab: 'layers',
-        activeLayer: 'winners',
+        activeTab: 'design',
+        selectedId: null,
+        selectedType: null, // 'custom', 'core'
+        isDragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        elementStartX: 0,
+        elementStartY: 0,
+
         savingDefault: false,
         publishing: false,
         statusMsg: '',
@@ -896,9 +843,8 @@ function posterStudio() {
 
         templatesMap: @json($templatesMap),
         templateImageObj: null,
-        overlayImageObj: null,
 
-        // Guidelines (Cyan lines)
+        // Cyan Guidelines
         guidelines: {
             show: true,
             vertical: [205, 540, 740],
@@ -907,30 +853,16 @@ function posterStudio() {
             newY: 200
         },
 
-        // Overlay Extra Element
-        overlay: {
-            enabled: true,
-            type: 'text',
-            preset: 'result_text',
-            text: 'Result',
-            font: 'Rockwell Std',
-            size: 140,
-            color: '#000000',
-            weight: '400',
-            x: 480,
-            y: 830,
-            rotation: 0,
-            opacity: 100,
-            layerOrder: 'below' // 'above' or 'below'
-        },
+        // Dynamic Custom Elements Array
+        customElements: [],
 
-        // Settings initialized from Controller
+        // Core Settings
         settings: {
             template_id: {{ $activeTemplate ? $activeTemplate->id : 1 }},
             template_image: '{{ $activeTemplate ? asset($activeTemplate->image_path) : asset("/images/result-templates/1778705272_srt1-01.png") }}',
             layout_mode: '{{ $currentSettings["layout_mode"] ?? "default" }}',
 
-            // Visibility Toggles
+            // Visibility
             show_result_no: true,
             show_competition: true,
             show_category: true,
@@ -949,9 +881,8 @@ function posterStudio() {
             row_gap: {{ (float) ($currentSettings['row_gap'] ?? 178) }},
 
             // Medal System
-            medal_type: 'numbers', // 'numbers', 'badges', 'medals', 'none'
+            medal_type: 'numbers', // 'numbers', 'badges', 'text', 'none'
             medal_size: 26,
-            item_gap: 0,
 
             result_x: {{ (float) ($currentSettings['result_x'] ?? 740) }},
             result_y: {{ (float) ($currentSettings['result_y'] ?? 779) }},
@@ -1001,112 +932,67 @@ function posterStudio() {
             }
         },
 
-        get activeLayerLabel() {
-            const labels = {
-                'winners': 'Winners & Groups',
-                'result_no': 'Result Number',
-                'competition': 'Program Name',
-                'category': 'Zone Capsule',
-                'overlay': 'Extra Overlay'
-            };
-            return labels[this.activeLayer] || this.activeLayer;
-        },
-
-        addWinner(rank) {
-            if (!this.data.winners[rank]) {
-                this.data.winners[rank] = [];
+        get selectedElement() {
+            if (this.selectedType === 'custom') {
+                return this.customElements.find(el => el.id === this.selectedId) || null;
             }
-            this.data.winners[rank].push({ name: '', unit: '' });
-            this.$nextTick(() => { this.render(); });
+            return null;
         },
 
-        removeWinner(rank, index) {
-            if (this.data.winners[rank] && this.data.winners[rank].length > 1) {
-                this.data.winners[rank].splice(index, 1);
-                this.$nextTick(() => { this.render(); });
+        get selectedLabel() {
+            if (this.selectedType === 'custom') {
+                const el = this.selectedElement;
+                return el ? el.label : 'None';
             }
-        },
-
-        addVGuide() {
-            if (this.guidelines.newX !== null && !isNaN(this.guidelines.newX)) {
-                this.guidelines.vertical.push(parseInt(this.guidelines.newX, 10));
-                this.guidelines.vertical.sort((a, b) => a - b);
-                this.render();
-            }
-        },
-
-        addHGuide() {
-            if (this.guidelines.newY !== null && !isNaN(this.guidelines.newY)) {
-                this.guidelines.horizontal.push(parseInt(this.guidelines.newY, 10));
-                this.guidelines.horizontal.sort((a, b) => a - b);
-                this.render();
-            }
-        },
-
-        resetStandardGuides() {
-            this.guidelines.vertical = [205, 540, 740];
-            this.guidelines.horizontal = [145, 165, 779];
-            this.guidelines.show = true;
-            this.render();
-        },
-
-        nudgeLayer(dx, dy) {
-            if (this.activeLayer === 'winners') {
-                this.settings.block_left += dx;
-                this.settings.first_top += dy;
-            } else if (this.activeLayer === 'result_no') {
-                this.settings.result_x += dx;
-                this.settings.result_y += dy;
-            } else if (this.activeLayer === 'competition') {
-                this.settings.competition_x += dx;
-                this.settings.competition_y += dy;
-            } else if (this.activeLayer === 'category') {
-                this.settings.category_x += dx;
-                this.settings.category_y += dy;
-            } else if (this.activeLayer === 'overlay') {
-                this.overlay.x += dx;
-                this.overlay.y += dy;
-            }
-            this.render();
-        },
-
-        alignLayer(direction) {
-            const canvasW = (this.settings.layout_mode === 'yellow_modern') ? 1080 : 1080;
-            if (direction === 'center') {
-                if (this.activeLayer === 'competition') this.settings.competition_x = Math.round(canvasW / 2);
-                if (this.activeLayer === 'category') this.settings.category_x = Math.round(canvasW / 2);
-                if (this.activeLayer === 'result_no') this.settings.result_x = Math.round(canvasW / 2);
-                if (this.activeLayer === 'overlay') this.overlay.x = Math.round(canvasW / 2);
-            } else if (direction === 'left') {
-                if (this.activeLayer === 'winners') this.settings.block_left = 205;
-                if (this.activeLayer === 'competition') this.settings.competition_x = 205;
-                if (this.activeLayer === 'overlay') this.overlay.x = 205;
-            } else if (direction === 'right') {
-                if (this.activeLayer === 'competition') this.settings.competition_x = 875;
-                if (this.activeLayer === 'overlay') this.overlay.x = 875;
-            }
-            this.render();
-        },
-
-        handleOverlayUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (loadEvent) => {
-                const img = new Image();
-                img.onload = () => {
-                    this.overlayImageObj = img;
-                    this.overlay.type = 'image';
-                    this.overlay.enabled = true;
-                    this.render();
+            if (this.selectedType === 'core') {
+                const coreLabels = {
+                    'result_no': 'Result Number',
+                    'competition': 'Program Name',
+                    'category': 'Zone Capsule',
+                    'winners': 'Podium Winners'
                 };
-                img.src = loadEvent.target.result;
-            };
-            reader.readAsDataURL(file);
+                return coreLabels[this.selectedId] || this.selectedId;
+            }
+            return 'None (Click canvas to select)';
         },
 
         init() {
+            // Restore saved custom elements if any
+            const savedSettings = @json($currentSettings);
+            if (savedSettings && savedSettings.custom_elements && Array.isArray(savedSettings.custom_elements)) {
+                this.customElements = savedSettings.custom_elements.map(el => {
+                    if (el.type === 'image' && el.imgSrc) {
+                        const img = new Image();
+                        img.src = el.imgSrc;
+                        el.imgObj = img;
+                    }
+                    return el;
+                });
+            } else {
+                // Default stylized "Result" text preset like Illustrator template
+                this.customElements.push({
+                    id: 'text_result_default',
+                    type: 'text',
+                    label: 'Result Text Art',
+                    text: 'Result',
+                    font: 'Rockwell Std',
+                    size: 140,
+                    weight: '400',
+                    color: '#000000',
+                    align: 'left',
+                    tracking: 0,
+                    lineHeight: 1.2,
+                    rotation: 0,
+                    opacity: 100,
+                    x: 480,
+                    y: 830,
+                    visible: true,
+                    layerOrder: 'below'
+                });
+            }
+
             this.loadTemplateImage(this.settings.template_image);
+
             if (document.fonts) {
                 Promise.all([
                     document.fonts.load('480px "Mongolian Baiti"'),
@@ -1134,349 +1020,657 @@ function posterStudio() {
         selectTemplate(id, src, layoutMode) {
             this.settings.template_id = id;
             this.settings.template_image = src;
-            this.settings.layout_mode = layoutMode || (src.includes('yellow') ? 'yellow_modern' : 'default');
-
-            if (this.settings.layout_mode === 'yellow_modern') {
-                this.settings.result_x = 740;
-                this.settings.result_y = 779;
-                this.settings.result_size = 480;
-                this.settings.result_weight = '400';
-                this.settings.result_color = '#D02627';
-
-                this.settings.category_x = 686;
-                this.settings.category_y = 165;
-                this.settings.category_size = 45;
-                this.settings.category_weight = '400';
-                this.settings.category_color = '#FFFFFF';
-                this.settings.category_align = 'center';
-
-                this.settings.competition_x = 584;
-                this.settings.competition_y = 220;
-                this.settings.competition_size = 100;
-                this.settings.competition_weight = '400';
-                this.settings.competition_color = '#000000';
-                this.settings.competition_align = 'left';
-                this.settings.competition_font = 'Rockwell Std';
-                this.settings.competition_max_width = 440;
-                this.settings.competition_line_height = 94;
-
-                this.settings.block_left = 205;
-                this.settings.first_top = 145;
-                this.settings.row_gap = 178;
-                this.settings.item_gap = 0;
-                this.settings.medal_size = 26;
-
-                this.settings.winner_name_size = 34;
-                this.settings.winner_name_weight = '400';
-                this.settings.winner_name_color = '#D02627';
-                this.settings.winner_unit_size = 26;
-                this.settings.winner_unit_weight = '300';
-                this.settings.winner_unit_color = '#000000';
-                this.settings.winner_font = 'Rockwell Std';
-            } else if (this.templatesMap && this.templatesMap[id]) {
-                const tplSettings = this.templatesMap[id];
-                const numericKeys = [
-                    'result_x', 'result_y', 'result_size',
-                    'category_x', 'category_y', 'category_size',
-                    'competition_x', 'competition_y', 'competition_size', 'competition_max_width', 'competition_line_height',
-                    'block_left', 'first_top', 'row_gap', 'item_gap', 'medal_size',
-                    'winner_name_size', 'winner_unit_size'
-                ];
-                numericKeys.forEach(k => {
-                    if (tplSettings[k] !== undefined && tplSettings[k] !== null) {
-                        this.settings[k] = parseFloat(tplSettings[k]);
-                    }
-                });
-            }
-
+            this.settings.layout_mode = layoutMode || 'default';
             this.loadTemplateImage(src);
         },
 
+        addCustomText() {
+            const newId = 'text_' + Date.now();
+            const count = this.customElements.filter(e => e.type === 'text').length + 1;
+            const newEl = {
+                id: newId,
+                type: 'text',
+                label: 'Custom Text ' + count,
+                text: 'NEW TEXT',
+                font: 'Rockwell Std',
+                size: 52,
+                weight: '700',
+                color: '#D02627',
+                align: 'left',
+                tracking: 0,
+                lineHeight: 1.2,
+                rotation: 0,
+                opacity: 100,
+                x: 205,
+                y: 650 + (count * 40),
+                visible: true,
+                layerOrder: 'above'
+            };
+            this.customElements.push(newEl);
+            this.selectElement(newId);
+            this.activeTab = 'design';
+            this.render();
+        },
+
+        addCustomShape(shapeType) {
+            const newId = 'shape_' + Date.now();
+            const count = this.customElements.filter(e => e.type === 'shape').length + 1;
+            const newEl = {
+                id: newId,
+                type: 'shape',
+                shapeType: shapeType || 'badge',
+                label: (shapeType === 'badge' ? 'Badge ' : 'Shape ') + count,
+                width: 160,
+                height: 50,
+                fillColor: '#D02627',
+                strokeColor: '#000000',
+                lineWidth: 0,
+                rotation: 0,
+                opacity: 100,
+                x: 205,
+                y: 750,
+                visible: true,
+                layerOrder: 'above'
+            };
+            this.customElements.push(newEl);
+            this.selectElement(newId);
+            this.activeTab = 'design';
+            this.render();
+        },
+
+        uploadCustomImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (loadEvent) => {
+                const img = new Image();
+                img.onload = () => {
+                    const newId = 'img_' + Date.now();
+                    const count = this.customElements.filter(e => e.type === 'image').length + 1;
+                    const newEl = {
+                        id: newId,
+                        type: 'image',
+                        label: 'Graphic ' + count,
+                        imgSrc: loadEvent.target.result,
+                        imgObj: img,
+                        width: Math.min(250, img.width || 200),
+                        height: Math.min(250, img.height || 200),
+                        rotation: 0,
+                        opacity: 100,
+                        x: 480,
+                        y: 700,
+                        visible: true,
+                        layerOrder: 'above'
+                    };
+                    this.customElements.push(newEl);
+                    this.selectElement(newId);
+                    this.activeTab = 'design';
+                    this.render();
+                };
+                img.src = loadEvent.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        selectElement(id) {
+            this.selectedId = id;
+            this.selectedType = 'custom';
+            this.render();
+        },
+
+        selectCoreLayer(layerName) {
+            this.selectedId = layerName;
+            this.selectedType = 'core';
+            if (layerName === 'winners') this.activeTab = 'winners';
+            else this.activeTab = 'core';
+            this.render();
+        },
+
+        duplicateSelected() {
+            if (this.selectedType === 'custom' && this.selectedElement) {
+                const clone = JSON.parse(JSON.stringify(this.selectedElement));
+                clone.id = clone.type + '_' + Date.now();
+                clone.label = clone.label + ' (Copy)';
+                clone.x += 25;
+                clone.y += 25;
+                if (clone.type === 'image' && this.selectedElement.imgObj) {
+                    clone.imgObj = this.selectedElement.imgObj;
+                }
+                this.customElements.push(clone);
+                this.selectElement(clone.id);
+                this.render();
+            }
+        },
+
+        deleteSelected() {
+            if (this.selectedType === 'custom' && this.selectedId) {
+                this.deleteElement(this.selectedId);
+            }
+        },
+
+        deleteElement(id) {
+            this.customElements = this.customElements.filter(el => el.id !== id);
+            this.selectedId = null;
+            this.selectedType = null;
+            this.render();
+        },
+
+        nudgeSelected(dx, dy) {
+            if (this.selectedType === 'custom' && this.selectedElement) {
+                this.selectedElement.x += dx;
+                this.selectedElement.y += dy;
+                this.render();
+            } else if (this.selectedType === 'core') {
+                if (this.selectedId === 'result_no') {
+                    this.settings.result_x += dx;
+                    this.settings.result_y += dy;
+                } else if (this.selectedId === 'competition') {
+                    this.settings.competition_x += dx;
+                    this.settings.competition_y += dy;
+                } else if (this.selectedId === 'category') {
+                    this.settings.category_x += dx;
+                    this.settings.category_y += dy;
+                } else if (this.selectedId === 'winners') {
+                    this.settings.block_left += dx;
+                    this.settings.first_top += dy;
+                }
+                this.render();
+            }
+        },
+
+        // Canvas Coordinates Conversion
+        getCanvasCoords(e) {
+            const canvas = document.getElementById('posterCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        },
+
+        // Hit Detection for Interactive Canvas Dragging
+        hitTest(x, y) {
+            // Check custom elements in reverse order (topmost first)
+            for (let i = this.customElements.length - 1; i >= 0; i--) {
+                const el = this.customElements[i];
+                if (!el.visible) continue;
+                const w = el.width || (el.size ? (el.text ? el.text.length * el.size * 0.55 : el.size) : 100);
+                const h = el.height || (el.size || 50);
+                if (x >= el.x - 25 && x <= el.x + w + 25 && y >= el.y - 25 && y <= el.y + h + 25) {
+                    return { type: 'custom', id: el.id, el: el };
+                }
+            }
+
+            // Check Result Number
+            if (this.settings.show_result_no) {
+                const rx = this.settings.result_x;
+                const ry = this.settings.result_y;
+                if (x >= rx - 100 && x <= rx + 300 && y >= ry - 50 && y <= ry + 250) {
+                    return { type: 'core', id: 'result_no' };
+                }
+            }
+
+            // Check Program Name
+            if (this.settings.show_competition) {
+                const cx = this.settings.competition_x;
+                const cy = this.settings.competition_y;
+                if (x >= cx - 20 && x <= cx + (this.settings.competition_max_width || 440) && y >= cy - 20 && y <= cy + 200) {
+                    return { type: 'core', id: 'competition' };
+                }
+            }
+
+            // Check Zone Capsule
+            if (this.settings.show_category) {
+                const zx = this.settings.category_x;
+                const zy = this.settings.category_y;
+                if (x >= zx - 120 && x <= zx + 120 && y >= zy - 35 && y <= zy + 35) {
+                    return { type: 'core', id: 'category' };
+                }
+            }
+
+            // Check Winners
+            if (this.settings.show_winners) {
+                const wx = this.settings.block_left;
+                const wy = this.settings.first_top;
+                if (x >= wx - 20 && x <= wx + 380 && y >= wy - 20 && y <= wy + 550) {
+                    return { type: 'core', id: 'winners' };
+                }
+            }
+
+            return null;
+        },
+
+        onMouseDown(e) {
+            const coords = this.getCanvasCoords(e);
+            const hit = this.hitTest(coords.x, coords.y);
+            if (hit) {
+                this.isDragging = true;
+                this.dragStartX = coords.x;
+                this.dragStartY = coords.y;
+
+                if (hit.type === 'custom') {
+                    this.selectElement(hit.id);
+                    this.activeTab = 'design';
+                    this.elementStartX = hit.el.x;
+                    this.elementStartY = hit.el.y;
+                } else {
+                    this.selectCoreLayer(hit.id);
+                    if (hit.id === 'result_no') {
+                        this.elementStartX = this.settings.result_x;
+                        this.elementStartY = this.settings.result_y;
+                    } else if (hit.id === 'competition') {
+                        this.elementStartX = this.settings.competition_x;
+                        this.elementStartY = this.settings.competition_y;
+                    } else if (hit.id === 'category') {
+                        this.elementStartX = this.settings.category_x;
+                        this.elementStartY = this.settings.category_y;
+                    } else if (hit.id === 'winners') {
+                        this.elementStartX = this.settings.block_left;
+                        this.elementStartY = this.settings.first_top;
+                    }
+                }
+            } else {
+                this.selectedId = null;
+                this.selectedType = null;
+                this.render();
+            }
+        },
+
+        onMouseMove(e) {
+            if (!this.isDragging) return;
+            const coords = this.getCanvasCoords(e);
+            const dx = coords.x - this.dragStartX;
+            const dy = coords.y - this.dragStartY;
+
+            if (this.selectedType === 'custom' && this.selectedElement) {
+                this.selectedElement.x = Math.round(this.elementStartX + dx);
+                this.selectedElement.y = Math.round(this.elementStartY + dy);
+                this.render();
+            } else if (this.selectedType === 'core') {
+                if (this.selectedId === 'result_no') {
+                    this.settings.result_x = Math.round(this.elementStartX + dx);
+                    this.settings.result_y = Math.round(this.elementStartY + dy);
+                } else if (this.selectedId === 'competition') {
+                    this.settings.competition_x = Math.round(this.elementStartX + dx);
+                    this.settings.competition_y = Math.round(this.elementStartY + dy);
+                } else if (this.selectedId === 'category') {
+                    this.settings.category_x = Math.round(this.elementStartX + dx);
+                    this.settings.category_y = Math.round(this.elementStartY + dy);
+                } else if (this.selectedId === 'winners') {
+                    this.settings.block_left = Math.round(this.elementStartX + dx);
+                    this.settings.first_top = Math.round(this.elementStartY + dy);
+                }
+                this.render();
+            }
+        },
+
+        onMouseUp() {
+            this.isDragging = false;
+        },
+
+        onTouchStart(e) {
+            this.onMouseDown(e);
+        },
+
+        onTouchMove(e) {
+            this.onMouseMove(e);
+        },
+
+        onTouchEnd() {
+            this.onMouseUp();
+        },
+
+        addGuide(type) {
+            if (type === 'v') {
+                this.guidelines.vertical.push(this.guidelines.newX);
+                this.guidelines.vertical.sort((a, b) => a - b);
+            } else {
+                this.guidelines.horizontal.push(this.guidelines.newY);
+                this.guidelines.horizontal.sort((a, b) => a - b);
+            }
+            this.render();
+        },
+
+        removeGuide(type, index) {
+            if (type === 'v') this.guidelines.vertical.splice(index, 1);
+            else this.guidelines.horizontal.splice(index, 1);
+            this.render();
+        },
+
+        // Render Canvas Pipeline
         render(isExport = false) {
             const canvas = document.getElementById('posterCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
 
-            const isYellow = this.settings.layout_mode === 'yellow_modern' || (this.settings.template_image && this.settings.template_image.includes('yellow'));
-
-            if (isYellow) {
-                canvas.width = 1080;
-                canvas.height = 1215;
-            } else {
-                canvas.width = 1080;
-                canvas.height = 1080;
-            }
-
-            // Clear
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, width, height);
 
             // 1. Draw Template Background
-            if (this.templateImageObj && this.templateImageObj.complete && this.templateImageObj.naturalWidth > 0) {
-                ctx.drawImage(this.templateImageObj, 0, 0, canvas.width, canvas.height);
+            if (this.templateImageObj && this.templateImageObj.complete) {
+                ctx.drawImage(this.templateImageObj, 0, 0, width, height);
             } else {
-                ctx.fillStyle = isYellow ? '#F2BC2E' : '#0f172a';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(0, 0, width, height);
             }
 
-            // 2. Draw Overlay Element if layer order is 'below' (Behind Text)
-            if (this.overlay.enabled && this.overlay.layerOrder === 'below') {
-                this.drawOverlayElement(ctx);
+            // 2. Draw Custom Elements with layerOrder === 'below'
+            this.drawCustomElements(ctx, 'below');
+
+            // 3. Draw Zone Capsule
+            if (this.settings.show_category && this.data.category) {
+                ctx.save();
+                ctx.translate(this.settings.category_x, this.settings.category_y);
+                if (this.settings.category_rotation) {
+                    ctx.rotate((this.settings.category_rotation * Math.PI) / 180);
+                }
+                ctx.fillStyle = this.settings.category_color || '#FFFFFF';
+                ctx.font = `${this.settings.category_weight || '400'} ${this.settings.category_size || 45}px "Rockwell Std", serif`;
+                ctx.textAlign = this.settings.category_align || 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.data.category.toUpperCase(), 0, 0);
+                ctx.restore();
             }
 
-            if (isYellow) {
-                // ============================================
-                // DEDICATED YELLOW MODERN POSTER RENDER ENGINE
-                // ============================================
-
-                // Zone inside Red Capsule (Top Right)
-                if (this.settings.show_category) {
-                    ctx.save();
-                    ctx.translate(this.settings.category_x || 686, this.settings.category_y || 165);
-                    if (this.settings.category_rotation) {
-                        ctx.rotate((this.settings.category_rotation * Math.PI) / 180);
-                    }
-                    ctx.fillStyle = this.settings.category_color || '#FFFFFF';
-                    ctx.font = `${this.settings.category_weight || '400'} ${this.settings.category_size || 45}px "Rockwell Std", serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.8px';
-                    ctx.fillText(this.data.category || '', 0, 0);
-                    ctx.restore();
+            // 4. Draw Program Name
+            if (this.settings.show_competition && this.data.competition) {
+                ctx.save();
+                ctx.translate(this.settings.competition_x, this.settings.competition_y);
+                if (this.settings.competition_rotation) {
+                    ctx.rotate((this.settings.competition_rotation * Math.PI) / 180);
                 }
+                const compFont = this.settings.competition_font || 'Rockwell Std';
+                ctx.fillStyle = this.settings.competition_color || '#000000';
+                ctx.font = `${this.settings.competition_weight || '400'} ${this.settings.competition_size || 100}px "${compFont}", serif`;
+                ctx.textAlign = this.settings.competition_align || 'left';
+                ctx.textBaseline = 'top';
 
-                // Program Name (Below Capsule, Left Aligned)
-                if (this.settings.show_competition) {
-                    ctx.save();
-                    ctx.translate(this.settings.competition_x || 584, this.settings.competition_y || 220);
-                    if (this.settings.competition_rotation) {
-                        ctx.rotate((this.settings.competition_rotation * Math.PI) / 180);
-                    }
-                    ctx.fillStyle = this.settings.competition_color || '#000000';
-                    const compFont = this.settings.competition_font || 'Rockwell Std';
-                    const compSize = this.settings.competition_size || 100;
-                    ctx.font = `${this.settings.competition_weight || '400'} ${compSize}px "${compFont}", serif`;
-                    ctx.textAlign = this.settings.competition_align || 'left';
-                    ctx.textBaseline = 'top';
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-4.0px';
-
-                    const compLines = this.wrapText(ctx, this.data.competition || '', this.settings.competition_max_width || 440);
-                    let compY = 0;
-                    const compLineH = this.settings.competition_line_height || 94;
-                    for (let line of compLines) {
-                        ctx.fillText(line, 0, compY);
-                        compY += compLineH;
-                    }
-                    ctx.restore();
+                const lines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width || 440);
+                let lineY = 0;
+                for (let l of lines) {
+                    ctx.fillText(l, 0, lineY);
+                    lineY += (this.settings.competition_line_height || 94);
                 }
-
-                // Result Sequence Number (Mongolian Baiti 145pt -> 480px, Color #D02627, Tracking -40)
-                if (this.settings.show_result_no && this.data.result_no) {
-                    ctx.save();
-                    ctx.translate(this.settings.result_x || 740, this.settings.result_y || 779);
-                    if (this.settings.result_rotation) {
-                        ctx.rotate((this.settings.result_rotation * Math.PI) / 180);
-                    }
-                    ctx.fillStyle = this.settings.result_color || '#D02627';
-                    const numFont = 'Mongolian Baiti';
-                    ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "${numFont}", serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'alphabetic';
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-20.8px';
-                    ctx.fillText(this.data.result_no, 0, 0);
-                    ctx.restore();
-                }
-
-                // Winners with 01, 02, 03 rank medals, multi-line support, and unified scale
-                if (this.settings.show_winners) {
-                    const flatWinners = [];
-                    ['first', 'second', 'third'].forEach(rankKey => {
-                        const rankNum = rankKey === 'first' ? '01' : (rankKey === 'second' ? '02' : '03');
-                        const rankLabel = rankKey === 'first' ? '1st' : (rankKey === 'second' ? '2nd' : '3rd');
-                        const items = this.data.winners[rankKey] || [];
-                        items.forEach(item => {
-                            if (item && item.name && item.name.trim() !== '') {
-                                flatWinners.push({
-                                    rank: rankNum,
-                                    rankLabel: rankLabel,
-                                    rankKey: rankKey,
-                                    name: item.name.trim(),
-                                    unit: (item.unit || '').trim()
-                                });
-                            }
-                        });
-                    });
-
-                    const count = flatWinners.length;
-                    if (count > 0) {
-                        const masterScale = (this.settings.winners_scale || 1.0);
-                        const autoScale = count <= 3 ? 1.0 : Math.min(1.0, Math.max(0.48, 3.15 / count));
-                        const finalScale = masterScale * autoScale;
-
-                        const availHeight = 520;
-                        const rowGap = Math.round((count <= 3 ? (this.settings.row_gap || 178) : Math.floor(availHeight / count)) * masterScale);
-                        const startY = count <= 3 ? (this.settings.first_top || 145) : Math.max(90, Math.floor(130 - (count - 3) * 10));
-
-                        const rankSize = Math.max(14, Math.round((this.settings.medal_size || 26) * finalScale));
-                        const winFont = this.settings.winner_font || 'Rockwell Std';
-                        const winSize = Math.max(16, Math.round((this.settings.winner_name_size || 34) * finalScale));
-                        const unitSize = Math.max(12, Math.round((this.settings.winner_unit_size || 26) * finalScale));
-                        const nameLineH = Math.max(16, Math.round((this.settings.winner_name_line_height || 38) * finalScale));
-                        const unitGap = Math.max(4, Math.round((this.settings.winner_unit_gap || 10) * finalScale));
-                        const blockLeft = this.settings.block_left || 205;
-                        const dividerWidth = Math.round(280 * Math.min(1.0, finalScale * 1.1));
-
-                        let currY = startY;
-                        flatWinners.forEach(w => {
-                            ctx.save();
-                            ctx.textAlign = 'left';
-                            ctx.textBaseline = 'top';
-
-                            // 1. Draw Medal / Rank
-                            const medalType = this.settings.medal_type || 'numbers';
-                            if (medalType === 'numbers') {
-                                ctx.fillStyle = this.settings.winner_name_color || '#D02627';
-                                ctx.font = `400 ${rankSize}px "Rockwell Std", serif`;
-                                if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.8px';
-                                ctx.fillText(w.rank, blockLeft, currY);
-                            } else if (medalType === 'badges') {
-                                const badgeW = Math.round(rankSize * 1.8);
-                                const badgeH = Math.round(rankSize * 1.1);
-                                ctx.fillStyle = '#D02627';
-                                this.drawRoundedRect(ctx, blockLeft, currY, badgeW, badgeH, 6);
-                                ctx.fill();
-                                ctx.fillStyle = '#FFFFFF';
-                                ctx.font = `700 ${Math.round(rankSize * 0.75)}px monospace`;
-                                ctx.textAlign = 'center';
-                                ctx.fillText(w.rank, blockLeft + (badgeW / 2), currY + 2);
-                                ctx.textAlign = 'left';
-                            } else if (medalType === 'text') {
-                                ctx.fillStyle = this.settings.winner_name_color || '#D02627';
-                                ctx.font = `700 ${Math.round(rankSize * 0.9)}px "Rockwell Std", serif`;
-                                ctx.fillText(w.rankLabel, blockLeft, currY);
-                            }
-
-                            // 2. Draw Student Name (Supports 2-Line Option)
-                            let nameY = currY + Math.round(rankSize * 1.3);
-                            ctx.fillStyle = this.settings.winner_name_color || '#D02627';
-                            ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
-                            if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.2px';
-
-                            let nameLines = [];
-                            if (w.name.includes('\n')) {
-                                nameLines = w.name.split('\n');
-                            } else if (w.name.includes('/')) {
-                                nameLines = w.name.split('/');
-                            } else if (this.settings.winner_name_2lines && w.name.length > 16 && w.name.includes(' ')) {
-                                const parts = w.name.split(' ');
-                                const splitIdx = Math.ceil(parts.length / 2);
-                                nameLines = [parts.slice(0, splitIdx).join(' '), parts.slice(splitIdx).join(' ')];
-                            } else {
-                                nameLines = [w.name];
-                            }
-
-                            nameLines.forEach((nLine, lIdx) => {
-                                ctx.fillText(nLine.trim(), blockLeft, nameY);
-                                if (lIdx < nameLines.length - 1) {
-                                    nameY += nameLineH;
-                                }
-                            });
-
-                            // 3. Draw Group Name
-                            let unitY = nameY + winSize + unitGap;
-                            ctx.fillStyle = this.settings.winner_unit_color || '#000000';
-                            ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
-                            if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
-                            ctx.fillText(w.unit, blockLeft, unitY);
-
-                            // 4. Subtle Divider Line
-                            let lineY = unitY + unitSize + 8;
-                            ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
-                            ctx.lineWidth = 1;
-                            ctx.beginPath();
-                            ctx.moveTo(blockLeft, lineY);
-                            ctx.lineTo(blockLeft + dividerWidth, lineY);
-                            ctx.stroke();
-
-                            ctx.restore();
-                            currY += rowGap;
-                        });
-                    }
-                }
-
-            } else {
-                // Classic Default Engine
-                if (this.settings.show_result_no && this.data.result_no) {
-                    ctx.save();
-                    ctx.fillStyle = this.settings.result_color;
-                    ctx.font = `${this.settings.result_weight} ${this.settings.result_size}px "JetBrains Mono", Sora, sans-serif`;
-                    ctx.textBaseline = 'top';
-                    ctx.fillText(this.data.result_no, this.settings.result_x, this.settings.result_y);
-                    ctx.restore();
-                }
-
-                if (this.settings.show_category && this.data.category) {
-                    ctx.save();
-                    ctx.fillStyle = this.settings.category_color;
-                    ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Anek Malayalam", Sora, sans-serif`;
-                    ctx.textAlign = this.settings.category_align;
-                    ctx.textBaseline = 'top';
-                    ctx.fillText(this.data.category, this.settings.category_x, this.settings.category_y);
-                    ctx.restore();
-                }
-
-                if (this.settings.show_competition && this.data.competition) {
-                    ctx.save();
-                    ctx.fillStyle = this.settings.competition_color;
-                    ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "${this.settings.competition_font || 'Sora'}", sans-serif`;
-                    ctx.textAlign = this.settings.competition_align;
-                    ctx.textBaseline = 'top';
-
-                    const lines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width);
-                    let lineY = this.settings.competition_y;
-                    for (let l of lines) {
-                        ctx.fillText(l, this.settings.competition_x, lineY);
-                        lineY += this.settings.competition_line_height;
-                    }
-                    ctx.restore();
-                }
+                ctx.restore();
             }
 
-            // 3. Draw Overlay Element if layer order is 'above' (Top Layer - Above All Content)
-            if (this.overlay.enabled && this.overlay.layerOrder === 'above') {
-                this.drawOverlayElement(ctx);
+            // 5. Draw Result Number (Mongolian Baiti)
+            if (this.settings.show_result_no && this.data.result_no) {
+                ctx.save();
+                ctx.translate(this.settings.result_x, this.settings.result_y);
+                if (this.settings.result_rotation) {
+                    ctx.rotate((this.settings.result_rotation * Math.PI) / 180);
+                }
+                ctx.fillStyle = this.settings.result_color || '#D02627';
+                ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "Mongolian Baiti", serif`;
+                ctx.textBaseline = 'top';
+                ctx.textAlign = 'left';
+                if ('letterSpacing' in ctx) ctx.letterSpacing = '-12px';
+                ctx.fillText(this.data.result_no, 0, 0);
+                ctx.restore();
             }
 
-            // 4. Draw Illustrator Cyan Guidelines (Preview only, NOT in export)
-            if (this.guidelines.show && !isExport) {
-                this.drawGuidelines(ctx, canvas.width, canvas.height);
+            // 6. Draw Podium Winners
+            if (this.settings.show_winners) {
+                this.drawPodiumWinners(ctx);
+            }
+
+            // 7. Draw Custom Elements with layerOrder === 'above'
+            this.drawCustomElements(ctx, 'above');
+
+            // 8. If Preview (!isExport), draw Selection Box & Guidelines
+            if (!isExport) {
+                this.drawSelectionOutline(ctx);
+                if (this.guidelines.show) {
+                    this.drawGuidelines(ctx, width, height);
+                }
             }
         },
 
-        drawOverlayElement(ctx) {
-            ctx.save();
-            ctx.translate(this.overlay.x || 480, this.overlay.y || 830);
-            if (this.overlay.rotation) {
-                ctx.rotate((this.overlay.rotation * Math.PI) / 180);
-            }
-            ctx.globalAlpha = Math.max(0, Math.min(1, (this.overlay.opacity || 100) / 100));
+        drawCustomElements(ctx, orderFilter) {
+            this.customElements.forEach(el => {
+                if (!el.visible) return;
+                if ((el.layerOrder || 'above') !== orderFilter) return;
 
-            if (this.overlay.type === 'image' && this.overlayImageObj && this.overlayImageObj.complete) {
-                const w = this.overlayImageObj.naturalWidth * (this.overlay.scale || 1.0);
-                const h = this.overlayImageObj.naturalHeight * (this.overlay.scale || 1.0);
-                ctx.drawImage(this.overlayImageObj, -w / 2, -h / 2, w, h);
-            } else if (this.overlay.type === 'text') {
-                ctx.fillStyle = this.overlay.color || '#000000';
-                ctx.font = `${this.overlay.weight || '400'} ${this.overlay.size || 140}px "${this.overlay.font || 'Rockwell Std'}", serif`;
+                ctx.save();
+                ctx.translate(el.x, el.y);
+                if (el.rotation) {
+                    ctx.rotate((el.rotation * Math.PI) / 180);
+                }
+                ctx.globalAlpha = (el.opacity ?? 100) / 100;
+
+                if (el.type === 'text') {
+                    ctx.fillStyle = el.color || '#000000';
+                    ctx.font = `${el.weight || '400'} ${el.size || 48}px "${el.font || 'Rockwell Std'}", sans-serif`;
+                    ctx.textAlign = el.align || 'left';
+                    ctx.textBaseline = 'top';
+                    if ('letterSpacing' in ctx && el.tracking) {
+                        ctx.letterSpacing = el.tracking + 'px';
+                    }
+                    const lines = (el.text || '').split('\n');
+                    const lineH = Math.round((el.size || 48) * (el.lineHeight || 1.2));
+                    lines.forEach((l, idx) => {
+                        ctx.fillText(l, 0, idx * lineH);
+                    });
+
+                } else if (el.type === 'shape') {
+                    if (el.shapeType === 'badge' || el.shapeType === 'stamp') {
+                        // Styled Festival Badge
+                        ctx.fillStyle = el.fillColor || '#D02627';
+                        this.drawRoundedRect(ctx, 0, 0, el.width, el.height, 8);
+                        ctx.fill();
+                        if (el.strokeColor && el.lineWidth > 0) {
+                            ctx.strokeStyle = el.strokeColor;
+                            ctx.lineWidth = el.lineWidth;
+                            ctx.stroke();
+                        }
+                    } else if (el.shapeType === 'pill') {
+                        ctx.fillStyle = el.fillColor || '#be1e2d';
+                        this.drawRoundedRect(ctx, 0, 0, el.width, el.height, el.height / 2);
+                        ctx.fill();
+                    } else if (el.shapeType === 'line') {
+                        ctx.strokeStyle = el.fillColor || '#000000';
+                        ctx.lineWidth = el.height || 2;
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(el.width, 0);
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = el.fillColor || '#D02627';
+                        ctx.fillRect(0, 0, el.width, el.height);
+                    }
+
+                } else if (el.type === 'image') {
+                    if (el.imgObj && el.imgObj.complete) {
+                        ctx.drawImage(el.imgObj, 0, 0, el.width, el.height);
+                    }
+                }
+
+                ctx.restore();
+            });
+        },
+
+        drawPodiumWinners(ctx) {
+            const flatWinners = [];
+            const addPlace = (arr, rank, label) => {
+                if (Array.isArray(arr)) {
+                    arr.forEach(w => {
+                        if (w && (w.name || w.unit)) {
+                            flatWinners.push({ rank, rankLabel: label, name: w.name || '', unit: w.unit || '' });
+                        }
+                    });
+                }
+            };
+            addPlace(this.data.winners.first, '01', '1st Place');
+            addPlace(this.data.winners.second, '02', '2nd Place');
+            addPlace(this.data.winners.third, '03', '3rd Place');
+
+            const count = flatWinners.length;
+            if (count === 0) return;
+
+            const masterScale = (this.settings.winners_scale || 1.0);
+            const autoScale = count <= 3 ? 1.0 : Math.min(1.0, Math.max(0.48, 3.15 / count));
+            const finalScale = masterScale * autoScale;
+
+            const availHeight = 520;
+            const rowGap = Math.round((count <= 3 ? (this.settings.row_gap || 178) : Math.floor(availHeight / count)) * masterScale);
+            const startY = count <= 3 ? (this.settings.first_top || 145) : Math.max(90, Math.floor(130 - (count - 3) * 10));
+
+            const rankSize = Math.max(14, Math.round((this.settings.medal_size || 26) * finalScale));
+            const winFont = this.settings.winner_font || 'Rockwell Std';
+            const winSize = Math.max(16, Math.round((this.settings.winner_name_size || 34) * finalScale));
+            const unitSize = Math.max(12, Math.round((this.settings.winner_unit_size || 26) * finalScale));
+            const nameLineH = Math.max(16, Math.round((this.settings.winner_name_line_height || 38) * finalScale));
+            const unitGap = Math.max(4, Math.round((this.settings.winner_unit_gap || 10) * finalScale));
+            const blockLeft = this.settings.block_left || 205;
+            const dividerWidth = Math.round(280 * Math.min(1.0, finalScale * 1.1));
+
+            let currY = startY;
+            flatWinners.forEach(w => {
+                ctx.save();
                 ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(this.overlay.text || 'Result', 0, 0);
+                ctx.textBaseline = 'top';
+
+                // Medal / Rank
+                const medalType = this.settings.medal_type || 'numbers';
+                if (medalType === 'numbers') {
+                    ctx.fillStyle = this.settings.winner_name_color || '#D02627';
+                    ctx.font = `400 ${rankSize}px "Rockwell Std", serif`;
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.8px';
+                    ctx.fillText(w.rank, blockLeft, currY);
+                } else if (medalType === 'badges') {
+                    const badgeW = Math.round(rankSize * 1.8);
+                    const badgeH = Math.round(rankSize * 1.1);
+                    ctx.fillStyle = '#D02627';
+                    this.drawRoundedRect(ctx, blockLeft, currY, badgeW, badgeH, 6);
+                    ctx.fill();
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = `700 ${Math.round(rankSize * 0.75)}px monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(w.rank, blockLeft + (badgeW / 2), currY + 2);
+                    ctx.textAlign = 'left';
+                } else if (medalType === 'text') {
+                    ctx.fillStyle = this.settings.winner_name_color || '#D02627';
+                    ctx.font = `700 ${Math.round(rankSize * 0.9)}px "Rockwell Std", serif`;
+                    ctx.fillText(w.rankLabel, blockLeft, currY);
+                }
+
+                // Student Name (2-line support)
+                let nameY = currY + Math.round(rankSize * 1.3);
+                ctx.fillStyle = this.settings.winner_name_color || '#D02627';
+                ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
+                if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.2px';
+
+                let nameLines = [];
+                if (w.name.includes('\n')) {
+                    nameLines = w.name.split('\n');
+                } else if (w.name.includes('/')) {
+                    nameLines = w.name.split('/');
+                } else if (this.settings.winner_name_2lines && w.name.length > 16 && w.name.includes(' ')) {
+                    const parts = w.name.split(' ');
+                    const splitIdx = Math.ceil(parts.length / 2);
+                    nameLines = [parts.slice(0, splitIdx).join(' '), parts.slice(splitIdx).join(' ')];
+                } else {
+                    nameLines = [w.name];
+                }
+
+                nameLines.forEach((nLine, lIdx) => {
+                    ctx.fillText(nLine.trim(), blockLeft, nameY);
+                    if (lIdx < nameLines.length - 1) {
+                        nameY += nameLineH;
+                    }
+                });
+
+                // Group Name
+                let unitY = nameY + winSize + unitGap;
+                ctx.fillStyle = this.settings.winner_unit_color || '#000000';
+                ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
+                if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
+                ctx.fillText(w.unit, blockLeft, unitY);
+
+                // Divider Line
+                let lineY = unitY + unitSize + 8;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(blockLeft, lineY);
+                ctx.lineTo(blockLeft + dividerWidth, lineY);
+                ctx.stroke();
+
+                ctx.restore();
+                currY += rowGap;
+            });
+        },
+
+        drawSelectionOutline(ctx) {
+            if (!this.selectedId) return;
+
+            let bx = 0, by = 0, bw = 0, bh = 0;
+
+            if (this.selectedType === 'custom' && this.selectedElement) {
+                const el = this.selectedElement;
+                bx = el.x;
+                by = el.y;
+                bw = el.width || (el.size ? (el.text ? el.text.length * el.size * 0.55 : el.size) : 100);
+                bh = el.height || (el.size || 50);
+            } else if (this.selectedType === 'core') {
+                if (this.selectedId === 'result_no') {
+                    bx = this.settings.result_x;
+                    by = this.settings.result_y;
+                    bw = 250;
+                    bh = 220;
+                } else if (this.selectedId === 'competition') {
+                    bx = this.settings.competition_x;
+                    by = this.settings.competition_y;
+                    bw = this.settings.competition_max_width || 440;
+                    bh = 160;
+                } else if (this.selectedId === 'category') {
+                    bx = this.settings.category_x - 100;
+                    by = this.settings.category_y - 30;
+                    bw = 200;
+                    bh = 60;
+                } else if (this.selectedId === 'winners') {
+                    bx = this.settings.block_left;
+                    by = this.settings.first_top;
+                    bw = 360;
+                    bh = 480;
+                }
             }
-            ctx.restore();
+
+            if (bw > 0 && bh > 0) {
+                ctx.save();
+                ctx.strokeStyle = '#00f0ff';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(bx - 6, by - 6, bw + 12, bh + 12);
+
+                // Small Corner Handles
+                ctx.fillStyle = '#00f0ff';
+                ctx.fillRect(bx - 10, by - 10, 8, 8);
+                ctx.fillRect(bx + bw + 2, by - 10, 8, 8);
+                ctx.fillRect(bx - 10, by + bh + 2, 8, 8);
+                ctx.fillRect(bx + bw + 2, by + bh + 2, 8, 8);
+
+                // Small badge
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+                ctx.fillRect(bx - 6, by - 26, 120, 18);
+                ctx.fillStyle = '#00f0ff';
+                ctx.font = 'bold 10px monospace';
+                ctx.fillText(`X:${bx} Y:${by}`, bx, by - 13);
+
+                ctx.restore();
+            }
         },
 
         drawGuidelines(ctx, width, height) {
             ctx.save();
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.85)'; // Signature Cyan
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.85)';
             ctx.lineWidth = 1;
             ctx.setLineDash([4, 4]);
 
@@ -1487,7 +1681,6 @@ function posterStudio() {
                 ctx.lineTo(gx, height);
                 ctx.stroke();
 
-                // Small badge
                 ctx.fillStyle = 'rgba(0, 240, 255, 0.9)';
                 ctx.fillRect(gx + 2, 8, 48, 14);
                 ctx.fillStyle = '#0f172a';
@@ -1502,7 +1695,6 @@ function posterStudio() {
                 ctx.lineTo(width, gy);
                 ctx.stroke();
 
-                // Small badge
                 ctx.fillStyle = 'rgba(0, 240, 255, 0.9)';
                 ctx.fillRect(8, gy + 2, 48, 14);
                 ctx.fillStyle = '#0f172a';
@@ -1548,14 +1740,12 @@ function posterStudio() {
         },
 
         downloadPoster() {
-            // Render cleanly without guidelines
             this.render(true);
             const canvas = document.getElementById('posterCanvas');
             const link = document.createElement('a');
             link.download = `QUAF_Result_${this.data.result_no}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            // Restore preview guidelines
             this.render(false);
         },
 
@@ -1572,7 +1762,11 @@ function posterStudio() {
                 body: JSON.stringify({
                     template_id: this.settings.template_id,
                     settings: Object.assign({}, this.settings, {
-                        overlay: this.overlay,
+                        custom_elements: this.customElements.map(el => {
+                            const clone = Object.assign({}, el);
+                            delete clone.imgObj;
+                            return clone;
+                        }),
                         guidelines: this.guidelines
                     })
                 })
@@ -1598,7 +1792,6 @@ function posterStudio() {
         saveAndPublish() {
             this.publishing = true;
             this.statusMsg = '';
-            // Render without guidelines for high-res clean export
             this.render(true);
 
             const canvas = document.getElementById('posterCanvas');
@@ -1616,7 +1809,11 @@ function posterStudio() {
                     template_id: this.settings.template_id,
                     settings: Object.assign({}, this.settings, {
                         custom_winners: this.data.winners,
-                        overlay: this.overlay,
+                        custom_elements: this.customElements.map(el => {
+                            const clone = Object.assign({}, el);
+                            delete clone.imgObj;
+                            return clone;
+                        }),
                         guidelines: this.guidelines
                     }),
                     publish_now: true
@@ -1625,7 +1822,7 @@ function posterStudio() {
             .then(res => res.json())
             .then(data => {
                 this.publishing = false;
-                this.render(false); // restore preview
+                this.render(false);
                 if (data.success) {
                     this.statusType = 'success';
                     this.statusMsg = 'Result poster generated and published successfully!';

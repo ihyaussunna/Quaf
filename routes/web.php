@@ -900,6 +900,8 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
 
     // Results & Poster Designer
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');
+    Route::get('/results/planner', [MediaResultController::class, 'planner'])->name('results.planner');
+    Route::post('/results/batch-publish', [MediaResultController::class, 'batchPublish'])->name('results.batch-publish');
     Route::post('/results/publish-standings', [MediaResultController::class, 'publishStandings'])->name('results.publish-standings');
     Route::post('/standings/{standingAnnouncement}/publish', [MediaResultController::class, 'publishStandingAnnouncement'])->name('standings.publish');
     Route::get('/results/{result}/studio', [MediaResultController::class, 'studio'])->name('results.studio');
