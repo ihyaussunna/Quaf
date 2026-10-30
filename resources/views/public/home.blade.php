@@ -509,9 +509,19 @@
             <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase block mb-1 animate-subheading">
                 STANDINGS & TALLIES
             </span>
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight animate-heading">
-                Festival Standings
-            </h2>
+            <div class="flex flex-wrap items-center gap-3">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 tracking-tight animate-heading">
+                    Festival Standings
+                </h2>
+                @php
+                    $standingsBadge = \App\Models\FestivalSetting::get('public_standings_label', '');
+                @endphp
+                @if($standingsBadge)
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
+                        {{ $standingsBadge }}
+                    </span>
+                @endif
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10">
@@ -526,9 +536,16 @@
                             <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
                                 RANK &amp; TEAM
                             </span>
-                            <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
-                                TOTAL POINTS
-                            </span>
+                            <div class="flex items-center gap-2">
+                                @if(!empty($standingsBadge))
+                                    <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                        {{ $standingsBadge }}
+                                    </span>
+                                @endif
+                                <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+                                    TOTAL POINTS
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Rows: Only Rank Number, Team Name, Points -->

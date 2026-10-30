@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Services\PointCalculationService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class Group extends Model
 {
@@ -78,6 +83,8 @@ class Group extends Model
         'assistant_managers',
         'points_cache',
         'rank_cache',
+        'public_points_cache',
+        'public_rank_cache',
     ];
 
     protected function casts(): array
@@ -86,7 +93,119 @@ class Group extends Model
             'assistant_managers' => 'array',
             'points_cache' => 'integer',
             'rank_cache' => 'integer',
+            'public_points_cache' => 'integer',
+            'public_rank_cache' => 'integer',
         ];
+    }
+
+    public static function ensureSchema(): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+
+        try {
+            if (! Schema::hasTable('groups')) {
+                return;
+            }
+
+            if (! Schema::hasColumn('groups', 'public_points_cache')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->integer('public_points_cache')->default(0)->after('points_cache');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'public_rank_cache')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->integer('public_rank_cache')->default(1)->after('rank_cache');
+                });
+            }
+
+            $checked = true;
+        } catch (\Throwable $e) {
+            // Graceful fallback
+        }
+    }
+
+    /**
+     * Get the officially released public team standings.
+     */
+    public static function getPublicStandings(): Collection
+    {
+        self::ensureSchema();
+
+        return self::orderBy('public_rank_cache', 'asc')
+            ->orderByDesc('public_points_cache')
+            ->withCount(['students', 'entries'])
+            ->get();
+    }
+
+    /**
+     * Publish / release the public team standings to match the current live points.
+     */
+    public static function publishStandings(?string $customLabel = null): int
+    {
+        self::ensureSchema();
+
+        // 1. Ensure live points are completely recalculated
+        app(PointCalculationService::class)->recalculateAllPoints();
+
+        // 2. Count total published results
+        $publishedResultsCount = Result::where('status', 'published')->count();
+
+        // 3. Determine milestone label if not given
+        $label = $customLabel ?: ($publishedResultsCount > 0
+            ? "After {$publishedResultsCount} Results"
+            : 'Initial Standings');
+
+        // 4. Copy live points_cache & rank_cache to public_points_cache & public_rank_cache
+        foreach (self::all() as $grp) {
+            $grp->update([
+                'public_points_cache' => (int) $grp->points_cache,
+                'public_rank_cache' => (int) $grp->rank_cache,
+            ]);
+        }
+
+        FestivalSetting::set('public_standings_results_count', (string) $publishedResultsCount);
+        FestivalSetting::set('public_standings_label', $label);
+        FestivalSetting::set('public_standings_updated_at', now()->toIso8601String());
+
+        // Invalidate all public standings caches
+        Cache::forget('public_api_standings');
+        Cache::forget('public_home_data');
+        Cache::forget('public_groups_list');
+        Cache::forget('public_results_groups');
+
+        return $publishedResultsCount;
+    }
+
+    /**
+     * Check if a milestone was reached upon publishing a result and update public standings if matching.
+     */
+    public static function checkAndApplyMilestone(): bool
+    {
+        self::ensureSchema();
+
+        $mode = FestivalSetting::get('public_standings_mode', 'milestone');
+        if ($mode !== 'milestone') {
+            return false;
+        }
+
+        $milestonesStr = FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40');
+        $milestones = array_map('intval', array_filter(explode(',', $milestonesStr)));
+
+        $publishedResultsCount = Result::where('status', 'published')->count();
+        $lastPublishedAtCount = (int) FestivalSetting::get('public_standings_results_count', '0');
+
+        // Check if current published count hits one of the configured milestones and hasn't been published yet
+        if (in_array($publishedResultsCount, $milestones, true) && $publishedResultsCount !== $lastPublishedAtCount) {
+            self::publishStandings("After {$publishedResultsCount} Results");
+
+            return true;
+        }
+
+        return false;
     }
 
     public function leader(): BelongsTo

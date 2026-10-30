@@ -36,6 +36,43 @@
         </div>
     </div>
 
+    <!-- Public Team Standings Release Ribbon -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 rounded-2xl border border-slate-700 shadow-sm font-sora">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/15">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-mono font-bold tracking-wider uppercase text-emerald-400">Public Team Standings</span>
+                        <span class="text-[11px] font-mono text-slate-400">| Mode: {{ strtoupper($standingsInfo['public_standings_mode']) }}</span>
+                    </div>
+                    <div class="text-sm font-bold text-white mt-0.5">
+                        Active Public Milestone: <span class="text-amber-300 font-mono">{{ $standingsInfo['public_standings_label'] }}</span>
+                        <span class="text-xs text-slate-400 font-normal font-mono">({{ $standingsInfo['public_standings_count'] }} of {{ $standingsInfo['published_results_count'] }} results released)</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">
+                        ഓട്ടോമാറ്റിക് മൈൽസ്റ്റോണുകൾ: <span class="text-slate-300">{{ $standingsInfo['public_standings_milestones'] }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <form method="POST" action="{{ route('media.results.publish-standings') }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="text" name="custom_label" placeholder="e.g. Standings after {{ $standingsInfo['published_results_count'] }} Results"
+                           class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 font-mono focus:outline-none focus:border-emerald-400 w-52 sm:w-64">
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm shrink-0">
+                        Release Standings Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Stat Badges -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- Announced Awaiting Poster -->

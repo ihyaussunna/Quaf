@@ -81,7 +81,7 @@ class ResultController extends Controller
 
         $zones = Program::ZONES;
         $categories = ProgramCategory::orderBy('name')->get();
-        $groups = Group::orderBy('rank_cache')->get();
+        $groups = Group::getPublicStandings();
         $programs = Program::orderBy('code')->get(['id', 'code', 'name', 'eligibility']);
         $stages = Stage::all();
 

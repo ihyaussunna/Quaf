@@ -61,13 +61,29 @@ class PublicApiController extends Controller
     public function standings(): JsonResponse
     {
         $standings = Cache::remember('public_api_standings', 20, function () {
-            return Group::orderBy('rank_cache', 'asc')
-                ->orderByDesc('points_cache')
-                ->select(['id', 'name', 'code', 'slug', 'color_hex', 'points_cache', 'rank_cache', 'manager_name'])
-                ->get();
+            return Group::getPublicStandings()
+                ->map(function ($g) {
+                    return [
+                        'id' => $g->id,
+                        'name' => $g->name,
+                        'code' => $g->code,
+                        'slug' => $g->slug,
+                        'color_hex' => $g->color_hex,
+                        'points_cache' => (int) $g->public_points_cache,
+                        'rank_cache' => (int) $g->public_rank_cache,
+                        'manager_name' => $g->manager_name,
+                    ];
+                });
         });
 
-        return response()->json(['standings' => $standings]);
+        $milestoneLabel = FestivalSetting::get('public_standings_label') ?: 'Official Standings';
+        $resultsCount = (int) FestivalSetting::get('public_standings_results_count', '0');
+
+        return response()->json([
+            'standings' => $standings,
+            'milestone_label' => $milestoneLabel,
+            'results_count' => $resultsCount,
+        ]);
     }
 
     public function stages(): JsonResponse

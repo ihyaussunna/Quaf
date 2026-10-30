@@ -15,10 +15,7 @@ class GroupController extends Controller
     {
         Cache::forget('public_groups_list');
 
-        $groups = Group::orderBy('rank_cache', 'asc')
-            ->orderByDesc('points_cache')
-            ->withCount(['students', 'entries'])
-            ->get();
+        $groups = Group::getPublicStandings();
 
         $totalPrograms = Program::count();
         $publishedCount = Result::where('status', 'published')->count();

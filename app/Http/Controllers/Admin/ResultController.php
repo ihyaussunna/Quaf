@@ -142,6 +142,7 @@ class ResultController extends Controller
             $this->issueCertificates($result);
             $this->pointService->recalculateAllPoints();
             $this->coinService->distributeCoinsForResult($result);
+            Group::checkAndApplyMilestone();
         }
 
         return redirect()->route('admin.results.index')->with('success', "Result for '{$result->program->name}' saved ({$result->status}).");
@@ -217,6 +218,7 @@ class ResultController extends Controller
             $this->issueCertificates($result);
             $this->pointService->recalculateAllPoints();
             $this->coinService->distributeCoinsForResult($result);
+            Group::checkAndApplyMilestone();
         }
 
         return redirect()->route('admin.results.index')->with('success', "Result for '{$result->program->name}' updated ({$result->status}).");
@@ -236,6 +238,7 @@ class ResultController extends Controller
         $this->issueCertificates($result);
         $this->pointService->recalculateAllPoints();
         $this->coinService->distributeCoinsForResult($result);
+        Group::checkAndApplyMilestone();
 
         AuditLogger::log('publish_result', $result, $old, $result->toArray());
 

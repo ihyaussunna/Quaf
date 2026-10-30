@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Media;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\FestivalSetting;
+use App\Models\Group;
 use App\Models\PosterSetting;
 use App\Models\Result;
 use App\Models\ResultTemplate;
@@ -68,7 +69,16 @@ class MediaResultController extends Controller
             'total_count' => Result::whereIn('status', ['announced', 'published', 'send', 'delivered'])->count(),
         ];
 
-        return view('media.results.index', compact('results', 'stats', 'tab', 'search'));
+        $standingsInfo = [
+            'published_results_count' => Result::where('status', 'published')->whereNotNull('published_at')->count(),
+            'public_standings_count' => (int) FestivalSetting::get('public_standings_results_count', 0),
+            'public_standings_label' => FestivalSetting::get('public_standings_label', 'Official Standings'),
+            'public_standings_mode' => FestivalSetting::get('public_standings_mode', 'milestone'),
+            'public_standings_milestones' => FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40'),
+            'public_standings_updated_at' => FestivalSetting::get('public_standings_updated_at'),
+        ];
+
+        return view('media.results.index', compact('results', 'stats', 'tab', 'search', 'standingsInfo'));
     }
 
     /**
@@ -196,6 +206,9 @@ class MediaResultController extends Controller
             $this->issueCertificates($result);
             app(PointCalculationService::class)->recalculateAllPoints();
             app(CoinRewardService::class)->distributeCoinsForResult($result);
+
+            // Check if milestone (e.g. after 10, 15, 20, 27, 35, 40) was reached
+            Group::checkAndApplyMilestone();
         }
 
         AuditLogger::log('save_result_poster', $result, null, [
@@ -239,9 +252,23 @@ class MediaResultController extends Controller
         // Distribute coins to winners
         app(CoinRewardService::class)->distributeCoinsForResult($result);
 
+        // Check if milestone (e.g. after 10, 15, 20, 27, 35, 40) was reached
+        Group::checkAndApplyMilestone();
+
         AuditLogger::log('media_publish_result', $result, $old, $result->toArray());
 
         return back()->with('success', "പ്രോഗ്രാം '{$result->program->name}' ഫലം പബ്ലിക് ആയി പ്രസിദ്ധീകരിച്ചു.");
+    }
+
+    /**
+     * Manual on-demand release of team standings from Media Desk.
+     */
+    public function publishStandings(Request $request): RedirectResponse
+    {
+        $customLabel = $request->input('custom_label', $request->input('label'));
+        $count = Group::publishStandings($customLabel);
+
+        return back()->with('success', "ടീം സ്റ്റാൻഡിങ് വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു (After {$count} Results). പബ്ലിക് വെബ്‌സൈറ്റിൽ പുതിയ പോയിന്റ് നില ലഭ്യമാണ്.");
     }
 
     protected function issueCertificates(Result $result): void

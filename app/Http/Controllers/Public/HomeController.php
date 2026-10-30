@@ -53,7 +53,7 @@ class HomeController extends Controller
 
     public function about(): View
     {
-        $groups = Group::orderBy('rank_cache')->get();
+        $groups = Group::getPublicStandings();
         $zones = Zone::orderBy('display_order')->get();
         $stats = [
             'programs' => Program::count(),
@@ -210,10 +210,7 @@ class HomeController extends Controller
 
         Cache::forget('public_home_data');
 
-        $groups = Group::orderBy('rank_cache', 'asc')
-            ->orderByDesc('points_cache')
-            ->withCount(['students', 'entries'])
-            ->get();
+        $groups = Group::getPublicStandings();
 
         $stages = Stage::with(['currentProgram.category', 'nextProgram.category'])->get();
 

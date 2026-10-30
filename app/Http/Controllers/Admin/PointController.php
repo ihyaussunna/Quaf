@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\PointSetting;
 use App\Models\PointsTransaction;
+use App\Models\Result;
 use App\Services\AuditLogger;
 use App\Services\PointCalculationService;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +50,26 @@ class PointController extends Controller
 
         $transactions = $txQuery->latest()->paginate(25)->withQueryString();
 
-        return view('admin.points.index', compact('settings', 'groups', 'transactions', 'selectedGroupId', 'sourceType'));
+        $publishedResultsCount = Result::where('status', 'published')->count();
+        $publicStandingsCount = (int) FestivalSetting::get('public_standings_results_count', '0');
+        $publicStandingsLabel = FestivalSetting::get('public_standings_label') ?: 'Not Released';
+        $publicStandingsMode = FestivalSetting::get('public_standings_mode', 'milestone');
+        $publicStandingsMilestones = FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40');
+        $publicStandingsUpdatedAt = FestivalSetting::get('public_standings_updated_at');
+
+        return view('admin.points.index', compact(
+            'settings',
+            'groups',
+            'transactions',
+            'selectedGroupId',
+            'sourceType',
+            'publishedResultsCount',
+            'publicStandingsCount',
+            'publicStandingsLabel',
+            'publicStandingsMode',
+            'publicStandingsMilestones',
+            'publicStandingsUpdatedAt'
+        ));
     }
 
     public function update(Request $request): RedirectResponse
@@ -78,5 +99,38 @@ class PointController extends Controller
         $this->pointService->recalculateAllPoints();
 
         return back()->with('success', 'All group rankings, student points, and points transaction ledgers successfully recalculated.');
+    }
+
+    /**
+     * Publish / release the official team standings to the public website.
+     */
+    public function publishPublicStandings(Request $request): RedirectResponse
+    {
+        $customLabel = $request->input('custom_label', $request->input('label'));
+        $count = Group::publishStandings($customLabel);
+
+        return back()->with('success', "Official public team standings successfully published (After {$count} Results).");
+    }
+
+    /**
+     * Update milestone release configuration.
+     */
+    public function updateMilestones(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'mode' => ['required', 'in:manual,milestone'],
+            'milestones' => ['nullable', 'string'],
+        ]);
+
+        FestivalSetting::set('public_standings_mode', $validated['mode']);
+        if (isset($validated['milestones'])) {
+            $parsed = array_values(array_filter(
+                array_map('intval', array_map('trim', explode(',', (string) $validated['milestones']))),
+                fn (int $n) => $n > 0
+            ));
+            FestivalSetting::set('public_standings_milestones', ! empty($parsed) ? implode(',', $parsed) : '10,15,20,27,35,40');
+        }
+
+        return back()->with('success', 'Public team standings milestone release settings successfully updated.');
     }
 }

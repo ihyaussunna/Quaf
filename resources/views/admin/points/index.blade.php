@@ -10,9 +10,117 @@
         <form method="POST" action="{{ route('admin.points.recalculate') }}">
             @csrf
             <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#f3bd2e] text-slate-950 font-mono font-bold text-xs uppercase tracking-wider hover:brightness-105 shadow-lg shadow-[#f3bd2e]/20 flex items-center gap-2">
-                <span>⚡ Recalculate Leaderboard</span>
+                <span>Recalculate Leaderboard</span>
             </button>
         </form>
+    </div>
+
+    <!-- Public Team Standings Release Control Engine -->
+    <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm font-sora">
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Public Standings Gate
+                        </span>
+                        <span class="text-xs font-mono text-slate-400">Milestone-Controlled Visibility</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black tracking-tight mt-1">
+                        പബ്ലിക് ടീം സ്റ്റാൻഡിംഗ്സ് റിലീസ് നിയന്ത്രണം
+                    </h2>
+                    <p class="text-xs text-slate-300 mt-1 max-w-2xl font-mono">
+                        മീഡിയ പാനലിൽ നിന്ന് ഓരോ റിസൾട്ട് പബ്ലിഷ് ചെയ്യുമ്പോഴും പബ്ലിക് വെബ്സൈറ്റിലെ പോയിന്റ് നില തത്സമയം മാറില്ല. 10, 15, 20, 27, 35, 40 റിസൾട്ടുകൾ തികയുമ്പോഴോ അല്ലെങ്കിൽ അഡ്മിൻ മാനുവലായി റിലീസ് ചെയ്യുമ്പോഴോ മാത്രമേ പബ്ലിക് ലീഡർബോർഡ് അപ്‌ഡേറ്റ് ആകൂ.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="bg-white/10 backdrop-blur-xs px-4 py-2.5 rounded-xl border border-white/15 text-center">
+                        <div class="text-[10px] font-mono uppercase text-slate-300 font-bold">Published Results</div>
+                        <div class="text-2xl font-black text-amber-300">{{ $publishedResultsCount }}</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-xs px-4 py-2.5 rounded-xl border border-white/15 text-center">
+                        <div class="text-[10px] font-mono uppercase text-slate-300 font-bold">Current Public Milestone</div>
+                        <div class="text-2xl font-black text-emerald-400">{{ $publicStandingsCount }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-slate-50 border-b border-slate-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Manual Release Form -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-sm text-slate-900">Manual Standings Release</h4>
+                            <span class="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                                Currently: {{ $publicStandingsLabel }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-600 mb-4 font-mono">
+                            ഏറ്റവും പുതിയ {{ $publishedResultsCount }} റിസൾട്ടുകൾ അടിസ്ഥാനമാക്കി പബ്ലിക് വെബ്സൈറ്റിലെ ടീം പോയിന്റ് നില ഇപ്പോഴത്തെ അവസ്ഥയിലേക്ക് തത്സമയം അപ്‌ഡേറ്റ് ചെയ്യുക.
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.points.publish-standings') }}" class="space-y-3">
+                        @csrf
+                        <div>
+                            <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Custom Display Label (Optional)</label>
+                            <input type="text" name="custom_label" placeholder="Standings after {{ $publishedResultsCount }} Results"
+                                   class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-mono">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <span>Publish Team Standings Now</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Milestone Settings Form -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-sm text-slate-900">Milestone Auto-Release Rules</h4>
+                            <span class="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 uppercase">
+                                Mode: {{ $publicStandingsMode }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-600 mb-4 font-mono">
+                            ഓരോ നിശ്ചിത എണ്ണം റിസൾട്ടുകൾ പബ്ലിഷ് ചെയ്യുമ്പോൾ ഓട്ടോമാറ്റിക്കായി പബ്ലിക് സ്റ്റാൻഡിംഗ്സ് റിലീസ് ചെയ്യേണ്ട മൈൽസ്റ്റോണുകൾ ക്രമീകരിക്കുക.
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.points.update-milestones') }}" class="space-y-3">
+                        @csrf
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Release Mode</label>
+                                <select name="mode" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-mono">
+                                    <option value="milestone" {{ $publicStandingsMode === 'milestone' ? 'selected' : '' }}>Milestone Auto-Release</option>
+                                    <option value="manual" {{ $publicStandingsMode === 'manual' ? 'selected' : '' }}>Strictly Manual Release</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-mono uppercase text-slate-600 font-bold mb-1">Milestones (Comma separated)</label>
+                                <input type="text" name="milestones" value="{{ $publicStandingsMilestones }}" required
+                                       placeholder="10, 15, 20, 27, 35, 40"
+                                       class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-500 font-mono">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <span>Save Milestone Configuration</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            @if($publicStandingsUpdatedAt)
+                <div class="mt-4 text-[11px] font-mono text-slate-500 flex items-center justify-between">
+                    <span>Last Public Standings Update: {{ \Carbon\Carbon::parse($publicStandingsUpdatedAt)->format('d M Y, h:i A') }}</span>
+                    <span>Current Active Label: <strong class="text-slate-800">{{ $publicStandingsLabel }}</strong></span>
+                </div>
+            @endif
+        </div>
     </div>
 
     <!-- Official Festival Rule 11: Points & Grades Matrix Showcase -->
@@ -204,7 +312,8 @@
                         <th class="px-6 py-4 font-semibold">Leader</th>
                         <th class="px-6 py-4 font-semibold">Delegates</th>
                         <th class="px-6 py-4 font-semibold">Entries</th>
-                        <th class="px-6 py-4 text-right font-semibold">Total Points</th>
+                        <th class="px-6 py-4 text-center font-semibold bg-emerald-50/80 text-emerald-900 border-x border-emerald-100">Public Standings</th>
+                        <th class="px-6 py-4 text-right font-semibold">Live Total Points</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -227,11 +336,21 @@
                             <td class="px-6 py-4 text-slate-600">{{ $grp->leader?->name ?? '—' }}</td>
                             <td class="px-6 py-4 text-slate-900 font-medium">{{ $grp->students_count }} students</td>
                             <td class="px-6 py-4 text-slate-900 font-medium">{{ $grp->entries_count }} entries</td>
+                            <td class="px-6 py-4 text-center bg-emerald-50/40 border-x border-emerald-100">
+                                <span class="inline-flex items-center gap-1 font-sora font-black text-xl text-emerald-800">
+                                    {{ number_format($grp->public_points_cache ?? 0) }}
+                                    <span class="text-[10px] font-mono text-emerald-600 font-normal">pts</span>
+                                </span>
+                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">
+                                    Public Rank: <strong class="text-slate-800">#{{ $grp->public_rank_cache ?? '—' }}</strong>
+                                </span>
+                            </td>
                             <td class="px-6 py-4 text-right">
                                 <span class="font-sora font-black text-2xl" style="color: {{ $grp->color_hex }}">
                                     {{ number_format($grp->points_cache) }}
                                 </span>
                                 <span class="text-slate-500 text-[10px]"> pts</span>
+                                <span class="block text-[10px] font-mono text-slate-400">Live Rank: #{{ $grp->rank_cache ?: $loop->iteration }}</span>
                             </td>
                         </tr>
                     @endforeach
