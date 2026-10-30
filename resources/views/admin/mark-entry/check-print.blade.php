@@ -113,9 +113,13 @@
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
+
+        body.hide-scores .col-score {
+            display: none !important;
+        }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen py-4 sm:py-8 px-2 sm:px-4">
+<body class="bg-slate-100 text-slate-900 min-h-screen py-4 sm:py-8 px-2 sm:px-4 hide-scores">
 
     <!-- Action Toolbar (Hidden during print) -->
     <div class="no-print max-w-5xl mx-auto mb-6 p-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
@@ -143,6 +147,12 @@
                     </select>
                 </form>
             @endif
+
+            <!-- Optional Score Column Toggle -->
+            <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 hover:bg-slate-100 transition cursor-pointer select-none text-xs font-semibold text-slate-700">
+                <input type="checkbox" id="toggleScoreCheckbox" onchange="toggleScoreColumn(this.checked)" class="w-4 h-4 rounded border-slate-300 text-[#BE1E2D] focus:ring-0 cursor-pointer">
+                <span>Show Score</span>
+            </label>
 
             <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-[#BE1E2D] hover:bg-[#a01624] text-white font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
@@ -188,7 +198,7 @@
                             <span class="font-bold text-slate-900 ml-1">{{ $prog->name }}</span>
                         </div>
                         <div class="p-2.5">
-                            <span class="text-slate-500 font-normal">Category / Zone:</span>
+                            <span class="text-slate-500 font-normal">Zone:</span>
                             <span class="font-bold text-slate-900 ml-1">{{ $prog->eligibility ?? 'All Zones' }}</span>
                         </div>
                         <div class="p-2.5">
@@ -206,9 +216,9 @@
                             <th class="px-3 py-2.5 text-center font-bold text-slate-900">LETTER</th>
                             <th class="px-3 py-2.5 text-center font-bold text-slate-900">ID</th>
                             <th class="px-4 py-2.5 font-bold text-slate-900">NAME</th>
-                            <th class="px-3 py-2.5 font-bold text-slate-900">TEAM / GROUP</th>
+                            <th class="px-3 py-2.5 font-bold text-slate-900">GROUP</th>
                             <th class="px-2.5 py-2.5 text-center font-bold text-slate-900">GRADE</th>
-                            <th class="px-3 py-2.5 text-center font-bold text-slate-900">SCORE</th>
+                            <th class="col-score px-3 py-2.5 text-center font-bold text-slate-900">SCORE</th>
                             <th class="px-3 py-2.5 text-center font-bold text-slate-900">RANK</th>
                             <th class="px-2.5 py-2.5 text-center font-bold text-slate-900">PTS</th>
                         </tr>
@@ -236,13 +246,13 @@
                                         {{ $item->computed_grade }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-2.5 text-center font-bold text-slate-900">
+                                <td class="col-score px-3 py-2.5 text-center font-bold text-slate-900">
                                     {{ number_format($item->computed_score, 0) }}
                                 </td>
                                 <td class="px-3 py-2.5 text-center">
                                     @if($item->computed_rank === 'first')
                                         <span class="inline-block px-2 py-0.5 font-bold text-amber-700 uppercase tracking-wider text-xs">
-                                            FIRST
+                                             FIRST
                                         </span>
                                     @elseif($item->computed_rank === 'second')
                                         <span class="inline-block px-2 py-0.5 font-bold text-slate-700 uppercase tracking-wider text-xs">
@@ -266,7 +276,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-slate-400 font-normal">
+                                <td colspan="8" class="empty-message-td px-4 py-8 text-center text-slate-400 font-normal">
                                     No marks recorded for this program yet.
                                 </td>
                             </tr>
@@ -275,12 +285,12 @@
                 </table>
 
                 <!-- Footer Info -->
-                <div class="mt-8 pt-3 border-t border-slate-200 text-[11px] text-slate-600 flex justify-between items-center">
-                    <div class="inline-flex items-center gap-2">
-                        <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="h-4 sm:h-4.5 w-auto object-contain inline-block">
-                        <span class="font-normal text-slate-700">Markaz Cultural Festival</span>
+                <div class="mt-8 pt-3 border-t border-slate-200 text-[10px] text-slate-500 flex justify-between items-center gap-4">
+                    <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                        <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 10px; max-height: 11px;">
+                        <span class="font-normal text-slate-600 whitespace-nowrap leading-none">Markaz Cultural Festival</span>
                     </div>
-                    <span class="text-[10px] text-slate-400">Printed: {{ now()->format('d M Y, h:i A') }}</span>
+                    <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
                 </div>
 
             </div>
@@ -294,5 +304,13 @@
         @endforelse
     </div>
 
+    <script>
+        function toggleScoreColumn(show) {
+            document.body.classList.toggle('hide-scores', !show);
+            document.querySelectorAll('.empty-message-td').forEach(td => {
+                td.colSpan = show ? 9 : 8;
+            });
+        }
+    </script>
 </body>
 </html>

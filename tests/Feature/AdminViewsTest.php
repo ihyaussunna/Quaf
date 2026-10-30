@@ -675,6 +675,10 @@ class AdminViewsTest extends TestCase
         $resPrint->assertDontSee('Judge 1');
         $resPrint->assertDontSee('Chief Scrutinizer');
         $resPrint->assertDontSee("QUAF '26");
+        $resPrint->assertDontSee('Category /');
+        $resPrint->assertDontSee('TEAM / GROUP');
+        $resPrint->assertSee('GROUP');
+        $resPrint->assertSee('Show Score');
         $resPrint->assertSee('quaf-black-title.svg');
         $resPrint->assertSee('Markaz Cultural Festival');
 
