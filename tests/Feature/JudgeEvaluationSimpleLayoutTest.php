@@ -168,4 +168,35 @@ class JudgeEvaluationSimpleLayoutTest extends TestCase
         $response->assertSee('Review / Edit Scores');
         $response->assertDontSee('Evaluate Participants Now');
     }
+
+    public function test_judge_dashboard_displays_live_and_next_program_cards(): void
+    {
+        // Program 1 is live on stage
+        $this->program->update(['status' => 'in_progress']);
+
+        // Program 2 is upcoming next
+        $program2 = Program::create([
+            'category_id' => $this->program->category_id,
+            'name' => 'Arabic Calligraphy Next',
+            'code' => 'Q9 - 202',
+            'type' => 'individual',
+            'eligibility' => 'A Zone',
+            'participant_count' => 1,
+            'duration_minutes' => 45,
+            'status' => 'upcoming',
+        ]);
+        $program2->judges()->attach($this->judge->id);
+
+        $response = $this->actingAs($this->judgeUser)
+            ->get(route('judge.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Live Program On Stage');
+        $response->assertSee('Elocution English');
+        $response->assertSee('Evaluate Live Program Now');
+
+        $response->assertSee('Next Program Schedule');
+        $response->assertSee('Arabic Calligraphy Next');
+        $response->assertSee('Open Next Evaluation Sheet');
+    }
 }

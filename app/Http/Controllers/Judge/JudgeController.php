@@ -94,7 +94,7 @@ class JudgeController extends Controller
         $judge = $this->getJudge();
 
         $assignedPrograms = $judge->programs()
-            ->with(['category', 'stage', 'schedule', 'scoringCriteria', 'result'])
+            ->with(['category', 'stage', 'schedule.stage', 'scoringCriteria', 'result', 'zone'])
             ->withCount('entries')
             ->get();
 
@@ -161,7 +161,54 @@ class JudgeController extends Controller
             }
         }
 
-        return view('judge.dashboard', compact('judge', 'assignedPrograms', 'upcoming', 'inProgress', 'completed', 'evaluationStatus', 'completedCount', 'inProgressCount', 'pendingEvaluationCount', 'upcomingCount'));
+        // Identify Live and Next programs for this judge
+        $liveProgram = $assignedPrograms->first(function ($prog) use ($evaluationStatus) {
+            $eval = $evaluationStatus[$prog->id] ?? null;
+            if ($eval && $eval['is_complete']) {
+                return false;
+            }
+            if ($prog->status === 'in_progress') {
+                return true;
+            }
+            if ($prog->schedule && in_array($prog->schedule->computed_status, ['live', 'in_progress'], true)) {
+                return true;
+            }
+            if ($eval && $eval['submitted'] > 0 && ! $eval['is_complete']) {
+                return true;
+            }
+
+            return false;
+        });
+
+        $nextProgram = $assignedPrograms->first(function ($prog) use ($evaluationStatus, $liveProgram) {
+            if ($liveProgram && $prog->id === $liveProgram->id) {
+                return false;
+            }
+            $eval = $evaluationStatus[$prog->id] ?? null;
+            if ($eval && $eval['is_complete']) {
+                return false;
+            }
+            if ($prog->status === 'completed') {
+                return false;
+            }
+
+            return true;
+        });
+
+        return view('judge.dashboard', compact(
+            'judge',
+            'assignedPrograms',
+            'upcoming',
+            'inProgress',
+            'completed',
+            'evaluationStatus',
+            'completedCount',
+            'inProgressCount',
+            'pendingEvaluationCount',
+            'upcomingCount',
+            'liveProgram',
+            'nextProgram'
+        ));
     }
 
     public function showProgram(Program $program): View

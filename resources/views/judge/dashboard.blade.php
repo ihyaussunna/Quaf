@@ -31,6 +31,118 @@
         </div>
     </div>
 
+    @if($liveProgram || $nextProgram)
+        <!-- Live & Next Program Focus Cards -->
+        <div class="grid grid-cols-1 {{ $liveProgram && $nextProgram ? 'lg:grid-cols-2' : '' }} gap-5">
+            @if($liveProgram)
+                @php
+                    $liveEval = $evaluationStatus[$liveProgram->id] ?? ['total' => 0, 'submitted' => 0, 'present' => 0, 'pending' => 0];
+                    $livePercent = $liveEval['total'] > 0 ? round(($liveEval['submitted'] / $liveEval['total']) * 100) : 0;
+                    $liveTime = $liveProgram->scheduled_time ?? $liveProgram->schedule?->start_time;
+                @endphp
+                <div class="rounded-3xl bg-gradient-to-br from-rose-50/80 via-white to-amber-50/30 border-2 border-[#be1e2d] p-6 shadow-md relative overflow-hidden flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#be1e2d] text-white text-[11px] font-mono font-bold uppercase tracking-wider shadow-xs animate-pulse">
+                                <span class="w-2 h-2 rounded-full bg-white"></span>
+                                <span>Live Program On Stage</span>
+                            </span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white text-slate-700 border border-slate-200">
+                                {{ $liveProgram->code }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 leading-tight">
+                                {{ $liveProgram->name }}
+                            </h3>
+                            @if($liveProgram->malayalam_name)
+                                <p class="text-xs font-ml text-slate-600 mt-0.5">{{ $liveProgram->malayalam_name }}</p>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-1 text-slate-700">
+                            <div class="p-2.5 rounded-xl bg-white/90 border border-rose-100 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[#be1e2d] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span class="truncate font-bold">{{ $liveProgram->stage->name ?? 'Stage Unassigned' }}</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-white/90 border border-rose-100 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[#be1e2d] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="truncate font-bold">{{ $liveTime?->format('h:i A') ?? 'Live Now' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-white/90 border border-rose-100 text-xs font-mono flex items-center justify-between text-slate-600">
+                            <span>Evaluation: <strong class="text-slate-900">{{ $liveEval['submitted'] }}/{{ $liveEval['present'] }} Evaluated</strong></span>
+                            <span class="text-rose-700 font-bold">{{ $liveEval['pending'] }} Pending</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 mt-2 border-t border-rose-100">
+                        <a href="{{ route('judge.evaluate', $liveProgram) }}" 
+                           class="w-full py-3.5 bg-[#be1e2d] hover:bg-[#a01624] text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Evaluate Live Program Now</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            @if($nextProgram)
+                @php
+                    $nextTime = $nextProgram->scheduled_time ?? $nextProgram->schedule?->start_time;
+                @endphp
+                <div class="rounded-3xl bg-gradient-to-br from-blue-50/70 via-white to-slate-50 border-2 border-[#005c94]/40 p-6 shadow-md relative overflow-hidden flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-[#005c94] text-[11px] font-mono font-bold uppercase tracking-wider border border-blue-200">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                <span>Next Program Schedule</span>
+                            </span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white text-slate-700 border border-slate-200">
+                                {{ $nextProgram->code }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-sora font-black text-slate-900 leading-tight">
+                                {{ $nextProgram->name }}
+                            </h3>
+                            @if($nextProgram->malayalam_name)
+                                <p class="text-xs font-ml text-slate-600 mt-0.5">{{ $nextProgram->malayalam_name }}</p>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-1 text-slate-700">
+                            <div class="p-2.5 rounded-xl bg-white/90 border border-blue-100 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[#005c94] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span class="truncate font-bold">{{ $nextProgram->stage->name ?? 'Stage Unassigned' }}</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-white/90 border border-blue-100 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[#005c94] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="truncate font-bold">{{ $nextTime?->format('h:i A') ?? 'Upcoming' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-white/90 border border-blue-100 text-xs font-mono flex items-center justify-between text-slate-600">
+                            <span>Zone: <strong class="text-slate-900">{{ $nextProgram->zone?->name ?: $nextProgram->eligibility }}</strong></span>
+                            <span>Duration: <strong class="text-slate-900">{{ $nextProgram->duration_minutes }} Mins</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 mt-2 border-t border-blue-100">
+                        <a href="{{ route('judge.evaluate', $nextProgram) }}" 
+                           class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>Open Next Evaluation Sheet</span>
+                        </a>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
     <!-- Assigned Programs List (Simple Aligned Downward Boxes) -->
     <div class="space-y-4">
         <div class="flex items-center justify-between">
