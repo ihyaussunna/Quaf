@@ -15,6 +15,10 @@
             <p class="text-xs text-slate-500 mt-0.5">Manage event judges and their login credentials</p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('admin.judges.duty') }}" class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center gap-1.5 transition-colors font-sora shadow-xs">
+                <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span>Duty Schedule & Print</span>
+            </a>
             <form method="POST" action="{{ route('admin.judges.sync-official') }}" class="inline">
                 @csrf
                 <button type="submit" class="px-3 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-medium text-xs flex items-center gap-1.5 transition-colors font-sora cursor-pointer" title="Sync all official stage and category judges roster">
@@ -126,6 +130,13 @@
                                     <span class="font-bold text-sm leading-none">···</span>
                                 </button>
                                 <div x-show="menuOpen" @click.away="menuOpen = false" class="absolute right-5 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-20 text-left text-xs" style="display: none;">
+                                    <a href="{{ route('admin.judges.duty.print', ['judge_id' => $j->id]) }}" target="_blank" class="block px-3 py-1.5 text-slate-800 hover:bg-slate-50 font-medium">
+                                        Print Duty Slip (PDF)
+                                    </a>
+                                    <a href="{{ route('admin.judges.duty', ['judge_id' => $j->id]) }}" class="block px-3 py-1.5 text-slate-700 hover:bg-slate-50">
+                                        View Duty Schedule
+                                    </a>
+                                    <div class="border-t border-slate-100 my-1"></div>
                                     <a href="{{ route('admin.judges.edit', $j) }}" class="block px-3 py-1.5 text-slate-700 hover:bg-slate-50">
                                         Edit Judge
                                     </a>

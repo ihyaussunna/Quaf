@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Judge;
 use App\Models\Program;
+use App\Models\ProgramCategory;
+use App\Models\Stage;
 use App\Models\User;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -298,5 +301,147 @@ class JudgeController extends Controller
         Artisan::call('app:sync-official-judges');
 
         return back()->with('success', 'Official festival judges roster synchronized successfully.');
+    }
+
+    /**
+     * Judge-wise Program Duty Schedule Allocation & View.
+     */
+    public function dutySchedules(Request $request): View
+    {
+        $selectedJudgeId = $request->query('judge_id');
+        $search = trim((string) $request->query('search'));
+        $stageId = $request->query('stage_id');
+        $categoryId = $request->query('category_id');
+        $filterStatus = $request->query('status'); // all, assigned, unassigned
+
+        $allJudges = Judge::orderBy('name')->get();
+        $stages = Stage::orderBy('order')->orderBy('name')->get();
+        $categories = ProgramCategory::orderBy('name')->get();
+
+        $query = Judge::with([
+            'user',
+            'programs' => function ($pq) use ($stageId, $categoryId) {
+                if ($stageId) {
+                    $pq->where('stage_id', $stageId);
+                }
+                if ($categoryId) {
+                    $pq->where('category_id', $categoryId);
+                }
+                $pq->with(['category', 'stage', 'schedule.stage', 'zone'])
+                    ->withCount('entries');
+            },
+        ])->withCount('programs');
+
+        if ($selectedJudgeId) {
+            $query->where('id', $selectedJudgeId);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('contact', 'like', "%{$search}%")
+                    ->orWhere('specialization', 'like', "%{$search}%")
+                    ->orWhereHas('programs', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%")
+                            ->orWhere('malayalam_name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($filterStatus === 'assigned') {
+            $query->has('programs');
+        } elseif ($filterStatus === 'unassigned') {
+            $query->doesntHave('programs');
+        }
+
+        $judges = $query->orderBy('name')->get();
+
+        // Sort programs by scheduled time for each judge
+        $judges->each(function ($judge) {
+            $judge->sorted_programs = $judge->programs->sortBy(function ($prog) {
+                $time = $prog->scheduled_time ?? $prog->schedule?->start_time;
+
+                return $time ? $time->timestamp : PHP_INT_MAX;
+            })->values();
+        });
+
+        $totalJudges = Judge::count();
+        $assignedJudges = Judge::has('programs')->count();
+        $unassignedJudges = $totalJudges - $assignedJudges;
+        $totalDutiesCount = DB::table('judge_assignments')->count();
+
+        $stats = [
+            'total_judges' => $totalJudges,
+            'assigned_judges' => $assignedJudges,
+            'unassigned_judges' => $unassignedJudges,
+            'total_duties' => $totalDutiesCount,
+        ];
+
+        return view('admin.judges.duty', compact(
+            'judges',
+            'allJudges',
+            'stages',
+            'categories',
+            'selectedJudgeId',
+            'search',
+            'stageId',
+            'categoryId',
+            'filterStatus',
+            'stats'
+        ));
+    }
+
+    /**
+     * Printable & PDF Download View of Judges Duty Allocation.
+     * Supports:
+     * - Single Judge Duty Slip (judge_id=...)
+     * - 1 Judge Per Page mode (mode=per_page, page-break-after: always)
+     * - Continuous Master Timetable (mode=continuous)
+     */
+    public function printDuty(Request $request): View
+    {
+        $judgeId = $request->query('judge_id');
+        $mode = $request->query('mode', 'per_page'); // 'per_page' or 'continuous'
+        $includeUnassigned = (bool) $request->query('include_unassigned', false);
+
+        $allJudges = Judge::orderBy('name')->get();
+
+        $query = Judge::with([
+            'user',
+            'programs' => function ($pq) {
+                $pq->with(['category', 'stage', 'schedule.stage', 'zone'])
+                    ->withCount('entries');
+            },
+        ])->withCount('programs');
+
+        if ($judgeId) {
+            $query->where('id', $judgeId);
+        } elseif (! $includeUnassigned) {
+            // Default when printing all: only print judges who have assigned programs
+            $query->has('programs');
+        }
+
+        $judges = $query->orderBy('name')->get();
+
+        // Sort each judge's programs chronologically by schedule / time
+        $judges->each(function ($judge) {
+            $judge->sorted_programs = $judge->programs->sortBy(function ($prog) {
+                $time = $prog->scheduled_time ?? $prog->schedule?->start_time;
+
+                return $time ? $time->timestamp : PHP_INT_MAX;
+            })->values();
+        });
+
+        $singleJudge = $judgeId ? $judges->first() : null;
+
+        return view('admin.judges.duty-print', compact(
+            'judges',
+            'allJudges',
+            'judgeId',
+            'singleJudge',
+            'mode',
+            'includeUnassigned'
+        ));
     }
 }

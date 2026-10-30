@@ -466,11 +466,29 @@
                 </div>
             </div>
 
-            <!-- 12. Judges -->
-            <a href="{{ route('admin.judges.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.judges.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
-                <span>Judges</span>
-            </a>
+            <!-- 12. Judges (List & Duty Schedule) -->
+            <div class="space-y-0.5" x-data="{ open: {{ request()->routeIs('admin.judges.*') ? 'true' : 'false' }} }">
+                <a href="{{ route('admin.judges.index') }}" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.judges.index') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : (request()->routeIs('admin.judges.*') ? 'text-white font-semibold bg-slate-800/60' : 'hover:text-white hover:bg-slate-800/60') }}">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                        <span>Judges</span>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-amber-300">Hub</span>
+                </a>
+                <div class="pl-9 pr-2 py-1 space-y-1 text-[11px]">
+                    <a href="{{ route('admin.judges.index') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.judges.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                        <span>All Judges & PINs</span>
+                    </a>
+                    <a href="{{ route('admin.judges.duty') }}" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.judges.duty') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">
+                        <span>Duty Schedule & Print</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">PDF</span>
+                    </a>
+                    <a href="{{ route('admin.judges.duty.print') }}" target="_blank" class="flex items-center justify-between px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40">
+                        <span>Print All Slips (A4)</span>
+                        <span class="text-[9px] px-1 rounded bg-slate-800 text-slate-400 font-mono">1/Page</span>
+                    </a>
+                </div>
+            </div>
 
             <!-- 13. Templates -->
             <a href="{{ route('admin.templates.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.templates.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
