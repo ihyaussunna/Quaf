@@ -166,7 +166,7 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $this->assertEquals(0, $this->student->fresh()->coins_cache);
     }
 
-    public function test_student_cannot_redeem_with_invalid_secret_code(): void
+    public function test_student_cannot_redeem_with_invalid_coins(): void
     {
         // Credit coins first
         CoinTransaction::create([
@@ -175,21 +175,20 @@ class PresentationDeskCoinRedemptionTest extends TestCase
             'prize_position' => 1,
             'coins' => 100,
             'transaction_type' => 'credit',
-            'transaction_reference' => 'COIN-TEST-CREDIT-WRONG-PIN',
+            'transaction_reference' => 'COIN-TEST-CREDIT-WRONG-COINS',
             'status' => 'completed',
         ]);
         app(CoinRewardService::class)->syncStudentCoinsCache($this->student->id);
 
         $response = $this->actingAs($this->presentationUser)->post(route('presentation.redeem'), [
             'student_id' => $this->student->id,
-            'secret_code' => '0000', // incorrect PIN
             'item_name' => 'Book',
-            'coins' => 50,
+            'coins' => 0, // invalid zero coins
             'quantity' => 1,
             'item_category' => 'book',
         ]);
 
-        $response->assertSessionHas('error');
+        $response->assertSessionHasErrors(['coins']);
         $this->assertEquals(100, $this->student->fresh()->coins_cache);
     }
 
@@ -358,10 +357,12 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $response = $this->get(route('verify.student', $this->student->qr_token));
         $response->assertOk();
         $response->assertSee('Muhammad Bilal');
-        $response->assertSee('Secret Purchase Code');
-        $response->assertSee((string) $this->student->purchase_pin);
+        $response->assertSee('1st Prize Qawwali');
+        $response->assertSee('1st Prize');
         $response->assertSee('150');
         $response->assertSee('QUAF Recognition Gift');
+        $response->assertDontSee('Grade Achievements');
+        $response->assertDontSee('VERIFIED ENTRY');
     }
 
     public function test_student_portal_via_chest_number_login_masks_secret_code(): void
