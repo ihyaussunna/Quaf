@@ -7,7 +7,9 @@ use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
+use App\Models\Schedule;
 use App\Models\ScoreSheet;
+use App\Models\Stage;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -198,5 +200,29 @@ class JudgeEvaluationSimpleLayoutTest extends TestCase
         $response->assertSee('Next Program Schedule');
         $response->assertSee('Arabic Calligraphy Next');
         $response->assertSee('Open Next Evaluation Sheet');
+    }
+
+    public function test_finished_program_is_never_shown_as_live_program(): void
+    {
+        $stage = Stage::create([
+            'name' => 'Stage 01',
+            'code' => 'STG-01',
+        ]);
+
+        $this->program->update(['status' => 'completed']);
+        Schedule::create([
+            'program_id' => $this->program->id,
+            'stage_id' => $stage->id,
+            'start_time' => now()->subHours(2),
+            'end_time' => now()->subHour(),
+            'status' => 'completed',
+        ]);
+
+        $response = $this->actingAs($this->judgeUser)
+            ->get(route('judge.dashboard'));
+
+        $response->assertOk();
+        $response->assertDontSee('Live Program On Stage');
+        $response->assertDontSee('Evaluate Live Program Now');
     }
 }

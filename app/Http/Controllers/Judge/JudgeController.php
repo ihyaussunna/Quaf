@@ -161,34 +161,54 @@ class JudgeController extends Controller
             }
         }
 
-        // Identify Live and Next programs for this judge
-        $liveProgram = $assignedPrograms->first(function ($prog) use ($evaluationStatus) {
-            $eval = $evaluationStatus[$prog->id] ?? null;
+        // A program is finished/completed if its status is completed, schedule is completed, or result published
+        $isFinished = function ($prog, $eval) {
+            if ($prog->status === 'completed') {
+                return true;
+            }
             if ($eval && $eval['is_complete']) {
+                return true;
+            }
+            if ($prog->result && in_array($prog->result->status, ['published', 'announced'], true)) {
+                return true;
+            }
+            if ($prog->schedule && in_array($prog->schedule->status, ['completed', 'cancelled'], true)) {
+                return true;
+            }
+            if ($prog->schedule && $prog->schedule->computed_status === 'completed') {
+                return true;
+            }
+
+            return false;
+        };
+
+        // Identify Live program: ONLY programs that are genuinely ongoing right now on stage and NOT completed/finished
+        $liveProgram = $assignedPrograms->first(function ($prog) use ($evaluationStatus, $isFinished) {
+            $eval = $evaluationStatus[$prog->id] ?? null;
+            if ($isFinished($prog, $eval)) {
                 return false;
             }
+
             if ($prog->status === 'in_progress') {
                 return true;
             }
-            if ($prog->schedule && in_array($prog->schedule->computed_status, ['live', 'in_progress'], true)) {
+            if ($prog->schedule && in_array($prog->schedule->status, ['in_progress'], true)) {
                 return true;
             }
-            if ($eval && $eval['submitted'] > 0 && ! $eval['is_complete']) {
+            if ($prog->schedule && $prog->schedule->computed_status === 'live') {
                 return true;
             }
 
             return false;
         });
 
-        $nextProgram = $assignedPrograms->first(function ($prog) use ($evaluationStatus, $liveProgram) {
+        // Identify Next program: First upcoming program that is not finished and not currently live
+        $nextProgram = $assignedPrograms->first(function ($prog) use ($evaluationStatus, $liveProgram, $isFinished) {
             if ($liveProgram && $prog->id === $liveProgram->id) {
                 return false;
             }
             $eval = $evaluationStatus[$prog->id] ?? null;
-            if ($eval && $eval['is_complete']) {
-                return false;
-            }
-            if ($prog->status === 'completed') {
+            if ($isFinished($prog, $eval)) {
                 return false;
             }
 
