@@ -23,6 +23,70 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Mongolian Baiti Web Font */
+        @font-face {
+            font-family: 'Mongolian Baiti';
+            src: local('Mongolian Baiti'), url('{{ asset('fonts/monbaiti.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* Rockwell Std & Rockwell Declarations */
+        @font-face {
+            font-family: 'Rockwell Std';
+            src: local('Rockwell Std Light'), local('Rockwell Light'), url('{{ asset('fonts/Rockwell-Light.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Light.otf') }}') format('opentype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell Std';
+            src: local('Rockwell Std'), local('Rockwell'), local('Rockwell-Regular'), url('{{ asset('fonts/Rockwell-Regular.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype'), url('{{ asset('fonts/ROCK.TTF') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell Std';
+            src: local('Rockwell Std Bold'), local('Rockwell Bold'), url('{{ asset('fonts/Rockwell-Bold.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell Std';
+            src: local('Rockwell Std Extra Bold'), local('Rockwell Extra Bold'), url('{{ asset('fonts/Rockwell-Extra-Bold.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Extra-Bold.otf') }}') format('opentype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* Alias Rockwell to Rockwell Std */
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Light'), url('{{ asset('fonts/Rockwell-Light.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Light.otf') }}') format('opentype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell'), local('Rockwell Regular'), url('{{ asset('fonts/Rockwell-Regular.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Regular.otf') }}') format('opentype'), url('{{ asset('fonts/ROCK.TTF') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rockwell';
+            src: local('Rockwell Bold'), url('{{ asset('fonts/Rockwell-Bold.woff2') }}') format('woff2'), url('{{ asset('fonts/Rockwell-Bold.otf') }}') format('opentype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+    </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-900 font-sora antialiased min-h-screen flex overflow-x-hidden max-w-full"
       x-data="{ sidebarOpen: false }">
