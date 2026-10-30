@@ -77,10 +77,10 @@
                     </div>
 
                     <h4 class="text-sm font-bold text-slate-900 mt-1 font-sora">
-                        ഡാറ്റാബേസിൽ ഡാറ്റ സേവ് ആയിട്ടുണ്ട്
+                        Score Saved in Database
                     </h4>
                     <p class="text-xs text-slate-600 font-medium mt-0.5">
-                        സൈറ്റിന്റെ സിസ്റ്റം ഡാറ്റാബേസിലും റിസൾട്ട് ഷീറ്റിലും മാർക്ക് വിജയകരമായി രേഖപ്പെടുത്തി (Data Confirmed & Saved in Database).
+                        Marks and grade recorded in system database and synced with result sheet.
                     </p>
 
                     <div class="mt-2.5 pt-2 border-t border-emerald-100 flex flex-wrap items-center gap-2 text-xs font-mono">

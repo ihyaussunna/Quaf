@@ -100,7 +100,8 @@ class JudgeEvaluationSimpleLayoutTest extends TestCase
         $response->assertSee('GRADE');
         $response->assertSee('MARK');
         $response->assertSee('Save All Scores');
-        $response->assertSee('ഡാറ്റാബേസിൽ ഡാറ്റ സേവ് ആയിട്ടുണ്ട്');
+        $response->assertSee('Score Saved in Database');
+        $response->assertDontSee('ഡാറ്റാബേസിൽ ഡാറ്റ സേവ് ആയിട്ടുണ്ട്');
         $response->assertSee('Database Synchronized');
         $response->assertSee('Elocution English');
 
