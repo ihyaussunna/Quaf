@@ -144,7 +144,7 @@ class VerificationController extends Controller
             }
 
             $res = $prog->result;
-            if (! in_array($res->status, ['verified', 'published', 'announced'], true)) {
+            if (! in_array($res->status, ['verified', 'published', 'announced'], true) && ! $res->is_media_published) {
                 continue;
             }
 

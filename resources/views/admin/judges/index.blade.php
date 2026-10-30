@@ -15,6 +15,13 @@
             <p class="text-xs text-slate-500 mt-0.5">Manage event judges and their login credentials</p>
         </div>
         <div class="flex items-center gap-2">
+            <form method="POST" action="{{ route('admin.judges.sync-official') }}" class="inline">
+                @csrf
+                <button type="submit" class="px-3 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-medium text-xs flex items-center gap-1.5 transition-colors font-sora cursor-pointer" title="Sync all official stage and category judges roster">
+                    <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>Sync Official Roster</span>
+                </button>
+            </form>
             <a href="{{ route('admin.panel-access.index', ['panel' => 'judge']) }}" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs flex items-center gap-1.5 transition-colors font-sora">
                 <span>Panel Credentials Hub</span>
                 <span class="text-slate-400">&rarr;</span>

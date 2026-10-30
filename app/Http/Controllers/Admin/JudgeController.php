@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,11 @@ class JudgeController extends Controller
 {
     public function index(Request $request): View
     {
+        // Auto-sync official stage judges if not yet present in this environment
+        if (! Judge::whereRaw('LOWER(TRIM(name)) = ?', ['rafi ahsani'])->exists()) {
+            Artisan::call('app:sync-official-judges');
+        }
+
         $search = $request->query('search');
 
         $query = Judge::with(['user', 'programs.category'])
@@ -282,5 +288,15 @@ class JudgeController extends Controller
         AuditLogger::log('regenerate_judge_pin', $judge, ['access_code' => $oldPin], ['access_code' => $newPin]);
 
         return back()->with('success', "Judge '{$judge->name}' നുള്ള പുതിയ ടഫ് പിൻ (PIN): {$newPin} വിജയകരമായി നൽകി.");
+    }
+
+    /**
+     * One-click trigger to sync official judges roster from Admin panel.
+     */
+    public function syncOfficialJudges(): RedirectResponse
+    {
+        Artisan::call('app:sync-official-judges');
+
+        return back()->with('success', 'Official festival judges roster synchronized successfully.');
     }
 }

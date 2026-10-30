@@ -9,6 +9,7 @@ use App\Models\PosterSetting;
 use App\Models\Result;
 use App\Models\ResultTemplate;
 use App\Services\AuditLogger;
+use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
 use App\Services\ResultPosterGenerator;
 use Carbon\Carbon;
@@ -175,14 +176,27 @@ class MediaResultController extends Controller
 
         $isPublish = $request->boolean('publish_now', true);
 
-        $result->update([
+        $updates = [
             'poster_image' => $posterUrl,
             'template_id' => $request->input('template_id') ?? $result->template_id,
             'custom_poster_settings' => $request->input('settings') ?? $result->custom_poster_settings,
-            'is_media_published' => $isPublish ? true : $result->is_media_published,
-            'media_published_at' => $isPublish ? Carbon::now() : $result->media_published_at,
-            'status' => $isPublish ? 'published' : $result->status,
-        ]);
+        ];
+
+        if ($isPublish) {
+            $updates['is_media_published'] = true;
+            $updates['media_published_at'] = Carbon::now();
+            $updates['published_at'] = $result->published_at ?? Carbon::now();
+            $updates['status'] = 'published';
+        }
+
+        $result->update($updates);
+
+        if ($isPublish) {
+            $result->program->update(['status' => 'completed']);
+            $this->issueCertificates($result);
+            app(PointCalculationService::class)->recalculateAllPoints();
+            app(CoinRewardService::class)->distributeCoinsForResult($result);
+        }
 
         AuditLogger::log('save_result_poster', $result, null, [
             'is_published' => $result->is_media_published,
@@ -222,6 +236,9 @@ class MediaResultController extends Controller
         // Recalculate points
         app(PointCalculationService::class)->recalculateAllPoints();
 
+        // Distribute coins to winners
+        app(CoinRewardService::class)->distributeCoinsForResult($result);
+
         AuditLogger::log('media_publish_result', $result, $old, $result->toArray());
 
         return back()->with('success', "പ്രോഗ്രാം '{$result->program->name}' ഫലം പബ്ലിക് ആയി പ്രസിദ്ധീകരിച്ചു.");
@@ -238,19 +255,39 @@ class MediaResultController extends Controller
         ];
 
         foreach ($placements as $pos => $entry) {
-            if ($entry && $entry->student_id) {
-                $certNum = 'QUAF09-'.strtoupper(Str::slug($program->code)).'-'.$entry->chest_number;
-                Certificate::firstOrCreate(
-                    ['certificate_number' => $certNum],
-                    [
-                        'entry_id' => $entry->id,
-                        'student_id' => $entry->student_id,
-                        'program_id' => $program->id,
-                        'position' => $pos,
-                        'issued_at' => Carbon::now(),
-                        'qr_verification_url' => route('verify.certificate', $certNum),
-                    ]
-                );
+            if ($entry) {
+                // If individual entry
+                if ($entry->student_id) {
+                    $certNum = 'QUAF09-'.strtoupper(Str::slug($program->code)).'-'.$entry->chest_number;
+                    Certificate::firstOrCreate(
+                        ['certificate_number' => $certNum],
+                        [
+                            'entry_id' => $entry->id,
+                            'student_id' => $entry->student_id,
+                            'program_id' => $program->id,
+                            'position' => $pos,
+                            'issued_at' => Carbon::now(),
+                            'qr_verification_url' => route('verify.certificate', $certNum),
+                        ]
+                    );
+                }
+
+                // If group entry with participants
+                $participants = $entry->participants()->get();
+                foreach ($participants as $participant) {
+                    $certNum = 'QUAF09-'.strtoupper(Str::slug($program->code)).'-'.$participant->student_id;
+                    Certificate::firstOrCreate(
+                        ['certificate_number' => $certNum],
+                        [
+                            'entry_id' => $entry->id,
+                            'student_id' => $participant->id,
+                            'program_id' => $program->id,
+                            'position' => $pos,
+                            'issued_at' => Carbon::now(),
+                            'qr_verification_url' => route('verify.certificate', $certNum),
+                        ]
+                    );
+                }
             }
         }
     }
