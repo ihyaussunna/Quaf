@@ -599,6 +599,8 @@ class MarkEntryController extends Controller
      */
     protected function computeRankedEntries(Program $program): Collection
     {
+        $posPointsMap = PointCalculationService::getPositionPointsForProgram($program);
+
         $entries = ProgramEntry::where('program_id', $program->id)
             ->with(['student.group', 'group', 'scores'])
             ->get()
@@ -607,6 +609,7 @@ class MarkEntryController extends Controller
                 $entry->computed_score = $score;
                 $gradeInfo = PointCalculationService::getGradeFromScore($score);
                 $entry->computed_grade = $gradeInfo['grade'] ?? '-';
+                $entry->grade_points = $gradeInfo['points'] ?? 0;
 
                 return $entry;
             })
@@ -620,6 +623,8 @@ class MarkEntryController extends Controller
         foreach ($entries as $item) {
             if ($item->computed_score <= 0) {
                 $item->computed_rank = '';
+                $item->position_points = 0;
+                $item->team_points = 0;
 
                 continue;
             }
@@ -630,6 +635,8 @@ class MarkEntryController extends Controller
             }
 
             $item->computed_rank = $rankMap[$currentRank] ?? '';
+            $item->position_points = $posPointsMap[$currentRank] ?? 0;
+            $item->team_points = $item->position_points + $item->grade_points;
         }
 
         return $entries;

@@ -482,15 +482,19 @@ class CallListController extends Controller
             'entries.scoreSheets.judge',
         ]);
 
+        $posPointsMap = PointCalculationService::getPositionPointsForProgram($program);
+
         $entries = $program->entries()
-            ->where('status', 'verified')
+            ->whereIn('status', ['verified', 'confirmed'])
             ->with(['student.group', 'group', 'scoreSheets.judge'])
             ->get()
             ->map(function ($entry) {
                 $submittedSheets = $entry->scoreSheets->where('is_submitted', true);
                 $entry->submitted_score_count = $submittedSheets->count();
                 $entry->average_score = $submittedSheets->isNotEmpty() ? (float) $submittedSheets->avg('total_score') : 0.0;
-                $entry->grade = PointCalculationService::getGradeFromScore($entry->average_score)['grade'] ?? '-';
+                $gradeInfo = PointCalculationService::getGradeFromScore($entry->average_score);
+                $entry->grade = $gradeInfo['grade'] ?? '-';
+                $entry->grade_points = $gradeInfo['points'] ?? 0;
 
                 return $entry;
             })
@@ -509,6 +513,26 @@ class CallListController extends Controller
                 return strcmp($a->code_letter ?? '', $b->code_letter ?? '');
             })
             ->values();
+
+        $currentRank = 0;
+        $prevScore = null;
+
+        foreach ($entries as $entry) {
+            $isPresent = $entry->attendance_status === 'present';
+            if ($isPresent && $entry->submitted_score_count > 0 && $entry->average_score > 0) {
+                if ($prevScore === null || abs($entry->average_score - $prevScore) > 0.001) {
+                    $currentRank++;
+                    $prevScore = $entry->average_score;
+                }
+                $entry->computed_rank = $currentRank;
+                $entry->position_points = $posPointsMap[$currentRank] ?? 0;
+            } else {
+                $entry->computed_rank = null;
+                $entry->position_points = 0;
+            }
+
+            $entry->team_points = $entry->position_points + $entry->grade_points;
+        }
 
         $judges = $program->judges;
 

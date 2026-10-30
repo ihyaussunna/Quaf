@@ -114,6 +114,7 @@
                         @endforeach
                         <th class="px-4 py-3 text-center w-28 bg-emerald-50/60 text-emerald-900 font-black">Average</th>
                         <th class="px-4 py-3 text-center w-20">Grade</th>
+                        <th class="px-4 py-3 text-center w-32 bg-amber-50/70 text-amber-950 font-black">Team Point</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -123,15 +124,15 @@
                         @endphp
                         <tr class="hover:bg-slate-50/75 transition-colors {{ ! $isPresent ? 'opacity-50 bg-red-50/10' : '' }}">
                             <td class="px-4 py-3 text-center font-mono font-bold text-slate-400">
-                                @if($isPresent && $entry->average_score > 0)
-                                    @if($index === 0)
+                                @if($isPresent && $entry->average_score > 0 && ($entry->computed_rank ?? null))
+                                    @if($entry->computed_rank === 1)
                                         <span class="w-6 h-6 rounded-full bg-amber-400 text-white font-black inline-flex items-center justify-center text-xs shadow-xs">1</span>
-                                    @elseif($index === 1)
+                                    @elseif($entry->computed_rank === 2)
                                         <span class="w-6 h-6 rounded-full bg-slate-400 text-white font-black inline-flex items-center justify-center text-xs shadow-xs">2</span>
-                                    @elseif($index === 2)
+                                    @elseif($entry->computed_rank === 3)
                                         <span class="w-6 h-6 rounded-full bg-amber-700 text-white font-black inline-flex items-center justify-center text-xs shadow-xs">3</span>
                                     @else
-                                        {{ $index + 1 }}
+                                        {{ $entry->computed_rank }}
                                     @endif
                                 @else
                                     -
@@ -195,10 +196,34 @@
                                     <span class="text-slate-400">-</span>
                                 @endif
                             </td>
+
+                            <!-- Team Point based on Mark + Grade + Position -->
+                            <td class="px-4 py-3 text-center font-mono bg-amber-50/20">
+                                @if($isPresent && $entry->submitted_score_count > 0 && ($entry->team_points ?? 0) > 0)
+                                    <div class="inline-flex flex-col items-center">
+                                        <span class="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-black text-xs border border-amber-300 shadow-2xs">
+                                            +{{ $entry->team_points }} Pts
+                                        </span>
+                                        <span class="text-[9px] text-slate-500 font-normal mt-0.5 whitespace-nowrap">
+                                            @if(($entry->position_points ?? 0) > 0 && ($entry->grade_points ?? 0) > 0)
+                                                {{ $entry->position_points }} pos + {{ $entry->grade_points }} gr
+                                            @elseif(($entry->position_points ?? 0) > 0)
+                                                {{ $entry->position_points }} pos
+                                            @elseif(($entry->grade_points ?? 0) > 0)
+                                                {{ $entry->grade_points }} gr
+                                            @endif
+                                        </span>
+                                    </div>
+                                @elseif($isPresent && $entry->submitted_score_count > 0)
+                                    <span class="text-slate-400 font-bold text-xs">0 Pts</span>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ 8 + $judges->count() }}" class="p-12 text-center text-slate-400 font-mono text-xs">
+                            <td colspan="{{ 9 + $judges->count() }}" class="p-12 text-center text-slate-400 font-mono text-xs">
                                 No participants registered in this program.
                             </td>
                         </tr>

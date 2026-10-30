@@ -210,6 +210,7 @@
                             <th class="px-2.5 py-2.5 text-center font-bold text-slate-900">GRADE</th>
                             <th class="px-3 py-2.5 text-center font-bold text-slate-900">SCORE</th>
                             <th class="px-3 py-2.5 text-center font-bold text-slate-900">RANK</th>
+                            <th class="px-2.5 py-2.5 text-center font-bold text-slate-900">PTS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -255,10 +256,17 @@
                                         <span class="text-slate-300 font-bold">—</span>
                                     @endif
                                 </td>
+                                <td class="px-2.5 py-2.5 text-center font-bold">
+                                    @if(($item->team_points ?? 0) > 0)
+                                        <span class="text-slate-900 font-bold">+{{ $item->team_points }}</span>
+                                    @else
+                                        <span class="text-slate-300 font-normal">0</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-8 text-center text-slate-400 font-normal">
+                                <td colspan="9" class="px-4 py-8 text-center text-slate-400 font-normal">
                                     No marks recorded for this program yet.
                                 </td>
                             </tr>

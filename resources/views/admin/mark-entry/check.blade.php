@@ -113,6 +113,7 @@
                             <th class="px-4 py-3.5 text-center">Grade</th>
                             <th class="px-4 py-3.5 text-center">Score</th>
                             <th class="px-4 py-3.5 text-center">Rank</th>
+                            <th class="px-4 py-3.5 text-center bg-amber-50/70 text-amber-950 font-bold">Team Point</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -140,10 +141,32 @@
                                         <span class="text-gray-300">-</span>
                                     @endif
                                 </td>
+                                <td class="px-4 py-3.5 text-center font-mono">
+                                    @if(($item->team_points ?? 0) > 0)
+                                        <div class="inline-flex flex-col items-center">
+                                            <span class="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-bold text-xs border border-amber-300 shadow-2xs">
+                                                +{{ $item->team_points }} Pts
+                                            </span>
+                                            <span class="text-[10px] text-gray-500 font-medium mt-0.5 whitespace-nowrap">
+                                                @if(($item->position_points ?? 0) > 0 && ($item->grade_points ?? 0) > 0)
+                                                    {{ $item->position_points }} pos + {{ $item->grade_points }} gr
+                                                @elseif(($item->position_points ?? 0) > 0)
+                                                    {{ $item->position_points }} pos
+                                                @elseif(($item->grade_points ?? 0) > 0)
+                                                    {{ $item->grade_points }} gr
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @elseif($item->computed_score > 0)
+                                        <span class="text-gray-400 font-medium text-xs">0 Pts</span>
+                                    @else
+                                        <span class="text-gray-300">-</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center text-gray-400">
+                                <td colspan="9" class="px-6 py-12 text-center text-gray-400">
                                     No marks recorded for this program yet.
                                 </td>
                             </tr>
