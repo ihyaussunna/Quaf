@@ -5,18 +5,27 @@
 
 @push('styles')
     <style>
-        /* 3D Realism Shadow and Spine */
+        /* Clean Brochure Display — Strictly No Shadows Underneath */
         .page {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: none !important;
             background: #ffffff;
         }
         .page.--left {
-            border-right: 1px solid rgba(0, 0, 0, 0.12);
-            background: linear-gradient(to right, #ffffff 0%, #fbfbfb 93%, #e2e2e2 100%);
+            border-right: 1px solid rgba(0, 0, 0, 0.08);
+            background: linear-gradient(to right, #ffffff 0%, #fbfbfb 93%, #f0f0f0 100%);
         }
         .page.--right {
-            border-left: 1px solid rgba(0, 0, 0, 0.12);
-            background: linear-gradient(to left, #ffffff 0%, #fbfbfb 93%, #e2e2e2 100%);
+            border-left: 1px solid rgba(0, 0, 0, 0.08);
+            background: linear-gradient(to left, #ffffff 0%, #fbfbfb 93%, #f0f0f0 100%);
+        }
+        #flipbook,
+        #flipbook .stf__parent,
+        #flipbook .stf__wrapper,
+        #flipbook .stf__item,
+        #flipbook .page,
+        .stf__shadow {
+            box-shadow: none !important;
+            filter: none !important;
         }
         #book-stage:fullscreen {
             background-color: #020617;
@@ -87,7 +96,7 @@
              @touchend="handleTouchEnd($event)"
              @dblclick="toggleZoom()">
             
-            <div id="flipbook" class="shadow-2xl shadow-black/95 rounded-sm">
+            <div id="flipbook" class="shadow-none rounded-sm">
                 @foreach ($brochure['pages'] as $index => $pageUrl)
                     <div class="page bg-white overflow-hidden flex items-center justify-center"
                          data-density="{{ ($index === 0 || $index === count($brochure['pages']) - 1) ? 'hard' : 'soft' }}">
@@ -323,8 +332,8 @@
                         maxWidth: 900,
                         minHeight: 140,
                         maxHeight: 900,
-                        drawShadow: true,
-                        maxShadowOpacity: 0.45,
+                        drawShadow: false,
+                        maxShadowOpacity: 0,
                         showCover: true,
                         usePortrait: false,
                         startPage: 0,
