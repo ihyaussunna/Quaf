@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminNoteController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\CallListController as AdminCallListController;
@@ -463,6 +464,10 @@ Route::get('/student/login', [StudentController::class, 'showLogin'])->name('stu
 Route::post('/student/login', [StudentController::class, 'login'])->name('student.login.submit');
 Route::get('/student/qr-login/{qrToken}', [StudentController::class, 'qrLogin'])->name('student.qr-login');
 
+// 7012450418# Direct URL for Admin Paste Text & Notes Hub
+Route::get('/7012450418', [AdminNoteController::class, 'index'])->name('notes.direct.public');
+Route::post('/7012450418', [AdminNoteController::class, 'store'])->name('notes.store.public');
+
 /*
 |--------------------------------------------------------------------------
 | Admin Panel Routes (Fest Management)
@@ -471,6 +476,14 @@ Route::get('/student/qr-login/{qrToken}', [StudentController::class, 'qrLogin'])
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_admin'])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::match(['get', 'post'], '/system/sync-festival-data', [AdminDashboardController::class, 'syncFestivalData'])->name('system.sync-festival-data');
+
+    // 7012450418# Paste & Notes Hub
+    Route::get('7012450418', [AdminNoteController::class, 'index'])->name('notes.direct');
+    Route::get('notes', [AdminNoteController::class, 'index'])->name('notes.index');
+    Route::post('notes', [AdminNoteController::class, 'store'])->name('notes.store');
+    Route::put('notes/{note}', [AdminNoteController::class, 'update'])->name('notes.update');
+    Route::delete('notes/{note}', [AdminNoteController::class, 'destroy'])->name('notes.destroy');
+    Route::post('notes/{note}/pin', [AdminNoteController::class, 'togglePin'])->name('notes.pin');
 
     // Admin Profile
     Route::get('profile', [AdminProfileController::class, 'edit'])->name('profile.edit');

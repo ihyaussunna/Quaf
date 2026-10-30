@@ -540,6 +540,15 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                 </div>
             </a>
+
+            <!-- 16. 7012450418# Notes & Pastepad Hub -->
+            <a href="{{ route('admin.notes.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.notes.*') || request()->is('7012450418*') || request()->is('admin/7012450418*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>7012450418# Notes</span>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-amber-500/20 text-amber-300 font-bold">PASTE</span>
+            </a>
             @endif
 
         </nav>
