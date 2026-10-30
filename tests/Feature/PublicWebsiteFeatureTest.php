@@ -257,13 +257,27 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('QUAF 9.0 Official Theme Song');
     }
 
-    public function test_brochure_page_renders(): void
+    public function test_brochure_page_renders_with_header_and_footer(): void
     {
         $response = $this->get('/brochure');
 
         $response->assertStatus(200);
         $response->assertViewIs('public.brochure');
         $response->assertSee('Theme Note');
+        // Header navigation check
+        $response->assertSee('Student Portal');
+        // Footer check
+        $response->assertSee('QUAF Markaz Cultural Festival 2026');
+        $response->assertSee('Markazu Saquafathi Sunniyya');
+    }
+
+    public function test_home_page_displays_single_theme_hero_logo(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('adabic-inheritance-web.svg');
+        $response->assertDontSee('quaf-logo-hero.svg');
     }
 
     public function test_verification_hub_and_detail_routes_render(): void
@@ -329,14 +343,14 @@ class PublicWebsiteFeatureTest extends TestCase
         // 2. Offstage Rockwell PDF print view (Admin)
         $pdfResponse = $this->actingAs($user)->get(route('admin.schedules.offstage.pdf', ['date' => '2026-10-07']));
         $pdfResponse->assertStatus(200);
-        $pdfResponse->assertSee('Offstage Program Schedule');
+        $pdfResponse->assertSee('Program Schedule');
         $pdfResponse->assertSee('2026 October 07 Wednesday');
         $pdfResponse->assertSee('Rockwell');
 
         // 3. Public Offstage PDF view
         $publicPdf = $this->get(route('schedule.offstage-pdf', ['date' => '2026-10-07']));
         $publicPdf->assertStatus(200);
-        $publicPdf->assertSee('Offstage Program Schedule');
+        $publicPdf->assertSee('Program Schedule');
 
         // 4. Conflict check API
         $checkResponse = $this->actingAs($user)->getJson(route('admin.schedules.check-conflict', [

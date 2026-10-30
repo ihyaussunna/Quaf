@@ -89,23 +89,13 @@ function fundHomePage() {
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full flex flex-col items-center text-center">
             
-            <!-- Hero Center: Alternating Official Theme Logo & QUAF Festival Logo -->
-            <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center"
-                 x-data="{ activeLogo: 0 }"
-                 x-init="setInterval(() => { activeLogo = 1 - activeLogo; }, 4200)">
+            <!-- Hero Center: Official Theme Logo -->
+            <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center">
                 
                 <div class="relative w-full h-[112px] xs:h-[135px] sm:h-[165px] flex items-center justify-center">
-                    <!-- 1. Adabic Inheritance Logo -->
                     <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
                          alt="Adabic Inheritance — QUAF" 
-                         class="max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
-                         :class="activeLogo === 0 ? 'opacity-100 scale-100 relative z-10' : 'opacity-0 scale-95 absolute pointer-events-none z-0'">
-
-                    <!-- 2. QUAF Festival Logo -->
-                    <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
-                         alt="QUAF — Markaz Cultural Festival" 
-                         class="max-w-[195px] xs:max-w-[240px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
-                         :class="activeLogo === 1 ? 'opacity-100 scale-100 relative z-10' : 'opacity-0 scale-95 absolute pointer-events-none z-0'">
+                         class="max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]">
                 </div>
 
                 <!-- Festival Info Pills -->
