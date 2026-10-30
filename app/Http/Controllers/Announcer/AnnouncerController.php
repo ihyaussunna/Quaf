@@ -12,6 +12,7 @@ use App\Services\AuditLogger;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class AnnouncerController extends Controller
@@ -56,8 +57,18 @@ class AnnouncerController extends Controller
             'total_count' => Result::whereIn('status', ['send', 'delivered', 'announced', 'published'])->count(),
         ];
 
-        $pendingStandings = StandingAnnouncement::where('status', 'ready')->latest()->get();
-        $announcedStandings = StandingAnnouncement::whereIn('status', ['announced', 'published'])->latest()->take(6)->get();
+        $pendingStandings = collect();
+        $announcedStandings = collect();
+        try {
+            StandingAnnouncement::ensureSchema();
+            if (Schema::hasTable('standing_announcements')) {
+                $pendingStandings = StandingAnnouncement::where('status', 'ready')->latest()->get();
+                $announcedStandings = StandingAnnouncement::whereIn('status', ['announced', 'published'])->latest()->take(6)->get();
+            }
+        } catch (\Throwable) {
+            $pendingStandings = collect();
+            $announcedStandings = collect();
+        }
 
         return view('announcer.index', compact('results', 'stats', 'tab', 'search', 'pendingStandings', 'announcedStandings'));
     }

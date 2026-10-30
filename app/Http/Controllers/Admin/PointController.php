@@ -13,6 +13,7 @@ use App\Services\AuditLogger;
 use App\Services\PointCalculationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class PointController extends Controller
@@ -58,10 +59,18 @@ class PointController extends Controller
         $publicStandingsMilestones = FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40');
         $publicStandingsUpdatedAt = FestivalSetting::get('public_standings_updated_at');
 
-        $recentStandingsAnnouncements = StandingAnnouncement::with(['sentBy', 'announcedBy', 'publishedBy'])
-            ->latest()
-            ->take(8)
-            ->get();
+        $recentStandingsAnnouncements = collect();
+        try {
+            StandingAnnouncement::ensureSchema();
+            if (Schema::hasTable('standing_announcements')) {
+                $recentStandingsAnnouncements = StandingAnnouncement::with(['sentBy', 'announcedBy', 'publishedBy'])
+                    ->latest()
+                    ->take(8)
+                    ->get();
+            }
+        } catch (\Throwable) {
+            $recentStandingsAnnouncements = collect();
+        }
 
         return view('admin.points.index', compact(
             'settings',

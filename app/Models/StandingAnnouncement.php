@@ -6,9 +6,58 @@ use App\Services\PointCalculationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class StandingAnnouncement extends Model
 {
+    protected static function booted(): void
+    {
+        static::ensureSchema();
+    }
+
+    public static function ensureSchema(): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+
+        try {
+            if (! Schema::hasTable('standing_announcements')) {
+                try {
+                    Artisan::call('migrate', ['--force' => true]);
+                } catch (\Throwable) {
+                }
+            }
+
+            if (! Schema::hasTable('standing_announcements')) {
+                Schema::create('standing_announcements', function (Blueprint $table) {
+                    $table->id();
+                    $table->unsignedInteger('results_count')->default(0);
+                    $table->string('title', 150);
+                    $table->text('script_text')->nullable();
+                    $table->json('standings_data');
+                    $table->string('status', 30)->default('ready');
+                    $table->foreignId('sent_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+                    $table->foreignId('announced_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+                    $table->foreignId('published_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+                    $table->timestamp('sent_at')->nullable();
+                    $table->timestamp('announced_at')->nullable();
+                    $table->timestamp('published_at')->nullable();
+                    $table->timestamps();
+
+                    $table->index(['status', 'created_at']);
+                });
+            }
+
+            $checked = true;
+        } catch (\Throwable) {
+            $checked = true;
+        }
+    }
+
     protected $fillable = [
         'results_count',
         'title',

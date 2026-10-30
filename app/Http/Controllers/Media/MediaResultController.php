@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -79,8 +80,18 @@ class MediaResultController extends Controller
             'public_standings_updated_at' => FestivalSetting::get('public_standings_updated_at'),
         ];
 
-        $incomingStandings = StandingAnnouncement::where('status', 'announced')->latest()->get();
-        $publishedStandingsHistory = StandingAnnouncement::where('status', 'published')->latest()->take(6)->get();
+        $incomingStandings = collect();
+        $publishedStandingsHistory = collect();
+        try {
+            StandingAnnouncement::ensureSchema();
+            if (Schema::hasTable('standing_announcements')) {
+                $incomingStandings = StandingAnnouncement::where('status', 'announced')->latest()->get();
+                $publishedStandingsHistory = StandingAnnouncement::where('status', 'published')->latest()->take(6)->get();
+            }
+        } catch (\Throwable) {
+            $incomingStandings = collect();
+            $publishedStandingsHistory = collect();
+        }
 
         return view('media.results.index', compact('results', 'stats', 'tab', 'search', 'standingsInfo', 'incomingStandings', 'publishedStandingsHistory'));
     }

@@ -340,4 +340,16 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
             'milestone_label' => 'Standings after 10 Results',
         ]);
     }
+
+    public function test_media_and_announcer_portals_load_safely_even_if_no_standings_exist(): void
+    {
+        $mediaResponse = $this->actingAs($this->mediaUser)->get(route('media.results.index'));
+        $mediaResponse->assertOk();
+
+        $announcerResponse = $this->actingAs($this->announcer)->get(route('announcer.index'));
+        $announcerResponse->assertOk();
+
+        $adminResponse = $this->actingAs($this->admin)->get(route('admin.points.index'));
+        $adminResponse->assertOk();
+    }
 }
