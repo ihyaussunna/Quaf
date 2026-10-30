@@ -6,7 +6,6 @@
     <div class="text-center px-2">
         <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase">PARTICIPANT IDENTIFICATION & WALLET</span>
         <h1 class="text-2xl sm:text-4xl font-sora font-black text-slate-900 mt-1">Official Delegate Profile</h1>
-        <p class="text-xs text-slate-500 font-anek mt-1">ഐഡി കാർഡ് സ്കാൻ ചെയ്തുകൊണ്ടുള്ള ഔദ്യോഗിക വിവരങ്ങളും കോയിൻ ബാലൻസും</p>
     </div>
 
     @if($isValid && $student)
@@ -45,20 +44,6 @@
                         <p>Festival Contribution: <strong class="text-[#be1e2d] font-bold">{{ $student->points_cache }} Points</strong></p>
                     </div>
                 </div>
-
-                <!-- Open Full Portal Button -->
-                <div class="shrink-0 flex flex-col gap-2 w-full sm:w-auto max-w-full">
-                    <a href="{{ route('student.qr-login', $student->qr_token) }}" 
-                       class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md block">
-                        Open Student Portal
-                    </a>
-                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
-                        <a href="{{ route('presentation.dashboard', ['student' => $student->student_id]) }}" 
-                           class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-bold text-xs font-mono uppercase tracking-wider text-center transition-all shadow-md block">
-                            Open in Presentation Desk
-                        </a>
-                    @endif
-                </div>
             </div>
 
             <!-- COIN WALLET BALANCE GRID -->
@@ -71,7 +56,6 @@
                             <span>{{ number_format($coinSummary['balance']) }}</span>
                             <span class="text-xs font-mono uppercase font-bold text-slate-800">Coins</span>
                         </div>
-                        <div class="text-[11px] font-anek text-slate-900 mt-2 font-medium">കൈവശമുള്ള ആകെ കോയിനുകൾ</div>
                     </div>
 
                     <!-- Total Earned -->
@@ -80,7 +64,6 @@
                         <div class="text-2xl sm:text-3xl font-black mt-1 font-sora text-emerald-600">
                             +{{ number_format($coinSummary['total_earned']) }}
                         </div>
-                        <div class="text-[11px] font-anek text-slate-500 mt-2 font-medium">വിവിധ മത്സരങ്ങളിൽ നിന്ന് ലഭിച്ചത്</div>
                     </div>
 
                     <!-- Total Spent -->
@@ -89,7 +72,6 @@
                         <div class="text-2xl sm:text-3xl font-black mt-1 font-sora text-rose-600">
                             -{{ number_format($coinSummary['total_spent']) }}
                         </div>
-                        <div class="text-[11px] font-anek text-slate-500 mt-2 font-medium">സമ്മാനങ്ങൾക്കായി ചെലവഴിച്ചത്</div>
                     </div>
                 </div>
             @endif
@@ -252,14 +234,14 @@
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-slate-400"></span>
                         <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-600">
-                            QUAF Recognition Gift (ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം)
+                            QUAF Recognition Gift
                         </span>
                     </div>
                     <div class="text-base sm:text-lg font-black font-sora mt-1 text-slate-800">
-                        അർഹതയില്ല (Not Eligible)
+                        Not Eligible
                     </div>
-                    <div class="text-xs font-anek text-slate-500 mt-0.5">
-                        മത്സരങ്ങളിൽ (Individual / Group) പങ്കെടുത്ത വിദ്യാർത്ഥികൾക്ക് മാത്രമാണ് ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം നൽകുന്നത്.
+                    <div class="text-xs font-mono text-slate-500 mt-0.5">
+                        Awarded exclusively to candidates who participated in competitive events.
                     </div>
                 </div>
             @else
@@ -269,23 +251,23 @@
                             <div class="flex items-center gap-2">
                                 <span class="w-3 h-3 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                 <span class="text-xs font-mono font-bold uppercase tracking-wider">
-                                    QUAF Recognition Gift (ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം)
+                                    QUAF Recognition Gift
                                 </span>
                             </div>
                             
                             @if($student->recognition_gift_delivered)
                                 <div class="text-lg font-black font-sora mt-1 text-emerald-900">
-                                    സമ്മാനം കൈപ്പറ്റി (Gift Delivered)
+                                    Gift Delivered
                                 </div>
                                 <div class="text-xs font-mono text-emerald-800 mt-0.5">
-                                    തീയതി: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • വിതരണം: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                                    Delivered on: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • Counter: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
                                 </div>
                             @else
                                 <div class="text-lg font-black font-sora mt-1 text-amber-900">
-                                    സമ്മാനം കൈപ്പറ്റാനുണ്ട് (Pending Collection)
+                                    Pending Collection
                                 </div>
-                                <div class="text-xs font-anek text-amber-800 mt-0.5">
-                                    പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും നിങ്ങളുടെ ക്വാഫ് റെക്കഗ്നിഷൻ സമ്മാനം കൈപ്പറ്റാവുന്നതാണ്.
+                                <div class="text-xs font-mono text-amber-800 mt-0.5">
+                                    Collect your QUAF Recognition Gift from the Presentation Counter.
                                 </div>
                             @endif
                         </div>
@@ -295,7 +277,7 @@
                                 @csrf
                                 <button type="submit" 
                                         class="px-4 py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm {{ $student->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (നൽകി എന്ന് അടയാളപ്പെടുത്തുക)' }}
+                                    {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered' }}
                                 </button>
                             </form>
                         @endif
@@ -307,8 +289,8 @@
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-sora font-bold text-lg text-slate-900">Purchase History & Gifts (വാങ്ങിയ സമ്മാനങ്ങൾ)</h3>
-                        <p class="text-xs text-slate-500 font-anek">പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും കോയിൻ നൽകി വാങ്ങിയ മുഴുവൻ ഇനങ്ങളുടെയും വിവരങ്ങൾ.</p>
+                        <h3 class="font-sora font-bold text-lg text-slate-900">Purchase History & Gifts</h3>
+                        <p class="text-xs text-slate-500 font-mono">Record of items and rewards redeemed at the Presentation Desk.</p>
                     </div>
                     <span class="text-xs font-mono font-bold text-slate-400 uppercase">
                         {{ $purchaseHistory->count() }} Items
@@ -330,7 +312,7 @@
                                 @foreach($purchaseHistory as $purchase)
                                     <tr class="hover:bg-slate-50/70 transition-colors">
                                         <td class="py-3 px-4 font-mono text-slate-500">
-                                            {{ $purchase->created_at?->format('d M Y, h:i A') }}
+                                             {{ $purchase->created_at?->format('d M Y, h:i A') }}
                                         </td>
                                         <td class="py-3 px-4">
                                             <div class="font-bold text-slate-900">{{ $purchase->description }}</div>
@@ -354,7 +336,7 @@
                     </div>
                 @else
                     <div class="p-6 text-center text-xs text-slate-400 font-mono bg-slate-50 rounded-2xl border border-slate-200/80">
-                        ഇതുവരെ പ്രസന്റേഷൻ കൗണ്ടറിൽ നിന്നും പർച്ചേസുകൾ ഒന്നും നടത്തിയിട്ടില്ല (No purchases recorded yet).
+                        No purchases or redeemed items recorded yet.
                     </div>
                 @endif
             </div>
