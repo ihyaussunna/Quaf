@@ -32,7 +32,15 @@ class ResultPosterGenerator
                             ->where('id', '<=', $result->id);
                     });
             })
-            ->count() ?: 1;
+            ->count() ?: ($result->id ?? 1);
+
+        $isYellow = ($result->custom_poster_settings['layout_mode'] ?? '') === 'yellow_modern'
+            || str_contains(strtolower($result->template?->image_path ?? ''), 'yellow')
+            || str_contains(strtolower($result->template?->name ?? ''), 'yellow');
+
+        if ($isYellow && file_exists(public_path('images/result-templates/quaf_template_yellow.png'))) {
+            return self::generateYellow($result, $resultNo);
+        }
 
         $width = 1080;
         $height = 1440;
@@ -272,6 +280,142 @@ class ResultPosterGenerator
         imagefilledellipse($img, $x2 - $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
         imagefilledellipse($img, $x1 + $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
         imagefilledellipse($img, $x2 - $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
+    }
+
+    /**
+     * Generate dedicated yellow modern poster layout matching Adobe Illustrator design.
+     */
+    public static function generateYellow(Result $result, int $resultNo): \GdImage
+    {
+        $templatePath = public_path('images/result-templates/quaf_template_yellow.png');
+        $img = imagecreatefrompng($templatePath);
+        imagealphablending($img, true);
+
+        $red = imagecolorallocate($img, 208, 38, 39); // #D02627
+        $black = imagecolorallocate($img, 0, 0, 0);
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $divider = imagecolorallocatealpha($img, 0, 0, 0, 100);
+
+        $rockwellRegular = public_path('fonts/ROCK.TTF');
+        $rockwellLight = public_path('fonts/Rockwell-Light.otf');
+        if (! file_exists($rockwellLight)) {
+            $rockwellLight = $rockwellRegular;
+        }
+        $serifFont = public_path('fonts/georgiab.ttf');
+        if (! file_exists($serifFont)) {
+            $serifFont = $rockwellRegular;
+        }
+
+        $program = $result->program;
+        $zone = $program->zone?->name ?? ($program->eligibility ?? 'All Zones');
+
+        // 1. Zone in Red Capsule
+        $zoneBbox = @imagettfbbox(33, 0, $rockwellRegular, $zone);
+        if ($zoneBbox) {
+            $zw = abs($zoneBbox[4] - $zoneBbox[0]);
+            $zh = abs($zoneBbox[5] - $zoneBbox[1]);
+            $zx = 686 - ($zw / 2);
+            $zy = 165 + ($zh / 2) - 2;
+            imagettftext($img, 33, 0, (int) $zx, (int) $zy, $white, $rockwellRegular, $zone);
+        }
+
+        // 2. Program Name
+        $progName = $program->name ?? 'Competition';
+        $words = explode(' ', $progName);
+        $lines = [];
+        $line = '';
+        foreach ($words as $w) {
+            if (strlen($line.' '.$w) > 12 && ! empty($line)) {
+                $lines[] = trim($line);
+                $line = $w;
+            } else {
+                $line .= ' '.$w;
+            }
+        }
+        if (! empty($line)) {
+            $lines[] = trim($line);
+        }
+
+        $py = count($lines) > 2 ? 260 : 290;
+        $fontSize = count($lines) > 2 ? 55 : 75;
+        $lineH = (int) ($fontSize * 1.15);
+        foreach ($lines as $l) {
+            imagettftext($img, $fontSize, 0, 584, $py, $black, $rockwellRegular, $l);
+            $py += $lineH;
+        }
+
+        // 3. Result Sequence Number
+        $resultNoStr = sprintf('%02d', $resultNo);
+        $bboxNo = @imagettfbbox(260, 0, $serifFont, $resultNoStr);
+        if ($bboxNo) {
+            $nw = abs($bboxNo[4] - $bboxNo[0]);
+            imagettftext($img, 260, 0, (int) (740 - ($nw / 2)), 760, $red, $serifFont, $resultNoStr);
+        }
+
+        // 4. Multiple Winners with dynamic auto-scaling
+        $winnersData = ! empty($result->custom_poster_settings['custom_winners'])
+            ? $result->custom_poster_settings['custom_winners']
+            : $result->getPosterWinners();
+
+        $flatWinners = [];
+        foreach (['first', 'second', 'third'] as $rankKey) {
+            $rankNum = $rankKey === 'first' ? '01' : ($rankKey === 'second' ? '02' : '03');
+            if (! empty($winnersData[$rankKey])) {
+                foreach ($winnersData[$rankKey] as $item) {
+                    if (! empty($item['name'])) {
+                        $flatWinners[] = [
+                            'rank' => $rankNum,
+                            'name' => $item['name'],
+                            'unit' => $item['unit'] ?? '',
+                        ];
+                    }
+                }
+            }
+        }
+
+        $count = count($flatWinners);
+        if ($count > 0) {
+            $baseScale = $count <= 3 ? 1.0 : min(1.0, max(0.48, 3.15 / $count));
+            $availHeight = 520;
+            $rowGap = $count <= 3 ? 175 : (int) ($availHeight / $count);
+            $startY = $count <= 3 ? 120 : max(90, (int) (130 - ($count - 3) * 10));
+
+            $rankSize = (int) max(14, round(23 * $baseScale));
+            $nameSize = (int) max(15, round(25 * $baseScale));
+            $unitSize = (int) max(12, round(19 * $baseScale));
+
+            $blockLeft = 205;
+            $dividerWidth = (int) (280 * min(1.0, $baseScale * 1.1));
+
+            $currY = $startY;
+            foreach ($flatWinners as $winner) {
+                // Rank
+                imagettftext($img, $rankSize, 0, $blockLeft, $currY, $red, $rockwellRegular, $winner['rank']);
+
+                // Name
+                $nameY = $currY + (int) ($rankSize * 1.45);
+                $nameParts = explode(' ', trim($winner['name']));
+                if (count($nameParts) > 2 && strlen($winner['name']) > 16) {
+                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, $nameParts[0]);
+                    $nameY += (int) ($nameSize * 1.25);
+                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, implode(' ', array_slice($nameParts, 1)));
+                } else {
+                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, $winner['name']);
+                }
+
+                // Unit
+                $unitY = $nameY + (int) ($nameSize * 1.4);
+                imagettftext($img, $unitSize, 0, $blockLeft, $unitY, $black, $rockwellLight, $winner['unit']);
+
+                // Divider line
+                $lineY = $unitY + (int) ($unitSize * 0.95);
+                imageline($img, $blockLeft, $lineY, $blockLeft + $dividerWidth, $lineY, $divider);
+
+                $currY += $rowGap;
+            }
+        }
+
+        return $img;
     }
 
     /**

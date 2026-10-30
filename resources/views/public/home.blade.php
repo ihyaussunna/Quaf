@@ -10,7 +10,7 @@
 <!-- =====================================================================
      SECTION 1: HERO HEADER (BLACK THEME / OBSIDIAN APPLE GLASS)
      ===================================================================== -->
-<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-0 z-10">
+<section class="relative bg-[#07070a] text-white pt-16 sm:pt-24 lg:pt-32 pb-0 z-10 overflow-hidden">
     <!-- Atmospheric Multi-Color Mesh Glows (Official Festival Palette) -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[680px] h-[340px] sm:h-[480px] bg-[#be1e2d]/20 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute top-10 left-10 w-72 sm:w-96 h-72 sm:h-96 bg-[#f3bd2e]/15 rounded-full blur-[130px] pointer-events-none"></div>
@@ -21,12 +21,12 @@
     <style>
         @keyframes heroPatternSlideIn {
             0% {
-                transform: translate3d(100%, 0, 0);
+                transform: translate3d(100%, -50%, 0);
                 opacity: 0;
             }
             100% {
-                transform: translate3d(36%, 0, 0);
-                opacity: 0.95;
+                transform: translate3d(25%, -50%, 0);
+                opacity: 0.9;
             }
         }
         @keyframes heroPatternSpin {
@@ -40,7 +40,8 @@
         .hero-pattern-wrapper {
             position: absolute;
             right: 0;
-            bottom: -60px;
+            top: 50%;
+            transform: translate3d(25%, -50%, 0);
             width: 260px;
             height: 260px;
             pointer-events: none;
@@ -51,9 +52,9 @@
         }
         @media (max-width: 639px) {
             .hero-pattern-wrapper {
-                bottom: -35px;
-                width: 230px;
-                height: 230px;
+                top: 52%;
+                width: 220px;
+                height: 220px;
             }
             .hero-pattern-svg {
                 animation: heroPatternSpin 72s linear infinite;
@@ -61,16 +62,16 @@
         }
         @media (min-width: 640px) {
             .hero-pattern-wrapper {
-                bottom: -75px;
-                width: 360px;
-                height: 360px;
+                top: 50%;
+                width: 340px;
+                height: 340px;
             }
         }
         @media (min-width: 1024px) {
             .hero-pattern-wrapper {
-                bottom: -95px;
-                width: 440px;
-                height: 440px;
+                top: 48%;
+                width: 420px;
+                height: 420px;
             }
         }
         .hero-pattern-svg {
@@ -153,18 +154,18 @@
         </div>
 
         <!-- Primary Action CTAs (Apple Glassy Buttons) -->
-        <div class="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 max-w-lg mb-6 sm:mb-8">
+        <div class="flex flex-wrap sm:flex-nowrap items-center justify-center gap-3.5 sm:gap-4 max-w-3xl mb-8 sm:mb-12">
             <a href="{{ route('results.index') }}" 
-               class="px-7 py-3 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#be1e2d] text-white hover:brightness-110 shadow-lg shadow-red-600/30 border border-red-500/30 transition-all transform hover:-translate-y-0.5 text-center">
+               class="px-6 sm:px-7 py-3 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-gradient-to-r from-[#be1e2d] via-red-600 to-[#be1e2d] text-white hover:brightness-110 shadow-lg shadow-red-600/30 border border-red-500/30 transition-all transform hover:-translate-y-0.5 text-center whitespace-nowrap">
                 Festival Results
             </a>
             <a href="{{ route('schedule.index') }}" 
-               class="px-7 py-3 rounded-2xl font-semibold text-xs sm:text-sm tracking-wider bg-white/10 hover:bg-white/15 text-white border border-white/20 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center">
+               class="px-6 sm:px-7 py-3 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-white/10 hover:bg-white/15 text-white border border-white/20 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center whitespace-nowrap">
                 Festival Schedule
             </a>
             <button type="button" 
                     @click="showStudentModal = true" 
-                    class="px-6 py-3 rounded-2xl font-semibold text-xs sm:text-sm tracking-wider bg-white/5 hover:bg-white/10 text-[#f3bd2e] border border-[#f3bd2e]/30 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center cursor-pointer">
+                    class="px-6 sm:px-7 py-3 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase bg-white/5 hover:bg-white/10 text-[#f3bd2e] border border-[#f3bd2e]/30 backdrop-blur-xl transition-all transform hover:-translate-y-0.5 text-center cursor-pointer whitespace-nowrap">
                 Student Portal
             </button>
         </div>

@@ -338,44 +338,87 @@
                 <!-- 7. Edit Podium Winners (1st, 2nd, 3rd) -->
                 <div class="p-4" x-data="{ open: true }">
                     <button type="button" @click="open = !open" class="w-full flex items-center justify-between font-bold text-slate-800">
-                        <span>Podium Winners Data (1st, 2nd, 3rd)</span>
+                        <span class="flex items-center gap-2">
+                            <span>Podium Winners Data (1st, 2nd, 3rd)</span>
+                            <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">Auto-Scaling</span>
+                        </span>
                         <svg class="w-4 h-4 transition-transform text-slate-400" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <div x-show="open" class="mt-4 space-y-3">
-                        <!-- First Place -->
-                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="w-5 h-5 rounded-md bg-amber-500 text-white font-mono font-bold text-[11px] flex items-center justify-center">01</span>
-                                <span class="font-bold text-[11px] text-slate-800">1st Place Winner (01)</span>
+                    <div x-show="open" class="mt-4 space-y-4">
+                        <p class="text-[11px] text-slate-500">
+                            ഒന്നിലധികം വിജയികൾ ഒരേ സ്ഥാനത്ത് (Tie) വരികയാണെങ്കിൽ "+ Add Tie Winner" ബട്ടൺ ഉപയോഗിച്ച് ആഡ് ചെയ്യാം. മുഴുവൻ വിജയികളും കൃത്യമായി പോസ്റ്ററിൽ ഫിറ്റ് ആവാൻ ഓട്ടോമാറ്റിക്കലി സൈസ് സ്കെയിൽ ആകും.
+                        </p>
+
+                        <!-- First Place (01) -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-md bg-[#be1e2d] text-white font-mono font-bold text-[11px] flex items-center justify-center shadow-xs">01</span>
+                                    <span class="font-bold text-[11px] text-slate-800">1st Place / ഒന്നാം സ്ഥാനം (01)</span>
+                                </div>
+                                <button type="button" @click="addWinner('first')" class="px-2 py-0.5 text-[10px] font-bold text-[#be1e2d] hover:bg-red-50 rounded border border-red-200 transition-colors">
+                                    + Add Tie Winner
+                                </button>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" x-model="data.winners.first[0].name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
-                                <input type="text" x-model="data.winners.first[0].unit" @input="render()" placeholder="Team / Unit" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
-                            </div>
+                            <template x-for="(w, idx) in data.winners.first" :key="'first-' + idx">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="grid grid-cols-2 gap-1.5 flex-1">
+                                        <input type="text" x-model="w.name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white font-medium text-slate-800">
+                                        <input type="text" x-model="w.unit" @input="render()" placeholder="Team / Group" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white text-slate-600">
+                                    </div>
+                                    <button type="button" x-show="data.winners.first.length > 1" @click="removeWinner('first', idx)" class="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded" title="Remove">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            </template>
                         </div>
 
-                        <!-- Second Place -->
-                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="w-5 h-5 rounded-md bg-slate-500 text-white font-mono font-bold text-[11px] flex items-center justify-center">02</span>
-                                <span class="font-bold text-[11px] text-slate-800">2nd Place Winner (02)</span>
+                        <!-- Second Place (02) -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-md bg-[#be1e2d] text-white font-mono font-bold text-[11px] flex items-center justify-center shadow-xs">02</span>
+                                    <span class="font-bold text-[11px] text-slate-800">2nd Place / രണ്ടാം സ്ഥാനം (02)</span>
+                                </div>
+                                <button type="button" @click="addWinner('second')" class="px-2 py-0.5 text-[10px] font-bold text-[#be1e2d] hover:bg-red-50 rounded border border-red-200 transition-colors">
+                                    + Add Tie Winner
+                                </button>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" x-model="data.winners.second[0].name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
-                                <input type="text" x-model="data.winners.second[0].unit" @input="render()" placeholder="Team / Unit" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
-                            </div>
+                            <template x-for="(w, idx) in data.winners.second" :key="'second-' + idx">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="grid grid-cols-2 gap-1.5 flex-1">
+                                        <input type="text" x-model="w.name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white font-medium text-slate-800">
+                                        <input type="text" x-model="w.unit" @input="render()" placeholder="Team / Group" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white text-slate-600">
+                                    </div>
+                                    <button type="button" x-show="data.winners.second.length > 1" @click="removeWinner('second', idx)" class="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded" title="Remove">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            </template>
                         </div>
 
-                        <!-- Third Place -->
-                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="w-5 h-5 rounded-md bg-amber-800 text-white font-mono font-bold text-[11px] flex items-center justify-center">03</span>
-                                <span class="font-bold text-[11px] text-slate-800">3rd Place Winner (03)</span>
+                        <!-- Third Place (03) -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-md bg-[#be1e2d] text-white font-mono font-bold text-[11px] flex items-center justify-center shadow-xs">03</span>
+                                    <span class="font-bold text-[11px] text-slate-800">3rd Place / മൂന്നാം സ്ഥാനം (03)</span>
+                                </div>
+                                <button type="button" @click="addWinner('third')" class="px-2 py-0.5 text-[10px] font-bold text-[#be1e2d] hover:bg-red-50 rounded border border-red-200 transition-colors">
+                                    + Add Tie Winner
+                                </button>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" x-model="data.winners.third[0].name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
-                                <input type="text" x-model="data.winners.third[0].unit" @input="render()" placeholder="Team / Unit" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white">
-                            </div>
+                            <template x-for="(w, idx) in data.winners.third" :key="'third-' + idx">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="grid grid-cols-2 gap-1.5 flex-1">
+                                        <input type="text" x-model="w.name" @input="render()" placeholder="Student Name" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white font-medium text-slate-800">
+                                        <input type="text" x-model="w.unit" @input="render()" placeholder="Team / Unit" class="px-2 py-1 text-xs rounded border border-slate-300 bg-white text-slate-600">
+                                    </div>
+                                    <button type="button" x-show="data.winners.third.length > 1" @click="removeWinner('third', idx)" class="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded" title="Remove">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -521,24 +564,24 @@ function posterStudio() {
             category: '{{ $result->program->zone?->name ?? $result->program->eligibility ?? "All Zones" }}',
             competition: '{{ $result->program->name }}',
             winners: {
-                first: [
-                    {
-                        name: '{{ !empty($winners["first"]) ? addslashes($winners["first"][0]["name"]) : "1st Winner Name" }}',
-                        unit: '{{ !empty($winners["first"]) ? addslashes($winners["first"][0]["unit"]) : "Team / Group" }}'
-                    }
-                ],
-                second: [
-                    {
-                        name: '{{ !empty($winners["second"]) ? addslashes($winners["second"][0]["name"]) : "2nd Winner Name" }}',
-                        unit: '{{ !empty($winners["second"]) ? addslashes($winners["second"][0]["unit"]) : "Team / Group" }}'
-                    }
-                ],
-                third: [
-                    {
-                        name: '{{ !empty($winners["third"]) ? addslashes($winners["third"][0]["name"]) : "3rd Winner Name" }}',
-                        unit: '{{ !empty($winners["third"]) ? addslashes($winners["third"][0]["unit"]) : "Team / Group" }}'
-                    }
-                ]
+                first: @json(!empty($winners['first']) ? array_values($winners['first']) : [['name' => '', 'unit' => '']]),
+                second: @json(!empty($winners['second']) ? array_values($winners['second']) : [['name' => '', 'unit' => '']]),
+                third: @json(!empty($winners['third']) ? array_values($winners['third']) : [['name' => '', 'unit' => '']])
+            }
+        },
+
+        addWinner(rank) {
+            if (!this.data.winners[rank]) {
+                this.data.winners[rank] = [];
+            }
+            this.data.winners[rank].push({ name: '', unit: '' });
+            this.$nextTick(() => { this.render(); });
+        },
+
+        removeWinner(rank, index) {
+            if (this.data.winners[rank] && this.data.winners[rank].length > 1) {
+                this.data.winners[rank].splice(index, 1);
+                this.$nextTick(() => { this.render(); });
             }
         },
 
@@ -559,7 +602,17 @@ function posterStudio() {
             this.loadTemplateImage(this.settings.template_image);
 
             // Preload fonts for Canvas
-            if (document.fonts) {
+            if (window.FontFace) {
+                const baitiFont = new FontFace('Mongolian Baiti', 'url(/fonts/monbaiti.ttf)');
+                const rockwellReg = new FontFace('Rockwell Std', 'url(/fonts/ROCK.TTF)', { weight: '400' });
+                const rockwellLight = new FontFace('Rockwell Std', 'url(/fonts/Rockwell-Light.woff2)', { weight: '300' });
+                Promise.all([baitiFont.load(), rockwellReg.load(), rockwellLight.load()]).then(fonts => {
+                    fonts.forEach(f => document.fonts.add(f));
+                    this.render();
+                }).catch(e => {
+                    this.render();
+                });
+            } else if (document.fonts) {
                 document.fonts.ready.then(() => {
                     this.render();
                 });
@@ -725,54 +778,84 @@ function posterStudio() {
                     ctx.restore();
                 }
 
-                // 5. Winners (01, 02, 03) on the left - NO MEDAL ICONS, ONLY NUMBERS AS IN POSTER
-                const winnerPositions = [
-                    { key: 'first', rank: '01' },
-                    { key: 'second', rank: '02' },
-                    { key: 'third', rank: '03' }
-                ];
-
-                let currentY = this.settings.first_top || 145;
-                const blockLeft = this.settings.block_left || 205;
-                const rowGap = this.settings.row_gap || 178;
-
-                winnerPositions.forEach(pos => {
-                    const item = this.data.winners[pos.key] ? this.data.winners[pos.key][0] : null;
-                    if (!item || !item.name) return;
-
-                    ctx.save();
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'top';
-
-                    // Student Name: Rockwell Std Regular 9pt (34px), Color #D02627, Tracking -40
-                    ctx.fillStyle = this.settings.winner_name_color || '#D02627';
-                    const winFont = this.settings.winner_font || 'Rockwell Std';
-                    const winSize = this.settings.winner_name_size || 34;
-                    ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.4px';
-
-                    // Two-line wrapping for student name
-                    const nameParts = (item.name || '').trim().split(' ');
-                    let nameY = currentY;
-                    if (nameParts.length > 2 && (item.name.length > 18)) {
-                        ctx.fillText(nameParts[0], blockLeft, nameY);
-                        nameY += (winSize * 0.95);
-                        ctx.fillText(nameParts.slice(1).join(' '), blockLeft, nameY);
-                    } else {
-                        ctx.fillText(item.name, blockLeft, nameY);
-                    }
-
-                    // Group Name: Rockwell Std Light 7pt (26px), Color #000000, Tracking -20
-                    ctx.fillStyle = this.settings.winner_unit_color || '#000000';
-                    const unitSize = this.settings.winner_unit_size || 26;
-                    ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
-                    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
-                    ctx.fillText(item.unit || '', blockLeft, currentY + 68);
-
-                    ctx.restore();
-
-                    currentY += rowGap;
+                // 5. Winners with 01, 02, 03 rank medals and automatic multi-winner scaling
+                const flatWinners = [];
+                ['first', 'second', 'third'].forEach(rankKey => {
+                    const rankNum = rankKey === 'first' ? '01' : (rankKey === 'second' ? '02' : '03');
+                    const items = this.data.winners[rankKey] || [];
+                    items.forEach(item => {
+                        if (item && item.name && item.name.trim() !== '') {
+                            flatWinners.push({
+                                rank: rankNum,
+                                rankKey: rankKey,
+                                name: item.name.trim(),
+                                unit: (item.unit || '').trim()
+                            });
+                        }
+                    });
                 });
+
+                const count = flatWinners.length;
+                if (count > 0) {
+                    const baseScale = count <= 3 ? 1.0 : Math.min(1.0, Math.max(0.48, 3.15 / count));
+                    const availHeight = 520;
+                    const rowGap = count <= 3 ? (this.settings.row_gap || 175) : Math.floor(availHeight / count);
+                    const startY = count <= 3 ? (this.settings.first_top || 120) : Math.max(90, Math.floor(130 - (count - 3) * 10));
+
+                    const rankSize = Math.max(15, Math.round(26 * baseScale));
+                    const winFont = this.settings.winner_font || 'Rockwell Std';
+                    const winSize = Math.max(17, Math.round((this.settings.winner_name_size || 30) * baseScale));
+                    const unitSize = Math.max(13, Math.round((this.settings.winner_unit_size || 22) * baseScale));
+                    const blockLeft = this.settings.block_left || 205;
+                    const dividerWidth = Math.round(280 * Math.min(1.0, baseScale * 1.1));
+
+                    let currY = startY;
+                    flatWinners.forEach(w => {
+                        ctx.save();
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'top';
+
+                        // Rank: 01, 02, 03 (Rockwell Std Regular, Red)
+                        ctx.fillStyle = this.settings.winner_name_color || '#D02627';
+                        ctx.font = `400 ${rankSize}px "Rockwell Std", serif`;
+                        if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.8px';
+                        ctx.fillText(w.rank, blockLeft, currY);
+
+                        // Student Name (Rockwell Std Regular, Red)
+                        let nameY = currY + Math.round(rankSize * 1.35);
+                        ctx.fillStyle = this.settings.winner_name_color || '#D02627';
+                        ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
+                        if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.2px';
+
+                        const nameParts = w.name.split(' ');
+                        if (nameParts.length > 2 && w.name.length > 16) {
+                            ctx.fillText(nameParts[0], blockLeft, nameY);
+                            nameY += Math.round(winSize * 1.05);
+                            ctx.fillText(nameParts.slice(1).join(' '), blockLeft, nameY);
+                        } else {
+                            ctx.fillText(w.name, blockLeft, nameY);
+                        }
+
+                        // Group Name (Rockwell Std Light, Black)
+                        let unitY = nameY + Math.round(winSize * 1.25);
+                        ctx.fillStyle = this.settings.winner_unit_color || '#000000';
+                        ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
+                        if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
+                        ctx.fillText(w.unit, blockLeft, unitY);
+
+                        // Subtle Divider Line below Group
+                        let lineY = unitY + Math.round(unitSize * 1.15);
+                        ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(blockLeft, lineY);
+                        ctx.lineTo(blockLeft + dividerWidth, lineY);
+                        ctx.stroke();
+
+                        ctx.restore();
+                        currY += rowGap;
+                    });
+                }
 
             } else {
                 // ============================================
@@ -812,43 +895,51 @@ function posterStudio() {
                 }
                 ctx.restore();
 
-                // 5. Draw Winners with Medals
-                const winnerPositions = [
+                // 5. Draw Winners with Medals (supporting multiple winners per rank)
+                const classicWinners = [];
+                [
                     { key: 'first', medal: this.medals.first },
                     { key: 'second', medal: this.medals.second },
                     { key: 'third', medal: this.medals.third }
-                ];
+                ].forEach(pos => {
+                    const items = this.data.winners[pos.key] || [];
+                    items.forEach(item => {
+                        if (item && item.name && item.name.trim() !== '') {
+                            classicWinners.push({
+                                medal: pos.medal,
+                                name: item.name.trim(),
+                                unit: (item.unit || '').trim()
+                            });
+                        }
+                    });
+                });
 
                 let currentY = this.settings.first_top;
                 const blockLeft = this.settings.block_left;
                 const medalSize = this.settings.medal_size;
                 const itemGap = this.settings.item_gap;
-                const rowGap = this.settings.row_gap;
+                const cCount = classicWinners.length;
+                const cScale = cCount <= 3 ? 1.0 : Math.min(1.0, Math.max(0.55, 3.2 / cCount));
+                const rowGap = cCount <= 3 ? this.settings.row_gap : Math.floor(this.settings.row_gap * cScale);
 
-                winnerPositions.forEach(pos => {
-                    const item = this.data.winners[pos.key] ? this.data.winners[pos.key][0] : null;
-                    if (!item || !item.name) return;
-
-                    // Draw Medal (if medalSize > 0)
-                    if (medalSize > 0 && pos.medal && pos.medal.complete && pos.medal.naturalWidth > 0) {
-                        ctx.drawImage(pos.medal, blockLeft, currentY, medalSize, medalSize);
+                classicWinners.forEach(item => {
+                    if (medalSize > 0 && item.medal && item.medal.complete && item.medal.naturalWidth > 0) {
+                        ctx.drawImage(item.medal, blockLeft, currentY, medalSize * cScale, medalSize * cScale);
                     }
 
-                    // Draw Name
-                    const textX = medalSize > 0 ? (blockLeft + medalSize + itemGap) : blockLeft;
+                    const textX = medalSize > 0 ? (blockLeft + (medalSize * cScale) + itemGap) : blockLeft;
                     ctx.save();
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'top';
 
                     ctx.fillStyle = this.settings.winner_name_color;
                     const winFont = this.settings.winner_font || 'Anek Malayalam';
-                    ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
+                    ctx.font = `${this.settings.winner_name_weight} ${Math.round(this.settings.winner_name_size * cScale)}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
                     ctx.fillText(item.name, textX, currentY);
 
-                    // Draw Team / Unit below name
                     ctx.fillStyle = this.settings.winner_unit_color;
-                    ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
-                    const nameOffset = this.settings.winner_name_size * 1.15;
+                    ctx.font = `${this.settings.winner_unit_weight} ${Math.round(this.settings.winner_unit_size * cScale)}px "${winFont}", "Anek Malayalam", Sora, sans-serif`;
+                    const nameOffset = Math.round(this.settings.winner_name_size * cScale * 1.15);
                     ctx.fillText(item.unit, textX, currentY + nameOffset);
                     ctx.restore();
 
@@ -949,7 +1040,7 @@ function posterStudio() {
                 body: JSON.stringify({
                     poster_data: dataUrl,
                     template_id: this.settings.template_id,
-                    settings: this.settings,
+                    settings: Object.assign({}, this.settings, { custom_winners: this.data.winners }),
                     publish_now: true
                 })
             })

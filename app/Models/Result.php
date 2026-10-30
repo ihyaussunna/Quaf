@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PointCalculationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -76,7 +77,7 @@ class Result extends Model
     }
 
     /**
-     * Get ONLY 1st, 2nd, and 3rd place winners for poster generation.
+     * Get 1st, 2nd, and 3rd place winners (including ties) for poster generation.
      */
     public function getPosterWinners(): array
     {
@@ -86,42 +87,97 @@ class Result extends Model
             'third' => [],
         ];
 
-        if ($this->firstEntry) {
+        // 1. Try to fetch all podium entries including ties from PointCalculationService
+        if ($this->program) {
+            try {
+                $podium = PointCalculationService::determinePodiumForProgram($this->program);
+
+                if (! empty($podium['first_all']) && $podium['first_all']->isNotEmpty()) {
+                    foreach ($podium['first_all'] as $entry) {
+                        $winners['first'][] = [
+                            'id' => $entry->id,
+                            'name' => $entry->student->name ?? ($entry->group->name ?? '1st Place Winner'),
+                            'unit' => $entry->student->group->name ?? ($entry->group->name ?? 'Group'),
+                            'chest' => $entry->chest_number ?? ($entry->student->student_id ?? ''),
+                            'medal' => '/images/medals/first.png',
+                            'rank' => '01',
+                        ];
+                    }
+                }
+
+                if (! empty($podium['second_all']) && $podium['second_all']->isNotEmpty()) {
+                    foreach ($podium['second_all'] as $entry) {
+                        $winners['second'][] = [
+                            'id' => $entry->id,
+                            'name' => $entry->student->name ?? ($entry->group->name ?? '2nd Place Winner'),
+                            'unit' => $entry->student->group->name ?? ($entry->group->name ?? 'Group'),
+                            'chest' => $entry->chest_number ?? ($entry->student->student_id ?? ''),
+                            'medal' => '/images/medals/second.png',
+                            'rank' => '02',
+                        ];
+                    }
+                }
+
+                if (! empty($podium['third_all']) && $podium['third_all']->isNotEmpty()) {
+                    foreach ($podium['third_all'] as $entry) {
+                        $winners['third'][] = [
+                            'id' => $entry->id,
+                            'name' => $entry->student->name ?? ($entry->group->name ?? '3rd Place Winner'),
+                            'unit' => $entry->student->group->name ?? ($entry->group->name ?? 'Group'),
+                            'chest' => $entry->chest_number ?? ($entry->student->student_id ?? ''),
+                            'medal' => '/images/medals/third.png',
+                            'rank' => '03',
+                        ];
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Ignore and fall back to direct relationships
+            }
+        }
+
+        // 2. Fallbacks for direct single entry relations if not populated from podium calculation
+        if (empty($winners['first']) && $this->firstEntry) {
             $name = $this->firstEntry->student->name ?? ($this->firstEntry->group->name ?? '1st Place Winner');
             $unit = $this->firstEntry->student->group->name ?? ($this->firstEntry->group->name ?? 'Group');
             $chest = $this->firstEntry->chest_number ?? ($this->firstEntry->student->student_id ?? '');
 
             $winners['first'][] = [
+                'id' => $this->firstEntry->id,
                 'name' => $name,
                 'unit' => $unit,
                 'chest' => $chest,
                 'medal' => '/images/medals/first.png',
+                'rank' => '01',
             ];
         }
 
-        if ($this->secondEntry) {
+        if (empty($winners['second']) && $this->secondEntry) {
             $name = $this->secondEntry->student->name ?? ($this->secondEntry->group->name ?? '2nd Place Winner');
             $unit = $this->secondEntry->student->group->name ?? ($this->secondEntry->group->name ?? 'Group');
             $chest = $this->secondEntry->chest_number ?? ($this->secondEntry->student->student_id ?? '');
 
             $winners['second'][] = [
+                'id' => $this->secondEntry->id,
                 'name' => $name,
                 'unit' => $unit,
                 'chest' => $chest,
                 'medal' => '/images/medals/second.png',
+                'rank' => '02',
             ];
         }
 
-        if ($this->thirdEntry) {
+        if (empty($winners['third']) && $this->thirdEntry) {
             $name = $this->thirdEntry->student->name ?? ($this->thirdEntry->group->name ?? '3rd Place Winner');
             $unit = $this->thirdEntry->student->group->name ?? ($this->thirdEntry->group->name ?? 'Group');
             $chest = $this->thirdEntry->chest_number ?? ($this->thirdEntry->student->student_id ?? '');
 
             $winners['third'][] = [
+                'id' => $this->thirdEntry->id,
                 'name' => $name,
                 'unit' => $unit,
                 'chest' => $chest,
                 'medal' => '/images/medals/third.png',
+                'rank' => '03',
             ];
         }
 

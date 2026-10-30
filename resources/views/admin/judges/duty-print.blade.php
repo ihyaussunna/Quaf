@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        @if($singleJudge)
+        @if(!empty($singleJudge))
             Judge Duty Slip — {{ $singleJudge->name }} | QUAF 2026
         @else
             Judges Official Duty Allocation Schedule | QUAF 2026
@@ -179,34 +179,21 @@
                     <!-- Official QUAF Header on Every Judge Page -->
                     @include('partials.print-pdf-header', [
                         'title' => 'OFFICIAL JUDGE DUTY ALLOCATION',
-                        'subtitle' => 'QUAF 2026 Markaz Arts Festival — Stage & Offstage Evaluation Duty Roster',
-                        'extraMeta' => [
-                            'Judge' => $judge->name,
-                            'Designation' => $judge->designation ?: 'Official Evaluator',
-                            'PIN' => $judge->access_code ?: '—',
-                            'Duties' => $dutyPrograms->count().' Competitions',
-                        ],
                     ])
 
-                    <!-- Judge Information Card Box -->
-                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 sm:p-4 mb-4 text-xs">
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
-                            <div>
-                                <span class="text-[10px] text-slate-500 uppercase font-bold block">Judge Name</span>
-                                <span class="font-bold text-slate-900 text-sm font-sans">{{ $judge->name }}</span>
-                            </div>
-                            <div>
-                                <span class="text-[10px] text-slate-500 uppercase font-bold block">Access PIN</span>
-                                <span class="font-bold text-[#be1e2d] text-sm">{{ $judge->access_code ?: '—' }}</span>
-                            </div>
-                            <div>
-                                <span class="text-[10px] text-slate-500 uppercase font-bold block">Mobile / Contact</span>
-                                <span class="font-bold text-slate-800">{{ $judge->contact ?: '—' }}</span>
-                            </div>
-                            <div>
-                                <span class="text-[10px] text-slate-500 uppercase font-bold block">Specialization / Domain</span>
-                                <span class="font-bold text-slate-800 truncate block">{{ $judge->specialization ?: 'General' }}</span>
-                            </div>
+                    <!-- Large Prominent Judge Name Header -->
+                    <div class="py-2.5 flex items-center justify-between border-b-2 border-slate-900 mb-4">
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-mono uppercase tracking-widest block font-bold">Judge Name</span>
+                            <h2 class="text-xl sm:text-2xl font-black text-slate-900 font-sora tracking-tight leading-tight">
+                                {{ $judge->name }}
+                            </h2>
+                        </div>
+                        <div class="text-right font-mono text-xs">
+                            @if($judge->access_code)
+                                <div class="text-slate-600">Access PIN: <span class="font-bold text-[#be1e2d] text-base">{{ $judge->access_code }}</span></div>
+                            @endif
+                            <div class="text-slate-500 text-[11px]">Assigned: <span class="font-bold text-slate-900">{{ $dutyPrograms->count() }} Competitions</span></div>
                         </div>
                     </div>
 
@@ -219,14 +206,12 @@
                         <table class="duty-table mb-4">
                             <thead>
                                 <tr>
-                                    <th style="width: 28px; text-align: center;">#</th>
-                                    <th style="width: 70px;">Code</th>
+                                    <th style="width: 32px; text-align: center;">#</th>
+                                    <th style="width: 85px;">Code</th>
                                     <th>Competition / Event Name</th>
-                                    <th style="width: 80px;">Category</th>
-                                    <th style="width: 110px;">Stage / Venue</th>
-                                    <th style="width: 105px;">Scheduled Time</th>
-                                    <th style="width: 45px; text-align: center;">Entries</th>
-                                    <th style="width: 80px; text-align: center;">Sign-Off</th>
+                                    <th style="width: 140px;">Stage / Venue</th>
+                                    <th style="width: 130px;">Scheduled Time</th>
+                                    <th style="width: 60px; text-align: center;">Entries</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -244,7 +229,7 @@
                                     @endphp
                                     <tr style="background-color: {{ $pIdx % 2 === 0 ? '#ffffff' : '#f8fafc' }};">
                                         <td style="text-align: center; font-weight: bold; color: #64748b; font-size: 11px;">
-                                            {{ $pIdx + 1 }}
+                                             {{ $pIdx + 1 }}
                                         </td>
                                         <td style="font-family: monospace; font-weight: 700; font-size: 11px;">
                                             {{ $prog->code ?: 'PROG-'.$prog->id }}
@@ -254,9 +239,6 @@
                                             @if($prog->malayalam_name)
                                                 <div style="font-size: 11px; color: #475569; font-family: sans-serif;">{{ $prog->malayalam_name }}</div>
                                             @endif
-                                        </td>
-                                        <td style="font-size: 11px; color: #334155;">
-                                            {{ $prog->category?->name ?? 'General' }}
                                         </td>
                                         <td style="font-weight: 700; font-size: 11px; color: #1e293b;">
                                             {{ $stageName }}
@@ -272,34 +254,19 @@
                                         <td style="text-align: center; font-weight: 700; font-size: 11px;">
                                             {{ $prog->entries_count ?? $prog->entries()->count() }}
                                         </td>
-                                        <td style="text-align: center; color: #cbd5e1; font-size: 10px;">
-                                            [ &nbsp; &nbsp; &nbsp; &nbsp; ]
-                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     @endif
 
-                    <!-- Official Sign-off Box at the bottom of each page -->
-                    <div class="mt-8 pt-4 border-t-2 border-slate-900 grid grid-cols-3 gap-4 text-center font-mono text-[10px] uppercase tracking-wider text-slate-700">
-                        <div>
-                            <div class="h-10"></div>
-                            <div class="border-t border-slate-400 pt-1 font-bold">Program Committee Convener</div>
+                    <!-- Official Result PDF Style Clean Footer -->
+                    <div class="mt-8 pt-3 border-t border-slate-300 text-[10px] text-slate-500 flex justify-between items-center gap-4 font-mono">
+                        <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                            <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 11px; max-height: 12px;">
+                            <span class="font-normal text-slate-600 whitespace-nowrap leading-none font-sans">Markaz Cultural Festival</span>
                         </div>
-                        <div>
-                            <div class="h-10"></div>
-                            <div class="border-t border-slate-400 pt-1 font-bold">Festival General Secretary</div>
-                        </div>
-                        <div>
-                            <div class="h-10"></div>
-                            <div class="border-t border-slate-400 pt-1 font-bold">Judge Acceptance Signature</div>
-                        </div>
-                    </div>
-
-                    <!-- Footer Note -->
-                    <div class="mt-3 text-center text-[9px] font-mono text-slate-400">
-                        QUAF 2026 Markaz Arts Festival — Official Evaluation Document — Generated on {{ now()->format('d M Y, h:i A') }}
+                        <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
                     </div>
                 </div>
             @endforeach

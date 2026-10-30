@@ -149,8 +149,10 @@ class MediaResultController extends Controller
             $customSettings
         );
 
-        // Extract ONLY 1st, 2nd, and 3rd place winners
-        $winners = $result->getPosterWinners();
+        // Extract 1st, 2nd, and 3rd place winners (including ties or saved custom winners)
+        $winners = ! empty($customSettings['custom_winners'])
+            ? $customSettings['custom_winners']
+            : $result->getPosterWinners();
 
         // Compute sequence result number (e.g. 37, 61) rather than program code
         $resultNo = Result::where(function ($q) use ($result) {
