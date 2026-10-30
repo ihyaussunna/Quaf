@@ -122,7 +122,7 @@
     <!-- Floating Top Toolbar (Hidden during print) -->
     <div class="no-print fixed top-4 inset-x-0 z-50 flex justify-center px-4">
         <div class="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl px-5 py-3 shadow-2xl border border-white/10 flex flex-wrap items-center gap-3 text-xs font-mono">
-            <a href="{{ route('admin.judges.duty', ['judge_id' => $judgeId]) }}" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold transition">
+            <a href="{{ route('admin.judges.duty', ['judge_id' => $judgeId ?? null]) }}" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold transition">
                 &larr; Admin Duty View
             </a>
 
@@ -130,23 +130,23 @@
 
             <!-- Mode Selector: Per Judge Page vs Continuous -->
             <div class="flex items-center gap-1 bg-white/10 p-1 rounded-xl">
-                <a href="{{ route('admin.judges.duty.print', ['mode' => 'per_page', 'judge_id' => $judgeId, 'include_unassigned' => $includeUnassigned ? 1 : 0]) }}"
-                   class="px-2.5 py-1 rounded-lg font-bold transition {{ $mode === 'per_page' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-300 hover:text-white' }}">
+                <a href="{{ route('admin.judges.duty.print', ['mode' => 'per_page', 'judge_id' => $judgeId ?? null, 'include_unassigned' => !empty($includeUnassigned) ? 1 : 0]) }}"
+                   class="px-2.5 py-1 rounded-lg font-bold transition {{ ($mode ?? 'per_page') === 'per_page' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-300 hover:text-white' }}">
                     1 Judge Per Page
                 </a>
-                <a href="{{ route('admin.judges.duty.print', ['mode' => 'continuous', 'judge_id' => $judgeId, 'include_unassigned' => $includeUnassigned ? 1 : 0]) }}"
-                   class="px-2.5 py-1 rounded-lg font-bold transition {{ $mode === 'continuous' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-300 hover:text-white' }}">
+                <a href="{{ route('admin.judges.duty.print', ['mode' => 'continuous', 'judge_id' => $judgeId ?? null, 'include_unassigned' => !empty($includeUnassigned) ? 1 : 0]) }}"
+                   class="px-2.5 py-1 rounded-lg font-bold transition {{ ($mode ?? '') === 'continuous' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-300 hover:text-white' }}">
                     Continuous Sheet
                 </a>
             </div>
 
             <!-- Judge Selector -->
             <select onchange="window.location.href = this.value" class="bg-slate-800 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
-                <option value="{{ route('admin.judges.duty.print', ['mode' => $mode, 'include_unassigned' => $includeUnassigned ? 1 : 0]) }}">
+                <option value="{{ route('admin.judges.duty.print', ['mode' => $mode ?? 'per_page', 'include_unassigned' => !empty($includeUnassigned) ? 1 : 0]) }}">
                     All Judges ({{ $allJudges->count() }})
                 </option>
                 @foreach($allJudges as $j)
-                    <option value="{{ route('admin.judges.duty.print', ['mode' => $mode, 'judge_id' => $j->id]) }}" {{ (string)$judgeId === (string)$j->id ? 'selected' : '' }}>
+                    <option value="{{ route('admin.judges.duty.print', ['mode' => $mode ?? 'per_page', 'judge_id' => $j->id]) }}" {{ (string)($judgeId ?? '') === (string)$j->id ? 'selected' : '' }}>
                         {{ $j->name }}
                     </option>
                 @endforeach
@@ -179,6 +179,8 @@
                     <!-- Official QUAF Header on Every Judge Page -->
                     @include('partials.print-pdf-header', [
                         'title' => 'OFFICIAL JUDGE DUTY ALLOCATION',
+                        'centerTitle' => true,
+                        'hideDate' => true,
                     ])
 
                     <!-- Large Prominent Judge Name Header -->
@@ -206,12 +208,11 @@
                         <table class="duty-table mb-4">
                             <thead>
                                 <tr>
-                                    <th style="width: 32px; text-align: center;">#</th>
+                                    <th style="width: 35px; text-align: center;">#</th>
                                     <th style="width: 85px;">Code</th>
                                     <th>Competition / Event Name</th>
-                                    <th style="width: 140px;">Stage / Venue</th>
-                                    <th style="width: 130px;">Scheduled Time</th>
-                                    <th style="width: 60px; text-align: center;">Entries</th>
+                                    <th style="width: 160px;">Stage / Venue</th>
+                                    <th style="width: 150px;">Scheduled Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -250,9 +251,6 @@
                                             @else
                                                 <span style="color: #94a3b8; font-style: italic;">TBD</span>
                                             @endif
-                                        </td>
-                                        <td style="text-align: center; font-weight: 700; font-size: 11px;">
-                                            {{ $prog->entries_count ?? $prog->entries()->count() }}
                                         </td>
                                     </tr>
                                 @endforeach
