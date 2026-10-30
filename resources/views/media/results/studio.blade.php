@@ -37,6 +37,12 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
+            <button type="button" @click="openPhotopeaModal()"
+                    class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-slate-950 font-black text-xs flex items-center gap-2 transition-all shadow-md shadow-amber-500/25 cursor-pointer">
+                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                <span>Edit in Photopea (.AI)</span>
+            </button>
+
             <button type="button" @click="saveAsDefault()" :disabled="savingDefault"
                     class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors disabled:opacity-50">
                 <span x-text="savingDefault ? 'Saving Defaults...' : 'Save as Template Default'"></span>
@@ -467,6 +473,12 @@
                     </div>
 
                     <div class="flex items-center gap-2">
+                        <button type="button" @click="openPhotopeaModal()"
+                                class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span>Open in Photopea</span>
+                        </button>
+
                         <button type="button" @click="downloadPoster()"
                                 class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -485,6 +497,61 @@
         </div>
 
     </div>
+
+    <!-- Photopea Illustrator/Photoshop Embed Modal -->
+    <div x-show="photopeaOpen" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md"
+         @keydown.escape.window="closePhotopeaModal()">
+        
+        <div class="relative w-full h-[94vh] bg-[#1e1e1e] rounded-2xl border border-slate-700 shadow-2xl flex flex-col overflow-hidden">
+            
+            <!-- Photopea Modal Header Bar -->
+            <div class="h-14 px-4 bg-[#121417] border-b border-slate-800 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    </div>
+                    <div class="h-4 w-px bg-slate-700 mx-1"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black text-white font-sora">Photopea Graphic Suite</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Illustrator (.AI) & Photoshop (.PSD) Engine
+                        </span>
+                        <span class="text-[11px] text-slate-400 font-mono hidden md:inline">&bull; {{ $result->program->name }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button type="button" @click="syncFromPhotopea()"
+                            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>📥 Sync to Studio Canvas</span>
+                    </button>
+
+                    <button type="button" @click="openLocalAiInModal()"
+                            class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <span class="hidden sm:inline">Open .AI / .PSD</span>
+                    </button>
+
+                    <button type="button" @click="closePhotopeaModal()"
+                            class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer" title="Close Editor">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hidden File Input for Modal -->
+            <input type="file" id="modalLocalFileInput" accept=".ai,.psd,.svg,.pdf,.png,.jpg" class="hidden" @change="handleModalLocalFile($event)">
+
+            <!-- Iframe Container -->
+            <div class="flex-1 w-full h-full relative bg-[#1e1e1e]">
+                <iframe id="studioPhotopeaIframe" class="w-full h-full border-0 block" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+            </div>
+        </div>
+    </div>
 </div>
 
 @php
@@ -502,6 +569,9 @@ function posterStudio() {
         publishing: false,
         statusMsg: '',
         statusType: 'success',
+
+        photopeaOpen: false,
+        photopeaInitialized: false,
 
         templatesMap: @json($templatesMap),
 
@@ -1063,6 +1133,121 @@ function posterStudio() {
                 this.statusType = 'error';
                 this.statusMsg = 'Error uploading poster: ' + err.message;
             });
+        },
+
+        openPhotopeaModal() {
+            this.photopeaOpen = true;
+            this.render(); // make sure latest canvas is drawn
+
+            this.$nextTick(() => {
+                const iframe = document.getElementById('studioPhotopeaIframe');
+                if (!iframe) return;
+
+                if (!this.photopeaInitialized) {
+                    this.photopeaInitialized = true;
+
+                    // Message listener for Photopea callbacks & save triggers
+                    window.addEventListener('message', (e) => {
+                        if (e.origin !== 'https://www.photopea.com') return;
+
+                        if (e.data instanceof ArrayBuffer) {
+                            // User saved or sync triggered from Photopea
+                            const blob = new Blob([e.data], { type: 'image/png' });
+                            const url = URL.createObjectURL(blob);
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.getElementById('posterCanvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = img.naturalWidth || 1080;
+                                canvas.height = img.naturalHeight || (canvas.height || 1215);
+                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                this.photopeaOpen = false;
+                                this.statusMsg = 'Photopea-യിൽ എഡിറ്റ് ചെയ്ത ഡിസൈൻ സ്റ്റുഡിയോ കാൻവാസിലേക്ക് സിങ്ക് ചെയ്തു!';
+                                this.statusType = 'success';
+                            };
+                            img.src = url;
+                        }
+                    });
+
+                    // Build Photopea config with QUAF typography resources & dark mode
+                    const fonts = [
+                        "{{ asset('fonts/ROCK.TTF') }}",
+                        "{{ asset('fonts/monbaiti.ttf') }}",
+                        "{{ asset('fonts/Rockwell-Light.woff2') }}",
+                        "{{ asset('fonts/MLU-Revathi.ttf') }}",
+                        "{{ asset('fonts/MLU-Revathi-Bold.ttf') }}",
+                        "{{ asset('fonts/AnekMalayalam-Bold.ttf') }}",
+                        "{{ asset('fonts/Sora-Bold.ttf') }}"
+                    ];
+
+                    const config = {
+                        environment: {
+                            theme: 2, // Darkest
+                            lang: 'en',
+                            vmode: 0,
+                            customIO: {
+                                save: "app.activeDocument.saveToOE('png');"
+                            }
+                        },
+                        resources: fonts
+                    };
+
+                    iframe.src = 'https://www.photopea.com#' + encodeURIComponent(JSON.stringify(config));
+
+                    iframe.onload = () => {
+                        setTimeout(() => {
+                            this.sendCanvasToPhotopea();
+                        }, 1800);
+                    };
+                } else {
+                    this.sendCanvasToPhotopea();
+                }
+            });
+        },
+
+        closePhotopeaModal() {
+            this.photopeaOpen = false;
+        },
+
+        sendCanvasToPhotopea() {
+            const canvas = document.getElementById('posterCanvas');
+            if (!canvas) return;
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                blob.arrayBuffer().then((buf) => {
+                    const iframe = document.getElementById('studioPhotopeaIframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(buf, 'https://www.photopea.com');
+                    }
+                });
+            }, 'image/png');
+        },
+
+        syncFromPhotopea() {
+            const iframe = document.getElementById('studioPhotopeaIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage('app.activeDocument.saveToOE("png");', 'https://www.photopea.com');
+            }
+        },
+
+        openLocalAiInModal() {
+            document.getElementById('modalLocalFileInput').click();
+        },
+
+        handleModalLocalFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (loadEvent) => {
+                const arrayBuffer = loadEvent.target.result;
+                const iframe = document.getElementById('studioPhotopeaIframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage(arrayBuffer, 'https://www.photopea.com');
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
     };
 }

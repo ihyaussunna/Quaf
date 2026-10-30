@@ -558,4 +558,14 @@ class MediaResultController extends Controller
         return redirect()->route('media.results.templates')
             ->with('success', "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് സെറ്റിംഗ്സുകൾ സേവ് ചെയ്തു.");
     }
+
+    /**
+     * Standalone Photopea Illustrator/Photoshop Web Editor for festival designers.
+     */
+    public function photopeaEditor(): View
+    {
+        $templates = ResultTemplate::where('is_active', true)->get();
+
+        return view('media.photopea', compact('templates'));
+    }
 }

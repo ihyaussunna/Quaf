@@ -108,7 +108,14 @@
                 <span>Poster Templates</span>
             </a>
 
-            <!-- 7. QR Code Generator -->
+            <!-- 7. Photopea Illustrator Editor -->
+            <a href="{{ route('media.photopea') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('media.photopea') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60 text-amber-400 font-semibold' }}">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                <span>Photopea Editor (.AI/.PSD)</span>
+            </a>
+
+            <!-- 8. QR Code Generator -->
             <a href="{{ route('media.qr.index') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('media.qr.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>

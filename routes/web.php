@@ -913,6 +913,9 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::get('/results/templates/{template}/customize', [MediaResultController::class, 'templateCustomize'])->name('results.templates.customize');
     Route::post('/results/templates/{template}/customize', [MediaResultController::class, 'templateSaveCustomization'])->name('results.templates.save-customization');
 
+    // Standalone Photopea Illustrator / PSD Editor
+    Route::get('/photopea', [MediaResultController::class, 'photopeaEditor'])->name('photopea');
+
     // QR Code Generator
     Route::get('/qr-generator', [MediaController::class, 'qrGenerator'])->name('qr.index');
 });
