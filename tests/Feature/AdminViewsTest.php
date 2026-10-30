@@ -672,8 +672,11 @@ class AdminViewsTest extends TestCase
         $resPrint->assertSee('Zayd Rahman');
         $resPrint->assertSee('FIRST');
         $resPrint->assertSee('+11');
-        $resPrint->assertSee('Judge 1');
-        $resPrint->assertSee('Chief Scrutinizer');
+        $resPrint->assertDontSee('Judge 1');
+        $resPrint->assertDontSee('Chief Scrutinizer');
+        $resPrint->assertDontSee("QUAF '26");
+        $resPrint->assertSee('quaf-black-title.svg');
+        $resPrint->assertSee('Markaz Cultural Festival');
 
         // 4. Check evaluation monitor with team points
         $entry->update(['status' => 'verified', 'attendance_status' => 'present']);

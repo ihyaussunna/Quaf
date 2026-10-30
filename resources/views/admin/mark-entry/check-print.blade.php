@@ -126,7 +126,7 @@
             </a>
             <div>
                 <h2 class="font-bold text-sm text-slate-800">Program Result Print Preview</h2>
-                <p class="text-xs text-slate-500 font-normal">Official Result Sheet with QUAF Header, Tabulation & Verification Signatures</p>
+                <p class="text-xs text-slate-500 font-normal">Official Result Sheet with QUAF Header & Tabulation Report</p>
             </div>
         </div>
 
@@ -274,33 +274,13 @@
                     </tbody>
                 </table>
 
-                <!-- Official Signature & Verification Endorsement Footer -->
-                <div class="mt-8 pt-4 border-t border-slate-300 grid grid-cols-4 gap-4 text-center text-xs">
-                    <div>
-                        <div class="h-10 border-b border-dashed border-slate-400 mb-1"></div>
-                        <div class="font-bold text-slate-900">Judge 1</div>
-                        <div class="text-[10px] text-slate-500">Signature</div>
+                <!-- Footer Info -->
+                <div class="mt-8 pt-3 border-t border-slate-200 text-[11px] text-slate-600 flex justify-between items-center">
+                    <div class="inline-flex items-center gap-2">
+                        <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="h-4 sm:h-4.5 w-auto object-contain inline-block">
+                        <span class="font-normal text-slate-700">Markaz Cultural Festival</span>
                     </div>
-                    <div>
-                        <div class="h-10 border-b border-dashed border-slate-400 mb-1"></div>
-                        <div class="font-bold text-slate-900">Judge 2</div>
-                        <div class="text-[10px] text-slate-500">Signature</div>
-                    </div>
-                    <div>
-                        <div class="h-10 border-b border-dashed border-slate-400 mb-1"></div>
-                        <div class="font-bold text-slate-900">Chief Scrutinizer</div>
-                        <div class="text-[10px] text-slate-500">Tabulation Checked</div>
-                    </div>
-                    <div>
-                        <div class="h-10 border-b border-dashed border-slate-400 mb-1"></div>
-                        <div class="font-bold text-slate-900">Festival Convener</div>
-                        <div class="text-[10px] text-slate-500">Office Approval</div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-2 border-t border-slate-200 text-[10px] text-slate-400 flex justify-between items-center">
-                    <span>QUAF '26 • Markaz Cultural Festival</span>
-                    <span>Printed: {{ now()->format('d M Y, h:i A') }}</span>
+                    <span class="text-[10px] text-slate-400">Printed: {{ now()->format('d M Y, h:i A') }}</span>
                 </div>
 
             </div>
