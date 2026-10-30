@@ -15,13 +15,25 @@
 
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full flex flex-col items-center text-center">
             
-            <!-- Hero Center: Official Theme Logo -->
-            <div class="relative w-full max-w-xl flex flex-col items-center text-center mb-4 sm:mb-6">
+            <!-- Hero Center: Alternating Official Theme Logo & QUAF Festival Logo -->
+            <div class="relative w-full max-w-xl flex flex-col items-center text-center mb-4 sm:mb-6"
+                 x-data="{ activeLogo: 0 }"
+                 x-init="setInterval(() => { activeLogo = 1 - activeLogo; }, 4200)">
                 
                 <div class="relative w-full h-[115px] xs:h-[138px] sm:h-[170px] flex items-center justify-center">
+                    <!-- 1. Adabic Inheritance Logo -->
                     <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
                          alt="Adabic Inheritance — QUAF" 
-                         class="max-w-[220px] xs:max-w-[270px] sm:max-w-[350px] lg:max-w-[400px] max-h-[110px] xs:max-h-[132px] sm:max-h-[162px] w-auto h-auto object-contain drop-shadow-[0_12px_40px_rgba(255,255,255,0.10)]">
+                         class="absolute inset-0 m-auto max-w-[220px] xs:max-w-[270px] sm:max-w-[350px] lg:max-w-[400px] max-h-[110px] xs:max-h-[132px] sm:max-h-[162px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.10)]"
+                         style="opacity: 1; transform: scale(1); pointer-events: auto; z-index: 10;"
+                         :style="activeLogo === 0 ? 'opacity: 1; transform: scale(1); pointer-events: auto; z-index: 10;' : 'opacity: 0; transform: scale(0.95); pointer-events: none; z-index: 0;'">
+
+                    <!-- 2. QUAF Festival Logo -->
+                    <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
+                         alt="QUAF — Markaz Cultural Festival" 
+                         class="absolute inset-0 m-auto max-w-[205px] xs:max-w-[255px] sm:max-w-[350px] lg:max-w-[400px] max-h-[110px] xs:max-h-[132px] sm:max-h-[162px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.14)]"
+                         style="opacity: 0; transform: scale(0.95); pointer-events: none; z-index: 0;"
+                         :style="activeLogo === 1 ? 'opacity: 1; transform: scale(1); pointer-events: auto; z-index: 10;' : 'opacity: 0; transform: scale(0.95); pointer-events: none; z-index: 0;'">
                 </div>
 
                 <!-- Festival Info Badges (No action buttons) -->

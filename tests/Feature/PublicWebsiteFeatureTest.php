@@ -271,13 +271,14 @@ class PublicWebsiteFeatureTest extends TestCase
         $response->assertSee('Markazu Saquafathi Sunniyya');
     }
 
-    public function test_home_page_displays_single_theme_hero_logo(): void
+    public function test_home_page_displays_alternating_hero_logos(): void
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
         $response->assertSee('adabic-inheritance-web.svg');
-        $response->assertDontSee('quaf-logo-hero.svg');
+        $response->assertSee('quaf-logo-hero.svg');
+        $response->assertSee('activeLogo');
     }
 
     public function test_verification_hub_and_detail_routes_render(): void

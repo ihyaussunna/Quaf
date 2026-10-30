@@ -89,13 +89,25 @@ function fundHomePage() {
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full flex flex-col items-center text-center">
             
-            <!-- Hero Center: Official Theme Logo -->
-            <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center">
+            <!-- Hero Center: Alternating Official Theme Logo & QUAF Festival Logo -->
+            <div class="relative w-full max-w-xl mb-6 sm:mb-8 flex flex-col items-center text-center"
+                 x-data="{ activeLogo: 0 }"
+                 x-init="setInterval(() => { activeLogo = 1 - activeLogo; }, 4200)">
                 
                 <div class="relative w-full h-[112px] xs:h-[135px] sm:h-[165px] flex items-center justify-center">
+                    <!-- 1. Adabic Inheritance Logo -->
                     <img src="{{ asset('images/adabic-inheritance-web.svg') }}" 
                          alt="Adabic Inheritance — QUAF" 
-                         class="max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]">
+                         class="absolute inset-0 m-auto max-w-[210px] xs:max-w-[255px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.08)]"
+                         style="opacity: 1; transform: scale(1); pointer-events: auto; z-index: 10;"
+                         :style="activeLogo === 0 ? 'opacity: 1; transform: scale(1); pointer-events: auto; z-index: 10;' : 'opacity: 0; transform: scale(0.95); pointer-events: none; z-index: 0;'">
+
+                    <!-- 2. QUAF Festival Logo -->
+                    <img src="{{ asset('images/quaf-logo-hero.svg') }}" 
+                         alt="QUAF — Markaz Cultural Festival" 
+                         class="absolute inset-0 m-auto max-w-[195px] xs:max-w-[240px] sm:max-w-[336px] lg:max-w-[384px] max-h-[105px] xs:max-h-[128px] sm:max-h-[158px] w-auto h-auto object-contain transition-all duration-700 transform drop-shadow-[0_12px_40px_rgba(255,255,255,0.12)]"
+                         style="opacity: 0; transform: scale(0.95); pointer-events: none; z-index: 0;"
+                         :style="activeLogo === 1 ? 'opacity: 1; transform: scale(1); pointer-events: auto; z-index: 10;' : 'opacity: 0; transform: scale(0.95); pointer-events: none; z-index: 0;'">
                 </div>
 
                 <!-- Festival Info Pills -->
