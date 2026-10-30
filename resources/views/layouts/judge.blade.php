@@ -90,8 +90,12 @@
         </div>
 
         <!-- Right: Actions with app-tap -->
-        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            <a href="{{ route('judge.dashboard') }}" class="app-tap px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 border border-slate-200 transition-all">
+        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            <a href="{{ route('judge.schedule') }}" class="app-tap px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all {{ request()->routeIs('judge.schedule') ? 'bg-amber-500 text-slate-950 shadow-xs border border-amber-500' : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200' }}">
+                <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>My Schedule</span>
+            </a>
+            <a href="{{ route('judge.dashboard') }}" class="app-tap px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-mono font-bold {{ request()->routeIs('judge.dashboard') ? 'bg-slate-900 text-white border border-slate-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 border border-slate-200' }} transition-all">
                 Programs
             </a>
             <form method="POST" action="{{ route('logout') }}">

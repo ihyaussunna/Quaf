@@ -96,7 +96,13 @@ class JudgeController extends Controller
         $assignedPrograms = $judge->programs()
             ->with(['category', 'stage', 'schedule.stage', 'scoringCriteria', 'result', 'zone'])
             ->withCount('entries')
-            ->get();
+            ->get()
+            ->sortBy(function ($prog) {
+                $time = $prog->scheduled_time ?? $prog->schedule?->start_time;
+
+                return $time ? $time->timestamp : PHP_INT_MAX;
+            })
+            ->values();
 
         $upcoming = $assignedPrograms->where('status', 'upcoming');
         $inProgress = $assignedPrograms->where('status', 'in_progress');
@@ -229,6 +235,24 @@ class JudgeController extends Controller
             'liveProgram',
             'nextProgram'
         ));
+    }
+
+    public function schedule(): View
+    {
+        $judge = $this->getJudge();
+
+        $assignedPrograms = $judge->programs()
+            ->with(['category', 'stage', 'schedule.stage', 'scoringCriteria', 'result', 'zone'])
+            ->withCount('entries')
+            ->get()
+            ->sortBy(function ($prog) {
+                $time = $prog->scheduled_time ?? $prog->schedule?->start_time;
+
+                return $time ? $time->timestamp : PHP_INT_MAX;
+            })
+            ->values();
+
+        return view('judge.schedule', compact('judge', 'assignedPrograms'));
     }
 
     public function showProgram(Program $program): View

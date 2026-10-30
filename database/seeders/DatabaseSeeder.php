@@ -259,6 +259,9 @@ class DatabaseSeeder extends Seeder
             $judge2->programs()->sync([$programs['Q9-102']->id, $programs['Q9-104']->id, $programs['Q9-105']->id]);
         }
 
+        // 10. Official Festival Stage Judges
+        $this->call(OfficialFestivalJudgesSeeder::class);
+
         // 11. Seed Official Students for all 5 Groups (Lumo, Pacto, Conco, Unio, Yugo)
         $this->call(OfficialGroupStudentsSeeder::class);
 

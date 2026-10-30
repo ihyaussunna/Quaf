@@ -704,6 +704,7 @@ Route::get('admin/students-export', [AdminStudentController::class, 'export'])->
 */
 Route::prefix('judge')->name('judge.')->middleware(['auth', 'role:judge'])->group(function () {
     Route::get('/', [JudgeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/schedule', [JudgeController::class, 'schedule'])->name('schedule');
     Route::get('/evaluate/{program}', [JudgeController::class, 'showProgram'])->name('evaluate');
     Route::get('/evaluate/{program}/submissions-pdf', [JudgeController::class, 'submissionsPdf'])->name('evaluate.submissions-pdf');
     Route::post('/evaluate/{program}/{entry}', [JudgeController::class, 'saveScore'])->name('evaluate.save');
