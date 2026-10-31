@@ -7,7 +7,6 @@ use App\Models\Certificate;
 use App\Models\CoinTransaction;
 use App\Models\Student;
 use App\Services\CoinRewardService;
-use App\Services\PointCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -22,10 +21,14 @@ class VerificationController extends Controller
     public function verifyCertificate(string $certificateNumber): View
     {
         $certificate = Certificate::where('certificate_number', trim($certificateNumber))
-            ->with(['student.group', 'program.category', 'entry'])
+            ->with(['student.group', 'program.category', 'entry', 'program.result'])
             ->first();
 
-        $isValid = (bool) $certificate;
+        $isMediaPublished = $certificate && $certificate->program && $certificate->program->result
+            && $certificate->program->result->status === 'published'
+            && (bool) $certificate->program->result->is_media_published;
+
+        $isValid = (bool) $certificate && $isMediaPublished;
 
         return view('public.verify-certificate', compact('certificate', 'isValid', 'certificateNumber'));
     }
@@ -56,13 +59,23 @@ class VerificationController extends Controller
         $awardedPrograms = collect();
 
         if ($student) {
-            $coinSummary = $coinRewardService->getStudentCoinSummary($student);
-            $studentAchievements = $coinRewardService->getStudentAchievements($student);
+            // Scanner page is public: only show media-published coins and achievements
+            $coinSummary = $coinRewardService->getStudentCoinSummary($student, true);
+            $studentAchievements = $coinRewardService->getStudentAchievements($student, true);
             $purchaseHistory = CoinTransaction::where('student_id', $student->id)
                 ->where('transaction_type', 'debit')
                 ->latest()
                 ->get();
             $coinTransactions = CoinTransaction::where('student_id', $student->id)
+                ->where(function ($q) {
+                    $q->whereNull('result_id')
+                        ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                })
+                ->where(function ($q) {
+                    $q->whereNull('program_id')
+                        ->orDoesntHave('program.result')
+                        ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                })
                 ->latest()
                 ->take(15)
                 ->get();
@@ -83,6 +96,7 @@ class VerificationController extends Controller
 
     /**
      * Resolve all competition programs where the student achieved 1st/2nd/3rd prize or a grade.
+     * Only reveals results that have been officially published with a poster by the Media Desk.
      *
      * @return Collection<int, array{
      *     program_id: int|null,
@@ -98,14 +112,29 @@ class VerificationController extends Controller
     {
         $awarded = collect();
 
-        // 1. From CoinTransactions (credits with coins > 0)
+        // 1. From CoinTransactions (credits with coins > 0 for media-published results)
         $credits = CoinTransaction::where('student_id', $student->id)
             ->where('transaction_type', 'credit')
             ->where('coins', '>', 0)
-            ->with(['program.category'])
+            ->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })
+            ->where(function ($q) {
+                $q->whereNull('program_id')
+                    ->orDoesntHave('program.result')
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })
+            ->with(['program.category', 'program.result', 'result'])
             ->get();
 
         foreach ($credits as $credit) {
+            $prog = $credit->program;
+            $res = $credit->result ?? $prog?->result;
+            if ($res && (! $res->is_media_published || $res->status !== 'published')) {
+                continue;
+            }
+
             $pos = in_array((int) $credit->prize_position, [1, 2, 3], true) ? (int) $credit->prize_position : null;
             $grade = ! empty($credit->grade) && $credit->grade !== '-' ? trim($credit->grade) : null;
             if ($pos || $grade) {
@@ -124,15 +153,14 @@ class VerificationController extends Controller
             }
         }
 
-        // 2. From Entries & Group Participations
+        // 2. From Entries & Group Participations (ONLY if officially published by Media Desk)
         $student->loadMissing([
             'entries.program.result',
             'entries.program.category',
-            'entries.scoreSheets',
             'participations.program.result',
             'participations.program.category',
-            'participations.scoreSheets',
             'certificates.program.category',
+            'certificates.program.result',
         ]);
 
         $allEntries = $student->entries->merge($student->participations)->unique('id');
@@ -144,7 +172,8 @@ class VerificationController extends Controller
             }
 
             $res = $prog->result;
-            if (! in_array($res->status, ['verified', 'published', 'announced'], true) && ! $res->is_media_published) {
+            // CRITICAL: MUST BE OFFICIALLY PUBLISHED BY MEDIA DESK
+            if ($res->status !== 'published' || ! $res->is_media_published) {
                 continue;
             }
 
@@ -166,16 +195,6 @@ class VerificationController extends Controller
                 $grade = $entry->computed_grade;
             }
 
-            if (! $grade && $entry->scoreSheets->where('is_submitted', true)->isNotEmpty()) {
-                $avgScore = (float) $entry->scoreSheets->where('is_submitted', true)->avg('total_score');
-                if ($avgScore > 0) {
-                    $gInfo = PointCalculationService::getGradeFromScore($avgScore);
-                    if (! empty($gInfo['grade']) && $gInfo['grade'] !== '-') {
-                        $grade = $gInfo['grade'];
-                    }
-                }
-            }
-
             $grade = (! empty($grade) && $grade !== '-') ? trim($grade) : null;
 
             if ($pos || $grade) {
@@ -194,9 +213,14 @@ class VerificationController extends Controller
             }
         }
 
-        // 3. From Certificates
+        // 3. From Certificates (Only if program result is media published)
         foreach ($student->certificates as $cert) {
-            if ($cert->program) {
+            if ($cert->program && $cert->program->result) {
+                $res = $cert->program->result;
+                if ($res->status !== 'published' || ! $res->is_media_published) {
+                    continue;
+                }
+
                 $pos = in_array((int) $cert->position, [1, 2, 3], true) ? (int) $cert->position : null;
                 $existing = $awarded->get($cert->program_id, []);
                 if ($pos || ! empty($existing['grade'])) {

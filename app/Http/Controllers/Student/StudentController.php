@@ -111,7 +111,11 @@ class StudentController extends Controller
 
         $myPrograms = $student->entries;
 
-        $myResults = $student->certificates()->with('program.category')->latest('issued_at')->get();
+        $myResults = $student->certificates()
+            ->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true))
+            ->with('program.category')
+            ->latest('issued_at')
+            ->get();
 
         $announcements = Announcement::where('is_active', true)
             ->where(function ($q) use ($student) {
@@ -126,8 +130,17 @@ class StudentController extends Controller
             ->take(4)
             ->get();
 
-        $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student);
+        $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student, true);
         $coinTransactions = CoinTransaction::where('student_id', $student->id)
+            ->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })
+            ->where(function ($q) {
+                $q->whereNull('program_id')
+                    ->orDoesntHave('program.result')
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })
             ->latest()
             ->take(15)
             ->get();

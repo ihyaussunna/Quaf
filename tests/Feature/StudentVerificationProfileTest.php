@@ -119,6 +119,7 @@ class StudentVerificationProfileTest extends TestCase
             'first_entry_id' => $entry1->id,
             'first_grade' => 'A+',
             'status' => 'published',
+            'is_media_published' => true,
         ]);
 
         // 2. Program 2: Student wins 2nd prize without grade
@@ -141,6 +142,7 @@ class StudentVerificationProfileTest extends TestCase
             'second_entry_id' => $entry2->id,
             'second_grade' => null,
             'status' => 'published',
+            'is_media_published' => true,
         ]);
 
         // 3. Program 3: Student has no prize, no grade
@@ -173,5 +175,65 @@ class StudentVerificationProfileTest extends TestCase
         // Program 3 without prize or grade must NOT appear in the Competition Results section
         $response->assertDontSee('3rd Prize');
         $response->assertDontSee('VERIFIED ENTRY');
+    }
+
+    public function test_verification_profile_does_not_reveal_results_or_coins_until_media_published(): void
+    {
+        $prog = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Secret Ghazal Competition',
+            'code' => 'Q9-999',
+            'type' => 'individual',
+            'status' => 'completed',
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '4129',
+            'status' => 'verified',
+        ]);
+
+        $result = Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry->id,
+            'first_grade' => 'A+',
+            'status' => 'published',
+            'is_media_published' => false, // Not yet published by Media Desk!
+            'published_at' => now(),
+        ]);
+
+        // When scanned, the result must be completely hidden
+        $response = $this->get(route('verify.student', $this->student->qr_token));
+        $response->assertOk();
+        $response->assertDontSee('Competition Results');
+        $response->assertDontSee('1st Prize');
+        $response->assertDontSee('Grade A+');
+
+        // Also public results page must not show it in published results
+        $pubResponse = $this->get(route('results.index'));
+        $pubResponse->assertOk();
+        $this->assertCount(0, $pubResponse->viewData('results'));
+        $pubResponse->assertSee('No results match the selected filters');
+
+        // Now Media Desk publishes the poster & result
+        $result->update([
+            'is_media_published' => true,
+            'media_published_at' => now(),
+        ]);
+
+        // Now when scanned, it reveals the achievements
+        $response2 = $this->get(route('verify.student', $this->student->qr_token));
+        $response2->assertOk();
+        $response2->assertSee('Competition Results');
+        $response2->assertSee('1st Prize');
+        $response2->assertSee('Grade A+');
+
+        // And public results page now displays it in published results
+        $pubResponse2 = $this->get(route('results.index'));
+        $pubResponse2->assertOk();
+        $this->assertCount(1, $pubResponse2->viewData('results'));
+        $pubResponse2->assertSee('Download Poster');
     }
 }

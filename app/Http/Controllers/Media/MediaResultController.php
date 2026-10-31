@@ -55,8 +55,8 @@ class MediaResultController extends Controller
         }
 
         if ($tab === 'announced') {
-            // Priority: Announced from stage awaiting media poster
-            $query->where('status', 'announced')
+            // Priority: Announced from stage or declared awaiting media poster
+            $query->whereIn('status', ['announced', 'published'])
                 ->where('is_media_published', false);
         } elseif ($tab === 'published') {
             // Posters published
@@ -69,7 +69,7 @@ class MediaResultController extends Controller
         $results = $query->latest('updated_at')->paginate(12)->withQueryString();
 
         $stats = [
-            'announced_count' => Result::where('status', 'announced')->where('is_media_published', false)->count(),
+            'announced_count' => Result::whereIn('status', ['announced', 'published'])->where('is_media_published', false)->count(),
             'published_count' => Result::where('is_media_published', true)->count(),
             'total_count' => Result::whereIn('status', ['announced', 'published', 'send', 'delivered'])->count(),
         ];
@@ -631,6 +631,8 @@ class MediaResultController extends Controller
      */
     public function publicPoster(Result $result): View
     {
+        abort_unless($result->status === 'published' && (bool) $result->is_media_published, 404);
+
         $result->load([
             'program.category',
             'program.stage',
@@ -649,6 +651,8 @@ class MediaResultController extends Controller
      */
     public function downloadPoster(Result $result): Response|StreamedResponse
     {
+        abort_unless($result->status === 'published' && (bool) $result->is_media_published, 404);
+
         $result->loadMissing([
             'program.category',
             'program.stage',

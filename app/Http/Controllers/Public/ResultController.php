@@ -25,6 +25,7 @@ class ResultController extends Controller
         $search = $request->query('search');
 
         $query = Result::where('status', 'published')
+            ->where('is_media_published', true)
             ->with([
                 'program.category',
                 'program.stage',
@@ -68,6 +69,7 @@ class ResultController extends Controller
         $results = $query->latest('published_at')->paginate(12)->withQueryString();
 
         $allPublishedOrder = Result::where('status', 'published')
+            ->where('is_media_published', true)
             ->orderBy('published_at', 'asc')
             ->orderBy('id', 'asc')
             ->pluck('id')
@@ -113,6 +115,7 @@ class ResultController extends Controller
 
         $result = Result::where('program_id', $program->id)
             ->where('status', 'published')
+            ->where('is_media_published', true)
             ->with([
                 'program.category',
                 'program.stage',
@@ -132,6 +135,7 @@ class ResultController extends Controller
         $resultNo = null;
         if ($result) {
             $resultNo = Result::where('status', 'published')
+                ->where('is_media_published', true)
                 ->where(function ($q) use ($result) {
                     $q->where('published_at', '<', $result->published_at)
                         ->orWhere(function ($sub) use ($result) {

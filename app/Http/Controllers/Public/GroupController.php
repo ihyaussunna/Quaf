@@ -18,7 +18,7 @@ class GroupController extends Controller
         $groups = Group::getPublicStandings();
 
         $totalPrograms = Program::count();
-        $publishedCount = Result::where('status', 'published')->count();
+        $publishedCount = Result::where('status', 'published')->where('is_media_published', true)->count();
         $isFullResultsPublished = ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
 
         return view('public.groups', compact('groups', 'isFullResultsPublished'));
@@ -30,6 +30,7 @@ class GroupController extends Controller
 
         // Fetch winning results where this group got 1st, 2nd or 3rd place
         $groupWins = Result::where('status', 'published')
+            ->where('is_media_published', true)
             ->where(function ($q) use ($group) {
                 $q->whereHas('firstEntry', fn ($sq) => $sq->where('group_id', $group->id))
                     ->orWhereHas('secondEntry', fn ($sq) => $sq->where('group_id', $group->id))

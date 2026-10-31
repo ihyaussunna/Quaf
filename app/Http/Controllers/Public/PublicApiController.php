@@ -18,6 +18,7 @@ class PublicApiController extends Controller
 
         $tickerData = Cache::remember('public_api_live_ticker', 15, function () {
             return Result::where('status', 'published')
+                ->where('is_media_published', true)
                 ->with(['program', 'firstEntry.student.group', 'secondEntry.student.group', 'thirdEntry.student.group'])
                 ->latest('published_at')
                 ->take(10)
@@ -124,6 +125,7 @@ class PublicApiController extends Controller
     {
         $results = Cache::remember('public_api_latest_results', 30, function () {
             return Result::where('status', 'published')
+                ->where('is_media_published', true)
                 ->with(['program.category', 'firstEntry.student.group', 'secondEntry.student.group', 'thirdEntry.student.group'])
                 ->latest('published_at')
                 ->take(12)

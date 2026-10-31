@@ -232,6 +232,7 @@ class ResultPublishTest extends TestCase
             'first_entry_id' => $entry->id,
             'first_grade' => 'A+',
             'status' => 'published',
+            'is_media_published' => true,
             'published_at' => now(),
         ]);
 
@@ -274,6 +275,7 @@ class ResultPublishTest extends TestCase
         $result = Result::create([
             'program_id' => $program->id,
             'status' => 'published',
+            'is_media_published' => true,
             'published_at' => now(),
         ]);
 

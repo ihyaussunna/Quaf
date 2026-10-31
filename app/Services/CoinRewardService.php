@@ -466,21 +466,34 @@ class CoinRewardService
     /**
      * Get real-time coin ledger summary for a student.
      *
+     * @param  bool  $onlyMediaPublished  When true, only includes coins from results published by media desk.
      * @return array{balance: int, total_earned: int, total_spent: int}
      */
-    public function getStudentCoinSummary(Student $student): array
+    public function getStudentCoinSummary(Student $student, bool $onlyMediaPublished = false): array
     {
         CoinTransaction::ensureSchema();
 
-        $earned = (int) CoinTransaction::where('student_id', $student->id)
-            ->where('coins', '>', 0)
-            ->sum('coins');
+        $earnedQuery = CoinTransaction::where('student_id', $student->id)
+            ->where('coins', '>', 0);
+
+        if ($onlyMediaPublished) {
+            $earnedQuery->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })->where(function ($q) {
+                $q->whereNull('program_id')
+                    ->orDoesntHave('program.result')
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            });
+        }
+
+        $earned = (int) $earnedQuery->sum('coins');
 
         $spent = (int) abs(CoinTransaction::where('student_id', $student->id)
             ->where('transaction_type', 'debit')
             ->sum('coins'));
 
-        $balance = max(0, (int) CoinTransaction::where('student_id', $student->id)->sum('coins'));
+        $balance = max(0, $earned - $spent);
 
         return [
             'balance' => $balance,
@@ -492,12 +505,13 @@ class CoinRewardService
     /**
      * Get student achievements including grade breakdown and prize positions.
      *
+     * @param  bool  $onlyMediaPublished  When true, only includes prizes/grades from results published by media desk.
      * @return array{
      *     grade_counts: array<string, int>,
      *     prizes: array<int, array{count: int, title: string, rank: string, message: string, programs: array}>
      * }
      */
-    public function getStudentAchievements(Student $student): array
+    public function getStudentAchievements(Student $student, bool $onlyMediaPublished = false): array
     {
         CoinTransaction::ensureSchema();
 
@@ -536,14 +550,31 @@ class CoinRewardService
         $processedPrograms = [];
 
         // 1. Scan completed positive coin transactions
-        $credits = CoinTransaction::where('student_id', $student->id)
+        $creditsQuery = CoinTransaction::where('student_id', $student->id)
             ->where('transaction_type', 'credit')
             ->where('coins', '>', 0)
-            ->with(['program.category'])
-            ->get();
+            ->with(['program.category', 'program.result', 'result']);
+
+        if ($onlyMediaPublished) {
+            $creditsQuery->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })->where(function ($q) {
+                $q->whereNull('program_id')
+                    ->orDoesntHave('program.result')
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            });
+        }
+
+        $credits = $creditsQuery->get();
 
         foreach ($credits as $credit) {
             $progId = $credit->program_id;
+            $res = $credit->result ?? $credit->program?->result;
+            if ($onlyMediaPublished && $res && (! $res->is_media_published || $res->status !== 'published')) {
+                continue;
+            }
+
             $pos = (int) $credit->prize_position;
             $grade = self::normalizeGrade($credit->grade);
             $progName = $credit->program?->name ?? ($credit->metadata['program_name'] ?? 'Competition');
@@ -567,15 +598,19 @@ class CoinRewardService
         }
 
         // 2. Scan verified program entries (individual and group) that may not yet have coin transactions
-        $entries = ProgramEntry::where('student_id', $student->id)
-            ->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']))
-            ->with(['program.result', 'scoreSheets'])
-            ->get();
+        $entriesQuery = ProgramEntry::where('student_id', $student->id);
+        $groupEntriesQuery = $student->participations();
 
-        $groupEntries = $student->participations()
-            ->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']))
-            ->with(['program.result', 'scoreSheets'])
-            ->get();
+        if ($onlyMediaPublished) {
+            $entriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
+            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
+        } else {
+            $entriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']));
+            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']));
+        }
+
+        $entries = $entriesQuery->with(['program.result', 'scoreSheets'])->get();
+        $groupEntries = $groupEntriesQuery->with(['program.result', 'scoreSheets'])->get();
 
         $allEntries = $entries->merge($groupEntries)->unique('id');
 
@@ -586,6 +621,10 @@ class CoinRewardService
             }
             $result = $program->result;
             if (! $result) {
+                continue;
+            }
+
+            if ($onlyMediaPublished && (! $result->is_media_published || $result->status !== 'published')) {
                 continue;
             }
 
@@ -607,7 +646,7 @@ class CoinRewardService
                 $grade = self::normalizeGrade($entry->computed_grade);
             }
 
-            if (! $grade) {
+            if (! $onlyMediaPublished && ! $grade) {
                 $judgeGrade = $entry->scoreSheets->where('is_submitted', true)->pluck('criteria_scores.grade')->filter()->first();
                 if ($judgeGrade) {
                     $grade = self::normalizeGrade($judgeGrade);

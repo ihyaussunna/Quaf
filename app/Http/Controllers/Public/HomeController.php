@@ -215,6 +215,7 @@ class HomeController extends Controller
         $stages = Stage::with(['currentProgram.category', 'nextProgram.category'])->get();
 
         $latestResults = Result::where('status', 'published')
+            ->where('is_media_published', true)
             ->with([
                 'program.category',
                 'firstEntry.student.group',
@@ -280,7 +281,7 @@ class HomeController extends Controller
         ];
 
         $totalProgramsCount = $stats['programs'] ?? Program::count();
-        $publishedResultsCount = Result::where('status', 'published')->count();
+        $publishedResultsCount = Result::where('status', 'published')->where('is_media_published', true)->count();
         $isFullResultsPublished = ($totalProgramsCount > 0 && $publishedResultsCount >= $totalProgramsCount);
 
         return view('public.home', compact(
