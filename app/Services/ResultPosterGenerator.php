@@ -321,19 +321,22 @@ class ResultPosterGenerator
 
         // 2. Program Name
         $progName = $program->name ?? 'Competition';
-        $words = explode(' ', $progName);
+        $paragraphs = preg_split('/\r?\n/', $progName);
         $lines = [];
-        $line = '';
-        foreach ($words as $w) {
-            if (strlen($line.' '.$w) > 12 && ! empty($line)) {
-                $lines[] = trim($line);
-                $line = $w;
-            } else {
-                $line .= ' '.$w;
+        foreach ($paragraphs as $para) {
+            $words = explode(' ', trim($para));
+            $line = '';
+            foreach ($words as $w) {
+                if (strlen($line.' '.$w) > 12 && ! empty($line)) {
+                    $lines[] = trim($line);
+                    $line = $w;
+                } else {
+                    $line .= ' '.$w;
+                }
             }
-        }
-        if (! empty($line)) {
-            $lines[] = trim($line);
+            if (! empty($line)) {
+                $lines[] = trim($line);
+            }
         }
 
         $py = count($lines) > 2 ? 260 : 290;
@@ -397,15 +400,23 @@ class ResultPosterGenerator
                 // Rank
                 imagettftext($img, $rankSize, 0, $blockLeft, $currY, $red, $rockwellRegular, $winner['rank']);
 
-                // Name
+                // Name (supports explicit newlines when user presses Enter)
                 $nameY = $currY + (int) ($rankSize * 1.45);
-                $nameParts = explode(' ', trim($winner['name']));
-                if (count($nameParts) > 2 && strlen($winner['name']) > 16) {
-                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, $nameParts[0]);
-                    $nameY += (int) ($nameSize * 1.25);
-                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, implode(' ', array_slice($nameParts, 1)));
+                if (str_contains($winner['name'], "\n")) {
+                    $nlParts = preg_split('/\r?\n/', $winner['name']);
+                    foreach ($nlParts as $nl) {
+                        imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, trim($nl));
+                        $nameY += (int) ($nameSize * 1.25);
+                    }
                 } else {
-                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, $winner['name']);
+                    $nameParts = explode(' ', trim($winner['name']));
+                    if (count($nameParts) > 2 && strlen($winner['name']) > 16) {
+                        imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, $nameParts[0]);
+                        $nameY += (int) ($nameSize * 1.25);
+                        imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, implode(' ', array_slice($nameParts, 1)));
+                    } else {
+                        imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, $winner['name']);
+                    }
                 }
 
                 // Unit / Team Name

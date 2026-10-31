@@ -1113,9 +1113,14 @@
                             </div>
                             <template x-for="(w, idx) in data.winners.first" :key="'w1_' + idx">
                                 <div class="space-y-1 pt-1">
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" x-model="w.name" @input="render()" placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Student Name)" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white font-medium">
-                                        <button type="button" @click="removeWinner('first', idx)" x-show="data.winners.first.length > 1" class="text-red-500 p-1">&times;</button>
+                                    <div class="flex items-start gap-2">
+                                        <textarea rows="2" 
+                                                  x-model="w.name" 
+                                                  @input="render()" 
+                                                  @keydown.enter.stop="setTimeout(() => { render(); pushHistory(); }, 10)"
+                                                  placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Enter = 2 വരി)" 
+                                                  class="flex-1 text-xs p-1.5 rounded-lg border border-slate-300 bg-white font-medium resize-y leading-snug focus:border-purple-600 focus:ring-1 focus:ring-purple-600"></textarea>
+                                        <button type="button" @click="removeWinner('first', idx)" x-show="data.winners.first.length > 1" class="text-red-500 p-1 font-bold text-sm hover:bg-red-50 rounded">&times;</button>
                                     </div>
                                     <input type="text" x-model="w.unit" @input="render()" placeholder="ഗ്രൂപ്പ് / യൂണിറ്റ് (Group Name)" class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600">
                                 </div>
@@ -1133,9 +1138,14 @@
                             </div>
                             <template x-for="(w, idx) in data.winners.second" :key="'w2_' + idx">
                                 <div class="space-y-1 pt-1">
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" x-model="w.name" @input="render()" placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Student Name)" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white font-medium">
-                                        <button type="button" @click="removeWinner('second', idx)" x-show="data.winners.second.length > 1" class="text-red-500 p-1">&times;</button>
+                                    <div class="flex items-start gap-2">
+                                        <textarea rows="2" 
+                                                  x-model="w.name" 
+                                                  @input="render()" 
+                                                  @keydown.enter.stop="setTimeout(() => { render(); pushHistory(); }, 10)"
+                                                  placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Enter = 2 വരി)" 
+                                                  class="flex-1 text-xs p-1.5 rounded-lg border border-slate-300 bg-white font-medium resize-y leading-snug focus:border-purple-600 focus:ring-1 focus:ring-purple-600"></textarea>
+                                        <button type="button" @click="removeWinner('second', idx)" x-show="data.winners.second.length > 1" class="text-red-500 p-1 font-bold text-sm hover:bg-red-50 rounded">&times;</button>
                                     </div>
                                     <input type="text" x-model="w.unit" @input="render()" placeholder="ഗ്രൂപ്പ് / യൂണിറ്റ് (Group Name)" class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600">
                                 </div>
@@ -1153,9 +1163,14 @@
                             </div>
                             <template x-for="(w, idx) in data.winners.third" :key="'w3_' + idx">
                                 <div class="space-y-1 pt-1">
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" x-model="w.name" @input="render()" placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Student Name)" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white font-medium">
-                                        <button type="button" @click="removeWinner('third', idx)" x-show="data.winners.third.length > 1" class="text-red-500 p-1">&times;</button>
+                                    <div class="flex items-start gap-2">
+                                        <textarea rows="2" 
+                                                  x-model="w.name" 
+                                                  @input="render()" 
+                                                  @keydown.enter.stop="setTimeout(() => { render(); pushHistory(); }, 10)"
+                                                  placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Enter = 2 വരി)" 
+                                                  class="flex-1 text-xs p-1.5 rounded-lg border border-slate-300 bg-white font-medium resize-y leading-snug focus:border-purple-600 focus:ring-1 focus:ring-purple-600"></textarea>
+                                        <button type="button" @click="removeWinner('third', idx)" x-show="data.winners.third.length > 1" class="text-red-500 p-1 font-bold text-sm hover:bg-red-50 rounded">&times;</button>
                                     </div>
                                     <input type="text" x-model="w.unit" @input="render()" placeholder="ഗ്രൂപ്പ് / യൂണിറ്റ് (Group Name)" class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600">
                                 </div>
@@ -1190,9 +1205,16 @@
 
                         <!-- Editable Program Name Input -->
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-600">Program Title Text (പേര് എഡിറ്റ് ചെയ്യാം)</label>
-                            <input type="text" x-model="data.competition" @input="render()" placeholder="മത്സരത്തിന്റെ പേര്"
-                                   class="w-full text-xs p-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[11px] font-bold text-slate-600">Program Title Text (പേര് എഡിറ്റ് ചെയ്യാം)</label>
+                                <span class="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded border border-purple-200">Enter = 2 വരി (Double Line)</span>
+                            </div>
+                            <textarea rows="2" 
+                                      x-model="data.competition" 
+                                      @input="render()" 
+                                      @keydown.enter.stop="setTimeout(() => { render(); pushHistory(); }, 10)"
+                                      placeholder="മത്സരത്തിന്റെ പേര് (Enter അടിച്ചു 2 വരി ആക്കാം)"
+                                      class="w-full text-xs p-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600 resize-y leading-snug"></textarea>
                         </div>
 
                         <!-- Program Name Color Picker & Quick Swatches -->
@@ -2752,11 +2774,12 @@ function posterStudio() {
                 } else if (this.selectedId === 'competition') {
                     const maxW = this.settings.competition_max_width || 440;
                     const lineH = this.settings.competition_line_height || 94;
+                    const lineCount = Math.max(1, (this.data.competition || '').split(/\r?\n/).length);
                     return {
                         x: this.settings.competition_x,
                         y: this.settings.competition_y,
                         w: maxW,
-                        h: Math.round(lineH * 2.2),
+                        h: Math.round(lineH * Math.max(1.8, lineCount * 1.15)),
                         rotation: this.settings.competition_rotation || 0,
                         type: 'core',
                         id: 'competition'
@@ -3417,9 +3440,9 @@ function posterStudio() {
 
                 let nameLines = [];
                 if (w.name.includes('\n')) {
-                    nameLines = w.name.split('\n');
+                    nameLines = w.name.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 0);
                 } else if (w.name.includes('/')) {
-                    nameLines = w.name.split('/');
+                    nameLines = w.name.split('/').map(s => s.trim()).filter(s => s.length > 0);
                 } else if (this.settings.winner_name_2lines && w.name.length > 16 && w.name.includes(' ')) {
                     const parts = w.name.split(' ');
                     const splitIdx = Math.ceil(parts.length / 2);
@@ -3427,6 +3450,7 @@ function posterStudio() {
                 } else {
                     nameLines = [w.name];
                 }
+                if (nameLines.length === 0) nameLines = [w.name || ''];
 
                 let currentNameY = nameY;
                 nameLines.forEach((nLine, lIdx) => {
@@ -3453,7 +3477,8 @@ function posterStudio() {
                 ctx.stroke();
 
                 ctx.restore();
-                currY += rowGap;
+                const extraNameH = Math.max(0, (nameLines.length - 1) * nameLineH);
+                currY += (rowGap + extraNameH);
             });
         },
 
@@ -3588,22 +3613,31 @@ function posterStudio() {
 
         wrapText(ctx, text, maxWidth) {
             if (!text) return [];
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = words[0];
+            // Split by explicit newline (Enter key) first
+            const paragraphs = text.toString().split(/\r?\n/);
+            const allLines = [];
 
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                const width = ctx.measureText(currentLine + ' ' + word).width;
-                if (width < maxWidth) {
-                    currentLine += ' ' + word;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
+            for (const para of paragraphs) {
+                const trimmed = para.trim();
+                if (!trimmed) {
+                    continue;
                 }
+                const words = trimmed.split(/\s+/);
+                let currentLine = words[0];
+
+                for (let i = 1; i < words.length; i++) {
+                    const word = words[i];
+                    const width = ctx.measureText(currentLine + ' ' + word).width;
+                    if (maxWidth && width <= maxWidth) {
+                        currentLine += ' ' + word;
+                    } else {
+                        allLines.push(currentLine);
+                        currentLine = word;
+                    }
+                }
+                if (currentLine) allLines.push(currentLine);
             }
-            if (currentLine) lines.push(currentLine);
-            return lines;
+            return allLines.length > 0 ? allLines : [text];
         },
 
         downloadPoster() {
