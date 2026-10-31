@@ -113,6 +113,8 @@ class AnnouncerController extends Controller
         $result->is_media_published = false;
         $result->save();
 
+        app(PointCalculationService::class)->recalculateForProgram($result->program_id);
+
         AuditLogger::log('announcer_announced_result', $result, ['status' => $old], ['status' => 'announced']);
 
         return back()->with('success', "പ്രോഗ്രാം '{$result->program->name}' അനൗൺസ് ചെയ്തു. റിസൾട്ട് മീഡിയ ഡെസ്കിലേക്ക് കൈമാറിയിരിക്കുന്നു.");

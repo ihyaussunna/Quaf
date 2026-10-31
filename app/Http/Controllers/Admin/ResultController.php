@@ -268,11 +268,17 @@ class ResultController extends Controller
     public function sendToAnnouncer(Result $result): RedirectResponse
     {
         $old = $result->status;
-        $result->update(['status' => 'send']);
+        $result->update([
+            'status' => 'send',
+            'published_at' => $result->published_at ?? Carbon::now(),
+        ]);
+
+        // Immediately update team standings in Admin Panel
+        $this->pointService->recalculateAllPoints();
 
         AuditLogger::log('send_result_to_announcer', $result, ['status' => $old], ['status' => 'send']);
 
-        return back()->with('success', "Result for '{$result->program->name}' has been sent to the Announcer Desk.");
+        return back()->with('success', "Result for '{$result->program->name}' has been sent to the Announcer Desk. Admin team standings updated.");
     }
 
     protected function issueCertificates(Result $result): void
@@ -604,12 +610,19 @@ class ResultController extends Controller
         $count = 0;
         foreach ($results as $res) {
             $old = $res->status;
-            $res->update(['status' => 'send']);
+            $res->update([
+                'status' => 'send',
+                'published_at' => $res->published_at ?? Carbon::now(),
+            ]);
             AuditLogger::log('send_result_to_announcer', $res, ['status' => $old], ['status' => 'send']);
             $count++;
         }
 
-        return back()->with('success', "{$count} മത്സര ഫലങ്ങൾ സ്റ്റേജ് അനൗൺസർ ഡെസ്കിലേക്ക് കൈമാറി.");
+        if ($count > 0) {
+            $this->pointService->recalculateAllPoints();
+        }
+
+        return back()->with('success', "{$count} മത്സര ഫലങ്ങൾ സ്റ്റേജ് അനൗൺസർ ഡെസ്കിലേക്ക് കൈമാറി. അഡ്മിൻ ടീം സ്റ്റാൻഡിങ്സ് അപ്‌ഡേറ്റ് ചെയ്തു.");
     }
 
     /**

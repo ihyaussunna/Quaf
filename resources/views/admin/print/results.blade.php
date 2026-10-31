@@ -81,7 +81,7 @@
         </div>
 
         <!-- Filter Selectors -->
-        <form method="GET" action="{{ route('admin.print.results') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <form method="GET" action="{{ route('admin.print.results') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
                 <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by Zone / Category</label>
                 <select name="zone" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
@@ -104,13 +104,23 @@
                 </select>
             </div>
 
-            @if($selectedZone || $selectedProgramId)
-                <div class="flex items-end">
-                    <a href="{{ route('admin.print.results') }}" class="px-3 py-2 text-xs font-mono text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl">
+            <div>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Result Status</label>
+                <select name="status" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Declared ({{ $results->count() }})</option>
+                    <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published Only</option>
+                    <option value="announced" {{ request('status') === 'announced' ? 'selected' : '' }}>Announced Only</option>
+                    <option value="send" {{ request('status') === 'send' ? 'selected' : '' }}>Sent to Announcer</option>
+                </select>
+            </div>
+
+            <div class="flex items-end gap-2">
+                @if($selectedZone || $selectedProgramId || request('status'))
+                    <a href="{{ route('admin.print.results') }}" class="px-3 py-2 text-xs font-mono text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
                         Reset Filters
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
         </form>
 
         <!-- Section Checkboxes (Interactive Toggle) -->

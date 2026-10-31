@@ -67,10 +67,16 @@
                 </button>
             </form>
 
-            <!-- Print / Export PDF -->
-            <a href="{{ route('admin.print.results') }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold text-xs hover:bg-slate-50 hover:border-[#be1e2d] transition-all flex items-center gap-1.5 shadow-2xs">
-                <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                <span>Print / PDF Report</span>
+            <!-- Declared Results PDF -->
+            <a href="{{ route('admin.print.results') }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold text-xs hover:bg-slate-50 hover:border-[#be1e2d] transition-all flex items-center gap-1.5 shadow-2xs" title="All Declared Results PDF Report">
+                <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Declared Results PDF</span>
+            </a>
+
+            <!-- Standings After 5 / Custom Results -->
+            <a href="{{ route('admin.print.milestone-standings', ['count' => 5]) }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-xs hover:bg-indigo-100 transition-all flex items-center gap-1.5 shadow-2xs" title="Standings after 5 or custom results">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span>Standings After 5 / Custom</span>
             </a>
 
             <!-- Export CSV -->
@@ -345,7 +351,40 @@
                     @endforelse
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-sora">
+                <!-- Milestone Standings Quick Print Box -->
+                <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-slate-800 uppercase tracking-wider font-mono">Milestone Standings</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Print Report</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1.5 text-center">
+                        <a href="{{ route('admin.print.milestone-standings', ['count' => 5]) }}" target="_blank"
+                           class="py-1.5 px-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 text-xs font-semibold text-slate-700 transition">
+                            After 5
+                        </a>
+                        <a href="{{ route('admin.print.milestone-standings', ['count' => 10]) }}" target="_blank"
+                           class="py-1.5 px-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 text-xs font-semibold text-slate-700 transition">
+                            After 10
+                        </a>
+                        <a href="{{ route('admin.print.milestone-standings', ['count' => 15]) }}" target="_blank"
+                           class="py-1.5 px-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 text-xs font-semibold text-slate-700 transition">
+                            After 15
+                        </a>
+                        <a href="{{ route('admin.print.milestone-standings', ['count' => 0]) }}" target="_blank"
+                           class="py-1.5 px-1 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 text-xs font-semibold text-slate-700 transition">
+                            All
+                        </a>
+                    </div>
+                    <form action="{{ route('admin.print.milestone-standings') }}" method="GET" target="_blank" class="flex items-center gap-1.5 pt-1">
+                        <input type="number" name="count" min="1" max="500" placeholder="Custom results count (e.g. 7)"
+                               class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 focus:outline-none focus:border-indigo-500">
+                        <button type="submit" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shrink-0 transition shadow-2xs">
+                            View &amp; Print
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-sora">
                     <span>Updates instantly on results</span>
                     <a href="{{ route('admin.points.index') }}" class="text-[#be1e2d] hover:underline font-medium">Points Rules →</a>
                 </div>

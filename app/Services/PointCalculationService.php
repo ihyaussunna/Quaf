@@ -28,6 +28,11 @@ class PointCalculationService
     ];
 
     /**
+     * Declared result statuses that count towards official team points and merit awards.
+     */
+    public const DECLARED_STATUSES = ['send', 'delivered', 'announced', 'published'];
+
+    /**
      * Handbook official grade points (Rule 11):
      * A+ = 90% - 100% -> 6 points
      * A  = 70% - 89%  -> 5 points
@@ -294,8 +299,8 @@ class PointCalculationService
             Student::query()->update(['points_cache' => 0]);
             Group::query()->update(['points_cache' => 0, 'rank_cache' => 0]);
 
-            // 3. Fetch all published results with their programs and entries
-            $results = Result::where('status', 'published')
+            // 3. Fetch all declared results with their programs and entries
+            $results = Result::whereIn('status', self::DECLARED_STATUSES)
                 ->with([
                     'program.zone',
                     'firstEntry.group',
@@ -353,7 +358,7 @@ class PointCalculationService
             PointsTransaction::where('program_id', $programId)->delete();
 
             $result = Result::where('program_id', $programId)
-                ->where('status', 'published')
+                ->whereIn('status', self::DECLARED_STATUSES)
                 ->with([
                     'program.zone',
                     'firstEntry.group',
@@ -619,7 +624,7 @@ class PointCalculationService
         $totalPrograms = Cache::remember('chart_total_programs_cached', 60, fn () => Program::count());
         $totalPrograms = max(1, (int) $totalPrograms);
 
-        $results = Result::where('status', 'published')
+        $results = Result::whereIn('status', self::DECLARED_STATUSES)
             ->orderBy('published_at', 'asc')
             ->orderBy('id', 'asc')
             ->get();
@@ -828,6 +833,139 @@ class PointCalculationService
             'totalPrograms' => $totalPrograms,
             'maxScore' => $highestPoint,
             'yMax' => $yMax,
+        ];
+    }
+
+    /**
+     * Calculate team standings after a specific milestone count of declared results.
+     *
+     * @param  int  $limit  Number of declared results to consider (0 for all declared)
+     * @return array{
+     *     limit: int,
+     *     total_declared: int,
+     *     effective_count: int,
+     *     milestone_label: string,
+     *     standings: array<int, array<string, mixed>>,
+     *     results: Collection<int, Result>
+     * }
+     */
+    public static function getStandingsAfterResults(int $limit = 0): array
+    {
+        $allDeclared = Result::whereIn('status', self::DECLARED_STATUSES)
+            ->with([
+                'program.zone',
+                'program.category',
+                'firstEntry.group',
+                'firstEntry.student',
+                'firstEntry.scoreSheets',
+                'secondEntry.group',
+                'secondEntry.student',
+                'secondEntry.scoreSheets',
+                'thirdEntry.group',
+                'thirdEntry.student',
+                'thirdEntry.scoreSheets',
+            ])
+            ->orderByRaw('COALESCE(published_at, created_at) ASC, id ASC')
+            ->get();
+
+        $totalDeclared = $allDeclared->count();
+        $effectiveCount = $limit > 0 ? min($limit, $totalDeclared) : $totalDeclared;
+        $milestoneResults = $limit > 0 ? $allDeclared->take($limit) : $allDeclared;
+
+        $formatted = sprintf('%02d', $effectiveCount);
+        $milestoneLabel = $effectiveCount > 0 ? "After {$formatted} Results" : 'Initial Standings';
+
+        $groups = Group::all();
+        $calcService = app(self::class);
+
+        $teamData = [];
+        foreach ($groups as $g) {
+            $teamData[$g->id] = [
+                'group' => $g,
+                'points' => 0,
+                'first_count' => 0,
+                'second_count' => 0,
+                'third_count' => 0,
+                'grade_points' => 0,
+                'position_points' => 0,
+                'rank' => 0,
+            ];
+        }
+
+        foreach ($milestoneResults as $result) {
+            $program = $result->program;
+            if (! $program) {
+                continue;
+            }
+
+            if ($result->firstEntry?->group_id && isset($teamData[$result->firstEntry->group_id])) {
+                $teamData[$result->firstEntry->group_id]['first_count']++;
+            }
+            if ($result->secondEntry?->group_id && isset($teamData[$result->secondEntry->group_id])) {
+                $teamData[$result->secondEntry->group_id]['second_count']++;
+            }
+            if ($result->thirdEntry?->group_id && isset($teamData[$result->thirdEntry->group_id])) {
+                $teamData[$result->thirdEntry->group_id]['third_count']++;
+            }
+
+            $txs = $calcService->buildTransactionsForResult($result, $program);
+            foreach ($txs as $tx) {
+                $gid = $tx['group_id'] ?? null;
+                if ($gid && isset($teamData[$gid])) {
+                    $pts = (int) ($tx['points'] ?? 0);
+                    $teamData[$gid]['points'] += $pts;
+                    if (($tx['source_type'] ?? '') === 'POSITION') {
+                        $teamData[$gid]['position_points'] += $pts;
+                    } elseif (($tx['source_type'] ?? '') === 'GRADE') {
+                        $teamData[$gid]['grade_points'] += $pts;
+                    }
+                }
+            }
+        }
+
+        uasort($teamData, function ($a, $b) {
+            if ($b['points'] !== $a['points']) {
+                return $b['points'] <=> $a['points'];
+            }
+            if ($b['first_count'] !== $a['first_count']) {
+                return $b['first_count'] <=> $a['first_count'];
+            }
+
+            return strcmp($a['group']->name, $b['group']->name);
+        });
+
+        $rank = 1;
+        $prevPts = null;
+        $actualPos = 1;
+        $standingsList = [];
+        $topPoints = null;
+
+        foreach ($teamData as $gid => $item) {
+            if ($prevPts !== null && $item['points'] < $prevPts) {
+                $rank = $actualPos;
+            }
+            $item['rank'] = $rank;
+            $prevPts = $item['points'];
+            $actualPos++;
+
+            if ($topPoints === null) {
+                $topPoints = $item['points'];
+                $item['diff_from_leader'] = 0;
+            } else {
+                $item['diff_from_leader'] = $topPoints - $item['points'];
+            }
+
+            $standingsList[] = $item;
+        }
+
+        return [
+            'limit' => $limit,
+            'total_declared' => $totalDeclared,
+            'effective_count' => $effectiveCount,
+            'total_results' => $effectiveCount,
+            'milestone_label' => $milestoneLabel,
+            'standings' => $standingsList,
+            'results' => $milestoneResults,
         ];
     }
 }

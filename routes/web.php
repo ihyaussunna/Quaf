@@ -686,6 +686,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Selective Customizable Print & PDF Reports
     Route::get('print/results', [AdminPrintReportController::class, 'results'])->name('print.results');
+    Route::get('results/declared-pdf', [AdminPrintReportController::class, 'results'])->name('results.declared-pdf');
+    Route::get('print/milestone-standings', [AdminPrintReportController::class, 'milestoneStandings'])->name('print.milestone-standings');
+    Route::get('standings/milestone', [AdminPrintReportController::class, 'milestoneStandings'])->name('standings.milestone');
     Route::get('print/students', [AdminPrintReportController::class, 'students'])->name('print.students');
     Route::get('print/programs', [AdminPrintReportController::class, 'programs'])->name('print.programs');
     Route::get('print/entries', [AdminPrintReportController::class, 'entries'])->name('print.entries');

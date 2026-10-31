@@ -10,6 +10,7 @@ use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Stage;
 use App\Models\Student;
+use App\Services\PointCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -22,6 +23,7 @@ class PrintReportController extends Controller
     {
         $selectedZone = $request->query('zone');
         $selectedProgramId = $request->query('program');
+        $selectedStatus = $request->query('status');
 
         $groups = Group::orderByDesc('points_cache')->get();
         $categories = ProgramCategory::orderBy('name')->get();
@@ -30,13 +32,24 @@ class PrintReportController extends Controller
         $query = Result::with([
             'program.category',
             'program.stage',
-            'firstEntry.student',
+            'program.zone',
+            'firstEntry.student.group',
             'firstEntry.group',
-            'secondEntry.student',
+            'firstEntry.scoreSheets',
+            'secondEntry.student.group',
             'secondEntry.group',
-            'thirdEntry.student',
+            'secondEntry.scoreSheets',
+            'thirdEntry.student.group',
             'thirdEntry.group',
-        ])->where('status', 'published');
+            'thirdEntry.scoreSheets',
+        ]);
+
+        if ($selectedStatus && in_array($selectedStatus, ['published', 'announced', 'send'], true)) {
+            $query->where('status', $selectedStatus);
+        } else {
+            // Default: All declared results (sent to announcer, announced, or published)
+            $query->whereIn('status', PointCalculationService::DECLARED_STATUSES);
+        }
 
         if ($selectedZone) {
             $query->whereHas('program', function ($q) use ($selectedZone) {
@@ -48,7 +61,7 @@ class PrintReportController extends Controller
             $query->where('program_id', $selectedProgramId);
         }
 
-        $results = $query->latest('published_at')->get();
+        $results = $query->orderByRaw('COALESCE(published_at, created_at) ASC, id ASC')->get();
         $zones = Program::ZONES;
 
         return view('admin.print.results', compact(
@@ -58,8 +71,33 @@ class PrintReportController extends Controller
             'zones',
             'allPrograms',
             'selectedZone',
-            'selectedProgramId'
+            'selectedProgramId',
+            'selectedStatus'
         ));
+    }
+
+    /**
+     * Display printable & exportable Team Standings after X results (e.g. after 5, or custom number).
+     */
+    public function milestoneStandings(Request $request): View
+    {
+        $requestedCount = $request->query('count');
+        $count = $requestedCount !== null && $requestedCount !== '' ? (int) $requestedCount : 5;
+        if ($count < 0) {
+            $count = 0;
+        }
+
+        $milestoneData = PointCalculationService::getStandingsAfterResults($count);
+
+        return view('admin.print.milestone_standings', [
+            'count' => $count,
+            'limit' => $milestoneData['limit'],
+            'totalDeclared' => $milestoneData['total_declared'],
+            'effectiveCount' => $milestoneData['effective_count'],
+            'milestoneLabel' => $milestoneData['milestone_label'],
+            'standings' => $milestoneData['standings'],
+            'results' => $milestoneData['results'],
+        ]);
     }
 
     /**
