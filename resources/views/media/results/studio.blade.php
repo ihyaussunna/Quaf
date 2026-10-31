@@ -874,17 +874,18 @@
                             <input type="range" min="12" max="90" step="1" x-model.number="settings.winner_name_line_height" @input="render()" class="w-full accent-[#be1e2d]">
                         </div>
 
-                        <!-- 2. Distance from Name to Group -->
+                        <!-- 2. Distance from Name to Group/Team -->
                         <div class="space-y-1.5">
                             <div class="flex items-center justify-between text-xs font-bold text-slate-700">
-                                <span>Name to Group Gap (പേരും ഗ്രൂപ്പും തമ്മിലുള്ള അകലം)</span>
+                                <span>Name to Team Gap (പേരും ടീമും തമ്മിലുള്ള അകലം)</span>
                                 <div class="flex items-center gap-1 font-mono">
-                                    <button type="button" @click="settings.winner_unit_gap = Math.max(0, settings.winner_unit_gap - 2); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <button type="button" @click="settings.winner_unit_gap = Math.max(-25, (Number.isFinite(settings.winner_unit_gap) ? settings.winner_unit_gap : 2) - 2); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer" title="അടുപ്പിക്കുക (Reduce Gap)">-</button>
                                     <span class="w-12 text-center" x-text="settings.winner_unit_gap + 'px'"></span>
-                                    <button type="button" @click="settings.winner_unit_gap = Math.min(60, settings.winner_unit_gap + 2); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                    <button type="button" @click="settings.winner_unit_gap = Math.min(50, (Number.isFinite(settings.winner_unit_gap) ? settings.winner_unit_gap : 2) + 2); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer" title="അകലം കൂട്ടുക (Increase Gap)">+</button>
                                 </div>
                             </div>
-                            <input type="range" min="0" max="60" step="1" x-model.number="settings.winner_unit_gap" @input="render()" class="w-full accent-[#be1e2d]">
+                            <input type="range" min="-25" max="50" step="1" x-model.number="settings.winner_unit_gap" @input="render()" class="w-full accent-[#be1e2d]">
+                            <p class="text-[10px] text-slate-500">ടീം നെയിം പാർട്ടിസിപ്പന്റിന്റെ പേരിനോട് കൂടുതൽ അടുപ്പിക്കാൻ കുറഞ്ഞ / മൈനസ് വാല്യൂ നൽകാം.</p>
                         </div>
 
                         <!-- 3. Row Gap Between 1st, 2nd, 3rd -->
@@ -1450,7 +1451,7 @@ function posterStudio() {
             winners_scale: {{ (float) ($currentSettings['winners_scale'] ?? 1.0) }},
             winner_name_2lines: {{ isset($currentSettings['winner_name_2lines']) ? ($currentSettings['winner_name_2lines'] ? 'true' : 'false') : 'true' }},
             winner_name_line_height: {{ (float) ($currentSettings['winner_name_line_height'] ?? 38) }},
-            winner_unit_gap: {{ (float) ($currentSettings['winner_unit_gap'] ?? 10) }},
+            winner_unit_gap: {{ (float) ($currentSettings['winner_unit_gap'] ?? 2) }},
             row_gap: {{ (float) ($currentSettings['row_gap'] ?? 178) }},
 
             // Medal System
@@ -2725,7 +2726,8 @@ function posterStudio() {
             const winSize = Math.max(16, Math.round((this.settings.winner_name_size || 34) * finalScale));
             const unitSize = Math.max(12, Math.round((this.settings.winner_unit_size || 26) * finalScale));
             const nameLineH = Math.max(14, Math.round((this.settings.winner_name_line_height || 38) * finalScale));
-            const unitGap = Math.max(2, Math.round((this.settings.winner_unit_gap || 10) * finalScale));
+            const rawUnitGap = (this.settings.winner_unit_gap !== undefined && this.settings.winner_unit_gap !== null && !isNaN(this.settings.winner_unit_gap)) ? Number(this.settings.winner_unit_gap) : 2;
+            const unitGap = Math.round(rawUnitGap * finalScale);
             const blockLeft = this.settings.block_left || 205;
             const dividerWidth = Math.round(280 * Math.min(1.0, finalScale * 1.1));
 
@@ -2844,15 +2846,15 @@ function posterStudio() {
                     }
                 });
 
-                // 3. Group Name
-                let unitY = currentNameY + winSize + unitGap;
+                // 3. Group / Team Name (closer to student name)
+                let unitY = currentNameY + Math.round(winSize * 0.76) + unitGap;
                 ctx.fillStyle = this.settings.winner_unit_color || '#000000';
                 ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
                 ctx.fillText(w.unit, textX, unitY);
 
                 // 4. Divider Line
-                let lineY = unitY + unitSize + 8;
+                let lineY = unitY + Math.round(unitSize * 0.95) + 6;
                 ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();

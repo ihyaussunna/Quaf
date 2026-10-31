@@ -403,8 +403,8 @@ class ResultPosterGenerator
                     imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, $winner['name']);
                 }
 
-                // Unit
-                $unitY = $nameY + (int) ($nameSize * 1.4);
+                // Unit / Team Name
+                $unitY = $nameY + (int) ($nameSize * 1.05);
                 imagettftext($img, $unitSize, 0, $blockLeft, $unitY, $black, $rockwellLight, $winner['unit']);
 
                 // Divider line
