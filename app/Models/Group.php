@@ -146,19 +146,21 @@ class Group extends Model
     /**
      * Publish / release the public team standings to match the current live points.
      */
-    public static function publishStandings(?string $customLabel = null): int
+    public static function publishStandings(?string $customLabel = null, ?int $forceResultsCount = null): int
     {
         self::ensureSchema();
 
         // 1. Ensure live points are completely recalculated
         app(PointCalculationService::class)->recalculateAllPoints();
 
-        // 2. Count total published results
-        $publishedResultsCount = Result::where('status', 'published')->count();
+        // 2. Count total declared results sent to announcer
+        $declaredResultsCount = Result::whereIn('status', PointCalculationService::DECLARED_STATUSES)->count();
+        $resultsCount = $forceResultsCount ?? ($declaredResultsCount > 0 ? $declaredResultsCount : Result::where('status', 'published')->count());
 
         // 3. Determine milestone label if not given
-        $label = $customLabel ?: ($publishedResultsCount > 0
-            ? "After {$publishedResultsCount} Results"
+        $formatted = sprintf('%02d', $resultsCount);
+        $label = $customLabel ?: ($resultsCount > 0
+            ? "After {$formatted} Results"
             : 'Initial Standings');
 
         // 4. Copy live points_cache & rank_cache to public_points_cache & public_rank_cache
@@ -171,7 +173,7 @@ class Group extends Model
             ]);
         }
 
-        FestivalSetting::set('public_standings_results_count', (string) $publishedResultsCount);
+        FestivalSetting::set('public_standings_results_count', (string) $resultsCount);
         FestivalSetting::set('public_standings_label', $label);
         FestivalSetting::set('public_standings_updated_at', now()->toIso8601String());
 
@@ -181,7 +183,7 @@ class Group extends Model
         Cache::forget('public_groups_list');
         Cache::forget('public_results_groups');
 
-        return $publishedResultsCount;
+        return $resultsCount;
     }
 
     /**

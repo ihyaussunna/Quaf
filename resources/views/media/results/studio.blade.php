@@ -38,6 +38,9 @@
                             <span>Back to Results</span>
                         </a>
                         <span class="text-slate-300">&bull;</span>
+                        <span class="px-2.5 py-0.5 rounded font-mono text-[10px] font-black bg-[#be1e2d] text-white shadow-2xs">
+                            Result #{{ sprintf('%02d', $result->result_number) }}
+                        </span>
                         <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-slate-900 text-white">
                             {{ $result->program->code ?? 'RESULT' }}
                         </span>

@@ -945,6 +945,10 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::get('/team-standings', [MediaStandingsController::class, 'index'])->name('standings.index');
     Route::post('/team-standings', [MediaStandingsController::class, 'update'])->name('standings.update');
 
+    // Printable Reports for Media Desk
+    Route::get('/print/milestone-standings', [AdminPrintReportController::class, 'milestoneStandings'])->name('print.milestone-standings');
+    Route::get('/print/evaluation/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('print.evaluation');
+
     // Results & Poster Designer
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');
     Route::post('/results/publish-standings', [MediaResultController::class, 'publishStandings'])->name('results.publish-standings');

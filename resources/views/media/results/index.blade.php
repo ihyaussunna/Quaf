@@ -195,40 +195,128 @@
         </div>
     @endif
 
-    <!-- Public Team Standings Release Ribbon -->
-    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 rounded-2xl border border-slate-700 shadow-sm font-sora">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div class="flex items-start sm:items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/15">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
+    <!-- Dedicated Section: Total Announced Competitions Live Team Standings -->
+    <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border-2 border-indigo-500/40 shadow-xl ring-4 ring-indigo-500/10 font-sora" x-data="{ showFullTable: false }">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/10 pb-5">
+            <div>
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-indigo-600 text-white flex items-center gap-1.5 shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <span>Announcer Sync Leaderboard</span>
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400 text-slate-950">
+                        {{ $totalAnnouncedStandings['milestone_label'] }}
+                    </span>
+                    <span class="text-xs font-mono text-slate-300">
+                        ആകെ അനൗൺസ് ചെയ്ത മത്സരങ്ങൾ: <strong class="text-white font-bold">{{ $totalAnnouncedCount }}</strong>
+                    </span>
                 </div>
-                <div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-mono font-bold tracking-wider uppercase text-emerald-400">Public Team Standings</span>
-                        <span class="text-[11px] font-mono text-slate-400">| Mode: {{ strtoupper($standingsInfo['public_standings_mode']) }}</span>
-                    </div>
-                    <div class="text-sm font-bold text-white mt-0.5">
-                        Active Public Milestone: <span class="text-amber-300 font-mono">{{ $standingsInfo['public_standings_label'] }}</span>
-                        <span class="text-xs text-slate-400 font-normal font-mono">({{ $standingsInfo['public_standings_count'] }} of {{ $standingsInfo['published_results_count'] }} results released)</span>
-                    </div>
-                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">
-                        ഓട്ടോമാറ്റിക് മൈൽസ്റ്റോണുകൾ: <span class="text-slate-300">{{ $standingsInfo['public_standings_milestones'] }}</span>
-                    </div>
-                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    അനൗൺസർക്ക് അയച്ച മുഴുവൻ മത്സരങ്ങളുടെയും ടീം പോയിന്റ് നില
+                </h2>
+                <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
+                    അനൗൺസർ ഡെസ്കിലേക്ക് കൈമാറിയ ആകെ {{ $totalAnnouncedCount }} മത്സരങ്ങളുടെ യഥാർത്ഥ പോയിന്റുകൾ അടിസ്ഥാനമാക്കിയുള്ള ലൈവ് ടീം നിലയാണിത്.
+                </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <form method="POST" action="{{ route('media.results.publish-standings') }}" class="flex items-center gap-2">
+            <!-- Action Buttons for Announced Standings -->
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a href="{{ route('media.print.milestone-standings', ['count' => $totalAnnouncedCount]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Print Standings PDF ↗</span>
+                </a>
+
+                <form method="POST" action="{{ route('media.results.publish-standings') }}" class="inline">
                     @csrf
-                    <input type="text" name="custom_label" placeholder="e.g. Standings after {{ $standingsInfo['published_results_count'] }} Results"
-                           class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 font-mono focus:outline-none focus:border-emerald-400 w-52 sm:w-64">
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-sm shrink-0">
-                        Release Standings Now
+                    <input type="hidden" name="results_count" value="{{ $totalAnnouncedCount }}">
+                    <input type="hidden" name="custom_label" value="{{ $totalAnnouncedStandings['milestone_label'] }}">
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 font-mono cursor-pointer">
+                        <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Publish {{ $totalAnnouncedStandings['milestone_label'] }}</span>
                     </button>
                 </form>
             </div>
+        </div>
+
+        <!-- Team Standings Live Podium Strip -->
+        <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            @foreach($totalAnnouncedStandings['standings'] as $tItem)
+                <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
+                    <div class="flex items-center justify-between text-xs font-mono mb-2">
+                        <span class="px-2 py-0.5 rounded font-black {{ $tItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : ($tItem['rank'] === 2 ? 'bg-slate-200 text-slate-900' : ($tItem['rank'] === 3 ? 'bg-amber-600 text-white' : 'bg-white/20 text-white')) }}">
+                            #{{ $tItem['rank'] }}
+                        </span>
+                        <span class="text-[10px] text-slate-300 font-bold uppercase">{{ $tItem['code'] }}</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-white text-sm truncate">{{ $tItem['name'] }}</div>
+                        <div class="mt-1 flex items-baseline gap-1.5">
+                            <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($tItem['points']) }}</span>
+                            <span class="text-[10px] text-slate-300 uppercase font-mono font-bold">pts</span>
+                        </div>
+                        <div class="mt-1.5 text-[10px] font-mono text-slate-400 flex items-center gap-2 border-t border-white/10 pt-1">
+                            <span>1st: <strong class="text-slate-200">{{ $tItem['first_count'] }}</strong></span>
+                            <span>2nd: <strong class="text-slate-200">{{ $tItem['second_count'] }}</strong></span>
+                            <span>3rd: <strong class="text-slate-200">{{ $tItem['third_count'] }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Toggle Full Breakdown Table -->
+        <div class="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <button type="button" @click="showFullTable = !showFullTable" class="text-xs font-bold text-indigo-300 hover:text-white flex items-center gap-1.5 transition cursor-pointer">
+                <svg class="w-4 h-4 transition-transform" :class="showFullTable ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <span x-text="showFullTable ? 'Hide Complete Team Score Breakdown' : 'View Complete Team Score Breakdown (Position & Grade Pts)'"></span>
+            </button>
+            <div class="flex items-center gap-2 text-slate-400 font-mono text-[11px]">
+                <span>Active Public Site Milestone:</span>
+                <strong class="text-emerald-400">{{ $standingsInfo['public_standings_label'] }}</strong>
+                <a href="{{ route('media.standings.index') }}" class="ml-2 text-indigo-300 hover:text-white underline">
+                    Edit Standings &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Detailed Table -->
+        <div x-show="showFullTable" x-cloak class="mt-3 overflow-x-auto rounded-2xl border border-white/15 bg-black/30">
+            <table class="w-full text-left text-xs font-sora">
+                <thead class="bg-white/10 text-slate-300 uppercase font-mono text-[10px] border-b border-white/10">
+                    <tr>
+                        <th class="py-2.5 px-3">Rank</th>
+                        <th class="py-2.5 px-3">Team Name</th>
+                        <th class="py-2.5 px-3 text-center">1st</th>
+                        <th class="py-2.5 px-3 text-center">2nd</th>
+                        <th class="py-2.5 px-3 text-center">3rd</th>
+                        <th class="py-2.5 px-3 text-center">Position Pts</th>
+                        <th class="py-2.5 px-3 text-center">Grade Pts</th>
+                        <th class="py-2.5 px-3 text-right">Total Points</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10 font-mono">
+                    @foreach($totalAnnouncedStandings['standings'] as $tItem)
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="py-2.5 px-3 font-bold">
+                                <span class="px-2 py-0.5 rounded font-black {{ $tItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
+                                    #{{ $tItem['rank'] }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3 font-sora font-bold text-white">
+                                {{ $tItem['name'] }} <span class="text-slate-400 text-xs">({{ $tItem['code'] }})</span>
+                            </td>
+                            <td class="py-2.5 px-3 text-center text-amber-300 font-bold">{{ $tItem['first_count'] }}</td>
+                            <td class="py-2.5 px-3 text-center text-slate-300 font-bold">{{ $tItem['second_count'] }}</td>
+                            <td class="py-2.5 px-3 text-center text-amber-500 font-bold">{{ $tItem['third_count'] }}</td>
+                            <td class="py-2.5 px-3 text-center text-slate-300">{{ number_format($tItem['position_points']) }}</td>
+                            <td class="py-2.5 px-3 text-center text-emerald-300">{{ number_format($tItem['grade_points']) }}</td>
+                            <td class="py-2.5 px-3 text-right text-base font-black text-amber-300">
+                                {{ number_format($tItem['points']) }} pts
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -290,22 +378,38 @@
             </a>
         </div>
 
-        <form method="GET" action="{{ route('media.results.index') }}" class="flex items-center gap-2">
-            <input type="hidden" name="tab" value="{{ $tab }}">
-            <div class="relative w-full md:w-64">
-                <input type="text" name="search" value="{{ $search }}" placeholder="Search program, code..."
-                       class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#be1e2d]">
-                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </div>
-            <button type="submit" class="px-3.5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors">
-                Search
-            </button>
-            @if($search)
-                <a href="{{ route('media.results.index', ['tab' => $tab]) }}" class="px-3 py-2 text-slate-500 hover:text-slate-800 text-xs font-medium rounded-xl hover:bg-slate-100 transition-colors">
-                    Clear
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Numerical Order Selector -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-mono font-bold">
+                <span class="text-[10px] text-slate-500 uppercase px-1.5 font-bold">Order:</span>
+                <a href="{{ route('media.results.index', array_merge(request()->query(), ['order' => 'desc'])) }}" 
+                   class="px-2.5 py-1 rounded-lg transition {{ $sortOrder !== 'asc' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                    #15 &rarr; #01 (Latest First)
                 </a>
-            @endif
-        </form>
+                <a href="{{ route('media.results.index', array_merge(request()->query(), ['order' => 'asc'])) }}" 
+                   class="px-2.5 py-1 rounded-lg transition {{ $sortOrder === 'asc' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                    #01 &rarr; #15 (Sequential)
+                </a>
+            </div>
+
+            <form method="GET" action="{{ route('media.results.index') }}" class="flex items-center gap-2">
+                <input type="hidden" name="tab" value="{{ $tab }}">
+                <input type="hidden" name="order" value="{{ $sortOrder }}">
+                <div class="relative w-full md:w-56">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Search program, code..."
+                           class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#be1e2d]">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <button type="submit" class="px-3.5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors">
+                    Search
+                </button>
+                @if($search)
+                    <a href="{{ route('media.results.index', ['tab' => $tab, 'order' => $sortOrder]) }}" class="px-3 py-2 text-slate-500 hover:text-slate-800 text-xs font-medium rounded-xl hover:bg-slate-100 transition-colors">
+                        Clear
+                    </a>
+                @endif
+            </form>
+        </div>
     </div>
 
     <!-- Results Cards Grid -->
@@ -315,12 +419,16 @@
                 @php
                     $prog = $res->program;
                     $winners = $res->getPosterWinners();
+                    $resNo = sprintf('%02d', $res->result_number);
                 @endphp
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div>
                         <!-- Header Bar of Card -->
                         <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                             <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-xl font-mono text-xs font-black bg-[#be1e2d] text-white shadow-xs tracking-wider">
+                                    Result #{{ $resNo }}
+                                </span>
                                 <span class="px-2 py-0.5 rounded font-mono text-[11px] font-bold bg-slate-900 text-white">
                                     {{ $prog->code ?? 'PROG' }}
                                 </span>
@@ -347,7 +455,10 @@
                         <!-- Content Info -->
                         <div class="p-5 space-y-4">
                             <div>
-                                <h3 class="text-base font-bold text-slate-900 leading-snug">{{ $prog->name }}</h3>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs font-mono font-black text-[#be1e2d]">#{{ $resNo }}</span>
+                                    <h3 class="text-base font-bold text-slate-900 leading-snug">{{ $prog->name }}</h3>
+                                </div>
                                 @if($prog->malayalam_name)
                                     <div class="text-xs text-slate-500 font-ml mt-0.5">{{ $prog->malayalam_name }}</div>
                                 @endif

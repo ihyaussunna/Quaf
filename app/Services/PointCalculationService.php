@@ -865,7 +865,7 @@ class PointCalculationService
                 'thirdEntry.student',
                 'thirdEntry.scoreSheets',
             ])
-            ->orderByRaw('COALESCE(published_at, created_at) ASC, id ASC')
+            ->orderByRaw('CASE WHEN result_number IS NOT NULL AND result_number > 0 THEN result_number ELSE 999999 END ASC, COALESCE(published_at, created_at) ASC, id ASC')
             ->get();
 
         $totalDeclared = $allDeclared->count();
@@ -954,6 +954,9 @@ class PointCalculationService
             } else {
                 $item['diff_from_leader'] = $topPoints - $item['points'];
             }
+
+            $item['name'] = $item['group']?->name ?? '';
+            $item['code'] = $item['group']?->code ?? '';
 
             $standingsList[] = $item;
         }

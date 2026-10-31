@@ -697,4 +697,119 @@ class MediaPanelAndAccessControlTest extends TestCase
         $guestResponse = $this->get(route('media.qr.index'));
         $guestResponse->assertRedirect(route('login'));
     }
+
+    public function test_media_results_ordered_by_result_number_displays_number_and_shows_total_announced_standings_section(): void
+    {
+        $groupA = Group::create(['name' => 'Cordova House', 'code' => 'CRD', 'slug' => 'cordova-house', 'color_hex' => '#be1e2d']);
+        $groupB = Group::create(['name' => 'Baghdad House', 'code' => 'BGD', 'slug' => 'baghdad-house', 'color_hex' => '#1e3a8a']);
+
+        $cat = ProgramCategory::create(['name' => 'General', 'slug' => 'general']);
+
+        $prog1 = Program::create([
+            'category_id' => $cat->id,
+            'name' => 'Kitab Quiz',
+            'code' => 'Q9-224',
+            'type' => 'individual',
+            'status' => 'completed',
+        ]);
+
+        $prog2 = Program::create([
+            'category_id' => $cat->id,
+            'name' => 'Qiraath',
+            'code' => 'Q9-101',
+            'type' => 'individual',
+            'status' => 'completed',
+        ]);
+
+        $s1 = Student::create([
+            'student_id' => 'STU701',
+            'chest_number' => '701',
+            'name' => 'Student One',
+            'group_id' => $groupA->id,
+            'admission_number' => 'ADM701',
+            'class' => 'D1',
+            'category' => 'General',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $s2 = Student::create([
+            'student_id' => 'STU702',
+            'chest_number' => '702',
+            'name' => 'Student Two',
+            'group_id' => $groupB->id,
+            'admission_number' => 'ADM702',
+            'class' => 'D2',
+            'category' => 'General',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $e1 = ProgramEntry::create([
+            'program_id' => $prog1->id,
+            'student_id' => $s1->id,
+            'group_id' => $groupA->id,
+            'chest_number' => '701',
+            'status' => 'verified',
+        ]);
+
+        $e2 = ProgramEntry::create([
+            'program_id' => $prog2->id,
+            'student_id' => $s2->id,
+            'group_id' => $groupB->id,
+            'chest_number' => '702',
+            'status' => 'verified',
+        ]);
+
+        // Result 1 was created first and assigned result_number = 1
+        $res1 = Result::create([
+            'program_id' => $prog1->id,
+            'first_entry_id' => $e1->id,
+            'status' => 'announced',
+            'result_number' => 1,
+            'is_media_published' => false,
+            'updated_at' => now()->subMinutes(10),
+        ]);
+
+        // Result 2 was announced later and assigned result_number = 2
+        $res2 = Result::create([
+            'program_id' => $prog2->id,
+            'first_entry_id' => $e2->id,
+            'status' => 'announced',
+            'result_number' => 2,
+            'is_media_published' => false,
+            'updated_at' => now()->subMinutes(5),
+        ]);
+
+        // Now, update poster on Result 1 (which updates its updated_at to NOW)
+        $res1->update([
+            'poster_image' => 'https://example.com/poster1.png',
+            'updated_at' => now()->addMinutes(10),
+        ]);
+
+        // Visit Media Results
+        $response = $this->actingAs($this->mediaUser)->get(route('media.results.index', ['tab' => 'all']));
+
+        $response->assertOk();
+
+        // 1. Check Result Number badges are displayed
+        $response->assertSee('Result #01');
+        $response->assertSee('Result #02');
+
+        // 2. Check Order: Result #02 must appear BEFORE Result #01 even though Result #01 has more recent updated_at!
+        $content = $response->getContent();
+        $posRes2 = strpos($content, 'Result #02');
+        $posRes1 = strpos($content, 'Result #01');
+        $this->assertTrue($posRes2 !== false && $posRes1 !== false);
+        $this->assertLessThan($posRes1, $posRes2, 'Result #02 must appear before Result #01 based on announced order');
+
+        // 3. Check Dedicated Total Announced Competitions Standings Section
+        $response->assertSee('അനൗൺസർക്ക് അയച്ച മുഴുവൻ മത്സരങ്ങളുടെയും ടീം പോയിന്റ് നില');
+        $response->assertSee('After 02 Results');
+        $response->assertSee(route('media.print.milestone-standings', ['count' => 2]));
+
+        // 4. Test Media user can access printable milestone standings
+        $printResponse = $this->actingAs($this->mediaUser)->get(route('media.print.milestone-standings', ['count' => 2]));
+        $printResponse->assertOk();
+        $printResponse->assertSee('Milestone Standings & PDF Print');
+        $printResponse->assertSee('Back to Media Studio');
+    }
 }

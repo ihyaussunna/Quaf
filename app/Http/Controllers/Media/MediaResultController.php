@@ -37,9 +37,12 @@ class MediaResultController extends Controller
     public function index(Request $request): View
     {
         Result::ensureSchema();
+        Result::resyncResultNumbers();
 
         $tab = $request->query('tab', 'announced');
         $search = trim((string) $request->query('search'));
+        $sortOrder = $request->query('order', 'desc');
+        $orderDir = strtolower($sortOrder) === 'asc' ? 'asc' : 'desc';
 
         $query = Result::with([
             'program.category',
@@ -69,7 +72,12 @@ class MediaResultController extends Controller
             $query->whereIn('status', ['announced', 'published', 'send', 'delivered']);
         }
 
-        $results = $query->latest('updated_at')->paginate(12)->withQueryString();
+        // Strictly order by announced result number so poster updates never disturb sequence
+        $nullSortVal = $orderDir === 'asc' ? '999999' : '0';
+        $results = $query->orderByRaw("CASE WHEN result_number IS NOT NULL AND result_number > 0 THEN result_number ELSE {$nullSortVal} END {$orderDir}")
+            ->orderBy('id', $orderDir)
+            ->paginate(12)
+            ->withQueryString();
 
         $stats = [
             'announced_count' => Result::whereIn('status', ['announced', 'published'])->where('is_media_published', false)->count(),
@@ -77,8 +85,13 @@ class MediaResultController extends Controller
             'total_count' => Result::whereIn('status', ['announced', 'published', 'send', 'delivered'])->count(),
         ];
 
+        // Total competitions sent to announcer & their live team standing
+        $totalAnnouncedCount = Result::whereIn('status', PointCalculationService::DECLARED_STATUSES)->count();
+        $totalAnnouncedStandings = PointCalculationService::getStandingsAfterResults($totalAnnouncedCount);
+
         $standingsInfo = [
             'published_results_count' => Result::where('status', 'published')->whereNotNull('published_at')->count(),
+            'total_announced_count' => $totalAnnouncedCount,
             'public_standings_count' => (int) FestivalSetting::get('public_standings_results_count', 0),
             'public_standings_label' => FestivalSetting::get('public_standings_label', 'Official Standings'),
             'public_standings_mode' => FestivalSetting::get('public_standings_mode', 'milestone'),
@@ -99,7 +112,18 @@ class MediaResultController extends Controller
             $publishedStandingsHistory = collect();
         }
 
-        return view('media.results.index', compact('results', 'stats', 'tab', 'search', 'standingsInfo', 'incomingStandings', 'publishedStandingsHistory'));
+        return view('media.results.index', compact(
+            'results',
+            'stats',
+            'tab',
+            'search',
+            'sortOrder',
+            'totalAnnouncedCount',
+            'totalAnnouncedStandings',
+            'standingsInfo',
+            'incomingStandings',
+            'publishedStandingsHistory'
+        ));
     }
 
     /**
@@ -401,7 +425,9 @@ class MediaResultController extends Controller
     public function publishStandings(Request $request): RedirectResponse
     {
         $customLabel = $request->input('custom_label', $request->input('label'));
-        $count = Group::publishStandings($customLabel);
+        $countInput = $request->input('results_count');
+        $forceCount = ($countInput !== null && $countInput !== '') ? (int) $countInput : null;
+        $count = Group::publishStandings($customLabel, $forceCount);
 
         return back()->with('success', "ടീം സ്റ്റാൻഡിങ് വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു (After {$count} Results). പബ്ലിക് വെബ്‌സൈറ്റിൽ പുതിയ പോയിന്റ് നില ലഭ്യമാണ്.");
     }
