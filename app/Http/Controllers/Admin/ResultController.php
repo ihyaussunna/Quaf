@@ -133,6 +133,8 @@ class ResultController extends Controller
         ]);
 
         if ($validated['status'] === 'published') {
+            $max = Result::getSafeMaxResultNumber();
+            $validated['result_number'] = $max + 1;
             $validated['published_at'] = Carbon::now();
             $validated['verified_by'] = Auth::id();
         }
@@ -206,9 +208,16 @@ class ResultController extends Controller
         $old = $result->toArray();
         $wasPublished = $result->status === 'published';
 
-        if ($validated['status'] === 'published' && ! $wasPublished) {
-            $validated['published_at'] = Carbon::now();
-            $validated['verified_by'] = Auth::id();
+        if ($validated['status'] === 'published') {
+            $rawNumber = $result->getRawOriginal('result_number');
+            if (empty($rawNumber) || (int) $rawNumber <= 0) {
+                $max = Result::getSafeMaxResultNumber();
+                $validated['result_number'] = $max + 1;
+            }
+            if (! $wasPublished) {
+                $validated['published_at'] = Carbon::now();
+                $validated['verified_by'] = Auth::id();
+            }
         }
 
         $result->update($validated);
@@ -234,9 +243,16 @@ class ResultController extends Controller
         Result::ensureSchema();
 
         $old = $result->toArray();
+        $rawNumber = $result->getRawOriginal('result_number');
+        if (empty($rawNumber) || (int) $rawNumber <= 0) {
+            $max = Result::getSafeMaxResultNumber();
+            $result->result_number = $max + 1;
+        }
+
         $result->update([
             'status' => 'published',
-            'published_at' => Carbon::now(),
+            'result_number' => $result->result_number,
+            'published_at' => $result->published_at ?? Carbon::now(),
             'verified_by' => Auth::id(),
         ]);
 
@@ -276,7 +292,8 @@ class ResultController extends Controller
         Result::ensureSchema();
         $old = $result->status;
 
-        if (! $result->result_number) {
+        $rawNumber = $result->getRawOriginal('result_number');
+        if (empty($rawNumber) || (int) $rawNumber <= 0) {
             $max = Result::getSafeMaxResultNumber();
             $result->result_number = $max + 1;
         }
@@ -347,6 +364,7 @@ class ResultController extends Controller
     public function declaredResults(Request $request): View
     {
         Result::ensureSchema();
+        Result::resyncResultNumbers();
 
         $search = $request->query('search');
 
@@ -360,7 +378,10 @@ class ResultController extends Controller
             });
         }
 
-        $results = $query->latest('published_at')->paginate(20)->withQueryString();
+        $results = $query->orderByDesc('result_number')
+            ->latest('published_at')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.results.declared', compact('results', 'search'));
     }
@@ -629,7 +650,8 @@ class ResultController extends Controller
         $count = 0;
         foreach ($results as $res) {
             $old = $res->status;
-            if (! $res->result_number) {
+            $rawNumber = $res->getRawOriginal('result_number');
+            if (empty($rawNumber) || (int) $rawNumber <= 0) {
                 $max = Result::getSafeMaxResultNumber();
                 $res->result_number = $max + 1;
             }
@@ -664,10 +686,16 @@ class ResultController extends Controller
         $results = Result::whereIn('id', $resultIds)->get();
         $count = 0;
         foreach ($results as $res) {
+            $rawNumber = $res->getRawOriginal('result_number');
+            if (empty($rawNumber) || (int) $rawNumber <= 0) {
+                $max = Result::getSafeMaxResultNumber();
+                $res->result_number = $max + 1;
+            }
             $res->update([
                 'status' => 'published',
                 'is_media_published' => true,
                 'media_published_at' => Carbon::now(),
+                'result_number' => $res->result_number,
                 'published_at' => $res->published_at ?? Carbon::now(),
             ]);
             $res->program->update(['status' => 'completed']);

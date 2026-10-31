@@ -111,7 +111,8 @@ class AnnouncerController extends Controller
             }
         }
 
-        if (! $result->result_number) {
+        $rawNumber = $result->getRawOriginal('result_number');
+        if (empty($rawNumber) || (int) $rawNumber <= 0) {
             $max = Result::getSafeMaxResultNumber();
             $result->result_number = $max + 1;
         }

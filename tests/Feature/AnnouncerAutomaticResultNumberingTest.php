@@ -9,7 +9,9 @@ use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Student;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -220,5 +222,56 @@ class AnnouncerAutomaticResultNumberingTest extends TestCase
             'id' => $result->id,
             'status' => 'published',
         ]);
+    }
+
+    public function test_resync_repairs_duplicate_and_gap_numbers_across_fifteen_declared_results(): void
+    {
+        // Simulate the scenario reported by the user with 15 results where numbers were duplicated or broken
+        $programs = [];
+        $results = [];
+
+        for ($i = 1; $i <= 15; $i++) {
+            [$p, $r] = $this->createProgramAndResult('P5'.sprintf('%02d', $i), 'Program '.$i, 'Zone '.$i);
+            $programs[$i] = $p;
+            $results[$i] = $r;
+
+            // Intentionally create duplicate result numbers to simulate production issue:
+            // e.g. results 1..5 having numbers 1..5, and results 12..15 also having 1,2,4,5
+            $bogusNum = ($i > 11) ? ($i - 11) : $i;
+            DB::table('results')->where('id', $r->id)->update([
+                'status' => 'send',
+                'result_number' => $bogusNum,
+                'published_at' => Carbon::now()->subMinutes(20 - $i),
+            ]);
+        }
+
+        // Verify duplicates exist prior to resync
+        $preUnique = DB::table('results')->whereIn('id', collect($results)->pluck('id'))->pluck('result_number')->unique()->count();
+        $this->assertLessThan(15, $preUnique);
+
+        // Run self-healing resync
+        Result::resyncResultNumbers();
+
+        // Verify that all 15 results now have strictly 1..15 with 0 duplicates
+        $postNumbers = DB::table('results')
+            ->whereIn('id', collect($results)->pluck('id'))
+            ->orderBy('result_number', 'asc')
+            ->pluck('result_number')
+            ->all();
+
+        $this->assertEquals(range(1, 15), $postNumbers);
+
+        // Verify declaring a 16th result gets 16
+        [$p16, $r16] = $this->createProgramAndResult('P516', 'Program 16', 'Zone 16');
+        $this->actingAs($this->admin)->post(route('admin.results.send-to-announcer', $r16));
+        $this->assertEquals(16, $r16->fresh()->result_number);
+        $this->assertEquals('16', $r16->fresh()->formatted_result_number);
+
+        // Declared Results view shows #16 down to #01
+        $declaredView = $this->actingAs($this->admin)->get(route('admin.results.declared'));
+        $declaredView->assertOk();
+        $declaredView->assertSee('#16');
+        $declaredView->assertSee('#15');
+        $declaredView->assertSee('#01');
     }
 }

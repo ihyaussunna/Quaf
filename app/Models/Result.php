@@ -57,22 +57,14 @@ class Result extends Model
 
             // Automatically assign next sequential result number when transferring to announcer or declaring
             if (in_array($result->status, ['send', 'delivered', 'announced', 'published'])) {
-                if (empty($result->attributes['result_number'])) {
+                $rawNo = $result->attributes['result_number'] ?? null;
+                if (empty($rawNo) || (int) $rawNo <= 0) {
                     $max = static::getSafeMaxResultNumber();
                     $result->result_number = $max + 1;
                 }
                 if (empty($result->published_at)) {
                     $result->published_at = Carbon::now();
                 }
-            }
-
-            // Guard against field list errors if column doesn't exist on live DB
-            try {
-                if (! Schema::hasColumn('results', 'result_number')) {
-                    unset($result->attributes['result_number']);
-                }
-            } catch (\Throwable) {
-                unset($result->attributes['result_number']);
             }
         });
     }
@@ -83,13 +75,77 @@ class Result extends Model
 
         try {
             if (Schema::hasTable('results') && Schema::hasColumn('results', 'result_number')) {
-                return (int) (static::max('result_number') ?? 0);
+                return (int) (DB::table('results')->whereNotNull('result_number')->max('result_number') ?? 0);
             }
         } catch (\Throwable) {
             // Column does not exist in live DB
         }
 
         return 0;
+    }
+
+    /**
+     * Resync all declared results sequentially: 1, 2, 3, 4, 5...
+     * Resolves any duplicates, gaps, or resets permanently.
+     */
+    public static function resyncResultNumbers(): void
+    {
+        try {
+            if (! Schema::hasTable('results') || ! Schema::hasColumn('results', 'result_number')) {
+                return;
+            }
+
+            $declared = DB::table('results')
+                ->whereIn('status', ['send', 'delivered', 'announced', 'published'])
+                ->get(['id', 'result_number', 'status', 'published_at', 'created_at']);
+
+            if ($declared->isEmpty()) {
+                return;
+            }
+
+            $total = $declared->count();
+            $assigned = $declared->filter(fn ($r) => ! empty($r->result_number) && (int) $r->result_number > 0);
+            $uniqueNumbers = $assigned->pluck('result_number')->unique();
+
+            $hasNullOrZero = $assigned->count() < $total;
+            $hasDuplicates = $uniqueNumbers->count() < $assigned->count();
+            $maxNum = (int) ($assigned->max('result_number') ?? 0);
+            $hasGapsOrMismatch = ($maxNum !== $total) || ($uniqueNumbers->min() !== 1 && $total > 0);
+
+            // If already perfectly 1..N sequential with no duplicates or gaps, do nothing
+            if (! $hasNullOrZero && ! $hasDuplicates && ! $hasGapsOrMismatch) {
+                return;
+            }
+
+            // Sort chronologically: published_at ASC, created_at ASC, id ASC
+            $sorted = $declared->sort(function ($a, $b) {
+                $pubA = $a->published_at ? strtotime($a->published_at) : ($a->created_at ? strtotime($a->created_at) : 0);
+                $pubB = $b->published_at ? strtotime($b->published_at) : ($b->created_at ? strtotime($b->created_at) : 0);
+
+                if ($pubA !== $pubB) {
+                    return $pubA <=> $pubB;
+                }
+
+                $crtA = $a->created_at ? strtotime($a->created_at) : 0;
+                $crtB = $b->created_at ? strtotime($b->created_at) : 0;
+
+                if ($crtA !== $crtB) {
+                    return $crtA <=> $crtB;
+                }
+
+                return $a->id <=> $b->id;
+            })->values();
+
+            $counter = 1;
+            foreach ($sorted as $row) {
+                DB::table('results')->where('id', $row->id)->update([
+                    'result_number' => $counter,
+                ]);
+                $counter++;
+            }
+        } catch (\Throwable) {
+            // Silently ignore if DB is unavailable
+        }
     }
 
     public static function ensureSchema(): void
@@ -120,6 +176,9 @@ class Result extends Model
                     } catch (\Throwable) {
                     }
                 }
+
+                // Automatically heal and re-sequence any existing duplicates or missing numbers
+                static::resyncResultNumbers();
             }
             $checked = true;
         } catch (\Throwable) {
@@ -309,42 +368,41 @@ class Result extends Model
      */
     public function assignNextResultNumber(): int
     {
-        if ($this->result_number) {
-            return (int) $this->result_number;
+        $raw = $this->attributes['result_number'] ?? null;
+        if (! empty($raw) && (int) $raw > 0) {
+            return (int) $raw;
         }
 
         $max = static::getSafeMaxResultNumber();
-        $this->result_number = $max + 1;
+        $next = $max + 1;
+        $this->result_number = $next;
         $this->saveQuietly();
 
         return (int) $this->result_number;
     }
 
     /**
-     * Compute sequence result number (e.g. 1, 2, 3...)
+     * Get or auto-assign sequential result number (e.g. 1, 2, 3...)
      */
     public function getResultNumberAttribute(): ?int
     {
-        if (isset($this->attributes['result_number']) && $this->attributes['result_number'] !== null && (int) $this->attributes['result_number'] > 0) {
-            return (int) $this->attributes['result_number'];
+        $raw = $this->attributes['result_number'] ?? null;
+        if ($raw !== null && (int) $raw > 0) {
+            return (int) $raw;
         }
 
         if (in_array($this->status, ['send', 'delivered', 'announced', 'published'])) {
-            if (! $this->id) {
-                return 1;
+            $max = static::getSafeMaxResultNumber();
+            $next = $max + 1;
+            $this->attributes['result_number'] = $next;
+            if ($this->exists && $this->id) {
+                try {
+                    DB::table('results')->where('id', $this->id)->update(['result_number' => $next]);
+                } catch (\Throwable) {
+                }
             }
 
-            return (int) self::where(function ($q) {
-                if ($this->published_at) {
-                    $q->where('published_at', '<', $this->published_at)
-                        ->orWhere(function ($sub) {
-                            $sub->where('published_at', '=', $this->published_at)
-                                ->where('id', '<=', $this->id);
-                        });
-                } else {
-                    $q->where('id', '<=', $this->id);
-                }
-            })->count() ?: 1;
+            return $next;
         }
 
         return null;
