@@ -44,12 +44,18 @@
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
            class="fixed lg:static top-0 bottom-0 left-0 z-50 w-64 bg-[#121417] text-slate-300 border-r border-slate-800 flex flex-col transition-transform duration-300 overflow-y-auto shadow-xl">
         
+        @php
+            $isCashier = request()->routeIs('presentation.cashier*') || in_array(auth()->user()?->role, ['presentation_cashier', 'cashier'], true);
+        @endphp
+
         <!-- Brand -->
         <div class="h-20 flex items-center justify-between px-4 border-b border-slate-800/80 flex-shrink-0">
-            <a href="{{ route('presentation.dashboard') }}" class="flex items-center gap-3 group py-2">
+            <a href="{{ $isCashier ? route('presentation.cashier') : route('presentation.dashboard') }}" class="flex items-center gap-3 group py-2">
                 <img src="{{ asset('images/quaf-logo-favicon-white.svg') }}" alt="QUAF Logo" class="h-[30px] max-h-[30px] w-auto object-contain shrink-0" style="height: 30px; width: auto;">
                 <div class="leading-none">
-                    <span class="text-[11px] font-mono tracking-wider text-amber-400 block uppercase font-bold">Presentation Desk</span>
+                    <span class="text-[11px] font-mono tracking-wider {{ $isCashier ? 'text-emerald-400' : 'text-amber-400' }} block uppercase font-bold">
+                        {{ $isCashier ? 'Cashier Desk' : 'Presentation Counter' }}
+                    </span>
                 </div>
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
@@ -60,45 +66,34 @@
         <!-- Portal Badge -->
         <div class="px-4 py-3 bg-[#181a1e] border-b border-slate-800/60">
             <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Presentation Desk</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[10px] font-bold uppercase tracking-wider {{ $isCashier ? 'text-emerald-400' : 'text-amber-400' }}">
+                    {{ $isCashier ? 'Cashier Console' : 'Presentation Desk' }}
+                </span>
+                <span class="w-2 h-2 rounded-full {{ $isCashier ? 'bg-emerald-400' : 'bg-amber-400' }} animate-pulse"></span>
             </div>
-            <div class="text-xs font-semibold text-slate-200 mt-0.5">Coins & Gift Distribution</div>
-            <div class="text-[11px] text-slate-400 font-anek">കോയിൻ & സമ്മാന വിതരണം</div>
+            <div class="text-xs font-semibold text-slate-200 mt-0.5">
+                {{ $isCashier ? 'Cash to Added Coins' : 'Coins & Gift Distribution' }}
+            </div>
+            <div class="text-[11px] text-slate-400 font-anek">
+                {{ $isCashier ? 'ക്യാഷ്യർ കൗണ്ടർ (കോയിൻ നൽകൽ)' : 'കോയിൻ & സമ്മാന വിതരണം' }}
+            </div>
         </div>
 
-        <!-- Navigation Links -->
+        <!-- Navigation Links (Strictly Isolated - No Cross-Portal Links) -->
         <nav class="flex-1 px-3 py-4 space-y-1.5 text-xs font-sora text-slate-400">
-            <!-- 1. Presentation Counter -->
-            <a href="{{ route('presentation.dashboard') }}" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('presentation.dashboard') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
-                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span>Presentation Counter</span>
-            </a>
-
-            <!-- 2. Cashier Counter (പണം സ്വീകരിച്ച് കോയിൻ നൽകൽ) -->
-            <a href="{{ route('presentation.cashier') }}" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('presentation.cashier*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
-                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                <span>Cashier Desk (കോയിൻ നൽകൽ)</span>
-            </a>
-
-            <!-- 2. Summary Report -->
-            <a href="{{ route('presentation.report') }}" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('presentation.report') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
-                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <span>Distribution Report</span>
-            </a>
-
-            <!-- 3. Return to Admin (if admin) -->
-            @if(auth()->user()?->isAdmin())
-                <div class="pt-4 border-t border-slate-800/80">
-                    <span class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Navigation</span>
-                </div>
-                <a href="{{ route('admin.dashboard') }}" 
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 text-slate-400">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
-                    <span>Back to Admin Panel</span>
+            @if($isCashier)
+                <!-- Cashier Desk Only -->
+                <a href="{{ route('presentation.cashier') }}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/20">
+                    <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span>Cashier Desk (കോയിൻ നൽകൽ)</span>
+                </a>
+            @else
+                <!-- Presentation Counter Only -->
+                <a href="{{ route('presentation.dashboard') }}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20">
+                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Presentation Counter</span>
                 </a>
             @endif
         </nav>
@@ -133,11 +128,11 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <div class="flex items-center gap-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Presentation Desk</span>
+                <span class="text-xs font-bold uppercase tracking-wider {{ $isCashier ? 'text-emerald-400' : 'text-amber-400' }}">
+                    {{ $isCashier ? 'Cashier Desk' : 'Presentation Counter' }}
+                </span>
             </div>
-            <a href="{{ route('presentation.dashboard') }}" class="p-2 text-amber-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </a>
+            <div class="w-8"></div>
         </header>
 
         <!-- Flash Messages -->

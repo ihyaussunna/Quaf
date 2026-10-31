@@ -48,6 +48,8 @@ class PanelAccessController extends Controller
                 $query->where('role', 'announcer');
             } elseif ($panel === 'presentation') {
                 $query->whereIn('role', ['presentation_team', 'presentation']);
+            } elseif ($panel === 'cashier') {
+                $query->whereIn('role', ['presentation_cashier', 'cashier']);
             } elseif ($panel === 'fund') {
                 $query->whereIn('role', ['fund_collector', 'fund_manager']);
             } elseif ($panel === 'greenroom') {
@@ -73,11 +75,13 @@ class PanelAccessController extends Controller
                 WHEN role IN ('program_committee', 'program_coordinator') THEN 3
                 WHEN role = 'announcer' THEN 4
                 WHEN role IN ('media_team', 'media_manager') THEN 5
-                WHEN role IN ('fund_collector', 'fund_manager') THEN 6
-                WHEN role = 'group_leader' THEN 7
-                WHEN role = 'judge' THEN 8
-                WHEN role = 'green_room_coordinator' THEN 9
-                ELSE 10
+                WHEN role IN ('presentation_cashier', 'cashier') THEN 6
+                WHEN role IN ('presentation_team', 'presentation') THEN 7
+                WHEN role IN ('fund_collector', 'fund_manager') THEN 8
+                WHEN role = 'group_leader' THEN 9
+                WHEN role = 'judge' THEN 10
+                WHEN role = 'green_room_coordinator' THEN 11
+                ELSE 12
             END ASC
         ")->orderBy('id')->get();
 
@@ -90,11 +94,39 @@ class PanelAccessController extends Controller
             'media' => User::whereIn('role', ['media_team', 'media_manager'])->count(),
             'announcer' => User::where('role', 'announcer')->count(),
             'fund' => User::whereIn('role', ['fund_collector', 'fund_manager'])->count(),
+            'cashier' => User::whereIn('role', ['presentation_cashier', 'cashier'])->count(),
+            'presentation' => User::whereIn('role', ['presentation_team', 'presentation'])->count(),
         ];
 
         $groups = Group::with('leader')->orderBy('name')->get();
 
-        return view('admin.panel-access.index', compact('users', 'stats', 'groups'));
+        $cashierUser = User::whereIn('role', ['presentation_cashier', 'cashier'])->first();
+        if (! $cashierUser) {
+            $cashierUser = User::create([
+                'name' => 'QUAF Presentation Cashier (ക്യാഷ്യർ കൗണ്ടർ)',
+                'email' => 'cashier@quaf.fest',
+                'role' => 'presentation_cashier',
+                'phone' => '+91 98470 00026',
+                'is_active' => true,
+                'plain_password' => 'Cashier#2026@Quaf!',
+                'password' => Hash::make('Cashier#2026@Quaf!'),
+            ]);
+        }
+
+        $presentationUser = User::whereIn('role', ['presentation_team', 'presentation'])->first();
+        if (! $presentationUser) {
+            $presentationUser = User::create([
+                'name' => 'QUAF Presentation Desk (പ്രസന്റേഷൻ ഡെസ്ക്)',
+                'email' => 'presentation@quaf.fest',
+                'role' => 'presentation_team',
+                'phone' => '+91 98470 00027',
+                'is_active' => true,
+                'plain_password' => 'Presentation#2026@Quaf!',
+                'password' => Hash::make('Presentation#2026@Quaf!'),
+            ]);
+        }
+
+        return view('admin.panel-access.index', compact('users', 'stats', 'groups', 'cashierUser', 'presentationUser'));
     }
 
     /**

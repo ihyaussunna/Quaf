@@ -94,7 +94,7 @@
     @endif
 
     <!-- Metric Stat Badges -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-3">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Accounts</div>
             <div class="text-2xl font-black text-slate-900 mt-1">{{ $stats['total'] }}</div>
@@ -122,6 +122,14 @@
         <div class="bg-white p-4 rounded-xl border border-emerald-200 bg-emerald-50/20 shadow-2xs">
             <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Fund Desk</div>
             <div class="text-2xl font-black text-emerald-700 mt-1">{{ $stats['fund'] ?? 0 }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-emerald-300 bg-emerald-50/40 shadow-2xs">
+            <div class="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Cashier Desk</div>
+            <div class="text-2xl font-black text-emerald-700 mt-1">{{ $stats['cashier'] ?? 0 }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-amber-300 bg-amber-50/40 shadow-2xs">
+            <div class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Presentation</div>
+            <div class="text-2xl font-black text-amber-700 mt-1">{{ $stats['presentation'] ?? 0 }}</div>
         </div>
     </div>
 
@@ -232,6 +240,198 @@
         </div>
     @endif
 
+    <!-- Dedicated Presentation & Cashier Desks Access Hub -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <h2 class="text-base font-bold text-slate-900 tracking-tight">Presentation &amp; Cashier Desks Credentials (കൗണ്ടറുകൾ)</h2>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono font-bold">Independent Portals</span>
+            </div>
+            <div class="text-xs font-mono text-slate-500">
+                പ്രസന്റേഷൻ കൗണ്ടറും ക്യാഷ്യർ കൗണ്ടറും പരസ്പരം ലിങ്കുകളില്ലാത്ത രണ്ട് വ്യത്യസ്ത പാനലുകളാണ്.
+            </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- 1. Cashier Desk Card -->
+            @php
+                $cashierUsername = $cashierUser?->email ?? 'cashier@quaf.fest';
+                $cashierPass = $cashierUser?->plain_password ?? 'Cashier#2026@Quaf!';
+            @endphp
+            <div class="rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 p-5 flex flex-col justify-between hover:border-emerald-400 transition-all shadow-2xs hover:shadow-xs"
+                 x-data="{ showPass: false }">
+                <div>
+                    <div class="flex items-center justify-between gap-2 pb-3 border-b border-emerald-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-xs">
+                                ₹
+                            </div>
+                            <div>
+                                <h3 class="font-black text-sm text-slate-900">Presentation Cashier Desk</h3>
+                                <p class="text-[11px] text-emerald-800 font-anek">ക്യാഷ്യർ കൗണ്ടർ (പണം സ്വീകരിച്ച് കോയിൻ നൽകൽ)</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            CASHIER
+                        </span>
+                    </div>
+
+                    <div class="mt-4 space-y-3">
+                        <!-- Login Alias -->
+                        <div class="flex items-center justify-between text-xs font-mono">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Short Username:</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-100 font-bold text-emerald-900 select-all cursor-pointer"
+                                  @click="copyText('cashier', 'cashier_alias')">cashier</span>
+                        </div>
+
+                        <!-- Full Username / Email -->
+                        <div>
+                            <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Username / Email</div>
+                            <div class="flex items-center justify-between gap-1.5 mt-1 bg-white border border-slate-200 rounded-xl px-3 py-2">
+                                <span class="font-mono text-xs text-slate-800 font-semibold select-all truncate">{{ $cashierUsername }}</span>
+                                <button type="button" 
+                                        @click="copyText('{{ $cashierUsername }}', 'cashier_u')" 
+                                        class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800 shrink-0" 
+                                        title="Copy Username">
+                                    <template x-if="copiedId === 'cashier_u'">
+                                        <span class="text-[10px] font-bold text-emerald-600">✓</span>
+                                    </template>
+                                    <template x-if="copiedId !== 'cashier_u'">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    </template>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Login Password</div>
+                            <div class="flex items-center justify-between gap-1 mt-1 bg-white border border-slate-200 rounded-xl px-3 py-2">
+                                <span class="font-mono text-xs text-slate-900 font-bold select-all truncate">
+                                    <span x-show="showPass">{{ $cashierPass }}</span>
+                                    <span x-show="!showPass" class="tracking-widest">••••••••••••</span>
+                                </span>
+                                <div class="flex items-center shrink-0">
+                                    <button type="button" @click="showPass = !showPass" class="p-1 text-slate-400 hover:text-slate-700" title="Show/Hide">
+                                        <svg x-show="!showPass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        <svg x-show="showPass" class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                                    </button>
+                                    <button type="button" 
+                                            @click="copyText('{{ $cashierPass }}', 'cashier_p')" 
+                                            class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800" 
+                                            title="Copy Password">
+                                        <template x-if="copiedId === 'cashier_p'">
+                                            <span class="text-[10px] font-bold text-emerald-600">✓</span>
+                                        </template>
+                                        <template x-if="copiedId !== 'cashier_p'">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        </template>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between text-xs">
+                    <span class="text-emerald-700 font-mono text-[11px]">Direct Cashier Console</span>
+                    <a href="{{ route('presentation.cashier') }}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono transition shadow-2xs">
+                        Open Cashier Desk ↗
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. Presentation Counter Card -->
+            @php
+                $presUsername = $presentationUser?->email ?? 'presentation@quaf.fest';
+                $presPass = $presentationUser?->plain_password ?? 'Presentation#2026@Quaf!';
+            @endphp
+            <div class="rounded-2xl border-2 border-amber-200 bg-amber-50/30 p-5 flex flex-col justify-between hover:border-amber-400 transition-all shadow-2xs hover:shadow-xs"
+                 x-data="{ showPass: false }">
+                <div>
+                    <div class="flex items-center justify-between gap-2 pb-3 border-b border-amber-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shadow-xs">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-sm text-slate-900">Presentation Gift Counter</h3>
+                                <p class="text-[11px] text-amber-800 font-anek">കോയിൻ &amp; സമ്മാന വിതരണം (Redemption &amp; Gifts)</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                            COUNTER
+                        </span>
+                    </div>
+
+                    <div class="mt-4 space-y-3">
+                        <!-- Login Alias -->
+                        <div class="flex items-center justify-between text-xs font-mono">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Short Username:</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-100 font-bold text-amber-900 select-all cursor-pointer"
+                                  @click="copyText('presentation', 'pres_alias')">presentation</span>
+                        </div>
+
+                        <!-- Full Username / Email -->
+                        <div>
+                            <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Username / Email</div>
+                            <div class="flex items-center justify-between gap-1.5 mt-1 bg-white border border-slate-200 rounded-xl px-3 py-2">
+                                <span class="font-mono text-xs text-slate-800 font-semibold select-all truncate">{{ $presUsername }}</span>
+                                <button type="button" 
+                                        @click="copyText('{{ $presUsername }}', 'pres_u')" 
+                                        class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800 shrink-0" 
+                                        title="Copy Username">
+                                    <template x-if="copiedId === 'pres_u'">
+                                        <span class="text-[10px] font-bold text-amber-600">✓</span>
+                                    </template>
+                                    <template x-if="copiedId !== 'pres_u'">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    </template>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <div class="text-[10px] uppercase font-mono font-bold text-slate-400">Login Password</div>
+                            <div class="flex items-center justify-between gap-1 mt-1 bg-white border border-slate-200 rounded-xl px-3 py-2">
+                                <span class="font-mono text-xs text-slate-900 font-bold select-all truncate">
+                                    <span x-show="showPass">{{ $presPass }}</span>
+                                    <span x-show="!showPass" class="tracking-widest">••••••••••••</span>
+                                </span>
+                                <div class="flex items-center shrink-0">
+                                    <button type="button" @click="showPass = !showPass" class="p-1 text-slate-400 hover:text-slate-700" title="Show/Hide">
+                                        <svg x-show="!showPass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        <svg x-show="showPass" class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                                    </button>
+                                    <button type="button" 
+                                            @click="copyText('{{ $presPass }}', 'pres_p')" 
+                                            class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800" 
+                                            title="Copy Password">
+                                        <template x-if="copiedId === 'pres_p'">
+                                            <span class="text-[10px] font-bold text-amber-600">✓</span>
+                                        </template>
+                                        <template x-if="copiedId !== 'pres_p'">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        </template>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between text-xs">
+                    <span class="text-amber-800 font-mono text-[11px]">Gift &amp; Coin Redemption</span>
+                    <a href="{{ route('presentation.dashboard') }}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs font-mono transition shadow-2xs">
+                        Open Presentation ↗
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filter & Search Toolbar -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div class="flex flex-wrap items-center gap-2">
@@ -256,9 +456,13 @@
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'announcer' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                 Announcer Desk
             </a>
+            <a href="{{ route('admin.panel-access.index', ['panel' => 'cashier']) }}" 
+               class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'cashier' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                Cashier Desk
+            </a>
             <a href="{{ route('admin.panel-access.index', ['panel' => 'presentation']) }}" 
-               class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'presentation' ? 'bg-yellow-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
-                Presentation Desk
+               class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'presentation' ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                Presentation Counter
             </a>
             <a href="{{ route('admin.panel-access.index', ['panel' => 'media']) }}" 
                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $currentPanel === 'media' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
@@ -320,6 +524,8 @@
                                 'program_committee', 'program_coordinator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                 'announcer' => 'bg-amber-50 text-amber-900 border-amber-300',
                                 'media_team', 'media_manager' => 'bg-purple-50 text-purple-700 border-purple-200',
+                                'presentation_cashier', 'cashier' => 'bg-emerald-50 text-emerald-800 border-emerald-300 font-bold',
+                                'presentation_team', 'presentation' => 'bg-amber-50 text-amber-900 border-amber-300 font-bold',
                                 'fund_collector', 'fund_manager' => 'bg-emerald-50 text-emerald-800 border-emerald-300',
                                 'group_leader' => 'bg-amber-50 text-amber-800 border-amber-200',
                                 'judge' => 'bg-blue-50 text-blue-700 border-blue-200',
@@ -333,6 +539,8 @@
                                 'program_committee', 'program_coordinator' => 'Program Samithi',
                                 'announcer' => 'Announcer Desk',
                                 'media_team', 'media_manager' => 'Media Wing',
+                                'presentation_cashier', 'cashier' => 'Presentation Cashier Desk (ക്യാഷ്യർ കൗണ്ടർ)',
+                                'presentation_team', 'presentation' => 'Presentation Counter (പ്രസന്റേഷൻ ഡെസ്ക്)',
                                 'fund_collector', 'fund_manager' => 'Fund Collection Desk',
                                 'group_leader' => 'Team Leader (' . ($user->ledGroup->name ?? 'Group') . ')',
                                 'judge' => 'Judges Panel',
@@ -345,6 +553,8 @@
                                 'program_committee', 'program_coordinator' => 'samithi',
                                 'announcer' => 'announcer',
                                 'media_team', 'media_manager' => 'media',
+                                'presentation_cashier', 'cashier' => 'cashier',
+                                'presentation_team', 'presentation' => 'presentation',
                                 'fund_collector', 'fund_manager' => 'fund',
                                 'group_leader' => strtolower($user->ledGroup->code ?? 'leader'),
                                 default => null

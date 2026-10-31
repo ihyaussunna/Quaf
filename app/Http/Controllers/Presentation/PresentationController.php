@@ -36,8 +36,12 @@ class PresentationController extends Controller
     /**
      * Display the Presentation Team Dashboard.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
+        if (in_array(auth()->user()?->role, ['presentation_cashier', 'cashier'], true)) {
+            return redirect()->route('presentation.cashier');
+        }
+
         CoinTransaction::ensureSchema();
 
         $eligibleCount = Student::participants()->count();
@@ -368,8 +372,12 @@ class PresentationController extends Controller
     /**
      * Display the Presentation Cashier Console.
      */
-    public function cashierIndex(Request $request): View
+    public function cashierIndex(Request $request): View|RedirectResponse
     {
+        if (in_array(auth()->user()?->role, ['presentation_team', 'presentation'], true)) {
+            return redirect()->route('presentation.dashboard');
+        }
+
         CoinTransaction::ensureSchema();
 
         $selectedStudent = null;

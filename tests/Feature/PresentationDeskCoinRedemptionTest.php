@@ -581,4 +581,59 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $response->assertSee('COIN-CASH-TEST-999');
         $response->assertSee('100.00');
     }
+
+    public function test_cashier_and_presentation_are_separate_pages_with_no_cross_navigation_buttons(): void
+    {
+        $cashierUser = User::where('role', 'presentation_cashier')->first() ?? User::create([
+            'name' => 'Cashier Operator',
+            'email' => 'cashier@quaf.fest',
+            'password' => bcrypt('Cashier#2026@Quaf!'),
+            'plain_password' => 'Cashier#2026@Quaf!',
+            'role' => 'presentation_cashier',
+            'is_active' => true,
+        ]);
+
+        // 1. If Cashier visits /presentation, they are redirected to /presentation/cashier
+        $response = $this->actingAs($cashierUser)->get(route('presentation.dashboard'));
+        $response->assertRedirect(route('presentation.cashier'));
+
+        // 2. When Cashier is on /presentation/cashier, no button to go to presentation counter
+        $cashierView = $this->actingAs($cashierUser)->get(route('presentation.cashier'));
+        $cashierView->assertOk();
+        $cashierView->assertDontSee('Gift Counter');
+        $cashierView->assertDontSee('Presentation Counter');
+
+        // 3. When Presentation Desk is on /presentation, no button to go to cashier desk
+        $presView = $this->actingAs($this->presentationUser)->get(route('presentation.dashboard'));
+        $presView->assertOk();
+        $presView->assertDontSee('Cashier Desk (കോയിൻ നൽകൽ)');
+        $presView->assertDontSee('Cashier Desk');
+
+        // 4. If Presentation user visits /presentation/cashier, they are redirected to /presentation
+        $presRedirect = $this->actingAs($this->presentationUser)->get(route('presentation.cashier'));
+        $presRedirect->assertRedirect(route('presentation.dashboard'));
+    }
+
+    public function test_admin_panel_access_lists_cashier_and_presentation_credentials(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'name' => 'Fest Admin',
+            'email' => 'admin@quaf.test',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.panel-access.index'));
+        $response->assertOk();
+        $response->assertSee('Presentation Cashier Desk');
+        $response->assertSee('cashier@quaf.fest');
+        $response->assertSee('Cashier#2026@Quaf!');
+        $response->assertSee('Presentation Gift Counter');
+        $response->assertSee('presentation@quaf.fest');
+        $response->assertSee('Presentation#2026@Quaf!');
+
+        // Panel filter test for cashier
+        $cashierFilter = $this->actingAs($admin)->get(route('admin.panel-access.index', ['panel' => 'cashier']));
+        $cashierFilter->assertOk();
+        $cashierFilter->assertSee('cashier@quaf.fest');
+    }
 }

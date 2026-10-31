@@ -807,6 +807,11 @@ Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:
     Route::get('/cashier/receipt/{transaction}', [PresentationController::class, 'cashierReceipt'])->name('cashier.receipt');
 });
 
+// Direct Cashier URL Alias
+Route::get('/cashier', function () {
+    return redirect()->route('presentation.cashier');
+})->name('cashier.direct');
+
 /*
 |--------------------------------------------------------------------------
 | Leaders Dashboard Routes
