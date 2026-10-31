@@ -622,9 +622,12 @@
         </div>
 
         <!-- Official Print Footer -->
-        <div class="mt-8 pt-3 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-slate-400">
-            <div>QUAF Fest Management Engine • Official Competition Roster</div>
-            <div>Generated on {{ now()->format('d M Y, h:i:s A') }}</div>
+        <div class="mt-8 pt-3 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-slate-500">
+            <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 11px; max-height: 12px;">
+                <span class="font-normal text-slate-600 whitespace-nowrap leading-none font-sans">Markaz Cultural Festival</span>
+            </div>
+            <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
         </div>
     </div>
 

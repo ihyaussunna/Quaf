@@ -295,6 +295,15 @@
                         No programs scheduled for this date.
                     </div>
                 @endif
+
+                <!-- Official Result PDF Style Clean Footer -->
+                <div class="mt-8 pt-3 border-t border-slate-300 text-[10px] text-slate-500 flex justify-between items-center gap-4 font-mono">
+                    <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                        <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 11px; max-height: 12px;">
+                        <span class="font-normal text-slate-600 whitespace-nowrap leading-none font-sans">Markaz Cultural Festival</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
+                </div>
             </div>
         @else
             <!-- All Dates Multi-Page Mode -->
@@ -407,6 +416,15 @@
                             No programs scheduled for this date.
                         </div>
                     @endif
+
+                    <!-- Official Result PDF Style Clean Footer -->
+                    <div class="mt-8 pt-3 border-t border-slate-300 text-[10px] text-slate-500 flex justify-between items-center gap-4 font-mono">
+                        <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                            <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 11px; max-height: 12px;">
+                            <span class="font-normal text-slate-600 whitespace-nowrap leading-none font-sans">Markaz Cultural Festival</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
+                    </div>
                 </div>
             @endforeach
         @endif
