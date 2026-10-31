@@ -1,6 +1,6 @@
 @extends('layouts.public', [
-    'title' => 'Live Festival Results & Point Table — QUAF 2026 | Markaz Art Fest',
-    'metaDescription' => 'Live official competition results, points table, winner announcements, and academic group standings for QUAF 2026 Markaz Cultural Festival.',
+    'title' => 'Live Festival Results — QUAF 2026 | Markaz Art Fest',
+    'metaDescription' => 'Live official competition results, winner announcements, and academic group rankings for QUAF 2026 Markaz Cultural Festival.',
 ])
 
 @section('content')
@@ -202,10 +202,6 @@
         @endforelse
     </div>
 
-    <div class="mt-8 sm:mt-12">
-        {{ $results->links() }}
-    </div>
-
     <!-- Alpine.js Interactive Modal Popup with Full Winners & Poster Download -->
     <div x-show="isModalOpen" 
          x-cloak
@@ -317,12 +313,9 @@
 
                                             <div class="text-right shrink-0 flex flex-col items-end gap-1">
                                                 <template x-if="item.grade">
-                                                    <span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-emerald-600 text-white shadow-2xs"
+                                                    <span class="px-2.5 py-1 rounded-lg font-mono font-bold text-xs bg-emerald-600 text-white shadow-2xs"
                                                           x-text="'Grade ' + item.grade"></span>
                                                 </template>
-                                                <span class="text-xs font-mono font-black px-2 py-0.5 rounded"
-                                                      :class="tier.pos === 1 ? 'bg-amber-200 text-amber-950' : (tier.pos === 2 ? 'bg-slate-200 text-slate-900' : 'bg-red-100 text-[#be1e2d]')"
-                                                      x-text="item.total_points + ' PTS'"></span>
                                             </div>
                                         </div>
                                     </template>
