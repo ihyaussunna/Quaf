@@ -22,14 +22,20 @@ class StandingPosterGenerator
      * @param  string|null  $titleText  Main title heading.
      * @param  string|null  $badgeText  Top capsule badge text.
      * @param  string  $subtitleFallback  Subtitle line under team name when amount/receipts are hidden.
+     * @param  string  $orientation  'vertical' (1080x1440) or 'horizontal' (1920x1280, 6:4 ratio)
      */
     public static function generate(
         ?Collection $topGroups = null,
         bool $showAmount = true,
         ?string $titleText = null,
         ?string $badgeText = null,
-        string $subtitleFallback = 'FINANCE SUPPORT POINTS'
+        string $subtitleFallback = 'FINANCE SUPPORT POINTS',
+        string $orientation = 'vertical'
     ): \GdImage {
+        if (in_array(strtolower($orientation), ['horizontal', '6:4', 'landscape', '6x4'])) {
+            return self::generateLandscape6x4($topGroups, $showAmount, $titleText, $badgeText, $subtitleFallback);
+        }
+
         if (! $topGroups) {
             $topGroups = Group::query()
                 ->withSum(['fundReceipts as total_collected' => function ($q) {
@@ -341,6 +347,329 @@ class StandingPosterGenerator
         $timestampFontSize = 11;
         $timestampColor = imagecolorallocate($img, 254, 215, 170);
         self::drawCenteredText($img, $timestampFontSize, $footerY + 22, $soraRegular, $timestampText, $timestampColor, $width);
+
+        return $img;
+    }
+
+    /**
+     * Generate the high-resolution Landscape Standing Poster in 6:4 aspect ratio (1920 x 1280).
+     * Tailored for horizontal displays, LED screens, widescreen social media, and presentations.
+     *
+     * @param  bool  $showAmount  Whether to display currency/amount. Defaults to false for pure point standings.
+     */
+    public static function generateLandscape6x4(
+        ?Collection $topGroups = null,
+        bool $showAmount = false,
+        ?string $titleText = null,
+        ?string $badgeText = null,
+        string $subtitleFallback = 'OFFICIAL FINANCE SUPPORT POINTS'
+    ): \GdImage {
+        if (! $topGroups) {
+            $topGroups = Group::query()
+                ->withSum(['fundReceipts as total_collected' => function ($q) {
+                    $q->where('is_cancelled', false);
+                }], 'amount')
+                ->withCount(['fundReceipts as receipts_count' => function ($q) {
+                    $q->where('is_cancelled', false);
+                }])
+                ->orderByDesc('total_collected')
+                ->get();
+        }
+
+        // Exact 6:4 Aspect Ratio (1920 / 1280 = 1.5 = 6:4)
+        $width = 1920;
+        $height = 1280;
+        $img = imagecreatetruecolor($width, $height);
+        imagealphablending($img, true);
+        imagesavealpha($img, true);
+
+        // Fonts
+        $soraBold = public_path('fonts/Sora-ExtraBold.ttf');
+        if (! file_exists($soraBold)) {
+            $soraBold = public_path('fonts/Sora-Bold.ttf');
+        }
+        if (! file_exists($soraBold)) {
+            $soraBold = public_path('fonts/Rockwell-Bold.otf');
+        }
+
+        $soraRegular = public_path('fonts/Sora-Bold.ttf');
+        if (! file_exists($soraRegular)) {
+            $soraRegular = $soraBold;
+        }
+
+        $amountFont = public_path('fonts/arialbd.ttf');
+        if (! file_exists($amountFont)) {
+            $amountFont = public_path('fonts/AnekMalayalam-Bold.ttf');
+        }
+        if (! file_exists($amountFont)) {
+            $amountFont = $soraBold;
+        }
+
+        // 1. Festive Crimson Background Gradient
+        $topR = 158;
+        $topG = 19;
+        $topB = 32;   // #9e1320
+        $midR = 190;
+        $midG = 30;
+        $midB = 45;   // #be1e2d
+        $botR = 130;
+        $botG = 14;
+        $botB = 24;   // #820e18
+
+        for ($y = 0; $y < $height; $y++) {
+            if ($y < $height * 0.5) {
+                $factor = $y / ($height * 0.5);
+                $r = (int) ($topR + ($midR - $topR) * $factor);
+                $g = (int) ($topG + ($midG - $topG) * $factor);
+                $b = (int) ($topB + ($midB - $topB) * $factor);
+            } else {
+                $factor = ($y - $height * 0.5) / ($height * 0.5);
+                $r = (int) ($midR + ($botR - $midR) * $factor);
+                $g = (int) ($midG + ($botG - $midG) * $factor);
+                $b = (int) ($midB + ($botB - $midB) * $factor);
+            }
+            $color = imagecolorallocate($img, $r, $g, $b);
+            imageline($img, 0, $y, $width, $y, $color);
+        }
+
+        // Decorative background geometric curves
+        $subtleRing1 = imagecolorallocatealpha($img, 255, 255, 255, 122);
+        imageellipse($img, 150, 150, 700, 700, $subtleRing1);
+        imageellipse($img, $width - 150, $height - 150, 800, 800, $subtleRing1);
+
+        // 2. Poster Header Graphic
+        $headerPngPath = public_path('images/poster-header.png');
+        if (file_exists($headerPngPath)) {
+            $headerImg = @imagecreatefrompng($headerPngPath);
+            if ($headerImg) {
+                $origW = imagesx($headerImg);
+                $origH = imagesy($headerImg);
+                $targetW = 500;
+                $targetH = (int) round(($origH / $origW) * $targetW);
+                $targetX = (int) (($width - $targetW) / 2);
+                $targetY = 30;
+
+                imagecopyresampled($img, $headerImg, $targetX, $targetY, 0, 0, $targetW, $targetH, $origW, $origH);
+                imagedestroy($headerImg);
+            }
+        }
+
+        // Amber Capsule Badge
+        $badgeText = $badgeText ?: ($showAmount ? 'Group Standings' : 'Point Standings');
+        $badgeFontSize = 16;
+        $badgeBbox = @imagettfbbox($badgeFontSize, 0, $soraBold, $badgeText);
+        $badgeTextW = $badgeBbox ? abs($badgeBbox[4] - $badgeBbox[0]) : 160;
+        $badgeW = max(260, $badgeTextW + 60);
+        $badgeH = 44;
+        $badgeX = (int) (($width - $badgeW) / 2);
+        $badgeY = 200;
+
+        self::drawRoundedRectangle($img, $badgeX, $badgeY, $badgeX + $badgeW, $badgeY + $badgeH, 22, imagecolorallocate($img, 247, 177, 51));
+        $badgeTextColor = imagecolorallocate($img, 20, 20, 20);
+        self::drawCenteredText($img, $badgeFontSize, $badgeY + 29, $soraBold, $badgeText, $badgeTextColor, $width);
+
+        // Main Title
+        $titleText = $titleText ?: ($showAmount ? 'Top Collected Groups' : 'Team Point Standings');
+        $titleFontSize = 42;
+        $titleY = 285;
+        $whiteColor = imagecolorallocate($img, 255, 255, 255);
+        self::drawCenteredText($img, $titleFontSize, $titleY, $soraBold, $titleText, $whiteColor, $width);
+
+        // 3. Five Wide Horizontal Standing Capsule Bars (Rows)
+        $capsuleW = 1680;
+        $capsuleH = 130;
+        $capsuleX1 = (int) (($width - $capsuleW) / 2); // 120
+        $capsuleX2 = $capsuleX1 + $capsuleW;           // 1800
+        $startY = 335;
+        $gap = 22;
+        $radius = 65;
+
+        $goldCircle = imagecolorallocate($img, 245, 197, 24);    // Rank 1 Gold
+        $silverCircle = imagecolorallocate($img, 203, 213, 225); // Rank 2 Silver
+        $bronzeCircle = imagecolorallocate($img, 217, 119, 6);   // Rank 3 Bronze
+        $greenCircle = imagecolorallocate($img, 16, 185, 129);   // Rank 4 Green
+        $redCircle = imagecolorallocate($img, 225, 29, 72);      // Rank 5 Rose
+
+        $rankColors = [
+            1 => ['circle' => $goldCircle, 'text' => imagecolorallocate($img, 120, 53, 15)],
+            2 => ['circle' => $silverCircle, 'text' => imagecolorallocate($img, 15, 23, 42)],
+            3 => ['circle' => $bronzeCircle, 'text' => imagecolorallocate($img, 255, 255, 255)],
+            4 => ['circle' => $greenCircle, 'text' => imagecolorallocate($img, 255, 255, 255)],
+            5 => ['circle' => $redCircle, 'text' => imagecolorallocate($img, 255, 255, 255)],
+        ];
+
+        $rankIndex = 0;
+        foreach ($topGroups->take(5) as $grp) {
+            $rank = $rankIndex + 1;
+            $currentY1 = $startY + ($rankIndex * ($capsuleH + $gap));
+            $currentY2 = $currentY1 + $capsuleH;
+            $centerY = (int) ($currentY1 + ($capsuleH / 2));
+
+            $collected = (float) ($grp->total_collected ?? ($grp->manual_amount ?? 0));
+            $receiptsCount = (int) ($grp->receipts_count ?? 0);
+            $points = isset($grp->points) ? (int) $grp->points : self::calculateFinancePoints($collected);
+
+            // Capsule Drop Shadow
+            $shadowColor = imagecolorallocatealpha($img, 60, 5, 10, 85);
+            self::drawRoundedRectangle($img, $capsuleX1 + 4, $currentY1 + 6, $capsuleX2 + 4, $currentY2 + 6, $radius, $shadowColor);
+
+            // Capsule White Body
+            $capsuleBg = imagecolorallocate($img, 255, 255, 255);
+            self::drawRoundedRectangle($img, $capsuleX1, $currentY1, $capsuleX2, $currentY2, $radius, $capsuleBg);
+
+            // Left Circular Rank Badge
+            $badgeRadius = 48;
+            $circleCenterX = $capsuleX1 + 75;
+            $colors = $rankColors[$rank] ?? $rankColors[5];
+
+            // Outer ring shadow
+            $ringShadow = imagecolorallocatealpha($img, 0, 0, 0, 105);
+            imagefilledellipse($img, $circleCenterX, $centerY + 2, $badgeRadius * 2, $badgeRadius * 2, $ringShadow);
+
+            // Main Badge Circle
+            imagefilledellipse($img, $circleCenterX, $centerY, $badgeRadius * 2, $badgeRadius * 2, $colors['circle']);
+
+            // White Inner Stroke
+            $innerStroke = imagecolorallocatealpha($img, 255, 255, 255, 75);
+            imageellipse($img, $circleCenterX, $centerY, ($badgeRadius * 2) - 6, ($badgeRadius * 2) - 6, $innerStroke);
+
+            // Rank Number text "01", "02", etc.
+            $rankStr = sprintf('%02d', $rank);
+            $rankNumFontSize = 26;
+            $bbox = @imagettfbbox($rankNumFontSize, 0, $soraBold, $rankStr);
+            if ($bbox) {
+                $numW = abs($bbox[4] - $bbox[0]);
+                $numH = abs($bbox[5] - $bbox[1]);
+                $numX = (int) ($circleCenterX - ($numW / 2));
+                $numY = (int) ($centerY + ($numH / 2) - 2);
+                imagettftext($img, $rankNumFontSize, 0, $numX, $numY, $colors['text'], $soraBold, $rankStr);
+            }
+
+            // Left Color Accent Dot
+            $grpColorHex = $grp->color_hex ?? '#be1e2d';
+            $grpDotColor = self::allocateHexColor($img, $grpColorHex);
+            $dotX = $capsuleX1 + 160;
+            imagefilledellipse($img, $dotX, $centerY - 16, 16, 16, $grpDotColor);
+
+            // Group Name (Larger in 6:4 Horizontal)
+            $grpName = strtoupper((string) $grp->name);
+            $nameFontSize = 26;
+            $nameColor = imagecolorallocate($img, 15, 23, 42); // Slate-900
+            $nameX = $capsuleX1 + 185;
+            $nameY = $centerY - 6;
+            imagettftext($img, $nameFontSize, 0, $nameX, $nameY, $nameColor, $soraBold, $grpName);
+
+            if ($showAmount) {
+                // Subtitle Details: Receipts Count
+                $detailText = $receiptsCount > 0 ? (number_format($receiptsCount).' '.($receiptsCount === 1 ? 'RECEIPT' : 'RECEIPTS').' ISSUED') : $subtitleFallback;
+                $detailFontSize = 12;
+                $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
+                $detailY = $centerY + 24;
+                imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
+
+                // Right side: Total Amount Collected & Finance Support Points
+                $amountText = '₹'.number_format($collected, 0);
+                $amountFontSize = 32;
+                $amountColor = imagecolorallocate($img, 15, 23, 42); // Bold dark
+                $bboxAmount = @imagettfbbox($amountFontSize, 0, $amountFont, $amountText);
+                $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 190;
+                $amountX = $capsuleX2 - $amountW - 45;
+                $amountY = $centerY - 4;
+                imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $amountFont, $amountText);
+
+                // Points Pill Badge (aligned to right, directly under the amount)
+                $ptsText = $points.' PTS';
+                $ptsFontSize = 13;
+                $bboxPts = @imagettfbbox($ptsFontSize, 0, $soraBold, $ptsText);
+                $ptsW = $bboxPts ? abs($bboxPts[4] - $bboxPts[0]) : 60;
+                $badgePadX = 16;
+                $badgeH = 28;
+                $badgeW = $ptsW + ($badgePadX * 2);
+                $badgeX2 = $capsuleX2 - 45;
+                $badgeX1 = $badgeX2 - $badgeW;
+                $badgeY1 = $centerY + 10;
+                $badgeY2 = $badgeY1 + $badgeH;
+
+                $badgeBg = ($rank === 1)
+                    ? imagecolorallocate($img, 254, 243, 199)
+                    : imagecolorallocate($img, 241, 245, 249);
+                $badgeTextColor = ($rank === 1)
+                    ? imagecolorallocate($img, 146, 64, 14)
+                    : imagecolorallocate($img, 30, 41, 59);
+
+                self::drawRoundedRectangle($img, $badgeX1, $badgeY1, $badgeX2, $badgeY2, 14, $badgeBg);
+                $ptsX = (int) ($badgeX1 + $badgePadX);
+                $ptsY = (int) ($badgeY1 + 19);
+                imagettftext($img, $ptsFontSize, 0, $ptsX, $ptsY, $badgeTextColor, $soraBold, $ptsText);
+            } else {
+                // Subtitle Line when amount is hidden: "OFFICIAL FINANCE SUPPORT POINTS"
+                $detailText = $subtitleFallback;
+                $detailFontSize = 12;
+                $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
+                $detailY = $centerY + 24;
+                imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
+
+                // 6:4 Horizontal Pure Points Pill Badge (prominently centered vertically on the right)
+                $ptsText = $points.' PTS';
+                $ptsFontSize = 26;
+                $badgeW = 200;
+                $badgeH = 62;
+                $badgeRadius = 31;
+                $badgeX2 = $capsuleX2 - 45;
+                $badgeX1 = $badgeX2 - $badgeW;
+                $badgeY1 = (int) ($centerY - ($badgeH / 2));
+                $badgeY2 = (int) ($centerY + ($badgeH / 2));
+
+                $badgeBg = match ($rank) {
+                    1 => imagecolorallocate($img, 254, 243, 199), // Amber-100
+                    2 => imagecolorallocate($img, 241, 245, 249), // Slate-100
+                    3 => imagecolorallocate($img, 255, 237, 213), // Orange-100
+                    default => imagecolorallocate($img, 248, 250, 252) // Slate-50
+                };
+                $badgeBorder = match ($rank) {
+                    1 => imagecolorallocate($img, 245, 158, 11), // Amber-500
+                    2 => imagecolorallocate($img, 203, 213, 225), // Slate-300
+                    3 => imagecolorallocate($img, 217, 119, 6), // Amber-600
+                    default => imagecolorallocate($img, 226, 232, 240) // Slate-200
+                };
+                $badgeTextColor = match ($rank) {
+                    1 => imagecolorallocate($img, 120, 53, 15), // Amber-950
+                    2 => imagecolorallocate($img, 15, 23, 42), // Slate-900
+                    3 => imagecolorallocate($img, 124, 45, 18), // Amber-950
+                    default => imagecolorallocate($img, 51, 65, 85) // Slate-700
+                };
+
+                // Draw filled rounded rectangle with neat border
+                self::drawRoundedRectangle($img, $badgeX1, $badgeY1, $badgeX2, $badgeY2, $badgeRadius, $badgeBorder);
+                self::drawRoundedRectangle($img, $badgeX1 + 2, $badgeY1 + 2, $badgeX2 - 2, $badgeY2 - 2, $badgeRadius - 2, $badgeBg);
+
+                $bboxPts = @imagettfbbox($ptsFontSize, 0, $soraBold, $ptsText);
+                $ptsW = $bboxPts ? abs($bboxPts[4] - $bboxPts[0]) : 85;
+                $ptsH = $bboxPts ? abs($bboxPts[5] - $bboxPts[1]) : 24;
+                $ptsX = (int) ($badgeX1 + (($badgeW - $ptsW) / 2));
+                $ptsY = (int) ($centerY + ($ptsH / 2) - 2);
+                imagettftext($img, $ptsFontSize, 0, $ptsX, $ptsY, $badgeTextColor, $soraBold, $ptsText);
+            }
+
+            $rankIndex++;
+        }
+
+        // 4. Poster Footer
+        $footerY = 1140;
+        $footerLineColor = imagecolorallocatealpha($img, 255, 255, 255, 100);
+        imageline($img, 120, $footerY, $width - 120, $footerY, $footerLineColor);
+
+        $footerText = $showAmount
+            ? 'QUAF 09  •  MARKAZ CULTURAL FESTIVAL 2026  •  OFFICIAL LIVE STANDINGS'
+            : 'QUAF 09  •  MARKAZ CULTURAL FESTIVAL 2026  •  OFFICIAL POINT STANDINGS';
+        $footerFontSize = 13;
+        $footerTextColor = imagecolorallocate($img, 255, 255, 255);
+        self::drawCenteredText($img, $footerFontSize, $footerY + 28, $soraBold, $footerText, $footerTextColor, $width);
+
+        $timestampText = 'Generated on '.now()->format('d M Y, h:i A').'  |  quaf.ihyaussunna.in';
+        $timestampFontSize = 12;
+        $timestampColor = imagecolorallocate($img, 254, 215, 170);
+        self::drawCenteredText($img, $timestampFontSize, $footerY + 54, $soraRegular, $timestampText, $timestampColor, $width);
 
         return $img;
     }

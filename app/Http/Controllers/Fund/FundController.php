@@ -668,19 +668,32 @@ class FundController extends Controller
             $standings = StandingPosterGenerator::getManualStandings();
         }
 
-        $showAmount = $request->boolean('show_amount', false);
-        $title = $request->input('title', 'Team Point Standings');
-        $badge = $request->input('badge', 'Point Standings');
+        $orientation = strtolower($request->input('orientation', 'horizontal'));
+        $isLandscape = in_array($orientation, ['horizontal', '6:4', 'landscape', '6x4']);
+
+        if ($request->has('show_amount')) {
+            $showAmount = $request->boolean('show_amount');
+        } else {
+            $showAmount = ! $isLandscape;
+        }
+
+        $title = $request->input('title', $showAmount ? 'Top Collected Groups' : 'Team Point Standings');
+        $badge = $request->input('badge', $showAmount ? 'Group Standings' : 'Point Standings');
 
         $img = StandingPosterGenerator::generate(
             topGroups: $standings,
             showAmount: $showAmount,
             titleText: $title,
             badgeText: $badge,
-            subtitleFallback: 'FINANCE SUPPORT POINTS'
+            subtitleFallback: 'FINANCE SUPPORT POINTS',
+            orientation: $isLandscape ? 'horizontal' : 'vertical'
         );
 
-        return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Team-Point-Standings.jpg', false);
+        $filename = $isLandscape
+            ? 'QUAF-09-Team-Point-Standings-6x4.jpg'
+            : ($showAmount ? 'QUAF-09-Team-Standings-Amount-With-Points.jpg' : 'QUAF-09-Team-Point-Standings-Vertical.jpg');
+
+        return StandingPosterGenerator::streamResponse($img, $filename, false);
     }
 
     /**
@@ -699,19 +712,32 @@ class FundController extends Controller
             $standings = StandingPosterGenerator::getManualStandings();
         }
 
-        $showAmount = $request->boolean('show_amount', false);
-        $title = $request->input('title', 'Team Point Standings');
-        $badge = $request->input('badge', 'Point Standings');
+        $orientation = strtolower($request->input('orientation', 'horizontal'));
+        $isLandscape = in_array($orientation, ['horizontal', '6:4', 'landscape', '6x4']);
+
+        if ($request->has('show_amount')) {
+            $showAmount = $request->boolean('show_amount');
+        } else {
+            $showAmount = ! $isLandscape;
+        }
+
+        $title = $request->input('title', $showAmount ? 'Top Collected Groups' : 'Team Point Standings');
+        $badge = $request->input('badge', $showAmount ? 'Group Standings' : 'Point Standings');
 
         $img = StandingPosterGenerator::generate(
             topGroups: $standings,
             showAmount: $showAmount,
             titleText: $title,
             badgeText: $badge,
-            subtitleFallback: 'FINANCE SUPPORT POINTS'
+            subtitleFallback: 'FINANCE SUPPORT POINTS',
+            orientation: $isLandscape ? 'horizontal' : 'vertical'
         );
 
-        return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Team-Point-Standings.jpg', true);
+        $filename = $isLandscape
+            ? 'QUAF-09-Team-Point-Standings-6x4.jpg'
+            : ($showAmount ? 'QUAF-09-Team-Standings-Amount-With-Points.jpg' : 'QUAF-09-Team-Point-Standings-Vertical.jpg');
+
+        return StandingPosterGenerator::streamResponse($img, $filename, true);
     }
 
     /**

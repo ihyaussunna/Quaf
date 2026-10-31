@@ -200,23 +200,42 @@
                     </h2>
                 </div>
                 <p class="text-xs text-slate-500 font-anek mt-1">
-                    ടീമുകൾക്ക് മാനുവലായി തുക നൽകി പോയിന്റും സ്റ്റാൻഡിങ്ങും കണക്കാക്കുക. നൽകിയ തുകയ്ക്കനുസരിച്ചുള്ള പോയിന്റും റാങ്കും മാത്രം ഉൾപ്പെടുത്തി പോസ്റ്റർ തയ്യാറാക്കാം (പോസ്റ്ററിൽ തുക പ്രദർശിപ്പിക്കില്ല).
+                    ടീമുകൾക്ക് മാനുവലായി തുക നൽകി പോയിന്റും സ്റ്റാൻഡിങ്ങും കണക്കാക്കുക. 6:4 റേഷ്യോയിൽ തുകയില്ലാതെ പോയിന്റ് മാത്രമുള്ള ഹൊറിസോണ്ടൽ പോസ്റ്ററോ, തുകയും പോയിന്റും അടങ്ങിയ വെർട്ടിക്കൽ പോസ്റ്ററോ ഡൗൺലോഡ് ചെയ്യാം.
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <button type="button" @click="openPreview()"
-                   class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    <span>Preview Poster</span>
-                </button>
-                <button type="button" @click="downloadPoster()"
-                   class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                    <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span>Download Standing Poster</span>
-                </button>
+                <!-- 6:4 Horizontal (Points Only) Buttons -->
+                <div class="inline-flex rounded-xl shadow-xs border border-amber-300 bg-amber-50/50 p-0.5">
+                    <button type="button" @click="openPreviewHorizontal()" title="Preview 6:4 Horizontal (Points Only)"
+                       class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <span>Preview 6:4</span>
+                    </button>
+                    <button type="button" @click="downloadHorizontal()" title="Download 6:4 Landscape Poster (Points Only)"
+                       class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download 6:4 (Points Only)</span>
+                    </button>
+                </div>
+
+                <!-- Vertical (Amount + Points) Buttons -->
+                <div class="inline-flex rounded-xl shadow-xs border border-emerald-300 bg-emerald-50/50 p-0.5">
+                    <button type="button" @click="openPreviewVertical()" title="Preview Vertical Poster (Amount + Points)"
+                       class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <span>Preview Vertical</span>
+                    </button>
+                    <button type="button" @click="downloadVertical()" title="Download Vertical Poster (Amount + Points)"
+                       class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download Vertical (Amount + Points)</span>
+                    </button>
+                </div>
+
+                <!-- Save Amounts Button -->
                 <button type="button" @click="saveAmounts()"
                    :disabled="saving"
-                   class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                   class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
                     <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     <span x-text="saving ? 'Saving...' : 'Save Amounts'">Save Amounts</span>
                 </button>
@@ -687,19 +706,47 @@ document.addEventListener('alpine:init', () => {
             this.toastMessage = 'എല്ലാ തുകകളും പൂജ്യമാക്കി (0).';
             setTimeout(() => this.toastMessage = '', 4000);
         },
-        openPreview() {
+        openPreviewHorizontal() {
             const params = new URLSearchParams();
             this.groups.forEach(g => {
                 params.append('amounts[' + g.id + ']', g.amount || 0);
             });
+            params.append('orientation', 'horizontal');
+            params.append('show_amount', '0');
             window.open('{{ route('fund.standings.manual.poster') }}?' + params.toString(), '_blank');
         },
-        downloadPoster() {
+        downloadHorizontal() {
             const params = new URLSearchParams();
             this.groups.forEach(g => {
                 params.append('amounts[' + g.id + ']', g.amount || 0);
             });
+            params.append('orientation', 'horizontal');
+            params.append('show_amount', '0');
             window.location.href = '{{ route('fund.standings.manual.download') }}?' + params.toString();
+        },
+        openPreviewVertical() {
+            const params = new URLSearchParams();
+            this.groups.forEach(g => {
+                params.append('amounts[' + g.id + ']', g.amount || 0);
+            });
+            params.append('orientation', 'vertical');
+            params.append('show_amount', '1');
+            window.open('{{ route('fund.standings.manual.poster') }}?' + params.toString(), '_blank');
+        },
+        downloadVertical() {
+            const params = new URLSearchParams();
+            this.groups.forEach(g => {
+                params.append('amounts[' + g.id + ']', g.amount || 0);
+            });
+            params.append('orientation', 'vertical');
+            params.append('show_amount', '1');
+            window.location.href = '{{ route('fund.standings.manual.download') }}?' + params.toString();
+        },
+        openPreview() {
+            this.openPreviewHorizontal();
+        },
+        downloadPoster() {
+            this.downloadHorizontal();
         },
         async saveAmounts() {
             this.saving = true;

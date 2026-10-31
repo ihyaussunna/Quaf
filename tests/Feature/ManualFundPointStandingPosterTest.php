@@ -95,8 +95,10 @@ class ManualFundPointStandingPosterTest extends TestCase
         $response->assertSee('Team Point Standing Poster Generator');
         $response->assertSee('Enter Manual Amount For Each Team');
         $response->assertSee('Save Amounts');
-        $response->assertSee('Preview Poster');
-        $response->assertSee('Download Standing Poster');
+        $response->assertSee('Preview 6:4');
+        $response->assertSee('Download 6:4 (Points Only)');
+        $response->assertSee('Preview Vertical');
+        $response->assertSee('Download Vertical (Amount + Points)');
 
         // Check points calculation in the view
         $response->assertSee('35 PTS');
@@ -134,7 +136,7 @@ class ManualFundPointStandingPosterTest extends TestCase
         $this->assertEquals(16, $standings[4]->points);
     }
 
-    public function test_manual_standing_poster_streams_inline_image(): void
+    public function test_manual_standing_poster_streams_inline_image_in_6x4_horizontal(): void
     {
         $response = $this->actingAs($this->adminUser)->get(route('fund.standings.manual.poster', [
             'amounts' => [
@@ -144,28 +146,78 @@ class ManualFundPointStandingPosterTest extends TestCase
                 $this->group4->id => 35000,
                 $this->group5->id => 25000,
             ],
+            'orientation' => 'horizontal',
             'show_amount' => 0,
         ]));
 
         $response->assertOk();
         $this->assertEquals('image/jpeg', $response->headers->get('Content-Type'));
         $this->assertStringContainsString('inline', (string) $response->headers->get('Content-Disposition'));
-        $this->assertStringContainsString('QUAF-09-Team-Point-Standings.jpg', (string) $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('6x4.jpg', (string) $response->headers->get('Content-Disposition'));
     }
 
-    public function test_manual_standing_poster_downloads_attachment_image(): void
+    public function test_manual_standing_poster_downloads_attachment_image_in_6x4_horizontal(): void
     {
         $response = $this->actingAs($this->adminUser)->get(route('fund.standings.manual.download', [
             'amounts' => [
                 $this->group1->id => 75000,
                 $this->group2->id => 65000,
             ],
+            'orientation' => 'horizontal',
             'show_amount' => 0,
         ]));
 
         $response->assertOk();
         $this->assertEquals('image/jpeg', $response->headers->get('Content-Type'));
         $this->assertStringContainsString('attachment', (string) $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('6x4.jpg', (string) $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_manual_standing_poster_streams_and_downloads_vertical_with_amount_and_points(): void
+    {
+        $response = $this->actingAs($this->adminUser)->get(route('fund.standings.manual.download', [
+            'amounts' => [
+                $this->group1->id => 75000,
+                $this->group2->id => 65000,
+            ],
+            'orientation' => 'vertical',
+            'show_amount' => 1,
+        ]));
+
+        $response->assertOk();
+        $this->assertEquals('image/jpeg', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('attachment', (string) $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('Amount-With-Points', (string) $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_standing_poster_generator_produces_valid_gd_images_for_both_orientations(): void
+    {
+        $customAmounts = [
+            $this->group1->id => 75000,
+            $this->group2->id => 65000,
+        ];
+        $standings = StandingPosterGenerator::getManualStandings($customAmounts);
+
+        // 1. Horizontal 6:4 (1920x1280)
+        $hImg = StandingPosterGenerator::generate(
+            topGroups: $standings,
+            showAmount: false,
+            orientation: 'horizontal'
+        );
+        $this->assertEquals(1920, imagesx($hImg));
+        $this->assertEquals(1280, imagesy($hImg));
+        $this->assertEquals(1.5, imagesx($hImg) / imagesy($hImg)); // 6:4 = 1.5
+        imagedestroy($hImg);
+
+        // 2. Vertical (1080x1440)
+        $vImg = StandingPosterGenerator::generate(
+            topGroups: $standings,
+            showAmount: true,
+            orientation: 'vertical'
+        );
+        $this->assertEquals(1080, imagesx($vImg));
+        $this->assertEquals(1440, imagesy($vImg));
+        imagedestroy($vImg);
     }
 
     public function test_save_manual_standing_amounts_persists_settings(): void
