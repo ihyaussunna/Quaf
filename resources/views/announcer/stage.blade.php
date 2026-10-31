@@ -67,7 +67,7 @@
                             Active Program: {{ $activeProgram->code ?: '#'.$activeProgram->id }}
                         </span>
                         <span class="text-xs text-slate-500 font-mono">
-                            {{ $activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All Zones' }} &bull; Stage: {{ $stage?->name }} &bull; Duration: {{ $activeProgram->duration_minutes }} Mins
+                            {{ \App\Services\PointCalculationService::toTitleCase($activeProgram->zone?->name ?? $activeProgram->eligibility ?? 'All Zones') }} &bull; Stage: {{ $stage?->name }} &bull; Duration: {{ $activeProgram->duration_minutes }} Mins
                         </span>
                         @if($activeProgram->is_call_list_locked)
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-100 text-red-800 border border-red-200">
@@ -76,7 +76,7 @@
                         @endif
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-sora">
-                        {{ $activeProgram->name }}
+                        {{ \App\Services\PointCalculationService::toTitleCase($activeProgram->name) }}
                     </h2>
                 </div>
 
@@ -116,10 +116,10 @@
 
                             <div class="bg-white/80 backdrop-blur-xs rounded-2xl p-4 border border-amber-200/80">
                                 <div class="text-base font-bold text-slate-900">
-                                    {{ $currentPerformer->entry?->student?->name ?? 'Candidate' }}
+                                    {{ \App\Services\PointCalculationService::toTitleCase($currentPerformer->entry?->student?->name ?? 'Candidate') }}
                                 </div>
                                 <div class="text-xs text-slate-600 font-medium mt-0.5">
-                                    {{ $currentPerformer->entry?->student?->group?->name ?? $currentPerformer->entry?->group?->name ?? 'Team / Unit' }}
+                                    {{ \App\Services\PointCalculationService::toTitleCase($currentPerformer->entry?->student?->group?->name ?? $currentPerformer->entry?->group?->name ?? 'Team / Unit') }}
                                 </div>
                             </div>
 
@@ -162,10 +162,10 @@
 
                                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                                     <div class="text-base font-bold text-slate-900">
-                                        {{ $nextPerformer->entry?->student?->name ?? 'Candidate' }}
+                                        {{ \App\Services\PointCalculationService::toTitleCase($nextPerformer->entry?->student?->name ?? 'Candidate') }}
                                     </div>
                                     <div class="text-xs text-slate-600 font-medium mt-0.5">
-                                        {{ $nextPerformer->entry?->student?->group?->name ?? $nextPerformer->entry?->group?->name ?? 'Team / Unit' }}
+                                        {{ \App\Services\PointCalculationService::toTitleCase($nextPerformer->entry?->student?->group?->name ?? $nextPerformer->entry?->group?->name ?? 'Team / Unit') }}
                                     </div>
                                 </div>
                             </div>
@@ -243,10 +243,10 @@
                                         #{{ $entry?->chest_number }}
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="font-bold text-slate-900">{{ $entry?->student?->name ?? 'Candidate' }}</div>
+                                        <div class="font-bold text-slate-900">{{ \App\Services\PointCalculationService::toTitleCase($entry?->student?->name ?? 'Candidate') }}</div>
                                     </td>
                                     <td class="px-4 py-3 text-slate-600">
-                                        {{ $entry?->student?->group?->name ?? $entry?->group?->name ?? '-' }}
+                                        {{ \App\Services\PointCalculationService::toTitleCase($entry?->student?->group?->name ?? $entry?->group?->name ?? '-') }}
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         @if($isOnStage)

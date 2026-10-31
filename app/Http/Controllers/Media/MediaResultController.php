@@ -918,9 +918,9 @@ class MediaResultController extends Controller
             ]);
         }
 
-        $sampleProgName = 'MAPPILAPPATTU';
+        $sampleProgName = 'Mappilappattu';
         $sampleProgCode = 'Q9-224';
-        $sampleZoneName = 'MIX ZONE';
+        $sampleZoneName = 'Mix Zone';
 
         $result = (object) [
             'id' => 1,
@@ -937,13 +937,13 @@ class MediaResultController extends Controller
 
         $winners = [
             'first' => [
-                ['name' => 'MUHAMMED YASEEN P.', 'unit' => 'RED FOX TEAM'],
+                ['name' => 'Muhammed Yaseen P.', 'unit' => 'Red Fox Team'],
             ],
             'second' => [
-                ['name' => 'AHMAD RAYYAN K.', 'unit' => 'GREEN WARRIORS'],
+                ['name' => 'Ahmad Rayyan K.', 'unit' => 'Green Warriors'],
             ],
             'third' => [
-                ['name' => 'BILAL MUHAMMED', 'unit' => 'BLUE RIDERS'],
+                ['name' => 'Bilal Muhammed', 'unit' => 'Blue Riders'],
             ],
         ];
 

@@ -2107,12 +2107,12 @@ function posterStudio() {
         // Content Data
         data: {
             result_no: '{{ !empty($resultNo) ? sprintf("%02d", $resultNo) : ($result->id ?? "01") }}',
-            category: '{{ $result->program->zone?->name ?? $result->program->eligibility ?? "All Zones" }}',
-            competition: '{{ $result->program->name }}',
+            category: '{{ \App\Services\PointCalculationService::toTitleCase($result->program->zone?->name ?? $result->program->eligibility ?? "All Zones") }}',
+            competition: '{{ \App\Services\PointCalculationService::toTitleCase($result->program->name) }}',
             winners: {
-                first: @json(!empty($winners['first']) ? array_values($winners['first']) : [['name' => 'MUHAMMED YASEEN P.', 'unit' => 'RED FOX TEAM']]),
-                second: @json(!empty($winners['second']) ? array_values($winners['second']) : [['name' => 'AHMAD RAYYAN K.', 'unit' => 'GREEN WARRIORS']]),
-                third: @json(!empty($winners['third']) ? array_values($winners['third']) : [['name' => 'BILAL MUHAMMED', 'unit' => 'BLUE RIDERS']])
+                first: @json(!empty($winners['first']) ? array_map(fn($w) => ['name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''), 'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? '')], array_values($winners['first'])) : [['name' => 'Muhammed Yaseen P.', 'unit' => 'Red Fox Team']]),
+                second: @json(!empty($winners['second']) ? array_map(fn($w) => ['name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''), 'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? '')], array_values($winners['second'])) : [['name' => 'Ahmad Rayyan K.', 'unit' => 'Green Warriors']]),
+                third: @json(!empty($winners['third']) ? array_map(fn($w) => ['name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''), 'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? '')], array_values($winners['third'])) : [['name' => 'Bilal Muhammed', 'unit' => 'Blue Riders']])
             }
         },
 
@@ -3389,7 +3389,7 @@ function posterStudio() {
             ctx.font = `${this.settings.category_weight || '400'} ${this.settings.category_size || 45}px "Rockwell Std", serif`;
             ctx.textAlign = this.settings.category_align || 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(this.data.category.toUpperCase(), 0, 0);
+            ctx.fillText(this.toTitleCase(this.data.category), 0, 0);
             ctx.restore();
         },
 
@@ -3406,7 +3406,7 @@ function posterStudio() {
             ctx.textAlign = this.settings.competition_align || 'left';
             ctx.textBaseline = 'top';
 
-            const lines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width || 440);
+            const lines = this.wrapText(ctx, this.toTitleCase(this.data.competition), this.settings.competition_max_width || 440);
             let lineY = 0;
             for (let l of lines) {
                 ctx.fillText(l, 0, lineY);
@@ -3507,17 +3507,17 @@ function posterStudio() {
             const addPlace = (arr, rank, label, defaultName) => {
                 if (Array.isArray(arr) && arr.length > 0) {
                     arr.forEach(w => {
-                        const name = (w && w.name && w.name.trim()) ? w.name : defaultName;
-                        const unit = (w && w.unit && w.unit.trim()) ? w.unit : 'TEAM / UNIT';
+                        const name = (w && w.name && w.name.trim()) ? this.toTitleCase(w.name) : defaultName;
+                        const unit = (w && w.unit && w.unit.trim()) ? this.toTitleCase(w.unit) : 'Team / Unit';
                         flatWinners.push({ rank, rankLabel: label, name, unit });
                     });
                 } else {
-                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'TEAM / UNIT' });
+                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'Team / Unit' });
                 }
             };
-            addPlace(this.data.winners.first, '01', '1st Place', 'MUHAMMED YASEEN P.');
-            addPlace(this.data.winners.second, '02', '2nd Place', 'AHMAD RAYYAN K.');
-            addPlace(this.data.winners.third, '03', '3rd Place', 'BILAL MUHAMMED');
+            addPlace(this.data.winners.first, '01', '1st Place', 'Muhammed Yaseen P.');
+            addPlace(this.data.winners.second, '02', '2nd Place', 'Ahmad Rayyan K.');
+            addPlace(this.data.winners.third, '03', '3rd Place', 'Bilal Muhammed');
 
             const count = flatWinners.length;
             if (count === 0) return;
@@ -3807,6 +3807,13 @@ function posterStudio() {
             ctx.lineTo(x, y + radius);
             ctx.quadraticCurveTo(x, y, x + radius, y);
             ctx.closePath();
+        },
+
+        toTitleCase(str) {
+            if (!str) return '';
+            return str.toString().trim().replace(/\w\S*/g, function(txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
         },
 
         wrapText(ctx, text, maxWidth) {

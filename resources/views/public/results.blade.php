@@ -129,8 +129,8 @@
                     $posItems = [];
                     foreach ($podiumData[$pos] as $w) {
                         $posItems[] = [
-                            'name' => $w['name'],
-                            'team' => $w['team'],
+                            'name' => \App\Services\PointCalculationService::toTitleCase($w['name']),
+                            'team' => \App\Services\PointCalculationService::toTitleCase($w['team']),
                             'team_color' => $w['team_color'],
                             'chest' => $w['chest'],
                             'grade' => $w['grade'],
@@ -150,10 +150,10 @@
                 $resultPayload = [
                     'id' => $result->id,
                     'result_no' => sprintf('%02d', $resultNo),
-                    'program_name' => $result->program->name,
+                    'program_name' => \App\Services\PointCalculationService::toTitleCase($result->program->name),
                     'program_code' => $result->program->code ?? '',
                     'malayalam_name' => $result->program->malayalam_name ?? '',
-                    'zone' => $result->program->eligibility ?? 'All Zones',
+                    'zone' => \App\Services\PointCalculationService::toTitleCase($result->program->eligibility ?? 'All Zones'),
                     'type' => ucfirst($result->program->type ?? 'Individual'),
                     'winners' => $modalWinners,
                     'poster_url' => route('media.results.download-poster', $result->id),
@@ -175,11 +175,11 @@
                     <!-- Program Name & Zone • Type Subtitle Pill -->
                     <div class="min-w-0">
                         <h3 class="text-lg sm:text-xl font-sora font-black text-[#be1e2d] group-hover:text-[#a01624] transition-colors truncate leading-tight">
-                            {{ $result->program->name }}
+                            {{ \App\Services\PointCalculationService::toTitleCase($result->program->name) }}
                         </h3>
                         <div class="mt-1 flex items-center gap-2">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
-                                <span>{{ $result->program->eligibility ?? 'Mix Zone' }}</span>
+                                <span>{{ \App\Services\PointCalculationService::toTitleCase($result->program->eligibility ?? 'Mix Zone') }}</span>
                                 <span class="text-slate-300">•</span>
                                 <span class="uppercase tracking-wider text-[10px] text-slate-600">{{ $result->program->type ?? 'INDIVIDUAL' }}</span>
                             </span>

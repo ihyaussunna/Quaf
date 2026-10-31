@@ -440,6 +440,13 @@ function templateCustomizer() {
             this.render();
         },
 
+        toTitleCase(str) {
+            if (!str) return '';
+            return str.toString().trim().replace(/\w\S*/g, function(txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+        },
+
         render() {
             const canvas = document.getElementById('customizerCanvas');
             if (!canvas) return;
@@ -473,7 +480,7 @@ function templateCustomizer() {
             ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Rockwell Std", Sora, sans-serif`;
             ctx.textAlign = this.settings.category_align;
             ctx.textBaseline = 'top';
-            ctx.fillText(this.data.category, this.settings.category_x, this.settings.category_y);
+            ctx.fillText(this.toTitleCase(this.data.category), this.settings.category_x, this.settings.category_y);
             ctx.restore();
 
             // 4. Draw Competition / Program Name
@@ -483,7 +490,7 @@ function templateCustomizer() {
             ctx.textAlign = this.settings.competition_align;
             ctx.textBaseline = 'top';
 
-            const compWords = this.data.competition.split(' ');
+            const compWords = this.toTitleCase(this.data.competition).split(' ');
             let line = '';
             let currentY = this.settings.competition_y;
             const maxW = this.settings.competition_max_width;
@@ -541,7 +548,7 @@ function templateCustomizer() {
                 ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "Rockwell Std", Sora, sans-serif`;
                 ctx.textBaseline = 'top';
                 ctx.textAlign = 'left';
-                ctx.fillText(winner.name, textLeft, rowTop + 2);
+                ctx.fillText(this.toTitleCase(winner.name), textLeft, rowTop + 2);
                 ctx.restore();
 
                 // Draw Winner Team / Unit Name
@@ -552,7 +559,7 @@ function templateCustomizer() {
                     ctx.textBaseline = 'top';
                     ctx.textAlign = 'left';
                     const unitTop = rowTop + this.settings.winner_name_size + 6;
-                    ctx.fillText(winner.unit, textLeft, unitTop);
+                    ctx.fillText(this.toTitleCase(winner.unit), textLeft, unitTop);
                     ctx.restore();
                 }
             });

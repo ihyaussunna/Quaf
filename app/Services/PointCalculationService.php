@@ -838,6 +838,147 @@ class PointCalculationService
     }
 
     /**
+     * Convert any string (names, zones, programs, groups) to clean, professional Title Case.
+     */
+    public static function toTitleCase(?string $string): string
+    {
+        if (empty($string)) {
+            return '';
+        }
+
+        $string = trim($string);
+        $words = preg_split('/\s+/', strtolower($string));
+        $capitalized = array_map(function ($w) {
+            if ($w === '') {
+                return '';
+            }
+            if (str_contains($w, '-')) {
+                return implode('-', array_map('ucfirst', explode('-', $w)));
+            }
+            if (str_contains($w, '/')) {
+                return implode('/', array_map('ucfirst', explode('/', $w)));
+            }
+            if (str_contains($w, '.')) {
+                return implode('.', array_map('ucfirst', explode('.', $w)));
+            }
+            if (in_array(strtolower($w), ['and', '&'])) {
+                return '&';
+            }
+
+            return ucfirst($w);
+        }, $words);
+
+        return implode(' ', array_filter($capitalized, fn ($w) => $w !== ''));
+    }
+
+    /**
+     * Calculate comprehensive points breakdown for a result, including position points,
+     * grade points (from declared grade, judge scores, or criteria grades), and non-placed entries.
+     *
+     * @return array{
+     *     points_by_group: array<int, int>,
+     *     position_points_by_group: array<int, int>,
+     *     grade_points_by_group: array<int, int>,
+     *     winner_details: array<int, array<int, array<string, mixed>>>,
+     *     first_group: ?Group,
+     *     second_group: ?Group,
+     *     third_group: ?Group,
+     *     top_group: ?Group,
+     *     max_points: int
+     * }
+     */
+    public static function calculatePointsBreakdownForResult(Result $result): array
+    {
+        $program = $result->relationLoaded('program')
+            ? $result->program
+            : ($result->program_id ? Program::find($result->program_id) : null);
+
+        if (! $program) {
+            return [
+                'points_by_group' => [],
+                'position_points_by_group' => [],
+                'grade_points_by_group' => [],
+                'winner_details' => [1 => [], 2 => [], 3 => []],
+                'first_group' => $result->firstEntry?->group,
+                'second_group' => $result->secondEntry?->group,
+                'third_group' => $result->thirdEntry?->group,
+                'top_group' => null,
+                'max_points' => 0,
+            ];
+        }
+
+        $calcService = app(self::class);
+        $txs = $calcService->buildTransactionsForResult($result, $program);
+
+        $pointsByGroup = [];
+        $posPointsByGroup = [];
+        $gradePointsByGroup = [];
+        $groupsMap = [];
+
+        foreach ($txs as $t) {
+            $gid = $t['group_id'] ?? null;
+            if (! $gid) {
+                continue;
+            }
+
+            $pts = (int) ($t['points'] ?? 0);
+            $pointsByGroup[$gid] = ($pointsByGroup[$gid] ?? 0) + $pts;
+
+            if (($t['source_type'] ?? '') === 'POSITION') {
+                $posPointsByGroup[$gid] = ($posPointsByGroup[$gid] ?? 0) + $pts;
+            } elseif (($t['source_type'] ?? '') === 'GRADE') {
+                $gradePointsByGroup[$gid] = ($gradePointsByGroup[$gid] ?? 0) + $pts;
+            }
+        }
+
+        $podiumData = $result->getPodiumWinnersWithTies();
+        $winnerDetails = [1 => [], 2 => [], 3 => []];
+
+        foreach ([1, 2, 3] as $pos) {
+            foreach ($podiumData[$pos] as $w) {
+                if (! empty($w['entry']) && $w['entry']->group) {
+                    $groupsMap[$w['entry']->group_id] = $w['entry']->group;
+                }
+                $winnerDetails[$pos][] = [
+                    'name' => self::toTitleCase($w['name'] ?? ''),
+                    'team' => self::toTitleCase($w['team'] ?? ''),
+                    'group_id' => $w['entry']?->group_id ?? null,
+                    'grade' => $w['grade'] ?? null,
+                    'grade_points' => $w['grade_points'] ?? 0,
+                    'position_points' => $w['position_points'] ?? 0,
+                    'total_points' => $w['total_points'] ?? 0,
+                ];
+            }
+        }
+
+        $topGroupId = null;
+        $maxPoints = 0;
+        foreach ($pointsByGroup as $gId => $pts) {
+            if ($pts > $maxPoints) {
+                $maxPoints = $pts;
+                $topGroupId = $gId;
+            }
+        }
+
+        $topGroup = null;
+        if ($topGroupId) {
+            $topGroup = $groupsMap[$topGroupId] ?? Group::find($topGroupId);
+        }
+
+        return [
+            'points_by_group' => $pointsByGroup,
+            'position_points_by_group' => $posPointsByGroup,
+            'grade_points_by_group' => $gradePointsByGroup,
+            'winner_details' => $winnerDetails,
+            'first_group' => $result->firstEntry?->group,
+            'second_group' => $result->secondEntry?->group,
+            'third_group' => $result->thirdEntry?->group,
+            'top_group' => $topGroup,
+            'max_points' => $maxPoints,
+        ];
+    }
+
+    /**
      * Calculate team standings after a specific milestone count of declared results.
      *
      * @param  int  $limit  Number of declared results to consider (0 for all declared)
@@ -1127,7 +1268,7 @@ class PointCalculationService
 
                 $teamsData[$gid] = [
                     'group_id' => $gid,
-                    'group_name' => $g->name,
+                    'group_name' => self::toTitleCase($g->name),
                     'group_code' => $g->code,
                     'color_hex' => $g->color_hex ?? '#be1e2d',
                     'this_points' => $thisPts,
@@ -1137,7 +1278,7 @@ class PointCalculationService
                     'cumulative_total' => $cumulativeTotals[$gid],
                     'placements' => $resultGroupPoints[$gid]['placements'],
                     'grades' => $resultGroupPoints[$gid]['grades'],
-                    'students' => $resultGroupPoints[$gid]['students'],
+                    'students' => array_map(fn ($s) => self::toTitleCase($s), $resultGroupPoints[$gid]['students']),
                 ];
             }
 
@@ -1146,10 +1287,10 @@ class PointCalculationService
                 'result_number' => $resNum,
                 'formatted_result_number' => sprintf('%02d', $resNum),
                 'program_id' => $program->id,
-                'program_name' => $program->name,
+                'program_name' => self::toTitleCase($program->name),
                 'program_code' => $program->code,
-                'category_name' => $program->category?->name ?? 'General',
-                'zone' => $program->zone ?? '',
+                'category_name' => self::toTitleCase($program->category?->name ?? 'General'),
+                'zone' => self::toTitleCase($program->zone ?? ''),
                 'status' => $result->status,
                 'teams' => $teamsData,
             ];

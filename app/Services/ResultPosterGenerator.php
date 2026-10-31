@@ -115,8 +115,8 @@ class ResultPosterGenerator
         // Circular Result No badge + Zone/Type Pill
         $badgeY = 240;
         $resultNoStr = sprintf('%02d', $resultNo);
-        $zoneStr = strtoupper($program->eligibility ?? 'ALL ZONES');
-        $typeStr = strtoupper($program->type ?? 'INDIVIDUAL');
+        $zoneStr = PointCalculationService::toTitleCase($program->eligibility ?? 'All Zones');
+        $typeStr = PointCalculationService::toTitleCase($program->type ?? 'Individual');
         $pillText = "{$zoneStr}  •  {$typeStr}";
 
         // Amber Capsule Pill for Zone & Type
@@ -142,7 +142,7 @@ class ResultPosterGenerator
         }
 
         // 4. Program Name Title
-        $progName = (string) $program->name;
+        $progName = PointCalculationService::toTitleCase((string) $program->name);
         $titleFontSize = strlen($progName) > 28 ? 34 : (strlen($progName) > 20 ? 40 : 46);
         $titleY = 360;
         $whiteColor = imagecolorallocate($img, 255, 255, 255);
@@ -222,8 +222,9 @@ class ResultPosterGenerator
             }
 
             // Winner Name & Group Info
-            $winnerName = $entry ? ($entry->student?->name ?? 'Team '.$entry->group?->name) : 'Pending / Not Declared';
-            $groupName = $entry?->group?->name ? strtoupper($entry->group->name) : '';
+            $rawWinnerName = $entry ? ($entry->student?->name ?? 'Team '.$entry->group?->name) : 'Pending / Not Declared';
+            $winnerName = PointCalculationService::toTitleCase($rawWinnerName);
+            $groupName = $entry?->group?->name ? PointCalculationService::toTitleCase($entry->group->name) : '';
             $groupColorHex = $entry?->group?->color_hex ?? '#be1e2d';
 
             $textStartX = $capsuleX1 + 165;
@@ -314,7 +315,7 @@ class ResultPosterGenerator
         }
 
         $program = $result->program;
-        $zone = $program->zone?->name ?? ($program->eligibility ?? 'All Zones');
+        $zone = PointCalculationService::toTitleCase($program->zone?->name ?? ($program->eligibility ?? 'All Zones'));
 
         // 1. Zone in Red Capsule
         $zoneBbox = @imagettfbbox(33, 0, $rockwellRegular, $zone);
@@ -327,7 +328,7 @@ class ResultPosterGenerator
         }
 
         // 2. Program Name
-        $progName = $program->name ?? 'Competition';
+        $progName = PointCalculationService::toTitleCase($program->name ?? 'Competition');
         $paragraphs = preg_split('/\r?\n/', $progName);
         $lines = [];
         foreach ($paragraphs as $para) {
@@ -375,8 +376,8 @@ class ResultPosterGenerator
                     if (! empty($item['name'])) {
                         $flatWinners[] = [
                             'rank' => $rankNum,
-                            'name' => $item['name'],
-                            'unit' => $item['unit'] ?? '',
+                            'name' => PointCalculationService::toTitleCase($item['name']),
+                            'unit' => PointCalculationService::toTitleCase($item['unit'] ?? ''),
                         ];
                     }
                 }

@@ -215,7 +215,7 @@
                         $isDelivered = in_array($res->status, ['send', 'delivered']);
                         $prog = $res->program;
                         $resNo = sprintf('%02d', $res->result_number);
-                        $zoneName = $prog?->zone?->name ?? $prog?->eligibility ?? 'All Zones';
+                        $zoneName = \App\Services\PointCalculationService::toTitleCase($prog?->zone?->name ?? $prog?->eligibility ?? 'All Zones');
                         
                         $podiumWithTies = $res->getPodiumWinnersWithTies();
                         $w1List = $podiumWithTies[1];
@@ -252,7 +252,7 @@
                                 </div>
                                 <h3 class="text-2xl font-black text-slate-900 font-sora flex items-center gap-2">
                                     <span class="text-[#be1e2d] font-mono">#{{ $resNo }}</span>
-                                    <span>{{ $prog?->name }}</span>
+                                    <span>{{ \App\Services\PointCalculationService::toTitleCase($prog?->name) }}</span>
                                 </h3>
                             </div>
 
@@ -342,10 +342,10 @@
                                                     </span>
                                                 </div>
                                                 <div class="font-bold text-slate-900 text-base font-sora truncate">
-                                                    {{ $w['name'] }}
+                                                    {{ \App\Services\PointCalculationService::toTitleCase($w['name']) }}
                                                 </div>
                                                 <div class="text-xs text-slate-600 mt-0.5">
-                                                    Chest: <strong class="font-mono text-slate-900">#{{ $w['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w['team'] }}</strong>
+                                                    Chest: <strong class="font-mono text-slate-900">#{{ $w['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ \App\Services\PointCalculationService::toTitleCase($w['team']) }}</strong>
                                                 </div>
 
                                                 <!-- Total Evaluation Mark -->
@@ -396,8 +396,8 @@
                                 <span class="text-xs font-bold text-slate-700">Other Grade Holders:</span>
                                 @foreach($otherGraded as $og)
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-xs font-mono shadow-2xs">
-                                        <strong class="text-slate-900">{{ $og->student?->name ?: 'Chest #'.$og->chest_number }}</strong>
-                                        <span class="text-slate-500">({{ $og->group?->name ?? $og->student?->group?->name }})</span>
+                                        <strong class="text-slate-900">{{ \App\Services\PointCalculationService::toTitleCase($og->student?->name ?: 'Chest #'.$og->chest_number) }}</strong>
+                                        <span class="text-slate-500">({{ \App\Services\PointCalculationService::toTitleCase($og->group?->name ?? $og->student?->group?->name) }})</span>
                                         @if(($og->computed_avg_score ?? 0) > 0)
                                             <span class="px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-900 border border-purple-200">Mark: {{ number_format($og->computed_avg_score, 1) }}</span>
                                         @endif
@@ -441,10 +441,10 @@
                                                 <tr class="hover:bg-slate-50/80 transition">
                                                     <td class="py-2.5 px-3 font-semibold text-slate-900">
                                                         <span class="font-mono font-black text-slate-900">#{{ $cEntry->chest_number }}</span>
-                                                        <span class="ml-1 text-slate-700">{{ $cEntry->student?->name }}</span>
+                                                        <span class="ml-1 text-slate-700">{{ \App\Services\PointCalculationService::toTitleCase($cEntry->student?->name) }}</span>
                                                     </td>
                                                     <td class="py-2.5 px-3 text-slate-600 font-medium">
-                                                        {{ $cEntry->group?->name ?? $cEntry->student?->group?->name ?? '—' }}
+                                                        {{ \App\Services\PointCalculationService::toTitleCase($cEntry->group?->name ?? $cEntry->student?->group?->name ?? '—') }}
                                                     </td>
                                                     <td class="py-2.5 px-3 text-center font-mono text-slate-500">
                                                         {{ $cEntry->computed_judge_count }}

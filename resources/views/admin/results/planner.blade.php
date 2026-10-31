@@ -95,7 +95,7 @@
                         <span class="text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">{{ $grp->code }}</span>
                     </div>
 
-                    <div class="text-xs font-bold truncate leading-tight">{{ $grp->name }}</div>
+                    <div class="text-xs font-bold truncate leading-tight">{{ \App\Services\PointCalculationService::toTitleCase($grp->name) }}</div>
                     
                     <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-baseline justify-between">
                         <div>
@@ -265,7 +265,7 @@
                                 <div>
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-slate-900 text-white" x-text="res.program_code"></span>
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase font-mono" x-text="res.category_name"></span>
+                                        <span class="text-[10px] font-bold text-slate-500 font-mono" x-text="res.category_name"></span>
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
                                               :class="{
                                                   'bg-emerald-100 text-emerald-800 border border-emerald-200': res.status === 'published',
@@ -295,30 +295,48 @@
                         <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                             <!-- 1st Place -->
                             <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200">
-                                <div class="text-[10px] font-bold text-amber-900 uppercase font-mono">1st Place</div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-amber-900 uppercase font-mono">1st Place</span>
+                                    <span x-show="res.first_grade" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900" x-text="res.first_grade ? 'Grade ' + res.first_grade : ''"></span>
+                                </div>
                                 <div class="font-bold text-slate-900 truncate mt-0.5" x-text="res.first_name || '—'"></div>
-                                <div class="text-[11px] text-amber-800 truncate" x-text="res.first_unit || '—'"></div>
+                                <div class="flex items-center justify-between text-[11px] text-amber-800 truncate mt-0.5">
+                                    <span x-text="res.first_unit || '—'"></span>
+                                    <span class="font-bold font-mono" x-show="res.first_pts" x-text="'+' + res.first_pts + ' pts'"></span>
+                                </div>
                             </div>
 
                             <!-- 2nd Place -->
                             <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                                <div class="text-[10px] font-bold text-slate-600 uppercase font-mono">2nd Place</div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase font-mono">2nd Place</span>
+                                    <span x-show="res.second_grade" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-800" x-text="res.second_grade ? 'Grade ' + res.second_grade : ''"></span>
+                                </div>
                                 <div class="font-bold text-slate-900 truncate mt-0.5" x-text="res.second_name || '—'"></div>
-                                <div class="text-[11px] text-slate-600 truncate" x-text="res.second_unit || '—'"></div>
+                                <div class="flex items-center justify-between text-[11px] text-slate-600 truncate mt-0.5">
+                                    <span x-text="res.second_unit || '—'"></span>
+                                    <span class="font-bold font-mono" x-show="res.second_pts" x-text="'+' + res.second_pts + ' pts'"></span>
+                                </div>
                             </div>
 
                             <!-- 3rd Place -->
                             <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                                <div class="text-[10px] font-bold text-slate-600 uppercase font-mono">3rd Place</div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase font-mono">3rd Place</span>
+                                    <span x-show="res.third_grade" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-800" x-text="res.third_grade ? 'Grade ' + res.third_grade : ''"></span>
+                                </div>
                                 <div class="font-bold text-slate-900 truncate mt-0.5" x-text="res.third_name || '—'"></div>
-                                <div class="text-[11px] text-slate-600 truncate" x-text="res.third_unit || '—'"></div>
+                                <div class="flex items-center justify-between text-[11px] text-slate-600 truncate mt-0.5">
+                                    <span x-text="res.third_unit || '—'"></span>
+                                    <span class="font-bold font-mono" x-show="res.third_pts" x-text="'+' + res.third_pts + ' pts'"></span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                             <span class="text-[11px] text-slate-500 font-mono">
-                                Points split: <span x-text="formatPointsSplit(res.points_by_group)"></span>
+                                Points split (incl. Grades): <span class="font-bold text-slate-700" x-text="formatPointsSplit(res.points_by_group)"></span>
                             </span>
 
                             <div class="flex items-center gap-2">
@@ -353,6 +371,13 @@
 </div>
 
 <script>
+function toTitleCase(str) {
+    if (!str) return '';
+    return str.toString().trim().replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+}
+
 function announcementPlanner() {
     const rawGroups = @json($groups);
     const rawResults = @json($resultsData);
@@ -361,31 +386,43 @@ function announcementPlanner() {
     return {
         groups: rawGroups.map(g => ({
             id: g.id,
-            name: g.name,
+            name: toTitleCase(g.name),
             code: g.code,
             color: g.color_hex || '#be1e2d',
             current_points: parseInt(g.points_cache || 0, 10)
         })),
 
-        results: rawResults.map(r => ({
-            id: r.id,
-            program_code: r.program ? r.program.code : 'PROG',
-            program_name: r.program ? r.program.name : 'Unknown',
-            category_name: (r.program && r.program.category) ? r.program.category.name : 'General',
-            status: r.status,
-            status_label: r.status === 'published' ? 'Published' : (r.status === 'announced' ? 'Announced on Stage' : (r.status === 'send' ? 'At Announcer' : 'Declared')),
-            first_name: r.first_entry ? (r.first_entry.student ? r.first_entry.student.name : 'Participant') : '',
-            first_unit: r.first_entry ? (r.first_entry.group ? r.first_entry.group.name : '') : '',
-            second_name: r.second_entry ? (r.second_entry.student ? r.second_entry.student.name : 'Participant') : '',
-            second_unit: r.second_entry ? (r.second_entry.group ? r.second_entry.group.name : '') : '',
-            third_name: r.third_entry ? (r.third_entry.student ? r.third_entry.student.name : 'Participant') : '',
-            third_unit: r.third_entry ? (r.third_entry.group ? r.third_entry.group.name : '') : '',
-            top_group_id: r.top_group ? r.top_group.id : null,
-            top_group_name: r.top_group ? r.top_group.name : '',
-            top_group_color: r.top_group ? r.top_group.color_hex : '',
-            max_points: r.max_points || 0,
-            points_by_group: r.points_by_group || {}
-        })),
+        results: rawResults.map(r => {
+            const w1 = (r.winner_details && r.winner_details[1] && r.winner_details[1][0]) ? r.winner_details[1][0] : null;
+            const w2 = (r.winner_details && r.winner_details[2] && r.winner_details[2][0]) ? r.winner_details[2][0] : null;
+            const w3 = (r.winner_details && r.winner_details[3] && r.winner_details[3][0]) ? r.winner_details[3][0] : null;
+
+            return {
+                id: r.id,
+                program_code: r.program ? r.program.code : 'PROG',
+                program_name: toTitleCase(r.program ? r.program.name : 'Unknown'),
+                category_name: toTitleCase((r.program && r.program.category) ? r.program.category.name : 'General'),
+                status: r.status,
+                status_label: r.status === 'published' ? 'Published' : (r.status === 'announced' ? 'Announced on Stage' : (r.status === 'send' ? 'At Announcer' : 'Declared')),
+                first_name: w1 ? w1.name : (r.first_entry ? (r.first_entry.student ? toTitleCase(r.first_entry.student.name) : 'Participant') : ''),
+                first_unit: w1 ? w1.team : (r.first_entry ? (r.first_entry.group ? toTitleCase(r.first_entry.group.name) : '') : ''),
+                first_grade: w1 ? w1.grade : (r.first_grade || ''),
+                first_pts: w1 ? w1.total_points : 0,
+                second_name: w2 ? w2.name : (r.second_entry ? (r.second_entry.student ? toTitleCase(r.second_entry.student.name) : 'Participant') : ''),
+                second_unit: w2 ? w2.team : (r.second_entry ? (r.second_entry.group ? toTitleCase(r.second_entry.group.name) : '') : ''),
+                second_grade: w2 ? w2.grade : (r.second_grade || ''),
+                second_pts: w2 ? w2.total_points : 0,
+                third_name: w3 ? w3.name : (r.third_entry ? (r.third_entry.student ? toTitleCase(r.third_entry.student.name) : 'Participant') : ''),
+                third_unit: w3 ? w3.team : (r.third_entry ? (r.third_entry.group ? toTitleCase(r.third_entry.group.name) : '') : ''),
+                third_grade: w3 ? w3.grade : (r.third_grade || ''),
+                third_pts: w3 ? w3.total_points : 0,
+                top_group_id: r.top_group ? r.top_group.id : null,
+                top_group_name: toTitleCase(r.top_group ? r.top_group.name : ''),
+                top_group_color: r.top_group ? r.top_group.color_hex : '',
+                max_points: r.max_points || 0,
+                points_by_group: r.points_by_group || {}
+            };
+        }),
 
         filterStatus: 'ready',
         filterTeamId: null,

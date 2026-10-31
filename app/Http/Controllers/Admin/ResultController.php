@@ -578,8 +578,18 @@ class ResultController extends Controller
             'program.category',
             'program.stage',
             'firstEntry.student.group',
+            'firstEntry.scoreSheets',
+            'firstEntry.scores',
             'secondEntry.student.group',
+            'secondEntry.scoreSheets',
+            'secondEntry.scores',
             'thirdEntry.student.group',
+            'thirdEntry.scoreSheets',
+            'thirdEntry.scores',
+            'program.entries.student.group',
+            'program.entries.scoreSheets',
+            'program.entries.scores',
+            'program.entries.group',
         ])->orderByRaw("CASE WHEN status IN ('draft', 'verified') THEN 0 WHEN status = 'send' THEN 1 WHEN status = 'announced' THEN 2 ELSE 3 END")
             ->latest('updated_at')
             ->get();
@@ -588,6 +598,9 @@ class ResultController extends Controller
         $resultsData = $results->map(function ($res) {
             $breakdown = $this->getResultPointsBreakdown($res);
             $res->points_by_group = $breakdown['points_by_group'];
+            $res->position_points_by_group = $breakdown['position_points_by_group'];
+            $res->grade_points_by_group = $breakdown['grade_points_by_group'];
+            $res->winner_details = $breakdown['winner_details'];
             $res->first_group = $breakdown['first_group'];
             $res->second_group = $breakdown['second_group'];
             $res->third_group = $breakdown['third_group'];
@@ -730,10 +743,13 @@ class ResultController extends Controller
     }
 
     /**
-     * Calculate points breakdown per group for a given Result.
+     * Calculate comprehensive points breakdown per group for a given Result (including positions and grades).
      *
      * @return array{
      *     points_by_group: array<int, int>,
+     *     position_points_by_group: array<int, int>,
+     *     grade_points_by_group: array<int, int>,
+     *     winner_details: array<int, array<int, array<string, mixed>>>,
      *     first_group: ?Group,
      *     second_group: ?Group,
      *     third_group: ?Group,
@@ -743,62 +759,7 @@ class ResultController extends Controller
      */
     public function getResultPointsBreakdown(Result $result): array
     {
-        $program = $result->program;
-        $posPointsMap = PointCalculationService::getPositionPointsForProgram($program);
-        $weight = (float) ($program->points_weight ?? 1.0);
-
-        $pointsByGroup = [];
-        $groupsMap = [];
-
-        $placements = [
-            1 => $result->firstEntry,
-            2 => $result->secondEntry,
-            3 => $result->thirdEntry,
-        ];
-
-        foreach ($placements as $pos => $entry) {
-            if (! $entry || ! $entry->group_id) {
-                continue;
-            }
-
-            $grpId = $entry->group_id;
-            $groupsMap[$grpId] = $entry->group;
-
-            $posPts = (int) round(($posPointsMap[$pos] ?? 0) * $weight);
-
-            $grade = match ($pos) {
-                1 => $result->first_grade,
-                2 => $result->second_grade,
-                3 => $result->third_grade,
-                default => null,
-            };
-
-            $gradePts = 0;
-            if ($grade && isset(PointCalculationService::GRADE_POINTS[strtoupper(trim($grade))])) {
-                $gradePts = PointCalculationService::GRADE_POINTS[strtoupper(trim($grade))];
-            }
-
-            $totalForEntry = $posPts + $gradePts;
-            $pointsByGroup[$grpId] = ($pointsByGroup[$grpId] ?? 0) + $totalForEntry;
-        }
-
-        $topGroupId = null;
-        $maxPoints = 0;
-        foreach ($pointsByGroup as $gId => $pts) {
-            if ($pts > $maxPoints) {
-                $maxPoints = $pts;
-                $topGroupId = $gId;
-            }
-        }
-
-        return [
-            'points_by_group' => $pointsByGroup,
-            'first_group' => $result->firstEntry?->group,
-            'second_group' => $result->secondEntry?->group,
-            'third_group' => $result->thirdEntry?->group,
-            'top_group' => $topGroupId ? ($groupsMap[$topGroupId] ?? null) : null,
-            'max_points' => $maxPoints,
-        ];
+        return PointCalculationService::calculatePointsBreakdownForResult($result);
     }
 
     /**
