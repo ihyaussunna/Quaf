@@ -316,6 +316,16 @@ class MediaResultController extends Controller
             $updates['status'] = 'published';
         }
 
+        if (Schema::hasTable('results')) {
+            try {
+                $driver = Schema::getConnection()->getDriverName();
+                if (in_array($driver, ['mysql', 'mariadb'])) {
+                    DB::statement('ALTER TABLE results MODIFY custom_poster_settings LONGTEXT NULL');
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
         $result->update($updates);
 
         if ($isPublish) {
@@ -461,19 +471,28 @@ class MediaResultController extends Controller
             }
 
             // 0. Save permanent preset in FestivalSetting (persists across all databases & sessions)
+            FestivalSetting::ensureSchema();
             $presetJson = json_encode($validated['settings']);
             FestivalSetting::set('poster_preset_template_'.$template->id, $presetJson);
             FestivalSetting::set('global_active_poster_preset', $presetJson);
             FestivalSetting::set('default_poster_template_id', (string) $template->id);
 
-            // 1. Ensure default_settings column exists on result_templates table
+            // 1. Ensure default_settings column exists on result_templates table as LONGTEXT
             if (! Schema::hasColumn('result_templates', 'default_settings')) {
                 try {
                     Schema::table('result_templates', function (Blueprint $table) {
-                        $table->json('default_settings')->nullable();
+                        $table->longText('default_settings')->nullable();
                     });
                 } catch (\Throwable $e) {
                     // Ignore schema alter errors
+                }
+            } else {
+                try {
+                    $driver = Schema::getConnection()->getDriverName();
+                    if (in_array($driver, ['mysql', 'mariadb'])) {
+                        DB::statement('ALTER TABLE result_templates MODIFY default_settings LONGTEXT NULL');
+                    }
+                } catch (\Throwable $e) {
                 }
             }
 
@@ -926,17 +945,26 @@ class MediaResultController extends Controller
         $settings = $validated['settings'];
 
         // 1. Save permanent preset in FestivalSetting
+        FestivalSetting::ensureSchema();
         $presetJson = json_encode($settings);
         FestivalSetting::set('poster_preset_template_'.$template->id, $presetJson);
         FestivalSetting::set('global_active_poster_preset', $presetJson);
         FestivalSetting::set('default_poster_template_id', (string) $template->id);
 
-        // 2. Ensure default_settings column exists on result_templates table
+        // 2. Ensure default_settings column exists on result_templates table as LONGTEXT
         if (! Schema::hasColumn('result_templates', 'default_settings')) {
             try {
                 Schema::table('result_templates', function (Blueprint $table) {
-                    $table->json('default_settings')->nullable();
+                    $table->longText('default_settings')->nullable();
                 });
+            } catch (\Throwable $e) {
+            }
+        } else {
+            try {
+                $driver = Schema::getConnection()->getDriverName();
+                if (in_array($driver, ['mysql', 'mariadb'])) {
+                    DB::statement('ALTER TABLE result_templates MODIFY default_settings LONGTEXT NULL');
+                }
             } catch (\Throwable $e) {
             }
         }
