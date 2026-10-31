@@ -854,6 +854,115 @@
                         <input type="checkbox" x-model="settings.winner_name_2lines" @change="render()" class="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500">
                     </div>
 
+                    <!-- Winner Text Styling & Colors (വിദ്യാർത്ഥികളുടെയും ഗ്രൂപ്പിന്റെയും നിറവും വലുപ്പവും) -->
+                    <div class="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2.5">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#be1e2d]"></span>
+                                <span>Winner Text Colors & Styling (ടെക്സ്റ്റ് കളറുകൾ)</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-purple-700">Student & Team Color Controls</span>
+                        </div>
+
+                        <!-- 1. Student Name Styling (വിദ്യാർത്ഥിയുടെ പേരിന്റെ നിറം) -->
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                    <span>Student Name Color (വിദ്യാർത്ഥിയുടെ പേര്)</span>
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" x-model="settings.winner_name_color" @input="render()" class="w-7 h-7 rounded border border-slate-300 cursor-pointer bg-white p-0.5">
+                                    <input type="text" x-model="settings.winner_name_color" @input="render()" class="w-20 font-mono text-xs text-slate-700 font-bold px-1.5 py-0.5 rounded border border-slate-300 bg-white uppercase text-center" maxlength="7" title="Custom Hex Code">
+                                </div>
+                            </div>
+
+                            <!-- Swatches for Student Name -->
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <template x-for="c in ['#D02627', '#000000', '#FFFFFF', '#1e293b', '#be1e2d', '#eab308', '#2563eb', '#16a34a', '#7c3aed', '#ea580c']" :key="'name_c_' + c">
+                                    <button type="button" @click="settings.winner_name_color = c; render();"
+                                            :style="'background-color: ' + c"
+                                            class="w-6 h-6 rounded-md border border-slate-300 shadow-2xs hover:scale-110 transition cursor-pointer"
+                                            :class="(settings.winner_name_color || '').toLowerCase() === c.toLowerCase() ? 'ring-2 ring-[#be1e2d] ring-offset-1 scale-105' : ''"
+                                            :title="c">
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- Student Name Size & Weight -->
+                            <div class="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                                <div class="space-y-1">
+                                    <div class="flex items-center justify-between font-bold text-slate-700">
+                                        <span>Size</span>
+                                        <div class="flex items-center gap-0.5 font-mono">
+                                            <button type="button" @click="settings.winner_name_size = Math.max(16, settings.winner_name_size - 2); render();" class="w-5 h-5 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                            <span class="w-9 text-center text-[#be1e2d] font-bold" x-text="settings.winner_name_size + 'px'"></span>
+                                            <button type="button" @click="settings.winner_name_size = Math.min(80, settings.winner_name_size + 2); render();" class="w-5 h-5 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                        </div>
+                                    </div>
+                                    <input type="range" min="16" max="80" step="1" x-model.number="settings.winner_name_size" @input="render()" class="w-full accent-[#be1e2d]">
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="font-bold text-slate-700 block">Weight</span>
+                                    <div class="grid grid-cols-3 gap-0.5">
+                                        <button type="button" @click="settings.winner_name_weight = '400'; render();" class="py-1 text-[10px] font-bold rounded border text-center transition" :class="(settings.winner_name_weight || '400') === '400' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">Normal</button>
+                                        <button type="button" @click="settings.winner_name_weight = '600'; render();" class="py-1 text-[10px] font-bold rounded border text-center transition" :class="settings.winner_name_weight === '600' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">Semi</button>
+                                        <button type="button" @click="settings.winner_name_weight = '700'; render();" class="py-1 text-[10px] font-bold rounded border text-center transition" :class="settings.winner_name_weight === '700' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">Bold</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Team / Group Name Styling (ടീം / ഗ്രൂപ്പ് പേരിന്റെ നിറം) -->
+                        <div class="space-y-2.5 pt-3 border-t border-slate-200">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                                    <span>Team / Group Color (ടീം / ഗ്രൂപ്പ് പേര്)</span>
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" x-model="settings.winner_unit_color" @input="render()" class="w-7 h-7 rounded border border-slate-300 cursor-pointer bg-white p-0.5">
+                                    <input type="text" x-model="settings.winner_unit_color" @input="render()" class="w-20 font-mono text-xs text-slate-700 font-bold px-1.5 py-0.5 rounded border border-slate-300 bg-white uppercase text-center" maxlength="7" title="Custom Hex Code">
+                                </div>
+                            </div>
+
+                            <!-- Swatches for Team / Group Name -->
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <template x-for="c in ['#000000', '#475569', '#D02627', '#FFFFFF', '#1e293b', '#be1e2d', '#eab308', '#2563eb', '#16a34a', '#059669']" :key="'unit_c_' + c">
+                                    <button type="button" @click="settings.winner_unit_color = c; render();"
+                                            :style="'background-color: ' + c"
+                                            class="w-6 h-6 rounded-md border border-slate-300 shadow-2xs hover:scale-110 transition cursor-pointer"
+                                            :class="(settings.winner_unit_color || '').toLowerCase() === c.toLowerCase() ? 'ring-2 ring-purple-600 ring-offset-1 scale-105' : ''"
+                                            :title="c">
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- Team / Group Size & Weight -->
+                            <div class="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                                <div class="space-y-1">
+                                    <div class="flex items-center justify-between font-bold text-slate-700">
+                                        <span>Size</span>
+                                        <div class="flex items-center gap-0.5 font-mono">
+                                            <button type="button" @click="settings.winner_unit_size = Math.max(10, settings.winner_unit_size - 2); render();" class="w-5 h-5 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                            <span class="w-9 text-center text-purple-700 font-bold" x-text="settings.winner_unit_size + 'px'"></span>
+                                            <button type="button" @click="settings.winner_unit_size = Math.min(60, settings.winner_unit_size + 2); render();" class="w-5 h-5 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                        </div>
+                                    </div>
+                                    <input type="range" min="10" max="60" step="1" x-model.number="settings.winner_unit_size" @input="render()" class="w-full accent-purple-600">
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="font-bold text-slate-700 block">Weight</span>
+                                    <div class="grid grid-cols-3 gap-0.5">
+                                        <button type="button" @click="settings.winner_unit_weight = '300'; render();" class="py-1 text-[10px] font-bold rounded border text-center transition" :class="(settings.winner_unit_weight || '300') === '300' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white border-slate-200 text-slate-700'">Light</button>
+                                        <button type="button" @click="settings.winner_unit_weight = '400'; render();" class="py-1 text-[10px] font-bold rounded border text-center transition" :class="settings.winner_unit_weight === '400' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white border-slate-200 text-slate-700'">Normal</button>
+                                        <button type="button" @click="settings.winner_unit_weight = '700'; render();" class="py-1 text-[10px] font-bold rounded border text-center transition" :class="settings.winner_unit_weight === '700' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white border-slate-200 text-slate-700'">Bold</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Line Spacing & Distance Controls (വരികൾ തമ്മിലുള്ള അകലം) -->
                     <div class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
                         <div class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center justify-between">
@@ -1492,13 +1601,25 @@ function posterStudio() {
             block_left: {{ (float) ($currentSettings['block_left'] ?? 205) }},
             first_top: {{ (float) ($currentSettings['first_top'] ?? 145) }},
 
+            @php
+                $formatHex = function ($val, $fallback) {
+                    $val = trim((string) $val);
+                    if ($val === '') return $fallback;
+                    if (strtolower($val) === 'white') return '#ffffff';
+                    if (strtolower($val) === 'black') return '#000000';
+                    if (!str_starts_with($val, '#') && strlen($val) === 6) $val = '#' . $val;
+                    return (strlen($val) === 7 && preg_match('/^#[0-9a-fA-F]{6}$/', $val)) ? $val : $fallback;
+                };
+                $cleanWinnerNameColor = $formatHex($currentSettings['winner_name_color'] ?? '', '#D02627');
+                $cleanWinnerUnitColor = $formatHex($currentSettings['winner_unit_color'] ?? '', '#000000');
+            @endphp
             winner_name_size: {{ (float) ($currentSettings['winner_name_size'] ?? 34) }},
             winner_name_weight: '{{ $currentSettings["winner_name_weight"] ?? "400" }}',
-            winner_name_color: '{{ (strlen($currentSettings["winner_name_color"] ?? "") === 7) ? $currentSettings["winner_name_color"] : "#D02627" }}',
+            winner_name_color: '{{ $cleanWinnerNameColor }}',
 
             winner_unit_size: {{ (float) ($currentSettings['winner_unit_size'] ?? 26) }},
             winner_unit_weight: '{{ $currentSettings["winner_unit_weight"] ?? "300" }}',
-            winner_unit_color: '{{ (strlen($currentSettings["winner_unit_color"] ?? "") === 7) ? $currentSettings["winner_unit_color"] : "#000000" }}',
+            winner_unit_color: '{{ $cleanWinnerUnitColor }}',
             winner_font: '{{ $currentSettings["winner_font"] ?? "Rockwell Std" }}',
         },
 

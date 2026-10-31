@@ -387,6 +387,11 @@ class ResultPosterGenerator
             $blockLeft = 205;
             $dividerWidth = (int) (280 * min(1.0, $baseScale * 1.1));
 
+            $winnerNameColorHex = $result->custom_poster_settings['winner_name_color'] ?? '#D02627';
+            $winnerUnitColorHex = $result->custom_poster_settings['winner_unit_color'] ?? '#000000';
+            $nameColor = self::allocateHexColor($img, $winnerNameColorHex, [208, 38, 39]);
+            $unitColor = self::allocateHexColor($img, $winnerUnitColorHex, [0, 0, 0]);
+
             $currY = $startY;
             foreach ($flatWinners as $winner) {
                 // Rank
@@ -396,16 +401,16 @@ class ResultPosterGenerator
                 $nameY = $currY + (int) ($rankSize * 1.45);
                 $nameParts = explode(' ', trim($winner['name']));
                 if (count($nameParts) > 2 && strlen($winner['name']) > 16) {
-                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, $nameParts[0]);
+                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, $nameParts[0]);
                     $nameY += (int) ($nameSize * 1.25);
-                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, implode(' ', array_slice($nameParts, 1)));
+                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, implode(' ', array_slice($nameParts, 1)));
                 } else {
-                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $red, $rockwellRegular, $winner['name']);
+                    imagettftext($img, $nameSize, 0, $blockLeft, $nameY, $nameColor, $rockwellRegular, $winner['name']);
                 }
 
                 // Unit / Team Name
                 $unitY = $nameY + (int) ($nameSize * 1.05);
-                imagettftext($img, $unitSize, 0, $blockLeft, $unitY, $black, $rockwellLight, $winner['unit']);
+                imagettftext($img, $unitSize, 0, $blockLeft, $unitY, $unitColor, $rockwellLight, $winner['unit']);
 
                 // Divider line
                 $lineY = $unitY + (int) ($unitSize * 0.95);
