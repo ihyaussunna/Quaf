@@ -156,12 +156,6 @@
                                         {{ $grp->code }}
                                     </span>
                                 </div>
-                                <div class="text-[11px] text-slate-500 font-mono mt-0.5 flex items-center gap-3">
-                                    <span>നിലവിലെ പബ്ലിക് പോയിന്റ്: <strong class="text-slate-800">{{ number_format($grp->public_points_cache ?? 0) }} pts</strong></span>
-                                    @if($grp->points_cache !== $grp->public_points_cache)
-                                        <span class="text-amber-700 font-ml">| സിസ്റ്റം കാൽക്കുലേഷൻ: {{ $grp->points_cache }} pts</span>
-                                    @endif
-                                </div>
                             </div>
                         </div>
 

@@ -447,6 +447,9 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $response->assertSee('ടീം പോയിന്റ് നില');
         $response->assertSee('House Alpha');
         $response->assertSee('House Beta');
+        $response->assertDontSee('സിസ്റ്റം കാൽക്കുലേഷൻ');
+        $response->assertDontSee('System Calculation');
+        $response->assertDontSee('നിലവിലെ പബ്ലിക് പോയിന്റ്');
 
         // 2. Media team enters custom points (Beta = 25 pts, Alpha = 10 pts) and sets 5 results
         $updateResponse = $this->actingAs($this->mediaUser)
