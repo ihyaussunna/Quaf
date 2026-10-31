@@ -94,6 +94,22 @@
                     <span x-text="guidelines.show ? 'Guides ON' : 'Guides OFF'"></span>
                 </button>
 
+                <!-- Undo & Redo Buttons (Header) -->
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button type="button" @click="undo()" :disabled="historyIndex <= 0"
+                            class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:shadow-2xs transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
+                            title="Undo (Ctrl+Z) - മുൻപത്തെ മാറ്റം റദ്ദാക്കുക">
+                        <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2m0 0l-4-4m4 4l4-4M3 10l4-4m-4 4l4 4"></path></svg>
+                        <span>Undo</span>
+                    </button>
+                    <button type="button" @click="redo()" :disabled="historyIndex >= history.length - 1"
+                            class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:shadow-2xs transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
+                            title="Redo (Ctrl+Y / Ctrl+Shift+Z) - മാറ്റം വീണ്ടെടുക്കുക">
+                        <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m0 0l4-4m-4 4l-4-4m15-6l-4-4m4 4l-4 4"></path></svg>
+                        <span>Redo</span>
+                    </button>
+                </div>
+
                 @if(!empty($isTemplateCustomizer))
                     <!-- Save Template Defaults in Customizer mode -->
                     <button type="button" @click="saveAsDefault()" :disabled="savingDefault"
@@ -1197,12 +1213,47 @@
                             <div class="flex items-center justify-between text-xs font-bold text-slate-800">
                                 <span>Font Size (വലുപ്പം)</span>
                                 <div class="flex items-center gap-1 font-mono">
-                                    <button type="button" @click="settings.competition_size = Math.max(20, settings.competition_size - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <button type="button" @click="settings.competition_size = Math.max(20, settings.competition_size - 4); render(); recordHistory();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
                                     <span class="w-12 text-center text-purple-700" x-text="settings.competition_size + 'px'"></span>
-                                    <button type="button" @click="settings.competition_size = Math.min(220, settings.competition_size + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                                    <button type="button" @click="settings.competition_size = Math.min(220, settings.competition_size + 4); render(); recordHistory();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
                                 </div>
                             </div>
-                            <input type="range" min="20" max="220" step="2" x-model.number="settings.competition_size" @input="render()" class="w-full accent-purple-600">
+                            <input type="range" min="20" max="220" step="2" x-model.number="settings.competition_size" @input="render(); recordHistory();" class="w-full accent-purple-600">
+                        </div>
+
+                        <!-- Program Font Weight (Light, Regular, Semi, Bold, Extra) -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Font Weight (ഫോണ്ട് കട്ടി / ഭാരം)</span>
+                                <span class="text-[11px] font-mono text-purple-700 font-bold" x-text="settings.competition_weight === '300' ? 'Light (300)' : (settings.competition_weight === '400' ? 'Regular (400)' : (settings.competition_weight === '600' ? 'Semi-Bold (600)' : (settings.competition_weight === '700' ? 'Bold (700)' : 'Extra-Bold (800)')))"></span>
+                            </div>
+                            <div class="grid grid-cols-5 gap-1">
+                                <button type="button" @click="settings.competition_weight = '300'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.competition_weight || '400') === '300' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    Light
+                                </button>
+                                <button type="button" @click="settings.competition_weight = '400'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.competition_weight || '400') === '400' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    Regular
+                                </button>
+                                <button type="button" @click="settings.competition_weight = '600'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="settings.competition_weight === '600' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    Semi
+                                </button>
+                                <button type="button" @click="settings.competition_weight = '700'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="settings.competition_weight === '700' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    Bold
+                                </button>
+                                <button type="button" @click="settings.competition_weight = '800'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="settings.competition_weight === '800' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'">
+                                    Extra
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Program Line Distance / Line Spacing -->
@@ -1318,12 +1369,47 @@
                             <div class="flex items-center justify-between text-xs font-bold text-amber-950">
                                 <span>Zone Size (വലുപ്പം)</span>
                                 <div class="flex items-center gap-1 font-mono">
-                                    <button type="button" @click="settings.category_size = Math.max(16, settings.category_size - 2); render();" class="w-6 h-6 rounded bg-white border border-amber-300 font-bold hover:bg-amber-50 flex items-center justify-center">-</button>
+                                    <button type="button" @click="settings.category_size = Math.max(16, settings.category_size - 2); render(); recordHistory();" class="w-6 h-6 rounded bg-white border border-amber-300 font-bold hover:bg-amber-50 flex items-center justify-center">-</button>
                                     <span class="w-12 text-center text-amber-900" x-text="settings.category_size + 'px'"></span>
-                                    <button type="button" @click="settings.category_size = Math.min(120, settings.category_size + 2); render();" class="w-6 h-6 rounded bg-white border border-amber-300 font-bold hover:bg-amber-50 flex items-center justify-center">+</button>
+                                    <button type="button" @click="settings.category_size = Math.min(120, settings.category_size + 2); render(); recordHistory();" class="w-6 h-6 rounded bg-white border border-amber-300 font-bold hover:bg-amber-50 flex items-center justify-center">+</button>
                                 </div>
                             </div>
-                            <input type="range" min="16" max="120" step="1" x-model.number="settings.category_size" @input="render()" class="w-full accent-amber-600">
+                            <input type="range" min="16" max="120" step="1" x-model.number="settings.category_size" @input="render(); recordHistory();" class="w-full accent-amber-600">
+                        </div>
+
+                        <!-- Zone Font Weight (Light, Regular, Semi, Bold, Extra) -->
+                        <div class="pt-2 border-t border-amber-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-amber-950">
+                                <span>Zone Font Weight (ഫോണ്ട് കട്ടി)</span>
+                                <span class="text-[11px] font-mono text-amber-900 font-bold" x-text="settings.category_weight === '300' ? 'Light (300)' : (settings.category_weight === '400' ? 'Regular (400)' : (settings.category_weight === '600' ? 'Semi (600)' : (settings.category_weight === '700' ? 'Bold (700)' : 'Extra (800)')))"></span>
+                            </div>
+                            <div class="grid grid-cols-5 gap-1">
+                                <button type="button" @click="settings.category_weight = '300'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.category_weight || '400') === '300' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    Light
+                                </button>
+                                <button type="button" @click="settings.category_weight = '400'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.category_weight || '400') === '400' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    Regular
+                                </button>
+                                <button type="button" @click="settings.category_weight = '600'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="settings.category_weight === '600' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    Semi
+                                </button>
+                                <button type="button" @click="settings.category_weight = '700'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="settings.category_weight === '700' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    Bold
+                                </button>
+                                <button type="button" @click="settings.category_weight = '800'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="settings.category_weight === '800' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    Extra
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Rotation -->
@@ -1488,6 +1574,24 @@
                 </div>
 
                 <div class="flex items-center gap-1.5 flex-wrap">
+                    <!-- Undo & Redo Canvas Buttons -->
+                    <div class="flex items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/15 mr-1 font-mono text-xs">
+                        <button type="button" @click="undo()" :disabled="historyIndex <= 0"
+                                title="Undo (Ctrl+Z) - മുൻപത്തെ അവസ്ഥ"
+                                class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2m0 0l-4-4m4 4l4-4M3 10l4-4m-4 4l4 4"></path></svg>
+                            <span>Undo</span>
+                            <span class="text-[9px] text-slate-400 hidden sm:inline">Ctrl+Z</span>
+                        </button>
+                        <button type="button" @click="redo()" :disabled="historyIndex >= history.length - 1"
+                                title="Redo (Ctrl+Y / Ctrl+Shift+Z) - തിരിച്ചെടുക്കുക"
+                                class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m0 0l4-4m-4 4l-4-4m15-6l-4-4m4 4l-4 4"></path></svg>
+                            <span>Redo</span>
+                            <span class="text-[9px] text-slate-400 hidden sm:inline">Ctrl+Y</span>
+                        </button>
+                    </div>
+
                     <!-- Layer Stacking Order Controls for Selected Layer -->
                     <template x-if="selectedId">
                         <div class="flex items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/15 mr-1 font-mono text-xs">
@@ -1569,6 +1673,13 @@ function posterStudio() {
         elementStartSize: 0,
         elementStartScale: 1.0,
         elementStartRotation: 0,
+
+        // History for Undo (Ctrl+Z) & Redo (Ctrl+Y)
+        history: [],
+        historyIndex: -1,
+        isApplyingHistory: false,
+        hasMutated: false,
+        historyDebounceTimer: null,
 
         savingDefault: false,
         publishing: false,
@@ -1689,9 +1800,9 @@ function posterStudio() {
             category: '{{ $result->program->zone?->name ?? $result->program->eligibility ?? "All Zones" }}',
             competition: '{{ $result->program->name }}',
             winners: {
-                first: @json(!empty($winners['first']) ? array_values($winners['first']) : [['name' => 'വിദ്യാർത്ഥിയുടെ പേര് (Winner 1)', 'unit' => 'ഗ്രൂപ്പ് പേര്']]),
-                second: @json(!empty($winners['second']) ? array_values($winners['second']) : [['name' => 'രണ്ടാം സ്ഥാനം (Winner 2)', 'unit' => 'ഗ്രൂപ്പ് പേര്']]),
-                third: @json(!empty($winners['third']) ? array_values($winners['third']) : [['name' => 'മൂന്നാം സ്ഥാനം (Winner 3)', 'unit' => 'ഗ്രൂപ്പ് പേര്']])
+                first: @json(!empty($winners['first']) ? array_values($winners['first']) : [['name' => 'MUHAMMED YASEEN P.', 'unit' => 'RED FOX TEAM']]),
+                second: @json(!empty($winners['second']) ? array_values($winners['second']) : [['name' => 'AHMAD RAYYAN K.', 'unit' => 'GREEN WARRIORS']]),
+                third: @json(!empty($winners['third']) ? array_values($winners['third']) : [['name' => 'BILAL MUHAMMED', 'unit' => 'BLUE RIDERS']])
             }
         },
 
@@ -1700,13 +1811,13 @@ function posterStudio() {
                 this.data.winners[rank] = [];
             }
             this.data.winners[rank].push({ name: '', unit: '' });
-            this.$nextTick(() => { this.render(); });
+            this.$nextTick(() => { this.render(); this.pushHistory(); });
         },
 
         removeWinner(rank, index) {
             if (this.data.winners[rank] && this.data.winners[rank].length > 1) {
                 this.data.winners[rank].splice(index, 1);
-                this.$nextTick(() => { this.render(); });
+                this.$nextTick(() => { this.render(); this.pushHistory(); });
             }
         },
 
@@ -1832,6 +1943,7 @@ function posterStudio() {
                 this.layerStack[idx] = this.layerStack[idx - 1];
                 this.layerStack[idx - 1] = temp;
                 this.render();
+                this.pushHistory();
             }
         },
 
@@ -1842,6 +1954,7 @@ function posterStudio() {
                 this.layerStack[idx] = this.layerStack[idx + 1];
                 this.layerStack[idx + 1] = temp;
                 this.render();
+                this.pushHistory();
             }
         },
 
@@ -1851,6 +1964,7 @@ function posterStudio() {
                 const [item] = this.layerStack.splice(idx, 1);
                 this.layerStack.unshift(item);
                 this.render();
+                this.pushHistory();
             }
         },
 
@@ -1860,6 +1974,7 @@ function posterStudio() {
                 const [item] = this.layerStack.splice(idx, 1);
                 this.layerStack.push(item);
                 this.render();
+                this.pushHistory();
             }
         },
 
@@ -1887,6 +2002,7 @@ function posterStudio() {
                 }
             }
             this.render();
+            this.pushHistory();
         },
 
         onLayerDragStart(e, idx) {
@@ -1910,6 +2026,92 @@ function posterStudio() {
             this.layerStack.splice(targetIdx, 0, item);
             this.draggedLayerIdx = null;
             this.render();
+            this.pushHistory();
+        },
+
+        // History Engine for Undo (Ctrl+Z) & Redo (Ctrl+Y)
+        pushHistory() {
+            if (this.isApplyingHistory) return;
+            const snapshot = {
+                settings: JSON.parse(JSON.stringify(this.settings)),
+                data: JSON.parse(JSON.stringify(this.data)),
+                customElements: this.customElements.map(el => {
+                    const copy = Object.assign({}, el);
+                    delete copy.imgObj;
+                    return copy;
+                }),
+                layerStack: [...(this.layerStack || [])],
+                guidelines: JSON.parse(JSON.stringify(this.guidelines))
+            };
+
+            // Check if identical to last snapshot
+            if (this.history.length > 0 && this.historyIndex >= 0 && this.historyIndex < this.history.length) {
+                const last = this.history[this.historyIndex];
+                if (JSON.stringify(last) === JSON.stringify(snapshot)) {
+                    return;
+                }
+            }
+
+            if (this.historyIndex < this.history.length - 1) {
+                this.history = this.history.slice(0, this.historyIndex + 1);
+            }
+            this.history.push(snapshot);
+            if (this.history.length > 50) {
+                this.history.shift();
+            }
+            this.historyIndex = this.history.length - 1;
+        },
+
+        recordHistory() {
+            if (this.isApplyingHistory) return;
+            if (this.historyDebounceTimer) clearTimeout(this.historyDebounceTimer);
+            this.historyDebounceTimer = setTimeout(() => {
+                this.pushHistory();
+            }, 300);
+        },
+
+        undo() {
+            if (this.historyIndex > 0) {
+                this.historyIndex--;
+                this.applyHistory(this.history[this.historyIndex]);
+            }
+        },
+
+        redo() {
+            if (this.historyIndex < this.history.length - 1) {
+                this.historyIndex++;
+                this.applyHistory(this.history[this.historyIndex]);
+            }
+        },
+
+        applyHistory(snapshot) {
+            if (!snapshot) return;
+            this.isApplyingHistory = true;
+            try {
+                this.settings = JSON.parse(JSON.stringify(snapshot.settings));
+                this.data = JSON.parse(JSON.stringify(snapshot.data));
+                this.guidelines = JSON.parse(JSON.stringify(snapshot.guidelines || this.guidelines));
+                this.customElements = (snapshot.customElements || []).map(el => {
+                    if (el.type === 'image' && el.imgSrc) {
+                        const img = new Image();
+                        img.src = el.imgSrc;
+                        el.imgObj = img;
+                    }
+                    return el;
+                });
+                if (Array.isArray(snapshot.layerStack)) {
+                    this.layerStack = [...snapshot.layerStack];
+                    this.syncLayerStack();
+                }
+                if (this.settings.template_image && (!this.templateImageObj || this.templateImageObj.src !== this.settings.template_image)) {
+                    this.loadTemplateImage(this.settings.template_image);
+                }
+                this.render();
+            } finally {
+                this.$nextTick(() => {
+                    this.isApplyingHistory = false;
+                });
+            }
         },
 
         init() {
@@ -1981,52 +2183,87 @@ function posterStudio() {
             this.loadTemplateImage(this.settings.template_image);
             this.loadMedalImages();
 
-            // Keyboard Shortcuts for Nudging, Sizing, and Line Spacing
+            // Keyboard Shortcuts for Undo/Redo, Nudging, Sizing, and Line Spacing
             window.addEventListener('keydown', (e) => {
+                // Undo: Ctrl+Z / Cmd+Z (without Shift)
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
+                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        this.undo();
+                        return;
+                    }
+                }
+                // Redo: Ctrl+Y / Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z
+                if (((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) ||
+                    ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z'))) {
+                    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                        e.preventDefault();
+                        this.redo();
+                        return;
+                    }
+                }
+
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
                 if (!this.selectedId) return;
 
                 const step = e.shiftKey ? 10 : 1;
-                if (e.key === 'ArrowLeft') { e.preventDefault(); this.nudgeSelected(-step, 0); }
-                else if (e.key === 'ArrowRight') { e.preventDefault(); this.nudgeSelected(step, 0); }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); this.nudgeSelected(0, -step); }
-                else if (e.key === 'ArrowDown') { e.preventDefault(); this.nudgeSelected(0, step); }
+                let altered = false;
+                if (e.key === 'ArrowLeft') { e.preventDefault(); this.nudgeSelected(-step, 0); altered = true; }
+                else if (e.key === 'ArrowRight') { e.preventDefault(); this.nudgeSelected(step, 0); altered = true; }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); this.nudgeSelected(0, -step); altered = true; }
+                else if (e.key === 'ArrowDown') { e.preventDefault(); this.nudgeSelected(0, step); altered = true; }
                 else if (e.key === '+' || e.key === '=') {
                     e.preventDefault();
                     if (this.selectedId === 'winners') this.settings.winners_scale = Math.min(3.0, +(this.settings.winners_scale + 0.05).toFixed(2));
                     else if (this.selectedId === 'competition') this.settings.competition_size += 2;
+                    else if (this.selectedId === 'category') this.settings.category_size += 2;
+                    else if (this.selectedId === 'result_no') this.settings.result_size += 10;
                     else if (this.selectedType === 'custom' && this.selectedElement) {
                         if (this.selectedElement.type === 'text') this.selectedElement.size += 2;
                         else { this.selectedElement.width += 5; this.selectedElement.height += 5; }
                     }
                     this.render();
+                    altered = true;
                 } else if (e.key === '-' || e.key === '_') {
                     e.preventDefault();
                     if (this.selectedId === 'winners') this.settings.winners_scale = Math.max(0.3, +(this.settings.winners_scale - 0.05).toFixed(2));
                     else if (this.selectedId === 'competition') this.settings.competition_size = Math.max(12, this.settings.competition_size - 2);
+                    else if (this.selectedId === 'category') this.settings.category_size = Math.max(12, this.settings.category_size - 2);
+                    else if (this.selectedId === 'result_no') this.settings.result_size = Math.max(40, this.settings.result_size - 10);
                     else if (this.selectedType === 'custom' && this.selectedElement) {
                         if (this.selectedElement.type === 'text') this.selectedElement.size = Math.max(8, this.selectedElement.size - 2);
                         else { this.selectedElement.width = Math.max(10, this.selectedElement.width - 5); this.selectedElement.height = Math.max(10, this.selectedElement.height - 5); }
                     }
                     this.render();
+                    altered = true;
                 } else if (e.key === '[' || e.key === '{') {
                     e.preventDefault();
                     if (this.selectedId === 'winners') this.settings.winner_name_line_height = Math.max(12, this.settings.winner_name_line_height - 2);
                     else if (this.selectedId === 'competition') this.settings.competition_line_height = Math.max(15, this.settings.competition_line_height - 4);
                     else if (this.selectedType === 'custom' && this.selectedElement) this.selectedElement.lineHeight = Math.max(0.6, +(this.selectedElement.lineHeight - 0.1).toFixed(1));
                     this.render();
+                    altered = true;
                 } else if (e.key === ']' || e.key === '}') {
                     e.preventDefault();
                     if (this.selectedId === 'winners') this.settings.winner_name_line_height = Math.min(90, this.settings.winner_name_line_height + 2);
                     else if (this.selectedId === 'competition') this.settings.competition_line_height = Math.min(160, this.settings.competition_line_height + 4);
                     else if (this.selectedType === 'custom' && this.selectedElement) this.selectedElement.lineHeight = Math.min(2.8, +(this.selectedElement.lineHeight + 0.1).toFixed(1));
                     this.render();
+                    altered = true;
                 } else if (e.key === 'Delete' || e.key === 'Backspace') {
                     if (this.selectedType === 'custom') {
                         e.preventDefault();
                         this.deleteSelected();
                     }
                 }
+                if (altered) {
+                    this.recordHistory();
+                }
+            });
+
+            // Initial history snapshot
+            this.$nextTick(() => {
+                this.pushHistory();
             });
 
             if (document.fonts) {
@@ -2081,6 +2318,7 @@ function posterStudio() {
             this.settings.custom_medal_3 = pack.third_image;
             this.settings.medal_type = 'medals';
             this.loadMedalImages();
+            this.pushHistory();
         },
 
         onLocalMedalPicked(rank, e) {
@@ -2094,6 +2332,7 @@ function posterStudio() {
                 if (rank === 3) this.settings.custom_medal_3 = dataUrl;
                 this.settings.medal_type = 'medals';
                 this.loadMedalImages();
+                this.pushHistory();
             };
             reader.readAsDataURL(file);
         },
@@ -2131,6 +2370,7 @@ function posterStudio() {
             }
 
             this.loadTemplateImage(src);
+            this.pushHistory();
         },
 
         addCustomText() {
@@ -2160,6 +2400,7 @@ function posterStudio() {
             this.selectElement(newId);
             this.activeTab = 'design';
             this.render();
+            this.pushHistory();
         },
 
         addCustomShape(shapeType) {
@@ -2187,6 +2428,7 @@ function posterStudio() {
             this.selectElement(newId);
             this.activeTab = 'design';
             this.render();
+            this.pushHistory();
         },
 
         uploadCustomImage(event) {
@@ -2219,6 +2461,7 @@ function posterStudio() {
                     this.selectElement(newId);
                     this.activeTab = 'design';
                     this.render();
+                    this.pushHistory();
                 };
                 img.src = loadEvent.target.result;
             };
@@ -2258,6 +2501,7 @@ function posterStudio() {
                 }
                 this.selectElement(clone.id);
                 this.render();
+                this.pushHistory();
             }
         },
 
@@ -2273,6 +2517,7 @@ function posterStudio() {
             this.selectedId = null;
             this.selectedType = null;
             this.render();
+            this.pushHistory();
         },
 
         nudgeSelected(dx, dy) {
@@ -2475,6 +2720,7 @@ function posterStudio() {
         },
 
         onMouseDown(e) {
+            this.hasMutated = false;
             const coords = this.getCanvasCoords(e);
 
             // 1. Check if clicking on a transform handle first (resizing / rotating)
@@ -2570,6 +2816,7 @@ function posterStudio() {
 
             // Handle Resizing / Scaling / Rotating via Handles
             if (this.isResizing) {
+                this.hasMutated = true;
                 if (this.activeHandle === 'rot') {
                     const cx = this.elementStartX + this.elementStartW / 2;
                     const cy = this.elementStartY + this.elementStartH / 2;
@@ -2647,6 +2894,7 @@ function posterStudio() {
 
             // Normal Position Dragging
             if (this.isDragging) {
+                this.hasMutated = true;
                 if (this.selectedType === 'custom' && this.selectedElement) {
                     this.selectedElement.x = Math.round(this.elementStartX + dx);
                     this.selectedElement.y = Math.round(this.elementStartY + dy);
@@ -2671,6 +2919,10 @@ function posterStudio() {
         },
 
         onMouseUp() {
+            if (this.hasMutated) {
+                this.pushHistory();
+                this.hasMutated = false;
+            }
             this.isDragging = false;
             this.isResizing = false;
             this.activeHandle = null;
@@ -2699,12 +2951,14 @@ function posterStudio() {
                 this.guidelines.horizontal.sort((a, b) => a - b);
             }
             this.render();
+            this.pushHistory();
         },
 
         removeGuide(type, index) {
             if (type === 'v') this.guidelines.vertical.splice(index, 1);
             else this.guidelines.horizontal.splice(index, 1);
             this.render();
+            this.pushHistory();
         },
 
         // Render Canvas Pipeline
@@ -2714,6 +2968,10 @@ function posterStudio() {
             const ctx = canvas.getContext('2d');
             const width = canvas.width;
             const height = canvas.height;
+
+            if (!this.isDragging && !this.isResizing && !isExport && !this.isApplyingHistory) {
+                this.recordHistory();
+            }
 
             ctx.clearRect(0, 0, width, height);
 
@@ -2880,16 +3138,16 @@ function posterStudio() {
                 if (Array.isArray(arr) && arr.length > 0) {
                     arr.forEach(w => {
                         const name = (w && w.name && w.name.trim()) ? w.name : defaultName;
-                        const unit = (w && w.unit && w.unit.trim()) ? w.unit : 'ഗ്രൂപ്പ് / ടീം';
+                        const unit = (w && w.unit && w.unit.trim()) ? w.unit : 'TEAM / UNIT';
                         flatWinners.push({ rank, rankLabel: label, name, unit });
                     });
                 } else {
-                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'ഗ്രൂപ്പ് / ടീം' });
+                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'TEAM / UNIT' });
                 }
             };
-            addPlace(this.data.winners.first, '01', '1st Place', 'വിദ്യാർത്ഥിയുടെ പേര് (Winner 1)');
-            addPlace(this.data.winners.second, '02', '2nd Place', 'രണ്ടാം സ്ഥാനം (Winner 2)');
-            addPlace(this.data.winners.third, '03', '3rd Place', 'മൂന്നാം സ്ഥാനം (Winner 3)');
+            addPlace(this.data.winners.first, '01', '1st Place', 'MUHAMMED YASEEN P.');
+            addPlace(this.data.winners.second, '02', '2nd Place', 'AHMAD RAYYAN K.');
+            addPlace(this.data.winners.third, '03', '3rd Place', 'BILAL MUHAMMED');
 
             const count = flatWinners.length;
             if (count === 0) return;

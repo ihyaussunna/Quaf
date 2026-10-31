@@ -865,13 +865,12 @@ class MediaResultController extends Controller
             ]);
         }
 
-        $latestResult = Result::with('program.zone')->latest('id')->first();
-        $sampleProgName = $latestResult?->program?->name ?? 'മാപ്പിളപ്പാട്ട് (Mappilappattu)';
-        $sampleProgCode = $latestResult?->program?->code ?? 'Q9-224';
-        $sampleZoneName = $latestResult?->program?->zone?->name ?? ($latestResult?->program?->eligibility ?? 'Mix Zone');
+        $sampleProgName = 'MAPPILAPPATTU';
+        $sampleProgCode = 'Q9-224';
+        $sampleZoneName = 'MIX ZONE';
 
         $result = (object) [
-            'id' => $latestResult?->id ?? 1,
+            'id' => 1,
             'status' => 'template_design',
             'template_id' => $template->id,
             'program' => (object) [
@@ -885,13 +884,13 @@ class MediaResultController extends Controller
 
         $winners = [
             'first' => [
-                ['name' => 'മുഹമ്മദ് യാസീൻ പി. (Muhammed Yaseen)', 'unit' => 'റെഡ് ഫോക്സ് (Red Fox Team)'],
+                ['name' => 'MUHAMMED YASEEN P.', 'unit' => 'RED FOX TEAM'],
             ],
             'second' => [
-                ['name' => 'അഹ്മദ് റയ്യാൻ കെ. (Ahmad Rayyan)', 'unit' => 'ഗ്രീൻ വാരിയേഴ്സ് (Green Warriors)'],
+                ['name' => 'AHMAD RAYYAN K.', 'unit' => 'GREEN WARRIORS'],
             ],
             'third' => [
-                ['name' => 'ബിലാൽ മുഹമ്മദ് (Bilal Muhammed)', 'unit' => 'ബ്ലൂ റൈഡേഴ്സ് (Blue Riders)'],
+                ['name' => 'BILAL MUHAMMED', 'unit' => 'BLUE RIDERS'],
             ],
         ];
 

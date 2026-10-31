@@ -430,7 +430,7 @@ function templateCustomizer() {
             // 3. Draw Category / Zone
             ctx.save();
             ctx.fillStyle = this.settings.category_color;
-            ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Anek Malayalam", Sora, sans-serif`;
+            ctx.font = `${this.settings.category_weight} ${this.settings.category_size}px "Rockwell Std", Sora, sans-serif`;
             ctx.textAlign = this.settings.category_align;
             ctx.textBaseline = 'top';
             ctx.fillText(this.data.category, this.settings.category_x, this.settings.category_y);
@@ -439,7 +439,7 @@ function templateCustomizer() {
             // 4. Draw Competition / Program Name
             ctx.save();
             ctx.fillStyle = this.settings.competition_color;
-            ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "Anek Malayalam", Sora, sans-serif`;
+            ctx.font = `${this.settings.competition_weight} ${this.settings.competition_size}px "Rockwell Std", Sora, sans-serif`;
             ctx.textAlign = this.settings.competition_align;
             ctx.textBaseline = 'top';
 
@@ -498,7 +498,7 @@ function templateCustomizer() {
                 // Draw Winner Participant Name
                 ctx.save();
                 ctx.fillStyle = this.settings.winner_name_color;
-                ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "Anek Malayalam", Sora, sans-serif`;
+                ctx.font = `${this.settings.winner_name_weight} ${this.settings.winner_name_size}px "Rockwell Std", Sora, sans-serif`;
                 ctx.textBaseline = 'top';
                 ctx.textAlign = 'left';
                 ctx.fillText(winner.name, textLeft, rowTop + 2);
@@ -508,7 +508,7 @@ function templateCustomizer() {
                 if (winner.unit) {
                     ctx.save();
                     ctx.fillStyle = this.settings.winner_unit_color;
-                    ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "Anek Malayalam", Sora, sans-serif`;
+                    ctx.font = `${this.settings.winner_unit_weight} ${this.settings.winner_unit_size}px "Rockwell Std", Sora, sans-serif`;
                     ctx.textBaseline = 'top';
                     ctx.textAlign = 'left';
                     const unitTop = rowTop + this.settings.winner_name_size + 6;
