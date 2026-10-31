@@ -44,6 +44,7 @@ class PosterSetting extends Model
         'winner_unit_size',
         'winner_unit_weight',
         'winner_unit_color',
+        'show_winner_divider',
         'sponsor_image',
         'sponsor_enabled',
     ];
@@ -52,6 +53,7 @@ class PosterSetting extends Model
     {
         return [
             'sponsor_enabled' => 'boolean',
+            'show_winner_divider' => 'boolean',
             'result_x' => 'float',
             'result_y' => 'float',
             'result_size' => 'float',
@@ -116,6 +118,7 @@ class PosterSetting extends Model
             'winner_unit_size' => 22,
             'winner_unit_weight' => '400',
             'winner_unit_color' => 'white',
+            'show_winner_divider' => false,
             'sponsor_enabled' => false,
         ];
     }

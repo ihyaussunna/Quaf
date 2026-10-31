@@ -1065,6 +1065,18 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Divider Line Under Group Toggle -->
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                                <div>
+                                    <span class="font-bold text-slate-700 block">Divider Line Below Group</span>
+                                    <span class="text-[10px] text-slate-400">ഗ്രൂപ്പിന് താഴെ വര കാണിക്കുക</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="settings.show_winner_divider" @change="render()" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -2017,6 +2029,7 @@ function posterStudio() {
             show_competition: {{ isset($currentSettings['show_competition']) ? ($currentSettings['show_competition'] ? 'true' : 'false') : 'true' }},
             show_category: {{ isset($currentSettings['show_category']) ? ($currentSettings['show_category'] ? 'true' : 'false') : 'true' }},
             show_winners: {{ isset($currentSettings['show_winners']) ? ($currentSettings['show_winners'] ? 'true' : 'false') : 'true' }},
+            show_winner_divider: {{ !empty($currentSettings['show_winner_divider']) ? 'true' : 'false' }},
 
             // Rotations
             result_rotation: {{ (float) ($currentSettings['result_rotation'] ?? 0) }},
@@ -2435,40 +2448,23 @@ function posterStudio() {
 
             // Restore saved custom elements if any
             if (savedSettings && savedSettings.custom_elements && Array.isArray(savedSettings.custom_elements)) {
-                this.customElements = savedSettings.custom_elements.map(el => {
-                    if (el.type === 'image' && el.imgSrc) {
-                        const img = new Image();
-                        img.src = el.imgSrc;
-                        el.imgObj = img;
-                    }
-                    return el;
-                });
+                this.customElements = savedSettings.custom_elements
+                    .filter(el => el.id !== 'text_result_default' && !(el.type === 'text' && el.text === 'Result' && (el.color === '#000000' || el.color === '#000') && el.y > 700))
+                    .map(el => {
+                        if (el.type === 'image' && el.imgSrc) {
+                            const img = new Image();
+                            img.src = el.imgSrc;
+                            el.imgObj = img;
+                        }
+                        return el;
+                    });
             } else {
-                // Default stylized "Result" text preset like Illustrator template
-                this.customElements.push({
-                    id: 'text_result_default',
-                    type: 'text',
-                    label: 'Result Text Art',
-                    text: 'Result',
-                    font: 'Rockwell Std',
-                    size: 140,
-                    weight: '400',
-                    color: '#000000',
-                    align: 'left',
-                    tracking: 0,
-                    lineHeight: 1.2,
-                    rotation: 0,
-                    opacity: 100,
-                    x: 480,
-                    y: 830,
-                    visible: true,
-                    layerOrder: 'below'
-                });
+                this.customElements = [];
             }
 
             // Restore saved layer stack or establish default hierarchy (Top to Bottom)
             if (savedSettings && Array.isArray(savedSettings.layer_stack) && savedSettings.layer_stack.length > 0) {
-                this.layerStack = [...savedSettings.layer_stack];
+                this.layerStack = savedSettings.layer_stack.filter(id => id !== 'text_result_default');
             } else {
                 const belowCustom = this.customElements.filter(e => e.layerOrder === 'below').map(e => e.id);
                 const aboveCustom = this.customElements.filter(e => e.layerOrder !== 'below').map(e => e.id);
@@ -2705,17 +2701,21 @@ function posterStudio() {
                     }
                 }
                 if (Array.isArray(tmplData.preset.custom_elements) && tmplData.preset.custom_elements.length > 0) {
-                    this.customElements = tmplData.preset.custom_elements.map(el => {
-                        if (el.type === 'image' && el.imgSrc) {
-                            const img = new Image();
-                            img.src = el.imgSrc;
-                            el.imgObj = img;
-                        }
-                        return el;
-                    });
+                    this.customElements = tmplData.preset.custom_elements
+                        .filter(el => el.id !== 'text_result_default' && !(el.type === 'text' && el.text === 'Result' && (el.color === '#000000' || el.color === '#000') && el.y > 700))
+                        .map(el => {
+                            if (el.type === 'image' && el.imgSrc) {
+                                const img = new Image();
+                                img.src = el.imgSrc;
+                                el.imgObj = img;
+                            }
+                            return el;
+                        });
+                } else {
+                    this.customElements = [];
                 }
                 if (Array.isArray(tmplData.preset.layer_stack) && tmplData.preset.layer_stack.length > 0) {
-                    this.layerStack = [...tmplData.preset.layer_stack];
+                    this.layerStack = tmplData.preset.layer_stack.filter(id => id !== 'text_result_default');
                     this.syncLayerStack();
                 }
                 if (tmplData.preset.guidelines) {
@@ -3663,14 +3663,16 @@ function posterStudio() {
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
                 ctx.fillText(w.unit, textX, unitY);
 
-                // 4. Divider Line
-                let lineY = unitY + Math.round(unitSize * 0.95) + 6;
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(textX, lineY);
-                ctx.lineTo(textX + dividerWidth, lineY);
-                ctx.stroke();
+                // 4. Divider Line (optional)
+                if (this.settings.show_winner_divider) {
+                    let lineY = unitY + Math.round(unitSize * 0.95) + 6;
+                    ctx.strokeStyle = this.settings.winner_divider_color || 'rgba(0, 0, 0, 0.22)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(textX, lineY);
+                    ctx.lineTo(textX + dividerWidth, lineY);
+                    ctx.stroke();
+                }
 
                 ctx.restore();
                 const extraNameH = Math.max(0, (nameLines.length - 1) * nameLineH);

@@ -430,9 +430,11 @@ class ResultPosterGenerator
                 $unitY = $nameY + (int) ($nameSize * 1.05);
                 imagettftext($img, $unitSize, 0, $blockLeft, $unitY, $unitColor, $rockwellLight, $winner['unit']);
 
-                // Divider line
-                $lineY = $unitY + (int) ($unitSize * 0.95);
-                imageline($img, $blockLeft, $lineY, $blockLeft + $dividerWidth, $lineY, $divider);
+                // Divider line (only if enabled)
+                if (! empty($customSettings['show_winner_divider'])) {
+                    $lineY = $unitY + (int) ($unitSize * 0.95);
+                    imageline($img, $blockLeft, $lineY, $blockLeft + $dividerWidth, $lineY, $divider);
+                }
 
                 $currY += $rowGap;
             }
