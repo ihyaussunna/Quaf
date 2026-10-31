@@ -6,6 +6,7 @@ use App\Models\CoinTransaction;
 use App\Models\FundReceipt;
 use App\Models\Judge;
 use App\Models\Program;
+use App\Models\Result;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 Judge::ensureCredentials();
                 FundReceipt::ensureSchema();
                 CoinTransaction::ensureSchema();
+                Result::ensureSchema();
             }
         } catch (\Throwable) {
         }

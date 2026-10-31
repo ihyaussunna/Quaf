@@ -104,13 +104,20 @@ class Result extends Model
                 if (! Schema::hasColumn('results', 'result_number')) {
                     try {
                         Schema::table('results', function (Blueprint $table) {
-                            $table->unsignedInteger('result_number')->nullable()->after('program_id')->index();
+                            $table->unsignedInteger('result_number')->nullable()->after('program_id');
                         });
                     } catch (\Throwable) {
                         try {
-                            DB::statement('ALTER TABLE results ADD COLUMN result_number INT UNSIGNED NULL AFTER program_id, ADD INDEX results_result_number_index (result_number)');
+                            DB::statement('ALTER TABLE results ADD COLUMN result_number INT UNSIGNED NULL');
                         } catch (\Throwable) {
                         }
+                    }
+
+                    try {
+                        Schema::table('results', function (Blueprint $table) {
+                            $table->index('result_number');
+                        });
+                    } catch (\Throwable) {
                     }
                 }
             }

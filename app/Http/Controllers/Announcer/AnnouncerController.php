@@ -56,18 +56,7 @@ class AnnouncerController extends Controller
             $query->whereIn('status', ['send', 'delivered', 'announced', 'published']);
         }
 
-        $hasResultNumber = false;
-        try {
-            $hasResultNumber = Schema::hasColumn('results', 'result_number');
-        } catch (\Throwable) {
-        }
-
-        $orderSql = "CASE WHEN status IN ('send', 'delivered') THEN 1 ELSE 2 END";
-        if ($hasResultNumber) {
-            $orderSql .= ', CASE WHEN result_number IS NOT NULL THEN result_number ELSE 0 END DESC';
-        }
-
-        $results = $query->orderByRaw($orderSql)
+        $results = $query->orderByRaw("CASE WHEN status IN ('send', 'delivered') THEN 1 ELSE 2 END")
             ->latest('updated_at')
             ->paginate(12)
             ->withQueryString();
