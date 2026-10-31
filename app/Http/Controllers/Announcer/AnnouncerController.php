@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Announcer;
 
 use App\Http\Controllers\Controller;
 use App\Models\GreenRoomCall;
+use App\Models\Group;
+use App\Models\Program;
+use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Stage;
 use App\Models\StandingAnnouncement;
 use App\Services\AuditLogger;
+use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -237,8 +241,14 @@ class AnnouncerController extends Controller
             'third_grade' => $thirdGrade,
         ]);
 
-        // Recalculate points for this program to ensure synchronization
-        app(PointCalculationService::class)->recalculateForProgram($result->program_id);
+        // Recalculate points and synchronize coins and milestones
+        app(PointCalculationService::class)->recalculateAllPoints();
+        if (class_exists(CoinRewardService::class)) {
+            $coinService = app(CoinRewardService::class);
+            $coinService->reverseCoinDistributionForResult($result, 'Grades updated from Announcer Desk');
+            $coinService->distributeCoinsForResult($result);
+        }
+        Group::checkAndApplyMilestone();
 
         AuditLogger::log('announcer_update_grades', $result, [], [
             'first_grade' => $firstGrade,
@@ -247,5 +257,29 @@ class AnnouncerController extends Controller
         ]);
 
         return back()->with('success', "Grades for program '{$result->program?->name}' updated successfully.");
+    }
+
+    /**
+     * Display Points Progression Matrix in the Announcer Portal.
+     */
+    public function progressionMatrix(Request $request): View
+    {
+        $zone = $request->query('zone');
+        $categoryId = $request->query('category') ? (int) $request->query('category') : null;
+
+        $matrix = PointCalculationService::getProgressionMatrix($zone, $categoryId);
+        $categories = ProgramCategory::orderBy('name')->get();
+        $zones = Program::ZONES;
+
+        return view('announcer.progression_matrix', [
+            'groups' => $matrix['groups'],
+            'rows' => $matrix['rows'],
+            'totals' => $matrix['totals'],
+            'totalResults' => $matrix['total_results'],
+            'selectedZone' => $zone,
+            'selectedCategory' => $categoryId,
+            'categories' => $categories,
+            'zones' => $zones,
+        ]);
     }
 }

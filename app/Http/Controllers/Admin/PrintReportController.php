@@ -117,6 +117,29 @@ class PrintReportController extends Controller
     }
 
     /**
+     * Display printable A4 Points Progression Matrix Sheet matching official ledger format.
+     * Shows result-by-result team points and cumulative progression (1, 1+2, 1+2+3...).
+     */
+    public function progressionMatrix(Request $request): View
+    {
+        $zone = $request->query('zone');
+        $categoryId = $request->query('category') ? (int) $request->query('category') : null;
+
+        $matrix = PointCalculationService::getProgressionMatrix($zone, $categoryId);
+        $categories = ProgramCategory::orderBy('name')->get();
+
+        return view('admin.print.progression_matrix', [
+            'groups' => $matrix['groups'],
+            'rows' => $matrix['rows'],
+            'totals' => $matrix['totals'],
+            'totalResults' => $matrix['total_results'],
+            'selectedZone' => $zone,
+            'selectedCategory' => $categoryId,
+            'categories' => $categories,
+        ]);
+    }
+
+    /**
      * Display printable multi-judge evaluation sheet & official scorecard for a program.
      */
     public function evaluationSheet(Program $program): View

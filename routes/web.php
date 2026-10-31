@@ -642,6 +642,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
         return app(PrintReportController::class)->results($request);
     })->name('results.evaluated-pdf');
+    Route::get('results/progression-matrix', [AdminResultController::class, 'progressionMatrix'])->name('results.progression-matrix');
     Route::resource('results', AdminResultController::class);
 
     // Points & Rankings
@@ -696,6 +697,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('print/evaluation/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('print.evaluation-sheet');
     Route::get('evaluation/print/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('evaluation.print');
     Route::get('print/milestone-standings', [AdminPrintReportController::class, 'milestoneStandings'])->name('print.milestone-standings');
+    Route::get('print/progression-matrix', [AdminPrintReportController::class, 'progressionMatrix'])->name('print.progression-matrix');
     Route::get('standings/milestone', [AdminPrintReportController::class, 'milestoneStandings'])->name('standings.milestone');
     Route::get('print/students', [AdminPrintReportController::class, 'students'])->name('print.students');
     Route::get('print/programs', [AdminPrintReportController::class, 'programs'])->name('print.programs');
@@ -794,6 +796,8 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
     Route::post('/standings/{standingAnnouncement}/announced', [AnnouncerController::class, 'markStandingAnnounced'])->name('standings.announced');
 
     // Official Printable Reports for Announcers
+    Route::get('/progression-matrix', [AnnouncerController::class, 'progressionMatrix'])->name('progression-matrix');
+    Route::get('/print/progression-matrix', [AdminPrintReportController::class, 'progressionMatrix'])->name('print.progression-matrix');
     Route::get('/print/evaluation/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('print.evaluation');
     Route::get('/print/declared-results', [AdminPrintReportController::class, 'results'])->name('print.results');
 });
@@ -947,6 +951,7 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
 
     // Printable Reports for Media Desk
     Route::get('/print/milestone-standings', [AdminPrintReportController::class, 'milestoneStandings'])->name('print.milestone-standings');
+    Route::get('/print/progression-matrix', [AdminPrintReportController::class, 'progressionMatrix'])->name('print.progression-matrix');
     Route::get('/print/evaluation/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('print.evaluation');
 
     // Results & Poster Designer

@@ -274,6 +274,16 @@ class PointCalculationService
 
         $result->save();
 
+        if (in_array($result->status, self::DECLARED_STATUSES)) {
+            app(self::class)->recalculateAllPoints();
+            if (class_exists(CoinRewardService::class)) {
+                $coinService = app(CoinRewardService::class);
+                $coinService->reverseCoinDistributionForResult($result, 'Podium or marks updated');
+                $coinService->distributeCoinsForResult($result);
+            }
+            Group::checkAndApplyMilestone();
+        }
+
         return $result;
     }
 
@@ -969,6 +979,221 @@ class PointCalculationService
             'milestone_label' => $milestoneLabel,
             'standings' => $standingsList,
             'results' => $milestoneResults,
+        ];
+    }
+
+    /**
+     * Build the sequential result-by-result points progression matrix.
+     * Shows points earned per result and progressive running total (1, 1+2, 1+2+3...).
+     *
+     * @return array<string, mixed>
+     */
+    public static function getProgressionMatrix(?string $zone = null, ?int $categoryId = null): array
+    {
+        Group::ensureSchema();
+        Result::ensureSchema();
+        Result::resyncResultNumbers();
+
+        $groups = Group::orderBy('name')->get();
+
+        $query = Result::whereIn('status', self::DECLARED_STATUSES)
+            ->with([
+                'program.zone',
+                'program.category',
+                'firstEntry.group',
+                'firstEntry.student',
+                'firstEntry.scoreSheets',
+                'secondEntry.group',
+                'secondEntry.student',
+                'secondEntry.scoreSheets',
+                'thirdEntry.group',
+                'thirdEntry.student',
+                'thirdEntry.scoreSheets',
+            ]);
+
+        if ($zone) {
+            $query->whereHas('program', fn ($q) => $q->where('zone', $zone));
+        }
+        if ($categoryId) {
+            $query->whereHas('program', fn ($q) => $q->where('category_id', $categoryId));
+        }
+
+        $results = $query
+            ->orderByRaw('CASE WHEN result_number IS NOT NULL AND result_number > 0 THEN result_number ELSE 999999 END ASC, COALESCE(published_at, created_at) ASC, id ASC')
+            ->get();
+
+        $calcService = app(self::class);
+
+        // Cumulative totals and group aggregate statistics
+        $cumulativeTotals = [];
+        $groupStats = [];
+        foreach ($groups as $g) {
+            $cumulativeTotals[$g->id] = 0;
+            $groupStats[$g->id] = [
+                'group' => $g,
+                'name' => $g->name,
+                'code' => $g->code,
+                'color_hex' => $g->color_hex ?? '#be1e2d',
+                'total_points' => 0,
+                'position_points' => 0,
+                'grade_points' => 0,
+                'participation_points' => 0,
+                'first_count' => 0,
+                'second_count' => 0,
+                'third_count' => 0,
+                'rank' => 1,
+            ];
+        }
+
+        $rows = [];
+        $seq = 1;
+
+        foreach ($results as $result) {
+            $program = $result->program;
+            if (! $program) {
+                continue;
+            }
+
+            $resNum = (int) ($result->result_number > 0 ? $result->result_number : $seq);
+            $seq++;
+
+            $txs = $calcService->buildTransactionsForResult($result, $program);
+
+            $resultGroupPoints = [];
+            foreach ($groups as $g) {
+                $resultGroupPoints[$g->id] = [
+                    'pos_points' => 0,
+                    'grade_points' => 0,
+                    'part_points' => 0,
+                    'this_points' => 0,
+                    'placements' => [],
+                    'grades' => [],
+                    'students' => [],
+                ];
+            }
+
+            foreach ($txs as $tx) {
+                $gid = $tx['group_id'] ?? null;
+                if ($gid && isset($resultGroupPoints[$gid])) {
+                    $pts = (int) ($tx['points'] ?? 0);
+                    $st = $tx['source_type'] ?? '';
+                    if ($st === 'POSITION') {
+                        $resultGroupPoints[$gid]['pos_points'] += $pts;
+                        $groupStats[$gid]['position_points'] += $pts;
+                    } elseif ($st === 'GRADE') {
+                        $resultGroupPoints[$gid]['grade_points'] += $pts;
+                        $groupStats[$gid]['grade_points'] += $pts;
+                    } elseif ($st === 'PARTICIPATION') {
+                        $resultGroupPoints[$gid]['part_points'] += $pts;
+                        $groupStats[$gid]['participation_points'] += $pts;
+                    }
+                    $resultGroupPoints[$gid]['this_points'] += $pts;
+                }
+            }
+
+            // Track podium placements
+            if ($result->firstEntry?->group_id && isset($resultGroupPoints[$result->firstEntry->group_id])) {
+                $gid = $result->firstEntry->group_id;
+                $resultGroupPoints[$gid]['placements'][] = '1st';
+                $groupStats[$gid]['first_count']++;
+                if ($result->firstEntry->student?->name) {
+                    $resultGroupPoints[$gid]['students'][] = $result->firstEntry->student->name;
+                }
+                if ($result->first_grade) {
+                    $resultGroupPoints[$gid]['grades'][] = $result->first_grade;
+                }
+            }
+            if ($result->secondEntry?->group_id && isset($resultGroupPoints[$result->secondEntry->group_id])) {
+                $gid = $result->secondEntry->group_id;
+                $resultGroupPoints[$gid]['placements'][] = '2nd';
+                $groupStats[$gid]['second_count']++;
+                if ($result->secondEntry->student?->name) {
+                    $resultGroupPoints[$gid]['students'][] = $result->secondEntry->student->name;
+                }
+                if ($result->second_grade) {
+                    $resultGroupPoints[$gid]['grades'][] = $result->second_grade;
+                }
+            }
+            if ($result->thirdEntry?->group_id && isset($resultGroupPoints[$result->thirdEntry->group_id])) {
+                $gid = $result->thirdEntry->group_id;
+                $resultGroupPoints[$gid]['placements'][] = '3rd';
+                $groupStats[$gid]['third_count']++;
+                if ($result->thirdEntry->student?->name) {
+                    $resultGroupPoints[$gid]['students'][] = $result->thirdEntry->student->name;
+                }
+                if ($result->third_grade) {
+                    $resultGroupPoints[$gid]['grades'][] = $result->third_grade;
+                }
+            }
+
+            // Calculate running cumulative progressive total for each team after this result
+            $teamsData = [];
+            foreach ($groups as $g) {
+                $gid = $g->id;
+                $thisPts = $resultGroupPoints[$gid]['this_points'];
+                $cumulativeTotals[$gid] += $thisPts;
+                $groupStats[$gid]['total_points'] = $cumulativeTotals[$gid];
+
+                $teamsData[$gid] = [
+                    'group_id' => $gid,
+                    'group_name' => $g->name,
+                    'group_code' => $g->code,
+                    'color_hex' => $g->color_hex ?? '#be1e2d',
+                    'this_points' => $thisPts,
+                    'pos_points' => $resultGroupPoints[$gid]['pos_points'],
+                    'grade_points' => $resultGroupPoints[$gid]['grade_points'],
+                    'part_points' => $resultGroupPoints[$gid]['part_points'],
+                    'cumulative_total' => $cumulativeTotals[$gid],
+                    'placements' => $resultGroupPoints[$gid]['placements'],
+                    'grades' => $resultGroupPoints[$gid]['grades'],
+                    'students' => $resultGroupPoints[$gid]['students'],
+                ];
+            }
+
+            $rows[] = [
+                'result_id' => $result->id,
+                'result_number' => $resNum,
+                'formatted_result_number' => sprintf('%02d', $resNum),
+                'program_id' => $program->id,
+                'program_name' => $program->name,
+                'program_code' => $program->code,
+                'category_name' => $program->category?->name ?? 'General',
+                'zone' => $program->zone ?? '',
+                'status' => $result->status,
+                'teams' => $teamsData,
+            ];
+        }
+
+        // Rank the final group stats
+        uasort($groupStats, function ($a, $b) {
+            if ($b['total_points'] !== $a['total_points']) {
+                return $b['total_points'] <=> $a['total_points'];
+            }
+            if ($b['first_count'] !== $a['first_count']) {
+                return $b['first_count'] <=> $a['first_count'];
+            }
+
+            return strcmp($a['name'], $b['name']);
+        });
+
+        $currRank = 1;
+        $prevPts = null;
+        $idx = 1;
+        foreach ($groupStats as $gid => &$st) {
+            if ($prevPts !== null && $st['total_points'] < $prevPts) {
+                $currRank = $idx;
+            }
+            $st['rank'] = $currRank;
+            $prevPts = $st['total_points'];
+            $idx++;
+        }
+        unset($st);
+
+        return [
+            'groups' => $groups,
+            'rows' => $rows,
+            'totals' => $groupStats,
+            'total_results' => count($rows),
         ];
     }
 }

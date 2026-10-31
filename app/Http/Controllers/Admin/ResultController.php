@@ -7,6 +7,7 @@ use App\Models\Certificate;
 use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\Program;
+use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Services\AuditLogger;
@@ -224,12 +225,11 @@ class ResultController extends Controller
 
         AuditLogger::log('update_result', $result, $old, $result->toArray());
 
-        if ($wasPublished && $result->wasChanged(['first_entry_id', 'second_entry_id', 'third_entry_id', 'first_grade', 'second_grade', 'third_grade', 'status'])) {
-            $this->coinService->reverseCoinDistributionForResult($result, 'Podium or status updated');
-        }
-
-        if ($result->status === 'published') {
-            $this->issueCertificates($result);
+        if (in_array($result->status, PointCalculationService::DECLARED_STATUSES)) {
+            $this->coinService->reverseCoinDistributionForResult($result, 'Podium, grade, or status updated');
+            if ($result->status === 'published') {
+                $this->issueCertificates($result);
+            }
             $this->pointService->recalculateAllPoints();
             $this->coinService->distributeCoinsForResult($result);
             Group::checkAndApplyMilestone();
@@ -794,5 +794,30 @@ class ResultController extends Controller
             'top_group' => $topGroupId ? ($groupsMap[$topGroupId] ?? null) : null,
             'max_points' => $maxPoints,
         ];
+    }
+
+    /**
+     * Interactive Points Progression Matrix Dashboard.
+     * Displays sequential declared results and cumulative progression (1, 1+2, 1+2+3...).
+     */
+    public function progressionMatrix(Request $request): View
+    {
+        $zone = $request->query('zone');
+        $categoryId = $request->query('category') ? (int) $request->query('category') : null;
+
+        $matrix = PointCalculationService::getProgressionMatrix($zone, $categoryId);
+        $categories = ProgramCategory::orderBy('name')->get();
+        $zones = Program::ZONES;
+
+        return view('admin.results.progression_matrix', [
+            'groups' => $matrix['groups'],
+            'rows' => $matrix['rows'],
+            'totals' => $matrix['totals'],
+            'totalResults' => $matrix['total_results'],
+            'selectedZone' => $zone,
+            'selectedCategory' => $categoryId,
+            'categories' => $categories,
+            'zones' => $zones,
+        ]);
     }
 }
