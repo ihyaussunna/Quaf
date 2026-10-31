@@ -11,7 +11,23 @@
         <span style="font-family: 'Rockwell Std'; font-weight: 400;">Rockwell Std 400</span>
         <span style="font-family: 'Rockwell Std'; font-weight: 700;">Rockwell Std 700</span>
         <span style="font-family: 'Rockwell Std'; font-weight: 800;">Rockwell Std 800</span>
+        <span style="font-family: 'Montserrat'; font-weight: 300;">Montserrat 300</span>
+        <span style="font-family: 'Montserrat'; font-weight: 400;">Montserrat 400</span>
+        <span style="font-family: 'Montserrat'; font-weight: 500;">Montserrat 500</span>
+        <span style="font-family: 'Montserrat'; font-weight: 600;">Montserrat 600</span>
+        <span style="font-family: 'Montserrat'; font-weight: 700;">Montserrat 700</span>
+        <span style="font-family: 'Montserrat'; font-weight: 800;">Montserrat 800</span>
+        <span style="font-family: 'Montserrat'; font-weight: 900;">Montserrat 900</span>
+        <span style="font-family: 'Sora'; font-weight: 300;">Sora 300</span>
+        <span style="font-family: 'Sora'; font-weight: 400;">Sora 400</span>
+        <span style="font-family: 'Sora'; font-weight: 600;">Sora 600</span>
         <span style="font-family: 'Sora'; font-weight: 700;">Sora 700</span>
+        <span style="font-family: 'Sora'; font-weight: 800;">Sora 800</span>
+        <span style="font-family: 'JetBrains Mono'; font-weight: 400;">JetBrains Mono 400</span>
+        <span style="font-family: 'JetBrains Mono'; font-weight: 700;">JetBrains Mono 700</span>
+        <span style="font-family: 'Georgia'; font-weight: 400;">Georgia 400</span>
+        <span style="font-family: 'Playfair Display'; font-weight: 700;">Playfair Display 700</span>
+        <span style="font-family: 'Cinzel'; font-weight: 700;">Cinzel 700</span>
         <span style="font-family: 'Anek Malayalam'; font-weight: 700;">Anek Malayalam 700</span>
     </div>
 
@@ -1500,6 +1516,102 @@
                             </template>
                         </div>
 
+                        <!-- Font Family Selection -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Font Family (ഫോണ്ട്)</span>
+                                <span class="font-mono text-[10px] text-red-600 truncate max-w-[140px]" x-text="settings.result_font || 'Rockwell Std'"></span>
+                            </div>
+
+                            <select x-model="settings.result_font" @change="onResultFontChange()" class="w-full text-xs p-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800">
+                                <optgroup label="Official Festival Fonts">
+                                    <option value="Rockwell Std">Rockwell Std</option>
+                                    <option value="Montserrat">Montserrat</option>
+                                    <option value="Sora">Sora</option>
+                                    <option value="Mongolian Baiti">Mongolian Baiti</option>
+                                </optgroup>
+                                <optgroup label="Popular Display Fonts">
+                                    <option value="JetBrains Mono">JetBrains Mono</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Playfair Display">Playfair Display</option>
+                                    <option value="Cinzel">Cinzel</option>
+                                    <option value="Impact">Impact</option>
+                                    <option value="Arial">Arial</option>
+                                </optgroup>
+                                <template x-if="availableSystemFonts && availableSystemFonts.length > 0">
+                                    <optgroup label="Installed PC / System Fonts">
+                                        <template x-for="sf in availableSystemFonts" :key="'sf_' + sf">
+                                            <option :value="sf" x-text="sf"></option>
+                                        </template>
+                                    </optgroup>
+                                </template>
+                                <option value="__custom__">+ Custom / System Font (മറ്റൊരു ഫോണ്ട് ടൈപ്പ് ചെയ്യുക)...</option>
+                            </select>
+
+                            <!-- Custom / System Font input when selected or custom font in use -->
+                            <div x-show="settings.result_font === '__custom__' || isCustomFontName" class="space-y-1 pt-1">
+                                <div class="text-[10px] text-slate-500 font-medium">Type any font installed on your computer (e.g. Century Gothic, Segoe UI, Tahoma, Trebuchet MS):</div>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="text" x-model="customFontInput" @input="applyCustomFont()" placeholder="Type font name..." class="w-full text-xs p-1.5 rounded-lg border border-slate-300 bg-white font-medium">
+                                    <button type="button" @click="applyCustomFont()" class="px-2.5 py-1.5 bg-slate-800 text-white text-[11px] font-bold rounded-lg hover:bg-slate-700">Apply</button>
+                                </div>
+                            </div>
+
+                            <!-- System Font Detector Button -->
+                            <div class="flex items-center justify-between pt-1">
+                                <button type="button" @click="loadSystemFonts()" :disabled="systemFontsLoading" class="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-1 rounded-md flex items-center gap-1 transition cursor-pointer">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                                    <span x-text="systemFontsLoading ? 'Scanning PC...' : (availableSystemFonts.length > 0 ? '✓ ' + availableSystemFonts.length + ' PC Fonts Loaded' : 'Detect PC / System Fonts')"></span>
+                                </button>
+                                <span class="text-[10px] text-slate-400 font-mono" x-show="availableSystemFonts.length > 0" x-text="availableSystemFonts.length + ' fonts'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Font Weight Selection -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Font Weight (ഫോണ്ട് കട്ടി)</span>
+                                <span class="text-[11px] font-mono text-red-600 font-bold" x-text="getWeightLabel(settings.result_weight)"></span>
+                            </div>
+                            <div class="grid grid-cols-4 sm:grid-cols-7 gap-1">
+                                <button type="button" @click="settings.result_weight = '300'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '300' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Light
+                                </button>
+                                <button type="button" @click="settings.result_weight = '400'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '400' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Regular
+                                </button>
+                                <button type="button" @click="settings.result_weight = '500'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '500' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Med
+                                </button>
+                                <button type="button" @click="settings.result_weight = '600'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '600' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Semi
+                                </button>
+                                <button type="button" @click="settings.result_weight = '700'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '700' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Bold
+                                </button>
+                                <button type="button" @click="settings.result_weight = '800'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '800' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Extra
+                                </button>
+                                <button type="button" @click="settings.result_weight = '900'; render(); recordHistory();"
+                                        class="py-1 px-1 text-[10px] font-bold rounded-lg border text-center transition cursor-pointer"
+                                        :class="(settings.result_weight || '400') === '900' ? 'bg-red-600 text-white border-red-600 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'">
+                                    Black
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Result Number Size -->
                         <div class="pt-2 border-t border-slate-200 space-y-1.5">
                             <div class="flex items-center justify-between text-xs font-bold text-slate-800">
@@ -1867,6 +1979,12 @@ function posterStudio() {
         templatesMap: @json($templatesMap ?? []),
         templateImageObj: null,
 
+        // System & Custom Fonts
+        availableSystemFonts: [],
+        systemFontsLoading: false,
+        customFontInput: '',
+        isCustomFontName: false,
+
         // Medal Library
         medalPacks: @json($medalPacks ?? []),
         medalImageObjs: { 1: null, 2: null, 3: null },
@@ -1928,6 +2046,7 @@ function posterStudio() {
             result_y: {{ (float) ($currentSettings['result_y'] ?? 779) }},
             result_size: {{ (float) ($currentSettings['result_size'] ?? 480) }},
             result_weight: '{{ $currentSettings["result_weight"] ?? "400" }}',
+            result_font: '{{ $currentSettings["result_font"] ?? "Rockwell Std" }}',
             result_color: '{{ (strlen($currentSettings["result_color"] ?? "") === 7) ? $currentSettings["result_color"] : "#D02627" }}',
 
             category_x: {{ (float) ($currentSettings['category_x'] ?? 686) }},
@@ -2308,6 +2427,12 @@ function posterStudio() {
                 }
             }
 
+            const presetResultFonts = ['Rockwell Std', 'Montserrat', 'Sora', 'Mongolian Baiti', 'JetBrains Mono', 'Georgia', 'Playfair Display', 'Cinzel', 'Impact', 'Arial'];
+            if (this.settings.result_font && !presetResultFonts.includes(this.settings.result_font)) {
+                this.customFontInput = this.settings.result_font;
+                this.isCustomFontName = true;
+            }
+
             // Restore saved custom elements if any
             if (savedSettings && savedSettings.custom_elements && Array.isArray(savedSettings.custom_elements)) {
                 this.customElements = savedSettings.custom_elements.map(el => {
@@ -2497,6 +2622,57 @@ function posterStudio() {
             this.settings.medal_type = 'medals';
             this.loadMedalImages();
             this.pushHistory();
+        },
+
+        onResultFontChange() {
+            if (this.settings.result_font === '__custom__') {
+                this.isCustomFontName = true;
+            } else {
+                this.isCustomFontName = false;
+                this.render();
+                this.recordHistory();
+            }
+        },
+
+        applyCustomFont() {
+            if (this.customFontInput && this.customFontInput.trim().length > 0) {
+                this.settings.result_font = this.customFontInput.trim();
+                this.render();
+                this.recordHistory();
+            }
+        },
+
+        async loadSystemFonts() {
+            if ('queryLocalFonts' in window) {
+                try {
+                    this.systemFontsLoading = true;
+                    const fonts = await window.queryLocalFonts();
+                    const fontFamilies = Array.from(new Set(fonts.map(f => f.family))).filter(Boolean).sort();
+                    this.availableSystemFonts = fontFamilies;
+                } catch (err) {
+                    console.warn('System font permission dismissed or denied:', err);
+                    alert('System font permission was not granted. You can type any system font name manually in the box!');
+                } finally {
+                    this.systemFontsLoading = false;
+                }
+            } else {
+                alert('Your browser does not support queryLocalFonts API. You can type any font installed on your computer into the box below (e.g. Century Gothic, Segoe UI, Tahoma) and it will render directly on the poster!');
+                this.isCustomFontName = true;
+                this.settings.result_font = '__custom__';
+            }
+        },
+
+        getWeightLabel(w) {
+            const weights = {
+                '300': 'Light (300)',
+                '400': 'Regular (400)',
+                '500': 'Medium (500)',
+                '600': 'SemiBold (600)',
+                '700': 'Bold (700)',
+                '800': 'ExtraBold (800)',
+                '900': 'Black (900)'
+            };
+            return weights[w] || (w ? w + ' Weight' : 'Regular (400)');
         },
 
         onLocalMedalPicked(rank, e) {
@@ -3247,10 +3423,22 @@ function posterStudio() {
                 ctx.rotate((this.settings.result_rotation * Math.PI) / 180);
             }
             ctx.fillStyle = this.settings.result_color || '#D02627';
-            ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "Mongolian Baiti", serif`;
+            const fontFam = this.settings.result_font || 'Rockwell Std';
+            const weight = this.settings.result_weight || '400';
+            const size = this.settings.result_size || 480;
+            ctx.font = `${weight} ${size}px "${fontFam}", "Rockwell Std", "Montserrat", "Sora", serif, sans-serif`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
-            if ('letterSpacing' in ctx) ctx.letterSpacing = '-12px';
+            if ('letterSpacing' in ctx) {
+                const lowerFont = fontFam.toLowerCase();
+                if (lowerFont.includes('mongolian') || lowerFont.includes('monbaiti')) {
+                    ctx.letterSpacing = Math.round(-12 * (size / 480)) + 'px';
+                } else if (lowerFont.includes('rockwell')) {
+                    ctx.letterSpacing = Math.round(-3 * (size / 480)) + 'px';
+                } else {
+                    ctx.letterSpacing = '0px';
+                }
+            }
             ctx.fillText(this.data.result_no, 0, 0);
             ctx.restore();
         },

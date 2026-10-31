@@ -140,64 +140,6 @@
         </div>
     </div>
 
-    <!-- Incoming Team Standings from Stage Announcer -->
-    @if(isset($incomingStandings) && $incomingStandings->isNotEmpty())
-        <div class="space-y-4">
-            @foreach($incomingStandings as $inStand)
-                <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl border-2 border-emerald-400 shadow-lg ring-4 ring-emerald-500/20 font-sora">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4">
-                        <div>
-                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-slate-950 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    <span>Announced by Stage</span>
-                                </span>
-                                <span class="text-xs font-mono text-amber-300 font-bold">
-                                    {{ $inStand->title }}
-                                </span>
-                                <span class="text-xs font-mono text-slate-400">
-                                    Announced at {{ $inStand->announced_at ? $inStand->announced_at->format('h:i A') : '—' }} by {{ $inStand->announcedBy?->name ?? 'Stage Announcer' }}
-                                </span>
-                            </div>
-                            <h3 class="text-xl sm:text-2xl font-black text-white">
-                                അടിയന്തിര പബ്ലിഷിംഗ്: ടീം പോയിന്റ് നില (Team Standings Ready to Publish)
-                            </h3>
-                            <p class="text-xs text-slate-300 mt-0.5 max-w-2xl font-ml">
-                                സ്റ്റേജ് അനൗൺസർ മൈക്കിൽ പ്രഖ്യാപിച്ച ഔദ്യോഗിക ടീം പോയിന്റ് നിലയാണിത്. പബ്ലിക് വെബ്സൈറ്റിൽ ലൈവായി നൽകാൻ "Publish Team Standings to Website" ക്ലിക്ക് ചെയ്യുക.
-                            </p>
-                        </div>
-
-                        <form method="POST" action="{{ route('media.standings.publish', $inStand->id) }}" class="shrink-0">
-                            @csrf
-                            <button type="submit" class="w-full sm:w-auto px-6 py-3.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2 font-mono">
-                                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                <span>Publish Team Standings to Website</span>
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Standing Ranks Quick Strip -->
-                    <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        @foreach($inStand->standings_data as $grpItem)
-                            <div class="bg-white/10 backdrop-blur-xs p-3 rounded-xl border border-white/10">
-                                <div class="flex items-center justify-between text-xs font-mono mb-1">
-                                    <span class="px-1.5 py-0.5 rounded font-black {{ $grpItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
-                                        #{{ $grpItem['rank'] }}
-                                    </span>
-                                    <span class="text-[10px] text-slate-300 font-bold uppercase">{{ $grpItem['code'] }}</span>
-                                </div>
-                                <div class="font-bold text-white text-xs truncate">{{ $grpItem['name'] }}</div>
-                                <div class="mt-1 flex items-baseline gap-1">
-                                    <span class="text-xl font-black text-amber-300 font-mono">{{ number_format($grpItem['points']) }}</span>
-                                    <span class="text-[9px] text-slate-400 uppercase font-mono">pts</span>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
 
     <!-- Dedicated Section: Total Announced Competitions Live Team Standings -->
     <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border-2 border-indigo-500/40 shadow-xl ring-4 ring-indigo-500/10 font-sora" x-data="{ showFullTable: false }">

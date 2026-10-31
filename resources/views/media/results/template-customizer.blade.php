@@ -69,6 +69,30 @@
                                 <input type="range" min="0" max="1350" step="1" x-model.number="settings.result_y" @input="render()" class="w-full accent-[#be1e2d]">
                             </div>
                         </div>
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-semibold text-slate-600">Font Family (ഫോണ്ട്)</label>
+                            <select x-model="settings.result_font" @change="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300 bg-white font-medium">
+                                <optgroup label="Official Festival Fonts">
+                                    <option value="Rockwell Std">Rockwell Std</option>
+                                    <option value="Montserrat">Montserrat</option>
+                                    <option value="Sora">Sora</option>
+                                    <option value="Mongolian Baiti">Mongolian Baiti</option>
+                                </optgroup>
+                                <optgroup label="Display & System Fonts">
+                                    <option value="JetBrains Mono">JetBrains Mono</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Playfair Display">Playfair Display</option>
+                                    <option value="Cinzel">Cinzel</option>
+                                    <option value="Impact">Impact</option>
+                                    <option value="Arial">Arial</option>
+                                </optgroup>
+                                <option value="__custom__">+ Custom / System Font Name...</option>
+                            </select>
+                            <div x-show="settings.result_font === '__custom__' || isCustomResultFont" class="pt-1">
+                                <input type="text" x-model="customResultFontInput" @input="settings.result_font = customResultFontInput; render();" placeholder="Type installed font name (e.g. Century Gothic, Tahoma)..." class="w-full px-2 py-1 text-xs rounded border border-slate-300">
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Font Size (<span x-text="settings.result_size"></span>px)</label>
@@ -77,10 +101,13 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Weight</label>
                                 <select x-model="settings.result_weight" @change="render()" class="w-full px-2 py-1 text-xs rounded border border-slate-300">
+                                    <option value="300">300 Light</option>
                                     <option value="400">400 Normal</option>
+                                    <option value="500">500 Medium</option>
                                     <option value="600">600 SemiBold</option>
                                     <option value="700">700 Bold</option>
                                     <option value="800">800 ExtraBold</option>
+                                    <option value="900">900 Black</option>
                                 </select>
                             </div>
                             <div>
@@ -330,6 +357,8 @@ function templateCustomizer() {
             third: null
         },
 
+        customResultFontInput: '',
+        isCustomResultFont: false,
         defaultSettings: @json(\App\Models\PosterSetting::defaultSettings()),
 
         settings: {
@@ -337,6 +366,7 @@ function templateCustomizer() {
             result_y: {{ (float) ($settings['result_y'] ?? 238) }},
             result_size: {{ (float) ($settings['result_size'] ?? 78) }},
             result_weight: '{{ $settings["result_weight"] ?? "700" }}',
+            result_font: '{{ $settings["result_font"] ?? "Rockwell Std" }}',
             result_color: '{{ (strlen($settings["result_color"] ?? "") === 7) ? $settings["result_color"] : "#be1e2d" }}',
 
             category_x: {{ (float) ($settings['category_x'] ?? 540) }},
@@ -373,6 +403,12 @@ function templateCustomizer() {
         data: @json($sampleData),
 
         init() {
+            const presets = ['Rockwell Std', 'Montserrat', 'Sora', 'Mongolian Baiti', 'JetBrains Mono', 'Georgia', 'Playfair Display', 'Cinzel', 'Impact', 'Arial'];
+            if (this.settings.result_font && !presets.includes(this.settings.result_font)) {
+                this.customResultFontInput = this.settings.result_font;
+                this.isCustomResultFont = true;
+            }
+
             const loadImg = (src) => {
                 const img = new Image();
                 img.crossOrigin = "anonymous";
@@ -425,7 +461,8 @@ function templateCustomizer() {
             // 2. Draw Result Number / Code
             ctx.save();
             ctx.fillStyle = this.settings.result_color;
-            ctx.font = `${this.settings.result_weight} ${this.settings.result_size}px "JetBrains Mono", Sora, sans-serif`;
+            const resFont = this.settings.result_font || 'Rockwell Std';
+            ctx.font = `${this.settings.result_weight || '700'} ${this.settings.result_size}px "${resFont}", "Rockwell Std", "Montserrat", "Sora", sans-serif`;
             ctx.textBaseline = 'top';
             ctx.fillText(this.data.result_no, this.settings.result_x, this.settings.result_y);
             ctx.restore();

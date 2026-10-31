@@ -301,9 +301,16 @@ class ResultPosterGenerator
         if (! file_exists($rockwellLight)) {
             $rockwellLight = $rockwellRegular;
         }
-        $serifFont = public_path('fonts/georgiab.ttf');
-        if (! file_exists($serifFont)) {
-            $serifFont = $rockwellRegular;
+
+        $customSettings = $result->custom_poster_settings ?? [];
+        $tmplSettings = $result->template?->default_settings ?? [];
+        $resFont = $customSettings['result_font'] ?? ($tmplSettings['result_font'] ?? 'Rockwell Std');
+        $resWeight = $customSettings['result_weight'] ?? ($tmplSettings['result_weight'] ?? '400');
+        $resultNumberFont = self::resolveResultNumberFont($resFont, $resWeight);
+
+        if (! empty($customSettings['result_color']) && preg_match('/^#?([a-f0-9]{6})$/i', $customSettings['result_color'], $m)) {
+            $hex = $m[1];
+            $red = imagecolorallocate($img, hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2)));
         }
 
         $program = $result->program;
@@ -349,10 +356,10 @@ class ResultPosterGenerator
 
         // 3. Result Sequence Number
         $resultNoStr = sprintf('%02d', $resultNo);
-        $bboxNo = @imagettfbbox(260, 0, $serifFont, $resultNoStr);
+        $bboxNo = @imagettfbbox(260, 0, $resultNumberFont, $resultNoStr);
         if ($bboxNo) {
             $nw = abs($bboxNo[4] - $bboxNo[0]);
-            imagettftext($img, 260, 0, (int) (740 - ($nw / 2)), 760, $red, $serifFont, $resultNoStr);
+            imagettftext($img, 260, 0, (int) (740 - ($nw / 2)), 760, $red, $resultNumberFont, $resultNoStr);
         }
 
         // 4. Multiple Winners with dynamic auto-scaling
@@ -462,6 +469,74 @@ class ResultPosterGenerator
         }
 
         return imagecolorallocate($img, $default[0], $default[1], $default[2]);
+    }
+
+    /**
+     * Resolve TTF font path based on font family and weight.
+     */
+    public static function resolveResultNumberFont(?string $fontFamily, ?string $weight = '400'): string
+    {
+        $font = strtolower(trim((string) $fontFamily));
+        $weight = (string) $weight;
+
+        if (str_contains($font, 'montserrat')) {
+            $var = public_path('fonts/Montserrat-VariableFont.ttf');
+            if (file_exists($var)) {
+                return $var;
+            }
+        }
+
+        if (str_contains($font, 'sora')) {
+            $var = public_path('fonts/Sora-VariableFont.ttf');
+            if (file_exists($var)) {
+                return $var;
+            }
+            if (in_array($weight, ['700', '800', '900']) && file_exists(public_path('fonts/Sora-Bold.ttf'))) {
+                return public_path('fonts/Sora-Bold.ttf');
+            }
+        }
+
+        if (str_contains($font, 'rockwell') || str_contains($font, 'rock')) {
+            if ($weight === '300' && file_exists(public_path('fonts/Rockwell-Light.otf'))) {
+                return public_path('fonts/Rockwell-Light.otf');
+            }
+            if ($weight === '800' && file_exists(public_path('fonts/Rockwell-Extra-Bold.otf'))) {
+                return public_path('fonts/Rockwell-Extra-Bold.otf');
+            }
+            if (in_array($weight, ['700', '800']) && file_exists(public_path('fonts/Rockwell-Bold.otf'))) {
+                return public_path('fonts/Rockwell-Bold.otf');
+            }
+            if (file_exists(public_path('fonts/Rockwell-Regular.otf'))) {
+                return public_path('fonts/Rockwell-Regular.otf');
+            }
+
+            return public_path('fonts/ROCK.TTF');
+        }
+
+        if (str_contains($font, 'mongolian') || str_contains($font, 'monbaiti')) {
+            if (file_exists(public_path('fonts/monbaiti.ttf'))) {
+                return public_path('fonts/monbaiti.ttf');
+            }
+        }
+
+        if (str_contains($font, 'georgia')) {
+            if (file_exists(public_path('fonts/georgiab.ttf'))) {
+                return public_path('fonts/georgiab.ttf');
+            }
+        }
+
+        if (str_contains($font, 'arial')) {
+            if (file_exists(public_path('fonts/arialbd.ttf'))) {
+                return public_path('fonts/arialbd.ttf');
+            }
+        }
+
+        // Fallback default
+        if (file_exists(public_path('fonts/Rockwell-Regular.otf'))) {
+            return public_path('fonts/Rockwell-Regular.otf');
+        }
+
+        return public_path('fonts/ROCK.TTF');
     }
 
     /**
