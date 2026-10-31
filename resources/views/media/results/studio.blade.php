@@ -901,34 +901,65 @@
             <!-- TAB 4: CORE ELEMENTS (PROGRAM, RESULT NO, ZONE)               -->
             <!-- ============================================================== -->
             <div x-show="activeTab === 'core'" class="space-y-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">Core Program Elements</h2>
-                    
-                    <!-- Result Number -->
-                    <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
-                            <span>Result Number (#{{ sprintf('%02d', $resultNo) }})</span>
-                            <span class="font-mono text-purple-700" x-text="settings.result_size + 'px'"></span>
-                        </div>
-                        <input type="range" min="150" max="650" step="5" x-model.number="settings.result_size" @input="render()" class="w-full accent-purple-600">
-                        <div class="flex items-center justify-between text-xs pt-1">
-                            <span>Rotation</span>
-                            <span class="font-mono" x-text="settings.result_rotation + '°'"></span>
-                        </div>
-                        <input type="range" min="-180" max="180" step="1" x-model.number="settings.result_rotation" @input="render()" class="w-full accent-purple-600">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Core Program Elements (പ്രധാന ഘടകങ്ങൾ)</h2>
+                        <span class="text-[10px] text-slate-500 font-mono">Realtime Controls</span>
                     </div>
 
-                    <!-- Program Name -->
-                    <div class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
-                            <span>Program Name Size</span>
-                            <div class="flex items-center gap-1 font-mono">
-                                <button type="button" @click="settings.competition_size = Math.max(20, settings.competition_size - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
-                                <span class="w-12 text-center" x-text="settings.competition_size + 'px'"></span>
-                                <button type="button" @click="settings.competition_size = Math.min(180, settings.competition_size + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                    <!-- 1. PROGRAM NAME (മത്സരത്തിന്റെ പേര്) -->
+                    <div class="space-y-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black uppercase tracking-wide text-slate-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                                <span>Program Name (മത്സരത്തിന്റെ പേര്)</span>
+                            </span>
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-slate-600 select-none">
+                                <input type="checkbox" x-model="settings.show_competition" @change="render()" class="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-0">
+                                <span>Show</span>
+                            </label>
+                        </div>
+
+                        <!-- Editable Program Name Input -->
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-600">Program Title Text (പേര് എഡിറ്റ് ചെയ്യാം)</label>
+                            <input type="text" x-model="data.competition" @input="render()" placeholder="മത്സരത്തിന്റെ പേര്"
+                                   class="w-full text-xs p-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                        </div>
+
+                        <!-- Program Name Color Picker & Quick Swatches -->
+                        <div class="pt-2 border-t border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Program Name Color (നിറം മാറ്റുക)</span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" x-model="settings.competition_color" @input="render()" class="w-7 h-7 rounded border border-slate-300 cursor-pointer bg-white p-0.5">
+                                    <span class="font-mono text-xs text-slate-700 font-bold" x-text="settings.competition_color"></span>
+                                </div>
+                            </div>
+                            <!-- Swatches -->
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <template x-for="c in ['#000000', '#D02627', '#be1e2d', '#FFFFFF', '#1e1b4b', '#0f172a', '#d97706', '#059669', '#2563eb', '#4b5563']" :key="'comp_c_' + c">
+                                    <button type="button" @click="settings.competition_color = c; render();"
+                                            :style="'background-color: ' + c"
+                                            class="w-6 h-6 rounded-md border border-slate-300 shadow-2xs hover:scale-110 transition cursor-pointer"
+                                            :class="settings.competition_color.toLowerCase() === c.toLowerCase() ? 'ring-2 ring-purple-600 ring-offset-1' : ''">
+                                    </button>
+                                </template>
                             </div>
                         </div>
-                        <input type="range" min="30" max="180" step="2" x-model.number="settings.competition_size" @input="render()" class="w-full accent-purple-600">
+
+                        <!-- Program Name Size -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Font Size (വലുപ്പം)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.competition_size = Math.max(20, settings.competition_size - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <span class="w-12 text-center text-purple-700" x-text="settings.competition_size + 'px'"></span>
+                                    <button type="button" @click="settings.competition_size = Math.min(220, settings.competition_size + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="20" max="220" step="2" x-model.number="settings.competition_size" @input="render()" class="w-full accent-purple-600">
+                        </div>
 
                         <!-- Program Line Distance / Line Spacing -->
                         <div class="pt-2 border-t border-slate-200 space-y-1.5">
@@ -937,27 +968,194 @@
                                 <div class="flex items-center gap-1 font-mono">
                                     <button type="button" @click="settings.competition_line_height = Math.max(15, settings.competition_line_height - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
                                     <span class="w-12 text-center text-purple-700" x-text="settings.competition_line_height + 'px'"></span>
-                                    <button type="button" @click="settings.competition_line_height = Math.min(160, settings.competition_line_height + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                    <button type="button" @click="settings.competition_line_height = Math.min(180, settings.competition_line_height + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
                                 </div>
                             </div>
-                            <input type="range" min="15" max="160" step="2" x-model.number="settings.competition_line_height" @input="render()" class="w-full accent-purple-600">
+                            <input type="range" min="15" max="180" step="2" x-model.number="settings.competition_line_height" @input="render()" class="w-full accent-purple-600">
                         </div>
 
-                        <!-- Max Width -->
-                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
-                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
-                                <span>Max Width (പരമാവധി വീതി)</span>
-                                <span class="font-mono text-purple-700" x-text="settings.competition_max_width + 'px'"></span>
+                        <!-- Max Width & Alignment -->
+                        <div class="pt-2 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs">
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between font-bold text-slate-700">
+                                    <span>Max Width</span>
+                                    <span class="font-mono text-purple-700 text-[11px]" x-text="settings.competition_max_width + 'px'"></span>
+                                </div>
+                                <input type="range" min="180" max="950" step="10" x-model.number="settings.competition_max_width" @input="render()" class="w-full accent-purple-600">
                             </div>
-                            <input type="range" min="200" max="950" step="10" x-model.number="settings.competition_max_width" @input="render()" class="w-full accent-purple-600">
+                            <div class="space-y-1">
+                                <span class="font-bold text-slate-700 block">Alignment</span>
+                                <div class="grid grid-cols-3 gap-1">
+                                    <button type="button" @click="settings.competition_align = 'left'; render();" class="py-1 px-1.5 text-[10px] font-bold rounded border text-center" :class="(settings.competition_align || 'left') === 'left' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white border-slate-200 text-slate-700'">Left</button>
+                                    <button type="button" @click="settings.competition_align = 'center'; render();" class="py-1 px-1.5 text-[10px] font-bold rounded border text-center" :class="settings.competition_align === 'center' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white border-slate-200 text-slate-700'">Center</button>
+                                    <button type="button" @click="settings.competition_align = 'right'; render();" class="py-1 px-1.5 text-[10px] font-bold rounded border text-center" :class="settings.competition_align === 'right' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white border-slate-200 text-slate-700'">Right</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Rotation -->
-                        <div class="flex items-center justify-between text-xs pt-1">
-                            <span>Rotation</span>
-                            <span class="font-mono" x-text="settings.competition_rotation + '°'"></span>
+                        <div class="pt-2 border-t border-slate-200 space-y-1">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Rotation</span>
+                                <span class="font-mono text-purple-700" x-text="settings.competition_rotation + '°'"></span>
+                            </div>
+                            <input type="range" min="-180" max="180" step="1" x-model.number="settings.competition_rotation" @input="render()" class="w-full accent-purple-600">
                         </div>
-                        <input type="range" min="-180" max="180" step="1" x-model.number="settings.competition_rotation" @input="render()" class="w-full accent-purple-600">
+                    </div>
+
+                    <!-- 2. ZONE CAPSULE (MIX ZONE / സോൺ കാപ്സ്യൂൾ) -->
+                    <div class="space-y-3.5 bg-amber-50/60 p-4 rounded-xl border border-amber-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black uppercase tracking-wide text-amber-950 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                <span>Zone Capsule (MIX ZONE / സോൺ)</span>
+                            </span>
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-amber-900 select-none">
+                                <input type="checkbox" x-model="settings.show_category" @change="render()" class="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-0">
+                                <span>Show</span>
+                            </label>
+                        </div>
+
+                        <!-- Editable Zone Text Input -->
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-amber-900">Zone Text (സോൺ ടെക്സ്റ്റ്)</label>
+                            <input type="text" x-model="data.category" @input="render()" placeholder="ഉദാ: MIX ZONE, ZONE A"
+                                   class="w-full text-xs p-2 rounded-lg border border-amber-300 bg-white font-bold text-slate-900 uppercase focus:border-amber-600 focus:ring-1 focus:ring-amber-600">
+                        </div>
+
+                        <!-- Quick Zone Presets -->
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-amber-800">Quick Zone Presets (ക്ലിക്ക് ചെയ്ത് മാറ്റാം):</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" @click="data.category = 'MIX ZONE'; render();" class="px-2.5 py-1 rounded-md text-[10px] font-black border transition" :class="data.category.toUpperCase() === 'MIX ZONE' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    MIX ZONE
+                                </button>
+                                <button type="button" @click="data.category = 'ZONE A'; render();" class="px-2 py-1 rounded-md text-[10px] font-black border transition" :class="data.category.toUpperCase() === 'ZONE A' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    ZONE A
+                                </button>
+                                <button type="button" @click="data.category = 'ZONE B'; render();" class="px-2 py-1 rounded-md text-[10px] font-black border transition" :class="data.category.toUpperCase() === 'ZONE B' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    ZONE B
+                                </button>
+                                <button type="button" @click="data.category = 'ZONE C'; render();" class="px-2 py-1 rounded-md text-[10px] font-black border transition" :class="data.category.toUpperCase() === 'ZONE C' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    ZONE C
+                                </button>
+                                <button type="button" @click="data.category = 'GENERAL'; render();" class="px-2 py-1 rounded-md text-[10px] font-black border transition" :class="data.category.toUpperCase() === 'GENERAL' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    GENERAL
+                                </button>
+                                <button type="button" @click="data.category = 'ALL ZONES'; render();" class="px-2 py-1 rounded-md text-[10px] font-black border transition" :class="data.category.toUpperCase() === 'ALL ZONES' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-amber-300 text-amber-950 hover:bg-amber-100'">
+                                    ALL ZONES
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Zone Color Picker & Quick Swatches -->
+                        <div class="pt-2 border-t border-amber-200 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold text-amber-950">
+                                <span>Zone Text Color (സോൺ നിറം)</span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" x-model="settings.category_color" @input="render()" class="w-7 h-7 rounded border border-amber-300 cursor-pointer bg-white p-0.5">
+                                    <span class="font-mono text-xs text-amber-900 font-bold" x-text="settings.category_color"></span>
+                                </div>
+                            </div>
+                            <!-- Swatches -->
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <template x-for="c in ['#FFFFFF', '#000000', '#D02627', '#be1e2d', '#F59E0B', '#0EA5E9', '#10B981', '#1e1b4b', '#fde047', '#4b5563']" :key="'cat_c_' + c">
+                                    <button type="button" @click="settings.category_color = c; render();"
+                                            :style="'background-color: ' + c"
+                                            class="w-6 h-6 rounded-md border border-slate-300 shadow-2xs hover:scale-110 transition cursor-pointer"
+                                            :class="settings.category_color.toLowerCase() === c.toLowerCase() ? 'ring-2 ring-amber-600 ring-offset-1' : ''">
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Zone Font Size -->
+                        <div class="pt-2 border-t border-amber-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-amber-950">
+                                <span>Zone Size (വലുപ്പം)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.category_size = Math.max(16, settings.category_size - 2); render();" class="w-6 h-6 rounded bg-white border border-amber-300 font-bold hover:bg-amber-50 flex items-center justify-center">-</button>
+                                    <span class="w-12 text-center text-amber-900" x-text="settings.category_size + 'px'"></span>
+                                    <button type="button" @click="settings.category_size = Math.min(120, settings.category_size + 2); render();" class="w-6 h-6 rounded bg-white border border-amber-300 font-bold hover:bg-amber-50 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="16" max="120" step="1" x-model.number="settings.category_size" @input="render()" class="w-full accent-amber-600">
+                        </div>
+
+                        <!-- Rotation -->
+                        <div class="pt-2 border-t border-amber-200 space-y-1">
+                            <div class="flex items-center justify-between text-xs font-bold text-amber-950">
+                                <span>Rotation</span>
+                                <span class="font-mono text-amber-900" x-text="settings.category_rotation + '°'"></span>
+                            </div>
+                            <input type="range" min="-180" max="180" step="1" x-model.number="settings.category_rotation" @input="render()" class="w-full accent-amber-600">
+                        </div>
+                    </div>
+
+                    <!-- 3. RESULT NUMBER (#01) -->
+                    <div class="space-y-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black uppercase tracking-wide text-slate-800 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-red-600"></span>
+                                <span>Result Number (#{{ sprintf('%02d', $resultNo) }})</span>
+                            </span>
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-slate-600 select-none">
+                                <input type="checkbox" x-model="settings.show_result_no" @change="render()" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-0">
+                                <span>Show</span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 items-center">
+                            <!-- Number Input -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-600">Result Number</label>
+                                <input type="text" x-model="data.result_no" @input="render()" placeholder="01"
+                                       class="w-full text-xs p-2 rounded-lg border border-slate-300 bg-white font-mono font-bold text-slate-900">
+                            </div>
+                            <!-- Color Picker -->
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                    <span>Color</span>
+                                    <span class="font-mono text-[10px]" x-text="settings.result_color"></span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" x-model="settings.result_color" @input="render()" class="w-full h-8 rounded border border-slate-300 cursor-pointer bg-white p-0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Color Swatches for Result Number -->
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                            <template x-for="c in ['#D02627', '#be1e2d', '#000000', '#FFFFFF', '#1e1b4b', '#d97706', '#059669', '#7c3aed']" :key="'res_c_' + c">
+                                <button type="button" @click="settings.result_color = c; render();"
+                                        :style="'background-color: ' + c"
+                                        class="w-6 h-6 rounded-md border border-slate-300 shadow-2xs hover:scale-110 transition cursor-pointer"
+                                        :class="settings.result_color.toLowerCase() === c.toLowerCase() ? 'ring-2 ring-red-600 ring-offset-1' : ''">
+                                </button>
+                            </template>
+                        </div>
+
+                        <!-- Result Number Size -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Number Size</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.result_size = Math.max(80, settings.result_size - 10); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <span class="w-14 text-center text-red-600" x-text="settings.result_size + 'px'"></span>
+                                    <button type="button" @click="settings.result_size = Math.min(800, settings.result_size + 10); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="80" max="800" step="5" x-model.number="settings.result_size" @input="render()" class="w-full accent-red-600">
+                        </div>
+
+                        <!-- Rotation -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Rotation</span>
+                                <span class="font-mono text-red-600" x-text="settings.result_rotation + '°'"></span>
+                            </div>
+                            <input type="range" min="-180" max="180" step="1" x-model.number="settings.result_rotation" @input="render()" class="w-full accent-red-600">
+                        </div>
                     </div>
                 </div>
             </div>
