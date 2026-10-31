@@ -767,6 +767,7 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
     Route::post('/enter-stage/{call}', [AnnouncerController::class, 'enterStage'])->name('enter-stage');
     Route::post('/complete-stage/{call}', [AnnouncerController::class, 'completeStage'])->name('complete-stage');
     Route::post('/{result}/announced', [AnnouncerController::class, 'markAnnounced'])->name('announced');
+    Route::post('/{result}/update-grades', [AnnouncerController::class, 'updateGrades'])->name('update-grades');
     Route::post('/standings/{standingAnnouncement}/announced', [AnnouncerController::class, 'markStandingAnnounced'])->name('standings.announced');
 });
 

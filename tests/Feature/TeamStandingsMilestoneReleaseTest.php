@@ -147,6 +147,17 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
             'name' => 'House Alpha',
             'points_cache' => 0,
         ]);
+
+        // 4. Public Home page and Groups page must render public_points_cache (0 PTS), NOT live points!
+        $homeResponse = $this->get(route('home'));
+        $homeResponse->assertOk();
+        $homeResponse->assertSee('House Alpha');
+        $homeResponse->assertDontSee($this->groupA->points_cache.' PTS');
+
+        $groupsResponse = $this->get(route('groups.index'));
+        $groupsResponse->assertOk();
+        $groupsResponse->assertSee('House Alpha');
+        $groupsResponse->assertDontSee($this->groupA->points_cache.' PTS');
     }
 
     public function test_standings_auto_update_when_milestone_is_reached(): void
@@ -351,5 +362,80 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
 
         $adminResponse = $this->actingAs($this->admin)->get(route('admin.points.index'));
         $adminResponse->assertOk();
+    }
+
+    public function test_announcer_console_displays_grade_points_and_breakdown_and_can_update_grades(): void
+    {
+        $category = ProgramCategory::create(['name' => 'Speech', 'code' => 'SP', 'slug' => 'speech']);
+        $prog = Program::create([
+            'category_id' => $category->id,
+            'name' => 'English Elocution',
+            'code' => 'P-401',
+            'type' => 'individual',
+            'eligibility' => 'all',
+            'status' => 'completed',
+        ]);
+
+        $student1 = $this->createStudent($this->groupA, 'Yaseen First', 'CH-401');
+        $student2 = $this->createStudent($this->groupB, 'Rayyan Second', 'CH-402');
+        $student3 = $this->createStudent($this->groupA, 'Bilal Third', 'CH-403');
+
+        $entry1 = $this->createEntry($prog, $student1, 'CH-401');
+        $entry2 = $this->createEntry($prog, $student2, 'CH-402');
+        $entry3 = $this->createEntry($prog, $student3, 'CH-403');
+
+        $result = Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry1->id,
+            'first_grade' => 'A+',
+            'second_entry_id' => $entry2->id,
+            'second_grade' => 'A',
+            'third_entry_id' => $entry3->id,
+            'third_grade' => 'B',
+            'status' => 'delivered',
+        ]);
+
+        // 1. Announcer desk displays grades, grade points, and total points
+        $response = $this->actingAs($this->announcer)->get(route('announcer.index'));
+        $response->assertOk();
+        $response->assertSee('English Elocution');
+        $response->assertSee('Yaseen First');
+        $response->assertSee('Grade A+');
+        $response->assertSee('+6 Grade Pts');
+        $response->assertSee('+5 Pos Pts');
+        $response->assertSee('11 PTS');
+
+        $response->assertSee('Rayyan Second');
+        $response->assertSee('Grade A');
+        $response->assertSee('+5 Grade Pts');
+        $response->assertSee('+3 Pos Pts');
+        $response->assertSee('8 PTS');
+
+        $response->assertSee('Bilal Third');
+        $response->assertSee('Grade B');
+        $response->assertSee('+3 Grade Pts');
+        $response->assertSee('+1 Pos Pts');
+        $response->assertSee('4 PTS');
+
+        // 2. Announcer can update declared grades directly
+        $updateResponse = $this->actingAs($this->announcer)
+            ->post(route('announcer.update-grades', $result), [
+                'first_grade' => 'A+',
+                'second_grade' => 'A+',
+                'third_grade' => 'A',
+            ]);
+
+        $updateResponse->assertRedirect();
+        $updateResponse->assertSessionHas('success');
+
+        $result->refresh();
+        $this->assertEquals('A+', $result->second_grade);
+        $this->assertEquals('A', $result->third_grade);
+
+        $w2 = $result->getWinnerBreakdown(2);
+        $this->assertEquals('A+', $w2['grade']);
+        $this->assertEquals(6, $w2['grade_points']);
+        $this->assertEquals(3, $w2['position_points']);
+        $this->assertEquals(9, $w2['total_points']);
     }
 }

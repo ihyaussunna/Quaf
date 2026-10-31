@@ -137,6 +137,7 @@ class Group extends Model
 
         return self::orderBy('public_rank_cache', 'asc')
             ->orderByDesc('public_points_cache')
+            ->orderBy('id', 'asc')
             ->withCount(['students', 'entries'])
             ->get();
     }
@@ -160,10 +161,12 @@ class Group extends Model
             : 'Initial Standings');
 
         // 4. Copy live points_cache & rank_cache to public_points_cache & public_rank_cache
-        foreach (self::all() as $grp) {
+        $sortedGroups = self::orderByDesc('points_cache')->orderBy('name')->get();
+        $rank = 1;
+        foreach ($sortedGroups as $grp) {
             $grp->update([
                 'public_points_cache' => (int) $grp->points_cache,
-                'public_rank_cache' => (int) $grp->rank_cache,
+                'public_rank_cache' => $rank++,
             ]);
         }
 
@@ -192,7 +195,7 @@ class Group extends Model
             return false;
         }
 
-        $milestonesStr = FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40');
+        $milestonesStr = FestivalSetting::get('public_standings_milestones', '5,10,15,20,25,30,35,40');
         $milestones = array_map('intval', array_filter(explode(',', $milestonesStr)));
 
         $publishedResultsCount = Result::where('status', 'published')->count();

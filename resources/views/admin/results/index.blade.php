@@ -30,12 +30,40 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-            <!-- Publish Team Points -->
+            <!-- Release Standings to Public Website -->
+            <div x-data="{ open: false }" class="relative inline-block">
+                <button @click="open = !open" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-500 transition-all flex items-center gap-1.5 shadow-xs">
+                    <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Release Standings to Public</span>
+                </button>
+                <div x-show="open" @click.outside="open = false" x-cloak class="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl z-30 space-y-3 text-xs" style="display: none;">
+                    <div class="font-bold text-slate-900 border-b border-slate-100 pb-2">
+                        Release Official Public Standings
+                        <div class="text-[11px] text-slate-500 font-normal mt-0.5">Active Milestone: {{ \App\Models\FestivalSetting::get('public_standings_label', 'Initial Standings') }}</div>
+                    </div>
+                    <form method="POST" action="{{ route('admin.results.publish-standings') }}" class="space-y-2.5">
+                        @csrf
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Standings Milestone Label</label>
+                            <input type="text" name="custom_label" placeholder="e.g. Standings after 5 Results"
+                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-tight">
+                            പബ്ലിക് വെബ്സൈറ്റിലെ പോയിന്റ് നില ഈ നിമിഷത്തിലെ സ്കോറുകളിലേക്ക് അപ്‌ഡേറ്റ് ചെയ്യപ്പെടും.
+                        </p>
+                        <button type="submit" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs font-mono uppercase tracking-wider transition">
+                            Confirm &amp; Release Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recalculate Internal Points -->
             <form method="POST" action="{{ route('admin.points.recalculate') }}" class="inline">
                 @csrf
                 <button type="submit" class="px-3.5 py-2 rounded-xl bg-[#be1e2d] text-white font-semibold text-xs hover:bg-[#a01624] transition-all flex items-center gap-2 shadow-xs">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    <span>Publish Team Points</span>
+                    <span>Recalculate Points Engine</span>
                 </button>
             </form>
 

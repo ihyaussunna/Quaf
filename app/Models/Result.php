@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Result extends Model
 {
@@ -251,5 +252,120 @@ class Result extends Model
         $cleanProg = trim(preg_replace('/_+/', '_', (string) $cleanProg), '_');
 
         return "{$resNo}_{$cleanZone}_{$cleanProg}.{$ext}";
+    }
+
+    /**
+     * Get detailed points breakdown (position pts, grade, grade pts, total pts) for a podium placement.
+     *
+     * @return array{
+     *     entry: ?ProgramEntry,
+     *     name: string,
+     *     chest: string,
+     *     team: string,
+     *     team_color: string,
+     *     grade: ?string,
+     *     grade_points: int,
+     *     position_points: int,
+     *     total_points: int
+     * }
+     */
+    public function getWinnerBreakdown(int $pos): array
+    {
+        $entry = match ($pos) {
+            1 => $this->firstEntry,
+            2 => $this->secondEntry,
+            3 => $this->thirdEntry,
+            default => null,
+        };
+
+        $declaredGrade = match ($pos) {
+            1 => $this->first_grade,
+            2 => $this->second_grade,
+            3 => $this->third_grade,
+            default => null,
+        };
+
+        $grade = (! empty($declaredGrade) && strtoupper(trim($declaredGrade)) !== 'NO_GRADE')
+            ? strtoupper(trim($declaredGrade))
+            : null;
+
+        if (! $grade && $entry) {
+            if ($entry->relationLoaded('scoreSheets')) {
+                $judgeGrade = $entry->scoreSheets->where('is_submitted', true)->pluck('criteria_scores.grade')->filter()->first();
+                if ($judgeGrade && isset(PointCalculationService::GRADE_POINTS[strtoupper(trim($judgeGrade))])) {
+                    $grade = strtoupper(trim($judgeGrade));
+                } else {
+                    $avgScore = $entry->scoreSheets->where('is_submitted', true)->avg('total_score');
+                    if ($avgScore !== null && $avgScore > 0) {
+                        $gradeInfo = PointCalculationService::getGradeFromScore((float) $avgScore);
+                        $grade = $gradeInfo['grade'];
+                    }
+                }
+            }
+        }
+
+        $weight = (float) ($this->program?->points_weight ?? 1.0);
+        $gradePointsRaw = ($grade && isset(PointCalculationService::GRADE_POINTS[$grade]))
+            ? PointCalculationService::GRADE_POINTS[$grade]
+            : 0;
+        $gradePoints = (int) round($gradePointsRaw * $weight);
+
+        $posPointsMap = $this->program
+            ? PointCalculationService::getPositionPointsForProgram($this->program)
+            : [1 => 5, 2 => 3, 3 => 1];
+        $posPoints = (int) round(($posPointsMap[$pos] ?? 0) * $weight);
+
+        $name = $entry?->student?->name ?: ($entry ? 'Chest #'.$entry->chest_number : '—');
+        $chest = $entry?->chest_number ?? '—';
+        $team = $entry?->group?->name ?? $entry?->student?->group?->name ?? '—';
+        $teamColor = $entry?->group?->color_hex ?? $entry?->student?->group?->color_hex ?? '#be1e2d';
+
+        return [
+            'entry' => $entry,
+            'name' => $name,
+            'chest' => $chest,
+            'team' => $team,
+            'team_color' => $teamColor,
+            'grade' => $grade,
+            'grade_points' => $gradePoints,
+            'position_points' => $posPoints,
+            'total_points' => ($posPoints + $gradePoints),
+        ];
+    }
+
+    /**
+     * Get non-placed entries in this program that achieved grades (A+, A, B, C).
+     *
+     * @return Collection<int, ProgramEntry>
+     */
+    public function getOtherGradeHolders(): Collection
+    {
+        if (! $this->program) {
+            return collect();
+        }
+
+        $placedEntryIds = array_filter([
+            $this->first_entry_id,
+            $this->second_entry_id,
+            $this->third_entry_id,
+        ]);
+
+        $weight = (float) ($this->program->points_weight ?? 1.0);
+
+        return $this->program->entries()
+            ->whereIn('status', ['verified', 'confirmed'])
+            ->whereNotIn('id', $placedEntryIds)
+            ->with(['student.group', 'group', 'scoreSheets'])
+            ->get()
+            ->map(function ($e) use ($weight) {
+                $avgScore = $e->scoreSheets->where('is_submitted', true)->avg('total_score');
+                $gradeInfo = $avgScore ? PointCalculationService::getGradeFromScore((float) $avgScore) : ['grade' => null, 'points' => 0];
+                $e->computed_grade = $gradeInfo['grade'];
+                $e->computed_grade_points = (int) round($gradeInfo['points'] * $weight);
+
+                return $e;
+            })
+            ->filter(fn ($e) => ! empty($e->computed_grade))
+            ->values();
     }
 }

@@ -28,7 +28,7 @@
             <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 text-center md:text-right font-mono shrink-0">
                 <span class="text-xs text-slate-400 uppercase font-semibold block mb-1">Official Points Tally</span>
                 <div class="text-4xl sm:text-5xl font-rockwell font-bold" style="color: {{ $group->color_hex }}">
-                    {{ number_format($group->points_cache) }}
+                    {{ number_format($group->public_points_cache ?? 0) }}
                 </div>
                 <span class="text-[11px] text-slate-500 mt-1 block">Aggregated Score</span>
             </div>

@@ -95,7 +95,7 @@
                             <!-- Points -->
                             <div class="flex items-baseline gap-1.5 shrink-0 text-right">
                                 <span class="font-sora font-black text-2xl sm:text-3xl lg:text-4xl text-amber-600 leading-none">
-                                    {{ number_format($group->points_cache) }}
+                                    {{ number_format($group->public_points_cache ?? 0) }}
                                 </span>
                                 <span class="text-xs sm:text-sm font-mono text-slate-500 uppercase tracking-widest font-semibold">
                                     PTS
@@ -119,7 +119,7 @@
                             <!-- Points -->
                             <div class="flex items-baseline gap-1.5 shrink-0 text-right">
                                 <span class="font-sora font-black text-2xl sm:text-3xl lg:text-4xl text-slate-900 leading-none">
-                                    {{ number_format($group->points_cache) }}
+                                    {{ number_format($group->public_points_cache ?? 0) }}
                                 </span>
                                 <span class="text-xs sm:text-sm font-mono text-slate-400 uppercase tracking-widest font-semibold">
                                     PTS

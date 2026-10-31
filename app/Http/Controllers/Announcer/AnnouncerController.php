@@ -9,6 +9,7 @@ use App\Models\Result;
 use App\Models\Stage;
 use App\Models\StandingAnnouncement;
 use App\Services\AuditLogger;
+use App\Services\PointCalculationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,9 +26,16 @@ class AnnouncerController extends Controller
         $query = Result::with([
             'program.category',
             'program.stage',
+            'program.zone',
             'firstEntry.student.group',
+            'firstEntry.group',
+            'firstEntry.scoreSheets',
             'secondEntry.student.group',
+            'secondEntry.group',
+            'secondEntry.scoreSheets',
             'thirdEntry.student.group',
+            'thirdEntry.group',
+            'thirdEntry.scoreSheets',
         ]);
 
         if ($search) {
@@ -189,5 +197,38 @@ class AnnouncerController extends Controller
         AuditLogger::log('announcer_complete_stage', $call, null, ['status' => 'completed']);
 
         return back()->with('success', "കോഡ് {$call->entry?->code_letter} (ചെസ്റ്റ് #{$call->entry?->chest_number}) മത്സരം പൂർത്തിയാക്കി.");
+    }
+
+    /**
+     * Quick update for declared grades from the Announcer Desk.
+     */
+    public function updateGrades(Request $request, Result $result): RedirectResponse
+    {
+        $validated = $request->validate([
+            'first_grade' => ['nullable', 'string', 'max:10'],
+            'second_grade' => ['nullable', 'string', 'max:10'],
+            'third_grade' => ['nullable', 'string', 'max:10'],
+        ]);
+
+        $firstGrade = $validated['first_grade'] === 'NO_GRADE' ? null : ($validated['first_grade'] ?? $result->first_grade);
+        $secondGrade = $validated['second_grade'] === 'NO_GRADE' ? null : ($validated['second_grade'] ?? $result->second_grade);
+        $thirdGrade = $validated['third_grade'] === 'NO_GRADE' ? null : ($validated['third_grade'] ?? $result->third_grade);
+
+        $result->update([
+            'first_grade' => $firstGrade,
+            'second_grade' => $secondGrade,
+            'third_grade' => $thirdGrade,
+        ]);
+
+        // Recalculate points for this program to ensure synchronization
+        app(PointCalculationService::class)->recalculateForProgram($result->program_id);
+
+        AuditLogger::log('announcer_update_grades', $result, [], [
+            'first_grade' => $firstGrade,
+            'second_grade' => $secondGrade,
+            'third_grade' => $thirdGrade,
+        ]);
+
+        return back()->with('success', "പ്രോഗ്രാം '{$result->program?->name}' ഫലത്തിന്റെ ഗ്രേഡുകൾ വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു.");
     }
 }

@@ -220,19 +220,33 @@
                         $isDelivered = in_array($res->status, ['send', 'delivered']);
                         $prog = $res->program;
                         
-                        $firstWinnerName = $res->firstEntry?->student?->name ?: ($res->firstEntry ? 'Chest #'.$res->firstEntry->chest_number : 'None');
-                        $firstWinnerChest = $res->firstEntry?->chest_number ?? '-';
-                        $firstWinnerTeam = $res->firstEntry?->group?->name ?? $res->firstEntry?->student?->group?->name ?? '-';
+                        $w1 = $res->getWinnerBreakdown(1);
+                        $w2 = $res->getWinnerBreakdown(2);
+                        $w3 = $res->getWinnerBreakdown(3);
+                        $otherGraded = $res->getOtherGradeHolders();
 
-                        $secondWinnerName = $res->secondEntry?->student?->name ?: ($res->secondEntry ? 'Chest #'.$res->secondEntry->chest_number : 'None');
-                        $secondWinnerChest = $res->secondEntry?->chest_number ?? '-';
-                        $secondWinnerTeam = $res->secondEntry?->group?->name ?? $res->secondEntry?->student?->group?->name ?? '-';
+                        $w1Desc = "{$w1['name']} (ചെസ്റ്റ് #{$w1['chest']}, {$w1['team']})";
+                        if ($w1['grade']) {
+                            $w1Desc .= " — Grade {$w1['grade']} (ഗ്രേഡ് പോയിന്റ്: +{$w1['grade_points']}, പൊസിഷൻ: +{$w1['position_points']} | ആകെ: {$w1['total_points']} pts)";
+                        } else {
+                            $w1Desc .= " — പൊസിഷൻ: +{$w1['position_points']} pts (ആകെ: {$w1['total_points']} pts)";
+                        }
 
-                        $thirdWinnerName = $res->thirdEntry?->student?->name ?: ($res->thirdEntry ? 'Chest #'.$res->thirdEntry->chest_number : 'None');
-                        $thirdWinnerChest = $res->thirdEntry?->chest_number ?? '-';
-                        $thirdWinnerTeam = $res->thirdEntry?->group?->name ?? $res->thirdEntry?->student?->group?->name ?? '-';
+                        $w2Desc = "{$w2['name']} (ചെസ്റ്റ് #{$w2['chest']}, {$w2['team']})";
+                        if ($w2['grade']) {
+                            $w2Desc .= " — Grade {$w2['grade']} (ഗ്രേഡ് പോയിന്റ്: +{$w2['grade_points']}, പൊസിഷൻ: +{$w2['position_points']} | ആകെ: {$w2['total_points']} pts)";
+                        } else {
+                            $w2Desc .= " — പൊസിഷൻ: +{$w2['position_points']} pts (ആകെ: {$w2['total_points']} pts)";
+                        }
 
-                        $scriptText = "ക്വാഫ് ഫെസ്റ്റ് {$prog?->name} മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു: ഒന്നാം സ്ഥാനം: {$firstWinnerName} (ചെസ്റ്റ് #{$firstWinnerChest}, ടീം {$firstWinnerTeam}). രണ്ടാം സ്ഥാനം: {$secondWinnerName} (ചെസ്റ്റ് #{$secondWinnerChest}, ടീം {$secondWinnerTeam}). മൂന്നാം സ്ഥാനം: {$thirdWinnerName} (ചെസ്റ്റ് #{$thirdWinnerChest}, ടീം {$thirdWinnerTeam}).";
+                        $w3Desc = "{$w3['name']} (ചെസ്റ്റ് #{$w3['chest']}, {$w3['team']})";
+                        if ($w3['grade']) {
+                            $w3Desc .= " — Grade {$w3['grade']} (ഗ്രേഡ് പോയിന്റ്: +{$w3['grade_points']}, പൊസിഷൻ: +{$w3['position_points']} | ആകെ: {$w3['total_points']} pts)";
+                        } else {
+                            $w3Desc .= " — പൊസിഷൻ: +{$w3['position_points']} pts (ആകെ: {$w3['total_points']} pts)";
+                        }
+
+                        $scriptText = "ക്വാഫ് ഫെസ്റ്റ് {$prog?->name} മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു: ഒന്നാം സ്ഥാനം: {$w1Desc}. രണ്ടാം സ്ഥാനം: {$w2Desc}. മൂന്നാം സ്ഥാനം: {$w3Desc}.";
                     @endphp
 
                     <div class="bg-white rounded-3xl p-6 sm:p-8 border {{ $isDelivered ? 'border-amber-300 ring-4 ring-amber-100/70 shadow-md' : 'border-slate-200 shadow-xs' }} transition">
@@ -281,68 +295,235 @@
                         <!-- Stage Microphone Speech Script Box -->
                         <div class="mt-5 p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200">
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5 font-sora">
                                     <svg class="w-4 h-4 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-                                    മൈക്രോഫോൺ അനൗൺസ്മെന്റ് സ്ക്രിപ്റ്റ് (Stage Announcement Script)
+                                    <span>മൈക്രോഫോൺ അനൗൺസ്മെന്റ് സ്ക്രിപ്റ്റ് (Stage Announcement Script with Grade Points)</span>
                                 </span>
                                 <button type="button" onclick="navigator.clipboard.writeText('{{ addslashes($scriptText) }}'); alert('അനൗൺസ്മെന്റ് സ്ക്രിപ്റ്റ് കോപ്പി ചെയ്തു.');" 
-                                        class="px-2.5 py-1 rounded-lg bg-amber-200/80 hover:bg-amber-300 text-amber-900 text-[11px] font-bold transition font-ml">
+                                        class="px-2.5 py-1 rounded-lg bg-amber-200/80 hover:bg-amber-300 text-amber-900 text-[11px] font-bold transition font-ml shadow-2xs">
                                     സ്ക്രിപ്റ്റ് കോപ്പി ചെയ്യുക
                                 </button>
                             </div>
                             <div class="text-sm font-ml text-slate-800 leading-relaxed bg-white/80 p-3.5 rounded-xl border border-amber-200/60">
                                 <div>ശ്രദ്ധിക്കുക... ക്വാഫ് ഫെസ്റ്റ് <strong>{{ $prog?->name }}</strong> ({{ $prog?->malayalam_name ?: $prog?->code }}) മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു:</div>
-                                <div class="mt-2 space-y-1 font-medium">
-                                    <div>• <strong>ഒന്നാം സ്ഥാനം:</strong> {{ $firstWinnerName }} (ചെസ്റ്റ് നമ്പർ #{{ $firstWinnerChest }}, {{ $firstWinnerTeam }})</div>
-                                    <div>• <strong>രണ്ടാം സ്ഥാനം:</strong> {{ $secondWinnerName }} (ചെസ്റ്റ് നമ്പർ #{{ $secondWinnerChest }}, {{ $secondWinnerTeam }})</div>
-                                    <div>• <strong>മൂന്നാം സ്ഥാനം:</strong> {{ $thirdWinnerName }} (ചെസ്റ്റ് നമ്പർ #{{ $thirdWinnerChest }}, {{ $thirdWinnerTeam }})</div>
+                                <div class="mt-2.5 space-y-2 font-medium">
+                                    <div class="flex flex-wrap items-baseline gap-1.5">
+                                        <span class="font-bold text-amber-900">• ഒന്നാം സ്ഥാനം:</span>
+                                        <span class="font-bold text-slate-900 font-sora">{{ $w1['name'] }}</span>
+                                        <span class="text-xs font-mono text-slate-600">(ചെസ്റ്റ് #{{ $w1['chest'] }}, {{ $w1['team'] }})</span>
+                                        <span class="text-slate-400">—</span>
+                                        @if($w1['grade'])
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Grade {{ $w1['grade'] }} (+{{ $w1['grade_points'] }} pts)</span>
+                                            <span class="text-xs font-mono text-slate-600">+{{ $w1['position_points'] }} pos = <strong class="text-amber-900 text-sm font-bold">{{ $w1['total_points'] }} pts</strong></span>
+                                        @else
+                                            <span class="text-xs font-mono text-slate-600">+{{ $w1['position_points'] }} pos = <strong class="text-amber-900 text-sm font-bold">{{ $w1['total_points'] }} pts</strong></span>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-wrap items-baseline gap-1.5">
+                                        <span class="font-bold text-slate-800">• രണ്ടാം സ്ഥാനം:</span>
+                                        <span class="font-bold text-slate-900 font-sora">{{ $w2['name'] }}</span>
+                                        <span class="text-xs font-mono text-slate-600">(ചെസ്റ്റ് #{{ $w2['chest'] }}, {{ $w2['team'] }})</span>
+                                        <span class="text-slate-400">—</span>
+                                        @if($w2['grade'])
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Grade {{ $w2['grade'] }} (+{{ $w2['grade_points'] }} pts)</span>
+                                            <span class="text-xs font-mono text-slate-600">+{{ $w2['position_points'] }} pos = <strong class="text-slate-900 text-sm font-bold">{{ $w2['total_points'] }} pts</strong></span>
+                                        @else
+                                            <span class="text-xs font-mono text-slate-600">+{{ $w2['position_points'] }} pos = <strong class="text-slate-900 text-sm font-bold">{{ $w2['total_points'] }} pts</strong></span>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-wrap items-baseline gap-1.5">
+                                        <span class="font-bold text-red-900">• മൂന്നാം സ്ഥാനം:</span>
+                                        <span class="font-bold text-slate-900 font-sora">{{ $w3['name'] }}</span>
+                                        <span class="text-xs font-mono text-slate-600">(ചെസ്റ്റ് #{{ $w3['chest'] }}, {{ $w3['team'] }})</span>
+                                        <span class="text-slate-400">—</span>
+                                        @if($w3['grade'])
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Grade {{ $w3['grade'] }} (+{{ $w3['grade_points'] }} pts)</span>
+                                            <span class="text-xs font-mono text-slate-600">+{{ $w3['position_points'] }} pos = <strong class="text-red-900 text-sm font-bold">{{ $w3['total_points'] }} pts</strong></span>
+                                        @else
+                                            <span class="text-xs font-mono text-slate-600">+{{ $w3['position_points'] }} pos = <strong class="text-red-900 text-sm font-bold">{{ $w3['total_points'] }} pts</strong></span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Winners Podium Details -->
+                        <!-- Winners Podium Details with Grade Points -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
                             <!-- 1st Place -->
-                            <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 font-sora">1st Place</span>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">Rank 1</span>
+                            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col justify-between shadow-2xs">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 font-sora">1st Place</span>
+                                        <span class="text-xs font-black font-mono px-2 py-0.5 rounded bg-amber-200 text-amber-950">
+                                            {{ $w1['total_points'] }} PTS
+                                        </span>
+                                    </div>
+                                    <div class="font-bold text-slate-900 text-base font-sora truncate">
+                                        {{ $w1['name'] }}
+                                    </div>
+                                    <div class="text-xs text-slate-600 mt-0.5">
+                                        Chest: <strong class="font-mono text-slate-900">#{{ $w1['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w1['team'] }}</strong>
+                                    </div>
                                 </div>
-                                <div class="font-bold text-slate-900 text-base font-sora">
-                                    {{ $firstWinnerName }}
-                                </div>
-                                <div class="text-xs text-slate-600 mt-1">
-                                    Chest: <strong class="font-mono text-slate-900">#{{ $firstWinnerChest }}</strong> • Team: <strong class="text-slate-800">{{ $firstWinnerTeam }}</strong>
+
+                                <!-- Points Breakdown -->
+                                <div class="mt-3 pt-2.5 border-t border-amber-200/80 flex flex-wrap items-center gap-1.5 text-xs">
+                                    @if($w1['grade'])
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
+                                            Grade {{ $w1['grade'] }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                            +{{ $w1['grade_points'] }} Grade Pts
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
+                                            No Grade
+                                        </span>
+                                    @endif
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+                                        +{{ $w1['position_points'] }} Pos Pts
+                                    </span>
                                 </div>
                             </div>
 
                             <!-- 2nd Place -->
-                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 font-sora">2nd Place</span>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800">Rank 2</span>
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between shadow-2xs">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 font-sora">2nd Place</span>
+                                        <span class="text-xs font-black font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-800">
+                                            {{ $w2['total_points'] }} PTS
+                                        </span>
+                                    </div>
+                                    <div class="font-bold text-slate-900 text-base font-sora truncate">
+                                        {{ $w2['name'] }}
+                                    </div>
+                                    <div class="text-xs text-slate-600 mt-0.5">
+                                        Chest: <strong class="font-mono text-slate-900">#{{ $w2['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w2['team'] }}</strong>
+                                    </div>
                                 </div>
-                                <div class="font-bold text-slate-900 text-base font-sora">
-                                    {{ $secondWinnerName }}
-                                </div>
-                                <div class="text-xs text-slate-600 mt-1">
-                                    Chest: <strong class="font-mono text-slate-900">#{{ $secondWinnerChest }}</strong> • Team: <strong class="text-slate-800">{{ $secondWinnerTeam }}</strong>
+
+                                <!-- Points Breakdown -->
+                                <div class="mt-3 pt-2.5 border-t border-slate-200 flex flex-wrap items-center gap-1.5 text-xs">
+                                    @if($w2['grade'])
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
+                                            Grade {{ $w2['grade'] }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                            +{{ $w2['grade_points'] }} Grade Pts
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
+                                            No Grade
+                                        </span>
+                                    @endif
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold bg-slate-200 text-slate-800 border border-slate-300">
+                                        +{{ $w2['position_points'] }} Pos Pts
+                                    </span>
                                 </div>
                             </div>
 
                             <!-- 3rd Place -->
-                            <div class="p-4 rounded-2xl bg-red-50/60 border border-red-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-[#be1e2d] font-sora">3rd Place</span>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-[#be1e2d]">Rank 3</span>
+                            <div class="p-4 rounded-2xl bg-red-50/60 border border-red-200 flex flex-col justify-between shadow-2xs">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs font-extrabold uppercase tracking-wider text-[#be1e2d] font-sora">3rd Place</span>
+                                        <span class="text-xs font-black font-mono px-2 py-0.5 rounded bg-red-100 text-[#be1e2d]">
+                                            {{ $w3['total_points'] }} PTS
+                                        </span>
+                                    </div>
+                                    <div class="font-bold text-slate-900 text-base font-sora truncate">
+                                        {{ $w3['name'] }}
+                                    </div>
+                                    <div class="text-xs text-slate-600 mt-0.5">
+                                        Chest: <strong class="font-mono text-slate-900">#{{ $w3['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w3['team'] }}</strong>
+                                    </div>
                                 </div>
-                                <div class="font-bold text-slate-900 text-base font-sora">
-                                    {{ $thirdWinnerName }}
-                                </div>
-                                <div class="text-xs text-slate-600 mt-1">
-                                    Chest: <strong class="font-mono text-slate-900">#{{ $thirdWinnerChest }}</strong> • Team: <strong class="text-slate-800">{{ $thirdWinnerTeam }}</strong>
+
+                                <!-- Points Breakdown -->
+                                <div class="mt-3 pt-2.5 border-t border-red-200 flex flex-wrap items-center gap-1.5 text-xs">
+                                    @if($w3['grade'])
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
+                                            Grade {{ $w3['grade'] }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                            +{{ $w3['grade_points'] }} Grade Pts
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
+                                            No Grade
+                                        </span>
+                                    @endif
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold bg-red-100 text-red-900 border border-red-200">
+                                        +{{ $w3['position_points'] }} Pos Pts
+                                    </span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Other Grade Holders (if any) -->
+                        @if($otherGraded->isNotEmpty())
+                            <div class="mt-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold text-slate-700 font-ml">മറ്റ് ഗ്രേഡ് ജേതാക്കൾ (Other Grade Holders):</span>
+                                @foreach($otherGraded as $og)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-xs font-mono shadow-2xs">
+                                        <strong class="text-slate-900">{{ $og->student?->name ?: 'Chest #'.$og->chest_number }}</strong>
+                                        <span class="text-slate-500">({{ $og->group?->name ?? $og->student?->group?->name }})</span>
+                                        <span class="px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800">Grade {{ $og->computed_grade }} (+{{ $og->computed_grade_points }} pts)</span>
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <!-- Quick Grade Management Accordion / Form -->
+                        <div class="mt-4 pt-3 border-t border-slate-100" x-data="{ open: false }">
+                            <div class="flex items-center justify-between">
+                                <button type="button" @click="open = !open" 
+                                        class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
+                                    <svg class="w-4 h-4 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="font-ml">ഗ്രേഡുകൾ തിരുത്തുക / രേഖപ്പെടുത്തുക (Edit / Adjust Grades)</span>
+                                </button>
+                                <span class="text-[11px] font-mono text-slate-400">Official Grade Points: A+=6, A=5, B=3, C=1 pts</span>
+                            </div>
+
+                            <form method="POST" action="{{ route('announcer.update-grades', $res->id) }}" x-show="open" x-cloak class="mt-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                                @csrf
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">1st Place Grade</label>
+                                    <select name="first_grade" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-[#be1e2d]">
+                                        <option value="NO_GRADE" {{ empty($res->first_grade) ? 'selected' : '' }}>No Grade (0 pts)</option>
+                                        <option value="A+" {{ $res->first_grade === 'A+' ? 'selected' : '' }}>Grade A+ (+6 pts)</option>
+                                        <option value="A" {{ $res->first_grade === 'A' ? 'selected' : '' }}>Grade A (+5 pts)</option>
+                                        <option value="B" {{ $res->first_grade === 'B' ? 'selected' : '' }}>Grade B (+3 pts)</option>
+                                        <option value="C" {{ $res->first_grade === 'C' ? 'selected' : '' }}>Grade C (+1 pt)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">2nd Place Grade</label>
+                                    <select name="second_grade" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-[#be1e2d]">
+                                        <option value="NO_GRADE" {{ empty($res->second_grade) ? 'selected' : '' }}>No Grade (0 pts)</option>
+                                        <option value="A+" {{ $res->second_grade === 'A+' ? 'selected' : '' }}>Grade A+ (+6 pts)</option>
+                                        <option value="A" {{ $res->second_grade === 'A' ? 'selected' : '' }}>Grade A (+5 pts)</option>
+                                        <option value="B" {{ $res->second_grade === 'B' ? 'selected' : '' }}>Grade B (+3 pts)</option>
+                                        <option value="C" {{ $res->second_grade === 'C' ? 'selected' : '' }}>Grade C (+1 pt)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">3rd Place Grade</label>
+                                    <select name="third_grade" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-[#be1e2d]">
+                                        <option value="NO_GRADE" {{ empty($res->third_grade) ? 'selected' : '' }}>No Grade (0 pts)</option>
+                                        <option value="A+" {{ $res->third_grade === 'A+' ? 'selected' : '' }}>Grade A+ (+6 pts)</option>
+                                        <option value="A" {{ $res->third_grade === 'A' ? 'selected' : '' }}>Grade A (+5 pts)</option>
+                                        <option value="B" {{ $res->third_grade === 'B' ? 'selected' : '' }}>Grade B (+3 pts)</option>
+                                        <option value="C" {{ $res->third_grade === 'C' ? 'selected' : '' }}>Grade C (+1 pt)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <button type="submit" class="w-full py-1.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition">
+                                        Save Grades
+                                    </button>
+                                </div>
+                            </form>
                         </div>
 
                         <!-- Note regarding Media Sync -->
