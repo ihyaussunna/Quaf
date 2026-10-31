@@ -905,7 +905,7 @@ function posterStudio() {
         statusMsg: '',
         statusType: 'success',
 
-        templatesMap: @json($templatesMap),
+        templatesMap: @json($templatesMap ?? []),
         templateImageObj: null,
 
         // Cyan Guidelines

@@ -184,9 +184,17 @@ class MediaResultController extends Controller
 
         $themeColor = FestivalSetting::get('theme_color', '#be1e2d');
 
+        $templatesMap = $templates->keyBy('id')->map(fn ($t) => [
+            'id' => $t->id,
+            'name' => $t->name,
+            'image' => asset($t->image_path),
+            'layout_mode' => $t->posterSetting?->layout_mode ?? 'default',
+        ]);
+
         return view('media.results.studio', compact(
             'result',
             'templates',
+            'templatesMap',
             'activeTemplate',
             'currentSettings',
             'winners',
