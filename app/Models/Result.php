@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class Result extends Model
@@ -49,18 +50,46 @@ class Result extends Model
 
     protected static function booted(): void
     {
+        static::ensureSchema();
+
         static::saving(function (Result $result) {
+            static::ensureSchema();
+
             // Automatically assign next sequential result number when transferring to announcer or declaring
             if (in_array($result->status, ['send', 'delivered', 'announced', 'published'])) {
                 if (empty($result->attributes['result_number'])) {
-                    $max = (int) (static::max('result_number') ?? 0);
+                    $max = static::getSafeMaxResultNumber();
                     $result->result_number = $max + 1;
                 }
                 if (empty($result->published_at)) {
                     $result->published_at = Carbon::now();
                 }
             }
+
+            // Guard against field list errors if column doesn't exist on live DB
+            try {
+                if (! Schema::hasColumn('results', 'result_number')) {
+                    unset($result->attributes['result_number']);
+                }
+            } catch (\Throwable) {
+                unset($result->attributes['result_number']);
+            }
         });
+    }
+
+    public static function getSafeMaxResultNumber(): int
+    {
+        static::ensureSchema();
+
+        try {
+            if (Schema::hasTable('results') && Schema::hasColumn('results', 'result_number')) {
+                return (int) (static::max('result_number') ?? 0);
+            }
+        } catch (\Throwable) {
+            // Column does not exist in live DB
+        }
+
+        return 0;
     }
 
     public static function ensureSchema(): void
@@ -71,10 +100,19 @@ class Result extends Model
         }
 
         try {
-            if (Schema::hasTable('results') && ! Schema::hasColumn('results', 'result_number')) {
-                Schema::table('results', function (Blueprint $table) {
-                    $table->unsignedInteger('result_number')->nullable()->after('program_id')->index();
-                });
+            if (Schema::hasTable('results')) {
+                if (! Schema::hasColumn('results', 'result_number')) {
+                    try {
+                        Schema::table('results', function (Blueprint $table) {
+                            $table->unsignedInteger('result_number')->nullable()->after('program_id')->index();
+                        });
+                    } catch (\Throwable) {
+                        try {
+                            DB::statement('ALTER TABLE results ADD COLUMN result_number INT UNSIGNED NULL AFTER program_id, ADD INDEX results_result_number_index (result_number)');
+                        } catch (\Throwable) {
+                        }
+                    }
+                }
             }
             $checked = true;
         } catch (\Throwable) {
@@ -268,7 +306,7 @@ class Result extends Model
             return (int) $this->result_number;
         }
 
-        $max = (int) (static::max('result_number') ?? 0);
+        $max = static::getSafeMaxResultNumber();
         $this->result_number = $max + 1;
         $this->saveQuietly();
 

@@ -196,4 +196,30 @@ class AnnouncerAutomaticResultNumberingTest extends TestCase
         $this->assertEquals(1, $r1->fresh()->result_number);
         $this->assertEquals(2, $r2->fresh()->result_number);
     }
+
+    public function test_media_studio_and_save_poster_never_crashes_with_unknown_column_error(): void
+    {
+        $mediaUser = User::factory()->create([
+            'role' => 'media_team',
+            'name' => 'Media Studio Designer',
+            'email' => 'media-studio@quaf.test',
+        ]);
+
+        [$program, $result] = $this->createProgramAndResult('P401', 'Poster Competition', 'Zone Alpha');
+
+        // Studio view renders 200 OK
+        $studioResponse = $this->actingAs($mediaUser)->get(route('media.results.studio', $result));
+        $studioResponse->assertOk();
+        $studioResponse->assertSee('Poster Competition');
+
+        // Saving poster does not throw 1054 Unknown column error
+        $saveResponse = $this->actingAs($mediaUser)->post(route('media.results.save-poster', $result), [
+            'publish_now' => true,
+        ]);
+        $saveResponse->assertRedirect();
+        $this->assertDatabaseHas('results', [
+            'id' => $result->id,
+            'status' => 'published',
+        ]);
+    }
 }

@@ -20,6 +20,8 @@ class AnnouncerController extends Controller
 {
     public function index(Request $request): View
     {
+        Result::ensureSchema();
+
         $tab = $request->query('tab', 'ready');
         $search = trim((string) $request->query('search'));
 
@@ -54,8 +56,18 @@ class AnnouncerController extends Controller
             $query->whereIn('status', ['send', 'delivered', 'announced', 'published']);
         }
 
-        $results = $query->orderByRaw("CASE WHEN status IN ('send', 'delivered') THEN 1 ELSE 2 END")
-            ->orderBy('result_number', 'desc')
+        $hasResultNumber = false;
+        try {
+            $hasResultNumber = Schema::hasColumn('results', 'result_number');
+        } catch (\Throwable) {
+        }
+
+        $orderSql = "CASE WHEN status IN ('send', 'delivered') THEN 1 ELSE 2 END";
+        if ($hasResultNumber) {
+            $orderSql .= ', CASE WHEN result_number IS NOT NULL THEN result_number ELSE 0 END DESC';
+        }
+
+        $results = $query->orderByRaw($orderSql)
             ->latest('updated_at')
             ->paginate(12)
             ->withQueryString();
@@ -111,7 +123,7 @@ class AnnouncerController extends Controller
         }
 
         if (! $result->result_number) {
-            $max = (int) (Result::max('result_number') ?? 0);
+            $max = Result::getSafeMaxResultNumber();
             $result->result_number = $max + 1;
         }
 

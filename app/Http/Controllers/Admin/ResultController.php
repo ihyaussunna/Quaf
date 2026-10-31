@@ -103,6 +103,8 @@ class ResultController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        Result::ensureSchema();
+
         $programId = $request->input('program_id');
         $program = Program::findOrFail($programId);
 
@@ -188,6 +190,8 @@ class ResultController extends Controller
 
     public function update(Request $request, Result $result): RedirectResponse
     {
+        Result::ensureSchema();
+
         $validated = $request->validate([
             'first_entry_id' => ['required', 'exists:program_entries,id'],
             'first_grade' => ['nullable', 'string', 'max:10'],
@@ -227,6 +231,8 @@ class ResultController extends Controller
 
     public function publish(Result $result): RedirectResponse
     {
+        Result::ensureSchema();
+
         $old = $result->toArray();
         $result->update([
             'status' => 'published',
@@ -271,7 +277,7 @@ class ResultController extends Controller
         $old = $result->status;
 
         if (! $result->result_number) {
-            $max = (int) (Result::max('result_number') ?? 0);
+            $max = Result::getSafeMaxResultNumber();
             $result->result_number = $max + 1;
         }
 
@@ -340,6 +346,8 @@ class ResultController extends Controller
 
     public function declaredResults(Request $request): View
     {
+        Result::ensureSchema();
+
         $search = $request->query('search');
 
         $query = Result::with(['program.category', 'program.stage', 'firstEntry.student', 'secondEntry.student', 'thirdEntry.student'])
@@ -622,7 +630,7 @@ class ResultController extends Controller
         foreach ($results as $res) {
             $old = $res->status;
             if (! $res->result_number) {
-                $max = (int) (Result::max('result_number') ?? 0);
+                $max = Result::getSafeMaxResultNumber();
                 $res->result_number = $max + 1;
             }
             $res->update([
@@ -646,6 +654,8 @@ class ResultController extends Controller
      */
     public function batchPublish(Request $request): RedirectResponse
     {
+        Result::ensureSchema();
+
         $resultIds = $request->input('result_ids', []);
         if (empty($resultIds)) {
             return back()->with('error', 'പ്രസിദ്ധീകരിക്കാൻ റിസൾട്ടുകൾ തിരഞ്ഞെടുത്തിട്ടില്ല.');

@@ -36,6 +36,8 @@ class MediaResultController extends Controller
      */
     public function index(Request $request): View
     {
+        Result::ensureSchema();
+
         $tab = $request->query('tab', 'announced');
         $search = trim((string) $request->query('search'));
 
@@ -117,6 +119,8 @@ class MediaResultController extends Controller
      */
     public function studio(Result $result): View
     {
+        Result::ensureSchema();
+
         $result->load([
             'program.category',
             'program.stage',
@@ -273,6 +277,8 @@ class MediaResultController extends Controller
      */
     public function savePoster(Request $request, Result $result): JsonResponse|RedirectResponse
     {
+        Result::ensureSchema();
+
         $request->validate([
             'poster_data' => ['nullable', 'string'],
             'poster_file' => ['nullable', 'image', 'max:10240'],
@@ -360,6 +366,8 @@ class MediaResultController extends Controller
      */
     public function publishPublic(Result $result): RedirectResponse
     {
+        Result::ensureSchema();
+
         $old = $result->toArray();
         $result->update([
             'status' => 'published',
