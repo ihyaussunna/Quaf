@@ -25,6 +25,10 @@
 
             <!-- Live Status & Controls -->
             <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('announcer.print.results') }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sora">
+                    <svg class="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Print Declared Results PDF ↗</span>
+                </a>
                 <a href="{{ route('announcer.stage') }}" class="px-4 py-2.5 rounded-xl bg-[#005c94] hover:bg-[#004b78] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sora">
                     <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
                     <span>Stage Calling Console &rarr;</span>
@@ -247,28 +251,36 @@
                                 </h3>
                             </div>
 
-                            @if($isDelivered)
-                                <form method="POST" action="{{ route('announcer.announced', $res->id) }}">
-                                    @csrf
-                                    <button type="submit" class="w-full sm:w-auto px-6 py-3.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-2xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2">
-                                        <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                                        <span>Mark as Announced</span>
-                                    </button>
-                                </form>
-                            @else
-                                <div class="flex flex-col sm:items-end gap-1">
-                                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                        Announced on Stage
-                                    </span>
-                                    <span class="text-[11px] font-semibold text-slate-500">
-                                        {{ $res->is_media_published ? 'Media Poster Published' : 'Transferred to Media Desk' }}
-                                    </span>
-                                </div>
-                            @endif
+                            <div class="flex flex-wrap items-center gap-2">
+                                <a href="{{ route('announcer.print.evaluation', $prog->id) }}" target="_blank" 
+                                   class="px-3.5 py-2.5 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sora">
+                                    <svg class="w-4 h-4 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Scorecard PDF ↗</span>
+                                </a>
+
+                                @if($isDelivered)
+                                    <form method="POST" action="{{ route('announcer.announced', $res->id) }}">
+                                        @csrf
+                                        <button type="submit" class="w-full sm:w-auto px-6 py-3.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-2xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2">
+                                            <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                            <span>Mark as Announced</span>
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="flex flex-col sm:items-end gap-1">
+                                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            Announced on Stage
+                                        </span>
+                                        <span class="text-[11px] font-semibold text-slate-500">
+                                            {{ $res->is_media_published ? 'Media Poster Published' : 'Transferred to Media Desk' }}
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
-                        <!-- Winners Podium Details with Grade Points -->
+                        <!-- Winners Podium Details with Total Evaluation Marks & Grade Points -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
                             <!-- 1st Place -->
                             <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col justify-between shadow-2xs">
@@ -284,6 +296,19 @@
                                     </div>
                                     <div class="text-xs text-slate-600 mt-0.5">
                                         Chest: <strong class="font-mono text-slate-900">#{{ $w1['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w1['team'] }}</strong>
+                                    </div>
+
+                                    <!-- Total Evaluation Mark -->
+                                    <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border border-amber-300/80 flex items-center justify-between shadow-2xs">
+                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
+                                        <div class="text-right">
+                                            <span class="text-xs font-mono font-black text-slate-950 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                                                {{ ($w1['avg_marks'] > 0 || $w1['total_marks'] > 0) ? number_format($w1['avg_marks'], 2) : '—' }}
+                                            </span>
+                                            @if($w1['judge_count'] > 1)
+                                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w1['total_marks'], 1) }} ({{ $w1['judge_count'] }} Judges)</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
@@ -322,6 +347,19 @@
                                     <div class="text-xs text-slate-600 mt-0.5">
                                         Chest: <strong class="font-mono text-slate-900">#{{ $w2['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w2['team'] }}</strong>
                                     </div>
+
+                                    <!-- Total Evaluation Mark -->
+                                    <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border border-slate-300/80 flex items-center justify-between shadow-2xs">
+                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
+                                        <div class="text-right">
+                                            <span class="text-xs font-mono font-black text-slate-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                                {{ ($w2['avg_marks'] > 0 || $w2['total_marks'] > 0) ? number_format($w2['avg_marks'], 2) : '—' }}
+                                            </span>
+                                            @if($w2['judge_count'] > 1)
+                                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w2['total_marks'], 1) }} ({{ $w2['judge_count'] }} Judges)</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Points Breakdown -->
@@ -359,6 +397,19 @@
                                     <div class="text-xs text-slate-600 mt-0.5">
                                         Chest: <strong class="font-mono text-slate-900">#{{ $w3['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w3['team'] }}</strong>
                                     </div>
+
+                                    <!-- Total Evaluation Mark -->
+                                    <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border border-red-200 flex items-center justify-between shadow-2xs">
+                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
+                                        <div class="text-right">
+                                            <span class="text-xs font-mono font-black text-[#be1e2d] bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                                                {{ ($w3['avg_marks'] > 0 || $w3['total_marks'] > 0) ? number_format($w3['avg_marks'], 2) : '—' }}
+                                            </span>
+                                            @if($w3['judge_count'] > 1)
+                                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w3['total_marks'], 1) }} ({{ $w3['judge_count'] }} Judges)</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Points Breakdown -->
@@ -390,9 +441,79 @@
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-xs font-mono shadow-2xs">
                                         <strong class="text-slate-900">{{ $og->student?->name ?: 'Chest #'.$og->chest_number }}</strong>
                                         <span class="text-slate-500">({{ $og->group?->name ?? $og->student?->group?->name }})</span>
+                                        @if(($og->computed_avg_score ?? 0) > 0)
+                                            <span class="px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-900 border border-purple-200">Mark: {{ number_format($og->computed_avg_score, 1) }}</span>
+                                        @endif
                                         <span class="px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800">Grade {{ $og->computed_grade }} (+{{ $og->computed_grade_points }} pts)</span>
                                     </span>
                                 @endforeach
+                            </div>
+                        @endif
+
+                        <!-- View All Candidate Marks & Jury Valuation Accordion -->
+                        @php
+                            $allEntriesMarks = $res->getAllEntriesWithMarks();
+                        @endphp
+                        @if($allEntriesMarks->isNotEmpty())
+                            <div class="mt-4 pt-3 border-t border-slate-100" x-data="{ showScorecard: false }">
+                                <div class="flex items-center justify-between">
+                                    <button type="button" @click="showScorecard = !showScorecard" 
+                                            class="text-xs font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1.5 transition">
+                                        <svg class="w-4 h-4 transition-transform" :class="showScorecard ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        <span>Candidate Valuation Marks ({{ $allEntriesMarks->count() }} Participants)</span>
+                                    </button>
+                                    <a href="{{ route('announcer.print.evaluation', $prog->id) }}" target="_blank" class="text-xs font-mono font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1">
+                                        <span>Print Scorecard PDF &rarr;</span>
+                                    </a>
+                                </div>
+
+                                <div x-show="showScorecard" x-cloak class="mt-3 overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-2xs">
+                                    <table class="w-full text-left text-xs font-sora">
+                                        <thead class="bg-slate-50 text-slate-700 uppercase font-mono text-[10px] border-b border-slate-200">
+                                            <tr>
+                                                <th class="py-2.5 px-3">Chest / Candidate</th>
+                                                <th class="py-2.5 px-3">Team</th>
+                                                <th class="py-2.5 px-3 text-center">Judges</th>
+                                                <th class="py-2.5 px-3 text-center">Total Mark</th>
+                                                <th class="py-2.5 px-3 text-center">Average Mark</th>
+                                                <th class="py-2.5 px-3 text-center">Grade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            @foreach($allEntriesMarks as $cEntry)
+                                                <tr class="hover:bg-slate-50/80 transition">
+                                                    <td class="py-2.5 px-3 font-semibold text-slate-900">
+                                                        <span class="font-mono font-black text-slate-900">#{{ $cEntry->chest_number }}</span>
+                                                        <span class="ml-1 text-slate-700">{{ $cEntry->student?->name }}</span>
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-slate-600 font-medium">
+                                                        {{ $cEntry->group?->name ?? $cEntry->student?->group?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-center font-mono text-slate-500">
+                                                        {{ $cEntry->computed_judge_count }}
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                        {{ number_format($cEntry->computed_total_marks, 1) }}
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-center">
+                                                        <span class="px-2 py-0.5 rounded font-mono font-black {{ $cEntry->computed_avg_score >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800' }}">
+                                                            {{ number_format($cEntry->computed_avg_score, 2) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-center font-mono font-bold">
+                                                        @if($cEntry->computed_grade)
+                                                            <span class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[11px]">
+                                                                Grade {{ $cEntry->computed_grade }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-slate-400">—</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         @endif
 

@@ -434,7 +434,7 @@ class Result extends Model
     }
 
     /**
-     * Get detailed points breakdown (position pts, grade, grade pts, total pts) for a podium placement.
+     * Get detailed points breakdown (position pts, grade, grade pts, total pts, evaluation marks) for a podium placement.
      *
      * @return array{
      *     entry: ?ProgramEntry,
@@ -445,7 +445,10 @@ class Result extends Model
      *     grade: ?string,
      *     grade_points: int,
      *     position_points: int,
-     *     total_points: int
+     *     total_points: int,
+     *     total_marks: float,
+     *     avg_marks: float,
+     *     judge_count: int
      * }
      */
     public function getWinnerBreakdown(int $pos): array
@@ -468,17 +471,39 @@ class Result extends Model
             ? strtoupper(trim($declaredGrade))
             : null;
 
+        $totalMarks = 0.0;
+        $avgMarks = 0.0;
+        $judgeCount = 0;
+
+        if ($entry) {
+            $scores = $entry->relationLoaded('scores')
+                ? $entry->scores
+                : ($entry->relationLoaded('scoreSheets') ? $entry->scoreSheets : $entry->scores);
+
+            $submitted = $scores ? $scores->where('is_submitted', true) : collect();
+            if ($submitted->isEmpty() && $scores && $scores->where('total_score', '>', 0)->isNotEmpty()) {
+                $submitted = $scores->where('total_score', '>', 0);
+            }
+
+            if ($submitted->isNotEmpty()) {
+                $judgeCount = $submitted->count();
+                $totalMarks = round((float) $submitted->sum('total_score'), 2);
+                $avgMarks = round((float) $submitted->avg('total_score'), 2);
+            } elseif (isset($entry->computed_avg_score) && $entry->computed_avg_score > 0) {
+                $avgMarks = round((float) $entry->computed_avg_score, 2);
+                $totalMarks = round((float) ($entry->computed_total_marks ?? $entry->computed_avg_score), 2);
+                $judgeCount = (int) ($entry->computed_judge_count ?? 1);
+            }
+        }
+
         if (! $grade && $entry) {
-            if ($entry->relationLoaded('scoreSheets')) {
+            if ($avgMarks > 0) {
+                $gradeInfo = PointCalculationService::getGradeFromScore($avgMarks);
+                $grade = $gradeInfo['grade'];
+            } elseif ($entry->relationLoaded('scoreSheets')) {
                 $judgeGrade = $entry->scoreSheets->where('is_submitted', true)->pluck('criteria_scores.grade')->filter()->first();
                 if ($judgeGrade && isset(PointCalculationService::GRADE_POINTS[strtoupper(trim($judgeGrade))])) {
                     $grade = strtoupper(trim($judgeGrade));
-                } else {
-                    $avgScore = $entry->scoreSheets->where('is_submitted', true)->avg('total_score');
-                    if ($avgScore !== null && $avgScore > 0) {
-                        $gradeInfo = PointCalculationService::getGradeFromScore((float) $avgScore);
-                        $grade = $gradeInfo['grade'];
-                    }
                 }
             }
         }
@@ -509,6 +534,9 @@ class Result extends Model
             'grade_points' => $gradePoints,
             'position_points' => $posPoints,
             'total_points' => ($posPoints + $gradePoints),
+            'total_marks' => $totalMarks,
+            'avg_marks' => $avgMarks,
+            'judge_count' => $judgeCount,
         ];
     }
 
@@ -534,17 +562,64 @@ class Result extends Model
         return $this->program->entries()
             ->whereIn('status', ['verified', 'confirmed'])
             ->whereNotIn('id', $placedEntryIds)
-            ->with(['student.group', 'group', 'scoreSheets'])
+            ->with(['student.group', 'group', 'scoreSheets', 'scores'])
             ->get()
             ->map(function ($e) use ($weight) {
-                $avgScore = $e->scoreSheets->where('is_submitted', true)->avg('total_score');
+                $scores = $e->relationLoaded('scores') ? $e->scores : ($e->relationLoaded('scoreSheets') ? $e->scoreSheets : $e->scores);
+                $submitted = $scores ? $scores->where('is_submitted', true) : collect();
+                if ($submitted->isEmpty() && $scores && $scores->where('total_score', '>', 0)->isNotEmpty()) {
+                    $submitted = $scores->where('total_score', '>', 0);
+                }
+
+                $avgScore = $submitted->isNotEmpty() ? (float) $submitted->avg('total_score') : 0.0;
+                $totalScore = $submitted->isNotEmpty() ? (float) $submitted->sum('total_score') : 0.0;
+                $judgeCount = $submitted->count();
+
                 $gradeInfo = $avgScore ? PointCalculationService::getGradeFromScore((float) $avgScore) : ['grade' => null, 'points' => 0];
                 $e->computed_grade = $gradeInfo['grade'];
                 $e->computed_grade_points = (int) round($gradeInfo['points'] * $weight);
+                $e->computed_avg_score = round($avgScore, 2);
+                $e->computed_total_marks = round($totalScore, 2);
+                $e->computed_judge_count = $judgeCount;
 
                 return $e;
             })
             ->filter(fn ($e) => ! empty($e->computed_grade))
+            ->values();
+    }
+
+    /**
+     * Get all participant entries for this result's program with their evaluation marks and rank.
+     *
+     * @return Collection<int, ProgramEntry>
+     */
+    public function getAllEntriesWithMarks(): Collection
+    {
+        if (! $this->program) {
+            return collect();
+        }
+
+        return $this->program->entries()
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->with(['student.group', 'group', 'scores.judge', 'scoreSheets.judge'])
+            ->get()
+            ->map(function ($entry) {
+                $scores = $entry->relationLoaded('scores') ? $entry->scores : ($entry->relationLoaded('scoreSheets') ? $entry->scoreSheets : $entry->scores);
+                $submitted = $scores ? $scores->where('is_submitted', true) : collect();
+                if ($submitted->isEmpty() && $scores && $scores->where('total_score', '>', 0)->isNotEmpty()) {
+                    $submitted = $scores->where('total_score', '>', 0);
+                }
+
+                $entry->computed_judge_count = $submitted->count();
+                $entry->computed_total_marks = round((float) $submitted->sum('total_score'), 2);
+                $entry->computed_avg_score = $submitted->isNotEmpty() ? round((float) $submitted->avg('total_score'), 2) : 0.0;
+                $gradeInfo = PointCalculationService::getGradeFromScore($entry->computed_avg_score);
+                $entry->computed_grade = $gradeInfo['grade'];
+                $entry->computed_grade_points = $gradeInfo['points'];
+
+                return $entry;
+            })
+            ->sortByDesc('computed_avg_score')
             ->values();
     }
 }

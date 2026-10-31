@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Group;
+use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
+use App\Models\ScoreSheet;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -222,5 +224,76 @@ class AnnouncerAndResultsPipelineTest extends TestCase
         $publicResponse = $this->get(route('results.show', $this->program));
         $publicResponse->assertStatus(200);
         $publicResponse->assertSee('Ahmed Fayiz');
+    }
+
+    public function test_announcer_sees_total_marks_and_can_print_evaluation_scorecard_and_results_pdf(): void
+    {
+        $judge = Judge::create([
+            'name' => 'Prof. Shamsudheen',
+            'designation' => 'Chief Jury',
+            'access_code' => '9999',
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $this->program->id,
+            'entry_id' => $this->entry1->id,
+            'total_score' => 94.50,
+            'is_submitted' => true,
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $this->program->id,
+            'entry_id' => $this->entry2->id,
+            'total_score' => 88.00,
+            'is_submitted' => true,
+        ]);
+
+        ScoreSheet::create([
+            'judge_id' => $judge->id,
+            'program_id' => $this->program->id,
+            'entry_id' => $this->entry3->id,
+            'total_score' => 76.50,
+            'is_submitted' => true,
+        ]);
+
+        $result = Result::create([
+            'program_id' => $this->program->id,
+            'first_entry_id' => $this->entry1->id,
+            'second_entry_id' => $this->entry2->id,
+            'third_entry_id' => $this->entry3->id,
+            'status' => 'send',
+            'is_media_published' => false,
+        ]);
+
+        // 1. Announcer Console view: Marks & Scorecard link visible
+        $response = $this->actingAs($this->announcer)
+            ->get(route('announcer.index', ['tab' => 'ready']));
+
+        $response->assertStatus(200);
+        $response->assertSee('94.50');
+        $response->assertSee('88.00');
+        $response->assertSee('76.50');
+        $response->assertSee(route('announcer.print.evaluation', $this->program->id));
+        $response->assertSee(route('announcer.print.results'));
+
+        // 2. Announcer Scorecard Printable PDF
+        $scorecardResponse = $this->actingAs($this->announcer)
+            ->get(route('announcer.print.evaluation', $this->program->id));
+
+        $scorecardResponse->assertStatus(200);
+        $scorecardResponse->assertSee('OFFICIAL VALUATION REPORT');
+        $scorecardResponse->assertSee('Ahmed Fayiz');
+        $scorecardResponse->assertSee('Back to Announcer Console');
+
+        // 3. Announcer Declared Results Printable PDF
+        $resultsPrintResponse = $this->actingAs($this->announcer)
+            ->get(route('announcer.print.results'));
+
+        $resultsPrintResponse->assertStatus(200);
+        $resultsPrintResponse->assertSee('Results Report Customizer');
+        $resultsPrintResponse->assertSee('Malayalam Speech');
+        $resultsPrintResponse->assertSee('Back to Announcer Console');
     }
 }

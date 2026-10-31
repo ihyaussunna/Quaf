@@ -29,15 +29,22 @@ class AnnouncerController extends Controller
             'program.category',
             'program.stage',
             'program.zone',
+            'program.entries.student.group',
+            'program.entries.group',
+            'program.entries.scoreSheets.judge',
+            'program.entries.scores.judge',
             'firstEntry.student.group',
             'firstEntry.group',
             'firstEntry.scoreSheets',
+            'firstEntry.scores',
             'secondEntry.student.group',
             'secondEntry.group',
             'secondEntry.scoreSheets',
+            'secondEntry.scores',
             'thirdEntry.student.group',
             'thirdEntry.group',
             'thirdEntry.scoreSheets',
+            'thirdEntry.scores',
         ]);
 
         if ($search) {

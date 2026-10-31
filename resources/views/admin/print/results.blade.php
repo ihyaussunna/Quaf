@@ -70,9 +70,15 @@
             </div>
             
             <div class="flex items-center gap-2.5">
-                <a href="{{ route('admin.results.index') }}" class="px-4 py-2 rounded-xl text-xs font-mono font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">
-                    ← Back to Results
-                </a>
+                @if(request()->user() && request()->user()->role === 'announcer')
+                    <a href="{{ route('announcer.index') }}" class="px-4 py-2 rounded-xl text-xs font-mono font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        ← Back to Announcer Console
+                    </a>
+                @else
+                    <a href="{{ route('admin.results.index') }}" class="px-4 py-2 rounded-xl text-xs font-mono font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        ← Back to Results
+                    </a>
+                @endif
                 <button @click="printReport()" class="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-[#be1e2d] hover:bg-[#a01624] text-white flex items-center gap-2 shadow-md transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                     <span>Print / Save PDF</span>
@@ -81,7 +87,7 @@
         </div>
 
         <!-- Filter Selectors -->
-        <form method="GET" action="{{ route('admin.print.results') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <form method="GET" action="{{ request()->routeIs('announcer.*') ? route('announcer.print.results') : route('admin.print.results') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
                 <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Filter by Zone / Category</label>
                 <select name="zone" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
@@ -118,7 +124,7 @@
 
             <div class="flex items-end gap-2">
                 @if($selectedZone || $selectedProgramId || request('status'))
-                    <a href="{{ route('admin.print.results') }}" class="px-3 py-2 text-xs font-mono text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+                    <a href="{{ request()->routeIs('announcer.*') ? route('announcer.print.results') : route('admin.print.results') }}" class="px-3 py-2 text-xs font-mono text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
                         Reset Filters
                     </a>
                 @endif
@@ -257,7 +263,7 @@
                                     @endif
                                 </div>
                                 <div class="font-mono text-[11px] text-slate-500 flex items-center gap-2">
-                                    <a href="{{ route('admin.print.evaluation-sheet', $res->program_id) }}" target="_blank" class="no-print px-2 py-0.5 rounded bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 font-bold transition flex items-center gap-1" title="Print Multi-Judge Valuation Scorecard">
+                                    <a href="{{ request()->routeIs('announcer.*') ? route('announcer.print.evaluation', $res->program_id) : route('admin.print.evaluation-sheet', $res->program_id) }}" target="_blank" class="no-print px-2 py-0.5 rounded bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 font-bold transition flex items-center gap-1" title="Print Multi-Judge Valuation Scorecard">
                                         <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                         <span>Valuation Sheet ↗</span>
                                     </a>

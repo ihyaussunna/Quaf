@@ -792,6 +792,10 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
     Route::post('/{result}/announced', [AnnouncerController::class, 'markAnnounced'])->name('announced');
     Route::post('/{result}/update-grades', [AnnouncerController::class, 'updateGrades'])->name('update-grades');
     Route::post('/standings/{standingAnnouncement}/announced', [AnnouncerController::class, 'markStandingAnnounced'])->name('standings.announced');
+
+    // Official Printable Reports for Announcers
+    Route::get('/print/evaluation/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('print.evaluation');
+    Route::get('/print/declared-results', [AdminPrintReportController::class, 'results'])->name('print.results');
 });
 
 /*
