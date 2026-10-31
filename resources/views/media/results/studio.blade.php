@@ -2990,10 +2990,12 @@ function posterStudio() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
                     template_id: this.settings.template_id,
+                    result_id: {{ $result->id }},
                     settings: Object.assign({}, this.settings, {
                         layer_stack: this.layerStack,
                         custom_elements: this.customElements.map(el => {
@@ -3005,15 +3007,15 @@ function posterStudio() {
                     })
                 })
             })
-            .then(res => res.json())
-            .then(data => {
+            .then(async res => {
                 this.savingDefault = false;
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
                     this.statusType = 'success';
-                    this.statusMsg = data.message || 'Default settings saved successfully.';
+                    this.statusMsg = data.message || 'ഡിഫോൾട്ട് ക്രമീകരണങ്ങൾ വിജയകരമായി സേവ് ചെയ്തു.';
                 } else {
                     this.statusType = 'error';
-                    this.statusMsg = 'Failed to save default settings.';
+                    this.statusMsg = (data && data.message) ? data.message : 'സേവ് ചെയ്യാൻ സാധിച്ചില്ല (Status ' + res.status + ')';
                 }
             })
             .catch(err => {
@@ -3054,11 +3056,11 @@ function posterStudio() {
                     publish_now: true
                 })
             })
-            .then(res => res.json())
-            .then(data => {
+            .then(async res => {
                 this.publishing = false;
                 this.render(false);
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
                     this.statusType = 'success';
                     this.statusMsg = 'Result poster generated and published successfully!';
                     setTimeout(() => {
@@ -3066,7 +3068,7 @@ function posterStudio() {
                     }, 1200);
                 } else {
                     this.statusType = 'error';
-                    this.statusMsg = data.message || 'Failed to publish poster.';
+                    this.statusMsg = (data && data.message) ? data.message : 'Failed to publish poster (Status ' + res.status + ')';
                 }
             })
             .catch(err => {

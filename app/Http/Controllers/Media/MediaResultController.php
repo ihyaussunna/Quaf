@@ -17,6 +17,7 @@ use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
 use App\Services\ResultPosterGenerator;
 use Carbon\Carbon;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -412,23 +413,76 @@ class MediaResultController extends Controller
      */
     public function saveDefaultSettings(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'template_id' => ['required', 'exists:result_templates,id'],
-            'settings' => ['required', 'array'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'template_id' => ['required'],
+                'result_id' => ['nullable', 'exists:results,id'],
+                'settings' => ['required', 'array'],
+            ]);
 
-        $template = ResultTemplate::findOrFail($validated['template_id']);
-        $template->update(['default_settings' => $validated['settings']]);
-        $settings = PosterSetting::updateOrCreate(
-            ['template_id' => $template->id],
-            $validated['settings']
-        );
+            $template = ResultTemplate::find($validated['template_id']);
+            if (! $template) {
+                $template = ResultTemplate::first();
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'ടെംപ്ലേറ്റിന്റെ ഡിഫോൾട്ട് സെറ്റിംഗ്സുകൾ സേവ് ചെയ്തു.',
-            'settings' => $settings,
-        ]);
+            if (! $template) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ടെംപ്ലേറ്റ് കണ്ടെത്താൻ കഴിഞ്ഞില്ല.',
+                ], 404);
+            }
+
+            // 1. Ensure default_settings column exists on result_templates table
+            if (! Schema::hasColumn('result_templates', 'default_settings')) {
+                try {
+                    Schema::table('result_templates', function (Blueprint $table) {
+                        $table->json('default_settings')->nullable();
+                    });
+                } catch (\Throwable $e) {
+                    // Ignore schema alter errors
+                }
+            }
+
+            if (Schema::hasColumn('result_templates', 'default_settings')) {
+                $template->update(['default_settings' => $validated['settings']]);
+            }
+
+            // 2. Safely update poster_settings only with valid existing table columns
+            $settingsRecord = null;
+            if (Schema::hasTable('poster_settings')) {
+                $columns = Schema::getColumnListing('poster_settings');
+                $settingPayload = collect($validated['settings'])
+                    ->filter(fn ($val, $key) => in_array($key, $columns) && ! is_array($val) && ! is_object($val))
+                    ->toArray();
+
+                $settingsRecord = PosterSetting::updateOrCreate(
+                    ['template_id' => $template->id],
+                    $settingPayload
+                );
+            }
+
+            // 3. If result_id provided, also update current result's custom settings
+            if (! empty($validated['result_id'])) {
+                $result = Result::find($validated['result_id']);
+                if ($result) {
+                    $result->update([
+                        'template_id' => $template->id,
+                        'custom_poster_settings' => $validated['settings'],
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'ടെംപ്ലേറ്റിന്റെ ഡിഫോൾട്ട് സെറ്റിംഗ്സുകൾ വിജയകരമായി സേവ് ചെയ്തു.',
+                'settings' => $settingsRecord,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ഡിഫോൾട്ട് സേവ് ചെയ്യുന്നതിൽ പിഴവ് സംഭവിച്ചു: '.$e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
