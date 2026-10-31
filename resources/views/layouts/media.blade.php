@@ -165,16 +165,6 @@
                 @endif
             </a>
 
-            <!-- 5b. Announcement Strategy & Standings Planner -->
-            <a href="{{ route('media.results.planner') }}" 
-               class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('media.results.planner') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60 text-purple-300' }}">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    <span>Strategy & Queue</span>
-                </div>
-                <span class="px-1.5 py-0.5 text-[9px] font-black rounded uppercase bg-purple-500/30 text-purple-200 border border-purple-500/40">Planner</span>
-            </a>
-
             <!-- 6. Poster Templates -->
             <a href="{{ route('media.results.templates') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('media.results.templates') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">

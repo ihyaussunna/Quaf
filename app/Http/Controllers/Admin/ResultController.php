@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
+use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramEntry;
@@ -516,5 +517,215 @@ class ResultController extends Controller
         $programs = $query->orderBy('name')->paginate(10)->withQueryString();
 
         return view('admin.results.all', compact('programs', 'search'));
+    }
+
+    /**
+     * Strategic Announcement & Standings Simulation Planner for Central Festival Committee.
+     */
+    public function planner(Request $request): View
+    {
+        $groups = Group::orderByDesc('points_cache')->get();
+
+        $results = Result::with([
+            'program.category',
+            'program.stage',
+            'firstEntry.student.group',
+            'secondEntry.student.group',
+            'thirdEntry.student.group',
+        ])->orderByRaw("CASE WHEN status IN ('draft', 'verified') THEN 0 WHEN status = 'send' THEN 1 WHEN status = 'announced' THEN 2 ELSE 3 END")
+            ->latest('updated_at')
+            ->get();
+
+        // Attach points breakdown to each result
+        $resultsData = $results->map(function ($res) {
+            $breakdown = $this->getResultPointsBreakdown($res);
+            $res->points_by_group = $breakdown['points_by_group'];
+            $res->first_group = $breakdown['first_group'];
+            $res->second_group = $breakdown['second_group'];
+            $res->third_group = $breakdown['third_group'];
+            $res->top_group = $breakdown['top_group'];
+            $res->max_points = $breakdown['max_points'];
+
+            return $res;
+        });
+
+        // Calculate group strategy potential in queue
+        $groupStrategyStats = [];
+        foreach ($groups as $grp) {
+            $readyWins = $resultsData->where('status', '!=', 'published')
+                ->filter(fn ($r) => $r->top_group && $r->top_group->id === $grp->id)
+                ->count();
+
+            $pendingPoints = $resultsData->where('status', '!=', 'published')
+                ->sum(fn ($r) => $r->points_by_group[$grp->id] ?? 0);
+
+            $groupStrategyStats[$grp->id] = [
+                'group' => $grp,
+                'ready_wins' => $readyWins,
+                'pending_points' => $pendingPoints,
+            ];
+        }
+
+        $stats = [
+            'total_programs' => Program::count(),
+            'published_count' => Result::where('status', 'published')->count(),
+            'send_count' => Result::where('status', 'send')->count(),
+            'announced_count' => Result::where('status', 'announced')->count(),
+            'ready_count' => Result::where('status', '!=', 'published')->count(),
+            'remaining_count' => Program::whereDoesntHave('result')->count(),
+        ];
+
+        $publicStandingsInfo = [
+            'count' => (int) FestivalSetting::get('public_standings_results_count', 0),
+            'label' => FestivalSetting::get('public_standings_label', 'Official Standings'),
+            'updated_at' => FestivalSetting::get('public_standings_updated_at'),
+        ];
+
+        return view('admin.results.planner', compact(
+            'groups',
+            'resultsData',
+            'groupStrategyStats',
+            'stats',
+            'publicStandingsInfo'
+        ));
+    }
+
+    /**
+     * Batch send selected results to the Stage Announcer desk.
+     */
+    public function batchSendToAnnouncer(Request $request): RedirectResponse
+    {
+        $resultIds = $request->input('result_ids', []);
+        if (empty($resultIds)) {
+            return back()->with('error', 'അനൗൺസർ ഡെസ്കിലേക്ക് അയക്കാൻ റിസൾട്ടുകൾ തിരഞ്ഞെടുത്തിട്ടില്ല.');
+        }
+
+        $results = Result::whereIn('id', $resultIds)->get();
+        $count = 0;
+        foreach ($results as $res) {
+            $old = $res->status;
+            $res->update(['status' => 'send']);
+            AuditLogger::log('send_result_to_announcer', $res, ['status' => $old], ['status' => 'send']);
+            $count++;
+        }
+
+        return back()->with('success', "{$count} മത്സര ഫലങ്ങൾ സ്റ്റേജ് അനൗൺസർ ഡെസ്കിലേക്ക് കൈമാറി.");
+    }
+
+    /**
+     * Batch publish selected results directly and optionally update standings.
+     */
+    public function batchPublish(Request $request): RedirectResponse
+    {
+        $resultIds = $request->input('result_ids', []);
+        if (empty($resultIds)) {
+            return back()->with('error', 'പ്രസിദ്ധീകരിക്കാൻ റിസൾട്ടുകൾ തിരഞ്ഞെടുത്തിട്ടില്ല.');
+        }
+
+        $results = Result::whereIn('id', $resultIds)->get();
+        $count = 0;
+        foreach ($results as $res) {
+            $res->update([
+                'status' => 'published',
+                'is_media_published' => true,
+                'media_published_at' => Carbon::now(),
+                'published_at' => $res->published_at ?? Carbon::now(),
+            ]);
+            $res->program->update(['status' => 'completed']);
+            $this->issueCertificates($res);
+            $count++;
+        }
+
+        $this->pointService->recalculateAllPoints();
+
+        if ($request->boolean('update_standings')) {
+            $customLabel = $request->input('standings_label');
+            Group::publishStandings($customLabel);
+        }
+
+        return back()->with('success', "{$count} ഫലങ്ങൾ വിജയകരമായി പബ്ലിഷ് ചെയ്യുകയും പോയിന്റ് നില അപ്‌ഡേറ്റ് ചെയ്യുകയും ചെയ്തു.");
+    }
+
+    /**
+     * Publish team standings milestone announcement.
+     */
+    public function publishStandings(Request $request): RedirectResponse
+    {
+        $customLabel = $request->input('custom_label', $request->input('label'));
+        $count = Group::publishStandings($customLabel);
+
+        return back()->with('success', "ടീം സ്റ്റാൻഡിങ് വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു (After {$count} Results).");
+    }
+
+    /**
+     * Calculate points breakdown per group for a given Result.
+     *
+     * @return array{
+     *     points_by_group: array<int, int>,
+     *     first_group: ?Group,
+     *     second_group: ?Group,
+     *     third_group: ?Group,
+     *     top_group: ?Group,
+     *     max_points: int
+     * }
+     */
+    public function getResultPointsBreakdown(Result $result): array
+    {
+        $program = $result->program;
+        $posPointsMap = PointCalculationService::getPositionPointsForProgram($program);
+        $weight = (float) ($program->points_weight ?? 1.0);
+
+        $pointsByGroup = [];
+        $groupsMap = [];
+
+        $placements = [
+            1 => $result->firstEntry,
+            2 => $result->secondEntry,
+            3 => $result->thirdEntry,
+        ];
+
+        foreach ($placements as $pos => $entry) {
+            if (! $entry || ! $entry->group_id) {
+                continue;
+            }
+
+            $grpId = $entry->group_id;
+            $groupsMap[$grpId] = $entry->group;
+
+            $posPts = (int) round(($posPointsMap[$pos] ?? 0) * $weight);
+
+            $grade = match ($pos) {
+                1 => $result->first_grade,
+                2 => $result->second_grade,
+                3 => $result->third_grade,
+                default => null,
+            };
+
+            $gradePts = 0;
+            if ($grade && isset(PointCalculationService::GRADE_POINTS[strtoupper(trim($grade))])) {
+                $gradePts = PointCalculationService::GRADE_POINTS[strtoupper(trim($grade))];
+            }
+
+            $totalForEntry = $posPts + $gradePts;
+            $pointsByGroup[$grpId] = ($pointsByGroup[$grpId] ?? 0) + $totalForEntry;
+        }
+
+        $topGroupId = null;
+        $maxPoints = 0;
+        foreach ($pointsByGroup as $gId => $pts) {
+            if ($pts > $maxPoints) {
+                $maxPoints = $pts;
+                $topGroupId = $gId;
+            }
+        }
+
+        return [
+            'points_by_group' => $pointsByGroup,
+            'first_group' => $result->firstEntry?->group,
+            'second_group' => $result->secondEntry?->group,
+            'third_group' => $result->thirdEntry?->group,
+            'top_group' => $topGroupId ? ($groupsMap[$topGroupId] ?? null) : null,
+            'max_points' => $maxPoints,
+        ];
     }
 }

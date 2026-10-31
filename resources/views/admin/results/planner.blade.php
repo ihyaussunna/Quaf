@@ -1,6 +1,6 @@
-@extends('layouts.media')
+@extends('layouts.admin')
 
-@section('title', 'Announcement Strategy & Standings Planner | QUAF Media')
+@section('title', 'Results Strategy & Queue Planner - QUAF Fest')
 
 @section('content')
 <div class="space-y-6" x-data="announcementPlanner()">
@@ -9,22 +9,22 @@
         <div>
             <div class="flex items-center gap-2">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-950 text-purple-200 border border-purple-800">
-                    Strategy Room
+                    Central Committee Strategy Room
                 </span>
-                <span class="text-xs text-slate-500 font-mono">Standings Impact & Sequence Optimizer</span>
+                <span class="text-xs text-slate-500 font-mono">Standings Impact & Announcement Queue</span>
             </div>
             <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1.5 font-sora">
                 ഫലപ്രഖ്യാപന സ്ട്രാറ്റജി പ്ലാനർ & ടീം ലീഡ് സിമുലേറ്റർ
             </h1>
             <p class="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
-                ഓരോ അനൗൺസ്‌മെന്റിലും ടീമുകളുടെ പോയിന്റ് നിലയിലെ മാറ്റങ്ങൾ നേരത്തെ കണ്ട്, ഏത് ടീമിനെ ഒന്നാം സ്ഥാനത്ത് എത്തിക്കണമെന്ന് മുൻകൂട്ടി പ്ലാൻ ചെയ്ത് ഫലപ്രഖ്യാപനം ക്രമീകരിക്കാനുള്ള പ്രത്യേക ടൂൾ.
+                ഓരോ അനൗൺസ്‌മെന്റിലും ടീമുകളുടെ പോയിന്റ് നിലയിലെ മാറ്റങ്ങൾ നേരത്തെ കണ്ട്, ഏത് ടീമിനെ ഒന്നാം സ്ഥാനത്ത് എത്തിക്കണമെന്ന് മുൻകൂട്ടി പ്ലാൻ ചെയ്ത് ഫലങ്ങൾ സ്റ്റേജിലേക്കും മീഡിയയിലേക്കും ക്രമീകരിക്കാനുള്ള അഡ്മിൻ കൺട്രോൾ ടൂൾ.
             </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <a href="{{ route('media.results.index') }}" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition flex items-center gap-2">
+            <a href="{{ route('admin.results.declared') }}" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition flex items-center gap-2">
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span>Back to Results</span>
+                <span>Declared Results</span>
             </a>
             <button type="button" @click="selectAllReady()" class="px-4 py-2.5 rounded-xl bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100 font-bold text-xs transition">
                 Select All Ready Results
@@ -54,7 +54,7 @@
             <div class="text-[10px] text-emerald-700 mt-1 font-mono">പോസ്റ്ററുകൾ പബ്ലിഷായവ</div>
         </div>
 
-        <!-- 3. Ready Awaiting Announcement / Poster -->
+        <!-- 3. Ready Awaiting Announcement / Stage Queue -->
         <div class="bg-amber-50/80 p-4 sm:p-5 rounded-2xl border border-amber-300 shadow-2xs ring-2 ring-amber-400/30">
             <div class="text-[11px] font-bold text-amber-900 uppercase tracking-wider flex items-center justify-between">
                 <span>ക്യൂവിലുള്ള ഫലങ്ങൾ</span>
@@ -97,19 +97,19 @@
 
                     <div class="text-xs font-bold truncate leading-tight">{{ $grp->name }}</div>
                     
-                    <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-baseline justify-between">
+                    <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-baseline justify-between">
                         <div>
                             <div class="text-[9px] uppercase font-bold opacity-70">Current</div>
                             <div class="text-base font-black font-mono">{{ number_format($grp->points_cache) }}</div>
                         </div>
                         <div class="text-right">
                             <div class="text-[9px] uppercase font-bold text-amber-500">In Queue</div>
-                            <div class="text-base font-black font-mono text-amber-400">+{{ $strat['pending_points'] }}</div>
+                            <div class="text-base font-black font-mono text-amber-500">+{{ $strat['pending_points'] }}</div>
                         </div>
                     </div>
 
                     @if($strat['ready_wins'] > 0)
-                        <div class="mt-2 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-400/20 text-amber-500 text-center font-mono">
+                        <div class="mt-2 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-400/20 text-amber-600 text-center font-mono">
                             {{ $strat['ready_wins'] }} Wins in Queue
                         </div>
                     @endif
@@ -137,7 +137,7 @@
 
                 <!-- Simulation Status Banner -->
                 <div x-show="selectedResultIds.length === 0" class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300">
-                    ലിസ്റ്റിൽ നിന്ന് റിസൾട്ടുകളുടെ ചെക്ക്ബോക്സ് സെലക്ട് ചെയ്യുക. അവ പ്രസിദ്ധീകരിച്ചാൽ ഏത് ടീം ഒന്നാമതെത്തും എന്ന് താഴെ തത്സമയം കാണാം.
+                    ലിസ്റ്റിൽ നിന്ന് റിസൾട്ടുകൾ സെലക്ട് ചെയ്യുക. അവ അനൗൺസ് ചെയ്യുകയോ പബ്ലിഷ് ചെയ്യുകയോ ചെയ്താൽ ഏത് ടീം ഒന്നാമതെത്തും എന്ന് താഴെ തത്സമയം കാണാം.
                 </div>
 
                 <div x-show="selectedResultIds.length > 0" class="p-3.5 rounded-xl bg-purple-950/80 border border-purple-500/50 text-xs text-purple-200">
@@ -180,27 +180,44 @@
                     </template>
                 </div>
 
-                <!-- Batch Action Form -->
-                <form method="POST" action="{{ route('media.results.batch-publish') }}" class="pt-3 border-t border-white/10 space-y-3">
-                    @csrf
-                    <template x-for="rId in selectedResultIds" :key="rId">
-                        <input type="hidden" name="result_ids[]" :value="rId">
-                    </template>
+                <!-- Batch Action Buttons -->
+                <div class="pt-3 border-t border-white/10 space-y-2.5">
+                    <!-- Action 1: Send to Announcer Desk -->
+                    <form method="POST" action="{{ route('admin.results.batch-send-announcer') }}">
+                        @csrf
+                        <template x-for="rId in selectedResultIds" :key="'snd_' + rId">
+                            <input type="hidden" name="result_ids[]" :value="rId">
+                        </template>
 
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" id="update_standings_check" name="update_standings" value="1" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
-                        <label for="update_standings_check" class="text-xs text-slate-300 font-medium">ഫലങ്ങൾക്കൊപ്പം പുതിയ ടീം സ്റ്റാൻഡിങ്സും പബ്ലിക് ആക്കുക</label>
-                    </div>
+                        <button type="submit" :disabled="selectedResultIds.length === 0"
+                                class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md font-mono flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                            <span>സ്റ്റേജ് അനൗൺസർക്ക് അയക്കുക (<span x-text="selectedResultIds.length"></span>)</span>
+                        </button>
+                    </form>
 
-                    <input type="text" name="standings_label" :value="suggestedMilestoneLabel"
-                           class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 font-mono focus:outline-none focus:border-emerald-400">
+                    <!-- Action 2: Batch Publish to Website -->
+                    <form method="POST" action="{{ route('admin.results.batch-publish') }}" class="space-y-2">
+                        @csrf
+                        <template x-for="rId in selectedResultIds" :key="'pub_' + rId">
+                            <input type="hidden" name="result_ids[]" :value="rId">
+                        </template>
 
-                    <button type="submit" :disabled="selectedResultIds.length === 0"
-                            class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-md font-mono flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <span>സെലക്ട് ചെയ്ത ഫലങ്ങൾ പബ്ലിഷ് ചെയ്യുക (<span x-text="selectedResultIds.length"></span>)</span>
-                    </button>
-                </form>
+                        <div class="flex items-center gap-2 pt-1">
+                            <input type="checkbox" id="update_standings_check" name="update_standings" value="1" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
+                            <label for="update_standings_check" class="text-xs text-slate-300 font-medium">ഫലങ്ങൾക്കൊപ്പം പുതിയ ടീം സ്റ്റാൻഡിങ്സും പബ്ലിക് ആക്കുക</label>
+                        </div>
+
+                        <input type="text" name="standings_label" :value="suggestedMilestoneLabel"
+                               class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 font-mono focus:outline-none focus:border-emerald-400">
+
+                        <button type="submit" :disabled="selectedResultIds.length === 0"
+                                class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-md font-mono flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span>പബ്ലിഷ് ചെയ്യുക & പോയിന്റ് നില അപ്‌ഡേറ്റ് ചെയ്യുക (<span x-text="selectedResultIds.length"></span>)</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -218,12 +235,12 @@
                     <button type="button" @click="filterStatus = 'ready'"
                             class="px-3 py-1.5 rounded-xl text-xs font-bold transition"
                             :class="filterStatus === 'ready' ? 'bg-amber-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-                        Ready in Queue (<span x-text="results.filter(r => !r.is_media_published).length"></span>)
+                        Unpublished Queue (<span x-text="results.filter(r => r.status !== 'published').length"></span>)
                     </button>
                     <button type="button" @click="filterStatus = 'published'"
                             class="px-3 py-1.5 rounded-xl text-xs font-bold transition"
                             :class="filterStatus === 'published' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-                        Published (<span x-text="results.filter(r => r.is_media_published).length"></span>)
+                        Published (<span x-text="results.filter(r => r.status === 'published').length"></span>)
                     </button>
                 </div>
 
@@ -249,9 +266,14 @@
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-slate-900 text-white" x-text="res.program_code"></span>
                                         <span class="text-[10px] font-bold text-slate-500 uppercase font-mono" x-text="res.category_name"></span>
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                                              :class="res.is_media_published ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-900 border border-amber-300'">
-                                            <span x-text="res.is_media_published ? 'Published' : 'Awaiting Poster'"></span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
+                                              :class="{
+                                                  'bg-emerald-100 text-emerald-800 border border-emerald-200': res.status === 'published',
+                                                  'bg-purple-100 text-purple-800 border border-purple-200': res.status === 'announced',
+                                                  'bg-blue-100 text-blue-800 border border-blue-200': res.status === 'send',
+                                                  'bg-amber-100 text-amber-900 border border-amber-300': res.status !== 'published' && res.status !== 'send' && res.status !== 'announced'
+                                              }">
+                                            <span x-text="res.status_label"></span>
                                         </span>
                                     </div>
                                     <h4 class="text-base font-bold text-slate-900 mt-1 leading-snug" x-text="res.program_name"></h4>
@@ -300,18 +322,25 @@
                             </span>
 
                             <div class="flex items-center gap-2">
-                                <a :href="'/media-portal/results/' + res.id + '/studio'"
-                                   class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    <span>Open Studio</span>
-                                </a>
+                                <form method="POST" :action="'/admin/results/' + res.id + '/send-to-announcer'" x-show="res.status !== 'send' && res.status !== 'announced' && res.status !== 'published'">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition">
+                                        Send to Announcer
+                                    </button>
+                                </form>
 
-                                <form method="POST" :action="'/media-portal/results/' + res.id + '/publish'" x-show="!res.is_media_published">
+                                <form method="POST" :action="'/admin/results/' + res.id + '/publish'" x-show="res.status !== 'published'">
                                     @csrf
                                     <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
                                         1-Click Publish
                                     </button>
                                 </form>
+
+                                <a :href="'/media-portal/results/' + res.id + '/studio'" target="_blank"
+                                   class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    <span>Poster Studio</span>
+                                </a>
                             </div>
                         </div>
 
@@ -343,7 +372,8 @@ function announcementPlanner() {
             program_code: r.program ? r.program.code : 'PROG',
             program_name: r.program ? r.program.name : 'Unknown',
             category_name: (r.program && r.program.category) ? r.program.category.name : 'General',
-            is_media_published: Boolean(r.is_media_published),
+            status: r.status,
+            status_label: r.status === 'published' ? 'Published' : (r.status === 'announced' ? 'Announced on Stage' : (r.status === 'send' ? 'At Announcer' : 'Declared')),
             first_name: r.first_entry ? (r.first_entry.student ? r.first_entry.student.name : 'Participant') : '',
             first_unit: r.first_entry ? (r.first_entry.group ? r.first_entry.group.name : '') : '',
             second_name: r.second_entry ? (r.second_entry.student ? r.second_entry.student.name : 'Participant') : '',
@@ -363,15 +393,14 @@ function announcementPlanner() {
 
         get filteredResults() {
             return this.results.filter(r => {
-                if (this.filterStatus === 'ready' && r.is_media_published) return false;
-                if (this.filterStatus === 'published' && !r.is_media_published) return false;
+                if (this.filterStatus === 'ready' && r.status === 'published') return false;
+                if (this.filterStatus === 'published' && r.status !== 'published') return false;
                 if (this.filterTeamId !== null && r.top_group_id !== this.filterTeamId) return false;
                 return true;
             });
         },
 
         get projectedLeaderboard() {
-            // Calculate simulated points for each group
             const addedPoints = {};
             this.groups.forEach(g => { addedPoints[g.id] = 0; });
 
@@ -413,7 +442,7 @@ function announcementPlanner() {
         },
 
         selectAllReady() {
-            this.selectedResultIds = this.results.filter(r => !r.is_media_published).map(r => r.id);
+            this.selectedResultIds = this.results.filter(r => r.status !== 'published').map(r => r.id);
         },
 
         clearSelection() {

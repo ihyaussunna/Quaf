@@ -411,6 +411,10 @@
                     <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-[11px]" style="display: none;">
+                    <a href="{{ route('admin.results.planner') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.results.planner') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }} flex items-center justify-between">
+                        <span>Strategy & Queue</span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-purple-500/30 text-purple-200">Planner</span>
+                    </a>
                     <a href="{{ route('admin.results.declare') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.results.declare') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Declare Results</a>
                     <a href="{{ route('admin.results.declared') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.results.declared') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Declared Results</a>
                     <a href="{{ route('admin.results.specified') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.results.specified') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Show Specified</a>

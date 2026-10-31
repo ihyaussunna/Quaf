@@ -609,6 +609,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::post('judges/{judge}/update-password', [AdminJudgeController::class, 'updatePassword'])->name('judges.update-password');
 
     // Result Management & Approval Workflow
+    Route::get('results/planner', [AdminResultController::class, 'planner'])->name('results.planner');
+    Route::post('results/batch-send-announcer', [AdminResultController::class, 'batchSendToAnnouncer'])->name('results.batch-send-announcer');
+    Route::post('results/batch-publish', [AdminResultController::class, 'batchPublish'])->name('results.batch-publish');
+    Route::post('results/publish-standings', [AdminResultController::class, 'publishStandings'])->name('results.publish-standings');
     Route::get('results/declare', [AdminResultController::class, 'declareIndex'])->name('results.declare');
     Route::get('results/declared', [AdminResultController::class, 'declaredResults'])->name('results.declared');
     Route::delete('results/{result}/undeclare', [AdminResultController::class, 'undeclare'])->name('results.undeclare');
@@ -900,8 +904,6 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
 
     // Results & Poster Designer
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');
-    Route::get('/results/planner', [MediaResultController::class, 'planner'])->name('results.planner');
-    Route::post('/results/batch-publish', [MediaResultController::class, 'batchPublish'])->name('results.batch-publish');
     Route::post('/results/publish-standings', [MediaResultController::class, 'publishStandings'])->name('results.publish-standings');
     Route::post('/standings/{standingAnnouncement}/publish', [MediaResultController::class, 'publishStandingAnnouncement'])->name('standings.publish');
     Route::get('/results/{result}/studio', [MediaResultController::class, 'studio'])->name('results.studio');
