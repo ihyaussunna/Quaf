@@ -20,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -192,7 +193,35 @@ class MediaResultController extends Controller
             'layout_mode' => $t->posterSetting?->layout_mode ?? 'default',
         ]);
 
-        $medalPacks = ResultMedal::where('is_active', true)->orderByDesc('id')->get();
+        $medalPacks = collect();
+        if (! Schema::hasTable('result_medals')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                // Ignore if artisan call is restricted
+            }
+        }
+
+        if (Schema::hasTable('result_medals')) {
+            try {
+                $medalPacks = ResultMedal::where('is_active', true)->orderByDesc('id')->get();
+            } catch (\Throwable $e) {
+                $medalPacks = collect();
+            }
+        }
+
+        if ($medalPacks->isEmpty()) {
+            $medalPacks = collect([
+                (object) [
+                    'id' => 1,
+                    'name' => 'Classic Official Medals',
+                    'first_image' => asset('images/medals/first.png'),
+                    'second_image' => asset('images/medals/second.png'),
+                    'third_image' => asset('images/medals/third.png'),
+                    'is_active' => true,
+                ],
+            ]);
+        }
 
         return view('media.results.studio', compact(
             'result',
@@ -464,7 +493,22 @@ class MediaResultController extends Controller
      */
     public function medalsIndex(): View
     {
-        $medals = ResultMedal::orderByDesc('id')->get();
+        if (! Schema::hasTable('result_medals')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                // Ignore
+            }
+        }
+
+        $medals = collect();
+        if (Schema::hasTable('result_medals')) {
+            try {
+                $medals = ResultMedal::orderByDesc('id')->get();
+            } catch (\Throwable $e) {
+                $medals = collect();
+            }
+        }
 
         return view('media.results.medals', compact('medals'));
     }
@@ -474,6 +518,14 @@ class MediaResultController extends Controller
      */
     public function medalStore(Request $request): RedirectResponse
     {
+        if (! Schema::hasTable('result_medals')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                // Ignore
+            }
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'first_image' => ['required', 'image', 'mimes:png,webp,svg,jpg,jpeg', 'max:5120'],
@@ -503,6 +555,14 @@ class MediaResultController extends Controller
      */
     public function medalAjaxUpload(Request $request): JsonResponse
     {
+        if (! Schema::hasTable('result_medals')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                // Ignore
+            }
+        }
+
         $request->validate([
             'name' => ['nullable', 'string', 'max:255'],
             'first_image' => ['nullable', 'image', 'max:5120'],
