@@ -185,8 +185,8 @@ class Result extends Model
         if (empty($winners['first'])) {
             $winners['first'][] = [
                 'id' => null,
-                'name' => 'വിദ്യാർത്ഥിയുടെ പേര് (First Winner)',
-                'unit' => 'ഗ്രൂപ്പ് പേര് (Group Name)',
+                'name' => 'MUHAMMED YASEEN P.',
+                'unit' => 'RED FOX TEAM',
                 'chest' => 'QF0001',
                 'medal' => '/images/medals/first.png',
                 'rank' => '01',
@@ -196,8 +196,8 @@ class Result extends Model
         if (empty($winners['second'])) {
             $winners['second'][] = [
                 'id' => null,
-                'name' => 'രണ്ടാം സ്ഥാനം (Second Winner)',
-                'unit' => 'ഗ്രൂപ്പ് പേര് (Group Name)',
+                'name' => 'AHMAD RAYYAN K.',
+                'unit' => 'GREEN WARRIORS',
                 'chest' => 'QF0002',
                 'medal' => '/images/medals/second.png',
                 'rank' => '02',
@@ -207,8 +207,8 @@ class Result extends Model
         if (empty($winners['third'])) {
             $winners['third'][] = [
                 'id' => null,
-                'name' => 'മൂന്നാം സ്ഥാനം (Third Winner)',
-                'unit' => 'ഗ്രൂപ്പ് പേര് (Group Name)',
+                'name' => 'BILAL MUHAMMED',
+                'unit' => 'BLUE RIDERS',
                 'chest' => 'QF0003',
                 'medal' => '/images/medals/third.png',
                 'rank' => '03',
@@ -216,5 +216,40 @@ class Result extends Model
         }
 
         return $winners;
+    }
+
+    /**
+     * Compute sequence result number (e.g. 1, 2, 3...)
+     */
+    public function getResultNumberAttribute(): int
+    {
+        return self::where(function ($q) {
+            if ($this->published_at) {
+                $q->where('published_at', '<', $this->published_at)
+                    ->orWhere(function ($sub) {
+                        $sub->where('published_at', '=', $this->published_at)
+                            ->where('id', '<=', $this->id);
+                    });
+            } else {
+                $q->where('id', '<=', $this->id);
+            }
+        })->count() ?: ($this->id ?? 1);
+    }
+
+    /**
+     * Get clean download filename: {result_number}_{zone}_{program_name}.{ext}
+     */
+    public function getDownloadFilename(string $ext = 'png'): string
+    {
+        $resNo = sprintf('%02d', $this->result_number);
+        $zone = $this->program?->zone?->name ?? $this->program?->eligibility ?? 'Zone';
+        $prog = $this->program?->name ?? 'Program';
+
+        $cleanZone = preg_replace('/[^A-Za-z0-9_-]/', '_', trim($zone));
+        $cleanProg = preg_replace('/[^A-Za-z0-9_-]/', '_', trim($prog));
+        $cleanZone = trim(preg_replace('/_+/', '_', (string) $cleanZone), '_');
+        $cleanProg = trim(preg_replace('/_+/', '_', (string) $cleanProg), '_');
+
+        return "{$resNo}_{$cleanZone}_{$cleanProg}.{$ext}";
     }
 }

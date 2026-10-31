@@ -138,6 +138,14 @@
                         <span>Download PNG</span>
                     </button>
 
+                    <!-- Direct Poster Upload Button -->
+                    <button type="button" @click="showStudioUploadModal = true"
+                            class="px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                            title="Upload already finished poster file directly (ഡിസൈൻ ചെയ്ത പോസ്റ്റർ നേരിട്ട് അപ്‌ലോഡ് ചെയ്യുക)">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span>Upload Poster</span>
+                    </button>
+
                     <!-- Save & Publish -->
                     <button type="button" @click="saveAndPublish()" :disabled="publishing"
                             class="px-5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50 cursor-pointer">
@@ -1651,6 +1659,127 @@
         </div>
 
     </div>
+
+    <!-- Studio Upload Ready Poster Modal -->
+    <div x-show="showStudioUploadModal" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+         style="display: none;"
+         @keydown.escape.window="showStudioUploadModal = false">
+
+        <div @click.away="showStudioUploadModal = false" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden font-sora my-8">
+
+            <form action="{{ !empty($result->id) ? route('media.results.save-poster', $result->id) : '#' }}" 
+                  method="POST" 
+                  enctype="multipart/form-data" 
+                  @submit="isStudioUploading = true">
+                @csrf
+
+                <!-- Header -->
+                <div class="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-white">Upload Finished Poster</h3>
+                            <p class="text-[11px] text-slate-300">ഫോട്ടോഷോപ്പ് / കാൻവ ഡിസൈൻ ചെയ്ത പോസ്റ്റർ നേരിട്ട് അപ്‌ലോഡ് ചെയ്യുക</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showStudioUploadModal = false" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="p-5 space-y-4">
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Target Result</div>
+                        <div class="text-xs font-bold text-slate-900 mt-0.5">
+                            #{{ !empty($resultNo) ? sprintf("%02d", $resultNo) : ($result->id ?? "01") }} • {{ $result->program->name ?? 'Program' }} ({{ $result->program->zone?->name ?? $result->program->eligibility ?? 'All Zones' }})
+                        </div>
+                    </div>
+
+                    <!-- Drop Box -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            Poster Image File
+                        </label>
+                        <div @dragover.prevent="isStudioDragging = true"
+                             @dragleave.prevent="isStudioDragging = false"
+                             @drop.prevent="isStudioDragging = false; const f = $event.dataTransfer.files[0]; if (f) { const el = document.getElementById('studioFileInput'); if (el) { const dt = new DataTransfer(); dt.items.add(f); el.files = dt.files; } handleStudioFile(f); }"
+                             :class="isStudioDragging ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'"
+                             class="relative border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all">
+
+                            <input type="file" 
+                                   id="studioFileInput"
+                                   name="poster_file" 
+                                   accept="image/png,image/jpeg,image/webp" 
+                                   required
+                                   @change="handleStudioFile($event.target.files[0])"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
+                            <div x-show="!studioUploadPreview" class="space-y-1.5">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 mx-auto flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800">
+                                    Drag & drop finished poster image here
+                                </div>
+                                <div class="text-[11px] text-slate-500">
+                                    or <span class="text-indigo-600 font-bold underline">browse file</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 font-mono">PNG, JPG, WEBP (Max 10MB)</div>
+                            </div>
+
+                            <div x-show="studioUploadPreview" class="space-y-2" style="display: none;">
+                                <div class="relative max-w-[200px] mx-auto rounded-lg overflow-hidden shadow border border-slate-200 aspect-[4/5] bg-slate-900">
+                                    <img :src="studioUploadPreview" alt="Preview" class="w-full h-full object-contain">
+                                </div>
+                                <div class="text-xs font-bold text-slate-800 truncate" x-text="studioUploadFileName"></div>
+                                <div class="text-[10px] text-slate-500 font-mono" x-text="studioUploadFileSize"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Publish checkbox -->
+                    <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5">
+                        <input type="hidden" name="publish_now" value="0">
+                        <input type="checkbox" name="publish_now" id="studioPublishCheck" value="1" checked class="w-4 h-4 mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500">
+                        <label for="studioPublishCheck" class="text-xs text-emerald-900 cursor-pointer">
+                            <span class="font-bold">Publish immediately to public website</span>
+                            <span class="block text-[11px] text-emerald-700 mt-0.5">തത്സമയം പബ്ലിക് വെബ്സൈറ്റിൽ പബ്ലിഷ് ചെയ്യുക</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="showStudioUploadModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            :disabled="isStudioUploading || !studioUploadPreview"
+                            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition flex items-center gap-2 shadow-md disabled:opacity-50 cursor-pointer">
+                        <svg x-show="!isStudioUploading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span x-text="isStudioUploading ? 'Uploading...' : 'Upload & Publish Poster'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1670,6 +1799,28 @@ function posterStudio() {
         activeHandle: null,
         elementStartW: 0,
         elementStartH: 0,
+
+        showStudioUploadModal: false,
+        studioUploadPreview: null,
+        studioUploadFileName: '',
+        studioUploadFileSize: '',
+        isStudioUploading: false,
+        isStudioDragging: false,
+
+        handleStudioFile(file) {
+            if (!file) return;
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (PNG, JPG, WEBP).');
+                return;
+            }
+            this.studioUploadFileName = file.name;
+            this.studioUploadFileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.studioUploadPreview = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
         elementStartSize: 0,
         elementStartScale: 1.0,
         elementStartRotation: 0,
@@ -3459,7 +3610,11 @@ function posterStudio() {
             this.render(true);
             const canvas = document.getElementById('posterCanvas');
             const link = document.createElement('a');
-            link.download = `QUAF_Result_${this.data.result_no}.png`;
+            const resNo = (this.data.result_no || '01').toString().trim().padStart(2, '0');
+            const cleanSlug = (s) => (s || '').toString().trim().replace(/[/\\?%*:|"<>#]/g, '').replace(/\s+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+            const zone = cleanSlug(this.data.category || 'Zone');
+            const prog = cleanSlug(this.data.competition || 'Program');
+            link.download = `${resNo}_${zone}_${prog}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
             this.render(false);

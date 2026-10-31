@@ -3,7 +3,103 @@
 @section('title', 'Results & Poster Studio | QUAF Media')
 
 @section('content')
-<div class="space-y-6">
+<div x-data="{
+    uploadModalOpen: false,
+    selectedResultId: '',
+    programName: '',
+    programCode: '',
+    zoneName: '',
+    resultNo: '',
+    formAction: '',
+    isUploading: false,
+    previewUrl: null,
+    fileName: '',
+    fileSize: '',
+    isDragging: false,
+    availableResults: [
+        @foreach($results as $r)
+        {
+            id: {{ $r->id }},
+            code: '{{ $r->program->code ?? 'PROG' }}',
+            name: '{{ addslashes($r->program->name) }}',
+            zone: '{{ addslashes($r->program->zone?->name ?? $r->program->eligibility ?? 'All Zones') }}',
+            result_no: '{{ sprintf('%02d', $r->result_number) }}',
+            action: '{{ route('media.results.save-poster', $r) }}'
+        },
+        @endforeach
+    ],
+    init() {
+        this.$watch('uploadModalOpen', (val) => {
+            window.__isModalActive = !!val;
+        });
+    },
+    openGeneralUploadModal() {
+        if (!this.availableResults.length) {
+            alert('No announced results available for upload.');
+            return;
+        }
+        const first = this.availableResults[0];
+        this.openUploadModal(first.id, first.name, first.code, first.zone, first.result_no, first.action);
+    },
+    openUploadModal(id, name, code, zone, resNo, action) {
+        this.selectedResultId = id;
+        this.programName = name;
+        this.programCode = code;
+        this.zoneName = zone;
+        this.resultNo = resNo;
+        this.formAction = action;
+        this.previewUrl = null;
+        this.fileName = '';
+        this.fileSize = '';
+        this.isUploading = false;
+        this.isDragging = false;
+        const input = document.getElementById('posterFileInput');
+        if (input) input.value = '';
+        this.uploadModalOpen = true;
+    },
+    onResultSelected(id) {
+        const item = this.availableResults.find(r => r.id == id);
+        if (item) {
+            this.selectedResultId = item.id;
+            this.programName = item.name;
+            this.programCode = item.code;
+            this.zoneName = item.zone;
+            this.resultNo = item.result_no;
+            this.formAction = item.action;
+        }
+    },
+    handleFile(file) {
+        if (!file) return;
+        if (!file.type.match('image.*')) {
+            alert('Please select a valid image file (PNG, JPG, WEBP).');
+            return;
+        }
+        this.fileName = file.name;
+        this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.previewUrl = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    },
+    onFileChange(e) {
+        const file = e.target.files && e.target.files[0];
+        this.handleFile(file);
+    },
+    onDrop(e) {
+        this.isDragging = false;
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) {
+            const input = document.getElementById('posterFileInput');
+            if (input) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+            }
+            this.handleFile(file);
+        }
+    }
+}" class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
         <div>
@@ -22,6 +118,10 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button type="button" @click="openGeneralUploadModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <span>Upload Poster</span>
+            </button>
             <button type="button" onclick="window.location.reload()" class="px-3 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs">
                 <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 <span>Refresh</span>
@@ -309,28 +409,49 @@
                     </div>
 
                     <!-- Footer Action Buttons -->
-                    <div class="p-4 bg-slate-50/70 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                        <a href="{{ route('media.results.studio', $res) }}" class="flex-1 text-center py-2 px-3 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs transition-colors shadow-xs">
-                            {{ $res->poster_image ? 'Edit Poster Settings' : 'Create & Design Poster' }}
-                        </a>
-
-                        @if(!$res->is_media_published)
-                            <form method="POST" action="{{ route('media.results.publish', $res) }}" class="inline">
-                                @csrf
-                                <button type="submit" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-xs" title="Publish Public Result">
-                                    Publish Result
-                                </button>
-                            </form>
-                        @endif
-
-                        @if($res->poster_image)
-                            <a href="{{ $res->poster_image }}" download="QUAF_Result_{{ $prog->code }}.png" class="p-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="Download Poster Image">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <div class="p-4 bg-slate-50/70 border-t border-slate-100 space-y-2">
+                        <!-- Primary Action Row -->
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('media.results.studio', $res) }}" class="flex-1 text-center py-2 px-3 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs transition-colors shadow-xs">
+                                {{ $res->poster_image ? 'Edit in Studio' : 'Create & Design Poster' }}
                             </a>
-                            <a href="{{ route('media.results.public-poster', $res) }}" target="_blank" class="p-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="View Public Poster">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                            </a>
-                        @endif
+                            <button type="button" 
+                                    @click="openUploadModal({{ $res->id }}, '{{ addslashes($prog->name) }}', '{{ $prog->code }}', '{{ addslashes($prog->zone?->name ?? $prog->eligibility ?? 'All Zones') }}', '{{ sprintf('%02d', $res->result_number) }}', '{{ route('media.results.save-poster', $res) }}')"
+                                    class="py-2 px-3 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer"
+                                    title="Upload ready-made poster file directly">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                <span>Upload Poster</span>
+                            </button>
+                        </div>
+
+                        <!-- Secondary Row: Status / Publish / Download / View -->
+                        <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200/60">
+                            @if(!$res->is_media_published)
+                                <form method="POST" action="{{ route('media.results.publish', $res) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-2xs flex items-center gap-1" title="Publish Public Result">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Publish Result</span>
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>Live on Website</span>
+                                </span>
+                            @endif
+
+                            @if($res->poster_image)
+                                <div class="flex items-center gap-1.5 ml-auto">
+                                    <a href="{{ route('media.results.download-poster', $res) }}" download="{{ $res->getDownloadFilename('png') }}" class="p-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="Download Poster ({{ $res->getDownloadFilename('png') }})">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    </a>
+                                    <a href="{{ route('media.results.public-poster', $res) }}" target="_blank" class="p-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors" title="View Public Poster">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             @endforeach
@@ -350,6 +471,163 @@
             </p>
         </div>
     @endif
+
+    <!-- Upload Poster Modal (Direct Image Upload & Instant Publish) -->
+    <div x-show="uploadModalOpen" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+         style="display: none;"
+         @keydown.escape.window="uploadModalOpen = false">
+
+        <!-- Modal Dialog -->
+        <div @click.away="uploadModalOpen = false" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden font-sora my-8">
+
+            <form :action="formAction" method="POST" enctype="multipart/form-data" @submit="isUploading = true">
+                @csrf
+
+                <!-- Modal Header -->
+                <div class="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-black text-white">Upload Finished Poster</h3>
+                            <p class="text-xs text-slate-300">ഡിസൈൻ ചെയ്ത പോസ്റ്റർ നേരിട്ട് അപ്‌ലോഡ് ചെയ്തു പബ്ലിഷ് ചെയ്യുക</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="uploadModalOpen = false" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-5">
+                    <!-- Selected Program Info & Switcher -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Target Competition Result</span>
+                            <div class="flex items-center gap-1.5 font-mono text-[11px] font-bold">
+                                <span class="px-2 py-0.5 rounded bg-slate-900 text-amber-300" x-text="'Result #' + resultNo"></span>
+                                <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-700" x-text="zoneName"></span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded-lg font-mono text-xs font-black bg-indigo-600 text-white shrink-0" x-text="programCode"></span>
+                            <div class="text-sm font-bold text-slate-900 truncate" x-text="programName"></div>
+                        </div>
+
+                        <!-- Dropdown to select another program if needed -->
+                        <div class="pt-2 border-t border-slate-200/80" x-show="availableResults.length > 1">
+                            <label class="text-[11px] font-semibold text-slate-600 mb-1 block">Change Program (മറ്റൊരു റിസൾട്ട് തിരഞ്ഞെടുക്കുക):</label>
+                            <select class="w-full text-xs font-medium p-2 rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    x-model="selectedResultId" 
+                                    @change="onResultSelected($event.target.value)">
+                                <template x-for="item in availableResults" :key="item.id">
+                                    <option :value="item.id" x-text="'#' + item.result_no + ' • ' + item.code + ' - ' + item.name + ' (' + item.zone + ')'" :selected="item.id == selectedResultId"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- File Drag & Drop Box -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Poster Image File (പോസ്റ്റർ ഇമേജ് ഫയൽ)
+                        </label>
+                        <div @dragover.prevent="isDragging = true"
+                             @dragleave.prevent="isDragging = false"
+                             @drop.prevent="onDrop($event)"
+                             :class="isDragging ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'"
+                             class="relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all">
+
+                            <input type="file" 
+                                   id="posterFileInput"
+                                   name="poster_file" 
+                                   accept="image/png,image/jpeg,image/webp" 
+                                   required
+                                   @change="onFileChange($event)"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
+                            <!-- Case 1: No file selected yet -->
+                            <div x-show="!previewUrl" class="space-y-2">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 mx-auto flex items-center justify-center">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800">
+                                    Drag & drop your finished poster image here
+                                </div>
+                                <div class="text-[11px] text-slate-500">
+                                    or <span class="text-indigo-600 font-bold underline">browse file from device</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 font-mono">
+                                    Supported: PNG, JPG, WEBP • Recommended aspect ratio: 1:1 or 4:5 • Max 10MB
+                                </div>
+                            </div>
+
+                            <!-- Case 2: File Selected (Live Preview) -->
+                            <div x-show="previewUrl" class="space-y-3" style="display: none;">
+                                <div class="relative max-w-xs mx-auto rounded-xl overflow-hidden shadow-md border border-slate-200 aspect-square bg-slate-900">
+                                    <img :src="previewUrl" alt="Poster Preview" class="w-full h-full object-contain">
+                                </div>
+                                <div class="flex items-center justify-center gap-2 text-xs">
+                                    <span class="font-bold text-slate-800 truncate max-w-xs" x-text="fileName"></span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-mono text-[10px]" x-text="fileSize"></span>
+                                </div>
+                                <div class="text-[11px] text-indigo-600 font-bold hover:underline">
+                                    ക്ലിക്ക് ചെയ്ത് വേറെ ഇമേജ് മാറ്റാം (Change File)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instant Publish Checkbox -->
+                    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3">
+                        <input type="hidden" name="publish_now" value="0">
+                        <input type="checkbox" 
+                               name="publish_now" 
+                               id="publishNowCheck" 
+                               value="1" 
+                               checked 
+                               class="w-4 h-4 mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <label for="publishNowCheck" class="text-xs text-emerald-900 cursor-pointer">
+                            <span class="font-bold">Publish immediately to public website (തത്സമയം പബ്ലിഷ് ചെയ്യുക)</span>
+                            <span class="block text-[11px] text-emerald-700 mt-0.5">
+                                അപ്‌ലോഡ് പൂർത്തിയാകുന്ന ഉടൻ ഫെസ്റ്റിവൽ ലൈവ് പോർട്ടലിൽ റിസൾട്ടും പോസ്റ്ററും പ്രസിദ്ധീകരിക്കപ്പെടും.
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                    <button type="button" @click="uploadModalOpen = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            :disabled="isUploading || !previewUrl"
+                            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:pointer-events-none cursor-pointer">
+                        <svg x-show="!isUploading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <svg x-show="isUploading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span x-text="isUploading ? 'Uploading & Publishing...' : 'Upload & Publish Poster'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -357,6 +635,10 @@
     const label = document.getElementById('autoReloadLabel');
     if (label) {
         setInterval(() => {
+            if (window.__isModalActive) {
+                label.innerText = 'Paused (Modal Open)';
+                return;
+            }
             countdown--;
             if (countdown <= 0) {
                 window.location.reload();

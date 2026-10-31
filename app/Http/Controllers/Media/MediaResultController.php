@@ -765,7 +765,7 @@ class MediaResultController extends Controller
             }
 
             $ext = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: 'png';
-            $downloadFilename = 'QUAF-Result-'.Str::slug($result->program->name ?? 'result').'-'.$result->id.'.'.$ext;
+            $downloadFilename = $result->getDownloadFilename($ext);
 
             if (Storage::disk('public')->exists($diskPath)) {
                 $fullPath = Storage::disk('public')->path($diskPath);
@@ -785,7 +785,7 @@ class MediaResultController extends Controller
 
         // 2. Otherwise generate dynamic high-resolution poster using ResultPosterGenerator
         $img = ResultPosterGenerator::generate($result);
-        $downloadFilename = 'QUAF-Result-'.Str::slug($result->program->name ?? 'result').'-'.$result->id.'.jpg';
+        $downloadFilename = $result->getDownloadFilename('jpg');
 
         return ResultPosterGenerator::streamResponse($img, $downloadFilename, true);
     }
