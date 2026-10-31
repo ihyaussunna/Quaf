@@ -132,27 +132,46 @@ class MediaResultController extends Controller
             $templates = ResultTemplate::with('posterSetting')->orderByDesc('id')->get();
         }
 
-        $activeTemplate = $result->template ?? $templates->first();
-
-        // Get settings: either custom saved on this result, or from template, or defaults
-        $defaultSettings = PosterSetting::defaultSettings();
-        $templateSettings = null;
-        if ($activeTemplate && $activeTemplate->posterSetting) {
-            $templateSettings = $activeTemplate->posterSetting->toArray();
+        // 1. Determine active template:
+        $savedDefaultTemplateId = FestivalSetting::get('default_poster_template_id');
+        $activeTemplate = $result->template;
+        if (! $activeTemplate && $savedDefaultTemplateId) {
+            $activeTemplate = $templates->firstWhere('id', (int) $savedDefaultTemplateId);
         }
-        if ($activeTemplate && ! empty($activeTemplate->default_settings)) {
-            $templateSettings = array_merge($templateSettings ?? [], $activeTemplate->default_settings);
+        if (! $activeTemplate) {
+            $activeTemplate = $templates->first();
         }
 
-        // Only merge custom_poster_settings if they match current template's layout mode
+        // 2. Layered preset loading
+        $baseDefaults = PosterSetting::defaultSettings();
+        $dbPosterSettings = $activeTemplate?->posterSetting?->toArray() ?? [];
+        $templateJsonSettings = is_array($activeTemplate?->default_settings) ? $activeTemplate->default_settings : [];
+
+        $templatePresetJson = FestivalSetting::get('poster_preset_template_'.$activeTemplate?->id);
+        $templatePreset = $templatePresetJson ? json_decode($templatePresetJson, true) : [];
+        if (! is_array($templatePreset)) {
+            $templatePreset = [];
+        }
+
+        $globalPresetJson = FestivalSetting::get('global_active_poster_preset');
+        $globalPreset = $globalPresetJson ? json_decode($globalPresetJson, true) : [];
+        if (! is_array($globalPreset)) {
+            $globalPreset = [];
+        }
+
+        // 3. Result's own saved settings (if edited before)
         $customSettings = $result->custom_poster_settings ?? [];
-        if (! empty($customSettings) && ($customSettings['layout_mode'] ?? 'default') !== ($templateSettings['layout_mode'] ?? 'default')) {
+        if (! is_array($customSettings)) {
             $customSettings = [];
         }
 
+        // Merge in order of precedence: base -> db table -> template JSON -> global preset -> template preset -> result custom settings
         $currentSettings = array_merge(
-            $defaultSettings,
-            $templateSettings ?? [],
+            $baseDefaults,
+            $dbPosterSettings,
+            $templateJsonSettings,
+            $globalPreset,
+            $templatePreset,
             $customSettings
         );
 
@@ -190,12 +209,21 @@ class MediaResultController extends Controller
 
         $themeColor = FestivalSetting::get('theme_color', '#be1e2d');
 
-        $templatesMap = $templates->keyBy('id')->map(fn ($t) => [
-            'id' => $t->id,
-            'name' => $t->name,
-            'image' => asset($t->image_path),
-            'layout_mode' => $t->posterSetting?->layout_mode ?? 'default',
-        ]);
+        $templatesMap = $templates->keyBy('id')->map(function ($t) {
+            $presetJson = FestivalSetting::get('poster_preset_template_'.$t->id);
+            $preset = $presetJson ? json_decode($presetJson, true) : null;
+            if (! is_array($preset)) {
+                $preset = is_array($t->default_settings) ? $t->default_settings : ($t->posterSetting?->toArray() ?? []);
+            }
+
+            return [
+                'id' => $t->id,
+                'name' => $t->name,
+                'image' => asset($t->image_path),
+                'layout_mode' => $t->posterSetting?->layout_mode ?? ($preset['layout_mode'] ?? 'default'),
+                'preset' => $preset,
+            ];
+        });
 
         $medalPacks = collect();
         if (! Schema::hasTable('result_medals')) {
@@ -431,6 +459,12 @@ class MediaResultController extends Controller
                     'message' => 'ടെംപ്ലേറ്റ് കണ്ടെത്താൻ കഴിഞ്ഞില്ല.',
                 ], 404);
             }
+
+            // 0. Save permanent preset in FestivalSetting (persists across all databases & sessions)
+            $presetJson = json_encode($validated['settings']);
+            FestivalSetting::set('poster_preset_template_'.$template->id, $presetJson);
+            FestivalSetting::set('global_active_poster_preset', $presetJson);
+            FestivalSetting::set('default_poster_template_id', (string) $template->id);
 
             // 1. Ensure default_settings column exists on result_templates table
             if (! Schema::hasColumn('result_templates', 'default_settings')) {

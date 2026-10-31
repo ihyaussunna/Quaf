@@ -1415,11 +1415,11 @@ function posterStudio() {
 
         // Cyan Guidelines
         guidelines: {
-            show: true,
-            vertical: [205, 540, 740],
-            horizontal: [145, 165, 779],
-            newX: 205,
-            newY: 200
+            show: {{ isset($currentSettings['guidelines']['show']) ? ($currentSettings['guidelines']['show'] ? 'true' : 'false') : 'true' }},
+            vertical: @json($currentSettings['guidelines']['vertical'] ?? [205, 540, 740]),
+            horizontal: @json($currentSettings['guidelines']['horizontal'] ?? [145, 165, 779]),
+            newX: {{ (int) ($currentSettings['guidelines']['newX'] ?? 205) }},
+            newY: {{ (int) ($currentSettings['guidelines']['newY'] ?? 200) }}
         },
 
         // Dynamic Custom Elements Array
@@ -1436,21 +1436,21 @@ function posterStudio() {
             layout_mode: '{{ $currentSettings["layout_mode"] ?? "default" }}',
 
             // Visibility
-            show_result_no: true,
-            show_competition: true,
-            show_category: true,
-            show_winners: true,
+            show_result_no: {{ isset($currentSettings['show_result_no']) ? ($currentSettings['show_result_no'] ? 'true' : 'false') : 'true' }},
+            show_competition: {{ isset($currentSettings['show_competition']) ? ($currentSettings['show_competition'] ? 'true' : 'false') : 'true' }},
+            show_category: {{ isset($currentSettings['show_category']) ? ($currentSettings['show_category'] ? 'true' : 'false') : 'true' }},
+            show_winners: {{ isset($currentSettings['show_winners']) ? ($currentSettings['show_winners'] ? 'true' : 'false') : 'true' }},
 
             // Rotations
-            result_rotation: 0,
-            competition_rotation: 0,
-            category_rotation: 0,
+            result_rotation: {{ (float) ($currentSettings['result_rotation'] ?? 0) }},
+            competition_rotation: {{ (float) ($currentSettings['competition_rotation'] ?? 0) }},
+            category_rotation: {{ (float) ($currentSettings['category_rotation'] ?? 0) }},
 
             // Master Winner Scaling & Spacing
-            winners_scale: 1.0,
-            winner_name_2lines: true,
-            winner_name_line_height: 38,
-            winner_unit_gap: 10,
+            winners_scale: {{ (float) ($currentSettings['winners_scale'] ?? 1.0) }},
+            winner_name_2lines: {{ isset($currentSettings['winner_name_2lines']) ? ($currentSettings['winner_name_2lines'] ? 'true' : 'false') : 'true' }},
+            winner_name_line_height: {{ (float) ($currentSettings['winner_name_line_height'] ?? 38) }},
+            winner_unit_gap: {{ (float) ($currentSettings['winner_unit_gap'] ?? 10) }},
             row_gap: {{ (float) ($currentSettings['row_gap'] ?? 178) }},
 
             // Medal System
@@ -1731,8 +1731,22 @@ function posterStudio() {
         },
 
         init() {
-            // Restore saved custom elements if any
+            // Restore saved settings and presets
             const savedSettings = @json($currentSettings);
+            if (savedSettings && typeof savedSettings === 'object') {
+                for (const [key, val] of Object.entries(savedSettings)) {
+                    if (['custom_elements', 'layer_stack', 'guidelines', 'custom_winners'].includes(key)) continue;
+                    if (val !== undefined && val !== null) {
+                        this.settings[key] = val;
+                    }
+                }
+
+                if (savedSettings.guidelines) {
+                    this.guidelines = Object.assign(this.guidelines, savedSettings.guidelines);
+                }
+            }
+
+            // Restore saved custom elements if any
             if (savedSettings && savedSettings.custom_elements && Array.isArray(savedSettings.custom_elements)) {
                 this.customElements = savedSettings.custom_elements.map(el => {
                     if (el.type === 'image' && el.imgSrc) {
@@ -1906,6 +1920,34 @@ function posterStudio() {
             this.settings.template_id = id;
             this.settings.template_image = src;
             this.settings.layout_mode = layoutMode || 'default';
+
+            const tmplData = this.templatesMap[id];
+            if (tmplData && tmplData.preset && typeof tmplData.preset === 'object') {
+                for (const [key, val] of Object.entries(tmplData.preset)) {
+                    if (['custom_elements', 'layer_stack', 'guidelines', 'custom_winners', 'template_id', 'template_image'].includes(key)) continue;
+                    if (val !== undefined && val !== null) {
+                        this.settings[key] = val;
+                    }
+                }
+                if (Array.isArray(tmplData.preset.custom_elements) && tmplData.preset.custom_elements.length > 0) {
+                    this.customElements = tmplData.preset.custom_elements.map(el => {
+                        if (el.type === 'image' && el.imgSrc) {
+                            const img = new Image();
+                            img.src = el.imgSrc;
+                            el.imgObj = img;
+                        }
+                        return el;
+                    });
+                }
+                if (Array.isArray(tmplData.preset.layer_stack) && tmplData.preset.layer_stack.length > 0) {
+                    this.layerStack = [...tmplData.preset.layer_stack];
+                    this.syncLayerStack();
+                }
+                if (tmplData.preset.guidelines) {
+                    this.guidelines = Object.assign(this.guidelines, tmplData.preset.guidelines);
+                }
+            }
+
             this.loadTemplateImage(src);
         },
 
@@ -3013,6 +3055,17 @@ function posterStudio() {
                 if (res.ok && data && data.success) {
                     this.statusType = 'success';
                     this.statusMsg = data.message || 'ഡിഫോൾട്ട് ക്രമീകരണങ്ങൾ വിജയകരമായി സേവ് ചെയ്തു.';
+                    if (this.templatesMap && this.templatesMap[this.settings.template_id]) {
+                        this.templatesMap[this.settings.template_id].preset = Object.assign({}, this.settings, {
+                            layer_stack: [...this.layerStack],
+                            custom_elements: this.customElements.map(el => {
+                                const clone = Object.assign({}, el);
+                                delete clone.imgObj;
+                                return clone;
+                            }),
+                            guidelines: Object.assign({}, this.guidelines)
+                        });
+                    }
                 } else {
                     this.statusType = 'error';
                     this.statusMsg = (data && data.message) ? data.message : 'സേവ് ചെയ്യാൻ സാധിച്ചില്ല (Status ' + res.status + ')';
