@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\CoinTransaction;
 use App\Models\FundReceipt;
 use App\Models\Judge;
 use App\Models\Program;
@@ -37,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
                 Program::ensureSchema();
                 Judge::ensureCredentials();
                 FundReceipt::ensureSchema();
+                CoinTransaction::ensureSchema();
             }
         } catch (\Throwable) {
         }

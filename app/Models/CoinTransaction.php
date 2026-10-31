@@ -43,6 +43,11 @@ class CoinTransaction extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::ensureSchema();
+    }
+
     public static function ensureSchema(): void
     {
         static $checked = false;
@@ -63,7 +68,10 @@ class CoinTransaction extends Model
                     $table->string('grade', 15)->nullable();
                     $table->string('reward_rule_id', 60)->default('QUAF09_GROUP_PROGRAM_REWARD_RULE_V1');
                     $table->integer('coins');
+                    $table->decimal('cash_amount', 10, 2)->default(0.00);
+                    $table->string('payment_mode', 30)->nullable()->default('cash');
                     $table->string('transaction_type', 20)->default('credit');
+                    $table->string('source', 50)->default('competition');
                     $table->string('transaction_reference', 120)->unique();
                     $table->string('status', 20)->default('completed');
                     $table->string('description')->nullable();
@@ -72,8 +80,10 @@ class CoinTransaction extends Model
 
                     $table->index(['student_id', 'transaction_type']);
                     $table->index(['group_id', 'program_id']);
+                    $table->index('source');
                     $table->unique(['result_id', 'entry_id', 'student_id', 'transaction_type'], 'coin_tx_res_entry_stu_type_unique');
                 });
+            } else {
                 Schema::table('coin_transactions', function (Blueprint $table) {
                     if (! Schema::hasColumn('coin_transactions', 'source')) {
                         $table->string('source', 50)->default('competition')->after('transaction_type')->index();

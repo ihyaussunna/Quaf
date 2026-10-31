@@ -388,19 +388,51 @@ class PresentationController extends Controller
             }
         }
 
+        $hasSourceColumn = Schema::hasColumn('coin_transactions', 'source');
+        $hasCashAmountColumn = Schema::hasColumn('coin_transactions', 'cash_amount');
+
         // Cashier metrics for today
-        $todayCashDeposits = CoinTransaction::where('source', 'cash_deposit')
+        $todayCashDeposits = CoinTransaction::query()
             ->whereDate('created_at', today());
 
+        if ($hasSourceColumn) {
+            $todayCashDeposits->where(function ($q) {
+                $q->where('source', 'cash_deposit')
+                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            });
+        } else {
+            $todayCashDeposits->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+        }
+
+        $allTimeQuery = CoinTransaction::query();
+        if ($hasSourceColumn) {
+            $allTimeQuery->where(function ($q) {
+                $q->where('source', 'cash_deposit')
+                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            });
+        } else {
+            $allTimeQuery->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+        }
+
         $stats = [
-            'today_cash_total' => (float) $todayCashDeposits->sum('cash_amount'),
+            'today_cash_total' => $hasCashAmountColumn ? (float) $todayCashDeposits->sum('cash_amount') : 0.0,
             'today_coins_added' => (int) $todayCashDeposits->sum('coins'),
             'today_deposits_count' => $todayCashDeposits->count(),
-            'all_time_cash_total' => (float) CoinTransaction::where('source', 'cash_deposit')->sum('cash_amount'),
-            'all_time_coins_added' => (int) CoinTransaction::where('source', 'cash_deposit')->sum('coins'),
+            'all_time_cash_total' => $hasCashAmountColumn ? (float) (clone $allTimeQuery)->sum('cash_amount') : 0.0,
+            'all_time_coins_added' => (int) (clone $allTimeQuery)->sum('coins'),
         ];
 
-        $recentDeposits = CoinTransaction::where('source', 'cash_deposit')
+        $recentDepositsQuery = CoinTransaction::query();
+        if ($hasSourceColumn) {
+            $recentDepositsQuery->where(function ($q) {
+                $q->where('source', 'cash_deposit')
+                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            });
+        } else {
+            $recentDepositsQuery->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+        }
+
+        $recentDeposits = $recentDepositsQuery
             ->with(['student.group', 'student.zone'])
             ->latest()
             ->paginate(15)

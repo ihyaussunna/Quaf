@@ -473,24 +473,33 @@ class CoinRewardService
     {
         CoinTransaction::ensureSchema();
 
+        $hasSourceColumn = Schema::hasColumn('coin_transactions', 'source');
+
         // 1. Added coins purchased via Cashier cash deposit
         $addedQuery = CoinTransaction::where('student_id', $student->id)
-            ->where('coins', '>', 0)
-            ->where(function ($q) {
+            ->where('coins', '>', 0);
+
+        if ($hasSourceColumn) {
+            $addedQuery->where(function ($q) {
                 $q->where('source', 'cash_deposit')
                     ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
             });
+        } else {
+            $addedQuery->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+        }
         $addedCoins = (int) $addedQuery->sum('coins');
 
         // 2. Competition earned coins from grades/prizes
         $competitionQuery = CoinTransaction::where('student_id', $student->id)
             ->where('coins', '>', 0)
-            ->where(function ($q) {
-                $q->where(function ($sub) {
-                    $sub->whereNull('source')
-                        ->orWhere('source', '!=', 'cash_deposit');
-                })->where('reward_rule_id', '!=', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            ->where('reward_rule_id', '!=', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+
+        if ($hasSourceColumn) {
+            $competitionQuery->where(function ($sub) {
+                $sub->whereNull('source')
+                    ->orWhere('source', '!=', 'cash_deposit');
             });
+        }
 
         if ($onlyMediaPublished) {
             $competitionQuery->where(function ($q) {

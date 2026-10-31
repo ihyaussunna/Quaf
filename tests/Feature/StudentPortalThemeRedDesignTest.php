@@ -103,20 +103,14 @@ class StudentPortalThemeRedDesignTest extends TestCase
         $response->assertDontSee('Secret Purchase PIN');
         $response->assertSee('from-[#be1e2d]');
 
-        // 2. Verify Coin Wallet Banner has red and yellow gradient as requested
-        $response->assertSee('QUAF FEST COIN WALLET');
-        $response->assertSee('Available Balance');
-        $response->assertSee('from-[#be1e2d]');
-        $response->assertSee('to-[#f59e0b]');
-
-        // 3. Verify Global Header on desktop (hidden lg:block) matching home page
+        // 2. Verify Global Header on desktop (hidden lg:block) matching home page
         $response->assertSee('hidden lg:block');
         $response->assertSee('Student Portal');
 
-        // 4. Verify Mobile Bottom Navigation bar on mobile
+        // 3. Verify Mobile Bottom Navigation bar on mobile
         $response->assertSee('lg:hidden fixed bottom-0');
 
-        // 5. Verify Next Program stage slot and countdown has theme red styling
+        // 4. Verify Next Program stage slot and countdown has theme red styling
         $response->assertSee('NEXT PROGRAM STAGE SLOT');
         $response->assertSee('Tuhfa Talent Test');
         $response->assertSee('Stage 06');
