@@ -796,31 +796,123 @@ class MediaResultController extends Controller
     public function templateCustomize(ResultTemplate $template): View
     {
         $template->load('posterSetting');
-        $defaultSettings = PosterSetting::defaultSettings();
-        $savedSettings = $template->posterSetting?->toArray() ?? [];
-        $settings = array_merge($defaultSettings, $savedSettings);
 
-        $themeColor = FestivalSetting::get('theme_color', '#be1e2d');
+        $baseDefaults = PosterSetting::defaultSettings();
+        $dbPosterSettings = $template->posterSetting?->toArray() ?? [];
+        $templateJsonSettings = is_array($template->default_settings) ? $template->default_settings : [];
 
-        // Sample placeholder data for visual adjustment
-        $sampleData = [
-            'result_no' => '01',
-            'category' => 'General / Zone A',
-            'competition' => 'മാപ്പിളപ്പാട്ട് (Mappilappattu)',
-            'winners' => [
-                'first' => [
-                    ['name' => 'മുഹമ്മദ് യാസീൻ പി. (Muhammed Yaseen)', 'unit' => 'റെഡ് ഫോക്സ് (Red Fox Team)'],
+        $templatePresetJson = FestivalSetting::get('poster_preset_template_'.$template->id);
+        $templatePreset = $templatePresetJson ? json_decode($templatePresetJson, true) : [];
+        if (! is_array($templatePreset)) {
+            $templatePreset = [];
+        }
+
+        $globalPresetJson = FestivalSetting::get('global_active_poster_preset');
+        $globalPreset = $globalPresetJson ? json_decode($globalPresetJson, true) : [];
+        if (! is_array($globalPreset)) {
+            $globalPreset = [];
+        }
+
+        $currentSettings = array_merge(
+            $baseDefaults,
+            $dbPosterSettings,
+            $templateJsonSettings,
+            $globalPreset,
+            $templatePreset
+        );
+        $currentSettings['template_id'] = $template->id;
+        $currentSettings['template_image'] = asset($template->image_path);
+
+        $templates = ResultTemplate::where('is_active', true)->get();
+        if (! $templates->contains('id', $template->id)) {
+            $templates->prepend($template);
+        }
+
+        $templatesMap = $templates->keyBy('id')->map(function ($t) {
+            $presetJson = FestivalSetting::get('poster_preset_template_'.$t->id);
+            $preset = $presetJson ? json_decode($presetJson, true) : null;
+            if (! is_array($preset)) {
+                $preset = is_array($t->default_settings) ? $t->default_settings : ($t->posterSetting?->toArray() ?? []);
+            }
+
+            return [
+                'id' => $t->id,
+                'name' => $t->name,
+                'image' => asset($t->image_path),
+                'layout_mode' => $t->posterSetting?->layout_mode ?? ($preset['layout_mode'] ?? 'default'),
+                'preset' => $preset,
+            ];
+        });
+
+        $medalPacks = collect();
+        if (Schema::hasTable('result_medals')) {
+            try {
+                $medalPacks = ResultMedal::where('is_active', true)->orderByDesc('id')->get();
+            } catch (\Throwable $e) {
+                $medalPacks = collect();
+            }
+        }
+        if ($medalPacks->isEmpty()) {
+            $medalPacks = collect([
+                (object) [
+                    'id' => 1,
+                    'name' => 'Classic Official Medals',
+                    'first_image' => asset('images/medals/first.png'),
+                    'second_image' => asset('images/medals/second.png'),
+                    'third_image' => asset('images/medals/third.png'),
+                    'is_active' => true,
                 ],
-                'second' => [
-                    ['name' => 'അഹ്മദ് റയ്യാൻ കെ. (Ahmad Rayyan)', 'unit' => 'ഗ്രീൻ വാരിയേഴ്സ് (Green Warriors)'],
-                ],
-                'third' => [
-                    ['name' => 'ബിലാൽ മുഹമ്മദ് (Bilal Muhammed)', 'unit' => 'ബ്ലൂ റൈഡേഴ്സ് (Blue Riders)'],
-                ],
+            ]);
+        }
+
+        $latestResult = Result::with('program.zone')->latest('id')->first();
+        $sampleProgName = $latestResult?->program?->name ?? 'മാപ്പിളപ്പാട്ട് (Mappilappattu)';
+        $sampleProgCode = $latestResult?->program?->code ?? 'Q9-224';
+        $sampleZoneName = $latestResult?->program?->zone?->name ?? ($latestResult?->program?->eligibility ?? 'Mix Zone');
+
+        $result = (object) [
+            'id' => $latestResult?->id ?? 1,
+            'status' => 'template_design',
+            'template_id' => $template->id,
+            'program' => (object) [
+                'name' => $sampleProgName,
+                'code' => $sampleProgCode,
+                'eligibility' => $sampleZoneName,
+                'zone' => (object) ['name' => $sampleZoneName],
+            ],
+            'custom_poster_settings' => $currentSettings,
+        ];
+
+        $winners = [
+            'first' => [
+                ['name' => 'മുഹമ്മദ് യാസീൻ പി. (Muhammed Yaseen)', 'unit' => 'റെഡ് ഫോക്സ് (Red Fox Team)'],
+            ],
+            'second' => [
+                ['name' => 'അഹ്മദ് റയ്യാൻ കെ. (Ahmad Rayyan)', 'unit' => 'ഗ്രീൻ വാരിയേഴ്സ് (Green Warriors)'],
+            ],
+            'third' => [
+                ['name' => 'ബിലാൽ മുഹമ്മദ് (Bilal Muhammed)', 'unit' => 'ബ്ലൂ റൈഡേഴ്സ് (Blue Riders)'],
             ],
         ];
 
-        return view('media.results.template-customizer', compact('template', 'settings', 'themeColor', 'sampleData'));
+        $activeTemplate = $template;
+        $resultNo = 50;
+        $themeColor = FestivalSetting::get('theme_color', '#be1e2d');
+        $isTemplateCustomizer = true;
+
+        return view('media.results.studio', compact(
+            'result',
+            'template',
+            'isTemplateCustomizer',
+            'templates',
+            'templatesMap',
+            'medalPacks',
+            'activeTemplate',
+            'currentSettings',
+            'winners',
+            'resultNo',
+            'themeColor'
+        ));
     }
 
     /**
@@ -832,21 +924,50 @@ class MediaResultController extends Controller
             'settings' => ['required', 'array'],
         ]);
 
-        $posterSetting = PosterSetting::updateOrCreate(
-            ['template_id' => $template->id],
-            $validated['settings']
-        );
+        $settings = $validated['settings'];
+
+        // 1. Save permanent preset in FestivalSetting
+        $presetJson = json_encode($settings);
+        FestivalSetting::set('poster_preset_template_'.$template->id, $presetJson);
+        FestivalSetting::set('global_active_poster_preset', $presetJson);
+        FestivalSetting::set('default_poster_template_id', (string) $template->id);
+
+        // 2. Ensure default_settings column exists on result_templates table
+        if (! Schema::hasColumn('result_templates', 'default_settings')) {
+            try {
+                Schema::table('result_templates', function (Blueprint $table) {
+                    $table->json('default_settings')->nullable();
+                });
+            } catch (\Throwable $e) {
+            }
+        }
+
+        if (Schema::hasColumn('result_templates', 'default_settings')) {
+            $template->update(['default_settings' => $settings]);
+        }
+
+        // 3. Update poster_settings table
+        if (Schema::hasTable('poster_settings')) {
+            $columns = Schema::getColumnListing('poster_settings');
+            $settingPayload = collect($settings)
+                ->filter(fn ($val, $key) => in_array($key, $columns) && ! is_array($val) && ! is_object($val))
+                ->toArray();
+
+            PosterSetting::updateOrCreate(
+                ['template_id' => $template->id],
+                $settingPayload
+            );
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് സെറ്റിംഗ്സുകൾ സേവ് ചെയ്തു.",
-                'settings' => $posterSetting,
+                'message' => "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് ഡിഫോൾട്ടായി സേവ് ചെയ്തു. ഇനി ഈ ടെംപ്ലേറ്റ് തിരഞ്ഞെടുക്കുന്ന എല്ലാ റിസൾട്ടുകൾക്കും ഈ ക്രമീകരണം ലഭ്യമാകും.",
             ]);
         }
 
         return redirect()->route('media.results.templates')
-            ->with('success', "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് സെറ്റിംഗ്സുകൾ സേവ് ചെയ്തു.");
+            ->with('success', "'{$template->name}' ടെംപ്ലേറ്റിന്റെ ലേഔട്ട് ഡിഫോൾട്ടായി സേവ് ചെയ്തു.");
     }
 
     /**

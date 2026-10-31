@@ -1,6 +1,6 @@
 @extends('layouts.media')
 
-@section('title', 'Poster Studio: ' . $result->program->name . ' | QUAF Media')
+@section('title', (!empty($isTemplateCustomizer) ? 'Customize Template: ' . ($template->name ?? '') : 'Poster Studio: ' . ($result->program->name ?? '')) . ' | QUAF Media')
 
 @section('content')
 <div class="space-y-6" x-data="posterStudio()">
@@ -16,78 +16,138 @@
     </div>
 
     <!-- Top Action & Navigation Header -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-        <div>
-            <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('media.results.index') }}" class="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    <span>Back to Results</span>
-                </a>
-                <span class="text-slate-300">&bull;</span>
-                <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-slate-900 text-white">
-                    {{ $result->program->code }}
-                </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                    {{ ucfirst($result->status) }}
-                </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                    Mini Poster Design Studio
-                </span>
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if(!empty($isTemplateCustomizer))
+                        <a href="{{ route('media.results.templates') }}" class="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            <span>Back to Poster Templates</span>
+                        </a>
+                        <span class="text-slate-300">&bull;</span>
+                        <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-[#be1e2d] text-white">
+                            Template #{{ $template->id }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                            Master Template Customizer
+                        </span>
+                    @else
+                        <a href="{{ route('media.results.index') }}" class="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            <span>Back to Results</span>
+                        </a>
+                        <span class="text-slate-300">&bull;</span>
+                        <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-slate-900 text-white">
+                            {{ $result->program->code ?? 'RESULT' }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                            {{ ucfirst($result->status ?? 'announced') }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                            Result Poster Studio
+                        </span>
+                    @endif
+                </div>
+
+                <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight mt-1.5 font-sora">
+                    @if(!empty($isTemplateCustomizer))
+                        Customize Template: <span class="text-[#be1e2d]">{{ $template->name }}</span>
+                    @else
+                        {{ $result->program->name }}
+                    @endif
+                </h1>
+                <p class="text-xs text-slate-500">
+                    @if(!empty($isTemplateCustomizer))
+                        Mode: <strong class="text-purple-700">Master Template Designer</strong> &bull;
+                        Result No: <strong class="text-[#be1e2d] font-mono">#{{ sprintf('%02d', $resultNo) }}</strong> &bull;
+                        Selected: <strong class="text-purple-700 font-mono" x-text="selectedLabel">None</strong>
+                    @else
+                        Zone: <strong class="text-slate-700">{{ $result->program->zone->name ?? $result->program->eligibility ?? 'All Zones' }}</strong> &bull;
+                        Result No: <strong class="text-[#be1e2d] font-mono">#{{ sprintf('%02d', $resultNo) }}</strong> &bull;
+                        Selected: <strong class="text-purple-700 font-mono" x-text="selectedLabel">None</strong>
+                    @endif
+                </p>
             </div>
 
-            <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight mt-1.5 font-sora">
-                {{ $result->program->name }}
-            </h1>
-            <p class="text-xs text-slate-500">
-                Zone: <strong class="text-slate-700">{{ $result->program->zone->name ?? $result->program->eligibility ?? 'All Zones' }}</strong> &bull;
-                Result No: <strong class="text-[#be1e2d] font-mono">#{{ sprintf('%02d', $resultNo) }}</strong> &bull;
-                Selected: <strong class="text-purple-700 font-mono" x-text="selectedLabel">None</strong>
-            </p>
+            <!-- Header Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Add Text Button -->
+                <button type="button" @click="addCustomText()"
+                        class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span>+ Text</span>
+                </button>
+
+                <!-- Add Shape Button -->
+                <button type="button" @click="addCustomShape('badge')"
+                        class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                    <span>+ Badge / Shape</span>
+                </button>
+
+                <!-- Guidelines Toggle -->
+                <button type="button" @click="guidelines.show = !guidelines.show; render();"
+                        class="px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        :class="guidelines.show ? 'bg-cyan-50 border-cyan-400 text-cyan-800' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'">
+                    <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16M10 4v16M14 4v16"></path></svg>
+                    <span x-text="guidelines.show ? 'Guides ON' : 'Guides OFF'"></span>
+                </button>
+
+                @if(!empty($isTemplateCustomizer))
+                    <!-- Save Template Defaults in Customizer mode -->
+                    <button type="button" @click="saveAsDefault()" :disabled="savingDefault"
+                            class="px-5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span x-text="savingDefault ? 'സേവ് ചെയ്യുന്നു...' : 'Save Template Defaults (ടെംപ്ലേറ്റ് സേവ് ചെയ്യുക)'"></span>
+                    </button>
+                    <!-- Download PNG Preview for Template Customizer -->
+                    <button type="button" @click="downloadPoster()"
+                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Preview PNG</span>
+                    </button>
+                @else
+                    <!-- Save as Default in Result mode -->
+                    <button type="button" @click="saveAsDefault()" :disabled="savingDefault"
+                            class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                            title="ഈ റിസൾട്ടിലെ മാറ്റങ്ങൾ ടെംപ്ലേറ്റിന്റെ സ്ഥിരം ഡിഫോൾട്ടാക്കി മാറ്റുക">
+                        <span x-text="savingDefault ? 'Saving...' : 'Save Default'"></span>
+                    </button>
+
+                    <!-- Download PNG -->
+                    <button type="button" @click="downloadPoster()"
+                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download PNG</span>
+                    </button>
+
+                    <!-- Save & Publish -->
+                    <button type="button" @click="saveAndPublish()" :disabled="publishing"
+                            class="px-5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span x-text="publishing ? 'Publishing...' : 'Save & Publish'"></span>
+                    </button>
+                @endif
+            </div>
         </div>
 
-        <!-- Header Action Buttons -->
-        <div class="flex flex-wrap items-center gap-2">
-            <!-- Add Text Button -->
-            <button type="button" @click="addCustomText()"
-                    class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 font-bold text-xs flex items-center gap-1.5 transition">
-                <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                <span>+ Text</span>
-            </button>
-
-            <!-- Add Shape Button -->
-            <button type="button" @click="addCustomShape('badge')"
-                    class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs flex items-center gap-1.5 transition">
-                <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-                <span>+ Badge / Shape</span>
-            </button>
-
-            <!-- Guidelines Toggle -->
-            <button type="button" @click="guidelines.show = !guidelines.show; render();"
-                    class="px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-colors"
-                    :class="guidelines.show ? 'bg-cyan-50 border-cyan-400 text-cyan-800' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'">
-                <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16M10 4v16M14 4v16"></path></svg>
-                <span x-text="guidelines.show ? 'Guides ON' : 'Guides OFF'"></span>
-            </button>
-
-            <!-- Save as Default -->
-            <button type="button" @click="saveAsDefault()" :disabled="savingDefault"
-                    class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors disabled:opacity-50">
-                <span x-text="savingDefault ? 'Saving...' : 'Save Default'"></span>
-            </button>
-
-            <!-- Download PNG -->
-            <button type="button" @click="downloadPoster()"
-                    class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span>Download PNG</span>
-            </button>
-
-            <!-- Save & Publish -->
-            <button type="button" @click="saveAndPublish()" :disabled="publishing"
-                    class="px-5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                <span x-text="publishing ? 'Publishing...' : 'Save & Publish'"></span>
-            </button>
+        <!-- Quick Template Selector Bar (Always visible for instant 1-click switching) -->
+        <div class="pt-3 border-t border-slate-100 flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span>ഫ്രെയിം തിരഞ്ഞെടുക്കുക (Template):</span>
+            </span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+                @foreach($templates as $tmpl)
+                    <button type="button" @click="selectTemplate({{ $tmpl->id }}, '{{ asset($tmpl->image_path) }}', '{{ $tmpl->posterSetting?->layout_mode ?? "default" }}')"
+                            class="px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center gap-2"
+                            :class="settings.template_id == {{ $tmpl->id }} ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100'">
+                        <span class="w-2 h-2 rounded-full" :class="settings.template_id == {{ $tmpl->id }} ? 'bg-amber-300' : 'bg-slate-300'"></span>
+                        <span>{{ $tmpl->name }}</span>
+                    </button>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -107,46 +167,46 @@
             
             <!-- Pro Navigation Tabs -->
             <div class="flex items-center gap-1.5 p-1.5 bg-slate-200/80 rounded-2xl border border-slate-300/80 overflow-x-auto">
+                <button type="button" @click="activeTab = 'templates'"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        :class="activeTab === 'templates' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-700 hover:text-slate-900 bg-white/50'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Templates</span>
+                </button>
+
                 <button type="button" @click="activeTab = 'design'"
-                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
                         :class="activeTab === 'design' ? 'bg-white text-purple-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                     <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     <span>Design Tool</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'layers'"
-                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
                         :class="activeTab === 'layers' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     <span>Layers</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'winners'"
-                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
-                        :class="activeTab === 'winners' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        :class="activeTab === 'winners' ? 'bg-white text-amber-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <span>Winners & Scale</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'core'"
-                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
-                        :class="activeTab === 'core' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        :class="activeTab === 'core' ? 'bg-white text-blue-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>
                     <span>Core Elements</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'guides'"
-                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
-                        :class="activeTab === 'guides' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        :class="activeTab === 'guides' ? 'bg-white text-cyan-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
                     <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     <span>Guides</span>
-                </button>
-
-                <button type="button" @click="activeTab = 'templates'"
-                        class="px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5"
-                        :class="activeTab === 'templates' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span>Templates</span>
                 </button>
             </div>
 
@@ -3151,7 +3211,13 @@ function posterStudio() {
             this.savingDefault = true;
             this.statusMsg = '';
 
-            fetch('{{ route("media.results.save-default-settings") }}', {
+            const saveUrl = @if(!empty($isTemplateCustomizer))
+                '{{ route("media.results.templates.save-customization", $template ?? 1) }}'
+            @else
+                '{{ route("media.results.save-default-settings") }}'
+            @endif;
+
+            fetch(saveUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -3160,7 +3226,7 @@ function posterStudio() {
                 },
                 body: JSON.stringify({
                     template_id: this.settings.template_id,
-                    result_id: {{ $result->id }},
+                    result_id: {{ $result->id ?? 'null' }},
                     settings: Object.assign({}, this.settings, {
                         layer_stack: this.layerStack,
                         custom_elements: this.customElements.map(el => {
@@ -3202,6 +3268,11 @@ function posterStudio() {
         },
 
         saveAndPublish() {
+            @if(!empty($isTemplateCustomizer))
+                this.saveAsDefault();
+                return;
+            @endif
+
             this.publishing = true;
             this.statusMsg = '';
             this.render(true);
@@ -3209,7 +3280,7 @@ function posterStudio() {
             const canvas = document.getElementById('posterCanvas');
             const dataUrl = canvas.toDataURL('image/png');
 
-            fetch('{{ route("media.results.save-poster", $result) }}', {
+            fetch('{{ !empty($result->id) ? route("media.results.save-poster", $result->id) : "#" }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
