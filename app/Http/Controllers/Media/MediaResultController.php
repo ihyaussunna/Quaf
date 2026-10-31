@@ -139,6 +139,9 @@ class MediaResultController extends Controller
         if ($activeTemplate && $activeTemplate->posterSetting) {
             $templateSettings = $activeTemplate->posterSetting->toArray();
         }
+        if ($activeTemplate && ! empty($activeTemplate->default_settings)) {
+            $templateSettings = array_merge($templateSettings ?? [], $activeTemplate->default_settings);
+        }
 
         // Only merge custom_poster_settings if they match current template's layout mode
         $customSettings = $result->custom_poster_settings ?? [];
@@ -415,6 +418,7 @@ class MediaResultController extends Controller
         ]);
 
         $template = ResultTemplate::findOrFail($validated['template_id']);
+        $template->update(['default_settings' => $validated['settings']]);
         $settings = PosterSetting::updateOrCreate(
             ['template_id' => $template->id],
             $validated['settings']

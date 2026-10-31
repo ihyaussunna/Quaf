@@ -329,13 +329,15 @@
                         </div>
                     </div>
 
-                    <!-- Layer Depth: Top Layer vs Behind Text -->
+                    <!-- Layer Stacking Order: Top / Up / Down / Bottom -->
                     <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                        <span class="text-[11px] font-bold text-slate-700">Z-Order (ലെയർ ക്രമം)</span>
-                        <select x-model="selectedElement.layerOrder" @change="render()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white">
-                            <option value="above">Above All Content (Top)</option>
-                            <option value="below">Behind Text (Background)</option>
-                        </select>
+                        <span class="text-[11px] font-bold text-slate-700">Layer Stack (ലെയർ ക്രമം)</span>
+                        <div class="flex items-center gap-1 font-mono">
+                            <button type="button" @click="bringToFront(selectedId)" :disabled="layerStack.indexOf(selectedId) <= 0" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 rounded text-[10px] font-bold text-slate-700 disabled:opacity-30 cursor-pointer" title="Bring to Front (ഏറ്റവും മുകളിൽ)">⇈ Top</button>
+                            <button type="button" @click="moveLayerUp(selectedId)" :disabled="layerStack.indexOf(selectedId) <= 0" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-[10px] font-bold text-white disabled:opacity-30 cursor-pointer" title="Move Up (മുകളിലേക്ക്)">▲ Up</button>
+                            <button type="button" @click="moveLayerDown(selectedId)" :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-[10px] font-bold text-white disabled:opacity-30 cursor-pointer" title="Move Down (താഴേക്ക്)">▼ Down</button>
+                            <button type="button" @click="sendToBack(selectedId)" :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 rounded text-[10px] font-bold text-slate-700 disabled:opacity-30 cursor-pointer" title="Send to Back (ഏറ്റവും താഴെ)">⇊ Bottom</button>
+                        </div>
                     </div>
                 </div>
 
@@ -448,12 +450,15 @@
                         </div>
                     </div>
 
+                    <!-- Layer Stacking Order: Top / Up / Down / Bottom -->
                     <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                        <span class="text-[11px] font-bold text-slate-700">Z-Order (ലെയർ ക്രമം)</span>
-                        <select x-model="selectedElement.layerOrder" @change="render()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white">
-                            <option value="above">Above All Content (Top)</option>
-                            <option value="below">Behind Text (Background)</option>
-                        </select>
+                        <span class="text-[11px] font-bold text-slate-700">Layer Stack (ലെയർ ക്രമം)</span>
+                        <div class="flex items-center gap-1 font-mono">
+                            <button type="button" @click="bringToFront(selectedId)" :disabled="layerStack.indexOf(selectedId) <= 0" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 rounded text-[10px] font-bold text-slate-700 disabled:opacity-30 cursor-pointer" title="Bring to Front (ഏറ്റവും മുകളിൽ)">⇈ Top</button>
+                            <button type="button" @click="moveLayerUp(selectedId)" :disabled="layerStack.indexOf(selectedId) <= 0" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-[10px] font-bold text-white disabled:opacity-30 cursor-pointer" title="Move Up (മുകളിലേക്ക്)">▲ Up</button>
+                            <button type="button" @click="moveLayerDown(selectedId)" :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-[10px] font-bold text-white disabled:opacity-30 cursor-pointer" title="Move Down (താഴേക്ക്)">▼ Down</button>
+                            <button type="button" @click="sendToBack(selectedId)" :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 rounded text-[10px] font-bold text-slate-700 disabled:opacity-30 cursor-pointer" title="Send to Back (ഏറ്റവും താഴെ)">⇊ Bottom</button>
+                        </div>
                     </div>
                 </div>
 
@@ -520,12 +525,15 @@
                         </div>
                     </div>
 
+                    <!-- Layer Stacking Order: Top / Up / Down / Bottom -->
                     <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                        <span class="text-[11px] font-bold text-slate-700">Z-Order (ലെയർ ക്രമം)</span>
-                        <select x-model="selectedElement.layerOrder" @change="render()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white">
-                            <option value="above">Above All Content (Top)</option>
-                            <option value="below">Behind Text (Background)</option>
-                        </select>
+                        <span class="text-[11px] font-bold text-slate-700">Layer Stack (ലെയർ ക്രമം)</span>
+                        <div class="flex items-center gap-1 font-mono">
+                            <button type="button" @click="bringToFront(selectedId)" :disabled="layerStack.indexOf(selectedId) <= 0" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 rounded text-[10px] font-bold text-slate-700 disabled:opacity-30 cursor-pointer" title="Bring to Front (ഏറ്റവും മുകളിൽ)">⇈ Top</button>
+                            <button type="button" @click="moveLayerUp(selectedId)" :disabled="layerStack.indexOf(selectedId) <= 0" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-[10px] font-bold text-white disabled:opacity-30 cursor-pointer" title="Move Up (മുകളിലേക്ക്)">▲ Up</button>
+                            <button type="button" @click="moveLayerDown(selectedId)" :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-[10px] font-bold text-white disabled:opacity-30 cursor-pointer" title="Move Down (താഴേക്ക്)">▼ Down</button>
+                            <button type="button" @click="sendToBack(selectedId)" :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 rounded text-[10px] font-bold text-slate-700 disabled:opacity-30 cursor-pointer" title="Send to Back (ഏറ്റവും താഴെ)">⇊ Bottom</button>
+                        </div>
                     </div>
                 </div>
 
@@ -561,64 +569,130 @@
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                         <div>
                             <h2 class="text-xs font-black uppercase tracking-wider text-slate-800">Poster Layers (ലെയറുകൾ)</h2>
-                            <p class="text-[11px] text-slate-500">Click any layer to select, toggle visibility, or delete.</p>
+                            <p class="text-[11px] text-slate-500">മുകളിലേക്ക് (Up) / താഴേക്ക് (Down) നീക്കി ലെയറുകളുടെ ഓർഡർ മാറ്റാം. Top layer sits in front.</p>
                         </div>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
-                            <span x-text="customElements.length + 4"></span> Layers
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                            <span x-text="layerStack.length"></span> Layers
                         </span>
                     </div>
 
-                    <!-- Custom Elements Stack -->
+                    <!-- Selected Layer Reorder Controls Banner (Shows when any layer is selected) -->
+                    <template x-if="selectedId">
+                        <div class="p-3 bg-gradient-to-r from-purple-950 via-slate-900 to-slate-900 rounded-xl text-white space-y-2 shadow-xs border border-purple-800">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold flex items-center gap-1.5 truncate max-w-[200px]">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    <span x-text="selectedLabel"></span>
+                                </span>
+                                <span class="text-[10px] text-purple-300 font-mono">Move Order</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-1.5 pt-1">
+                                <button type="button" @click="bringToFront(selectedId)"
+                                        :disabled="layerStack.indexOf(selectedId) <= 0"
+                                        class="py-1.5 px-2 bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg text-[11px] font-bold text-center transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                                        title="Bring to Front (ഏറ്റവും മുകളിൽ)">
+                                    ⇈ Top
+                                </button>
+                                <button type="button" @click="moveLayerUp(selectedId)"
+                                        :disabled="layerStack.indexOf(selectedId) <= 0"
+                                        class="py-1.5 px-2 bg-purple-600 hover:bg-purple-500 border border-purple-400 rounded-lg text-[11px] font-bold text-center transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1"
+                                        title="Move Layer Up (മുകളിലേക്ക്)">
+                                    <span>▲</span> <span>Up</span>
+                                </button>
+                                <button type="button" @click="moveLayerDown(selectedId)"
+                                        :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1"
+                                        class="py-1.5 px-2 bg-purple-600 hover:bg-purple-500 border border-purple-400 rounded-lg text-[11px] font-bold text-center transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1"
+                                        title="Move Layer Down (താഴേക്ക്)">
+                                    <span>▼</span> <span>Down</span>
+                                </button>
+                                <button type="button" @click="sendToBack(selectedId)"
+                                        :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1"
+                                        class="py-1.5 px-2 bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg text-[11px] font-bold text-center transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                                        title="Send to Back (ഏറ്റവും താഴെ)">
+                                    ⇊ Bottom
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Unified Drag & Reorder Layer Stack -->
                     <div class="space-y-2">
-                        <template x-for="(el, idx) in customElements" :key="el.id">
-                            <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer"
-                                 :class="selectedElement && selectedElement.id === el.id ? 'bg-purple-50 border-purple-400 ring-1 ring-purple-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'"
-                                 @click="selectElement(el.id)">
+                        <template x-for="(layerId, idx) in layerStack" :key="'stk_' + layerId">
+                            <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer group select-none"
+                                 :class="selectedId === layerId ? 'bg-purple-50 border-purple-400 ring-2 ring-purple-400/30 shadow-xs' : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100/70'"
+                                 draggable="true"
+                                 @dragstart="onLayerDragStart($event, idx)"
+                                 @dragover.prevent="onLayerDragOver($event, idx)"
+                                 @drop="onLayerDrop($event, idx)"
+                                 @click="selectLayer(layerId)">
                                 
-                                <div class="flex items-center gap-2.5">
-                                    <button type="button" @click.stop="el.visible = !el.visible; render();"
-                                            class="p-1 rounded text-slate-400 hover:text-slate-800 transition" :class="el.visible ? 'text-emerald-600' : 'text-slate-300 opacity-50'">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                <!-- Left side: Index, Visibility, Label & Type -->
+                                <div class="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
+                                    <!-- Order Index -->
+                                    <span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-mono font-bold shrink-0"
+                                          :class="selectedId === layerId ? 'bg-purple-600 text-white' : 'bg-slate-200 text-slate-600'"
+                                          x-text="idx + 1"></span>
+
+                                    <!-- Visibility Button -->
+                                    <button type="button" @click.stop="toggleLayerVisibility(layerId)"
+                                            class="p-1 rounded text-slate-400 hover:text-slate-800 transition cursor-pointer shrink-0"
+                                            :class="getLayerInfo(layerId).visible ? 'text-emerald-600' : 'text-slate-300 opacity-40'"
+                                            title="Toggle Visibility">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
                                     </button>
-                                    <span class="text-xs font-bold text-slate-800" x-text="el.label"></span>
+
+                                    <!-- Name and Type Badge -->
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="text-xs font-bold text-slate-900 truncate" x-text="getLayerInfo(layerId).name"></span>
+                                            <span class="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded border"
+                                                  :class="getLayerInfo(layerId).badgeColor"
+                                                  x-text="getLayerInfo(layerId).badge"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200" x-text="el.type"></span>
-                                    <button type="button" @click.stop="deleteElement(el.id)" class="text-red-500 hover:text-red-700 p-1">
-                                        &times;
+                                <!-- Right side: Up / Down / Reorder Controls -->
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <!-- Move Layer Up (മുകളിലേക്ക്) -->
+                                    <button type="button" @click.stop="moveLayerUp(layerId)"
+                                            :disabled="idx === 0"
+                                            class="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs shadow-2xs disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+                                            title="Move Up (മുകളിലേക്ക്)">
+                                        ▲
                                     </button>
+
+                                    <!-- Move Layer Down (താഴേക്ക്) -->
+                                    <button type="button" @click.stop="moveLayerDown(layerId)"
+                                            :disabled="idx === layerStack.length - 1"
+                                            class="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs shadow-2xs disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+                                            title="Move Down (താഴേക്ക്)">
+                                        ▼
+                                    </button>
+
+                                    <!-- Delete (custom elements only) -->
+                                    <template x-if="getLayerInfo(layerId).canDelete">
+                                        <button type="button" @click.stop="deleteElement(layerId)"
+                                                class="w-7 h-7 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center justify-center text-sm font-bold transition ml-0.5 cursor-pointer"
+                                                title="Delete Layer">
+                                            &times;
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                         </template>
+                    </div>
 
-                        <!-- Core Layers -->
-                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
-                             :class="selectedId === 'result_no' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
-                             @click="selectCoreLayer('result_no')">
-                            <span class="text-xs font-bold text-slate-800">Result Number (#{{ sprintf('%02d', $resultNo) }})</span>
-                            <span class="text-[10px] font-mono text-slate-500">Core</span>
-                        </div>
-
-                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
-                             :class="selectedId === 'competition' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
-                             @click="selectCoreLayer('competition')">
-                            <span class="text-xs font-bold text-slate-800">Program Name</span>
-                            <span class="text-[10px] font-mono text-slate-500">Core</span>
-                        </div>
-
-                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
-                             :class="selectedId === 'category' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
-                             @click="selectCoreLayer('category')">
-                            <span class="text-xs font-bold text-slate-800">Zone Capsule</span>
-                            <span class="text-[10px] font-mono text-slate-500">Core</span>
-                        </div>
-
-                        <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between cursor-pointer"
-                             :class="selectedId === 'winners' ? 'bg-amber-50 border-amber-400 ring-1 ring-amber-400' : ''"
-                             @click="selectCoreLayer('winners')">
-                            <span class="text-xs font-bold text-slate-800">Podium Winners (1st, 2nd, 3rd)</span>
-                            <span class="text-[10px] font-mono text-slate-500">Core</span>
+                    <!-- Bottom Quick Insertion -->
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                        <span>New elements default to the top.</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="addCustomText()" class="text-purple-700 font-bold hover:underline cursor-pointer">+ Text</button>
+                            <span>&bull;</span>
+                            <button type="button" @click="addCustomShape('badge')" class="text-purple-700 font-bold hover:underline cursor-pointer">+ Badge</button>
                         </div>
                     </div>
                 </div>
@@ -1243,11 +1317,41 @@
                     <span class="text-xs text-amber-300 font-bold" x-text="selectedLabel"></span>
                 </div>
 
-                <div class="flex items-center gap-1.5">
-                    <button type="button" @click="addCustomText()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1">+ Text</button>
-                    <button type="button" @click="addCustomShape('badge')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1">+ Badge</button>
-                    <button type="button" @click="duplicateSelected()" :disabled="!selectedElement" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold disabled:opacity-40">Duplicate</button>
-                    <button type="button" @click="deleteSelected()" :disabled="!selectedElement" class="px-2 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 text-xs font-bold disabled:opacity-40">&times; Delete</button>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <!-- Layer Stacking Order Controls for Selected Layer -->
+                    <template x-if="selectedId">
+                        <div class="flex items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/15 mr-1 font-mono text-xs">
+                            <button type="button" @click="moveLayerUp(selectedId)"
+                                    :disabled="layerStack.indexOf(selectedId) <= 0"
+                                    title="Move Layer Up (മുകളിലേക്ക്)"
+                                    class="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer">
+                                ▲ Up
+                            </button>
+                            <button type="button" @click="moveLayerDown(selectedId)"
+                                    :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1"
+                                    title="Move Layer Down (താഴേക്ക്)"
+                                    class="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer">
+                                ▼ Down
+                            </button>
+                            <button type="button" @click="bringToFront(selectedId)"
+                                    :disabled="layerStack.indexOf(selectedId) <= 0"
+                                    title="Bring to Front (ഏറ്റവും മുകളിൽ)"
+                                    class="px-1.5 py-1 rounded hover:bg-white/20 font-bold disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer">
+                                ⇈ Top
+                            </button>
+                            <button type="button" @click="sendToBack(selectedId)"
+                                    :disabled="layerStack.indexOf(selectedId) >= layerStack.length - 1"
+                                    title="Send to Back (ഏറ്റവും താഴെ)"
+                                    class="px-1.5 py-1 rounded hover:bg-white/20 font-bold disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer">
+                                ⇊ Bottom
+                            </button>
+                        </div>
+                    </template>
+
+                    <button type="button" @click="addCustomText()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1 cursor-pointer">+ Text</button>
+                    <button type="button" @click="addCustomShape('badge')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1 cursor-pointer">+ Badge</button>
+                    <button type="button" @click="duplicateSelected()" :disabled="!selectedElement" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold disabled:opacity-40 cursor-pointer">Duplicate</button>
+                    <button type="button" @click="deleteSelected()" :disabled="!selectedElement" class="px-2 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 text-xs font-bold disabled:opacity-40 cursor-pointer">&times; Delete</button>
                 </div>
             </div>
 
@@ -1320,6 +1424,10 @@ function posterStudio() {
 
         // Dynamic Custom Elements Array
         customElements: [],
+
+        // Unified Layer Stacking Order (Index 0 = Frontmost/Top, Index N-1 = Backmost/Bottom)
+        layerStack: [],
+        draggedLayerIdx: null,
 
         // Core Settings
         settings: {
@@ -1444,6 +1552,184 @@ function posterStudio() {
             return 'None (Click canvas to select)';
         },
 
+        syncLayerStack() {
+            const coreIds = ['category', 'competition', 'result_no', 'winners'];
+            const customIds = this.customElements.map(e => e.id);
+            const validIds = new Set([...coreIds, ...customIds]);
+
+            // Filter out invalid/removed IDs
+            this.layerStack = (this.layerStack || []).filter(id => validIds.has(id));
+
+            // Ensure all customIds are in stack (add new ones at top)
+            customIds.forEach(id => {
+                if (!this.layerStack.includes(id)) {
+                    this.layerStack.unshift(id);
+                }
+            });
+
+            // Ensure all coreIds are in stack
+            coreIds.forEach(id => {
+                if (!this.layerStack.includes(id)) {
+                    this.layerStack.push(id);
+                }
+            });
+        },
+
+        getLayerInfo(layerId) {
+            if (layerId === 'result_no') {
+                return {
+                    name: 'Result Number (' + (this.data.result_no || '') + ')',
+                    badge: 'CORE',
+                    badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
+                    visible: !!this.settings.show_result_no,
+                    canDelete: false
+                };
+            }
+            if (layerId === 'competition') {
+                return {
+                    name: 'Program Name (' + (this.data.competition || '') + ')',
+                    badge: 'CORE',
+                    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+                    visible: !!this.settings.show_competition,
+                    canDelete: false
+                };
+            }
+            if (layerId === 'category') {
+                return {
+                    name: 'Zone Capsule (' + (this.data.category || '') + ')',
+                    badge: 'CORE',
+                    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    visible: !!this.settings.show_category,
+                    canDelete: false
+                };
+            }
+            if (layerId === 'winners') {
+                return {
+                    name: 'Podium Winners (1st, 2nd, 3rd)',
+                    badge: 'PODIUM',
+                    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+                    visible: !!this.settings.show_winners,
+                    canDelete: false
+                };
+            }
+
+            const el = this.customElements.find(e => e.id === layerId);
+            if (!el) {
+                return {
+                    name: layerId,
+                    badge: 'CUSTOM',
+                    badgeColor: 'bg-slate-50 text-slate-700 border-slate-200',
+                    visible: true,
+                    canDelete: true
+                };
+            }
+
+            let badge = (el.type || 'TEXT').toUpperCase();
+            let badgeColor = 'bg-purple-50 text-purple-700 border-purple-200';
+            if (el.type === 'shape') {
+                badge = (el.shapeType || 'SHAPE').toUpperCase();
+                badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+            } else if (el.type === 'image') {
+                badge = 'IMAGE';
+                badgeColor = 'bg-cyan-50 text-cyan-700 border-cyan-200';
+            }
+
+            return {
+                name: el.label || el.text || el.id,
+                badge: badge,
+                badgeColor: badgeColor,
+                visible: el.visible !== false,
+                canDelete: true
+            };
+        },
+
+        moveLayerUp(id) {
+            const idx = this.layerStack.indexOf(id);
+            if (idx > 0) {
+                const temp = this.layerStack[idx];
+                this.layerStack[idx] = this.layerStack[idx - 1];
+                this.layerStack[idx - 1] = temp;
+                this.render();
+            }
+        },
+
+        moveLayerDown(id) {
+            const idx = this.layerStack.indexOf(id);
+            if (idx >= 0 && idx < this.layerStack.length - 1) {
+                const temp = this.layerStack[idx];
+                this.layerStack[idx] = this.layerStack[idx + 1];
+                this.layerStack[idx + 1] = temp;
+                this.render();
+            }
+        },
+
+        bringToFront(id) {
+            const idx = this.layerStack.indexOf(id);
+            if (idx > 0) {
+                const [item] = this.layerStack.splice(idx, 1);
+                this.layerStack.unshift(item);
+                this.render();
+            }
+        },
+
+        sendToBack(id) {
+            const idx = this.layerStack.indexOf(id);
+            if (idx >= 0 && idx < this.layerStack.length - 1) {
+                const [item] = this.layerStack.splice(idx, 1);
+                this.layerStack.push(item);
+                this.render();
+            }
+        },
+
+        selectLayer(id) {
+            if (['result_no', 'competition', 'category', 'winners'].includes(id)) {
+                this.selectCoreLayer(id);
+            } else {
+                this.selectElement(id);
+            }
+        },
+
+        toggleLayerVisibility(id) {
+            if (id === 'result_no') {
+                this.settings.show_result_no = !this.settings.show_result_no;
+            } else if (id === 'competition') {
+                this.settings.show_competition = !this.settings.show_competition;
+            } else if (id === 'category') {
+                this.settings.show_category = !this.settings.show_category;
+            } else if (id === 'winners') {
+                this.settings.show_winners = !this.settings.show_winners;
+            } else {
+                const el = this.customElements.find(e => e.id === id);
+                if (el) {
+                    el.visible = (el.visible === false) ? true : false;
+                }
+            }
+            this.render();
+        },
+
+        onLayerDragStart(e, idx) {
+            this.draggedLayerIdx = idx;
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', idx);
+            }
+        },
+
+        onLayerDragOver(e, idx) {
+            e.preventDefault();
+            if (e.dataTransfer) {
+                e.dataTransfer.dropEffect = 'move';
+            }
+        },
+
+        onLayerDrop(e, targetIdx) {
+            if (this.draggedLayerIdx === null || this.draggedLayerIdx === targetIdx) return;
+            const item = this.layerStack.splice(this.draggedLayerIdx, 1)[0];
+            this.layerStack.splice(targetIdx, 0, item);
+            this.draggedLayerIdx = null;
+            this.render();
+        },
+
         init() {
             // Restore saved custom elements if any
             const savedSettings = @json($currentSettings);
@@ -1478,6 +1764,23 @@ function posterStudio() {
                     layerOrder: 'below'
                 });
             }
+
+            // Restore saved layer stack or establish default hierarchy (Top to Bottom)
+            if (savedSettings && Array.isArray(savedSettings.layer_stack) && savedSettings.layer_stack.length > 0) {
+                this.layerStack = [...savedSettings.layer_stack];
+            } else {
+                const belowCustom = this.customElements.filter(e => e.layerOrder === 'below').map(e => e.id);
+                const aboveCustom = this.customElements.filter(e => e.layerOrder !== 'below').map(e => e.id);
+                this.layerStack = [
+                    ...aboveCustom,
+                    'winners',
+                    'result_no',
+                    'competition',
+                    'category',
+                    ...belowCustom
+                ];
+            }
+            this.syncLayerStack();
 
             this.loadTemplateImage(this.settings.template_image);
             this.loadMedalImages();
@@ -1629,6 +1932,7 @@ function posterStudio() {
                 layerOrder: 'above'
             };
             this.customElements.push(newEl);
+            this.layerStack.unshift(newId);
             this.selectElement(newId);
             this.activeTab = 'design';
             this.render();
@@ -1655,6 +1959,7 @@ function posterStudio() {
                 layerOrder: 'above'
             };
             this.customElements.push(newEl);
+            this.layerStack.unshift(newId);
             this.selectElement(newId);
             this.activeTab = 'design';
             this.render();
@@ -1686,6 +1991,7 @@ function posterStudio() {
                         layerOrder: 'above'
                     };
                     this.customElements.push(newEl);
+                    this.layerStack.unshift(newId);
                     this.selectElement(newId);
                     this.activeTab = 'design';
                     this.render();
@@ -1720,6 +2026,12 @@ function posterStudio() {
                     clone.imgObj = this.selectedElement.imgObj;
                 }
                 this.customElements.push(clone);
+                const origIdx = this.layerStack.indexOf(this.selectedElement.id);
+                if (origIdx >= 0) {
+                    this.layerStack.splice(origIdx, 0, clone.id);
+                } else {
+                    this.layerStack.unshift(clone.id);
+                }
                 this.selectElement(clone.id);
                 this.render();
             }
@@ -1733,6 +2045,7 @@ function posterStudio() {
 
         deleteElement(id) {
             this.customElements = this.customElements.filter(el => el.id !== id);
+            this.layerStack = this.layerStack.filter(lid => lid !== id);
             this.selectedId = null;
             this.selectedType = null;
             this.render();
@@ -1885,53 +2198,52 @@ function posterStudio() {
             return null;
         },
 
-        // Hit Detection for Interactive Canvas Dragging & Selection
+        // Hit Detection for Interactive Canvas Dragging & Selection (Topmost layer checked first)
         hitTest(x, y) {
-            // Check custom elements in reverse order (topmost first)
-            for (let i = this.customElements.length - 1; i >= 0; i--) {
-                const el = this.customElements[i];
-                if (!el.visible) continue;
-                const w = el.width || (el.size ? (el.text ? el.text.length * el.size * 0.55 : el.size) : 100);
-                const h = el.height || (el.size || 50);
-                if (x >= el.x - 20 && x <= el.x + w + 20 && y >= el.y - 20 && y <= el.y + h + 20) {
-                    return { type: 'custom', id: el.id, el: el };
-                }
-            }
-
-            // Check Result Number
-            if (this.settings.show_result_no) {
-                const rx = this.settings.result_x;
-                const ry = this.settings.result_y;
-                if (x >= rx - 40 && x <= rx + 320 && y >= ry - 40 && y <= ry + 300) {
-                    return { type: 'core', id: 'result_no' };
-                }
-            }
-
-            // Check Program Name
-            if (this.settings.show_competition) {
-                const cx = this.settings.competition_x;
-                const cy = this.settings.competition_y;
-                if (x >= cx - 20 && x <= cx + (this.settings.competition_max_width || 440) + 20 && y >= cy - 20 && y <= cy + 220) {
-                    return { type: 'core', id: 'competition' };
-                }
-            }
-
-            // Check Zone Capsule
-            if (this.settings.show_category) {
-                const zx = this.settings.category_x;
-                const zy = this.settings.category_y;
-                if (x >= zx - 140 && x <= zx + 140 && y >= zy - 40 && y <= zy + 40) {
-                    return { type: 'core', id: 'category' };
-                }
-            }
-
-            // Check Winners
-            if (this.settings.show_winners) {
-                const wx = this.settings.block_left;
-                const wy = this.settings.first_top;
-                const scale = this.settings.winners_scale || 1.0;
-                if (x >= wx - 20 && x <= wx + Math.round(440 * scale) + 20 && y >= wy - 20 && y <= wy + Math.round(540 * scale) + 20) {
-                    return { type: 'core', id: 'winners' };
+            for (let i = 0; i < this.layerStack.length; i++) {
+                const layerId = this.layerStack[i];
+                if (layerId === 'result_no') {
+                    if (this.settings.show_result_no) {
+                        const rx = this.settings.result_x;
+                        const ry = this.settings.result_y;
+                        if (x >= rx - 40 && x <= rx + 320 && y >= ry - 40 && y <= ry + 300) {
+                            return { type: 'core', id: 'result_no' };
+                        }
+                    }
+                } else if (layerId === 'competition') {
+                    if (this.settings.show_competition) {
+                        const cx = this.settings.competition_x;
+                        const cy = this.settings.competition_y;
+                        if (x >= cx - 20 && x <= cx + (this.settings.competition_max_width || 440) + 20 && y >= cy - 20 && y <= cy + 220) {
+                            return { type: 'core', id: 'competition' };
+                        }
+                    }
+                } else if (layerId === 'category') {
+                    if (this.settings.show_category) {
+                        const zx = this.settings.category_x;
+                        const zy = this.settings.category_y;
+                        if (x >= zx - 140 && x <= zx + 140 && y >= zy - 40 && y <= zy + 40) {
+                            return { type: 'core', id: 'category' };
+                        }
+                    }
+                } else if (layerId === 'winners') {
+                    if (this.settings.show_winners) {
+                        const wx = this.settings.block_left;
+                        const wy = this.settings.first_top;
+                        const scale = this.settings.winners_scale || 1.0;
+                        if (x >= wx - 20 && x <= wx + Math.round(440 * scale) + 20 && y >= wy - 20 && y <= wy + Math.round(540 * scale) + 20) {
+                            return { type: 'core', id: 'winners' };
+                        }
+                    }
+                } else {
+                    const el = this.customElements.find(e => e.id === layerId);
+                    if (el && el.visible) {
+                        const w = el.width || (el.size ? (el.text ? el.text.length * el.size * 0.55 : el.size) : 100);
+                        const h = el.height || (el.size || 50);
+                        if (x >= el.x - 20 && x <= el.x + w + 20 && y >= el.y - 20 && y <= el.y + h + 20) {
+                            return { type: 'custom', id: el.id, el: el };
+                        }
+                    }
                 }
             }
 
@@ -2189,71 +2501,16 @@ function posterStudio() {
                 ctx.fillRect(0, 0, width, height);
             }
 
-            // 2. Draw Custom Elements with layerOrder === 'below'
-            this.drawCustomElements(ctx, 'below');
-
-            // 3. Draw Zone Capsule
-            if (this.settings.show_category && this.data.category) {
-                ctx.save();
-                ctx.translate(this.settings.category_x, this.settings.category_y);
-                if (this.settings.category_rotation) {
-                    ctx.rotate((this.settings.category_rotation * Math.PI) / 180);
-                }
-                ctx.fillStyle = this.settings.category_color || '#FFFFFF';
-                ctx.font = `${this.settings.category_weight || '400'} ${this.settings.category_size || 45}px "Rockwell Std", serif`;
-                ctx.textAlign = this.settings.category_align || 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(this.data.category.toUpperCase(), 0, 0);
-                ctx.restore();
+            // 2. Draw Layers in Painter's order (reverse of layerStack: bottom to top)
+            if (!this.layerStack || this.layerStack.length === 0) {
+                this.syncLayerStack();
             }
+            const drawOrder = [...this.layerStack].reverse();
+            drawOrder.forEach(layerId => {
+                this.drawLayer(ctx, layerId);
+            });
 
-            // 4. Draw Program Name
-            if (this.settings.show_competition && this.data.competition) {
-                ctx.save();
-                ctx.translate(this.settings.competition_x, this.settings.competition_y);
-                if (this.settings.competition_rotation) {
-                    ctx.rotate((this.settings.competition_rotation * Math.PI) / 180);
-                }
-                const compFont = this.settings.competition_font || 'Rockwell Std';
-                ctx.fillStyle = this.settings.competition_color || '#000000';
-                ctx.font = `${this.settings.competition_weight || '400'} ${this.settings.competition_size || 100}px "${compFont}", serif`;
-                ctx.textAlign = this.settings.competition_align || 'left';
-                ctx.textBaseline = 'top';
-
-                const lines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width || 440);
-                let lineY = 0;
-                for (let l of lines) {
-                    ctx.fillText(l, 0, lineY);
-                    lineY += (this.settings.competition_line_height || 94);
-                }
-                ctx.restore();
-            }
-
-            // 5. Draw Result Number (Mongolian Baiti)
-            if (this.settings.show_result_no && this.data.result_no) {
-                ctx.save();
-                ctx.translate(this.settings.result_x, this.settings.result_y);
-                if (this.settings.result_rotation) {
-                    ctx.rotate((this.settings.result_rotation * Math.PI) / 180);
-                }
-                ctx.fillStyle = this.settings.result_color || '#D02627';
-                ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "Mongolian Baiti", serif`;
-                ctx.textBaseline = 'top';
-                ctx.textAlign = 'left';
-                if ('letterSpacing' in ctx) ctx.letterSpacing = '-12px';
-                ctx.fillText(this.data.result_no, 0, 0);
-                ctx.restore();
-            }
-
-            // 6. Draw Podium Winners
-            if (this.settings.show_winners) {
-                this.drawPodiumWinners(ctx);
-            }
-
-            // 7. Draw Custom Elements with layerOrder === 'above'
-            this.drawCustomElements(ctx, 'above');
-
-            // 8. If Preview (!isExport), draw Selection Box & Guidelines
+            // 3. If Preview (!isExport), draw Selection Box & Guidelines
             if (!isExport) {
                 this.drawSelectionOutline(ctx);
                 if (this.guidelines.show) {
@@ -2262,67 +2519,135 @@ function posterStudio() {
             }
         },
 
-        drawCustomElements(ctx, orderFilter) {
-            this.customElements.forEach(el => {
-                if (!el.visible) return;
-                if ((el.layerOrder || 'above') !== orderFilter) return;
-
-                ctx.save();
-                ctx.translate(el.x, el.y);
-                if (el.rotation) {
-                    ctx.rotate((el.rotation * Math.PI) / 180);
+        drawLayer(ctx, layerId) {
+            if (layerId === 'category') {
+                this.drawZoneCapsule(ctx);
+            } else if (layerId === 'competition') {
+                this.drawProgramName(ctx);
+            } else if (layerId === 'result_no') {
+                this.drawResultNo(ctx);
+            } else if (layerId === 'winners') {
+                if (this.settings.show_winners) {
+                    this.drawPodiumWinners(ctx);
                 }
-                ctx.globalAlpha = (el.opacity ?? 100) / 100;
+            } else {
+                const el = this.customElements.find(e => e.id === layerId);
+                if (el && el.visible) {
+                    this.drawSingleCustomElement(ctx, el);
+                }
+            }
+        },
 
-                if (el.type === 'text') {
-                    ctx.fillStyle = el.color || '#000000';
-                    ctx.font = `${el.weight || '400'} ${el.size || 48}px "${el.font || 'Rockwell Std'}", sans-serif`;
-                    ctx.textAlign = el.align || 'left';
-                    ctx.textBaseline = 'top';
-                    if ('letterSpacing' in ctx && el.tracking) {
-                        ctx.letterSpacing = el.tracking + 'px';
-                    }
-                    const lines = (el.text || '').split('\n');
-                    const lineH = Math.round((el.size || 48) * (el.lineHeight || 1.2));
-                    lines.forEach((l, idx) => {
-                        ctx.fillText(l, 0, idx * lineH);
-                    });
+        drawZoneCapsule(ctx) {
+            if (!this.settings.show_category || !this.data.category) return;
+            ctx.save();
+            ctx.translate(this.settings.category_x, this.settings.category_y);
+            if (this.settings.category_rotation) {
+                ctx.rotate((this.settings.category_rotation * Math.PI) / 180);
+            }
+            ctx.fillStyle = this.settings.category_color || '#FFFFFF';
+            ctx.font = `${this.settings.category_weight || '400'} ${this.settings.category_size || 45}px "Rockwell Std", serif`;
+            ctx.textAlign = this.settings.category_align || 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.data.category.toUpperCase(), 0, 0);
+            ctx.restore();
+        },
 
-                } else if (el.type === 'shape') {
-                    if (el.shapeType === 'badge' || el.shapeType === 'stamp') {
-                        // Styled Festival Badge
-                        ctx.fillStyle = el.fillColor || '#D02627';
-                        this.drawRoundedRect(ctx, 0, 0, el.width, el.height, 8);
-                        ctx.fill();
-                        if (el.strokeColor && el.lineWidth > 0) {
-                            ctx.strokeStyle = el.strokeColor;
-                            ctx.lineWidth = el.lineWidth;
-                            ctx.stroke();
-                        }
-                    } else if (el.shapeType === 'pill') {
-                        ctx.fillStyle = el.fillColor || '#be1e2d';
-                        this.drawRoundedRect(ctx, 0, 0, el.width, el.height, el.height / 2);
-                        ctx.fill();
-                    } else if (el.shapeType === 'line') {
-                        ctx.strokeStyle = el.fillColor || '#000000';
-                        ctx.lineWidth = el.height || 2;
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(el.width, 0);
+        drawProgramName(ctx) {
+            if (!this.settings.show_competition || !this.data.competition) return;
+            ctx.save();
+            ctx.translate(this.settings.competition_x, this.settings.competition_y);
+            if (this.settings.competition_rotation) {
+                ctx.rotate((this.settings.competition_rotation * Math.PI) / 180);
+            }
+            const compFont = this.settings.competition_font || 'Rockwell Std';
+            ctx.fillStyle = this.settings.competition_color || '#000000';
+            ctx.font = `${this.settings.competition_weight || '400'} ${this.settings.competition_size || 100}px "${compFont}", serif`;
+            ctx.textAlign = this.settings.competition_align || 'left';
+            ctx.textBaseline = 'top';
+
+            const lines = this.wrapText(ctx, this.data.competition, this.settings.competition_max_width || 440);
+            let lineY = 0;
+            for (let l of lines) {
+                ctx.fillText(l, 0, lineY);
+                lineY += (this.settings.competition_line_height || 94);
+            }
+            ctx.restore();
+        },
+
+        drawResultNo(ctx) {
+            if (!this.settings.show_result_no || !this.data.result_no) return;
+            ctx.save();
+            ctx.translate(this.settings.result_x, this.settings.result_y);
+            if (this.settings.result_rotation) {
+                ctx.rotate((this.settings.result_rotation * Math.PI) / 180);
+            }
+            ctx.fillStyle = this.settings.result_color || '#D02627';
+            ctx.font = `${this.settings.result_weight || '400'} ${this.settings.result_size || 480}px "Mongolian Baiti", serif`;
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
+            if ('letterSpacing' in ctx) ctx.letterSpacing = '-12px';
+            ctx.fillText(this.data.result_no, 0, 0);
+            ctx.restore();
+        },
+
+        drawSingleCustomElement(ctx, el) {
+            if (!el || !el.visible) return;
+            ctx.save();
+            ctx.translate(el.x, el.y);
+            if (el.rotation) {
+                ctx.rotate((el.rotation * Math.PI) / 180);
+            }
+            ctx.globalAlpha = (el.opacity ?? 100) / 100;
+
+            if (el.type === 'text') {
+                ctx.fillStyle = el.color || '#000000';
+                ctx.font = `${el.weight || '400'} ${el.size || 48}px "${el.font || 'Rockwell Std'}", sans-serif`;
+                ctx.textAlign = el.align || 'left';
+                ctx.textBaseline = 'top';
+                if ('letterSpacing' in ctx && el.tracking) {
+                    ctx.letterSpacing = el.tracking + 'px';
+                }
+                const lines = (el.text || '').split('\n');
+                const lineH = Math.round((el.size || 48) * (el.lineHeight || 1.2));
+                lines.forEach((l, idx) => {
+                    ctx.fillText(l, 0, idx * lineH);
+                });
+
+            } else if (el.type === 'shape') {
+                if (el.shapeType === 'badge' || el.shapeType === 'stamp') {
+                    // Styled Festival Badge
+                    ctx.fillStyle = el.fillColor || '#D02627';
+                    this.drawRoundedRect(ctx, 0, 0, el.width, el.height, 8);
+                    ctx.fill();
+                    if (el.strokeColor && el.lineWidth > 0) {
+                        ctx.strokeStyle = el.strokeColor;
+                        ctx.lineWidth = el.lineWidth;
                         ctx.stroke();
-                    } else {
-                        ctx.fillStyle = el.fillColor || '#D02627';
-                        ctx.fillRect(0, 0, el.width, el.height);
                     }
-
-                } else if (el.type === 'image') {
-                    if (el.imgObj && el.imgObj.complete) {
-                        ctx.drawImage(el.imgObj, 0, 0, el.width, el.height);
-                    }
+                } else if (el.shapeType === 'pill') {
+                    ctx.fillStyle = el.fillColor || '#be1e2d';
+                    this.drawRoundedRect(ctx, 0, 0, el.width, el.height, el.height / 2);
+                    ctx.fill();
+                } else if (el.shapeType === 'line') {
+                    ctx.strokeStyle = el.fillColor || '#000000';
+                    ctx.lineWidth = el.height || 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(el.width, 0);
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = el.fillColor || '#D02627';
+                    ctx.fillRect(0, 0, el.width, el.height);
                 }
 
-                ctx.restore();
-            });
+            } else if (el.type === 'image') {
+                if (el.imgObj && el.imgObj.complete) {
+                    ctx.drawImage(el.imgObj, 0, 0, el.width, el.height);
+                }
+            }
+
+            ctx.restore();
         },
 
         drawPodiumWinners(ctx) {
@@ -2670,6 +2995,7 @@ function posterStudio() {
                 body: JSON.stringify({
                     template_id: this.settings.template_id,
                     settings: Object.assign({}, this.settings, {
+                        layer_stack: this.layerStack,
                         custom_elements: this.customElements.map(el => {
                             const clone = Object.assign({}, el);
                             delete clone.imgObj;
@@ -2716,6 +3042,7 @@ function posterStudio() {
                     poster_data: dataUrl,
                     template_id: this.settings.template_id,
                     settings: Object.assign({}, this.settings, {
+                        layer_stack: this.layerStack,
                         custom_winners: this.data.winners,
                         custom_elements: this.customElements.map(el => {
                             const clone = Object.assign({}, el);
