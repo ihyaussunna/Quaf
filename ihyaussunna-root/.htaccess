@@ -1,0 +1,27 @@
+# JAMIA IHYA-US-SUNNA - ROOT .htaccess
+# Handles root Coming Soon portal & isolates /foodcounter/ paths
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 1. Force HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. Food Counter Routing:
+    # Ensure /foodcounter/admin rewrites to /foodcounter/admin.php cleanly
+    RewriteRule ^foodcounter/admin/?$ foodcounter/admin.php [L,QSA]
+    RewriteRule ^foodcounter/api/?$ foodcounter/api.php [L,QSA]
+
+    # Let existing files/dirs pass through
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Clean URL support for root
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1.php [L,QSA]
+</IfModule>
+
+DirectoryIndex index.php index.html

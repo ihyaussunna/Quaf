@@ -5,6 +5,14 @@
  * ihyaussunna.in/foodcounter
  */
 declare(strict_types=1);
+
+// Clean routing for admin if accessed as /foodcounter/admin or ?admin
+$requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if (is_string($requestUri) && (preg_match('#/foodcounter/admin/?$#i', $requestUri) || isset($_GET['admin']))) {
+    require __DIR__.'/admin.php';
+    exit;
+}
+
 require_once __DIR__.'/db.php';
 
 $stmt = $pdo->query('SELECT * FROM meal_sessions WHERE is_active = 1 ORDER BY id DESC LIMIT 1');

@@ -1,39 +1,39 @@
 # QUAF 2026 - Food Counter Management System
-**Location:** `ihyaussunna.in/foodcounter`  
+**Scanner Location:** `https://ihyaussunna.in/foodcounter/`  
+**Admin Location:** `https://ihyaussunna.in/foodcounter/admin` (or `admin.php`)  
+**Main Domain:** `https://ihyaussunna.in/` (Official Institutional Coming Soon Page)  
 **Database:** `u788415270_foodcounter`  
 **MySQL User:** `u788415270_foodcounter`  
 
 ---
 
-## സിസ്റ്റം ഇൻസ്റ്റാൾ ചെയ്യേണ്ട ലളിതമായ 3 ഘട്ടങ്ങൾ (Hostinger Setup)
+## ഫുഡ് കൗണ്ടർ ലിങ്കുകൾ (Food Counter Accessible Routes)
 
-### ഘട്ടം 1: ഡാറ്റാബേസ് സെറ്റപ്പ് (Database Setup via phpMyAdmin)
-1. Hostinger hPanel-ൽ **Databases** -> **phpMyAdmin** തുറക്കുക.
-2. താങ്കൾ ഉണ്ടാക്കിയ `u788415270_foodcounter` എന്ന ഡാറ്റാബേസ് തിരഞ്ഞെടുക്കുക.
-3. മുകളിലുള്ള **Import** ടാബ് ക്ലിക്ക് ചെയ്യുക.
-4. `foodcounter_setup.sql` എന്ന ഫയൽ തിരഞ്ഞെടുത്ത് താഴെയുള്ള **Import** ബട്ടൺ അമർത്തുക.
-   *(ഇതോടെ 1,169 വിദ്യാർത്ഥികളുടെ മുഴുവൻ വിവരങ്ങളും മീൽ സെഷനുകളും ഓട്ടോമാറ്റിക്കായി ആ ഡാറ്റാബേസിലേക്ക് കയറും).*
+ഫുഡ് കൗണ്ടറുമായി ബന്ധപ്പെട്ട കാര്യങ്ങൾ താഴെ പറയുന്ന പേജുകളിൽ മാത്രമായി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു:
 
----
+1. **മൊബൈൽ/ടാബ്‌ലെറ്റ് സ്കാനർ:**  
+   - `https://ihyaussunna.in/foodcounter`  
+   - `https://ihyaussunna.in/foodcounter/index.php`  
+   - `https://ihyaussunna.in/foodcounter/`  
 
-### ഘട്ടം 2: ഫയലുകൾ ഹോസ്റ്റിംഗറിലേക്ക് അപ്‌ലോഡ് ചെയ്യുക (File Upload)
-1. Hostinger hPanel-ൽ **File Manager** തുറക്കുക.
-2. `public_html` ഫോൾഡറിനുള്ളിൽ `foodcounter` എന്ന പേരിൽ ഒരു പുതിയ ഫോൾഡർ ഉണ്ടാക്കുക:
-   `public_html/foodcounter/`
-3. ഈ ഫോൾഡറിലേക്ക് താഴെ പറയുന്ന ഫയലുകൾ അപ്‌ലോഡ് ചെയ്യുക (അല്ലെങ്കിൽ `foodcounter.zip` അപ്‌ലോഡ് ചെയ്ത് Extract ചെയ്യുക):
-   - `db.php` (ഡാറ്റാബേസ് കണക്ഷൻ - നിങ്ങളുടെ യൂസർനെയിമും പാസ്‌വേഡും ഇതിൽ മുൻകൂട്ടി സെറ്റ് ചെയ്തിട്ടുണ്ട്)
-   - `index.php` (മൊബൈൽ ക്യാമറ സ്കാനറും മാനുവൽ എൻട്രി കൗണ്ടറും)
-   - `api.php` (അതിവേഗ സ്കാൻ പരിശോധന എൻജിൻ)
-   - `admin.php` (റിപ്പോർട്ടുകൾ എക്സ്പോർട്ട് ചെയ്യാനും സെഷനുകൾ ക്രമീകരിക്കാനും)
+2. **അഡ്മിൻ മാനേജ്‌മെന്റ് (സെഷൻ കൺട്രോളർ):**  
+   - `https://ihyaussunna.in/foodcounter/admin`  
+   - `https://ihyaussunna.in/foodcounter/admin.php`  
+
+3. **സ്കാൻ പരിശോധന എപിഐ:**  
+   - `https://ihyaussunna.in/foodcounter/api.php`  
+
+> **ശ്രദ്ധിക്കുക:** `https://ihyaussunna.in` മെയിൻ ഡൊമെയ്‌ൻ ഇഹ്‌യാഉസ്സുന്നയുടെ പ്രധാന വിവരങ്ങൾക്കായുള്ള പോർട്ടൽ ആയതിനാൽ അവിടെ ഫുഡ് കൗണ്ടർ കാണിക്കില്ല; പകരം ഔദ്യോഗിക **Coming Soon** പേജ് മാത്രമേ ലഭ്യമാകൂ.
 
 ---
 
-### ഘട്ടം 3: കൗണ്ടർ ഓപ്പൺ ചെയ്യുക
-ഇനി മൊബൈൽ ഫോണിലോ ലാപ്ടോപ്പിലോ താഴെ കാണുന്ന ലിങ്ക് തുറക്കുക:
-`https://ihyaussunna.in/foodcounter/`
+## സിസ്റ്റം ഇൻസ്റ്റലേഷനും അപ്‌ഡേറ്റും (Hostinger Setup)
 
-1. **'Start Camera'** ക്ലിക്ക് ചെയ്താൽ മൊബൈൽ ക്യാമറ ഓൺ ആകും.
-2. കുട്ടികളുടെ ക്വാഫ് ചെസ്റ്റ് കാർഡിലെ QR കോഡ് കാണിക്കുക.
-   - ആദ്യ തവണ സ്കാൻ ചെയ്യുമ്പോൾ: **പച്ച നിറത്തിൽ വലിയ ചെക്ക്മാർക്കും (ഭക്ഷണം നൽകാം)**, കുട്ടിയുടെ പേര്, ചെസ്റ്റ് നമ്പർ, ടീം വിവരങ്ങളും ഒപ്പം ബെല്ലും കേൾക്കും.
-   - രണ്ടാമത് വീണ്ടും സ്കാൻ ചെയ്യാൻ നോക്കിയാൽ: **ചുവപ്പ് നിറത്തിൽ ഫ്ലാഷ് ചെയ്ത് (ഭക്ഷണം ഇതിനകം നൽകിയതാണ്)** എന്ന് മുന്നറിയിപ്പും ബസ്സറും വരും!
-3. ക്യാമറ കിട്ടാത്ത സാഹചര്യത്തിൽ മുകളിൽ ചെസ്റ്റ് നമ്പർ ടൈപ്പ് ചെയ്തും ചെക്ക് ചെയ്യാം.
+1. Hostinger File Manager-ൽ `public_html/` തുറക്കുക.
+2. `public_html/index.php` ആയി `ihyaussunna-root/index.php` (Coming Soon പേജ്) നൽകുക.
+3. `public_html/foodcounter/` എന്ന ഫോൾഡറിൽ താഴെ പറയുന്ന ഫയലുകൾ നൽകുക:
+   - `index.php`
+   - `admin.php`
+   - `api.php`
+   - `db.php`
+   - `.htaccess`

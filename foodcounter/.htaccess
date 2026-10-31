@@ -1,0 +1,23 @@
+# QUAF 2026 - Food Counter Management System
+# Specific Rewrite Rules for /foodcounter/
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /foodcounter/
+
+    # Direct rewrite for admin and admin.php
+    RewriteRule ^admin/?$ admin.php [L,QSA]
+    RewriteRule ^api/?$ api.php [L,QSA]
+    RewriteRule ^index/?$ index.php [L,QSA]
+
+    # Allow direct access to real existing files and directories
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Automatic .php extension matching
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1.php [L,QSA]
+</IfModule>
+
+DirectoryIndex index.php
