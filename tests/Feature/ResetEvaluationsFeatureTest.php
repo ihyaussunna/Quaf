@@ -91,6 +91,8 @@ class ResetEvaluationsFeatureTest extends TestCase
         $this->assertEquals(1, Result::count());
         $this->assertEquals(1, PointsTransaction::count());
 
+        $expectedStudentCount = Student::count();
+
         // Execute reset-evaluations endpoint
         $response = $this->get('/reset-evaluations?token=quaf2026setup');
         $response->assertStatus(200);
@@ -106,9 +108,9 @@ class ResetEvaluationsFeatureTest extends TestCase
         $this->assertEquals(0, $student->fresh()->points_cache);
 
         // Students and program entries remain 100% intact
-        $this->assertEquals(1, Student::count());
+        $this->assertEquals($expectedStudentCount, Student::count());
         $this->assertEquals(1, ProgramEntry::count());
-        $this->assertEquals('Zayd', Student::first()->name);
+        $this->assertEquals('Zayd', Student::where('student_id', 'STU-001')->first()->name);
         $this->assertEquals('101', ProgramEntry::first()->chest_number);
     }
 }

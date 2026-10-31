@@ -320,7 +320,7 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $this->assertFalse((bool) $this->student->fresh()->recognition_gift_delivered);
     }
 
-    public function test_non_participating_student_cannot_receive_recognition_gift(): void
+    public function test_non_participating_student_can_receive_quaf_qalam_gift(): void
     {
         $nonParticipant = Student::create([
             'name' => 'Campus Visitor',
@@ -333,10 +333,15 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         ]);
 
         $this->assertFalse($nonParticipant->isCompetitionParticipant());
+        $this->assertEquals('QUAF Qalam (ക്വാഫ് ഖലം)', $nonParticipant->gift_name);
 
         $response = $this->actingAs($this->presentationUser)->post(route('presentation.toggle-gift', $nonParticipant->id));
-        $response->assertSessionHas('error');
-        $this->assertFalse((bool) $nonParticipant->fresh()->recognition_gift_delivered);
+        $response->assertSessionHas('success');
+        $this->assertTrue((bool) $nonParticipant->fresh()->recognition_gift_delivered);
+
+        $verifyResponse = $this->get(route('verify.student', $nonParticipant->qr_token));
+        $verifyResponse->assertOk();
+        $verifyResponse->assertSee('QUAF Qalam');
     }
 
     public function test_scanned_student_verification_page_reveals_secret_code_and_wallet_data(): void

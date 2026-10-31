@@ -44,19 +44,27 @@ class PresentationController extends Controller
 
         CoinTransaction::ensureSchema();
 
-        $eligibleCount = Student::participants()->count();
-        $totalEligibleGifts = $eligibleCount > 0 ? $eligibleCount : Student::count();
+        $totalStudents = Student::count();
+        $deliveredCount = Schema::hasColumn('students', 'recognition_gift_delivered')
+            ? Student::where('recognition_gift_delivered', true)->count()
+            : 0;
+        $qalamDelivered = Schema::hasColumn('students', 'recognition_gift_delivered')
+            ? Student::where('recognition_gift_delivered', true)->whereDoesntHave('entries')->count()
+            : 0;
+        $qalamTotalEligible = Student::whereDoesntHave('entries')->count();
 
         $stats = [
             'total_credited' => (int) CoinTransaction::where('coins', '>', 0)->sum('coins'),
             'total_redeemed' => (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins')),
             'total_purchases' => CoinTransaction::where('transaction_type', 'debit')->count(),
             'unique_students' => CoinTransaction::where('transaction_type', 'debit')->distinct('student_id')->count('student_id'),
-            'gifts_delivered' => Schema::hasColumn('students', 'recognition_gift_delivered')
-                ? Student::where('recognition_gift_delivered', true)->count()
-                : 0,
-            'total_students' => $totalEligibleGifts,
-            'total_eligible_students' => $totalEligibleGifts,
+            'gifts_delivered' => $deliveredCount,
+            'total_students' => $totalStudents,
+            'total_eligible_students' => $totalStudents,
+            'qalam_gifts_delivered' => $qalamDelivered,
+            'qalam_total_eligible' => $qalamTotalEligible,
+            'recognition_gifts_delivered' => $deliveredCount - $qalamDelivered,
+            'recognition_total_eligible' => $totalStudents - $qalamTotalEligible,
         ];
 
         $selectedStudent = null;
@@ -170,8 +178,12 @@ class PresentationController extends Controller
                 'competition_earned' => $summary['competition_earned'],
                 'added_coins' => $summary['added_coins'],
                 'total_spent' => $summary['total_spent'],
+                'is_participant' => $student->isCompetitionParticipant(),
+                'gift_name' => $student->gift_name,
+                'gift_malayalam_title' => $student->gift_malayalam_title,
                 'recognition_gift_delivered' => (bool) $student->recognition_gift_delivered,
                 'recognition_gift_delivered_at' => $student->recognition_gift_delivered_at?->format('d M, h:i A'),
+                'recognition_gift_delivered_by' => $student->recognition_gift_delivered_by,
                 'grade_counts' => $achievements['grade_counts'],
                 'prizes' => $achievements['prizes'],
                 'recent_transactions' => $recent,
@@ -260,7 +272,7 @@ class PresentationController extends Controller
     }
 
     /**
-     * Toggle or mark QUAF Recognition Gift as delivered for a student.
+     * Toggle or mark Festival Gift (QUAF Recognition Gift for participants / QUAF Qalam for non-participants) as delivered.
      */
     public function toggleGift(Request $request, Student $student): RedirectResponse
     {
@@ -270,12 +282,9 @@ class PresentationController extends Controller
             return redirect()->back()->with('error', 'ഡാറ്റാബേസ് കോളം അപ്‌ഡേറ്റ് ആകുന്നു. ദയവായി അല്പം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക.');
         }
 
-        if (! $student->isCompetitionParticipant()) {
-            return redirect()->back()->with('error', "{$student->name} മത്സരങ്ങളിൽ (Individual / Group) പങ്കെടുത്തിട്ടില്ലാത്തതിനാൽ ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റിന് അർഹതയില്ല.");
-        }
-
         $newStatus = ! (bool) $student->recognition_gift_delivered;
         $operator = Auth::user()?->name ?? 'Presentation Desk';
+        $giftTitle = $student->gift_name;
 
         $student->update([
             'recognition_gift_delivered' => $newStatus,
@@ -284,8 +293,8 @@ class PresentationController extends Controller
         ]);
 
         $msg = $newStatus
-            ? "{$student->name}-ന് ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് നൽകിയതായി രേഖപ്പെടുത്തി."
-            : "{$student->name}-ന്റെ ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് സ്റ്റാറ്റസ് റദ്ദാക്കി.";
+            ? "{$student->name}-ന് '{$giftTitle}' നൽകിയതായി രേഖപ്പെടുത്തി (Marked Delivered)."
+            : "{$student->name}-ന്റെ '{$giftTitle}' സ്റ്റാറ്റസ് റദ്ദാക്കി (Reverted to Pending).";
 
         return redirect()->back()->with('success', $msg);
     }
@@ -355,8 +364,11 @@ class PresentationController extends Controller
             ? Student::where('recognition_gift_delivered', true)->count()
             : 0;
 
-        $eligibleCount = Student::participants()->count();
-        $totalStudents = $eligibleCount > 0 ? $eligibleCount : Student::count();
+        $totalStudents = Student::count();
+        $qalamDelivered = Schema::hasColumn('students', 'recognition_gift_delivered')
+            ? Student::where('recognition_gift_delivered', true)->whereDoesntHave('entries')->count()
+            : 0;
+        $qalamTotal = Student::whereDoesntHave('entries')->count();
 
         return view('presentation.report', compact(
             'transactions',
@@ -364,6 +376,8 @@ class PresentationController extends Controller
             'totalItemsCount',
             'totalGiftsDelivered',
             'totalStudents',
+            'qalamDelivered',
+            'qalamTotal',
             'startDate',
             'endDate'
         ));

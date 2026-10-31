@@ -52,8 +52,9 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
             </div>
             <div>
-                <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Recognition Gifts</div>
-                <div class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ number_format($stats['gifts_delivered'] ?? 0) }} <span class="text-xs font-mono font-normal text-slate-400">/ {{ number_format($stats['total_eligible_students'] ?? $stats['total_students']) }}</span></div>
+                <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Gifts Delivered</div>
+                <div class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ number_format($stats['gifts_delivered'] ?? 0) }} <span class="text-xs font-mono font-normal text-slate-400">/ {{ number_format($stats['total_students']) }}</span></div>
+                <div class="text-[10px] font-mono text-slate-400 mt-0.5">Qalam: {{ $stats['qalam_gifts_delivered'] ?? 0 }}/{{ $stats['qalam_total_eligible'] ?? 0 }} • Kit: {{ $stats['recognition_gifts_delivered'] ?? 0 }}</div>
             </div>
         </div>
 
@@ -365,52 +366,58 @@
                         </div>
                     @endif
 
-                    <!-- QUAF Recognition Gift Status & Delivery Action -->
-                    @if(!$selectedStudent->isCompetitionParticipant())
-                        <div class="p-4 sm:p-5 rounded-2xl border bg-slate-100 border-slate-200 text-slate-700">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">QUAF Recognition Gift</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-200 text-slate-700">
-                                    Not Eligible
-                                </span>
-                            </div>
-                            <div class="mt-2">
-                                <div class="text-sm font-bold font-sora text-slate-800">അർഹതയില്ല (Not Eligible)</div>
-                                <div class="text-[11px] text-slate-500 font-anek mt-0.5">ഈ വിദ്യാർത്ഥി മത്സരങ്ങളിൽ (Individual / Group) പങ്കെടുത്തിട്ടില്ല. ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് മത്സരങ്ങളിൽ പങ്കെടുത്തവർക്ക് മാത്രമുള്ളതാണ്.</div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="p-4 sm:p-5 rounded-2xl border transition-all {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-[10px] font-mono font-bold uppercase tracking-wider">QUAF Recognition Gift</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900' }}">
-                                    {{ $selectedStudent->recognition_gift_delivered ? 'Delivered' : 'Pending' }}
-                                </span>
-                            </div>
-
-                            <div class="mt-2">
-                                @if($selectedStudent->recognition_gift_delivered)
-                                    <div class="text-sm font-bold font-sora text-emerald-900">സമ്മാനം നൽകി (Gift Delivered)</div>
-                                    <div class="text-[10px] font-mono text-emerald-700 mt-0.5">
-                                        {{ $selectedStudent->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $selectedStudent->recognition_gift_delivered_by }}
-                                    </div>
-                                @else
-                                    <div class="text-sm font-bold font-sora text-amber-900">സമ്മാനം നൽകിയിട്ടില്ല (Gift Pending)</div>
-                                    <div class="text-[10px] text-amber-800 font-anek mt-0.5">ഈ വിദ്യാർത്ഥിക്ക് ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് നൽകുക.</div>
+                    <!-- QUAF Gift Status & Delivery Action (Recognition Gift for Participants / QUAF Qalam for Non-Participants) -->
+                    @php
+                        $isPart = $selectedStudent->isCompetitionParticipant();
+                        $giftTitle = $selectedStudent->gift_name;
+                        $giftDesc = $isPart 
+                            ? 'മത്സരങ്ങളിൽ പങ്കെടുത്തവർക്കുള്ള ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ്.' 
+                            : 'മത്സരങ്ങളിൽ പങ്കെടുക്കാത്തവർക്കുള്ള പ്രത്യേക \'ക്വാഫ് ഖലം\' സമ്മാനം (QUAF Qalam Gift).';
+                    @endphp
+                    <div class="p-4 sm:p-5 rounded-2xl border transition-all {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="w-2.5 h-2.5 rounded-full {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                <span class="text-[10px] font-mono font-bold uppercase tracking-wider">{{ $giftTitle }}</span>
+                                @if(!$isPart)
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-200 text-amber-900 border border-amber-300">
+                                        Non-Participant Special Gift
+                                    </span>
                                 @endif
                             </div>
-
-                            <div class="mt-3 pt-3 border-t {{ $selectedStudent->recognition_gift_delivered ? 'border-emerald-200' : 'border-amber-200' }}">
-                                <form method="POST" action="{{ route('presentation.toggle-gift', $selectedStudent->id) }}">
-                                    @csrf
-                                    <button type="submit" 
-                                            class="w-full py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs {{ $selectedStudent->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20' }}">
-                                        {{ $selectedStudent->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (സമ്മാനം നൽകി)' }}
-                                    </button>
-                                </form>
-                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900' }}">
+                                {{ $selectedStudent->recognition_gift_delivered ? 'Delivered' : 'Pending Collection' }}
+                            </span>
                         </div>
-                    @endif
+
+                        <div class="mt-2.5">
+                            @if($selectedStudent->recognition_gift_delivered)
+                                <div class="text-sm font-bold font-sora text-emerald-900 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>സമ്മാനം നൽകി (Gift Delivered)</span>
+                                </div>
+                                <div class="text-[10px] font-mono text-emerald-700 mt-0.5">
+                                    {{ $selectedStudent->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $selectedStudent->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                                </div>
+                            @else
+                                <div class="text-sm font-bold font-sora text-amber-900 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>കൈപ്പറ്റിയിട്ടില്ല (Pending Collection)</span>
+                                </div>
+                                <div class="text-[11px] text-amber-800 font-anek mt-0.5">{{ $giftDesc }} ഈ വിദ്യാർത്ഥിക്ക് സമ്മാനം നൽകുക.</div>
+                            @endif
+                        </div>
+
+                        <div class="mt-3 pt-3 border-t {{ $selectedStudent->recognition_gift_delivered ? 'border-emerald-200' : 'border-amber-200' }}">
+                            <form method="POST" action="{{ route('presentation.toggle-gift', $selectedStudent->id) }}">
+                                @csrf
+                                <button type="submit" 
+                                        class="w-full py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs {{ $selectedStudent->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20' }}">
+                                    {{ $selectedStudent->recognition_gift_delivered ? 'Cancel / Revert Status' : "Mark {$giftTitle} Delivered (സമ്മാനം നൽകി)" }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Student Transaction History -->

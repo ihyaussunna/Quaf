@@ -97,6 +97,112 @@
         </div>
     @endif
 
+    <!-- Official Festival Gift Card (QUAF Qalam for Non-Participants / QUAF Recognition Kit for Participants) -->
+    @php
+        $isPart = $student->isCompetitionParticipant();
+        $giftTitle = $student->gift_name;
+        $giftMalayalam = $student->gift_malayalam_title;
+        $chest = $student->chest_number ?? $student->student_id;
+        $qrVerifyUrl = route('verify.student', $student->qr_token ?? $chest);
+        $qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data=" . urlencode($qrVerifyUrl);
+    @endphp
+    <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-7 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden" x-data="{ showQrModal: false }">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="w-2.5 h-2.5 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse' }}"></span>
+                    <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
+                        Festival Gift &bull; പ്രസന്റേഷൻ കൗണ്ടർ
+                    </h3>
+                    @if(!$isPart)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                            Non-Participant Special Gift
+                        </span>
+                    @endif
+                </div>
+
+                <h2 class="text-xl sm:text-2xl font-black font-sora text-slate-900">
+                    {{ $giftMalayalam }}
+                </h2>
+
+                <p class="text-xs text-slate-600 font-sora max-w-2xl leading-relaxed">
+                    @if($isPart)
+                        മത്സരങ്ങളിൽ പങ്കെടുത്ത വിദ്യാർത്ഥികൾക്ക് പ്രസന്റേഷൻ ഡെസ്കിൽ നിന്ന് ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് &amp; കിറ്റ് കൈപ്പറ്റാം.
+                    @else
+                        മത്സരങ്ങളിൽ പങ്കെടുക്കാത്ത വിദ്യാർത്ഥികൾക്ക് പ്രസന്റേഷൻ സെക്ഷനിൽ നിന്ന് പ്രത്യേക 'ക്വാഫ് ഖലം' (QUAF Qalam) സമ്മാനം കൈപ്പറ്റാം.
+                    @endif
+                </p>
+            </div>
+
+            <!-- Status Indicator & Action Button -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
+                @if($student->recognition_gift_delivered)
+                    <div class="px-5 py-3 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center gap-3 shadow-2xs">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold font-sora text-emerald-900">സമ്മാനം കൈപ്പറ്റി (Delivered)</div>
+                            <div class="text-[10px] font-mono text-emerald-700">
+                                {{ $student->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold font-sora text-amber-900">കൈപ്പറ്റാൻ റെഡി (Pending)</div>
+                            <div class="text-[10px] font-mono text-amber-700">Presentation Counter</div>
+                        </div>
+                    </div>
+
+                    <button type="button" 
+                            @click="showQrModal = true"
+                            class="px-5 py-3 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                        <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                        <span>Show QR Code to Collect</span>
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <!-- QR Code Popup Modal for Quick Desk Scanning -->
+        <div x-show="showQrModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs"
+             @keydown.escape.window="showQrModal = false">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full space-y-4 text-center shadow-2xl border border-slate-200"
+                 @click.away="showQrModal = false">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">Official Fest QR</span>
+                    <button type="button" @click="showQrModal = false" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm cursor-pointer">&times;</button>
+                </div>
+
+                <div class="space-y-1">
+                    <h3 class="font-sora font-black text-xl text-slate-900">{{ $giftTitle }}</h3>
+                    <p class="text-xs font-anek text-slate-500">പ്രസന്റേഷൻ ഡെസ്കിൽ ഈ ക്യുആർ കോഡ് കാണിച്ച് സമ്മാനം കൈപ്പറ്റുക</p>
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200 inline-block shadow-inner">
+                    <img src="{{ $qrImageUrl }}" alt="QR Code" class="w-56 h-56 mx-auto rounded-lg shadow-xs">
+                </div>
+
+                <div class="space-y-0.5 font-mono text-xs text-slate-700">
+                    <div class="font-bold text-slate-900 text-sm">{{ $student->name }}</div>
+                    <div>Chest / ID: <strong class="text-[#be1e2d]">#{{ $chest }}</strong></div>
+                    <div class="text-[11px] text-slate-500">{{ $student->group->name }} &bull; {{ $student->zone_name }}</div>
+                </div>
+
+                <button type="button" @click="showQrModal = false" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase cursor-pointer transition">
+                    Done / Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Official Competition Results & Achievements (1st/2nd/3rd Prizes & Grades) -->
     @if(isset($awardedPrograms) && $awardedPrograms->isNotEmpty())
         <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-7 shadow-sm space-y-4 hover:shadow-md transition-shadow">

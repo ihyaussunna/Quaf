@@ -141,62 +141,59 @@
                 </div>
             @endif
 
-            <!-- QUAF RECOGNITION GIFT STATUS -->
-            @if(!$student->isCompetitionParticipant())
-                <div class="p-5 sm:p-6 rounded-2xl border bg-slate-50 border-slate-200 text-slate-700">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-slate-400"></span>
-                        <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-600">
-                            QUAF Recognition Gift
-                        </span>
-                    </div>
-                    <div class="text-base sm:text-lg font-black font-sora mt-1 text-slate-800">
-                        Not Eligible
-                    </div>
-                    <div class="text-xs font-mono text-slate-500 mt-0.5">
-                        Awarded exclusively to candidates who participated in competitive events.
-                    </div>
-                </div>
-            @else
-                <div class="p-5 sm:p-6 rounded-2xl border transition-all {{ $student->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                                <span class="text-xs font-mono font-bold uppercase tracking-wider">
-                                    QUAF Recognition Gift
+            <!-- QUAF FESTIVAL GIFT (RECOGNITION GIFT / QUAF QALAM) -->
+            @php
+                $isPart = $student->isCompetitionParticipant();
+                $giftTitle = $student->gift_name;
+                $giftDesc = $isPart 
+                    ? 'മത്സരങ്ങളിൽ പങ്കെടുത്ത വിദ്യാർത്ഥികൾക്കുള്ള ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ്.' 
+                    : 'മത്സരങ്ങളിൽ പങ്കെടുക്കാത്ത വിദ്യാർത്ഥികൾക്കുള്ള പ്രത്യേക \'ക്വാഫ് ഖലം\' സമ്മാനം (QUAF Qalam Gift).';
+            @endphp
+            <div class="p-5 sm:p-6 rounded-2xl border transition-all {{ $student->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="w-3 h-3 rounded-full {{ $student->recognition_gift_delivered ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                            <span class="text-xs font-mono font-bold uppercase tracking-wider">
+                                {{ $giftTitle }}
+                            </span>
+                            @if(!$isPart)
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-200 text-amber-900 border border-amber-300">
+                                    Non-Participant Gift
                                 </span>
-                            </div>
-                            
-                            @if($student->recognition_gift_delivered)
-                                <div class="text-lg font-black font-sora mt-1 text-emerald-900">
-                                    Gift Delivered
-                                </div>
-                                <div class="text-xs font-mono text-emerald-800 mt-0.5">
-                                    Delivered on: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • Counter: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
-                                </div>
-                            @else
-                                <div class="text-lg font-black font-sora mt-1 text-amber-900">
-                                    Pending Collection
-                                </div>
-                                <div class="text-xs font-mono text-amber-800 mt-0.5">
-                                    Collect your QUAF Recognition Gift from the Presentation Counter.
-                                </div>
                             @endif
                         </div>
-
-                        @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'presentation_team'))
-                            <form method="POST" action="{{ route('presentation.toggle-gift', $student->id) }}" class="shrink-0">
-                                @csrf
-                                <button type="submit" 
-                                        class="px-4 py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm {{ $student->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white' }}">
-                                    {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered' }}
-                                </button>
-                            </form>
+                        
+                        @if($student->recognition_gift_delivered)
+                            <div class="text-lg font-black font-sora mt-1 text-emerald-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>സമ്മാനം കൈപ്പറ്റി (Gift Delivered)</span>
+                            </div>
+                            <div class="text-xs font-mono text-emerald-800 mt-0.5">
+                                Delivered on: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • Counter: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                            </div>
+                        @else
+                            <div class="text-lg font-black font-sora mt-1 text-amber-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>കൈപ്പറ്റിയിട്ടില്ല (Pending Collection)</span>
+                            </div>
+                            <div class="text-xs font-mono text-amber-800 mt-0.5">
+                                {{ $giftDesc }} പ്രസന്റേഷൻ കൗണ്ടറിൽ ക്യുആർ കോഡ് കാണിച്ച് സമ്മാനം കൈപ്പറ്റുക.
+                            </div>
                         @endif
                     </div>
+
+                    @if(auth()->check() && (auth()->user()->isAdmin() || in_array(auth()->user()->role, ['presentation_team', 'presentation', 'presentation_cashier', 'cashier'], true)))
+                        <form method="POST" action="{{ route('presentation.toggle-gift', $student->id) }}" class="shrink-0">
+                            @csrf
+                            <button type="submit" 
+                                    class="px-4 py-2.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm {{ $student->recognition_gift_delivered ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30' }}">
+                                {{ $student->recognition_gift_delivered ? 'Cancel / Revert Status' : 'Mark Gift Delivered (സമ്മാനം നൽകി)' }}
+                            </button>
+                        </form>
+                    @endif
                 </div>
-            @endif
+            </div>
 
             <!-- PURCHASE HISTORY & REDEEMED ITEMS -->
             <div class="space-y-4">

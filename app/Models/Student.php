@@ -293,6 +293,28 @@ class Student extends Model
     }
 
     /**
+     * Get the festival gift name applicable to this student:
+     * - Competition participants get 'QUAF Recognition Gift'
+     * - Non-participating students get 'QUAF Qalam' (ക്വാഫ് ഖലം)
+     */
+    public function getGiftNameAttribute(): string
+    {
+        return $this->isCompetitionParticipant()
+            ? 'QUAF Recognition Gift'
+            : 'QUAF Qalam (ക്വാഫ് ഖലം)';
+    }
+
+    /**
+     * Get Malayalam descriptive title for the festival gift.
+     */
+    public function getGiftMalayalamTitleAttribute(): string
+    {
+        return $this->isCompetitionParticipant()
+            ? 'ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് (QUAF Recognition Gift)'
+            : 'ക്വാഫ് ഖലം സമ്മാനം (QUAF Qalam Gift)';
+    }
+
+    /**
      * Calculate active individual programme participation count
      * considering student's own zone + Mix zone programmes.
      * Excludes cancelled, rejected, and withdrawn registrations.
