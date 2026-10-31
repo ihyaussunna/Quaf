@@ -151,7 +151,21 @@ class MediaResultController extends Controller
         );
 
         // Extract 1st, 2nd, and 3rd place winners (including ties or saved custom winners)
-        $winners = ! empty($customSettings['custom_winners'])
+        $hasCustomWinners = false;
+        if (! empty($customSettings['custom_winners']) && is_array($customSettings['custom_winners'])) {
+            foreach ($customSettings['custom_winners'] as $cwList) {
+                if (is_array($cwList)) {
+                    foreach ($cwList as $cw) {
+                        if (! empty($cw['name']) || ! empty($cw['unit'])) {
+                            $hasCustomWinners = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        $winners = $hasCustomWinners
             ? $customSettings['custom_winners']
             : $result->getPosterWinners();
 

@@ -181,6 +181,40 @@ class Result extends Model
             ];
         }
 
+        // 3. Fallbacks so that Studio poster NEVER renders empty podium
+        if (empty($winners['first'])) {
+            $winners['first'][] = [
+                'id' => null,
+                'name' => 'വിദ്യാർത്ഥിയുടെ പേര് (First Winner)',
+                'unit' => 'ഗ്രൂപ്പ് പേര് (Group Name)',
+                'chest' => 'QF0001',
+                'medal' => '/images/medals/first.png',
+                'rank' => '01',
+            ];
+        }
+
+        if (empty($winners['second'])) {
+            $winners['second'][] = [
+                'id' => null,
+                'name' => 'രണ്ടാം സ്ഥാനം (Second Winner)',
+                'unit' => 'ഗ്രൂപ്പ് പേര് (Group Name)',
+                'chest' => 'QF0002',
+                'medal' => '/images/medals/second.png',
+                'rank' => '02',
+            ];
+        }
+
+        if (empty($winners['third'])) {
+            $winners['third'][] = [
+                'id' => null,
+                'name' => 'മൂന്നാം സ്ഥാനം (Third Winner)',
+                'unit' => 'ഗ്രൂപ്പ് പേര് (Group Name)',
+                'chest' => 'QF0003',
+                'medal' => '/images/medals/third.png',
+                'rank' => '03',
+            ];
+        }
+
         return $winners;
     }
 }

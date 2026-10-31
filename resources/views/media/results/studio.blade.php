@@ -669,6 +669,74 @@
                             <input type="range" min="90" max="250" step="2" x-model.number="settings.row_gap" @input="render()" class="w-full accent-purple-600">
                         </div>
                     </div>
+
+                    <!-- Editable Winner Names and Groups -->
+                    <div class="space-y-3 pt-3 border-t border-slate-100">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800">വിജയികളുടെ പേരുകൾ (Edit Winner Names)</span>
+                            <span class="text-[10px] text-slate-500">പേരും ഗ്രൂപ്പും ഇവിടെ എഡിറ്റ് ചെയ്യാം</span>
+                        </div>
+
+                        <!-- 1st Place Winners -->
+                        <div class="space-y-1.5 p-3 rounded-xl bg-amber-50/70 border border-amber-200">
+                            <div class="flex items-center justify-between text-xs font-bold text-amber-900">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-mono text-[10px] font-black">01</span>
+                                    <span>ഒന്നാം സ്ഥാനം (1st Place)</span>
+                                </span>
+                                <button type="button" @click="addWinner('first')" class="text-[10px] text-amber-800 font-bold hover:underline">+ Add Tie</button>
+                            </div>
+                            <template x-for="(w, idx) in data.winners.first" :key="'w1_' + idx">
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" x-model="w.name" @input="render()" placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Student Name)" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white font-medium">
+                                        <button type="button" @click="removeWinner('first', idx)" x-show="data.winners.first.length > 1" class="text-red-500 p-1">&times;</button>
+                                    </div>
+                                    <input type="text" x-model="w.unit" @input="render()" placeholder="ഗ്രൂപ്പ് / യൂണിറ്റ് (Group Name)" class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600">
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- 2nd Place Winners -->
+                        <div class="space-y-1.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-800 font-mono text-[10px] font-black">02</span>
+                                    <span>രണ്ടാം സ്ഥാനം (2nd Place)</span>
+                                </span>
+                                <button type="button" @click="addWinner('second')" class="text-[10px] text-slate-600 font-bold hover:underline">+ Add Tie</button>
+                            </div>
+                            <template x-for="(w, idx) in data.winners.second" :key="'w2_' + idx">
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" x-model="w.name" @input="render()" placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Student Name)" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white font-medium">
+                                        <button type="button" @click="removeWinner('second', idx)" x-show="data.winners.second.length > 1" class="text-red-500 p-1">&times;</button>
+                                    </div>
+                                    <input type="text" x-model="w.unit" @input="render()" placeholder="ഗ്രൂപ്പ് / യൂണിറ്റ് (Group Name)" class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600">
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- 3rd Place Winners -->
+                        <div class="space-y-1.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-800 font-mono text-[10px] font-black">03</span>
+                                    <span>മൂന്നാം സ്ഥാനം (3rd Place)</span>
+                                </span>
+                                <button type="button" @click="addWinner('third')" class="text-[10px] text-slate-600 font-bold hover:underline">+ Add Tie</button>
+                            </div>
+                            <template x-for="(w, idx) in data.winners.third" :key="'w3_' + idx">
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" x-model="w.name" @input="render()" placeholder="വിദ്യാർത്ഥിയുടെ പേര് (Student Name)" class="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white font-medium">
+                                        <button type="button" @click="removeWinner('third', idx)" x-show="data.winners.third.length > 1" class="text-red-500 p-1">&times;</button>
+                                    </div>
+                                    <input type="text" x-model="w.unit" @input="render()" placeholder="ഗ്രൂപ്പ് / യൂണിറ്റ് (Group Name)" class="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600">
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -926,9 +994,24 @@ function posterStudio() {
             category: '{{ $result->program->zone?->name ?? $result->program->eligibility ?? "All Zones" }}',
             competition: '{{ $result->program->name }}',
             winners: {
-                first: @json(!empty($winners['first']) ? array_values($winners['first']) : [['name' => '', 'unit' => '']]),
-                second: @json(!empty($winners['second']) ? array_values($winners['second']) : [['name' => '', 'unit' => '']]),
-                third: @json(!empty($winners['third']) ? array_values($winners['third']) : [['name' => '', 'unit' => '']])
+                first: @json(!empty($winners['first']) ? array_values($winners['first']) : [['name' => 'വിദ്യാർത്ഥിയുടെ പേര് (Winner 1)', 'unit' => 'ഗ്രൂപ്പ് പേര്']]),
+                second: @json(!empty($winners['second']) ? array_values($winners['second']) : [['name' => 'രണ്ടാം സ്ഥാനം (Winner 2)', 'unit' => 'ഗ്രൂപ്പ് പേര്']]),
+                third: @json(!empty($winners['third']) ? array_values($winners['third']) : [['name' => 'മൂന്നാം സ്ഥാനം (Winner 3)', 'unit' => 'ഗ്രൂപ്പ് പേര്']])
+            }
+        },
+
+        addWinner(rank) {
+            if (!this.data.winners[rank]) {
+                this.data.winners[rank] = [];
+            }
+            this.data.winners[rank].push({ name: '', unit: '' });
+            this.$nextTick(() => { this.render(); });
+        },
+
+        removeWinner(rank, index) {
+            if (this.data.winners[rank] && this.data.winners[rank].length > 1) {
+                this.data.winners[rank].splice(index, 1);
+                this.$nextTick(() => { this.render(); });
             }
         },
 
@@ -1498,18 +1581,20 @@ function posterStudio() {
 
         drawPodiumWinners(ctx) {
             const flatWinners = [];
-            const addPlace = (arr, rank, label) => {
-                if (Array.isArray(arr)) {
+            const addPlace = (arr, rank, label, defaultName) => {
+                if (Array.isArray(arr) && arr.length > 0) {
                     arr.forEach(w => {
-                        if (w && (w.name || w.unit)) {
-                            flatWinners.push({ rank, rankLabel: label, name: w.name || '', unit: w.unit || '' });
-                        }
+                        const name = (w && w.name && w.name.trim()) ? w.name : defaultName;
+                        const unit = (w && w.unit && w.unit.trim()) ? w.unit : 'ഗ്രൂപ്പ് / ടീം';
+                        flatWinners.push({ rank, rankLabel: label, name, unit });
                     });
+                } else {
+                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'ഗ്രൂപ്പ് / ടീം' });
                 }
             };
-            addPlace(this.data.winners.first, '01', '1st Place');
-            addPlace(this.data.winners.second, '02', '2nd Place');
-            addPlace(this.data.winners.third, '03', '3rd Place');
+            addPlace(this.data.winners.first, '01', '1st Place', 'വിദ്യാർത്ഥിയുടെ പേര് (Winner 1)');
+            addPlace(this.data.winners.second, '02', '2nd Place', 'രണ്ടാം സ്ഥാനം (Winner 2)');
+            addPlace(this.data.winners.third, '03', '3rd Place', 'മൂന്നാം സ്ഥാനം (Winner 3)');
 
             const count = flatWinners.length;
             if (count === 0) return;
