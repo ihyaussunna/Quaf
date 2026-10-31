@@ -917,6 +917,13 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::get('/results/templates/{template}/customize', [MediaResultController::class, 'templateCustomize'])->name('results.templates.customize');
     Route::post('/results/templates/{template}/customize', [MediaResultController::class, 'templateSaveCustomization'])->name('results.templates.save-customization');
 
+    // Medals Library & Uploads
+    Route::get('/results/medals', [MediaResultController::class, 'medalsIndex'])->name('results.medals');
+    Route::post('/results/medals', [MediaResultController::class, 'medalStore'])->name('results.medals.store');
+    Route::post('/results/medals/ajax-upload', [MediaResultController::class, 'medalAjaxUpload'])->name('results.medals.ajax-upload');
+    Route::post('/results/medals/{medal}/toggle', [MediaResultController::class, 'medalToggleActive'])->name('results.medals.toggle');
+    Route::delete('/results/medals/{medal}', [MediaResultController::class, 'medalDestroy'])->name('results.medals.destroy');
+
     // Standalone Photopea Illustrator / PSD Editor
     Route::get('/photopea', [MediaResultController::class, 'photopeaEditor'])->name('photopea');
 

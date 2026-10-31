@@ -266,6 +266,19 @@
                         </div>
                     </div>
 
+                    <!-- Line Distance / Spacing for Multi-line Text -->
+                    <div class="space-y-1.5 p-2.5 rounded-xl bg-purple-50/60 border border-purple-200">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                            <span>Line Distance (വരികൾ തമ്മിലുള്ള അകലം)</span>
+                            <div class="flex items-center gap-1 font-mono">
+                                <button type="button" @click="selectedElement.lineHeight = Math.max(0.6, +(selectedElement.lineHeight - 0.1).toFixed(1)); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
+                                <span class="w-12 text-center text-purple-700 font-bold" x-text="selectedElement.lineHeight"></span>
+                                <button type="button" @click="selectedElement.lineHeight = Math.min(2.8, +(selectedElement.lineHeight + 0.1).toFixed(1)); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                            </div>
+                        </div>
+                        <input type="range" min="0.6" max="2.8" step="0.05" x-model.number="selectedElement.lineHeight" @input="render()" class="w-full accent-purple-600">
+                    </div>
+
                     <!-- Rotation & Opacity -->
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1">
@@ -631,13 +644,130 @@
                     </div>
 
                     <!-- Medal Style Selector -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-700">Medal Style (മെഡൽ തരം)</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button type="button" @click="settings.medal_type = 'numbers'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'numbers' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">01 02 03</button>
-                            <button type="button" @click="settings.medal_type = 'badges'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'badges' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">Badges</button>
-                            <button type="button" @click="settings.medal_type = 'text'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'text' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">1st 2nd</button>
-                            <button type="button" @click="settings.medal_type = 'none'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'none' ? 'bg-purple-900 text-white border-purple-900' : 'bg-white border-slate-200 text-slate-700'">None</button>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-700">Medal Style (മെഡൽ തരം)</label>
+                            <a href="{{ route('media.results.medals') }}" target="_blank" class="text-[10px] text-[#be1e2d] font-bold hover:underline flex items-center gap-1">
+                                <span>Medals Library</span> &rarr;
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1.5">
+                            <button type="button" @click="settings.medal_type = 'medals'; loadMedalImages(); render();" class="p-2 text-xs font-bold rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5" :class="settings.medal_type === 'medals' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+                                <span class="text-amber-300 text-sm leading-none">★</span>
+                                <span class="text-[10px]">Medals</span>
+                            </button>
+                            <button type="button" @click="settings.medal_type = 'numbers'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'numbers' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">01 02 03</button>
+                            <button type="button" @click="settings.medal_type = 'badges'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'badges' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">Badges</button>
+                            <button type="button" @click="settings.medal_type = 'text'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'text' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">1st 2nd</button>
+                            <button type="button" @click="settings.medal_type = 'none'; render();" class="p-2 text-xs font-bold rounded-xl border text-center transition" :class="settings.medal_type === 'none' ? 'bg-[#be1e2d] text-white border-[#be1e2d]' : 'bg-white border-slate-200 text-slate-700'">None</button>
+                        </div>
+
+                        <!-- Custom Medals Options Panel -->
+                        <div x-show="settings.medal_type === 'medals'" class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
+                            <div class="flex items-center justify-between text-xs font-bold text-amber-950">
+                                <span>Uploaded Medal Sets (ലഭ്യമായ മെഡലുകൾ)</span>
+                                <span class="text-[10px] text-amber-800">ക്ലിക്ക് ചെയ്ത് സെലക്ട് ചെയ്യാം</span>
+                            </div>
+
+                            <!-- Medal Sets Gallery -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <template x-for="pack in medalPacks" :key="pack.id">
+                                    <div @click="selectMedalPack(pack)"
+                                         class="p-2 rounded-xl border-2 cursor-pointer transition flex items-center gap-2 bg-white"
+                                         :class="settings.selected_medal_pack_id === pack.id ? 'border-[#be1e2d] ring-1 ring-[#be1e2d]' : 'border-slate-200 hover:border-slate-300'">
+                                        <div class="flex -space-x-1.5 overflow-hidden">
+                                            <img :src="pack.first_image" alt="1st" class="w-6 h-6 object-contain">
+                                            <img :src="pack.second_image" alt="2nd" class="w-6 h-6 object-contain">
+                                            <img :src="pack.third_image" alt="3rd" class="w-6 h-6 object-contain">
+                                        </div>
+                                        <div class="truncate text-[10px] font-bold text-slate-800" x-text="pack.name"></div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Direct Upload Custom Medals (1st, 2nd, 3rd) -->
+                            <div class="pt-2 border-t border-amber-200/80 space-y-2">
+                                <div class="text-[11px] font-bold text-amber-900">Upload Your Own Medals (സ്വന്തം മെഡൽ അപ്‌ലോഡ് ചെയ്യുക)</div>
+                                <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+                                    <!-- 1st Medal Pick -->
+                                    <label class="p-2 rounded-xl border border-dashed border-amber-300 bg-white hover:bg-amber-50 cursor-pointer flex flex-col items-center gap-1">
+                                        <img :src="settings.custom_medal_1" alt="1st" class="w-8 h-8 object-contain">
+                                        <span class="font-bold text-amber-800">1st Medal</span>
+                                        <span class="text-[9px] text-slate-400">Change</span>
+                                        <input type="file" accept="image/png,image/webp,image/svg+xml" class="hidden" @change="onLocalMedalPicked(1, $event)">
+                                    </label>
+                                    <!-- 2nd Medal Pick -->
+                                    <label class="p-2 rounded-xl border border-dashed border-slate-300 bg-white hover:bg-slate-50 cursor-pointer flex flex-col items-center gap-1">
+                                        <img :src="settings.custom_medal_2" alt="2nd" class="w-8 h-8 object-contain">
+                                        <span class="font-bold text-slate-700">2nd Medal</span>
+                                        <span class="text-[9px] text-slate-400">Change</span>
+                                        <input type="file" accept="image/png,image/webp,image/svg+xml" class="hidden" @change="onLocalMedalPicked(2, $event)">
+                                    </label>
+                                    <!-- 3rd Medal Pick -->
+                                    <label class="p-2 rounded-xl border border-dashed border-amber-400 bg-white hover:bg-amber-50 cursor-pointer flex flex-col items-center gap-1">
+                                        <img :src="settings.custom_medal_3" alt="3rd" class="w-8 h-8 object-contain">
+                                        <span class="font-bold text-amber-900">3rd Medal</span>
+                                        <span class="text-[9px] text-slate-400">Change</span>
+                                        <input type="file" accept="image/png,image/webp,image/svg+xml" class="hidden" @change="onLocalMedalPicked(3, $event)">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Medal Size & Spacing Steppers -->
+                            <div class="space-y-2 pt-2 border-t border-amber-200/80">
+                                <!-- Medal Size -->
+                                <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                    <span>Medal Size (മെഡൽ സൈസ്)</span>
+                                    <div class="flex items-center gap-1 font-mono">
+                                        <button type="button" @click="settings.medal_size = Math.max(16, settings.medal_size - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
+                                        <span class="w-12 text-center" x-text="settings.medal_size + 'px'"></span>
+                                        <button type="button" @click="settings.medal_size = Math.min(220, settings.medal_size + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                                    </div>
+                                </div>
+                                <input type="range" min="16" max="220" step="2" x-model.number="settings.medal_size" @input="render()" class="w-full accent-[#be1e2d]">
+
+                                <!-- Medal Alignment & Offsets -->
+                                <div class="space-y-1.5 pt-1">
+                                    <div class="text-[11px] font-bold text-slate-700">Medal Alignment (മെഡൽ സ്ഥാനം)</div>
+                                    <div class="grid grid-cols-2 gap-1.5">
+                                        <button type="button" @click="settings.medal_position = 'left'; render();"
+                                                class="py-1 px-2 text-[11px] font-bold rounded-lg border text-center transition"
+                                                :class="(settings.medal_position || 'left') === 'left' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+                                            Left (ഇടത് വശത്ത്)
+                                        </button>
+                                        <button type="button" @click="settings.medal_position = 'top'; render();"
+                                                class="py-1 px-2 text-[11px] font-bold rounded-lg border text-center transition"
+                                                :class="settings.medal_position === 'top' ? 'bg-[#be1e2d] text-white border-[#be1e2d] shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+                                            Top (മുകളിൽ)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Medal Gap & X/Y Offsets -->
+                                <div class="grid grid-cols-3 gap-2 pt-1 text-[11px] font-bold text-slate-700">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span>Text Gap</span>
+                                            <span class="font-mono text-[10px]" x-text="settings.medal_gap + 'px'"></span>
+                                        </div>
+                                        <input type="range" min="2" max="60" step="1" x-model.number="settings.medal_gap" @input="render()" class="w-full accent-[#be1e2d]">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span>X-Offset</span>
+                                            <span class="font-mono text-[10px]" x-text="settings.medal_x_offset + 'px'"></span>
+                                        </div>
+                                        <input type="range" min="-60" max="80" step="1" x-model.number="settings.medal_x_offset" @input="render()" class="w-full accent-[#be1e2d]">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span>Y-Offset</span>
+                                            <span class="font-mono text-[10px]" x-text="settings.medal_y_offset + 'px'"></span>
+                                        </div>
+                                        <input type="range" min="-40" max="60" step="1" x-model.number="settings.medal_y_offset" @input="render()" class="w-full accent-[#be1e2d]">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -650,19 +780,50 @@
                         <input type="checkbox" x-model="settings.winner_name_2lines" @change="render()" class="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500">
                     </div>
 
-                    <!-- Line Spacing Sliders -->
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="space-y-1">
-                            <span class="text-[10px] font-bold text-slate-600">Leading</span>
-                            <input type="range" min="18" max="70" step="1" x-model.number="settings.winner_name_line_height" @input="render()" class="w-full accent-purple-600">
+                    <!-- Line Spacing & Distance Controls (വരികൾ തമ്മിലുള്ള അകലം) -->
+                    <div class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center justify-between">
+                            <span>Line Spacing & Distance (വരികൾ തമ്മിലുള്ള അകലം)</span>
+                            <span class="text-[10px] text-purple-700 font-bold">അകലം കൂട്ടാനും കുറയ്ക്കാനും</span>
                         </div>
-                        <div class="space-y-1">
-                            <span class="text-[10px] font-bold text-slate-600">Group Gap</span>
-                            <input type="range" min="2" max="30" step="1" x-model.number="settings.winner_unit_gap" @input="render()" class="w-full accent-purple-600">
+
+                        <!-- 1. Winner Name 2-line Distance -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Name 2-Line Distance (പേരുകളിലെ വരികൾ)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.winner_name_line_height = Math.max(12, settings.winner_name_line_height - 3); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <span class="w-12 text-center" x-text="settings.winner_name_line_height + 'px'"></span>
+                                    <button type="button" @click="settings.winner_name_line_height = Math.min(90, settings.winner_name_line_height + 3); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="12" max="90" step="1" x-model.number="settings.winner_name_line_height" @input="render()" class="w-full accent-[#be1e2d]">
                         </div>
-                        <div class="space-y-1">
-                            <span class="text-[10px] font-bold text-slate-600">Row Gap</span>
-                            <input type="range" min="90" max="250" step="2" x-model.number="settings.row_gap" @input="render()" class="w-full accent-purple-600">
+
+                        <!-- 2. Distance from Name to Group -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Name to Group Gap (പേരും ഗ്രൂപ്പും തമ്മിലുള്ള അകലം)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.winner_unit_gap = Math.max(0, settings.winner_unit_gap - 2); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <span class="w-12 text-center" x-text="settings.winner_unit_gap + 'px'"></span>
+                                    <button type="button" @click="settings.winner_unit_gap = Math.min(60, settings.winner_unit_gap + 2); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="60" step="1" x-model.number="settings.winner_unit_gap" @input="render()" class="w-full accent-[#be1e2d]">
+                        </div>
+
+                        <!-- 3. Row Gap Between 1st, 2nd, 3rd -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Winner Row Gap (സ്ഥാനങ്ങൾ തമ്മിലുള്ള അകലം)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.row_gap = Math.max(60, settings.row_gap - 8); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <span class="w-12 text-center" x-text="settings.row_gap + 'px'"></span>
+                                    <button type="button" @click="settings.row_gap = Math.min(350, settings.row_gap + 8); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="60" max="350" step="2" x-model.number="settings.row_gap" @input="render()" class="w-full accent-[#be1e2d]">
                         </div>
                     </div>
 
@@ -758,12 +919,40 @@
                     </div>
 
                     <!-- Program Name -->
-                    <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                         <div class="flex items-center justify-between text-xs font-bold text-slate-800">
                             <span>Program Name Size</span>
-                            <span class="font-mono text-purple-700" x-text="settings.competition_size + 'px'"></span>
+                            <div class="flex items-center gap-1 font-mono">
+                                <button type="button" @click="settings.competition_size = Math.max(20, settings.competition_size - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">-</button>
+                                <span class="w-12 text-center" x-text="settings.competition_size + 'px'"></span>
+                                <button type="button" @click="settings.competition_size = Math.min(180, settings.competition_size + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold hover:bg-slate-100 flex items-center justify-center">+</button>
+                            </div>
                         </div>
-                        <input type="range" min="40" max="160" step="2" x-model.number="settings.competition_size" @input="render()" class="w-full accent-purple-600">
+                        <input type="range" min="30" max="180" step="2" x-model.number="settings.competition_size" @input="render()" class="w-full accent-purple-600">
+
+                        <!-- Program Line Distance / Line Spacing -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Line Distance (വരികൾ തമ്മിലുള്ള അകലം)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.competition_line_height = Math.max(15, settings.competition_line_height - 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
+                                    <span class="w-12 text-center text-purple-700" x-text="settings.competition_line_height + 'px'"></span>
+                                    <button type="button" @click="settings.competition_line_height = Math.min(160, settings.competition_line_height + 4); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="15" max="160" step="2" x-model.number="settings.competition_line_height" @input="render()" class="w-full accent-purple-600">
+                        </div>
+
+                        <!-- Max Width -->
+                        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Max Width (പരമാവധി വീതി)</span>
+                                <span class="font-mono text-purple-700" x-text="settings.competition_max_width + 'px'"></span>
+                            </div>
+                            <input type="range" min="200" max="950" step="10" x-model.number="settings.competition_max_width" @input="render()" class="w-full accent-purple-600">
+                        </div>
+
+                        <!-- Rotation -->
                         <div class="flex items-center justify-between text-xs pt-1">
                             <span>Rotation</span>
                             <span class="font-mono" x-text="settings.competition_rotation + '°'"></span>
@@ -900,6 +1089,15 @@ function posterStudio() {
         elementStartX: 0,
         elementStartY: 0,
 
+        // Transform Gizmo state
+        isResizing: false,
+        activeHandle: null,
+        elementStartW: 0,
+        elementStartH: 0,
+        elementStartSize: 0,
+        elementStartScale: 1.0,
+        elementStartRotation: 0,
+
         savingDefault: false,
         publishing: false,
         statusMsg: '',
@@ -907,6 +1105,11 @@ function posterStudio() {
 
         templatesMap: @json($templatesMap ?? []),
         templateImageObj: null,
+
+        // Medal Library
+        medalPacks: @json($medalPacks ?? []),
+        medalImageObjs: { 1: null, 2: null, 3: null },
+        uploadingMedal: false,
 
         // Cyan Guidelines
         guidelines: {
@@ -945,8 +1148,16 @@ function posterStudio() {
             row_gap: {{ (float) ($currentSettings['row_gap'] ?? 178) }},
 
             // Medal System
-            medal_type: 'numbers', // 'numbers', 'badges', 'text', 'none'
-            medal_size: 26,
+            medal_type: '{{ $currentSettings["medal_type"] ?? "medals" }}', // 'medals', 'numbers', 'badges', 'text', 'none'
+            medal_position: '{{ $currentSettings["medal_position"] ?? "left" }}', // 'left', 'top'
+            selected_medal_pack_id: {{ $currentSettings['selected_medal_pack_id'] ?? (optional($medalPacks->first())->id ?? 1) }},
+            medal_size: {{ (float) ($currentSettings['medal_size'] ?? 52) }},
+            medal_x_offset: {{ (float) ($currentSettings['medal_x_offset'] ?? 0) }},
+            medal_y_offset: {{ (float) ($currentSettings['medal_y_offset'] ?? 0) }},
+            medal_gap: {{ (float) ($currentSettings['medal_gap'] ?? 16) }},
+            custom_medal_1: '{{ $currentSettings["custom_medal_1"] ?? (optional($medalPacks->first())->first_image ? asset($medalPacks->first()->first_image) : asset("/images/medals/first.png")) }}',
+            custom_medal_2: '{{ $currentSettings["custom_medal_2"] ?? (optional($medalPacks->first())->second_image ? asset($medalPacks->first()->second_image) : asset("/images/medals/second.png")) }}',
+            custom_medal_3: '{{ $currentSettings["custom_medal_3"] ?? (optional($medalPacks->first())->third_image ? asset($medalPacks->first()->third_image) : asset("/images/medals/third.png")) }}',
 
             result_x: {{ (float) ($currentSettings['result_x'] ?? 740) }},
             result_y: {{ (float) ($currentSettings['result_y'] ?? 779) }},
@@ -1071,6 +1282,55 @@ function posterStudio() {
             }
 
             this.loadTemplateImage(this.settings.template_image);
+            this.loadMedalImages();
+
+            // Keyboard Shortcuts for Nudging, Sizing, and Line Spacing
+            window.addEventListener('keydown', (e) => {
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+                if (!this.selectedId) return;
+
+                const step = e.shiftKey ? 10 : 1;
+                if (e.key === 'ArrowLeft') { e.preventDefault(); this.nudgeSelected(-step, 0); }
+                else if (e.key === 'ArrowRight') { e.preventDefault(); this.nudgeSelected(step, 0); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); this.nudgeSelected(0, -step); }
+                else if (e.key === 'ArrowDown') { e.preventDefault(); this.nudgeSelected(0, step); }
+                else if (e.key === '+' || e.key === '=') {
+                    e.preventDefault();
+                    if (this.selectedId === 'winners') this.settings.winners_scale = Math.min(3.0, +(this.settings.winners_scale + 0.05).toFixed(2));
+                    else if (this.selectedId === 'competition') this.settings.competition_size += 2;
+                    else if (this.selectedType === 'custom' && this.selectedElement) {
+                        if (this.selectedElement.type === 'text') this.selectedElement.size += 2;
+                        else { this.selectedElement.width += 5; this.selectedElement.height += 5; }
+                    }
+                    this.render();
+                } else if (e.key === '-' || e.key === '_') {
+                    e.preventDefault();
+                    if (this.selectedId === 'winners') this.settings.winners_scale = Math.max(0.3, +(this.settings.winners_scale - 0.05).toFixed(2));
+                    else if (this.selectedId === 'competition') this.settings.competition_size = Math.max(12, this.settings.competition_size - 2);
+                    else if (this.selectedType === 'custom' && this.selectedElement) {
+                        if (this.selectedElement.type === 'text') this.selectedElement.size = Math.max(8, this.selectedElement.size - 2);
+                        else { this.selectedElement.width = Math.max(10, this.selectedElement.width - 5); this.selectedElement.height = Math.max(10, this.selectedElement.height - 5); }
+                    }
+                    this.render();
+                } else if (e.key === '[' || e.key === '{') {
+                    e.preventDefault();
+                    if (this.selectedId === 'winners') this.settings.winner_name_line_height = Math.max(12, this.settings.winner_name_line_height - 2);
+                    else if (this.selectedId === 'competition') this.settings.competition_line_height = Math.max(15, this.settings.competition_line_height - 4);
+                    else if (this.selectedType === 'custom' && this.selectedElement) this.selectedElement.lineHeight = Math.max(0.6, +(this.selectedElement.lineHeight - 0.1).toFixed(1));
+                    this.render();
+                } else if (e.key === ']' || e.key === '}') {
+                    e.preventDefault();
+                    if (this.selectedId === 'winners') this.settings.winner_name_line_height = Math.min(90, this.settings.winner_name_line_height + 2);
+                    else if (this.selectedId === 'competition') this.settings.competition_line_height = Math.min(160, this.settings.competition_line_height + 4);
+                    else if (this.selectedType === 'custom' && this.selectedElement) this.selectedElement.lineHeight = Math.min(2.8, +(this.selectedElement.lineHeight + 0.1).toFixed(1));
+                    this.render();
+                } else if (e.key === 'Delete' || e.key === 'Backspace') {
+                    if (this.selectedType === 'custom') {
+                        e.preventDefault();
+                        this.deleteSelected();
+                    }
+                }
+            });
 
             if (document.fonts) {
                 Promise.all([
@@ -1094,6 +1354,51 @@ function posterStudio() {
             this.templateImageObj.onload = () => {
                 this.render();
             };
+        },
+
+        loadMedalImages() {
+            const m1 = this.settings.custom_medal_1 || '/images/medals/first.png';
+            const m2 = this.settings.custom_medal_2 || '/images/medals/second.png';
+            const m3 = this.settings.custom_medal_3 || '/images/medals/third.png';
+
+            const img1 = new Image();
+            img1.crossOrigin = 'anonymous';
+            img1.onload = () => { this.medalImageObjs[1] = img1; this.render(); };
+            img1.src = m1;
+
+            const img2 = new Image();
+            img2.crossOrigin = 'anonymous';
+            img2.onload = () => { this.medalImageObjs[2] = img2; this.render(); };
+            img2.src = m2;
+
+            const img3 = new Image();
+            img3.crossOrigin = 'anonymous';
+            img3.onload = () => { this.medalImageObjs[3] = img3; this.render(); };
+            img3.src = m3;
+        },
+
+        selectMedalPack(pack) {
+            this.settings.selected_medal_pack_id = pack.id;
+            this.settings.custom_medal_1 = pack.first_image;
+            this.settings.custom_medal_2 = pack.second_image;
+            this.settings.custom_medal_3 = pack.third_image;
+            this.settings.medal_type = 'medals';
+            this.loadMedalImages();
+        },
+
+        onLocalMedalPicked(rank, e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (loadEvent) => {
+                const dataUrl = loadEvent.target.result;
+                if (rank === 1) this.settings.custom_medal_1 = dataUrl;
+                if (rank === 2) this.settings.custom_medal_2 = dataUrl;
+                if (rank === 3) this.settings.custom_medal_3 = dataUrl;
+                this.settings.medal_type = 'medals';
+                this.loadMedalImages();
+            };
+            reader.readAsDataURL(file);
         },
 
         selectTemplate(id, src, layoutMode) {
@@ -1272,7 +1577,117 @@ function posterStudio() {
             };
         },
 
-        // Hit Detection for Interactive Canvas Dragging
+        // Compute Bounding Box of Selected Element for Transform Handles
+        getSelectionBox() {
+            if (!this.selectedId) return null;
+
+            if (this.selectedType === 'custom' && this.selectedElement) {
+                const el = this.selectedElement;
+                let w = el.width;
+                let h = el.height;
+                if (!w || !h) {
+                    if (el.type === 'text') {
+                        const lines = (el.text || '').split('\n');
+                        const maxLineLen = Math.max(...lines.map(l => l.length), 1);
+                        const lineH = Math.round((el.size || 48) * (el.lineHeight || 1.2));
+                        w = Math.max(60, Math.round(maxLineLen * (el.size || 48) * 0.58));
+                        h = Math.max(30, lines.length * lineH);
+                    } else {
+                        w = 120;
+                        h = 50;
+                    }
+                }
+                return {
+                    x: el.x,
+                    y: el.y,
+                    w: Math.max(20, w),
+                    h: Math.max(20, h),
+                    rotation: el.rotation || 0,
+                    type: 'custom',
+                    el: el
+                };
+            } else if (this.selectedType === 'core') {
+                if (this.selectedId === 'result_no') {
+                    const size = this.settings.result_size || 480;
+                    return {
+                        x: this.settings.result_x,
+                        y: this.settings.result_y,
+                        w: Math.round(size * 0.52),
+                        h: Math.round(size * 0.65),
+                        rotation: this.settings.result_rotation || 0,
+                        type: 'core',
+                        id: 'result_no'
+                    };
+                } else if (this.selectedId === 'competition') {
+                    const maxW = this.settings.competition_max_width || 440;
+                    const lineH = this.settings.competition_line_height || 94;
+                    return {
+                        x: this.settings.competition_x,
+                        y: this.settings.competition_y,
+                        w: maxW,
+                        h: Math.round(lineH * 2.2),
+                        rotation: this.settings.competition_rotation || 0,
+                        type: 'core',
+                        id: 'competition'
+                    };
+                } else if (this.selectedId === 'category') {
+                    return {
+                        x: this.settings.category_x - 120,
+                        y: this.settings.category_y - 35,
+                        w: 240,
+                        h: 70,
+                        rotation: this.settings.category_rotation || 0,
+                        type: 'core',
+                        id: 'category'
+                    };
+                } else if (this.selectedId === 'winners') {
+                    const scale = this.settings.winners_scale || 1.0;
+                    return {
+                        x: this.settings.block_left,
+                        y: this.settings.first_top,
+                        w: Math.round(440 * scale),
+                        h: Math.round(520 * scale),
+                        rotation: 0,
+                        type: 'core',
+                        id: 'winners'
+                    };
+                }
+            }
+            return null;
+        },
+
+        // Transform Handles (8 Resize Bounding Handles + 1 Rotation Knob)
+        getHandles(box) {
+            if (!box) return {};
+            const { x, y, w, h } = box;
+            return {
+                nw: { x: x, y: y, cursor: 'nwse-resize' },
+                n:  { x: x + w / 2, y: y, cursor: 'ns-resize' },
+                ne: { x: x + w, y: y, cursor: 'nesw-resize' },
+                e:  { x: x + w, y: y + h / 2, cursor: 'ew-resize' },
+                se: { x: x + w, y: y + h, cursor: 'nwse-resize' },
+                s:  { x: x + w / 2, y: y + h, cursor: 'ns-resize' },
+                sw: { x: x, y: y + h, cursor: 'nesw-resize' },
+                w:  { x: x, y: y + h / 2, cursor: 'ew-resize' },
+                rot: { x: x + w / 2, y: y - 28, cursor: 'grab' }
+            };
+        },
+
+        // Check if cursor hits any handle of the selected element
+        getHandleAt(mouseX, mouseY) {
+            const box = this.getSelectionBox();
+            if (!box) return null;
+            const handles = this.getHandles(box);
+            const hitRadius = 16;
+            for (const [name, pos] of Object.entries(handles)) {
+                if (Math.hypot(mouseX - pos.x, mouseY - pos.y) <= hitRadius) {
+                    return { name, pos, cursor: pos.cursor };
+                }
+            }
+            return null;
+        },
+
+        // Hit Detection for Interactive Canvas Dragging & Selection
         hitTest(x, y) {
             // Check custom elements in reverse order (topmost first)
             for (let i = this.customElements.length - 1; i >= 0; i--) {
@@ -1280,7 +1695,7 @@ function posterStudio() {
                 if (!el.visible) continue;
                 const w = el.width || (el.size ? (el.text ? el.text.length * el.size * 0.55 : el.size) : 100);
                 const h = el.height || (el.size || 50);
-                if (x >= el.x - 25 && x <= el.x + w + 25 && y >= el.y - 25 && y <= el.y + h + 25) {
+                if (x >= el.x - 20 && x <= el.x + w + 20 && y >= el.y - 20 && y <= el.y + h + 20) {
                     return { type: 'custom', id: el.id, el: el };
                 }
             }
@@ -1289,7 +1704,7 @@ function posterStudio() {
             if (this.settings.show_result_no) {
                 const rx = this.settings.result_x;
                 const ry = this.settings.result_y;
-                if (x >= rx - 100 && x <= rx + 300 && y >= ry - 50 && y <= ry + 250) {
+                if (x >= rx - 40 && x <= rx + 320 && y >= ry - 40 && y <= ry + 300) {
                     return { type: 'core', id: 'result_no' };
                 }
             }
@@ -1298,7 +1713,7 @@ function posterStudio() {
             if (this.settings.show_competition) {
                 const cx = this.settings.competition_x;
                 const cy = this.settings.competition_y;
-                if (x >= cx - 20 && x <= cx + (this.settings.competition_max_width || 440) && y >= cy - 20 && y <= cy + 200) {
+                if (x >= cx - 20 && x <= cx + (this.settings.competition_max_width || 440) + 20 && y >= cy - 20 && y <= cy + 220) {
                     return { type: 'core', id: 'competition' };
                 }
             }
@@ -1307,7 +1722,7 @@ function posterStudio() {
             if (this.settings.show_category) {
                 const zx = this.settings.category_x;
                 const zy = this.settings.category_y;
-                if (x >= zx - 120 && x <= zx + 120 && y >= zy - 35 && y <= zy + 35) {
+                if (x >= zx - 140 && x <= zx + 140 && y >= zy - 40 && y <= zy + 40) {
                     return { type: 'core', id: 'category' };
                 }
             }
@@ -1316,7 +1731,8 @@ function posterStudio() {
             if (this.settings.show_winners) {
                 const wx = this.settings.block_left;
                 const wy = this.settings.first_top;
-                if (x >= wx - 20 && x <= wx + 380 && y >= wy - 20 && y <= wy + 550) {
+                const scale = this.settings.winners_scale || 1.0;
+                if (x >= wx - 20 && x <= wx + Math.round(440 * scale) + 20 && y >= wy - 20 && y <= wy + Math.round(540 * scale) + 20) {
                     return { type: 'core', id: 'winners' };
                 }
             }
@@ -1326,6 +1742,43 @@ function posterStudio() {
 
         onMouseDown(e) {
             const coords = this.getCanvasCoords(e);
+
+            // 1. Check if clicking on a transform handle first (resizing / rotating)
+            const handleHit = this.getHandleAt(coords.x, coords.y);
+            if (handleHit) {
+                this.isResizing = true;
+                this.activeHandle = handleHit.name;
+                this.dragStartX = coords.x;
+                this.dragStartY = coords.y;
+
+                const box = this.getSelectionBox();
+                this.elementStartX = box.x;
+                this.elementStartY = box.y;
+                this.elementStartW = box.w;
+                this.elementStartH = box.h;
+
+                if (this.selectedType === 'custom' && this.selectedElement) {
+                    this.elementStartSize = this.selectedElement.size || 48;
+                    this.elementStartRotation = this.selectedElement.rotation || 0;
+                } else if (this.selectedType === 'core') {
+                    if (this.selectedId === 'winners') {
+                        this.elementStartScale = this.settings.winners_scale || 1.0;
+                    } else if (this.selectedId === 'competition') {
+                        this.elementStartSize = this.settings.competition_size || 100;
+                        this.elementStartW = this.settings.competition_max_width || 440;
+                        this.elementStartRotation = this.settings.competition_rotation || 0;
+                    } else if (this.selectedId === 'result_no') {
+                        this.elementStartSize = this.settings.result_size || 480;
+                        this.elementStartRotation = this.settings.result_rotation || 0;
+                    } else if (this.selectedId === 'category') {
+                        this.elementStartSize = this.settings.category_size || 45;
+                        this.elementStartRotation = this.settings.category_rotation || 0;
+                    }
+                }
+                return;
+            }
+
+            // 2. Normal hit testing for element dragging or selection
             const hit = this.hitTest(coords.x, coords.y);
             if (hit) {
                 this.isDragging = true;
@@ -1353,6 +1806,7 @@ function posterStudio() {
                         this.elementStartY = this.settings.first_top;
                     }
                 }
+                this.render();
             } else {
                 this.selectedId = null;
                 this.selectedType = null;
@@ -1361,35 +1815,133 @@ function posterStudio() {
         },
 
         onMouseMove(e) {
-            if (!this.isDragging) return;
+            const canvas = document.getElementById('posterCanvas');
             const coords = this.getCanvasCoords(e);
+
+            // Handle cursor styling when hovering
+            if (!this.isDragging && !this.isResizing) {
+                const handleHit = this.getHandleAt(coords.x, coords.y);
+                if (handleHit) {
+                    if (canvas) canvas.style.cursor = handleHit.cursor;
+                } else if (this.hitTest(coords.x, coords.y)) {
+                    if (canvas) canvas.style.cursor = 'move';
+                } else {
+                    if (canvas) canvas.style.cursor = 'default';
+                }
+                return;
+            }
+
             const dx = coords.x - this.dragStartX;
             const dy = coords.y - this.dragStartY;
 
-            if (this.selectedType === 'custom' && this.selectedElement) {
-                this.selectedElement.x = Math.round(this.elementStartX + dx);
-                this.selectedElement.y = Math.round(this.elementStartY + dy);
-                this.render();
-            } else if (this.selectedType === 'core') {
-                if (this.selectedId === 'result_no') {
-                    this.settings.result_x = Math.round(this.elementStartX + dx);
-                    this.settings.result_y = Math.round(this.elementStartY + dy);
-                } else if (this.selectedId === 'competition') {
-                    this.settings.competition_x = Math.round(this.elementStartX + dx);
-                    this.settings.competition_y = Math.round(this.elementStartY + dy);
-                } else if (this.selectedId === 'category') {
-                    this.settings.category_x = Math.round(this.elementStartX + dx);
-                    this.settings.category_y = Math.round(this.elementStartY + dy);
-                } else if (this.selectedId === 'winners') {
-                    this.settings.block_left = Math.round(this.elementStartX + dx);
-                    this.settings.first_top = Math.round(this.elementStartY + dy);
+            // Handle Resizing / Scaling / Rotating via Handles
+            if (this.isResizing) {
+                if (this.activeHandle === 'rot') {
+                    const cx = this.elementStartX + this.elementStartW / 2;
+                    const cy = this.elementStartY + this.elementStartH / 2;
+                    let angle = Math.round(Math.atan2(coords.y - cy, coords.x - cx) * (180 / Math.PI) + 90);
+                    if (angle < 0) angle += 360;
+                    [0, 90, 180, 270, 360].forEach(snap => {
+                        if (Math.abs(angle - snap) < 5) angle = (snap === 360 ? 0 : snap);
+                    });
+                    if (this.selectedType === 'custom' && this.selectedElement) {
+                        this.selectedElement.rotation = angle;
+                    } else if (this.selectedType === 'core') {
+                        if (this.selectedId === 'competition') this.settings.competition_rotation = angle;
+                        else if (this.selectedId === 'result_no') this.settings.result_rotation = angle;
+                        else if (this.selectedId === 'category') this.settings.category_rotation = angle;
+                    }
+                    this.render();
+                    return;
                 }
-                this.render();
+
+                // Resizing logic depending on active handle
+                if (this.selectedType === 'custom' && this.selectedElement) {
+                    const el = this.selectedElement;
+                    if (el.type === 'text') {
+                        const distDelta = (this.activeHandle.includes('e') || this.activeHandle.includes('s')) ? (dx + dy) : (-dx - dy);
+                        const scaleFactor = 1 + (distDelta / 240);
+                        el.size = Math.max(10, Math.min(320, Math.round(this.elementStartSize * scaleFactor)));
+                    } else {
+                        if (this.activeHandle.includes('e')) {
+                            el.width = Math.max(20, Math.round(this.elementStartW + dx));
+                        }
+                        if (this.activeHandle.includes('s')) {
+                            el.height = Math.max(15, Math.round(this.elementStartH + dy));
+                        }
+                        if (this.activeHandle.includes('w')) {
+                            const newW = Math.max(20, Math.round(this.elementStartW - dx));
+                            el.x = Math.round(this.elementStartX + (this.elementStartW - newW));
+                            el.width = newW;
+                        }
+                        if (this.activeHandle.includes('n')) {
+                            const newH = Math.max(15, Math.round(this.elementStartH - dy));
+                            el.y = Math.round(this.elementStartY + (this.elementStartH - newH));
+                            el.height = newH;
+                        }
+                    }
+                    this.render();
+                } else if (this.selectedType === 'core') {
+                    if (this.selectedId === 'winners') {
+                        const distDelta = (this.activeHandle.includes('e') || this.activeHandle.includes('s')) ? (dx + dy) : (-dx - dy);
+                        const scaleFactor = 1 + (distDelta / 300);
+                        this.settings.winners_scale = Math.max(0.35, Math.min(2.5, +(this.elementStartScale * scaleFactor).toFixed(2)));
+                        this.render();
+                    } else if (this.selectedId === 'competition') {
+                        if (this.activeHandle.includes('e') || this.activeHandle.includes('w')) {
+                            this.settings.competition_max_width = Math.max(180, Math.min(920, Math.round(this.elementStartW + dx)));
+                        }
+                        if (this.activeHandle.includes('s') || this.activeHandle.includes('se') || this.activeHandle.includes('sw')) {
+                            const scaleFactor = 1 + (dy / 200);
+                            this.settings.competition_size = Math.max(18, Math.min(220, Math.round(this.elementStartSize * scaleFactor)));
+                        }
+                        this.render();
+                    } else if (this.selectedId === 'result_no') {
+                        const distDelta = (this.activeHandle.includes('e') || this.activeHandle.includes('s')) ? (dx + dy) : (-dx - dy);
+                        const scaleFactor = 1 + (distDelta / 300);
+                        this.settings.result_size = Math.max(60, Math.min(800, Math.round(this.elementStartSize * scaleFactor)));
+                        this.render();
+                    } else if (this.selectedId === 'category') {
+                        const distDelta = (this.activeHandle.includes('e') || this.activeHandle.includes('s')) ? (dx + dy) : (-dx - dy);
+                        const scaleFactor = 1 + (distDelta / 200);
+                        this.settings.category_size = Math.max(16, Math.min(120, Math.round(this.elementStartSize * scaleFactor)));
+                        this.render();
+                    }
+                }
+                return;
+            }
+
+            // Normal Position Dragging
+            if (this.isDragging) {
+                if (this.selectedType === 'custom' && this.selectedElement) {
+                    this.selectedElement.x = Math.round(this.elementStartX + dx);
+                    this.selectedElement.y = Math.round(this.elementStartY + dy);
+                    this.render();
+                } else if (this.selectedType === 'core') {
+                    if (this.selectedId === 'result_no') {
+                        this.settings.result_x = Math.round(this.elementStartX + dx);
+                        this.settings.result_y = Math.round(this.elementStartY + dy);
+                    } else if (this.selectedId === 'competition') {
+                        this.settings.competition_x = Math.round(this.elementStartX + dx);
+                        this.settings.competition_y = Math.round(this.elementStartY + dy);
+                    } else if (this.selectedId === 'category') {
+                        this.settings.category_x = Math.round(this.elementStartX + dx);
+                        this.settings.category_y = Math.round(this.elementStartY + dy);
+                    } else if (this.selectedId === 'winners') {
+                        this.settings.block_left = Math.round(this.elementStartX + dx);
+                        this.settings.first_top = Math.round(this.elementStartY + dy);
+                    }
+                    this.render();
+                }
             }
         },
 
         onMouseUp() {
             this.isDragging = false;
+            this.isResizing = false;
+            this.activeHandle = null;
+            const canvas = document.getElementById('posterCanvas');
+            if (canvas) canvas.style.cursor = 'default';
         },
 
         onTouchStart(e) {
@@ -1607,10 +2159,17 @@ function posterStudio() {
             const winFont = this.settings.winner_font || 'Rockwell Std';
             const winSize = Math.max(16, Math.round((this.settings.winner_name_size || 34) * finalScale));
             const unitSize = Math.max(12, Math.round((this.settings.winner_unit_size || 26) * finalScale));
-            const nameLineH = Math.max(16, Math.round((this.settings.winner_name_line_height || 38) * finalScale));
-            const unitGap = Math.max(4, Math.round((this.settings.winner_unit_gap || 10) * finalScale));
+            const nameLineH = Math.max(14, Math.round((this.settings.winner_name_line_height || 38) * finalScale));
+            const unitGap = Math.max(2, Math.round((this.settings.winner_unit_gap || 10) * finalScale));
             const blockLeft = this.settings.block_left || 205;
             const dividerWidth = Math.round(280 * Math.min(1.0, finalScale * 1.1));
+
+            const medalType = this.settings.medal_type || 'medals';
+            const medalPos = this.settings.medal_position || 'left';
+            const medSize = Math.max(20, Math.round((this.settings.medal_size || 52) * finalScale));
+            const medXOffset = Math.round((this.settings.medal_x_offset || 0) * finalScale);
+            const medYOffset = Math.round((this.settings.medal_y_offset || 0) * finalScale);
+            const medGap = Math.max(6, Math.round((this.settings.medal_gap || 16) * finalScale));
 
             let currY = startY;
             flatWinners.forEach(w => {
@@ -1618,13 +2177,56 @@ function posterStudio() {
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
 
-                // Medal / Rank
-                const medalType = this.settings.medal_type || 'numbers';
-                if (medalType === 'numbers') {
+                const rankIndex = (w.rank === '01') ? 1 : ((w.rank === '02') ? 2 : 3);
+                let textX = blockLeft;
+                let nameY = currY;
+
+                // 1. Draw Medals / Numbers / Badges
+                if (medalType === 'medals') {
+                    const medImg = this.medalImageObjs ? this.medalImageObjs[rankIndex] : null;
+                    const medX = blockLeft + medXOffset;
+                    const medY = currY + medYOffset;
+
+                    if (medImg && medImg.complete && medImg.naturalWidth > 0) {
+                        ctx.drawImage(medImg, medX, medY, medSize, medSize);
+                    } else {
+                        // High-contrast clean vector badge fallback while loading
+                        const grad = ctx.createLinearGradient(medX, medY, medX + medSize, medY + medSize);
+                        if (rankIndex === 1) { grad.addColorStop(0, '#fef08a'); grad.addColorStop(1, '#eab308'); }
+                        else if (rankIndex === 2) { grad.addColorStop(0, '#f8fafc'); grad.addColorStop(1, '#94a3b8'); }
+                        else { grad.addColorStop(0, '#fed7aa'); grad.addColorStop(1, '#c2410c'); }
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(medX + medSize / 2, medY + medSize / 2, medSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                        ctx.fillStyle = '#0f172a';
+                        ctx.font = `bold ${Math.round(medSize * 0.42)}px "Rockwell Std", sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(w.rank, medX + medSize / 2, medY + medSize / 2);
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'top';
+                    }
+
+                    if (medalPos === 'left') {
+                        textX = blockLeft + medSize + medGap;
+                        nameY = currY;
+                    } else {
+                        textX = blockLeft;
+                        nameY = currY + medSize + medGap;
+                    }
+
+                } else if (medalType === 'numbers') {
                     ctx.fillStyle = this.settings.winner_name_color || '#D02627';
                     ctx.font = `400 ${rankSize}px "Rockwell Std", serif`;
                     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.8px';
                     ctx.fillText(w.rank, blockLeft, currY);
+                    textX = blockLeft;
+                    nameY = currY + Math.round(rankSize * 1.3);
+
                 } else if (medalType === 'badges') {
                     const badgeW = Math.round(rankSize * 1.8);
                     const badgeH = Math.round(rankSize * 1.1);
@@ -1636,14 +2238,22 @@ function posterStudio() {
                     ctx.textAlign = 'center';
                     ctx.fillText(w.rank, blockLeft + (badgeW / 2), currY + 2);
                     ctx.textAlign = 'left';
+                    textX = blockLeft;
+                    nameY = currY + badgeH + 6;
+
                 } else if (medalType === 'text') {
                     ctx.fillStyle = this.settings.winner_name_color || '#D02627';
                     ctx.font = `700 ${Math.round(rankSize * 0.9)}px "Rockwell Std", serif`;
                     ctx.fillText(w.rankLabel, blockLeft, currY);
+                    textX = blockLeft;
+                    nameY = currY + Math.round(rankSize * 1.3);
+
+                } else if (medalType === 'none') {
+                    textX = blockLeft;
+                    nameY = currY;
                 }
 
-                // Student Name (2-line support)
-                let nameY = currY + Math.round(rankSize * 1.3);
+                // 2. Student Name (with multi-line & 2-line auto-split support)
                 ctx.fillStyle = this.settings.winner_name_color || '#D02627';
                 ctx.font = `${this.settings.winner_name_weight || '400'} ${winSize}px "${winFont}", serif`;
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-1.2px';
@@ -1661,27 +2271,28 @@ function posterStudio() {
                     nameLines = [w.name];
                 }
 
+                let currentNameY = nameY;
                 nameLines.forEach((nLine, lIdx) => {
-                    ctx.fillText(nLine.trim(), blockLeft, nameY);
+                    ctx.fillText(nLine.trim(), textX, currentNameY);
                     if (lIdx < nameLines.length - 1) {
-                        nameY += nameLineH;
+                        currentNameY += nameLineH;
                     }
                 });
 
-                // Group Name
-                let unitY = nameY + winSize + unitGap;
+                // 3. Group Name
+                let unitY = currentNameY + winSize + unitGap;
                 ctx.fillStyle = this.settings.winner_unit_color || '#000000';
                 ctx.font = `${this.settings.winner_unit_weight || '300'} ${unitSize}px "Rockwell Std", serif`;
                 if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
-                ctx.fillText(w.unit, blockLeft, unitY);
+                ctx.fillText(w.unit, textX, unitY);
 
-                // Divider Line
+                // 4. Divider Line
                 let lineY = unitY + unitSize + 8;
                 ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.moveTo(blockLeft, lineY);
-                ctx.lineTo(blockLeft + dividerWidth, lineY);
+                ctx.moveTo(textX, lineY);
+                ctx.lineTo(textX + dividerWidth, lineY);
                 ctx.stroke();
 
                 ctx.restore();
@@ -1690,63 +2301,81 @@ function posterStudio() {
         },
 
         drawSelectionOutline(ctx) {
-            if (!this.selectedId) return;
+            const box = this.getSelectionBox();
+            if (!box) return;
 
-            let bx = 0, by = 0, bw = 0, bh = 0;
+            const { x, y, w, h } = box;
+            ctx.save();
 
-            if (this.selectedType === 'custom' && this.selectedElement) {
-                const el = this.selectedElement;
-                bx = el.x;
-                by = el.y;
-                bw = el.width || (el.size ? (el.text ? el.text.length * el.size * 0.55 : el.size) : 100);
-                bh = el.height || (el.size || 50);
-            } else if (this.selectedType === 'core') {
-                if (this.selectedId === 'result_no') {
-                    bx = this.settings.result_x;
-                    by = this.settings.result_y;
-                    bw = 250;
-                    bh = 220;
-                } else if (this.selectedId === 'competition') {
-                    bx = this.settings.competition_x;
-                    by = this.settings.competition_y;
-                    bw = this.settings.competition_max_width || 440;
-                    bh = 160;
-                } else if (this.selectedId === 'category') {
-                    bx = this.settings.category_x - 100;
-                    by = this.settings.category_y - 30;
-                    bw = 200;
-                    bh = 60;
-                } else if (this.selectedId === 'winners') {
-                    bx = this.settings.block_left;
-                    by = this.settings.first_top;
-                    bw = 360;
-                    bh = 480;
-                }
-            }
+            // 1. Sleek cyan bounding box
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 1.8;
+            ctx.setLineDash([5, 4]);
+            ctx.strokeRect(x - 4, y - 4, w + 8, h + 8);
+            ctx.setLineDash([]); // clear dash
 
-            if (bw > 0 && bh > 0) {
-                ctx.save();
+            // 2. Rotation Handle (connecting line + circular knob)
+            const rotX = x + w / 2;
+            const rotY = y - 28;
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(rotX, y - 4);
+            ctx.lineTo(rotX, rotY);
+            ctx.stroke();
+
+            // Rotation Knob
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(rotX, rotY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 3. 8 Transform Resize Handles (square knobs)
+            const handles = this.getHandles(box);
+            const handleSize = 9;
+            for (const [name, pos] of Object.entries(handles)) {
+                if (name === 'rot') continue;
+                ctx.fillStyle = '#ffffff';
                 ctx.strokeStyle = '#00f0ff';
-                ctx.lineWidth = 1.5;
-                ctx.setLineDash([4, 4]);
-                ctx.strokeRect(bx - 6, by - 6, bw + 12, bh + 12);
-
-                // Small Corner Handles
-                ctx.fillStyle = '#00f0ff';
-                ctx.fillRect(bx - 10, by - 10, 8, 8);
-                ctx.fillRect(bx + bw + 2, by - 10, 8, 8);
-                ctx.fillRect(bx - 10, by + bh + 2, 8, 8);
-                ctx.fillRect(bx + bw + 2, by + bh + 2, 8, 8);
-
-                // Small badge
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-                ctx.fillRect(bx - 6, by - 26, 120, 18);
-                ctx.fillStyle = '#00f0ff';
-                ctx.font = 'bold 10px monospace';
-                ctx.fillText(`X:${bx} Y:${by}`, bx, by - 13);
-
-                ctx.restore();
+                ctx.lineWidth = 1.8;
+                ctx.fillRect(pos.x - handleSize / 2, pos.y - handleSize / 2, handleSize, handleSize);
+                ctx.strokeRect(pos.x - handleSize / 2, pos.y - handleSize / 2, handleSize, handleSize);
             }
+
+            // 4. Floating Dimension & Position Tooltip Badge
+            let badgeText = `W:${Math.round(w)}px H:${Math.round(h)}px`;
+            if (this.selectedId === 'winners') {
+                badgeText = `Winners Scale: ${this.settings.winners_scale}x`;
+            } else if (this.selectedId === 'competition') {
+                badgeText = `Size:${this.settings.competition_size}px  Wrap:${Math.round(w)}px`;
+            }
+            if (box.rotation) {
+                badgeText += `  ${box.rotation}°`;
+            }
+
+            ctx.font = 'bold 11px monospace';
+            const textMetrics = ctx.measureText(badgeText);
+            const badgeW = textMetrics.width + 16;
+            const badgeH = 22;
+            const badgeX = x - 4;
+            const badgeY = y - 36;
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+            this.drawRoundedRect(ctx, badgeX, badgeY, badgeW, badgeH, 6);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = '#00f0ff';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(badgeText, badgeX + 8, badgeY + (badgeH / 2));
+
+            ctx.restore();
         },
 
         drawGuidelines(ctx, width, height) {

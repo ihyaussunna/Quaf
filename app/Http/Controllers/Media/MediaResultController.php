@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\PosterSetting;
 use App\Models\Program;
 use App\Models\Result;
+use App\Models\ResultMedal;
 use App\Models\ResultTemplate;
 use App\Models\StandingAnnouncement;
 use App\Services\AuditLogger;
@@ -191,10 +192,13 @@ class MediaResultController extends Controller
             'layout_mode' => $t->posterSetting?->layout_mode ?? 'default',
         ]);
 
+        $medalPacks = ResultMedal::where('is_active', true)->orderByDesc('id')->get();
+
         return view('media.results.studio', compact(
             'result',
             'templates',
             'templatesMap',
+            'medalPacks',
             'activeTemplate',
             'currentSettings',
             'winners',
@@ -453,6 +457,113 @@ class MediaResultController extends Controller
         $template->delete();
 
         return back()->with('success', 'ടെംപ്ലേറ്റ് നീക്കം ചെയ്തു.');
+    }
+
+    /**
+     * Medals list & management index.
+     */
+    public function medalsIndex(): View
+    {
+        $medals = ResultMedal::orderByDesc('id')->get();
+
+        return view('media.results.medals', compact('medals'));
+    }
+
+    /**
+     * Store new custom medal set.
+     */
+    public function medalStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'first_image' => ['required', 'image', 'mimes:png,webp,svg,jpg,jpeg', 'max:5120'],
+            'second_image' => ['required', 'image', 'mimes:png,webp,svg,jpg,jpeg', 'max:5120'],
+            'third_image' => ['required', 'image', 'mimes:png,webp,svg,jpg,jpeg', 'max:5120'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $firstPath = Storage::url($request->file('first_image')->store('media/medals', 'public'));
+        $secondPath = Storage::url($request->file('second_image')->store('media/medals', 'public'));
+        $thirdPath = Storage::url($request->file('third_image')->store('media/medals', 'public'));
+
+        ResultMedal::create([
+            'name' => $validated['name'],
+            'first_image' => $firstPath,
+            'second_image' => $secondPath,
+            'third_image' => $thirdPath,
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('media.results.medals')
+            ->with('success', 'പുതിയ മെഡൽ സെറ്റ് വിജയകരമായി അപ്‌ലോഡ് ചെയ്തു.');
+    }
+
+    /**
+     * Upload custom medal set on-the-fly directly from the Studio via AJAX.
+     */
+    public function medalAjaxUpload(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
+            'first_image' => ['nullable', 'image', 'max:5120'],
+            'second_image' => ['nullable', 'image', 'max:5120'],
+            'third_image' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $firstPath = $request->hasFile('first_image')
+            ? Storage::url($request->file('first_image')->store('media/medals', 'public'))
+            : '/images/medals/first.png';
+
+        $secondPath = $request->hasFile('second_image')
+            ? Storage::url($request->file('second_image')->store('media/medals', 'public'))
+            : '/images/medals/second.png';
+
+        $thirdPath = $request->hasFile('third_image')
+            ? Storage::url($request->file('third_image')->store('media/medals', 'public'))
+            : '/images/medals/third.png';
+
+        $name = $request->input('name') ?: ('Custom Medals '.date('d M H:i'));
+
+        $medal = ResultMedal::create([
+            'name' => $name,
+            'first_image' => $firstPath,
+            'second_image' => $secondPath,
+            'third_image' => $thirdPath,
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'മെഡലുകൾ വിജയകരമായി അപ്‌ലോഡ് ചെയ്തു.',
+            'medal' => [
+                'id' => $medal->id,
+                'name' => $medal->name,
+                'first_image' => asset($medal->first_image),
+                'second_image' => asset($medal->second_image),
+                'third_image' => asset($medal->third_image),
+            ],
+        ]);
+    }
+
+    /**
+     * Toggle medal pack active state.
+     */
+    public function medalToggleActive(ResultMedal $medal): RedirectResponse
+    {
+        $medal->is_active = ! $medal->is_active;
+        $medal->save();
+
+        return back()->with('success', 'മെഡൽ സ്റ്റാറ്റസ് മാറ്റി.');
+    }
+
+    /**
+     * Delete medal set.
+     */
+    public function medalDestroy(ResultMedal $medal): RedirectResponse
+    {
+        $medal->delete();
+
+        return back()->with('success', 'മെഡൽ സെറ്റ് നീക്കം ചെയ്തു.');
     }
 
     /**
