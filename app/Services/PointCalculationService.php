@@ -349,6 +349,11 @@ class PointCalculationService
             // 4. Update Students & Groups points_cache & rankings
             $this->syncPointsCache();
         });
+
+        // 5. Synchronize and distribute coins for all declared results
+        if (class_exists(CoinRewardService::class)) {
+            app(CoinRewardService::class)->distributeMissingCoinsForAllDeclaredResults();
+        }
     }
 
     /**
@@ -389,6 +394,10 @@ class PointCalculationService
                     foreach (array_chunk($txs, 100) as $chunk) {
                         PointsTransaction::insert($chunk);
                     }
+                }
+
+                if (class_exists(CoinRewardService::class)) {
+                    app(CoinRewardService::class)->distributeCoinsForResult($result);
                 }
             }
 

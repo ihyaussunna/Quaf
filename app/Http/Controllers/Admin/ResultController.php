@@ -304,6 +304,9 @@ class ResultController extends Controller
             'published_at' => $result->published_at ?? Carbon::now(),
         ]);
 
+        // Distribute coins to placed participants
+        $this->coinService->distributeCoinsForResult($result);
+
         // Immediately update team standings in Admin Panel
         $this->pointService->recalculateAllPoints();
 
@@ -660,6 +663,7 @@ class ResultController extends Controller
                 'result_number' => $res->result_number,
                 'published_at' => $res->published_at ?? Carbon::now(),
             ]);
+            $this->coinService->distributeCoinsForResult($res);
             AuditLogger::log('send_result_to_announcer', $res, ['status' => $old], ['status' => 'send', 'result_number' => $res->result_number]);
             $count++;
         }
@@ -700,6 +704,7 @@ class ResultController extends Controller
             ]);
             $res->program->update(['status' => 'completed']);
             $this->issueCertificates($res);
+            $this->coinService->distributeCoinsForResult($res);
             $count++;
         }
 

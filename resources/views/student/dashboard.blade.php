@@ -41,6 +41,120 @@
         </div>
     </div>
 
+    <!-- Official QUAF Coin Wallet Balance Grid -->
+    @if($coinSummary)
+        <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-7 shadow-sm space-y-4 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <h3 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-900">QUAF Coin Wallet</h3>
+                </div>
+                <span class="text-xs font-mono text-slate-500 font-semibold px-3 py-1 bg-amber-50 text-amber-900 rounded-full border border-amber-200">
+                    Live Balance Sync
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <!-- Available Balance -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 shadow-md border border-amber-300 col-span-2 sm:col-span-1">
+                    <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-800">Wallet Balance</div>
+                    <div class="text-2xl sm:text-3xl font-black mt-1 font-sora flex items-baseline gap-1.5">
+                        <span>{{ number_format($coinSummary['balance']) }}</span>
+                        <span class="text-[10px] font-mono uppercase font-bold text-slate-800">Coins</span>
+                    </div>
+                </div>
+
+                <!-- Competition Earned -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">മത്സരത്തിലൂടെ നേടിയത്</div>
+                    <div class="text-xl sm:text-2xl font-black mt-1 font-sora text-amber-700">
+                        +{{ number_format($coinSummary['competition_earned'] ?? $coinSummary['total_earned']) }}
+                    </div>
+                    <span class="text-[9px] text-slate-400 font-mono">Earned Coins</span>
+                </div>
+
+                <!-- Added Coins -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800">പണം നൽകി ചേർത്തത്</div>
+                        <span class="px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-emerald-200 text-emerald-900">ADDED COIN</span>
+                    </div>
+                    <div class="text-xl sm:text-2xl font-black mt-1 font-sora text-emerald-700">
+                        +{{ number_format($coinSummary['added_coins'] ?? 0) }}
+                    </div>
+                    <span class="text-[9px] text-emerald-700 font-mono">Cashier Added</span>
+                </div>
+
+                <!-- Total Spent -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Total Coins Spent</div>
+                    <div class="text-xl sm:text-2xl font-black mt-1 font-sora text-rose-600">
+                        -{{ number_format($coinSummary['total_spent']) }}
+                    </div>
+                    <span class="text-[9px] text-slate-400 font-mono">Redeemed</span>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Official Competition Results & Achievements (1st/2nd/3rd Prizes & Grades) -->
+    @if(isset($awardedPrograms) && $awardedPrograms->isNotEmpty())
+        <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-7 shadow-sm space-y-4 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#be1e2d]"></span>
+                    <h3 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-900">
+                        Official Competition Results &amp; Achievements
+                    </h3>
+                </div>
+                <span class="text-xs font-mono text-slate-500 font-bold px-3 py-1 bg-slate-100 rounded-full border border-slate-200">
+                    {{ $awardedPrograms->count() }} {{ \Illuminate\Support\Str::plural('Award', $awardedPrograms->count()) }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                @foreach($awardedPrograms as $result)
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 hover:border-red-300 transition-all flex items-center justify-between gap-3 shadow-2xs">
+                        <div class="min-w-0 flex-1">
+                            @if(!empty($result['code']))
+                                <div class="text-[11px] font-mono font-bold text-[#be1e2d]">{{ $result['code'] }}</div>
+                            @endif
+                            <h4 class="font-sora font-bold text-slate-900 text-sm truncate">{{ $result['name'] }}</h4>
+                            @if(!empty($result['category']))
+                                <span class="text-[11px] font-mono text-slate-400">{{ $result['category'] }}</span>
+                            @endif
+                        </div>
+
+                        <div class="shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
+                            @if($result['position'] === 1)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-amber-400 text-slate-950 shadow-xs border border-amber-300">
+                                    <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    <span>1st Prize</span>
+                                </span>
+                            @elseif($result['position'] === 2)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-blue-500 text-white shadow-xs">
+                                    <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    <span>2nd Prize</span>
+                                </span>
+                            @elseif($result['position'] === 3)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-amber-700 text-white shadow-xs">
+                                    <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    <span>3rd Prize</span>
+                                </span>
+                            @endif
+
+                            @if(!empty($result['grade']) && $result['grade'] !== '-')
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-black {{ in_array($result['grade'], ['A+', 'A']) ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-800 border border-slate-200' }}">
+                                    Grade {{ $result['grade'] }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <!-- Official Individual Programme Quota Meter (5 Max) -->
     <div class="rounded-3xl bg-white border border-slate-200/90 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
         <div class="space-y-2 w-full sm:w-auto">

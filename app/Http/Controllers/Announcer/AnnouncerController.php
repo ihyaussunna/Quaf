@@ -133,6 +133,9 @@ class AnnouncerController extends Controller
         $result->save();
 
         app(PointCalculationService::class)->recalculateForProgram($result->program_id);
+        if (class_exists(CoinRewardService::class)) {
+            app(CoinRewardService::class)->distributeCoinsForResult($result);
+        }
 
         AuditLogger::log('announcer_announced_result', $result, ['status' => $old], ['status' => 'announced']);
 

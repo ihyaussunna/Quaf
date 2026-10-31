@@ -111,8 +111,10 @@ class StudentController extends Controller
 
         $myPrograms = $student->entries;
 
+        $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
+
         $myResults = $student->certificates()
-            ->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true))
+            ->whereHas('program.result', fn ($q) => $q->whereIn('status', $declaredStatuses))
             ->with('program.category')
             ->latest('issued_at')
             ->get();
@@ -130,16 +132,20 @@ class StudentController extends Controller
             ->take(4)
             ->get();
 
-        $coinSummary = app(CoinRewardService::class)->getStudentCoinSummary($student, true);
+        $coinService = app(CoinRewardService::class);
+        $coinSummary = $coinService->getStudentCoinSummary($student, false);
+        $studentAchievements = $coinService->getStudentAchievements($student, false);
+        $awardedPrograms = $coinService->resolveStudentAwardedPrograms($student);
+
         $coinTransactions = CoinTransaction::where('student_id', $student->id)
-            ->where(function ($q) {
+            ->where(function ($q) use ($declaredStatuses) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('result', fn ($rq) => $rq->whereIn('status', $declaredStatuses));
             })
-            ->where(function ($q) {
+            ->where(function ($q) use ($declaredStatuses) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->whereIn('status', $declaredStatuses));
             })
             ->latest()
             ->take(15)
@@ -158,6 +164,8 @@ class StudentController extends Controller
             'maxSlots',
             'coinSummary',
             'coinTransactions',
+            'studentAchievements',
+            'awardedPrograms',
             'isQrVerifiedSession'
         ));
     }

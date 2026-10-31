@@ -20,6 +20,11 @@ class CoinRewardService
     public const REWARD_RULE_ID = 'QUAF09_GROUP_PROGRAM_REWARD_RULE_V1';
 
     /**
+     * Official competition declared result statuses that warrant coin distribution.
+     */
+    public const DECLARED_STATUSES = ['send', 'delivered', 'announced', 'published'];
+
+    /**
      * Official QUAF Season 09 Group Program Reward Chart:
      * Coins per individual eligible participant.
      */
@@ -307,42 +312,59 @@ class CoinRewardService
 
                 foreach ($participants as $student) {
                     $existing = CoinTransaction::where('result_id', $result->id)
+                        ->where('entry_id', $entry->id)
                         ->where('student_id', $student->id)
                         ->where('transaction_type', 'credit')
                         ->first();
 
-                    if ($existing) {
+                    if ($existing && (int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
+                        // Clean up any stale reversal transactions from prior edits
+                        CoinTransaction::where('result_id', $result->id)
+                            ->where('student_id', $student->id)
+                            ->where('transaction_type', 'reversal')
+                            ->delete();
+
                         continue;
                     }
+
+                    // Remove any stale reversal for this result & student so net matches exact new coins
+                    CoinTransaction::where('result_id', $result->id)
+                        ->where('student_id', $student->id)
+                        ->where('transaction_type', 'reversal')
+                        ->delete();
 
                     $ref = "COIN-RES{$result->id}-ENT{$entry->id}-STU{$student->id}-P{$pos}-CR";
                     $progType = $isGroup ? 'Group' : 'Individual';
 
-                    CoinTransaction::create([
-                        'student_id' => $student->id,
-                        'group_id' => $entry->group_id ?: $student->group_id,
-                        'program_id' => $program->id,
-                        'entry_id' => $entry->id,
-                        'result_id' => $result->id,
-                        'prize_position' => $pos,
-                        'grade' => $grade ?: 'NO_GRADE',
-                        'reward_rule_id' => self::REWARD_RULE_ID,
-                        'coins' => $coins,
-                        'transaction_type' => 'credit',
-                        'transaction_reference' => $ref,
-                        'status' => 'completed',
-                        'description' => "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
-                        'metadata' => [
-                            'program_name' => $program->name,
-                            'program_type' => $program->type,
-                            'group_name' => $entry->group?->name,
-                            'student_number' => $student->student_id,
-                            'student_name' => $student->name,
+                    CoinTransaction::updateOrCreate(
+                        [
+                            'result_id' => $result->id,
+                            'entry_id' => $entry->id,
+                            'student_id' => $student->id,
+                            'transaction_type' => 'credit',
+                        ],
+                        [
+                            'group_id' => $entry->group_id ?: $student->group_id,
+                            'program_id' => $program->id,
                             'prize_position' => $pos,
                             'grade' => $grade ?: 'NO_GRADE',
-                            'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
-                        ],
-                    ]);
+                            'reward_rule_id' => self::REWARD_RULE_ID,
+                            'coins' => $coins,
+                            'transaction_reference' => $existing?->transaction_reference ?? $ref,
+                            'status' => 'completed',
+                            'description' => "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
+                            'metadata' => [
+                                'program_name' => $program->name,
+                                'program_type' => $program->type,
+                                'group_name' => $entry->group?->name,
+                                'student_number' => $student->student_id,
+                                'student_name' => $student->name,
+                                'prize_position' => $pos,
+                                'grade' => $grade ?: 'NO_GRADE',
+                                'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
+                            ],
+                        ]
+                    );
 
                     $affectedStudentIds[] = $student->id;
                     $creditedCount++;
@@ -461,6 +483,178 @@ class CoinRewardService
                 }
             }
         }
+    }
+
+    /**
+     * Scan and distribute missing coins for all declared competition results.
+     * Ensures all students with 1st/2nd/3rd places and grades receive their coins immediately.
+     */
+    public function distributeMissingCoinsForAllDeclaredResults(): int
+    {
+        CoinTransaction::ensureSchema();
+
+        $declaredResults = Result::whereIn('status', self::DECLARED_STATUSES)
+            ->with([
+                'program',
+                'firstEntry.student',
+                'firstEntry.participants',
+                'secondEntry.student',
+                'secondEntry.participants',
+                'thirdEntry.student',
+                'thirdEntry.participants',
+            ])
+            ->get();
+
+        $totalCredited = 0;
+        foreach ($declaredResults as $res) {
+            $dist = $this->distributeCoinsForResult($res);
+            $totalCredited += $dist['credited_count'];
+        }
+
+        $this->syncStudentCoinsCache();
+
+        return $totalCredited;
+    }
+
+    /**
+     * Resolve all competition programs where the student achieved 1st/2nd/3rd prize or a grade.
+     *
+     * @return Collection<int, array{
+     *     program_id: int|null,
+     *     name: string,
+     *     code: string|null,
+     *     category: string|null,
+     *     position: int|null,
+     *     position_title: string|null,
+     *     grade: string|null
+     * }>
+     */
+    public function resolveStudentAwardedPrograms(Student $student, bool $onlyMediaPublished = false): Collection
+    {
+        $awarded = collect();
+        $declaredStatuses = self::DECLARED_STATUSES;
+
+        // 1. From CoinTransactions (credits with coins > 0 for declared results)
+        $creditsQuery = CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'credit')
+            ->where('coins', '>', 0)
+            ->with(['program.category', 'program.result', 'result']);
+
+        if ($onlyMediaPublished) {
+            $creditsQuery->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            })->where(function ($q) {
+                $q->whereNull('program_id')
+                    ->orDoesntHave('program.result')
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            });
+        } else {
+            $creditsQuery->where(function ($q) use ($declaredStatuses) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->whereIn('status', $declaredStatuses));
+            })->where(function ($q) use ($declaredStatuses) {
+                $q->whereNull('program_id')
+                    ->orDoesntHave('program.result')
+                    ->orWhereHas('program.result', fn ($rq) => $rq->whereIn('status', $declaredStatuses));
+            });
+        }
+
+        $credits = $creditsQuery->get();
+
+        foreach ($credits as $credit) {
+            $prog = $credit->program;
+            $res = $credit->result ?? $prog?->result;
+            if ($onlyMediaPublished && $res && (! $res->is_media_published || $res->status !== 'published')) {
+                continue;
+            }
+            if (! $onlyMediaPublished && $res && ! in_array($res->status, $declaredStatuses, true)) {
+                continue;
+            }
+
+            $pos = in_array((int) $credit->prize_position, [1, 2, 3], true) ? (int) $credit->prize_position : null;
+            $grade = ! empty($credit->grade) && $credit->grade !== '-' ? trim($credit->grade) : null;
+            if ($pos || $grade) {
+                $key = $credit->program_id ?: ('tx_'.$credit->id);
+                $awarded->put($key, [
+                    'program_id' => $credit->program_id,
+                    'name' => $credit->program?->name ?? ($credit->metadata['program_name'] ?? $credit->description),
+                    'code' => $credit->program?->code,
+                    'category' => $credit->program?->category?->name,
+                    'position' => $pos,
+                    'position_title' => $pos ? match ($pos) {
+                        1 => '1st Prize', 2 => '2nd Prize', 3 => '3rd Prize', default => null
+                    } : null,
+                    'grade' => $grade,
+                ]);
+            }
+        }
+
+        // 2. From Entries & Group Participations
+        $student->loadMissing([
+            'entries.program.result',
+            'entries.program.category',
+            'participations.program.result',
+            'participations.program.category',
+            'certificates.program.category',
+            'certificates.program.result',
+        ]);
+
+        $allEntries = $student->entries->merge($student->participations)->unique('id');
+
+        foreach ($allEntries as $entry) {
+            $prog = $entry->program;
+            if (! $prog || ! $prog->result) {
+                continue;
+            }
+
+            $res = $prog->result;
+            if ($onlyMediaPublished && (! $res->is_media_published || $res->status !== 'published')) {
+                continue;
+            }
+            if (! $onlyMediaPublished && ! in_array($res->status, $declaredStatuses, true)) {
+                continue;
+            }
+
+            $pos = null;
+            $grade = null;
+
+            if ($res->first_entry_id === $entry->id) {
+                $pos = 1;
+                $grade = $res->first_grade;
+            } elseif ($res->second_entry_id === $entry->id) {
+                $pos = 2;
+                $grade = $res->second_grade;
+            } elseif ($res->third_entry_id === $entry->id) {
+                $pos = 3;
+                $grade = $res->third_grade;
+            }
+
+            if (! $grade && ! empty($entry->computed_grade) && $entry->computed_grade !== '-') {
+                $grade = $entry->computed_grade;
+            }
+
+            $grade = (! empty($grade) && $grade !== '-') ? trim($grade) : null;
+
+            if ($pos || $grade) {
+                $key = $prog->id;
+                if (! $awarded->has($key)) {
+                    $awarded->put($key, [
+                        'program_id' => $prog->id,
+                        'name' => $prog->name,
+                        'code' => $prog->code,
+                        'category' => $prog->category?->name,
+                        'position' => $pos,
+                        'position_title' => $pos ? match ($pos) {
+                            1 => '1st Prize', 2 => '2nd Prize', 3 => '3rd Prize', default => null
+                        } : null,
+                        'grade' => $grade,
+                    ]);
+                }
+            }
+        }
+
+        return $awarded->values();
     }
 
     /**
@@ -633,8 +827,8 @@ class CoinRewardService
             $entriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
             $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
         } else {
-            $entriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']));
-            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', ['verified', 'published']));
+            $entriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', self::DECLARED_STATUSES));
+            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', self::DECLARED_STATUSES));
         }
 
         $entries = $entriesQuery->with(['program.result', 'scoreSheets'])->get();
