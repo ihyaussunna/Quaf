@@ -38,6 +38,7 @@ use App\Http\Controllers\Announcer\AnnouncerController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Fund\FundController;
 use App\Http\Controllers\GreenRoom\GreenRoomController;
+use App\Http\Controllers\Judge\CustomJudgeController;
 use App\Http\Controllers\Judge\JudgeController;
 use App\Http\Controllers\Leader\LeaderController;
 use App\Http\Controllers\Media\MediaController;
@@ -459,6 +460,16 @@ Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->nam
 // Judge 4-Digit Unique PIN Login
 Route::get('/judge/login', [JudgeController::class, 'showPinLogin'])->name('judge.login');
 Route::post('/judge/login', [JudgeController::class, 'pinLogin'])->name('judge.login.submit');
+
+// Custom Judge Panel (Universal Stage Adjudication Desk with 4-Digit PIN, Program Selector & Judge 1/2/3)
+Route::get('/custom-judge/login', [CustomJudgeController::class, 'showLogin'])->name('custom-judge.login');
+Route::post('/custom-judge/login', [CustomJudgeController::class, 'authenticate'])->name('custom-judge.authenticate');
+Route::get('/custom-judge', [CustomJudgeController::class, 'index'])->name('custom-judge.index');
+Route::get('/judge/custom', [CustomJudgeController::class, 'index'])->name('judge.custom');
+Route::post('/custom-judge/save', [CustomJudgeController::class, 'saveScore'])->name('custom-judge.save');
+Route::post('/custom-judge/save-all', [CustomJudgeController::class, 'saveAll'])->name('custom-judge.save-all');
+Route::post('/custom-judge/mark-attendance', [CustomJudgeController::class, 'markAttendance'])->name('custom-judge.mark-attendance');
+Route::match(['get', 'post'], '/custom-judge/logout', [CustomJudgeController::class, 'logout'])->name('custom-judge.logout');
 
 // Student Chest Number Quick Login
 Route::get('/student/login', [StudentController::class, 'showLogin'])->name('student.login');

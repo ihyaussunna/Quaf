@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Hash;
 
 class Judge extends Model
 {
@@ -57,5 +58,51 @@ class Judge extends Model
                 }
             }
         });
+    }
+
+    /**
+     * Ensure the 3 Universal Custom Judges exist with User accounts.
+     *
+     * @return array<int, Judge>
+     */
+    public static function ensureCustomJudges(): array
+    {
+        $judges = [];
+        $definitions = [
+            1 => ['name' => 'Judge 1', 'pin' => '1001', 'email' => 'judge1@quaf.fest'],
+            2 => ['name' => 'Judge 2', 'pin' => '1002', 'email' => 'judge2@quaf.fest'],
+            3 => ['name' => 'Judge 3', 'pin' => '1003', 'email' => 'judge3@quaf.fest'],
+        ];
+
+        foreach ($definitions as $num => $def) {
+            $user = User::firstOrCreate(
+                ['email' => $def['email']],
+                [
+                    'name' => $def['name'],
+                    'password' => Hash::make('Judge@'.$def['pin']),
+                    'plain_password' => $def['pin'],
+                    'role' => 'judge',
+                    'is_active' => true,
+                ]
+            );
+
+            $judge = self::firstOrCreate(
+                ['name' => $def['name']],
+                [
+                    'user_id' => $user->id,
+                    'access_code' => $def['pin'],
+                    'designation' => 'Official Stage Judge '.$num,
+                    'specialization' => 'Stage Evaluation Desk',
+                ]
+            );
+
+            if (! $judge->user_id || $judge->user_id !== $user->id) {
+                $judge->update(['user_id' => $user->id]);
+            }
+
+            $judges[$num] = $judge;
+        }
+
+        return $judges;
     }
 }

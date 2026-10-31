@@ -84,9 +84,9 @@
         <!-- Center: Quick Judge Info (hidden on small mobile) -->
         <div class="hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
             <span class="text-slate-500">Juror:</span>
-            <span class="text-slate-900 font-bold">{{ Auth::user()->name }}</span>
+            <span class="text-slate-900 font-bold">{{ Auth::user()?->name ?? 'Stage Adjudicator' }}</span>
             <span class="text-slate-300">•</span>
-            <span class="text-[#f3bd2e] font-semibold">{{ Auth::user()->judgeProfile->designation ?? 'Official Adjudicator' }}</span>
+            <span class="text-[#f3bd2e] font-semibold">{{ Auth::user()?->judgeProfile?->designation ?? 'Official Adjudicator' }}</span>
         </div>
 
         <!-- Right: Actions with app-tap -->
