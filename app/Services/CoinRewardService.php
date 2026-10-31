@@ -177,68 +177,75 @@ class CoinRewardService
         $totalCoins = 0;
         $flags = [];
 
-        $placementConfigs = [
-            1 => ['entry' => $result->firstEntry ?? ProgramEntry::with(['group', 'student', 'participants'])->find($result->first_entry_id), 'label' => '1st Prize'],
-            2 => ['entry' => $result->secondEntry ?? ProgramEntry::with(['group', 'student', 'participants'])->find($result->second_entry_id), 'label' => '2nd Prize'],
-            3 => ['entry' => $result->thirdEntry ?? ProgramEntry::with(['group', 'student', 'participants'])->find($result->third_entry_id), 'label' => '3rd Prize'],
-        ];
+        $podiumWinners = $result->getPodiumWinnersWithTies();
 
-        foreach ($placementConfigs as $pos => $cfg) {
-            /** @var ProgramEntry|null $entry */
-            $entry = $cfg['entry'];
-            if (! $entry) {
-                continue;
-            }
+        foreach ([1, 2, 3] as $pos) {
+            $baseLabel = match ($pos) {
+                1 => '1st Prize',
+                2 => '2nd Prize',
+                3 => '3rd Prize',
+                default => "Position {$pos}",
+            };
 
-            $group = $entry->group;
-            $grade = self::resolveGradeForEntry($entry, $result, $pos);
-            $coinsPerParticipant = self::calculateGroupRewardPerParticipant($pos, $grade);
-            $participants = self::getEligibleParticipantsForEntry($entry, false);
-            $isAbsent = $entry->attendance_status === 'absent';
+            foreach ($podiumWinners[$pos] as $wData) {
+                /** @var ProgramEntry|null $entry */
+                $entry = $wData['entry'];
+                if (! $entry) {
+                    continue;
+                }
 
-            $participantItems = [];
-            foreach ($participants as $student) {
-                $participantItems[] = [
-                    'student_id' => $student->id,
-                    'student_number' => $student->student_id ?? 'STU-'.$student->id,
-                    'name' => $student->name,
-                    'role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
-                    'coins' => $isAbsent ? 0 : $coinsPerParticipant,
+                $group = $entry->group;
+                $grade = $wData['grade'] ?? self::resolveGradeForEntry($entry, $result, $pos);
+                $coinsPerParticipant = self::calculateGroupRewardPerParticipant($pos, $grade);
+                $participants = self::getEligibleParticipantsForEntry($entry, false);
+                $isAbsent = $entry->attendance_status === 'absent';
+
+                $participantItems = [];
+                foreach ($participants as $student) {
+                    $participantItems[] = [
+                        'student_id' => $student->id,
+                        'student_number' => $student->student_id ?? 'STU-'.$student->id,
+                        'name' => $student->name,
+                        'role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
+                        'coins' => $isAbsent ? 0 : $coinsPerParticipant,
+                    ];
+                }
+
+                $count = $isAbsent ? 0 : $participants->count();
+                $subtotal = $count * $coinsPerParticipant;
+                $posLabel = $baseLabel.(! empty($wData['is_tied']) ? ' (Shared)' : '');
+
+                if ($participants->isEmpty()) {
+                    $identifier = $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? 'Participant');
+                    $flags[] = "{$posLabel} ({$identifier}): No registered participant found.";
+                }
+
+                if ($isAbsent) {
+                    $identifier = $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? 'Participant');
+                    $flags[] = "{$posLabel} ({$identifier}): Marked absent in Green Room attendance. Zero coins credited.";
+                }
+
+                $totalParticipants += $count;
+                $totalCoins += $subtotal;
+
+                $placements[] = [
+                    'position' => $pos,
+                    'position_label' => $posLabel,
+                    'entry_id' => $entry->id,
+                    'chest_number' => $entry->chest_number,
+                    'group_id' => $entry->group_id,
+                    'group_name' => $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? $group?->name ?? 'Participant'),
+                    'group_code' => $group?->code ?? '',
+                    'attendance_status' => $entry->attendance_status,
+                    'is_absent' => $isAbsent,
+                    'is_tied' => ! empty($wData['is_tied']),
+                    'grade' => $grade ?: 'No Grade',
+                    'coins_per_participant' => $coinsPerParticipant,
+                    'participants_count' => $count,
+                    'total_coins' => $subtotal,
+                    'participants' => $participantItems,
                 ];
             }
-
-            $count = $isAbsent ? 0 : $participants->count();
-            $subtotal = $count * $coinsPerParticipant;
-
-            if ($participants->isEmpty()) {
-                $identifier = $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? 'Participant');
-                $flags[] = "{$cfg['label']} ({$identifier}): No registered participant found.";
-            }
-
-            if ($isAbsent) {
-                $identifier = $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? 'Participant');
-                $flags[] = "{$cfg['label']} ({$identifier}): Marked absent in Green Room attendance. Zero coins credited.";
-            }
-
-            $totalParticipants += $count;
-            $totalCoins += $subtotal;
-
-            $placements[] = [
-                'position' => $pos,
-                'position_label' => $cfg['label'],
-                'entry_id' => $entry->id,
-                'chest_number' => $entry->chest_number,
-                'group_id' => $entry->group_id,
-                'group_name' => $isGroup ? ($group?->name ?? 'Team') : ($entry->student?->name ?? $group?->name ?? 'Participant'),
-                'group_code' => $group?->code ?? '',
-                'attendance_status' => $entry->attendance_status,
-                'is_absent' => $isAbsent,
-                'grade' => $grade ?: 'No Grade',
-                'coins_per_participant' => $coinsPerParticipant,
-                'participants_count' => $count,
-                'total_coins' => $subtotal,
-                'participants' => $participantItems,
-            ];
         }
 
         return [
@@ -275,34 +282,14 @@ class CoinRewardService
         }
 
         return DB::transaction(function () use ($result, $program) {
-            $placements = [
-                1 => $result->firstEntry ?? ProgramEntry::with(['group', 'student', 'participants'])->find($result->first_entry_id),
-                2 => $result->secondEntry ?? ProgramEntry::with(['group', 'student', 'participants'])->find($result->second_entry_id),
-                3 => $result->thirdEntry ?? ProgramEntry::with(['group', 'student', 'participants'])->find($result->third_entry_id),
-            ];
+            $podiumWinners = $result->getPodiumWinnersWithTies();
 
             $creditedCount = 0;
             $totalCoins = 0;
             $affectedStudentIds = [];
             $isGroup = $program->isGroup();
 
-            foreach ($placements as $pos => $entry) {
-                if (! $entry) {
-                    continue;
-                }
-
-                if ($entry->attendance_status === 'absent') {
-                    continue;
-                }
-
-                $grade = self::resolveGradeForEntry($entry, $result, $pos);
-                $coins = self::calculateGroupRewardPerParticipant($pos, $grade);
-                $participants = self::getEligibleParticipantsForEntry($entry, true);
-
-                if ($participants->isEmpty() || $coins <= 0) {
-                    continue;
-                }
-
+            foreach ([1, 2, 3] as $pos) {
                 $posLabel = match ($pos) {
                     1 => '1st Prize',
                     2 => '2nd Prize',
@@ -310,65 +297,81 @@ class CoinRewardService
                     default => "Position {$pos}",
                 };
 
-                foreach ($participants as $student) {
-                    $existing = CoinTransaction::where('result_id', $result->id)
-                        ->where('entry_id', $entry->id)
-                        ->where('student_id', $student->id)
-                        ->where('transaction_type', 'credit')
-                        ->first();
+                foreach ($podiumWinners[$pos] as $wData) {
+                    /** @var ProgramEntry|null $entry */
+                    $entry = $wData['entry'];
+                    if (! $entry || $entry->attendance_status === 'absent') {
+                        continue;
+                    }
 
-                    if ($existing && (int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
-                        // Clean up any stale reversal transactions from prior edits
+                    $grade = $wData['grade'] ?? self::resolveGradeForEntry($entry, $result, $pos);
+                    $coins = self::calculateGroupRewardPerParticipant($pos, $grade);
+                    $participants = self::getEligibleParticipantsForEntry($entry, true);
+
+                    if ($participants->isEmpty() || $coins <= 0) {
+                        continue;
+                    }
+
+                    foreach ($participants as $student) {
+                        $existing = CoinTransaction::where('result_id', $result->id)
+                            ->where('entry_id', $entry->id)
+                            ->where('student_id', $student->id)
+                            ->where('transaction_type', 'credit')
+                            ->first();
+
+                        if ($existing && (int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
+                            // Clean up any stale reversal transactions from prior edits
+                            CoinTransaction::where('result_id', $result->id)
+                                ->where('student_id', $student->id)
+                                ->where('transaction_type', 'reversal')
+                                ->delete();
+
+                            continue;
+                        }
+
+                        // Remove any stale reversal for this result & student so net matches exact new coins
                         CoinTransaction::where('result_id', $result->id)
                             ->where('student_id', $student->id)
                             ->where('transaction_type', 'reversal')
                             ->delete();
 
-                        continue;
-                    }
+                        $ref = "COIN-RES{$result->id}-ENT{$entry->id}-STU{$student->id}-P{$pos}-CR";
+                        $progType = $isGroup ? 'Group' : 'Individual';
 
-                    // Remove any stale reversal for this result & student so net matches exact new coins
-                    CoinTransaction::where('result_id', $result->id)
-                        ->where('student_id', $student->id)
-                        ->where('transaction_type', 'reversal')
-                        ->delete();
-
-                    $ref = "COIN-RES{$result->id}-ENT{$entry->id}-STU{$student->id}-P{$pos}-CR";
-                    $progType = $isGroup ? 'Group' : 'Individual';
-
-                    CoinTransaction::updateOrCreate(
-                        [
-                            'result_id' => $result->id,
-                            'entry_id' => $entry->id,
-                            'student_id' => $student->id,
-                            'transaction_type' => 'credit',
-                        ],
-                        [
-                            'group_id' => $entry->group_id ?: $student->group_id,
-                            'program_id' => $program->id,
-                            'prize_position' => $pos,
-                            'grade' => $grade ?: 'NO_GRADE',
-                            'reward_rule_id' => self::REWARD_RULE_ID,
-                            'coins' => $coins,
-                            'transaction_reference' => $existing?->transaction_reference ?? $ref,
-                            'status' => 'completed',
-                            'description' => "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
-                            'metadata' => [
-                                'program_name' => $program->name,
-                                'program_type' => $program->type,
-                                'group_name' => $entry->group?->name,
-                                'student_number' => $student->student_id,
-                                'student_name' => $student->name,
+                        CoinTransaction::updateOrCreate(
+                            [
+                                'result_id' => $result->id,
+                                'entry_id' => $entry->id,
+                                'student_id' => $student->id,
+                                'transaction_type' => 'credit',
+                            ],
+                            [
+                                'group_id' => $entry->group_id ?: $student->group_id,
+                                'program_id' => $program->id,
                                 'prize_position' => $pos,
                                 'grade' => $grade ?: 'NO_GRADE',
-                                'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
-                            ],
-                        ]
-                    );
+                                'reward_rule_id' => self::REWARD_RULE_ID,
+                                'coins' => $coins,
+                                'transaction_reference' => $existing?->transaction_reference ?? $ref,
+                                'status' => 'completed',
+                                'description' => "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
+                                'metadata' => [
+                                    'program_name' => $program->name,
+                                    'program_type' => $program->type,
+                                    'group_name' => $entry->group?->name,
+                                    'student_number' => $student->student_id,
+                                    'student_name' => $student->name,
+                                    'prize_position' => $pos,
+                                    'grade' => $grade ?: 'NO_GRADE',
+                                    'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
+                                ],
+                            ]
+                        );
 
-                    $affectedStudentIds[] = $student->id;
-                    $creditedCount++;
-                    $totalCoins += $coins;
+                        $affectedStudentIds[] = $student->id;
+                        $creditedCount++;
+                        $totalCoins += $coins;
+                    }
                 }
             }
 

@@ -418,94 +418,76 @@ class PointCalculationService
         $now = now();
 
         $posPointsMap = self::getPositionPointsForProgram($program);
+        $podiumData = $result->getPodiumWinnersWithTies();
+        $placedEntryIds = [];
 
-        $placements = [
-            1 => ['entry' => $result->firstEntry, 'label' => '1st Place', 'pts' => (int) round($posPointsMap[1] * $weight)],
-            2 => ['entry' => $result->secondEntry, 'label' => '2nd Place', 'pts' => (int) round($posPointsMap[2] * $weight)],
-            3 => ['entry' => $result->thirdEntry, 'label' => '3rd Place', 'pts' => (int) round($posPointsMap[3] * $weight)],
-        ];
-
-        foreach ($placements as $pos => $data) {
-            $entry = $data['entry'];
-            if (! $entry || ! $entry->group_id) {
-                continue;
-            }
-
-            $group = $entry->group;
-            $student = $entry->student;
-            $posPts = $data['pts'];
-            $posLabel = $data['label'];
-
-            // A. Position Points (Awarded to Group)
-            if ($posPts > 0) {
-                $transactions[] = [
-                    'group_id' => $group->id,
-                    'program_id' => $program->id,
-                    'result_id' => $result->id,
-                    'entry_id' => $entry->id,
-                    'student_id' => (! $isGroupProg && $student) ? $student->id : null,
-                    'source_type' => 'POSITION',
-                    'points' => $posPts,
-                    'description' => "{$group->name} — {$program->name} — {$posLabel} (+{$posPts} pts)",
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
-
-            // B. Grade Points from Result declaration or ScoreSheets
-            $declaredGrade = match ($pos) {
-                1 => $result->first_grade,
-                2 => $result->second_grade,
-                3 => $result->third_grade,
-                default => null,
+        foreach ([1, 2, 3] as $pos) {
+            $posLabel = match ($pos) {
+                1 => '1st Place',
+                2 => '2nd Place',
+                3 => '3rd Place',
             };
+            $posPts = (int) round(($posPointsMap[$pos] ?? 0) * $weight);
 
-            $gradeName = null;
-            $gradePointsRaw = 0;
-
-            if (! empty($declaredGrade) && isset(self::GRADE_POINTS[strtoupper(trim($declaredGrade))])) {
-                $gradeName = strtoupper(trim($declaredGrade));
-                $gradePointsRaw = self::GRADE_POINTS[$gradeName];
-            } else {
-                $judgeGrade = $entry->scoreSheets->where('is_submitted', true)->pluck('criteria_scores.grade')->filter()->first();
-                if ($judgeGrade && isset(self::GRADE_POINTS[strtoupper(trim($judgeGrade))])) {
-                    $gradeName = strtoupper(trim($judgeGrade));
-                    $gradePointsRaw = self::GRADE_POINTS[$gradeName];
-                } else {
-                    $avgScore = $entry->scoreSheets->where('is_submitted', true)->avg('total_score');
-                    if ($avgScore !== null && $avgScore > 0) {
-                        $gradeInfo = self::getGradeFromScore((float) $avgScore);
-                        $gradeName = $gradeInfo['grade'];
-                        $gradePointsRaw = $gradeInfo['points'];
-                    }
+            foreach ($podiumData[$pos] as $winner) {
+                $entry = $winner['entry'];
+                if (! $entry || ! $entry->group_id) {
+                    continue;
                 }
-            }
 
-            if ($gradeName && $gradePointsRaw > 0) {
-                $gradePts = (int) round($gradePointsRaw * $weight);
-                if ($gradePts > 0) {
+                $placedEntryIds[] = $entry->id;
+                $group = $entry->group;
+                $student = $entry->student;
+                $isTiedLabel = ! empty($winner['is_tied']) ? ' (Shared)' : '';
+
+                // A. Position Points (Awarded to Group)
+                if ($posPts > 0) {
                     $transactions[] = [
                         'group_id' => $group->id,
                         'program_id' => $program->id,
                         'result_id' => $result->id,
                         'entry_id' => $entry->id,
                         'student_id' => (! $isGroupProg && $student) ? $student->id : null,
-                        'source_type' => 'GRADE',
-                        'points' => $gradePts,
-                        'description' => "{$group->name} — {$program->name} — Grade {$gradeName} (+{$gradePts} pts)",
+                        'source_type' => 'POSITION',
+                        'points' => $posPts,
+                        'description' => "{$group->name} — {$program->name} — {$posLabel}{$isTiedLabel} (+{$posPts} pts)",
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
+                }
+
+                // B. Grade Points from Result declaration or ScoreSheets
+                $gradeName = $winner['grade'];
+                $gradePointsRaw = ($gradeName && isset(self::GRADE_POINTS[$gradeName]))
+                    ? self::GRADE_POINTS[$gradeName]
+                    : 0;
+
+                if ($gradeName && $gradePointsRaw > 0) {
+                    $gradePts = (int) round($gradePointsRaw * $weight);
+                    if ($gradePts > 0) {
+                        $transactions[] = [
+                            'group_id' => $group->id,
+                            'program_id' => $program->id,
+                            'result_id' => $result->id,
+                            'entry_id' => $entry->id,
+                            'student_id' => (! $isGroupProg && $student) ? $student->id : null,
+                            'source_type' => 'GRADE',
+                            'points' => $gradePts,
+                            'description' => "{$group->name} — {$program->name} — Grade {$gradeName} (+{$gradePts} pts)",
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
                 }
             }
         }
 
         // C. Participation Points for non-placed verified entries
-        $placedEntryIds = array_filter([
+        $placedEntryIds = array_unique(array_filter(array_merge($placedEntryIds, [
             $result->first_entry_id,
             $result->second_entry_id,
             $result->third_entry_id,
-        ]);
+        ])));
 
         $otherEntries = $program->entries()
             ->whereIn('status', ['verified', 'confirmed'])

@@ -468,48 +468,72 @@
                                 @endif
                             </div>
 
-                            <!-- Podium Winners (Only 1st, 2nd, 3rd) -->
+                            <!-- Podium Winners (Supports Ties / Shared Winners) -->
                             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2 text-xs">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Podium Winners</div>
                                 
                                 <!-- 1st Place -->
-                                <div class="flex items-center gap-2.5">
-                                    <img src="{{ asset('images/medals/first.png') }}" alt="1st" class="w-5 h-5 object-contain shrink-0">
-                                    @if(!empty($winners['first']))
-                                        <div class="truncate">
-                                            <span class="font-bold text-slate-900">{{ $winners['first'][0]['name'] }}</span>
-                                            <span class="text-slate-500 text-[11px]">({{ $winners['first'][0]['unit'] }})</span>
+                                @if(!empty($winners['first']))
+                                    @foreach($winners['first'] as $wFirst)
+                                        <div class="flex items-center gap-2.5">
+                                            <img src="{{ asset('images/medals/first.png') }}" alt="1st" class="w-5 h-5 object-contain shrink-0">
+                                            <div class="truncate flex items-center gap-1.5 min-w-0">
+                                                <span class="font-bold text-slate-900 truncate">{{ $wFirst['name'] }}</span>
+                                                <span class="text-slate-500 text-[11px] shrink-0">({{ $wFirst['unit'] }})</span>
+                                                @if(count($winners['first']) > 1)
+                                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-200 text-amber-950 shrink-0">Shared</span>
+                                                @endif
+                                            </div>
                                         </div>
-                                    @else
+                                    @endforeach
+                                @else
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="{{ asset('images/medals/first.png') }}" alt="1st" class="w-5 h-5 object-contain shrink-0">
                                         <span class="text-slate-400 italic text-[11px]">Not declared</span>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
 
                                 <!-- 2nd Place -->
-                                <div class="flex items-center gap-2.5">
-                                    <img src="{{ asset('images/medals/second.png') }}" alt="2nd" class="w-5 h-5 object-contain shrink-0">
-                                    @if(!empty($winners['second']))
-                                        <div class="truncate">
-                                            <span class="font-bold text-slate-900">{{ $winners['second'][0]['name'] }}</span>
-                                            <span class="text-slate-500 text-[11px]">({{ $winners['second'][0]['unit'] }})</span>
+                                @if(!empty($winners['second']))
+                                    @foreach($winners['second'] as $wSecond)
+                                        <div class="flex items-center gap-2.5">
+                                            <img src="{{ asset('images/medals/second.png') }}" alt="2nd" class="w-5 h-5 object-contain shrink-0">
+                                            <div class="truncate flex items-center gap-1.5 min-w-0">
+                                                <span class="font-bold text-slate-900 truncate">{{ $wSecond['name'] }}</span>
+                                                <span class="text-slate-500 text-[11px] shrink-0">({{ $wSecond['unit'] }})</span>
+                                                @if(count($winners['second']) > 1)
+                                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-800 shrink-0">Shared</span>
+                                                @endif
+                                            </div>
                                         </div>
-                                    @else
+                                    @endforeach
+                                @else
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="{{ asset('images/medals/second.png') }}" alt="2nd" class="w-5 h-5 object-contain shrink-0">
                                         <span class="text-slate-400 italic text-[11px]">Not declared</span>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
 
                                 <!-- 3rd Place -->
-                                <div class="flex items-center gap-2.5">
-                                    <img src="{{ asset('images/medals/third.png') }}" alt="3rd" class="w-5 h-5 object-contain shrink-0">
-                                    @if(!empty($winners['third']))
-                                        <div class="truncate">
-                                            <span class="font-bold text-slate-900">{{ $winners['third'][0]['name'] }}</span>
-                                            <span class="text-slate-500 text-[11px]">({{ $winners['third'][0]['unit'] }})</span>
+                                @if(!empty($winners['third']))
+                                    @foreach($winners['third'] as $wThird)
+                                        <div class="flex items-center gap-2.5">
+                                            <img src="{{ asset('images/medals/third.png') }}" alt="3rd" class="w-5 h-5 object-contain shrink-0">
+                                            <div class="truncate flex items-center gap-1.5 min-w-0">
+                                                <span class="font-bold text-slate-900 truncate">{{ $wThird['name'] }}</span>
+                                                <span class="text-slate-500 text-[11px] shrink-0">({{ $wThird['unit'] }})</span>
+                                                @if(count($winners['third']) > 1)
+                                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-red-100 text-[#be1e2d] shrink-0">Shared</span>
+                                                @endif
+                                            </div>
                                         </div>
-                                    @else
+                                    @endforeach
+                                @else
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="{{ asset('images/medals/third.png') }}" alt="3rd" class="w-5 h-5 object-contain shrink-0">
                                         <span class="text-slate-400 italic text-[11px]">Not declared</span>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
                             </div>
 
                             @if($res->poster_image)

@@ -226,107 +226,37 @@ class Result extends Model
      */
     public function getPosterWinners(): array
     {
+        if (! empty($this->custom_poster_settings['custom_winners']) && is_array($this->custom_poster_settings['custom_winners'])) {
+            return $this->custom_poster_settings['custom_winners'];
+        }
+
+        $podium = $this->getPodiumWinnersWithTies();
         $winners = [
             'first' => [],
             'second' => [],
             'third' => [],
         ];
 
-        // 1. Try to fetch all podium entries including ties from PointCalculationService
-        if ($this->program) {
-            try {
-                $podium = PointCalculationService::determinePodiumForProgram($this->program);
+        $medalMap = [
+            1 => '/images/medals/first.png',
+            2 => '/images/medals/second.png',
+            3 => '/images/medals/third.png',
+        ];
 
-                if (! empty($podium['first_all']) && $podium['first_all']->isNotEmpty()) {
-                    foreach ($podium['first_all'] as $entry) {
-                        $winners['first'][] = [
-                            'id' => $entry->id,
-                            'name' => $entry->student->name ?? ($entry->group->name ?? '1st Place Winner'),
-                            'unit' => $entry->student->group->name ?? ($entry->group->name ?? 'Group'),
-                            'chest' => $entry->chest_number ?? ($entry->student->student_id ?? ''),
-                            'medal' => '/images/medals/first.png',
-                            'rank' => '01',
-                        ];
-                    }
-                }
-
-                if (! empty($podium['second_all']) && $podium['second_all']->isNotEmpty()) {
-                    foreach ($podium['second_all'] as $entry) {
-                        $winners['second'][] = [
-                            'id' => $entry->id,
-                            'name' => $entry->student->name ?? ($entry->group->name ?? '2nd Place Winner'),
-                            'unit' => $entry->student->group->name ?? ($entry->group->name ?? 'Group'),
-                            'chest' => $entry->chest_number ?? ($entry->student->student_id ?? ''),
-                            'medal' => '/images/medals/second.png',
-                            'rank' => '02',
-                        ];
-                    }
-                }
-
-                if (! empty($podium['third_all']) && $podium['third_all']->isNotEmpty()) {
-                    foreach ($podium['third_all'] as $entry) {
-                        $winners['third'][] = [
-                            'id' => $entry->id,
-                            'name' => $entry->student->name ?? ($entry->group->name ?? '3rd Place Winner'),
-                            'unit' => $entry->student->group->name ?? ($entry->group->name ?? 'Group'),
-                            'chest' => $entry->chest_number ?? ($entry->student->student_id ?? ''),
-                            'medal' => '/images/medals/third.png',
-                            'rank' => '03',
-                        ];
-                    }
-                }
-            } catch (\Throwable $e) {
-                // Ignore and fall back to direct relationships
+        foreach ([1 => 'first', 2 => 'second', 3 => 'third'] as $pos => $key) {
+            foreach ($podium[$pos] as $w) {
+                $winners[$key][] = [
+                    'id' => $w['id'],
+                    'name' => $w['name'],
+                    'unit' => $w['team'],
+                    'chest' => $w['chest'],
+                    'medal' => $medalMap[$pos],
+                    'rank' => sprintf('%02d', $pos),
+                ];
             }
         }
 
-        // 2. Fallbacks for direct single entry relations if not populated from podium calculation
-        if (empty($winners['first']) && $this->firstEntry) {
-            $name = $this->firstEntry->student->name ?? ($this->firstEntry->group->name ?? '1st Place Winner');
-            $unit = $this->firstEntry->student->group->name ?? ($this->firstEntry->group->name ?? 'Group');
-            $chest = $this->firstEntry->chest_number ?? ($this->firstEntry->student->student_id ?? '');
-
-            $winners['first'][] = [
-                'id' => $this->firstEntry->id,
-                'name' => $name,
-                'unit' => $unit,
-                'chest' => $chest,
-                'medal' => '/images/medals/first.png',
-                'rank' => '01',
-            ];
-        }
-
-        if (empty($winners['second']) && $this->secondEntry) {
-            $name = $this->secondEntry->student->name ?? ($this->secondEntry->group->name ?? '2nd Place Winner');
-            $unit = $this->secondEntry->student->group->name ?? ($this->secondEntry->group->name ?? 'Group');
-            $chest = $this->secondEntry->chest_number ?? ($this->secondEntry->student->student_id ?? '');
-
-            $winners['second'][] = [
-                'id' => $this->secondEntry->id,
-                'name' => $name,
-                'unit' => $unit,
-                'chest' => $chest,
-                'medal' => '/images/medals/second.png',
-                'rank' => '02',
-            ];
-        }
-
-        if (empty($winners['third']) && $this->thirdEntry) {
-            $name = $this->thirdEntry->student->name ?? ($this->thirdEntry->group->name ?? '3rd Place Winner');
-            $unit = $this->thirdEntry->student->group->name ?? ($this->thirdEntry->group->name ?? 'Group');
-            $chest = $this->thirdEntry->chest_number ?? ($this->thirdEntry->student->student_id ?? '');
-
-            $winners['third'][] = [
-                'id' => $this->thirdEntry->id,
-                'name' => $name,
-                'unit' => $unit,
-                'chest' => $chest,
-                'medal' => '/images/medals/third.png',
-                'rank' => '03',
-            ];
-        }
-
-        // 3. Fallbacks so that Studio poster NEVER renders empty podium
+        // Fallbacks so that Studio poster NEVER renders empty podium
         if (empty($winners['first'])) {
             $winners['first'][] = [
                 'id' => null,
@@ -434,33 +364,13 @@ class Result extends Model
     }
 
     /**
-     * Get detailed points breakdown (position pts, grade, grade pts, total pts, evaluation marks) for a podium placement.
+     * Build standard breakdown attributes for a specific entry and position.
      *
-     * @return array{
-     *     entry: ?ProgramEntry,
-     *     name: string,
-     *     chest: string,
-     *     team: string,
-     *     team_color: string,
-     *     grade: ?string,
-     *     grade_points: int,
-     *     position_points: int,
-     *     total_points: int,
-     *     total_marks: float,
-     *     avg_marks: float,
-     *     judge_count: int
-     * }
+     * @return array<string, mixed>
      */
-    public function getWinnerBreakdown(int $pos): array
+    public function buildWinnerItemForEntry(?ProgramEntry $entry, int $pos, ?string $overrideGrade = null): array
     {
-        $entry = match ($pos) {
-            1 => $this->firstEntry,
-            2 => $this->secondEntry,
-            3 => $this->thirdEntry,
-            default => null,
-        };
-
-        $declaredGrade = match ($pos) {
+        $declaredGrade = $overrideGrade ?? match ($pos) {
             1 => $this->first_grade,
             2 => $this->second_grade,
             3 => $this->third_grade,
@@ -508,24 +418,28 @@ class Result extends Model
             }
         }
 
-        $weight = (float) ($this->program?->points_weight ?? 1.0);
+        $program = $this->relationLoaded('program') ? $this->program : ($this->program_id ? Program::find($this->program_id) : null);
+        $weight = (float) ($program?->points_weight ?? 1.0);
         $gradePointsRaw = ($grade && isset(PointCalculationService::GRADE_POINTS[$grade]))
             ? PointCalculationService::GRADE_POINTS[$grade]
             : 0;
         $gradePoints = (int) round($gradePointsRaw * $weight);
 
-        $posPointsMap = $this->program
-            ? PointCalculationService::getPositionPointsForProgram($this->program)
+        $posPointsMap = $program
+            ? PointCalculationService::getPositionPointsForProgram($program)
             : [1 => 5, 2 => 3, 3 => 1];
         $posPoints = (int) round(($posPointsMap[$pos] ?? 0) * $weight);
 
-        $name = $entry?->student?->name ?: ($entry ? 'Chest #'.$entry->chest_number : '—');
-        $chest = $entry?->chest_number ?? '—';
+        $name = $entry?->student?->name ?: ($entry ? ($entry->group?->name ?? 'Chest #'.$entry->chest_number) : '—');
+        $chest = $entry?->chest_number ?? ($entry?->student?->student_id ?? '—');
         $team = $entry?->group?->name ?? $entry?->student?->group?->name ?? '—';
         $teamColor = $entry?->group?->color_hex ?? $entry?->student?->group?->color_hex ?? '#be1e2d';
 
         return [
+            'id' => $entry?->id,
             'entry' => $entry,
+            'pos' => $pos,
+            'rank' => sprintf('%02d', $pos),
             'name' => $name,
             'chest' => $chest,
             'team' => $team,
@@ -537,7 +451,185 @@ class Result extends Model
             'total_marks' => $totalMarks,
             'avg_marks' => $avgMarks,
             'judge_count' => $judgeCount,
+            'is_tied' => false,
         ];
+    }
+
+    /**
+     * Get all podium winners (1st, 2nd, 3rd) including any ties/shared winners.
+     *
+     * @return array{
+     *     1: array<int, array<string, mixed>>,
+     *     2: array<int, array<string, mixed>>,
+     *     3: array<int, array<string, mixed>>,
+     *     has_ties: bool,
+     *     total_winners: int
+     * }
+     */
+    public function getPodiumWinnersWithTies(): array
+    {
+        $program = $this->relationLoaded('program') ? $this->program : ($this->program_id ? Program::with(['entries.scores', 'entries.scoreSheets', 'entries.student.group', 'entries.group'])->find($this->program_id) : null);
+
+        $customWinners = (! empty($this->custom_poster_settings['custom_winners']) && is_array($this->custom_poster_settings['custom_winners']))
+            ? $this->custom_poster_settings['custom_winners']
+            : null;
+
+        $podium = null;
+        if ($program) {
+            try {
+                $podium = PointCalculationService::determinePodiumForProgram($program);
+            } catch (\Throwable) {
+                $podium = null;
+            }
+        }
+
+        $result = [
+            1 => [],
+            2 => [],
+            3 => [],
+            'has_ties' => false,
+            'total_winners' => 0,
+        ];
+
+        foreach ([1 => 'first', 2 => 'second', 3 => 'third'] as $pos => $key) {
+            $entriesForPos = collect();
+
+            // A. Primary direct relationship
+            $primaryEntry = match ($pos) {
+                1 => $this->firstEntry,
+                2 => $this->secondEntry,
+                3 => $this->thirdEntry,
+                default => null,
+            };
+            if (! $primaryEntry) {
+                $pId = match ($pos) {
+                    1 => $this->first_entry_id,
+                    2 => $this->second_entry_id,
+                    3 => $this->third_entry_id,
+                    default => null,
+                };
+                if ($pId) {
+                    $primaryEntry = ProgramEntry::with(['group', 'student.group', 'scores', 'scoreSheets'])->find($pId);
+                }
+            }
+            if ($primaryEntry) {
+                $entriesForPos->push($primaryEntry);
+            }
+
+            // B. Add all tied entries from judge podium calculation
+            $podiumKey = "{$key}_all";
+            if ($podium && ! empty($podium[$podiumKey]) && $podium[$podiumKey]->isNotEmpty()) {
+                foreach ($podium[$podiumKey] as $tiedEntry) {
+                    if (! $entriesForPos->contains('id', $tiedEntry->id)) {
+                        $entriesForPos->push($tiedEntry);
+                    }
+                }
+            }
+
+            // C. Add manual shared entries from custom_poster_settings['shared_entry_ids']
+            if (! empty($this->custom_poster_settings['shared_entry_ids'][$pos]) && is_array($this->custom_poster_settings['shared_entry_ids'][$pos])) {
+                foreach ($this->custom_poster_settings['shared_entry_ids'][$pos] as $sharedId) {
+                    if (! $entriesForPos->contains('id', $sharedId)) {
+                        $sEntry = ProgramEntry::with(['group', 'student.group', 'scores', 'scoreSheets'])->find($sharedId);
+                        if ($sEntry) {
+                            $entriesForPos->push($sEntry);
+                        }
+                    }
+                }
+            }
+
+            // D. Add custom winners from studio
+            if (! empty($customWinners[$key]) && is_array($customWinners[$key])) {
+                foreach ($customWinners[$key] as $cw) {
+                    if (! empty($cw['id']) && ! $entriesForPos->contains('id', $cw['id'])) {
+                        $cEntry = ProgramEntry::with(['group', 'student.group', 'scores', 'scoreSheets'])->find($cw['id']);
+                        if ($cEntry) {
+                            $entriesForPos->push($cEntry);
+                        }
+                    }
+                }
+            }
+
+            // E. Format each winner item for this position
+            $winnerItems = [];
+            foreach ($entriesForPos as $entry) {
+                $winnerItems[] = $this->buildWinnerItemForEntry($entry, $pos);
+            }
+
+            // Fallback for custom studio names without entry ID
+            if (empty($winnerItems) && ! empty($customWinners[$key]) && is_array($customWinners[$key])) {
+                foreach ($customWinners[$key] as $cw) {
+                    if (! empty($cw['name'])) {
+                        $winnerItems[] = [
+                            'id' => $cw['id'] ?? null,
+                            'entry' => null,
+                            'pos' => $pos,
+                            'rank' => sprintf('%02d', $pos),
+                            'name' => $cw['name'],
+                            'chest' => $cw['chest'] ?? '—',
+                            'team' => $cw['unit'] ?? 'Group',
+                            'team_color' => '#be1e2d',
+                            'grade' => null,
+                            'grade_points' => 0,
+                            'position_points' => (int) round(($pos === 1 ? 5 : ($pos === 2 ? 3 : 1)) * (float) ($program?->points_weight ?? 1.0)),
+                            'total_points' => (int) round(($pos === 1 ? 5 : ($pos === 2 ? 3 : 1)) * (float) ($program?->points_weight ?? 1.0)),
+                            'total_marks' => 0.0,
+                            'avg_marks' => 0.0,
+                            'judge_count' => 0,
+                            'is_tied' => count($customWinners[$key]) > 1,
+                        ];
+                    }
+                }
+            }
+
+            if (count($winnerItems) > 1) {
+                foreach ($winnerItems as &$wi) {
+                    $wi['is_tied'] = true;
+                }
+                unset($wi);
+                $result['has_ties'] = true;
+            }
+
+            $result[$pos] = $winnerItems;
+            $result['total_winners'] += count($winnerItems);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get all winners breakdown for a specific podium position (1, 2, or 3).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getWinnersBreakdownForPosition(int $pos): array
+    {
+        $all = $this->getPodiumWinnersWithTies();
+
+        return $all[$pos] ?? [];
+    }
+
+    /**
+     * Get single winner breakdown for backward compatibility.
+     *
+     * @return array<string, mixed>
+     */
+    public function getWinnerBreakdown(int $pos): array
+    {
+        $winners = $this->getWinnersBreakdownForPosition($pos);
+
+        if (! empty($winners)) {
+            return $winners[0];
+        }
+
+        $entry = match ($pos) {
+            1 => $this->firstEntry,
+            2 => $this->secondEntry,
+            3 => $this->thirdEntry,
+            default => null,
+        };
+
+        return $this->buildWinnerItemForEntry($entry, $pos);
     }
 
     /**

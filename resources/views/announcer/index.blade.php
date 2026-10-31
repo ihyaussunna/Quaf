@@ -217,9 +217,10 @@
                         $resNo = sprintf('%02d', $res->result_number);
                         $zoneName = $prog?->zone?->name ?? $prog?->eligibility ?? 'All Zones';
                         
-                        $w1 = $res->getWinnerBreakdown(1);
-                        $w2 = $res->getWinnerBreakdown(2);
-                        $w3 = $res->getWinnerBreakdown(3);
+                        $podiumWithTies = $res->getPodiumWinnersWithTies();
+                        $w1List = $podiumWithTies[1];
+                        $w2List = $podiumWithTies[2];
+                        $w3List = $podiumWithTies[3];
                         $otherGraded = $res->getOtherGradeHolders();
                     @endphp
 
@@ -284,157 +285,109 @@
                             </div>
                         </div>
 
-                        <!-- Winners Podium Details with Total Evaluation Marks & Grade Points -->
+                        <!-- Winners Podium Details with Total Evaluation Marks & Grade Points (Supports Shared Winners/Ties) -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
-                            <!-- 1st Place -->
-                            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col justify-between shadow-2xs">
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 font-sora">1st Place</span>
-                                        <span class="text-xs font-black font-mono px-2 py-0.5 rounded bg-amber-200 text-amber-950">
-                                            {{ $w1['total_points'] }} PTS
-                                        </span>
-                                    </div>
-                                    <div class="font-bold text-slate-900 text-base font-sora truncate">
-                                        {{ $w1['name'] }}
-                                    </div>
-                                    <div class="text-xs text-slate-600 mt-0.5">
-                                        Chest: <strong class="font-mono text-slate-900">#{{ $w1['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w1['team'] }}</strong>
-                                    </div>
+                            @php
+                                $podiumCols = [
+                                    1 => [
+                                        'label' => '1st Place',
+                                        'list' => $w1List,
+                                        'bg' => 'bg-amber-50/70',
+                                        'border' => 'border-amber-200',
+                                        'header_text' => 'text-amber-800',
+                                        'pts_badge' => 'bg-amber-200 text-amber-950',
+                                        'mark_border' => 'border-amber-300/80',
+                                        'mark_bg' => 'bg-amber-100 text-slate-950',
+                                        'pos_bg' => 'bg-amber-100 text-amber-900 border border-amber-300',
+                                    ],
+                                    2 => [
+                                        'label' => '2nd Place',
+                                        'list' => $w2List,
+                                        'bg' => 'bg-slate-50',
+                                        'border' => 'border-slate-200',
+                                        'header_text' => 'text-slate-700',
+                                        'pts_badge' => 'bg-slate-200 text-slate-800',
+                                        'mark_border' => 'border-slate-300/80',
+                                        'mark_bg' => 'bg-slate-100 text-slate-950',
+                                        'pos_bg' => 'bg-slate-200 text-slate-800 border border-slate-300',
+                                    ],
+                                    3 => [
+                                        'label' => '3rd Place',
+                                        'list' => $w3List,
+                                        'bg' => 'bg-red-50/60',
+                                        'border' => 'border-red-200',
+                                        'header_text' => 'text-[#be1e2d]',
+                                        'pts_badge' => 'bg-red-100 text-[#be1e2d]',
+                                        'mark_border' => 'border-red-200',
+                                        'mark_bg' => 'bg-red-50 text-[#be1e2d]',
+                                        'pos_bg' => 'bg-red-100 text-red-900 border border-red-200',
+                                    ],
+                                ];
+                            @endphp
 
-                                    <!-- Total Evaluation Mark -->
-                                    <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border border-amber-300/80 flex items-center justify-between shadow-2xs">
-                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
-                                        <div class="text-right">
-                                            <span class="text-xs font-mono font-black text-slate-950 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
-                                                {{ ($w1['avg_marks'] > 0 || $w1['total_marks'] > 0) ? number_format($w1['avg_marks'], 2) : '—' }}
-                                            </span>
-                                            @if($w1['judge_count'] > 1)
-                                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w1['total_marks'], 1) }} ({{ $w1['judge_count'] }} Judges)</span>
-                                            @endif
+                            @foreach($podiumCols as $posNum => $col)
+                                <div class="space-y-3">
+                                    @forelse($col['list'] as $wIdx => $w)
+                                        <div class="p-4 rounded-2xl {{ $col['bg'] }} border {{ $col['border'] }} flex flex-col justify-between shadow-2xs">
+                                            <div>
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="text-xs font-extrabold uppercase tracking-wider {{ $col['header_text'] }} font-sora">{{ $col['label'] }}</span>
+                                                        @if(count($col['list']) > 1)
+                                                            <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-200 text-amber-950">Shared ({{ $wIdx + 1 }}/{{ count($col['list']) }})</span>
+                                                        @endif
+                                                    </div>
+                                                    <span class="text-xs font-black font-mono px-2 py-0.5 rounded {{ $col['pts_badge'] }}">
+                                                        {{ $w['total_points'] }} PTS
+                                                    </span>
+                                                </div>
+                                                <div class="font-bold text-slate-900 text-base font-sora truncate">
+                                                    {{ $w['name'] }}
+                                                </div>
+                                                <div class="text-xs text-slate-600 mt-0.5">
+                                                    Chest: <strong class="font-mono text-slate-900">#{{ $w['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w['team'] }}</strong>
+                                                </div>
+
+                                                <!-- Total Evaluation Mark -->
+                                                <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border {{ $col['mark_border'] }} flex items-center justify-between shadow-2xs">
+                                                    <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
+                                                    <div class="text-right">
+                                                        <span class="text-xs font-mono font-black {{ $col['mark_bg'] }} px-2 py-0.5 rounded border border-slate-200">
+                                                            {{ ($w['avg_marks'] > 0 || $w['total_marks'] > 0) ? number_format($w['avg_marks'], 2) : '—' }}
+                                                        </span>
+                                                        @if($w['judge_count'] > 1)
+                                                            <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w['total_marks'], 1) }} ({{ $w['judge_count'] }} Judges)</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Points Breakdown -->
+                                            <div class="mt-3 pt-2.5 border-t {{ $col['border'] }} flex flex-wrap items-center gap-1.5 text-xs">
+                                                @if($w['grade'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
+                                                        Grade {{ $w['grade'] }}
+                                                    </span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                                        +{{ $w['grade_points'] }} Grade Pts
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
+                                                        No Grade
+                                                    </span>
+                                                @endif
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold {{ $col['pos_bg'] }}">
+                                                    +{{ $w['position_points'] }} Pos Pts
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Points Breakdown -->
-                                <div class="mt-3 pt-2.5 border-t border-amber-200/80 flex flex-wrap items-center gap-1.5 text-xs">
-                                    @if($w1['grade'])
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
-                                            Grade {{ $w1['grade'] }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                            +{{ $w1['grade_points'] }} Grade Pts
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
-                                            No Grade
-                                        </span>
-                                    @endif
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold bg-amber-100 text-amber-900 border border-amber-300">
-                                        +{{ $w1['position_points'] }} Pos Pts
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- 2nd Place -->
-                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between shadow-2xs">
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 font-sora">2nd Place</span>
-                                        <span class="text-xs font-black font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-800">
-                                            {{ $w2['total_points'] }} PTS
-                                        </span>
-                                    </div>
-                                    <div class="font-bold text-slate-900 text-base font-sora truncate">
-                                        {{ $w2['name'] }}
-                                    </div>
-                                    <div class="text-xs text-slate-600 mt-0.5">
-                                        Chest: <strong class="font-mono text-slate-900">#{{ $w2['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w2['team'] }}</strong>
-                                    </div>
-
-                                    <!-- Total Evaluation Mark -->
-                                    <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border border-slate-300/80 flex items-center justify-between shadow-2xs">
-                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
-                                        <div class="text-right">
-                                            <span class="text-xs font-mono font-black text-slate-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                                                {{ ($w2['avg_marks'] > 0 || $w2['total_marks'] > 0) ? number_format($w2['avg_marks'], 2) : '—' }}
-                                            </span>
-                                            @if($w2['judge_count'] > 1)
-                                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w2['total_marks'], 1) }} ({{ $w2['judge_count'] }} Judges)</span>
-                                            @endif
+                                    @empty
+                                        <div class="p-4 rounded-2xl {{ $col['bg'] }} border {{ $col['border'] }} text-center text-xs text-slate-400 italic font-mono py-8">
+                                            {{ $col['label'] }} — Not declared
                                         </div>
-                                    </div>
+                                    @endforelse
                                 </div>
-
-                                <!-- Points Breakdown -->
-                                <div class="mt-3 pt-2.5 border-t border-slate-200 flex flex-wrap items-center gap-1.5 text-xs">
-                                    @if($w2['grade'])
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
-                                            Grade {{ $w2['grade'] }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                            +{{ $w2['grade_points'] }} Grade Pts
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
-                                            No Grade
-                                        </span>
-                                    @endif
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold bg-slate-200 text-slate-800 border border-slate-300">
-                                        +{{ $w2['position_points'] }} Pos Pts
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- 3rd Place -->
-                            <div class="p-4 rounded-2xl bg-red-50/60 border border-red-200 flex flex-col justify-between shadow-2xs">
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-xs font-extrabold uppercase tracking-wider text-[#be1e2d] font-sora">3rd Place</span>
-                                        <span class="text-xs font-black font-mono px-2 py-0.5 rounded bg-red-100 text-[#be1e2d]">
-                                            {{ $w3['total_points'] }} PTS
-                                        </span>
-                                    </div>
-                                    <div class="font-bold text-slate-900 text-base font-sora truncate">
-                                        {{ $w3['name'] }}
-                                    </div>
-                                    <div class="text-xs text-slate-600 mt-0.5">
-                                        Chest: <strong class="font-mono text-slate-900">#{{ $w3['chest'] }}</strong> • Team: <strong class="text-slate-800">{{ $w3['team'] }}</strong>
-                                    </div>
-
-                                    <!-- Total Evaluation Mark -->
-                                    <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-white border border-red-200 flex items-center justify-between shadow-2xs">
-                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">Total Mark:</span>
-                                        <div class="text-right">
-                                            <span class="text-xs font-mono font-black text-[#be1e2d] bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                                                {{ ($w3['avg_marks'] > 0 || $w3['total_marks'] > 0) ? number_format($w3['avg_marks'], 2) : '—' }}
-                                            </span>
-                                            @if($w3['judge_count'] > 1)
-                                                <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Sum: {{ number_format($w3['total_marks'], 1) }} ({{ $w3['judge_count'] }} Judges)</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Points Breakdown -->
-                                <div class="mt-3 pt-2.5 border-t border-red-200 flex flex-wrap items-center gap-1.5 text-xs">
-                                    @if($w3['grade'])
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold bg-emerald-600 text-white shadow-2xs">
-                                            Grade {{ $w3['grade'] }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                            +{{ $w3['grade_points'] }} Grade Pts
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-slate-500 bg-white/70 border border-slate-200">
-                                            No Grade
-                                        </span>
-                                    @endif
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-mono font-semibold bg-red-100 text-red-900 border border-red-200">
-                                        +{{ $w3['position_points'] }} Pos Pts
-                                    </span>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
 
                         <!-- Other Grade Holders (if any) -->
