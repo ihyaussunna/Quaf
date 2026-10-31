@@ -467,17 +467,33 @@ class CoinRewardService
      * Get real-time coin ledger summary for a student.
      *
      * @param  bool  $onlyMediaPublished  When true, only includes coins from results published by media desk.
-     * @return array{balance: int, total_earned: int, total_spent: int}
+     * @return array{balance: int, total_earned: int, competition_earned: int, added_coins: int, total_spent: int}
      */
     public function getStudentCoinSummary(Student $student, bool $onlyMediaPublished = false): array
     {
         CoinTransaction::ensureSchema();
 
-        $earnedQuery = CoinTransaction::where('student_id', $student->id)
-            ->where('coins', '>', 0);
+        // 1. Added coins purchased via Cashier cash deposit
+        $addedQuery = CoinTransaction::where('student_id', $student->id)
+            ->where('coins', '>', 0)
+            ->where(function ($q) {
+                $q->where('source', 'cash_deposit')
+                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            });
+        $addedCoins = (int) $addedQuery->sum('coins');
+
+        // 2. Competition earned coins from grades/prizes
+        $competitionQuery = CoinTransaction::where('student_id', $student->id)
+            ->where('coins', '>', 0)
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNull('source')
+                        ->orWhere('source', '!=', 'cash_deposit');
+                })->where('reward_rule_id', '!=', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            });
 
         if ($onlyMediaPublished) {
-            $earnedQuery->where(function ($q) {
+            $competitionQuery->where(function ($q) {
                 $q->whereNull('result_id')
                     ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             })->where(function ($q) {
@@ -487,7 +503,8 @@ class CoinRewardService
             });
         }
 
-        $earned = (int) $earnedQuery->sum('coins');
+        $competitionEarned = (int) $competitionQuery->sum('coins');
+        $earned = $competitionEarned + $addedCoins;
 
         $spent = (int) abs(CoinTransaction::where('student_id', $student->id)
             ->where('transaction_type', 'debit')
@@ -498,6 +515,8 @@ class CoinRewardService
         return [
             'balance' => $balance,
             'total_earned' => $earned,
+            'competition_earned' => $competitionEarned,
+            'added_coins' => $addedCoins,
             'total_spent' => $spent,
         ];
     }
@@ -740,6 +759,177 @@ class CoinRewardService
                     'notes' => $notes,
                     'operator_id' => $opId,
                     'operator_name' => $opName,
+                ],
+            ]);
+
+            $this->syncStudentCoinsCache($student->id);
+
+            return $transaction;
+        });
+    }
+
+    /**
+     * Record a multi-item cart redemption / purchase for a student at the Presentation Desk.
+     *
+     * @param  array<int, array{item_name: string, coins: int, quantity?: int, item_category?: string}>  $cartItems
+     * @param  array{notes?: string|null, operator_id?: int|null, operator_name?: string|null}  $details
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function redeemCart(Student $student, array $cartItems, array $details = []): CoinTransaction
+    {
+        CoinTransaction::ensureSchema();
+
+        if (empty($cartItems)) {
+            throw new \InvalidArgumentException('കാർട്ടിൽ ഇനങ്ങൾ ഒന്നും തിരഞ്ഞെടുത്തിട്ടില്ല (Cart is empty).');
+        }
+
+        return DB::transaction(function () use ($student, $cartItems, $details) {
+            $summary = $this->getStudentCoinSummary($student);
+            $available = $summary['balance'];
+
+            $normalizedItems = [];
+            $totalCoins = 0;
+            $totalQuantity = 0;
+
+            foreach ($cartItems as $item) {
+                $name = trim($item['item_name'] ?? '');
+                $coins = (int) ($item['coins'] ?? 0);
+                $qty = max(1, (int) ($item['quantity'] ?? 1));
+                $category = $item['item_category'] ?? ($item['category'] ?? 'book');
+
+                if ($name === '' || $coins <= 0) {
+                    continue;
+                }
+
+                $subtotal = $coins * $qty;
+                $totalCoins += $subtotal;
+                $totalQuantity += $qty;
+
+                $normalizedItems[] = [
+                    'item_name' => $name,
+                    'coins' => $coins,
+                    'quantity' => $qty,
+                    'item_category' => $category,
+                    'subtotal_coins' => $subtotal,
+                ];
+            }
+
+            if (empty($normalizedItems) || $totalCoins <= 0) {
+                throw new \InvalidArgumentException('സാധുവായ ഇനങ്ങളൊന്നും കാർട്ടിൽ കാണുന്നില്ല (No valid items found in cart).');
+            }
+
+            if ($available < $totalCoins) {
+                throw new \InvalidArgumentException("കോയിൻ തികയുന്നില്ല! വിദ്യാർത്ഥിയുടെ കൈവശം {$available} കോയിനുകൾ ലഭ്യമാണ്. എന്നാൽ ഈ പർച്ചേസിന് {$totalCoins} കോയിനുകൾ ആവശ്യമാണ്.");
+            }
+
+            $opId = $details['operator_id'] ?? null;
+            $opName = $details['operator_name'] ?? null;
+            $notes = $details['notes'] ?? null;
+
+            $itemsSummaryText = count($normalizedItems) === 1
+                ? $normalizedItems[0]['item_name'].($normalizedItems[0]['quantity'] > 1 ? " (Qty: {$normalizedItems[0]['quantity']})" : '')
+                : count($normalizedItems).' Items ('.implode(', ', array_slice(array_column($normalizedItems, 'item_name'), 0, 3)).(count($normalizedItems) > 3 ? '...' : '').')';
+
+            $ref = 'COIN-CART-STU'.$student->id.'-'.now()->format('YmdHis').'-'.strtoupper(Str::random(5));
+
+            $transaction = CoinTransaction::create([
+                'student_id' => $student->id,
+                'group_id' => $student->group_id,
+                'program_id' => null,
+                'entry_id' => null,
+                'result_id' => null,
+                'prize_position' => 0,
+                'grade' => null,
+                'reward_rule_id' => 'QUAF09_PRESENTATION_CART_PURCHASE_V1',
+                'coins' => -$totalCoins,
+                'cash_amount' => 0.00,
+                'payment_mode' => 'coins',
+                'source' => 'presentation_redemption',
+                'transaction_type' => 'debit',
+                'transaction_reference' => $ref,
+                'status' => 'completed',
+                'description' => "Cart Redemption: {$itemsSummaryText} [{$totalCoins} coins]",
+                'metadata' => [
+                    'is_cart' => true,
+                    'cart_items' => $normalizedItems,
+                    'items_count' => count($normalizedItems),
+                    'total_quantity' => $totalQuantity,
+                    'total_coins' => $totalCoins,
+                    'balance_before' => $available,
+                    'balance_after' => $available - $totalCoins,
+                    'notes' => $notes,
+                    'operator_id' => $opId,
+                    'operator_name' => $opName,
+                ],
+            ]);
+
+            $this->syncStudentCoinsCache($student->id);
+
+            return $transaction;
+        });
+    }
+
+    /**
+     * Add coins to a student's balance when paying cash in hand at the Presentation Cashier desk.
+     *
+     * @param  array{payment_mode?: string, notes?: string|null, operator_id?: int|null, operator_name?: string|null}  $details
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addCashierCoins(Student $student, int $coins, float $cashAmount, array $details = []): CoinTransaction
+    {
+        CoinTransaction::ensureSchema();
+
+        if ($coins <= 0) {
+            throw new \InvalidArgumentException('ചേർക്കുന്ന കോയിൻ പൂജ്യത്തേക്കാൾ വലുതായിരിക്കണം (Coins must be greater than zero).');
+        }
+
+        if ($cashAmount < 0) {
+            throw new \InvalidArgumentException('പണത്തിന്റെ തുക തെറ്റാണ് (Invalid cash amount).');
+        }
+
+        return DB::transaction(function () use ($student, $coins, $cashAmount, $details) {
+            $summaryBefore = $this->getStudentCoinSummary($student);
+            $balanceBefore = $summaryBefore['balance'];
+            $addedBefore = $summaryBefore['added_coins'];
+
+            $opId = $details['operator_id'] ?? null;
+            $opName = $details['operator_name'] ?? 'Presentation Cashier';
+            $notes = $details['notes'] ?? null;
+            $paymentMode = $details['payment_mode'] ?? 'cash';
+
+            $ref = 'COIN-CASH-STU'.$student->id.'-'.now()->format('YmdHis').'-'.strtoupper(Str::random(4));
+
+            $transaction = CoinTransaction::create([
+                'student_id' => $student->id,
+                'group_id' => $student->group_id,
+                'program_id' => null,
+                'entry_id' => null,
+                'result_id' => null,
+                'prize_position' => 0,
+                'grade' => null,
+                'reward_rule_id' => 'QUAF09_CASHIER_COIN_DEPOSIT_V1',
+                'coins' => $coins,
+                'cash_amount' => $cashAmount,
+                'payment_mode' => $paymentMode,
+                'source' => 'cash_deposit',
+                'transaction_type' => 'credit',
+                'transaction_reference' => $ref,
+                'status' => 'completed',
+                'description' => 'Added Coin (പണം നൽകി ചേർത്തത്): ₹'.number_format($cashAmount, 2)." (+{$coins} Coins)",
+                'metadata' => [
+                    'source_type' => 'cash_deposit',
+                    'cash_amount' => $cashAmount,
+                    'coins_added' => $coins,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $balanceBefore + $coins,
+                    'added_coins_before' => $addedBefore,
+                    'added_coins_after' => $addedBefore + $coins,
+                    'notes' => $notes,
+                    'operator_id' => $opId,
+                    'operator_name' => $opName,
+                    'payment_mode' => $paymentMode,
                 ],
             ]);
 

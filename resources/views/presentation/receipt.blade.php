@@ -186,17 +186,42 @@
     </div>
 
     <div class="item-box">
-        <div class="item-row">
-            <div>{{ $transaction->metadata['item_name'] ?? $transaction->description }}</div>
-            <div class="coins-total">{{ $transaction->coins }} Coins</div>
-        </div>
-        <div class="item-sub">
-            Qty: {{ $transaction->metadata['quantity'] ?? 1 }}
-            • Rate: {{ $transaction->metadata['coins_per_unit'] ?? abs($transaction->coins) }} Coins/unit
-            @if(!empty($transaction->metadata['notes']))
-                • Ref: {{ $transaction->metadata['notes'] }}
-            @endif
-        </div>
+        @if(!empty($transaction->metadata['cart_items']))
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 8px;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #cbd5e1; text-align: left; color: #64748b; font-size: 10px; font-family: 'JetBrains Mono', monospace;">
+                        <th style="padding-bottom: 6px;">ITEM</th>
+                        <th style="text-align: center; padding-bottom: 6px;">QTY</th>
+                        <th style="text-align: right; padding-bottom: 6px;">COINS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($transaction->metadata['cart_items'] as $cItem)
+                        <tr style="border-bottom: 1px dashed #e2e8f0;">
+                            <td style="padding: 6px 0; font-weight: 700;">{{ $cItem['item_name'] }}</td>
+                            <td style="text-align: center; font-family: 'JetBrains Mono', monospace;">{{ $cItem['quantity'] }}</td>
+                            <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #be1e2d;">{{ $cItem['subtotal_coins'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div class="item-row" style="padding-top: 6px;">
+                <div style="font-size: 12px; font-weight: 800;">Total Cart Coins:</div>
+                <div class="coins-total">{{ abs($transaction->coins) }} Coins</div>
+            </div>
+        @else
+            <div class="item-row">
+                <div>{{ $transaction->metadata['item_name'] ?? $transaction->description }}</div>
+                <div class="coins-total">{{ abs($transaction->coins) }} Coins</div>
+            </div>
+            <div class="item-sub">
+                Qty: {{ $transaction->metadata['quantity'] ?? 1 }}
+                • Rate: {{ $transaction->metadata['coins_per_unit'] ?? abs($transaction->coins) }} Coins/unit
+                @if(!empty($transaction->metadata['notes']))
+                    • Ref: {{ $transaction->metadata['notes'] }}
+                @endif
+            </div>
+        @endif
     </div>
 
     <div class="balance-box">

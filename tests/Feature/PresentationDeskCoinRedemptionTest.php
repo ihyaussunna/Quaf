@@ -415,4 +415,170 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $ajaxResponse->assertJsonPath('student.prizes.1.count', 1);
         $ajaxResponse->assertJsonPath('student.prizes.1.rank', 'Pinnacle');
     }
+
+    public function test_cashier_user_can_login_with_username_and_password_and_redirects_to_cashier_console(): void
+    {
+        $response = $this->post(route('login'), [
+            'username' => 'cashier',
+            'password' => 'Cashier#2026@Quaf!',
+        ]);
+
+        $response->assertRedirect(route('presentation.cashier'));
+        $this->assertAuthenticated();
+        $this->assertEquals('presentation_cashier', auth()->user()->role);
+    }
+
+    public function test_cashier_can_add_coins_for_cash_in_hand_and_it_shows_as_added_coins(): void
+    {
+        $cashierUser = User::where('role', 'presentation_cashier')->first() ?? User::create([
+            'name' => 'Cashier Operator',
+            'email' => 'cashier@quaf.fest',
+            'password' => bcrypt('Cashier#2026@Quaf!'),
+            'role' => 'presentation_cashier',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($cashierUser)->post(route('presentation.cashier.add-coins'), [
+            'student_id' => $this->student->id,
+            'cash_amount' => 150,
+            'coins' => 150,
+            'payment_mode' => 'cash',
+            'notes' => 'Received cash at presentation counter',
+        ]);
+
+        $response->assertRedirect(route('presentation.cashier', ['student' => $this->student->student_id]));
+        $response->assertSessionHas('success');
+
+        // Verify transaction in database
+        $this->assertDatabaseHas('coin_transactions', [
+            'student_id' => $this->student->id,
+            'coins' => 150,
+            'cash_amount' => 150.00,
+            'source' => 'cash_deposit',
+            'transaction_type' => 'credit',
+            'reward_rule_id' => 'QUAF09_CASHIER_COIN_DEPOSIT_V1',
+        ]);
+
+        // Check student coin summary
+        $service = app(CoinRewardService::class);
+        $summary = $service->getStudentCoinSummary($this->student);
+
+        $this->assertEquals(150, $summary['balance']);
+        $this->assertEquals(150, $summary['added_coins']);
+        $this->assertEquals(0, $summary['competition_earned']);
+        $this->assertEquals(150, $summary['total_earned']);
+
+        // Check cashier page displays "Added Coins"
+        $cashierView = $this->actingAs($cashierUser)->get(route('presentation.cashier', ['student' => $this->student->student_id]));
+        $cashierView->assertOk();
+        $cashierView->assertSee('പണം നൽകി ചേർത്തത്');
+        $cashierView->assertSee('ADDED COIN');
+        $cashierView->assertSee('+150');
+    }
+
+    public function test_cart_redemption_deducts_total_coins_for_multiple_items(): void
+    {
+        // First topup student wallet with 200 coins
+        CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->student->group_id,
+            'prize_position' => 0,
+            'coins' => 200,
+            'transaction_type' => 'credit',
+            'source' => 'cash_deposit',
+            'reward_rule_id' => 'QUAF09_CASHIER_COIN_DEPOSIT_V1',
+            'transaction_reference' => 'COIN-TEST-TOPUP-01',
+            'status' => 'completed',
+            'description' => 'Topup: ₹200',
+        ]);
+
+        $cart = [
+            ['item_name' => 'Book Premium', 'coins' => 100, 'quantity' => 1, 'category' => 'book'],
+            ['item_name' => 'Centenary Pen', 'coins' => 40, 'quantity' => 2, 'category' => 'stationery'],
+        ]; // Total: 100*1 + 40*2 = 180 coins
+
+        $response = $this->actingAs($this->presentationUser)->post(route('presentation.redeem-cart'), [
+            'student_id' => $this->student->id,
+            'cart_data' => json_encode($cart),
+            'notes' => 'Cart gift delivery',
+        ]);
+
+        $response->assertRedirect(route('presentation.dashboard', ['student' => $this->student->student_id]));
+        $response->assertSessionHas('success');
+
+        // Check debit transaction recorded
+        $this->assertDatabaseHas('coin_transactions', [
+            'student_id' => $this->student->id,
+            'coins' => -180,
+            'transaction_type' => 'debit',
+            'reward_rule_id' => 'QUAF09_PRESENTATION_CART_PURCHASE_V1',
+        ]);
+
+        $service = app(CoinRewardService::class);
+        $summary = $service->getStudentCoinSummary($this->student);
+        $this->assertEquals(20, $summary['balance']); // 200 - 180 = 20
+        $this->assertEquals(180, $summary['total_spent']);
+    }
+
+    public function test_cart_redemption_fails_when_coins_are_insufficient(): void
+    {
+        // Student has only 50 coins
+        CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->student->group_id,
+            'prize_position' => 0,
+            'coins' => 50,
+            'transaction_type' => 'credit',
+            'reward_rule_id' => 'QUAF09_GROUP_PROGRAM_REWARD_RULE_V1',
+            'transaction_reference' => 'COIN-TEST-COMP-50',
+            'status' => 'completed',
+            'description' => 'Competition 50 coins',
+        ]);
+
+        $cart = [
+            ['item_name' => 'Book Premium', 'coins' => 100, 'quantity' => 1, 'category' => 'book'],
+        ];
+
+        $response = $this->actingAs($this->presentationUser)->post(route('presentation.redeem-cart'), [
+            'student_id' => $this->student->id,
+            'cart_data' => json_encode($cart),
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseMissing('coin_transactions', [
+            'student_id' => $this->student->id,
+            'coins' => -100,
+        ]);
+    }
+
+    public function test_cashier_receipt_can_be_viewed(): void
+    {
+        $deposit = CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->student->group_id,
+            'prize_position' => 0,
+            'coins' => 100,
+            'cash_amount' => 100.00,
+            'payment_mode' => 'cash',
+            'source' => 'cash_deposit',
+            'transaction_type' => 'credit',
+            'reward_rule_id' => 'QUAF09_CASHIER_COIN_DEPOSIT_V1',
+            'transaction_reference' => 'COIN-CASH-TEST-999',
+            'status' => 'completed',
+            'description' => 'Cash Deposit ₹100 (+100 Coins)',
+            'metadata' => [
+                'cash_amount' => 100.00,
+                'coins_added' => 100,
+                'balance_before' => 0,
+                'balance_after' => 100,
+            ],
+        ]);
+
+        $response = $this->actingAs($this->presentationUser)->get(route('presentation.cashier.receipt', $deposit->id));
+        $response->assertOk();
+        $response->assertSee('QUAF FESTIVAL 09');
+        $response->assertSee('ADDED COINS RECEIPT');
+        $response->assertSee('COIN-CASH-TEST-999');
+        $response->assertSee('100.00');
+    }
 }

@@ -48,30 +48,44 @@
 
             <!-- COIN WALLET BALANCE GRID -->
             @if($coinSummary)
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                     <!-- Available Balance -->
-                    <div class="p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 shadow-md border border-amber-300">
-                        <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-800">Available Wallet Balance</div>
-                        <div class="text-3xl sm:text-4xl font-black mt-1 font-sora flex items-baseline gap-2">
+                    <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 shadow-md border border-amber-300 col-span-2 sm:col-span-1">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-800">Wallet Balance</div>
+                        <div class="text-2xl sm:text-3xl font-black mt-1 font-sora flex items-baseline gap-1.5">
                             <span>{{ number_format($coinSummary['balance']) }}</span>
-                            <span class="text-xs font-mono uppercase font-bold text-slate-800">Coins</span>
+                            <span class="text-[10px] font-mono uppercase font-bold text-slate-800">Coins</span>
                         </div>
                     </div>
 
-                    <!-- Total Earned -->
-                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-                        <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Coins Earned</div>
-                        <div class="text-2xl sm:text-3xl font-black mt-1 font-sora text-emerald-600">
-                            +{{ number_format($coinSummary['total_earned']) }}
+                    <!-- Competition Earned -->
+                    <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">മത്സരത്തിലൂടെ നേടിയത്</div>
+                        <div class="text-xl sm:text-2xl font-black mt-1 font-sora text-amber-700">
+                            +{{ number_format($coinSummary['competition_earned'] ?? $coinSummary['total_earned']) }}
                         </div>
+                        <span class="text-[9px] text-slate-400 font-mono">Earned Coins</span>
+                    </div>
+
+                    <!-- Added Coins -->
+                    <div class="p-4 sm:p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300">
+                        <div class="flex items-center justify-between">
+                            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800">പണം നൽകി ചേർത്തത്</div>
+                            <span class="px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-emerald-200 text-emerald-900">ADDED COIN</span>
+                        </div>
+                        <div class="text-xl sm:text-2xl font-black mt-1 font-sora text-emerald-700">
+                            +{{ number_format($coinSummary['added_coins'] ?? 0) }}
+                        </div>
+                        <span class="text-[9px] text-emerald-700 font-mono">Cashier Added</span>
                     </div>
 
                     <!-- Total Spent -->
-                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-                        <div class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Coins Spent</div>
-                        <div class="text-2xl sm:text-3xl font-black mt-1 font-sora text-rose-600">
+                    <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Total Coins Spent</div>
+                        <div class="text-xl sm:text-2xl font-black mt-1 font-sora text-rose-600">
                             -{{ number_format($coinSummary['total_spent']) }}
                         </div>
+                        <span class="text-[9px] text-slate-400 font-mono">Redeemed</span>
                     </div>
                 </div>
             @endif

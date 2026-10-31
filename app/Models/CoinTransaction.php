@@ -23,7 +23,10 @@ class CoinTransaction extends Model
         'grade',
         'reward_rule_id',
         'coins',
+        'cash_amount',
+        'payment_mode',
         'transaction_type',
+        'source',
         'transaction_reference',
         'status',
         'description',
@@ -35,6 +38,7 @@ class CoinTransaction extends Model
         return [
             'prize_position' => 'integer',
             'coins' => 'integer',
+            'cash_amount' => 'decimal:2',
             'metadata' => 'array',
         ];
     }
@@ -55,7 +59,7 @@ class CoinTransaction extends Model
                     $table->foreignId('program_id')->nullable()->constrained('programs')->nullOnDelete();
                     $table->foreignId('entry_id')->nullable()->constrained('program_entries')->nullOnDelete();
                     $table->foreignId('result_id')->nullable()->constrained('results')->nullOnDelete();
-                    $table->unsignedTinyInteger('prize_position');
+                    $table->unsignedTinyInteger('prize_position')->default(0);
                     $table->string('grade', 15)->nullable();
                     $table->string('reward_rule_id', 60)->default('QUAF09_GROUP_PROGRAM_REWARD_RULE_V1');
                     $table->integer('coins');
@@ -69,6 +73,17 @@ class CoinTransaction extends Model
                     $table->index(['student_id', 'transaction_type']);
                     $table->index(['group_id', 'program_id']);
                     $table->unique(['result_id', 'entry_id', 'student_id', 'transaction_type'], 'coin_tx_res_entry_stu_type_unique');
+                });
+                Schema::table('coin_transactions', function (Blueprint $table) {
+                    if (! Schema::hasColumn('coin_transactions', 'source')) {
+                        $table->string('source', 50)->default('competition')->after('transaction_type')->index();
+                    }
+                    if (! Schema::hasColumn('coin_transactions', 'cash_amount')) {
+                        $table->decimal('cash_amount', 10, 2)->default(0.00)->after('coins');
+                    }
+                    if (! Schema::hasColumn('coin_transactions', 'payment_mode')) {
+                        $table->string('payment_mode', 30)->nullable()->default('cash')->after('cash_amount');
+                    }
                 });
             }
 

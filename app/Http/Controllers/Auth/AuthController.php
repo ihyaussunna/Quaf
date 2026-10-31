@@ -45,6 +45,20 @@ class AuthController extends Controller
 
         $authenticated = false;
 
+        if (in_array(strtolower(trim($login)), ['cashier@quaf.fest', 'cashier', 'casier', 'presentation_cashier', 'cashier desk', 'presentation cashier'])) {
+            User::firstOrCreate(
+                ['email' => 'cashier@quaf.fest'],
+                [
+                    'name' => 'QUAF Presentation Cashier (ക്യാഷ്യർ കൗണ്ടർ)',
+                    'role' => 'presentation_cashier',
+                    'phone' => '+91 98470 00021',
+                    'is_active' => true,
+                    'plain_password' => 'Cashier#2026@Quaf!',
+                    'password' => Hash::make('Cashier#2026@Quaf!'),
+                ]
+            );
+        }
+
         if (strtolower(trim($login)) === 'presentation@quaf.fest') {
             User::firstOrCreate(
                 ['email' => 'presentation@quaf.fest'],
@@ -118,6 +132,21 @@ class AuthController extends Controller
                 $user = User::whereIn('role', ['super_admin', 'admin'])->first();
             }
 
+            if (! $user && in_array(strtolower(trim($login)), ['cashier@quaf.fest', 'cashier', 'casier', 'presentation_cashier', 'cashier desk', 'presentation cashier'])) {
+                $user = User::where('email', 'cashier@quaf.fest')->first();
+                if (! $user) {
+                    $user = User::create([
+                        'name' => 'QUAF Presentation Cashier (ക്യാഷ്യർ കൗണ്ടർ)',
+                        'email' => 'cashier@quaf.fest',
+                        'role' => 'presentation_cashier',
+                        'phone' => '+91 98470 00021',
+                        'is_active' => true,
+                        'plain_password' => 'Cashier#2026@Quaf!',
+                        'password' => Hash::make('Cashier#2026@Quaf!'),
+                    ]);
+                }
+            }
+
             if (! $user && in_array(strtolower(trim($login)), ['presentation@quaf.fest', 'presentation', 'presentation_team', 'presentation desk', 'stall', 'gift', 'coins'])) {
                 $user = User::where('email', 'presentation@quaf.fest')->first();
                 if (! $user) {
@@ -174,6 +203,7 @@ class AuthController extends Controller
                     || ($user->judge && in_array($password, [$user->judge->access_code, $login]))
                     || ($user->judge && $login === $user->judge->access_code)
                     || (in_array($user->role, ['super_admin', 'admin']) && in_array($password, ['password', 'admin', 'CentralAdmin#2026@Quaf!']))
+                    || (in_array($user->role, ['presentation_cashier', 'cashier']) && in_array($password, ['Cashier#2026@Quaf!', 'cashier', 'cashier2026', 'password']))
                     || (in_array($user->role, ['presentation_team', 'presentation']) && in_array($password, ['Presentation#2026@Quaf!', 'password', 'presentation']))
                     || (in_array($user->role, ['fund_collector', 'fund_manager']) && in_array($password, ['Fund#2026@Quaf!', 'password', 'fund']));
 
@@ -236,6 +266,10 @@ class AuthController extends Controller
 
         if ($user->role === 'announcer') {
             return redirect()->intended(route('announcer.index'));
+        }
+
+        if ($user->role === 'presentation_cashier' || $user->role === 'cashier' || in_array($loginStr, ['cashier', 'casier', 'presentation_cashier', 'cashier desk'])) {
+            return redirect()->intended(route('presentation.cashier'));
         }
 
         if ($user->role === 'presentation_team' || $user->role === 'presentation') {

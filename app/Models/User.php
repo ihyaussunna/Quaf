@@ -119,7 +119,12 @@ class User extends Authenticatable
 
     public function isPresentationTeam(): bool
     {
-        return in_array($this->role, ['super_admin', 'admin', 'presentation_team', 'presentation']);
+        return in_array($this->role, ['super_admin', 'admin', 'presentation_team', 'presentation', 'presentation_cashier', 'cashier']);
+    }
+
+    public function isPresentationCashier(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'presentation_cashier', 'cashier']);
     }
 
     public function isFundCollector(): bool

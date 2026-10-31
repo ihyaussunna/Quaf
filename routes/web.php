@@ -775,14 +775,20 @@ Route::prefix('announcer')->name('announcer.')->middleware(['auth', 'role:admin,
 | Presentation Desk Routes (Coins & Gift Redemption)
 |--------------------------------------------------------------------------
 */
-Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:admin,super_admin,presentation_team,presentation'])->group(function () {
+Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:admin,super_admin,presentation_team,presentation,presentation_cashier,cashier'])->group(function () {
     Route::get('/', [PresentationController::class, 'index'])->name('dashboard');
     Route::get('/search-student', [PresentationController::class, 'searchStudent'])->name('search-student');
     Route::post('/redeem', [PresentationController::class, 'redeem'])->name('redeem');
+    Route::post('/redeem-cart', [PresentationController::class, 'redeemCart'])->name('redeem-cart');
     Route::post('/students/{student}/toggle-gift', [PresentationController::class, 'toggleGift'])->name('toggle-gift');
     Route::post('/transactions/{transaction}/reverse', [PresentationController::class, 'reverseRedemption'])->name('reverse');
     Route::get('/transactions/{transaction}/receipt', [PresentationController::class, 'receipt'])->name('receipt');
     Route::get('/report', [PresentationController::class, 'report'])->name('report');
+
+    // Presentation Cashier Routes
+    Route::get('/cashier', [PresentationController::class, 'cashierIndex'])->name('cashier');
+    Route::post('/cashier/add-coins', [PresentationController::class, 'addCashierCoins'])->name('cashier.add-coins');
+    Route::get('/cashier/receipt/{transaction}', [PresentationController::class, 'cashierReceipt'])->name('cashier.receipt');
 });
 
 /*

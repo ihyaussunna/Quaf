@@ -18,6 +18,10 @@
         </div>
 
         <div class="flex items-center gap-3">
+            <a href="{{ route('presentation.cashier') }}" class="px-4 py-2.5 rounded-xl border border-emerald-300 hover:border-emerald-400 bg-emerald-50 text-emerald-800 text-xs font-bold font-mono uppercase transition-all shadow-xs flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span>Cashier Desk</span>
+            </a>
             <a href="{{ route('presentation.report') }}" class="px-4 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 bg-white text-slate-700 text-xs font-bold font-mono uppercase transition-all shadow-xs flex items-center gap-2">
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <span>Report</span>
@@ -198,6 +202,30 @@
                                 <span class="opacity-70">Total Spent:</span>
                                 <span class="text-rose-950 font-black">-{{ $studentSummary['total_spent'] }}</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown: Competition Earned vs Added Coins -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200">
+                            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-800">മത്സരത്തിലൂടെ നേടിയത്</div>
+                            <div class="text-lg font-black text-amber-950 mt-0.5">
+                                {{ number_format($studentSummary['competition_earned'] ?? $studentSummary['total_earned']) }}
+                                <span class="text-[11px] font-mono font-normal">Coins</span>
+                            </div>
+                            <span class="text-[9px] text-amber-700 font-anek block">Earned Coins</span>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-300">
+                            <div class="flex items-center justify-between">
+                                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800">പണം നൽകി ചേർത്തത്</div>
+                                <span class="px-1.5 py-0.5 rounded-full text-[8px] font-mono font-bold bg-emerald-200 text-emerald-900">ADDED COIN</span>
+                            </div>
+                            <div class="text-lg font-black text-emerald-900 mt-0.5">
+                                +{{ number_format($studentSummary['added_coins'] ?? 0) }}
+                                <span class="text-[11px] font-mono font-normal">Coins</span>
+                            </div>
+                            <span class="text-[9px] text-emerald-700 font-anek block">Cashier Added Coins</span>
                         </div>
                     </div>
 
@@ -412,8 +440,13 @@
                         @forelse($studentTransactions as $index => $stx)
                             <div x-show="showAll || {{ $index }} < 5" class="p-3 rounded-xl bg-slate-50 text-slate-900 flex items-center justify-between gap-3 text-xs border border-slate-200/80">
                                 <div class="min-w-0">
-                                    <div class="font-bold text-slate-900 truncate text-[11px]">{{ $stx->description }}</div>
-                                    <div class="text-[9px] font-mono text-slate-400">{{ $stx->created_at?->format('d M, h:i A') }}</div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        @if($stx->source === 'cash_deposit')
+                                            <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">ADDED COIN</span>
+                                        @endif
+                                        <span class="font-bold text-slate-900 truncate text-[11px]">{{ $stx->description }}</span>
+                                    </div>
+                                    <div class="text-[9px] font-mono text-slate-400 mt-0.5">{{ $stx->created_at?->format('d M, h:i A') }}</div>
                                 </div>
                                 <div class="font-mono font-black text-xs flex-shrink-0 {{ $stx->coins > 0 ? 'text-emerald-700' : 'text-rose-700' }}">
                                     {{ $stx->coins > 0 ? '+' : '-' }} {{ abs($stx->coins) }} Coins
@@ -428,144 +461,221 @@
                 </div>
             </div>
 
-            <!-- Right: Redemption / Purchase Action Form (7 cols) -->
-            <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-                <div>
-                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                        <span>Record Purchase / Gift Redemption</span>
-                    </h3>
-                    <p class="text-xs text-slate-500 font-anek">
-                        വിദ്യാർത്ഥിക്ക് നൽകുന്ന പുസ്തകമോ സമ്മാനമോ തിരഞ്ഞെടുക്കുക. കോയിനുകൾ സ്വമേധയാ അക്കൗണ്ടിൽ നിന്ന് കുറയുന്നതാണ്.
-                    </p>
-                </div>
+            <!-- Right: Item Selection & Cart Console (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
 
-                <!-- Fast Preset Catalog Buttons -->
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Quick Preset Items</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <!-- 1. Quick Presets (Click '+ Add to Cart' directly) -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                <span>Quick Preset Gifts (വേഗത്തിൽ തിരഞ്ഞെടുക്കാൻ)</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 font-anek mt-0.5">
+                                ഏതെങ്കിലും ഇനം തിരഞ്ഞെടുത്ത് '+ Add to Cart' ക്ലിക്ക് ചെയ്യുക. കോയിൻ ബാലൻസ് ഇല്ലെങ്കിലും കാർട്ടിലേക്ക് ചേർക്കാം.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Preset Items Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         @foreach($presets as $p)
-                            <button type="button" 
-                                    @click="selectPreset('{{ addslashes($p['name']) }}', {{ $p['coins'] }}, '{{ $p['category'] }}')"
-                                    class="p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 text-left transition-all cursor-pointer group shadow-2xs">
-                                <span class="block text-[10px] font-mono font-bold text-amber-700 uppercase">{{ $p['badge'] }}</span>
-                                <span class="block text-xs font-bold text-slate-800 group-hover:text-amber-950 truncate">{{ $p['name'] }}</span>
-                                <span class="block text-xs font-mono font-black text-[#be1e2d] mt-1">{{ $p['coins'] }} Coins</span>
-                            </button>
+                            <div class="p-3 rounded-2xl border border-slate-200 hover:border-amber-400 bg-white hover:bg-amber-50/30 transition-all flex flex-col justify-between shadow-2xs group">
+                                <div>
+                                    <span class="inline-block text-[9px] font-mono font-bold text-amber-700 bg-amber-100/60 px-1.5 py-0.5 rounded uppercase">{{ $p['badge'] }}</span>
+                                    <h4 class="text-xs font-bold text-slate-900 mt-1 leading-snug line-clamp-2">{{ $p['name'] }}</h4>
+                                    <div class="text-xs font-mono font-black text-[#be1e2d] mt-1">{{ $p['coins'] }} Coins</div>
+                                </div>
+                                <button type="button" 
+                                        @click="addToCart('{{ addslashes($p['name']) }}', {{ $p['coins'] }}, '{{ $p['category'] }}')"
+                                        class="mt-2.5 w-full py-1.5 px-2 bg-slate-900 group-hover:bg-[#be1e2d] text-white rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                    <span>Add to Cart</span>
+                                </button>
+                            </div>
                         @endforeach
+                    </div>
+
+                    <!-- Custom Item Entry (Accordion/Inline) -->
+                    <div x-data="{ openCustom: false }" class="pt-2 border-t border-slate-100">
+                        <button type="button" @click="openCustom = !openCustom" class="text-xs font-bold font-mono text-amber-800 hover:text-amber-950 flex items-center gap-1.5 cursor-pointer">
+                            <span x-text="openCustom ? '−' : '+'"></span>
+                            <span x-text="openCustom ? 'Hide Custom Gift Entry' : '+ Add Custom Gift / Book (ലിസ്റ്റിൽ ഇല്ലാത്തത് ചേർക്കുക)'"></span>
+                        </button>
+
+                        <div x-show="openCustom" x-cloak class="mt-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] font-mono font-bold uppercase text-slate-600">Gift / Book Name</label>
+                                    <input type="text" x-model="customItemName" placeholder="e.g. Special Islamic Encyclopedia" class="w-full mt-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono font-bold uppercase text-slate-600">Coins Required</label>
+                                    <input type="number" x-model.number="customItemCoins" min="1" placeholder="50" class="w-full mt-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl font-bold font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono font-bold uppercase text-slate-600">Quantity</label>
+                                    <input type="number" x-model.number="customItemQty" min="1" max="50" placeholder="1" class="w-full mt-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl font-bold font-mono">
+                                </div>
+                            </div>
+                            <button type="button" @click="addCustomToCart()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold font-mono uppercase tracking-wider cursor-pointer">
+                                + Add Custom Item to Cart
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Purchase Form -->
-                <form method="POST" action="{{ route('presentation.redeem') }}" class="space-y-5" @submit="confirmSubmit($event)">
-                    @csrf
-                    <input type="hidden" name="student_id" value="{{ $selectedStudent->id }}">
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Item Name -->
-                        <div class="sm:col-span-2 space-y-1.5">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                                Item / Book Name (പുസ്തകം / ഇനം) <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="item_name" 
-                                   x-model="itemName" 
-                                   required 
-                                   placeholder="e.g. Fiqhussunna / Islamic History Book / Trophy"
-                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:border-amber-500 focus:outline-none transition-all">
-                        </div>
-
-                        <!-- Coins per unit -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                                Coins Required (കോയിൻ) <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="number" 
-                                   name="coins" 
-                                   x-model.number="unitCoins" 
-                                   min="1" 
-                                   max="5000" 
-                                   required 
-                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-mono text-slate-900 focus:bg-white focus:border-amber-500 focus:outline-none transition-all">
-                        </div>
-
-                        <!-- Quantity -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                                Quantity (എണ്ണം)
-                            </label>
-                            <div class="flex items-center">
-                                <button type="button" @click="if (quantity > 1) quantity--" class="px-3 py-3 bg-slate-100 hover:bg-slate-200 rounded-l-xl text-slate-700 font-bold border border-slate-200 border-r-0 cursor-pointer">-</button>
-                                <input type="number" 
-                                       name="quantity" 
-                                       x-model.number="quantity" 
-                                       min="1" 
-                                       max="100" 
-                                       class="w-full px-3 py-3 text-center bg-slate-50 border border-slate-200 text-sm font-bold font-mono text-slate-900 focus:outline-none">
-                                <button type="button" @click="quantity++" class="px-3 py-3 bg-slate-100 hover:bg-slate-200 rounded-r-xl text-slate-700 font-bold border border-slate-200 border-l-0 cursor-pointer">+</button>
+                <!-- 2. THE CART PANEL -->
+                <div class="bg-white rounded-3xl border-2 border-slate-900/10 p-6 sm:p-7 shadow-sm space-y-5">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
+                                    <span>Selected Gifts Cart</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-900 text-amber-400" x-text="cart.length + ' Items'"></span>
+                                </h3>
+                                <p class="text-[11px] text-slate-400 font-anek">വിദ്യാർത്ഥി തിരഞ്ഞെടുത്ത സമ്മാനങ്ങളുടെ കാർട്ട്</p>
                             </div>
                         </div>
 
-                        <!-- Item Category -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                                Category
-                            </label>
-                            <select name="item_category" x-model="itemCategory" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:bg-white focus:border-amber-500 focus:outline-none">
-                                <option value="book">Book (പുസ്തകം)</option>
-                                <option value="souvenir">Fest Souvenir / Memento</option>
-                                <option value="stationery">Stationery (ഡയറി / പേന)</option>
-                                <option value="kit">Kit / Badge</option>
-                                <option value="other">Other / ഇതര ഇനങ്ങൾ</option>
-                            </select>
-                        </div>
-
-                        <!-- Notes / Reference -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                                Notes / Bill No (ഓപ്ഷണൽ)
-                            </label>
-                            <input type="text" 
-                                   name="notes" 
-                                   x-model="notes" 
-                                   placeholder="Bill or voucher number..."
-                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:bg-white focus:border-amber-500 focus:outline-none transition-all">
-                        </div>
+                        <button type="button" 
+                                x-show="cart.length > 0"
+                                @click="clearCart()" 
+                                class="text-xs font-mono font-bold text-rose-600 hover:text-rose-800 underline cursor-pointer">
+                            Clear Cart
+                        </button>
                     </div>
 
-                    <!-- Dynamic Balance Calculation Breakdown -->
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                        <div class="flex items-center justify-between text-xs font-mono">
-                            <span class="text-slate-500">Student Current Balance:</span>
-                            <span class="font-bold text-slate-900">{{ $studentSummary['balance'] }} Coins</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs font-mono">
-                            <span class="text-slate-500">Total Purchase Deduction:</span>
-                            <span class="font-bold text-rose-600" x-text="'-' + (unitCoins * quantity) + ' Coins'"></span>
-                        </div>
-                        <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-sm font-mono font-bold">
-                            <span class="text-slate-800">Remaining Balance After Purchase:</span>
-                            <span :class="( {{ $studentSummary['balance'] }} - (unitCoins * quantity) ) >= 0 ? 'text-emerald-700 font-black' : 'text-rose-600 font-black'"
-                                  x-text="( {{ $studentSummary['balance'] }} - (unitCoins * quantity) ) + ' Coins'"></span>
-                        </div>
+                    <!-- Toast Feedback -->
+                    <div x-show="addedFeedback" x-cloak 
+                         class="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center justify-between transition-all">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span x-text="addedFeedback"></span>
+                        </span>
+                        <button type="button" @click="addedFeedback = ''" class="text-emerald-700">&times;</button>
                     </div>
 
-                    <!-- Insufficient Balance Warning -->
-                    <div x-show="(unitCoins * quantity) > {{ $studentSummary['balance'] }}" x-cloak
-                         class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold flex items-center gap-3">
-                        <svg class="w-5 h-5 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        <span>ശ്രദ്ധിക്കുക: വിദ്യാർത്ഥിയുടെ അക്കൗണ്ടിൽ ആവശ്യത്തിന് കോയിനുകൾ ലഭ്യമല്ല (Insufficient Coins). ഈ പർച്ചേസ് സേവ് ചെയ്യാൻ സാധ്യമല്ല.</span>
+                    <!-- Empty State -->
+                    <div x-show="cart.length === 0" class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                        <svg class="w-10 h-10 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <div class="text-sm font-bold text-slate-700 font-sora">കാർട്ട് കാലിയാണ് (Cart is Empty)</div>
+                        <p class="text-xs text-slate-400 font-anek max-w-sm mx-auto">
+                            മുകളിൽ നൽകിയിട്ടുള്ള ലിസ്റ്റിൽ നിന്നും സമ്മാനങ്ങളോ പുസ്തകങ്ങളോ തിരഞ്ഞെടുത്ത് '+ Add to Cart' ക്ലിക്ക് ചെയ്യുക. കോയിൻ ഇല്ലെങ്കിലും കാർട്ടിലേക്ക് ചേർക്കാൻ സാധിക്കും.
+                        </p>
                     </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" 
-                            :disabled="(unitCoins * quantity) > {{ $studentSummary['balance'] }} || (unitCoins * quantity) <= 0 || !itemName"
-                            class="w-full py-4 rounded-2xl font-bold font-sora text-sm uppercase tracking-wider text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="(unitCoins * quantity) > {{ $studentSummary['balance'] }} ? 'bg-slate-400' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <span>Confirm Purchase & Deduct Coins (സേവ് ചെയ്യുക & കോയിൻ കുറയ്ക്കുക)</span>
-                    </button>
-                </form>
+                    <!-- Cart Table (When items exist) -->
+                    <div x-show="cart.length > 0" class="space-y-4">
+                        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-mono text-[10px] uppercase border-b border-slate-200">
+                                        <th class="py-2.5 px-3">Item Name</th>
+                                        <th class="py-2.5 px-3 text-center">Rate</th>
+                                        <th class="py-2.5 px-3 text-center">Qty</th>
+                                        <th class="py-2.5 px-3 text-right">Subtotal</th>
+                                        <th class="py-2.5 px-2 text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <template x-for="(item, idx) in cart" :key="item.id || idx">
+                                        <tr class="hover:bg-slate-50/50">
+                                            <td class="py-2.5 px-3">
+                                                <div class="font-bold text-slate-900" x-text="item.item_name"></div>
+                                                <div class="text-[9px] font-mono text-slate-400 uppercase" x-text="item.item_category"></div>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-600">
+                                                <span x-text="item.coins"></span> c
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <div class="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
+                                                    <button type="button" @click="updateQuantity(idx, -1)" class="px-2 py-0.5 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700 cursor-pointer">-</button>
+                                                    <span class="px-2 font-mono font-bold text-xs" x-text="item.quantity"></span>
+                                                    <button type="button" @click="updateQuantity(idx, 1)" class="px-2 py-0.5 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700 cursor-pointer">+</button>
+                                                </div>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-right font-mono font-black text-slate-900">
+                                                <span x-text="item.coins * item.quantity"></span> Coins
+                                            </td>
+                                            <td class="py-2.5 px-2 text-center">
+                                                <button type="button" @click="removeFromCart(idx)" class="text-slate-400 hover:text-rose-600 font-bold cursor-pointer">&times;</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Cart Totals & Balance Reconciliation -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 font-mono text-xs">
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>Total Required Coins (ആകെ ആവശ്യം):</span>
+                                <span class="font-black text-slate-900 text-sm" x-text="totalCartCoins() + ' Coins'"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>Student Available Balance (വിദ്യാർത്ഥിയുടെ ബാലൻസ്):</span>
+                                <span class="font-bold text-slate-900">{{ $studentSummary['balance'] }} Coins</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1">
+                                <span>Breakdown:</span>
+                                <span>Earned: {{ $studentSummary['competition_earned'] }} | Added: {{ $studentSummary['added_coins'] }}</span>
+                            </div>
+
+                            <!-- Case 1: Sufficient Balance -->
+                            <div x-show="totalCartCoins() <= {{ $studentSummary['balance'] }}" class="pt-2.5 border-t border-slate-200">
+                                <div class="flex items-center justify-between text-emerald-800 font-bold text-xs">
+                                    <span>Remaining Balance After Delivery:</span>
+                                    <span class="font-black text-sm" x-text="( {{ $studentSummary['balance'] }} - totalCartCoins() ) + ' Coins'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Case 2: Insufficient Balance Alert & Cashier Shortcut -->
+                            <div x-show="totalCartCoins() > {{ $studentSummary['balance'] }}" x-cloak class="pt-3 border-t border-rose-200 space-y-3">
+                                <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-1.5">
+                                    <div class="font-bold flex items-center gap-1.5 text-xs text-rose-800">
+                                        <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                        <span>കോയിൻ തികയുന്നില്ല! (Insufficient Coins)</span>
+                                    </div>
+                                    <p class="text-[11px] font-anek leading-relaxed text-rose-800">
+                                        ഈ ഓർഡർ പൂർത്തിയാക്കാൻ ഇനിയും <strong class="font-mono font-bold text-rose-950" x-text="(totalCartCoins() - {{ $studentSummary['balance'] }}) + ' കോയിനുകൾ'"></strong> ആവശ്യമാണ്.
+                                        കുട്ടികൾക്ക് ക്യാഷ്യർ കൗണ്ടറിൽ പണം നൽകി ബാക്കി കോയിനുകൾ അക്കൗണ്ടിലേക്ക് ചേർക്കാവുന്നതാണ്.
+                                    </p>
+                                </div>
+
+                                <a href="{{ route('presentation.cashier', ['student' => $selectedStudent->student_id]) }}" 
+                                   class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    <span>Go to Cashier Desk & Add Coins (ക്യാഷ്യറിൽ കോയിൻ ചേർക്കുക &rarr;)</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Form Submission -->
+                        <form method="POST" action="{{ route('presentation.redeem-cart') }}" @submit="confirmCartCheckout($event)" class="space-y-3">
+                            @csrf
+                            <input type="hidden" name="student_id" value="{{ $selectedStudent->id }}">
+                            <input type="hidden" name="cart_data" :value="JSON.stringify(cart)">
+
+                            <div>
+                                <input type="text" name="notes" placeholder="Notes / Bill No (ഓപ്ഷണൽ)..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                            </div>
+
+                            <button type="submit" 
+                                    :disabled="cart.length === 0 || totalCartCoins() > {{ $studentSummary['balance'] }}"
+                                    class="w-full py-4 rounded-2xl font-bold font-sora text-sm uppercase tracking-wider text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    :class="totalCartCoins() > {{ $studentSummary['balance'] }} ? 'bg-slate-400' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span x-text="totalCartCoins() > {{ $studentSummary['balance'] }} ? 'Insufficient Coins to Deliver' : 'Checkout & Deliver Gifts (ഓർഡർ പൂർത്തിയാക്കുക)'"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </div>
     @elseif($queryStr !== '')
@@ -636,7 +746,12 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 font-medium text-slate-800">
-                                <div>{{ $tx->description }}</div>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    @if($tx->source === 'cash_deposit')
+                                        <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">ADDED COIN</span>
+                                    @endif
+                                    <span>{{ $tx->description }}</span>
+                                </div>
                                 @if(!empty($tx->metadata['notes']))
                                     <div class="text-[10px] text-slate-400 italic">Notes: {{ $tx->metadata['notes'] }}</div>
                                 @endif
@@ -731,10 +846,128 @@ function presentationDesk() {
         itemCategory: '{{ $presets[0]['category'] ?? 'book' }}',
         notes: '',
 
-        selectPreset(name, coins, category) {
-            this.itemName = name;
-            this.unitCoins = coins;
-            this.itemCategory = category;
+        // Cart State
+        cart: [],
+        addedFeedback: '',
+        customItemName: '',
+        customItemCoins: 50,
+        customItemQty: 1,
+        customItemCategory: 'book',
+
+        init() {
+            @if($selectedStudent)
+                try {
+                    const saved = sessionStorage.getItem('quaf_pres_cart_{{ $selectedStudent->id }}');
+                    if (saved) {
+                        this.cart = JSON.parse(saved);
+                    }
+                } catch(e) {}
+            @endif
+        },
+
+        saveCart() {
+            @if($selectedStudent)
+                try {
+                    sessionStorage.setItem('quaf_pres_cart_{{ $selectedStudent->id }}', JSON.stringify(this.cart));
+                } catch(e) {}
+            @endif
+        },
+
+        addToCart(name, coins, category, qty = 1) {
+            qty = parseInt(qty) || 1;
+            coins = parseInt(coins) || 0;
+            if (!name || coins <= 0) return;
+
+            // Items can be added to Cart regardless of whether student has coins right now!
+            const existing = this.cart.find(i => i.item_name === name && i.coins === coins);
+            if (existing) {
+                existing.quantity += qty;
+                existing.subtotal_coins = existing.quantity * existing.coins;
+            } else {
+                this.cart.push({
+                    id: Date.now() + Math.random().toString(36).substr(2, 5),
+                    item_name: name,
+                    coins: coins,
+                    quantity: qty,
+                    item_category: category || 'book',
+                    subtotal_coins: coins * qty
+                });
+            }
+            this.saveCart();
+            this.showFeedback('"' + name + '" കാർട്ടിലേക്ക് ചേർത്തു!');
+            this.playBeep();
+        },
+
+        addCustomToCart() {
+            if (!this.customItemName || this.customItemCoins <= 0) {
+                alert('സാധുവായ സമ്മാനത്തിന്റെ പേരും കോയിനും നൽകുക.');
+                return;
+            }
+            this.addToCart(this.customItemName, this.customItemCoins, this.customItemCategory, this.customItemQty);
+            this.customItemName = '';
+            this.customItemCoins = 50;
+            this.customItemQty = 1;
+        },
+
+        updateQuantity(index, change) {
+            if (!this.cart[index]) return;
+            this.cart[index].quantity += change;
+            if (this.cart[index].quantity <= 0) {
+                this.removeFromCart(index);
+                return;
+            }
+            this.cart[index].subtotal_coins = this.cart[index].quantity * this.cart[index].coins;
+            this.saveCart();
+        },
+
+        removeFromCart(index) {
+            this.cart.splice(index, 1);
+            this.saveCart();
+        },
+
+        clearCart() {
+            if (this.cart.length === 0) return;
+            if (confirm('കാർട്ടിലുള്ള എല്ലാ ഇനങ്ങളും ഒഴിവാക്കട്ടെ?')) {
+                this.cart = [];
+                this.saveCart();
+            }
+        },
+
+        totalCartCoins() {
+            return this.cart.reduce((sum, item) => sum + (item.coins * item.quantity), 0);
+        },
+
+        totalCartQuantity() {
+            return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        },
+
+        showFeedback(msg) {
+            this.addedFeedback = msg;
+            setTimeout(() => {
+                if (this.addedFeedback === msg) this.addedFeedback = '';
+            }, 3000);
+        },
+
+        confirmCartCheckout(event) {
+            const total = this.totalCartCoins();
+            const balance = {{ $studentSummary['balance'] ?? 0 }};
+            if (this.cart.length === 0) {
+                alert('കാർട്ടിൽ ഇനങ്ങൾ ഒന്നും ചേർത്തിട്ടില്ല!');
+                event.preventDefault();
+                return;
+            }
+            if (total > balance) {
+                alert('കോയിൻ തികയുന്നില്ല! ബാക്കി കോയിനുകൾ ക്യാഷ്യർ കൗണ്ടറിൽ നിന്നും ചേർത്ത ശേഷം ഓർഡർ പൂർത്തിയാക്കുക.');
+                event.preventDefault();
+                return;
+            }
+            if (!confirm('ആകെ ' + this.cart.length + ' ഇനങ്ങൾ (' + total + ' കോയിൻ) നൽകി ഓർഡർ കൺഫേം ചെയ്യട്ടെ?')) {
+                event.preventDefault();
+            } else {
+                @if($selectedStudent)
+                    try { sessionStorage.removeItem('quaf_pres_cart_{{ $selectedStudent->id }}'); } catch(e) {}
+                @endif
+            }
         },
 
         playBeep() {
@@ -751,13 +984,6 @@ function presentationDesk() {
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.15);
             } catch (e) {}
-        },
-
-        confirmSubmit(event) {
-            let total = this.unitCoins * this.quantity;
-            if (!confirm(this.itemName + ' നൽകി ' + total + ' കോയിനുകൾ കുറയ്ക്കട്ടെ?')) {
-                event.preventDefault();
-            }
         },
 
         toggleCameraScanner() {

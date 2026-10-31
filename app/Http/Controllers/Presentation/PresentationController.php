@@ -163,6 +163,8 @@ class PresentationController extends Controller
                 'photo_url' => $student->photo_path ? asset('storage/'.$student->photo_path) : null,
                 'balance' => $summary['balance'],
                 'total_earned' => $summary['total_earned'],
+                'competition_earned' => $summary['competition_earned'],
+                'added_coins' => $summary['added_coins'],
                 'total_spent' => $summary['total_spent'],
                 'recognition_gift_delivered' => (bool) $student->recognition_gift_delivered,
                 'recognition_gift_delivered_at' => $student->recognition_gift_delivered_at?->format('d M, h:i A'),
@@ -211,6 +213,45 @@ class PresentationController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error processing purchase: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Record a multi-item cart redemption for the student.
+     */
+    public function redeemCart(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|integer|exists:students,id',
+            'cart_data' => 'required|string',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $cartItems = json_decode($validated['cart_data'], true);
+        if (! is_array($cartItems) || empty($cartItems)) {
+            return redirect()->back()->with('error', 'കാർട്ടിൽ ഇനങ്ങൾ ഒന്നും കണ്ടെത്തിയില്ല (Cart is empty).');
+        }
+
+        $student = Student::with(['group'])->findOrFail($validated['student_id']);
+
+        try {
+            $transaction = $this->coinRewardService->redeemCart($student, $cartItems, [
+                'notes' => $validated['notes'] ?? null,
+                'operator_id' => Auth::id(),
+                'operator_name' => Auth::user()?->name ?? 'Presentation Desk',
+            ]);
+
+            return redirect()->route('presentation.dashboard', ['student' => $student->student_id])
+                ->with('success', "വിജയകരമായി പൂർത്തിയാക്കി! {$student->name}-ൽ നിന്ന് ".abs($transaction->coins).' കോയിനുകൾ കുറച്ചു.')
+                ->with('last_transaction_id', $transaction->id);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error processing cart purchase: '.$e->getMessage());
         }
     }
 
@@ -322,6 +363,111 @@ class PresentationController extends Controller
             'startDate',
             'endDate'
         ));
+    }
+
+    /**
+     * Display the Presentation Cashier Console.
+     */
+    public function cashierIndex(Request $request): View
+    {
+        CoinTransaction::ensureSchema();
+
+        $selectedStudent = null;
+        $studentSummary = null;
+        $studentTransactions = collect();
+
+        $queryStr = trim((string) ($request->query('student') ?? $request->query('query') ?? ''));
+        if ($queryStr !== '') {
+            $selectedStudent = $this->resolveStudent($queryStr);
+            if ($selectedStudent) {
+                $studentSummary = $this->coinRewardService->getStudentCoinSummary($selectedStudent);
+                $studentTransactions = CoinTransaction::where('student_id', $selectedStudent->id)
+                    ->latest()
+                    ->take(20)
+                    ->get();
+            }
+        }
+
+        // Cashier metrics for today
+        $todayCashDeposits = CoinTransaction::where('source', 'cash_deposit')
+            ->whereDate('created_at', today());
+
+        $stats = [
+            'today_cash_total' => (float) $todayCashDeposits->sum('cash_amount'),
+            'today_coins_added' => (int) $todayCashDeposits->sum('coins'),
+            'today_deposits_count' => $todayCashDeposits->count(),
+            'all_time_cash_total' => (float) CoinTransaction::where('source', 'cash_deposit')->sum('cash_amount'),
+            'all_time_coins_added' => (int) CoinTransaction::where('source', 'cash_deposit')->sum('coins'),
+        ];
+
+        $recentDeposits = CoinTransaction::where('source', 'cash_deposit')
+            ->with(['student.group', 'student.zone'])
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $lastDeposit = null;
+        if (session('last_deposit_id')) {
+            $lastDeposit = CoinTransaction::with(['student.group'])->find(session('last_deposit_id'));
+        }
+
+        return view('presentation.cashier', compact(
+            'stats',
+            'selectedStudent',
+            'studentSummary',
+            'studentTransactions',
+            'recentDeposits',
+            'queryStr',
+            'lastDeposit'
+        ));
+    }
+
+    /**
+     * Cashier adds coins to student account in exchange for cash in hand.
+     */
+    public function addCashierCoins(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|integer|exists:students,id',
+            'cash_amount' => 'required|numeric|min:1',
+            'coins' => 'required|integer|min:1',
+            'payment_mode' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $student = Student::with(['group'])->findOrFail($validated['student_id']);
+
+        try {
+            $transaction = $this->coinRewardService->addCashierCoins(
+                $student,
+                (int) $validated['coins'],
+                (float) $validated['cash_amount'],
+                [
+                    'payment_mode' => $validated['payment_mode'] ?? 'cash',
+                    'notes' => $validated['notes'] ?? null,
+                    'operator_id' => Auth::id(),
+                    'operator_name' => Auth::user()?->name ?? 'Presentation Cashier',
+                ]
+            );
+
+            return redirect()->route('presentation.cashier', ['student' => $student->student_id])
+                ->with('success', "വിജയകരമായി ചേർത്തു! ₹{$validated['cash_amount']} പണം സ്വീകരിച്ച് {$student->name}-ന് {$validated['coins']} Added Coins നൽകി.")
+                ->with('last_deposit_id', $transaction->id);
+        } catch (\Throwable $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error adding coins: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Cashier print receipt for a cash-to-coins transaction.
+     */
+    public function cashierReceipt(CoinTransaction $transaction): View
+    {
+        $transaction->load(['student.group', 'student.zone']);
+
+        return view('presentation.cashier-receipt', compact('transaction'));
     }
 
     /**

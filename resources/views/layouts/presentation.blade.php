@@ -76,6 +76,13 @@
                 <span>Presentation Counter</span>
             </a>
 
+            <!-- 2. Cashier Counter (പണം സ്വീകരിച്ച് കോയിൻ നൽകൽ) -->
+            <a href="{{ route('presentation.cashier') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('presentation.cashier*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span>Cashier Desk (കോയിൻ നൽകൽ)</span>
+            </a>
+
             <!-- 2. Summary Report -->
             <a href="{{ route('presentation.report') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('presentation.report') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
