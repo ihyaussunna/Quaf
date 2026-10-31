@@ -42,6 +42,7 @@ use App\Http\Controllers\Judge\JudgeController;
 use App\Http\Controllers\Leader\LeaderController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Media\MediaResultController;
+use App\Http\Controllers\Media\MediaStandingsController;
 use App\Http\Controllers\Presentation\PresentationController;
 use App\Http\Controllers\ProgramCommittee\ProgramCommitteeController;
 use App\Http\Controllers\Public\BrochureController;
@@ -908,6 +909,10 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     Route::delete('/videos/{video}', [MediaController::class, 'videosDestroy'])->name('videos.destroy');
     Route::post('/videos/{video}/toggle-live', [MediaController::class, 'videosToggleLive'])->name('videos.toggle-live');
     Route::post('/videos/{video}/toggle-featured', [MediaController::class, 'videosToggleFeatured'])->name('videos.toggle-featured');
+
+    // Team Standings (Public Website Leaderboard)
+    Route::get('/team-standings', [MediaStandingsController::class, 'index'])->name('standings.index');
+    Route::post('/team-standings', [MediaStandingsController::class, 'update'])->name('standings.update');
 
     // Results & Poster Designer
     Route::get('/results', [MediaResultController::class, 'index'])->name('results.index');

@@ -130,13 +130,14 @@ class Group extends Model
 
     /**
      * Get the officially released public team standings.
+     * Highest points team is ALWAYS on top (Rank 1).
      */
     public static function getPublicStandings(): Collection
     {
         self::ensureSchema();
 
-        return self::orderBy('public_rank_cache', 'asc')
-            ->orderByDesc('public_points_cache')
+        return self::orderByDesc('public_points_cache')
+            ->orderBy('public_rank_cache', 'asc')
             ->orderBy('id', 'asc')
             ->withCount(['students', 'entries'])
             ->get();

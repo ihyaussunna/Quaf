@@ -438,4 +438,60 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $this->assertEquals(3, $w2['position_points']);
         $this->assertEquals(9, $w2['total_points']);
     }
+
+    public function test_media_panel_team_standings_management_and_public_ordering(): void
+    {
+        // 1. Media team can access Team Standings management panel
+        $response = $this->actingAs($this->mediaUser)->get(route('media.standings.index'));
+        $response->assertOk();
+        $response->assertSee('ടീം പോയിന്റ് നില');
+        $response->assertSee('House Alpha');
+        $response->assertSee('House Beta');
+
+        // 2. Media team enters custom points (Beta = 25 pts, Alpha = 10 pts) and sets 5 results
+        $updateResponse = $this->actingAs($this->mediaUser)
+            ->post(route('media.standings.update'), [
+                'results_count' => 5,
+                'points' => [
+                    $this->groupA->id => 10,
+                    $this->groupB->id => 25,
+                ],
+            ]);
+
+        $updateResponse->assertRedirect();
+        $updateResponse->assertSessionHas('success');
+
+        // 3. Verify FestivalSetting label and count
+        $this->assertEquals('5', FestivalSetting::get('public_standings_results_count'));
+        $this->assertEquals('After 05 Results', FestivalSetting::get('public_standings_label'));
+
+        // 4. Verify highest points team (House Beta, 25 pts) is assigned Rank 1
+        $this->groupA->refresh();
+        $this->groupB->refresh();
+        $this->assertEquals(25, $this->groupB->public_points_cache);
+        $this->assertEquals(1, $this->groupB->public_rank_cache);
+        $this->assertEquals(10, $this->groupA->public_points_cache);
+        $this->assertEquals(2, $this->groupA->public_rank_cache);
+
+        // 5. Verify Public Home page renders 'After 05 Results', does NOT show 'Initial Standings', and places House Beta on top
+        $homeResponse = $this->get(route('home'));
+        $homeResponse->assertOk();
+        $homeResponse->assertDontSee('Initial Standings');
+        $homeResponse->assertSee('After 05 Results');
+        $homeResponse->assertSee('25');
+        $homeResponse->assertSee('10');
+
+        $content = $homeResponse->getContent();
+        $posBeta = strpos($content, 'House Beta');
+        $posAlpha = strpos($content, 'House Alpha');
+        $this->assertNotFalse($posBeta);
+        $this->assertNotFalse($posAlpha);
+        $this->assertLessThan($posAlpha, $posBeta, 'The team with more points (House Beta) must appear before House Alpha in the standings!');
+
+        // 6. Verify Public Groups page renders 'After 05 Results' and does NOT show 'Initial Standings'
+        $groupsResponse = $this->get(route('groups.index'));
+        $groupsResponse->assertOk();
+        $groupsResponse->assertDontSee('Initial Standings');
+        $groupsResponse->assertSee('After 05 Results');
+    }
 }

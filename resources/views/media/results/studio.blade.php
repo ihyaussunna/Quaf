@@ -118,10 +118,11 @@
                         <span x-text="savingDefault ? 'സേവ് ചെയ്യുന്നു...' : 'Save Template Defaults (ടെംപ്ലേറ്റ് സേവ് ചെയ്യുക)'"></span>
                     </button>
                     <!-- Download PNG Preview for Template Customizer -->
-                    <button type="button" @click="downloadPoster()"
-                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Preview PNG</span>
+                    <button type="button" @click="downloadPoster(2)"
+                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                            title="Download high-resolution Ultra HD preview">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Preview Ultra HD</span>
                     </button>
                 @else
                     <!-- Save as Default in Result mode -->
@@ -131,11 +132,12 @@
                         <span x-text="savingDefault ? 'Saving...' : 'Save Default'"></span>
                     </button>
 
-                    <!-- Download PNG -->
-                    <button type="button" @click="downloadPoster()"
-                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Download PNG</span>
+                    <!-- Download PNG (Ultra HD) -->
+                    <button type="button" @click="downloadPoster(2)"
+                            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                            title="Download in Ultra HD (2160x2700 High Quality Clear Poster)">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download Ultra HD</span>
                     </button>
 
                     <!-- Direct Poster Upload Button -->
@@ -3143,6 +3145,9 @@ function posterStudio() {
             const width = canvas.width;
             const height = canvas.height;
 
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
             if (!this.isDragging && !this.isResizing && !isExport && !this.isApplyingHistory) {
                 this.recordHistory();
             }
@@ -3640,16 +3645,50 @@ function posterStudio() {
             return allLines.length > 0 ? allLines : [text];
         },
 
-        downloadPoster() {
+        generateHighQualityCanvas(scale = 2) {
+            const baseCanvas = document.getElementById('posterCanvas');
+            const exportCanvas = document.createElement('canvas');
+            const baseW = baseCanvas ? baseCanvas.width : 1080;
+            const baseH = baseCanvas ? baseCanvas.height : 1350;
+            
+            exportCanvas.width = baseW * scale;
+            exportCanvas.height = baseH * scale;
+            
+            const ctx = exportCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.scale(scale, scale);
+
+            // 1. Draw Template Background at High Res
+            if (this.templateImageObj && this.templateImageObj.complete) {
+                ctx.drawImage(this.templateImageObj, 0, 0, baseW, baseH);
+            } else {
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(0, 0, baseW, baseH);
+            }
+
+            // 2. Draw Layers in Painter's order (reverse of layerStack: bottom to top)
+            if (!this.layerStack || this.layerStack.length === 0) {
+                this.syncLayerStack();
+            }
+            const drawOrder = [...this.layerStack].reverse();
+            drawOrder.forEach(layerId => {
+                this.drawLayer(ctx, layerId);
+            });
+
+            return exportCanvas;
+        },
+
+        downloadPoster(scale = 2) {
             this.render(true);
-            const canvas = document.getElementById('posterCanvas');
+            const exportCanvas = this.generateHighQualityCanvas(scale);
             const link = document.createElement('a');
             const resNo = (this.data.result_no || '01').toString().trim().padStart(2, '0');
             const cleanSlug = (s) => (s || '').toString().trim().replace(/[/\\?%*:|"<>#]/g, '').replace(/\s+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
             const zone = cleanSlug(this.data.category || 'Zone');
             const prog = cleanSlug(this.data.competition || 'Program');
             link.download = `${resNo}_${zone}_${prog}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.href = exportCanvas.toDataURL('image/png', 1.0);
             link.click();
             this.render(false);
         },
@@ -3724,8 +3763,9 @@ function posterStudio() {
             this.statusMsg = '';
             this.render(true);
 
-            const canvas = document.getElementById('posterCanvas');
-            const dataUrl = canvas.toDataURL('image/png');
+            // Export Ultra-High Quality 2X resolution (2160x2700) for crystal clear clarity
+            const exportCanvas = this.generateHighQualityCanvas(2);
+            const dataUrl = exportCanvas.toDataURL('image/png', 1.0);
 
             fetch('{{ !empty($result->id) ? route("media.results.save-poster", $result->id) : "#" }}', {
                 method: 'POST',

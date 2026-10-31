@@ -13,13 +13,12 @@
             <div class="flex flex-wrap items-center gap-3 mt-1">
                 <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 animate-heading">Group Standings</h1>
                 @php
-                    $standingsLabel = \App\Models\FestivalSetting::get('public_standings_label', '');
+                    $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
+                    $standingsLabel = 'After ' . sprintf('%02d', $standingsCount) . ' Results';
                 @endphp
-                @if($standingsLabel)
-                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
-                        {{ $standingsLabel }}
-                    </span>
-                @endif
+                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
+                    {{ $standingsLabel }}
+                </span>
             </div>
             <p class="text-sm text-slate-600 mt-2 max-w-xl">
                 Official leaderboard and cumulative point standings of competing festival groups in QUAF.
@@ -39,11 +38,9 @@
                     RANK &amp; TEAM
                 </span>
                 <div class="flex items-center gap-2">
-                    @if(!empty($standingsLabel))
-                        <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            {{ $standingsLabel }}
-                        </span>
-                    @endif
+                    <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        {{ $standingsLabel }}
+                    </span>
                     <span class="text-xs font-mono uppercase tracking-widest text-slate-400 font-bold">
                         TOTAL POINTS
                     </span>

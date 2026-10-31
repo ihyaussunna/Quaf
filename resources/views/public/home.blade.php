@@ -515,13 +515,12 @@
                     Festival Standings
                 </h2>
                 @php
-                    $standingsBadge = \App\Models\FestivalSetting::get('public_standings_label', '');
+                    $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
+                    $standingsBadge = 'After ' . sprintf('%02d', $standingsCount) . ' Results';
                 @endphp
-                @if($standingsBadge)
-                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
-                        {{ $standingsBadge }}
-                    </span>
-                @endif
+                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
+                    {{ $standingsBadge }}
+                </span>
             </div>
         </div>
 
@@ -538,11 +537,9 @@
                                 RANK &amp; TEAM
                             </span>
                             <div class="flex items-center gap-2">
-                                @if(!empty($standingsBadge))
-                                    <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                        {{ $standingsBadge }}
-                                    </span>
-                                @endif
+                                <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                    {{ $standingsBadge }}
+                                </span>
                                 <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
                                     TOTAL POINTS
                                 </span>
