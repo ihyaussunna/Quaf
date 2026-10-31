@@ -69,12 +69,13 @@ class ResultController extends Controller
         $results = $query->latest('published_at')->paginate(12)->withQueryString();
 
         $allPublishedOrder = Result::where('status', 'published')
-            ->where('is_media_published', true)
+            ->orderByRaw('CASE WHEN result_number IS NOT NULL THEN result_number ELSE 999999 END ASC')
             ->orderBy('published_at', 'asc')
             ->orderBy('id', 'asc')
-            ->pluck('id')
-            ->flip()
-            ->map(fn ($idx) => $idx + 1)
+            ->get(['id', 'result_number'])
+            ->mapWithKeys(function ($r, $idx) {
+                return [$r->id => $r->result_number ?: ($idx + 1)];
+            })
             ->toArray();
 
         Cache::forget('public_results_categories');

@@ -219,6 +219,8 @@
                     @php
                         $isDelivered = in_array($res->status, ['send', 'delivered']);
                         $prog = $res->program;
+                        $resNo = sprintf('%02d', $res->result_number);
+                        $zoneName = $prog?->zone?->name ?? $prog?->eligibility ?? 'All Zones';
                         
                         $w1 = $res->getWinnerBreakdown(1);
                         $w2 = $res->getWinnerBreakdown(2);
@@ -246,7 +248,7 @@
                             $w3Desc .= " — പൊസിഷൻ: +{$w3['position_points']} pts (ആകെ: {$w3['total_points']} pts)";
                         }
 
-                        $scriptText = "ക്വാഫ് ഫെസ്റ്റ് {$prog?->name} മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു: ഒന്നാം സ്ഥാനം: {$w1Desc}. രണ്ടാം സ്ഥാനം: {$w2Desc}. മൂന്നാം സ്ഥാനം: {$w3Desc}.";
+                        $scriptText = "ക്വാഫ് ഫെസ്റ്റ് റിസൾട്ട് നമ്പർ {$resNo} ({$zoneName}): {$prog?->name} മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു: ഒന്നാം സ്ഥാനം: {$w1Desc}. രണ്ടാം സ്ഥാനം: {$w2Desc}. മൂന്നാം സ്ഥാനം: {$w3Desc}.";
                     @endphp
 
                     <div class="bg-white rounded-3xl p-6 sm:p-8 border {{ $isDelivered ? 'border-amber-300 ring-4 ring-amber-100/70 shadow-md' : 'border-slate-200 shadow-xs' }} transition">
@@ -254,18 +256,31 @@
                         <!-- Top Header Section of Card -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                             <div>
-                                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                    <span class="px-2.5 py-0.5 rounded font-mono text-xs font-bold bg-slate-900 text-white">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <!-- Result Number Badge -->
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono text-xs font-black bg-[#be1e2d] text-white shadow-xs tracking-wider">
+                                        <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                                        <span>Result #{{ $resNo }}</span>
+                                    </span>
+
+                                    <span class="px-2.5 py-1 rounded-xl font-mono text-xs font-bold bg-slate-900 text-white">
                                         {{ $prog?->code ?: 'PROG' }}
                                     </span>
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $isDelivered ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' : 'bg-emerald-100 text-emerald-800 border border-emerald-200' }}">
+                                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold {{ $isDelivered ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' : 'bg-emerald-100 text-emerald-800 border border-emerald-200' }}">
                                         {{ $isDelivered ? 'READY FOR MIC ANNOUNCEMENT' : 'ANNOUNCED ON STAGE' }}
                                     </span>
+                                    <!-- Zone Badge -->
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 font-mono">
+                                        <span class="text-blue-500 font-normal">Zone:</span> {{ $zoneName }}
+                                    </span>
                                     <span class="text-xs text-slate-500 font-semibold">
-                                        {{ $prog?->eligibility ?? 'General' }} • {{ $prog?->is_stage ? 'Stage Event' : 'Non-stage Event' }} • {{ $prog?->stage?->name ?? 'Main Stage' }}
+                                        {{ $prog?->is_stage ? 'Stage Event' : 'Non-stage Event' }} • {{ $prog?->stage?->name ?? 'Main Stage' }}
                                     </span>
                                 </div>
-                                <h3 class="text-2xl font-bold text-slate-900 font-sora">{{ $prog?->name }}</h3>
+                                <h3 class="text-2xl font-black text-slate-900 font-sora flex items-center gap-2">
+                                    <span class="text-[#be1e2d] font-mono">#{{ $resNo }}</span>
+                                    <span>{{ $prog?->name }}</span>
+                                </h3>
                                 @if($prog?->malayalam_name)
                                     <p class="text-sm text-slate-500 font-ml mt-0.5">{{ $prog->malayalam_name }}</p>
                                 @endif
@@ -305,7 +320,12 @@
                                 </button>
                             </div>
                             <div class="text-sm font-ml text-slate-800 leading-relaxed bg-white/80 p-3.5 rounded-xl border border-amber-200/60">
-                                <div>ശ്രദ്ധിക്കുക... ക്വാഫ് ഫെസ്റ്റ് <strong>{{ $prog?->name }}</strong> ({{ $prog?->malayalam_name ?: $prog?->code }}) മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു:</div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="px-2 py-0.5 rounded bg-slate-900 text-amber-300 font-mono font-black text-xs">
+                                        Result #{{ $resNo }}
+                                    </span>
+                                    <span>ശ്രദ്ധിക്കുക... ക്വാഫ് ഫെസ്റ്റ് <strong>{{ $prog?->name }}</strong> ({{ $zoneName }} &bull; {{ $prog?->malayalam_name ?: $prog?->code }}) മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു:</span>
+                                </div>
                                 <div class="mt-2.5 space-y-2 font-medium">
                                     <div class="flex flex-wrap items-baseline gap-1.5">
                                         <span class="font-bold text-amber-900">• ഒന്നാം സ്ഥാനം:</span>

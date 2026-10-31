@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Services\PointCalculationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class Result extends Model
 {
@@ -15,6 +18,7 @@ class Result extends Model
 
     protected $fillable = [
         'program_id',
+        'result_number',
         'first_entry_id',
         'first_grade',
         'second_entry_id',
@@ -35,11 +39,47 @@ class Result extends Model
     protected function casts(): array
     {
         return [
+            'result_number' => 'integer',
             'published_at' => 'datetime',
             'media_published_at' => 'datetime',
             'is_media_published' => 'boolean',
             'custom_poster_settings' => 'array',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Result $result) {
+            // Automatically assign next sequential result number when transferring to announcer or declaring
+            if (in_array($result->status, ['send', 'delivered', 'announced', 'published'])) {
+                if (empty($result->attributes['result_number'])) {
+                    $max = (int) (static::max('result_number') ?? 0);
+                    $result->result_number = $max + 1;
+                }
+                if (empty($result->published_at)) {
+                    $result->published_at = Carbon::now();
+                }
+            }
+        });
+    }
+
+    public static function ensureSchema(): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+
+        try {
+            if (Schema::hasTable('results') && ! Schema::hasColumn('results', 'result_number')) {
+                Schema::table('results', function (Blueprint $table) {
+                    $table->unsignedInteger('result_number')->nullable()->after('program_id')->index();
+                });
+            }
+            $checked = true;
+        } catch (\Throwable) {
+            // Ignore schema errors in constrained environments
+        }
     }
 
     public function program(): BelongsTo
@@ -220,21 +260,57 @@ class Result extends Model
     }
 
     /**
+     * Assign next sequential result number immediately if not already assigned.
+     */
+    public function assignNextResultNumber(): int
+    {
+        if ($this->result_number) {
+            return (int) $this->result_number;
+        }
+
+        $max = (int) (static::max('result_number') ?? 0);
+        $this->result_number = $max + 1;
+        $this->saveQuietly();
+
+        return (int) $this->result_number;
+    }
+
+    /**
      * Compute sequence result number (e.g. 1, 2, 3...)
      */
-    public function getResultNumberAttribute(): int
+    public function getResultNumberAttribute(): ?int
     {
-        return self::where(function ($q) {
-            if ($this->published_at) {
-                $q->where('published_at', '<', $this->published_at)
-                    ->orWhere(function ($sub) {
-                        $sub->where('published_at', '=', $this->published_at)
-                            ->where('id', '<=', $this->id);
-                    });
-            } else {
-                $q->where('id', '<=', $this->id);
+        if (isset($this->attributes['result_number']) && $this->attributes['result_number'] !== null && (int) $this->attributes['result_number'] > 0) {
+            return (int) $this->attributes['result_number'];
+        }
+
+        if (in_array($this->status, ['send', 'delivered', 'announced', 'published'])) {
+            if (! $this->id) {
+                return 1;
             }
-        })->count() ?: ($this->id ?? 1);
+
+            return (int) self::where(function ($q) {
+                if ($this->published_at) {
+                    $q->where('published_at', '<', $this->published_at)
+                        ->orWhere(function ($sub) {
+                            $sub->where('published_at', '=', $this->published_at)
+                                ->where('id', '<=', $this->id);
+                        });
+                } else {
+                    $q->where('id', '<=', $this->id);
+                }
+            })->count() ?: 1;
+        }
+
+        return null;
+    }
+
+    /**
+     * Formatted two-digit result number (e.g. "01", "02", "10").
+     */
+    public function getFormattedResultNumberAttribute(): ?string
+    {
+        return $this->result_number ? sprintf('%02d', $this->result_number) : null;
     }
 
     /**

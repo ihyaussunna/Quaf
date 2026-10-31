@@ -245,6 +245,9 @@
                         <div class="border border-slate-300 rounded-xl p-3.5 bg-white avoid-break shadow-2xs">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 mb-2 border-b border-slate-200 text-xs">
                                 <div>
+                                    <span class="font-mono font-black text-white bg-slate-900 px-2 py-0.5 rounded text-[11px] mr-1 shadow-2xs">
+                                        Result #{{ sprintf('%02d', $res->result_number) }}
+                                    </span>
                                     <span class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                                         {{ $res->program?->code }}
                                     </span>

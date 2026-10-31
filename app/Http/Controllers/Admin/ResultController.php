@@ -267,18 +267,28 @@ class ResultController extends Controller
 
     public function sendToAnnouncer(Result $result): RedirectResponse
     {
+        Result::ensureSchema();
         $old = $result->status;
+
+        if (! $result->result_number) {
+            $max = (int) (Result::max('result_number') ?? 0);
+            $result->result_number = $max + 1;
+        }
+
         $result->update([
             'status' => 'send',
+            'result_number' => $result->result_number,
             'published_at' => $result->published_at ?? Carbon::now(),
         ]);
 
         // Immediately update team standings in Admin Panel
         $this->pointService->recalculateAllPoints();
 
-        AuditLogger::log('send_result_to_announcer', $result, ['status' => $old], ['status' => 'send']);
+        AuditLogger::log('send_result_to_announcer', $result, ['status' => $old], ['status' => 'send', 'result_number' => $result->result_number]);
 
-        return back()->with('success', "Result for '{$result->program->name}' has been sent to the Announcer Desk. Admin team standings updated.");
+        $formattedNo = sprintf('%02d', $result->result_number);
+
+        return back()->with('success', "Result #{$formattedNo} for '{$result->program->name}' has been sent to the Announcer Desk. Admin team standings updated.");
     }
 
     protected function issueCertificates(Result $result): void
@@ -333,7 +343,7 @@ class ResultController extends Controller
         $search = $request->query('search');
 
         $query = Result::with(['program.category', 'program.stage', 'firstEntry.student', 'secondEntry.student', 'thirdEntry.student'])
-            ->whereIn('status', ['published', 'announced']);
+            ->whereIn('status', ['send', 'delivered', 'announced', 'published']);
 
         if ($search) {
             $query->whereHas('program', function ($q) use ($search) {
@@ -601,6 +611,7 @@ class ResultController extends Controller
      */
     public function batchSendToAnnouncer(Request $request): RedirectResponse
     {
+        Result::ensureSchema();
         $resultIds = $request->input('result_ids', []);
         if (empty($resultIds)) {
             return back()->with('error', 'അനൗൺസർ ഡെസ്കിലേക്ക് അയക്കാൻ റിസൾട്ടുകൾ തിരഞ്ഞെടുത്തിട്ടില്ല.');
@@ -610,11 +621,16 @@ class ResultController extends Controller
         $count = 0;
         foreach ($results as $res) {
             $old = $res->status;
+            if (! $res->result_number) {
+                $max = (int) (Result::max('result_number') ?? 0);
+                $res->result_number = $max + 1;
+            }
             $res->update([
                 'status' => 'send',
+                'result_number' => $res->result_number,
                 'published_at' => $res->published_at ?? Carbon::now(),
             ]);
-            AuditLogger::log('send_result_to_announcer', $res, ['status' => $old], ['status' => 'send']);
+            AuditLogger::log('send_result_to_announcer', $res, ['status' => $old], ['status' => 'send', 'result_number' => $res->result_number]);
             $count++;
         }
 

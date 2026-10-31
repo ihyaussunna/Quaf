@@ -106,7 +106,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         @forelse($results as $result)
             @php
-                $resultNo = $allPublishedOrder[$result->id] ?? $loop->iteration;
+                $resultNo = $result->result_number ?: ($allPublishedOrder[$result->id] ?? $loop->iteration);
             @endphp
             <div class="rounded-2xl bg-white border border-slate-200 hover:border-[#be1e2d]/40 p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between group shadow-xs hover:shadow-md">
                 <div>

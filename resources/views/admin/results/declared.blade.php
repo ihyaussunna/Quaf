@@ -38,7 +38,7 @@
             <table class="w-full text-left text-sm">
                 <thead>
                     <tr class="bg-gray-50/75 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        <th class="px-4 py-3.5 text-center w-16">Results</th>
+                        <th class="px-4 py-3.5 text-center w-20">Result #</th>
                         <th class="px-4 py-3.5">Id</th>
                         <th class="px-6 py-3.5">Program Name</th>
                         <th class="px-4 py-3.5">Zone</th>
@@ -50,7 +50,11 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($results as $index => $res)
                         <tr class="hover:bg-gray-50/50 transition">
-                            <td class="px-4 py-3.5 text-center text-gray-500 text-xs font-medium">{{ $results->firstItem() + $index }}</td>
+                            <td class="px-4 py-3.5 text-center">
+                                <span class="font-mono font-black text-xs text-white bg-[#be1e2d] px-2.5 py-1 rounded-lg shadow-2xs">
+                                    #{{ sprintf('%02d', $res->result_number) }}
+                                </span>
+                            </td>
                             <td class="px-4 py-3.5 text-gray-800 font-mono text-xs font-semibold">{{ $res->program?->code ?: $res->program?->id }}</td>
                             <td class="px-6 py-3.5 font-bold text-gray-900 capitalize">{{ $res->program?->name }}</td>
                             <td class="px-4 py-3.5 text-gray-600 text-xs">{{ $res->program?->eligibility ?? 'A Zone' }}</td>

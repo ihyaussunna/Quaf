@@ -55,6 +55,7 @@ class AnnouncerController extends Controller
         }
 
         $results = $query->orderByRaw("CASE WHEN status IN ('send', 'delivered') THEN 1 ELSE 2 END")
+            ->orderBy('result_number', 'desc')
             ->latest('updated_at')
             ->paginate(12)
             ->withQueryString();
@@ -107,6 +108,11 @@ class AnnouncerController extends Controller
                 $result->second_entry_id = $topEntries->get(1)?->id;
                 $result->third_entry_id = $topEntries->get(2)?->id;
             }
+        }
+
+        if (! $result->result_number) {
+            $max = (int) (Result::max('result_number') ?? 0);
+            $result->result_number = $max + 1;
         }
 
         $result->status = 'announced';

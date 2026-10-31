@@ -156,12 +156,21 @@
                                 <tr class="hover:bg-slate-50/70 transition-colors">
                                     <td class="px-5 py-3.5">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-mono font-bold text-[11px] text-[#be1e2d] bg-red-50 px-2 py-0.5 rounded border border-orange-100">{{ $res->program->code }}</span>
+                                            @if($res->result_number)
+                                                <span class="font-mono font-black text-[11px] text-white bg-slate-900 px-2 py-0.5 rounded shadow-2xs shrink-0" title="Result Number">
+                                                    #{{ sprintf('%02d', $res->result_number) }}
+                                                </span>
+                                            @endif
+                                            <span class="font-mono font-bold text-[11px] text-[#be1e2d] bg-red-50 px-2 py-0.5 rounded border border-orange-100 shrink-0">{{ $res->program->code }}</span>
                                             <div>
                                                 <span class="font-semibold text-slate-900 block">{{ $res->program->name }}</span>
-                                                @if($res->program->malayalam_name)
-                                                    <span class="text-[11px] text-slate-400 block font-ml">{{ $res->program->malayalam_name }}</span>
-                                                @endif
+                                                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
+                                                    <span class="text-blue-600 font-medium">{{ $res->program->zone?->name ?? $res->program->eligibility ?? 'All Zones' }}</span>
+                                                    @if($res->program->malayalam_name)
+                                                        <span>•</span>
+                                                        <span class="font-ml text-slate-500">{{ $res->program->malayalam_name }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
