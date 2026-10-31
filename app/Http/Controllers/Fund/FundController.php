@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Fund;
 
 use App\Http\Controllers\Controller;
+use App\Models\FestivalSetting;
 use App\Models\FundReceipt;
 use App\Models\FundReceiptSetting;
 use App\Models\Group;
@@ -542,6 +543,11 @@ class FundController extends Controller
             ->orderByDesc('total_collected')
             ->get();
 
+        // Manual team point standings data
+        $allGroups = Group::orderBy('name')->get();
+        $manualStandings = StandingPosterGenerator::getManualStandings();
+        $manualAmounts = $manualStandings->pluck('manual_amount', 'id')->all();
+
         return view('fund.ledger', compact(
             'receipts',
             'collectors',
@@ -550,7 +556,10 @@ class FundController extends Controller
             'todayAmount',
             'cancelledCount',
             'cancelledAmount',
-            'topGroups'
+            'topGroups',
+            'allGroups',
+            'manualStandings',
+            'manualAmounts'
         ));
     }
 
@@ -641,5 +650,95 @@ class FundController extends Controller
         $img = StandingPosterGenerator::generate();
 
         return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Top-Collected-Groups.jpg', true);
+    }
+
+    /**
+     * Stream the generated Manual Point Standing Poster inline.
+     */
+    public function manualStandingPoster(Request $request): StreamedResponse
+    {
+        $customAmounts = $request->input('amounts');
+        if (is_array($customAmounts)) {
+            $parsedAmounts = [];
+            foreach ($customAmounts as $gid => $val) {
+                $parsedAmounts[(int) $gid] = (float) $val;
+            }
+            $standings = StandingPosterGenerator::getManualStandings($parsedAmounts);
+        } else {
+            $standings = StandingPosterGenerator::getManualStandings();
+        }
+
+        $showAmount = $request->boolean('show_amount', false);
+        $title = $request->input('title', 'Team Point Standings');
+        $badge = $request->input('badge', 'Point Standings');
+
+        $img = StandingPosterGenerator::generate(
+            topGroups: $standings,
+            showAmount: $showAmount,
+            titleText: $title,
+            badgeText: $badge,
+            subtitleFallback: 'FINANCE SUPPORT POINTS'
+        );
+
+        return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Team-Point-Standings.jpg', false);
+    }
+
+    /**
+     * Download the generated Manual Point Standing Poster as a JPEG file.
+     */
+    public function downloadManualStandingPoster(Request $request): StreamedResponse
+    {
+        $customAmounts = $request->input('amounts');
+        if (is_array($customAmounts)) {
+            $parsedAmounts = [];
+            foreach ($customAmounts as $gid => $val) {
+                $parsedAmounts[(int) $gid] = (float) $val;
+            }
+            $standings = StandingPosterGenerator::getManualStandings($parsedAmounts);
+        } else {
+            $standings = StandingPosterGenerator::getManualStandings();
+        }
+
+        $showAmount = $request->boolean('show_amount', false);
+        $title = $request->input('title', 'Team Point Standings');
+        $badge = $request->input('badge', 'Point Standings');
+
+        $img = StandingPosterGenerator::generate(
+            topGroups: $standings,
+            showAmount: $showAmount,
+            titleText: $title,
+            badgeText: $badge,
+            subtitleFallback: 'FINANCE SUPPORT POINTS'
+        );
+
+        return StandingPosterGenerator::streamResponse($img, 'QUAF-09-Team-Point-Standings.jpg', true);
+    }
+
+    /**
+     * Save the manual team amounts for point standing generator.
+     */
+    public function saveManualStandingAmounts(Request $request): JsonResponse|RedirectResponse
+    {
+        FestivalSetting::ensureSchema();
+        $rawAmounts = $request->input('amounts', []);
+
+        $parsed = [];
+        if (is_array($rawAmounts)) {
+            foreach ($rawAmounts as $gid => $val) {
+                $parsed[(int) $gid] = max(0, (float) $val);
+            }
+        }
+
+        FestivalSetting::set('manual_fund_standings', json_encode($parsed));
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'മാനുവൽ ടീം തുകകളും പോയിന്റ് നിലയും വിജയകരമായി സേവ് ചെയ്തു.',
+                'amounts' => $parsed,
+            ]);
+        }
+
+        return back()->with('success', 'മാനുവൽ ടീം തുകകളും പോയിന്റ് നിലയും വിജയകരമായി സേവ് ചെയ്തു.');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\FestivalSetting;
 use App\Models\FundReceipt;
 use App\Models\Group;
 use Illuminate\Support\Collection;
@@ -13,8 +14,22 @@ class StandingPosterGenerator
      * Generate the high-resolution Standing Poster as a GD Image.
      * Dimensions: 1080 x 1440 (HD Social & Print Quality)
      */
-    public static function generate(?Collection $topGroups = null): \GdImage
-    {
+    /**
+     * Generate the high-resolution Standing Poster as a GD Image.
+     * Dimensions: 1080 x 1440 (HD Social & Print Quality)
+     *
+     * @param  bool  $showAmount  Whether to display currency/amount on the poster. Set to false for pure point standings.
+     * @param  string|null  $titleText  Main title heading.
+     * @param  string|null  $badgeText  Top capsule badge text.
+     * @param  string  $subtitleFallback  Subtitle line under team name when amount/receipts are hidden.
+     */
+    public static function generate(
+        ?Collection $topGroups = null,
+        bool $showAmount = true,
+        ?string $titleText = null,
+        ?string $badgeText = null,
+        string $subtitleFallback = 'FINANCE SUPPORT POINTS'
+    ): \GdImage {
         if (! $topGroups) {
             $topGroups = Group::query()
                 ->withSum(['fundReceipts as total_collected' => function ($q) {
@@ -90,7 +105,7 @@ class StandingPosterGenerator
         imageellipse($img, 100, 120, 500, 500, $subtleRing1);
         imageellipse($img, $width - 80, $height - 120, 600, 600, $subtleRing1);
 
-        // 2. Poster Header Graphic (from poster header.svg)
+        // 2. Poster Header Graphic (from poster header.png)
         $headerPngPath = public_path('images/poster-header.png');
         if (file_exists($headerPngPath)) {
             $headerImg = @imagecreatefrompng($headerPngPath);
@@ -107,10 +122,12 @@ class StandingPosterGenerator
             }
         }
 
-        // Amber Capsule Badge: "Group Standings"
-        $badgeText = 'Group Standings';
+        // Amber Capsule Badge
+        $badgeText = $badgeText ?: ($showAmount ? 'Group Standings' : 'Point Standings');
         $badgeFontSize = 15;
-        $badgeW = 250;
+        $badgeBbox = @imagettfbbox($badgeFontSize, 0, $soraBold, $badgeText);
+        $badgeTextW = $badgeBbox ? abs($badgeBbox[4] - $badgeBbox[0]) : 160;
+        $badgeW = max(250, $badgeTextW + 60);
         $badgeH = 46;
         $badgeX = (int) (($width - $badgeW) / 2);
         $badgeY = 245;
@@ -121,14 +138,12 @@ class StandingPosterGenerator
         $badgeTextColor = imagecolorallocate($img, 20, 20, 20);
         self::drawCenteredText($img, $badgeFontSize, $badgeY + 31, $soraBold, $badgeText, $badgeTextColor, $width);
 
-        // Main Title: "Top Collected Groups"
-        $titleText = 'Top Collected Groups';
+        // Main Title
+        $titleText = $titleText ?: ($showAmount ? 'Top Collected Groups' : 'Team Point Standings');
         $titleFontSize = 42;
         $titleY = 345;
         $whiteColor = imagecolorallocate($img, 255, 255, 255);
         self::drawCenteredText($img, $titleFontSize, $titleY, $soraBold, $titleText, $whiteColor, $width);
-
-        // Note: Total collection is removed from poster as requested
 
         // 3. Five Standing Capsule Bars (Rows)
         $capsuleW = 960;
@@ -160,9 +175,9 @@ class StandingPosterGenerator
             $currentY2 = $currentY1 + $capsuleH;
             $centerY = (int) ($currentY1 + ($capsuleH / 2));
 
-            $collected = (float) ($grp->total_collected ?? 0);
+            $collected = (float) ($grp->total_collected ?? ($grp->manual_amount ?? 0));
             $receiptsCount = (int) ($grp->receipts_count ?? 0);
-            $percentage = $totalAmount > 0 ? round(($collected / $totalAmount) * 100, 1) : 0;
+            $points = isset($grp->points) ? (int) $grp->points : self::calculateFinancePoints($collected);
 
             // Capsule Drop Shadow
             $shadowColor = imagecolorallocatealpha($img, 60, 5, 10, 85);
@@ -214,49 +229,98 @@ class StandingPosterGenerator
             $nameY = $centerY - 6;
             imagettftext($img, $nameFontSize, 0, $nameX, $nameY, $nameColor, $soraBold, $grpName);
 
-            // Subtitle Details: Receipts Count (Team code excluded as requested)
-            $detailText = number_format($receiptsCount).' '.($receiptsCount === 1 ? 'RECEIPT' : 'RECEIPTS').' ISSUED';
-            $detailFontSize = 11;
-            $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
-            $detailY = $centerY + 24;
-            imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
+            if ($showAmount) {
+                // Subtitle Details: Receipts Count
+                $detailText = number_format($receiptsCount).' '.($receiptsCount === 1 ? 'RECEIPT' : 'RECEIPTS').' ISSUED';
+                $detailFontSize = 11;
+                $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
+                $detailY = $centerY + 24;
+                imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
 
-            // Right side: Total Amount Collected & Finance Support Points
-            $points = self::calculateFinancePoints($collected);
-            $amountText = '₹'.number_format($collected, 0);
-            $amountFontSize = 28;
-            $amountColor = imagecolorallocate($img, 15, 23, 42); // Bold dark
-            $bboxAmount = @imagettfbbox($amountFontSize, 0, $amountFont, $amountText);
-            $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 170;
-            $amountX = $capsuleX2 - $amountW - 40;
-            $amountY = $centerY - 4;
-            imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $amountFont, $amountText);
+                // Right side: Total Amount Collected & Finance Support Points
+                $amountText = '₹'.number_format($collected, 0);
+                $amountFontSize = 28;
+                $amountColor = imagecolorallocate($img, 15, 23, 42); // Bold dark
+                $bboxAmount = @imagettfbbox($amountFontSize, 0, $amountFont, $amountText);
+                $amountW = $bboxAmount ? abs($bboxAmount[4] - $bboxAmount[0]) : 170;
+                $amountX = $capsuleX2 - $amountW - 40;
+                $amountY = $centerY - 4;
+                imagettftext($img, $amountFontSize, 0, $amountX, $amountY, $amountColor, $amountFont, $amountText);
 
-            // Points Pill Badge (aligned to right, directly under the amount)
-            $ptsText = $points.' PTS';
-            $ptsFontSize = 12;
-            $bboxPts = @imagettfbbox($ptsFontSize, 0, $soraBold, $ptsText);
-            $ptsW = $bboxPts ? abs($bboxPts[4] - $bboxPts[0]) : 55;
-            $badgePadX = 14;
-            $badgeH = 26;
-            $badgeW = $ptsW + ($badgePadX * 2);
-            $badgeX2 = $capsuleX2 - 40;
-            $badgeX1 = $badgeX2 - $badgeW;
-            $badgeY1 = $centerY + 10;
-            $badgeY2 = $badgeY1 + $badgeH;
+                // Points Pill Badge (aligned to right, directly under the amount)
+                $ptsText = $points.' PTS';
+                $ptsFontSize = 12;
+                $bboxPts = @imagettfbbox($ptsFontSize, 0, $soraBold, $ptsText);
+                $ptsW = $bboxPts ? abs($bboxPts[4] - $bboxPts[0]) : 55;
+                $badgePadX = 14;
+                $badgeH = 26;
+                $badgeW = $ptsW + ($badgePadX * 2);
+                $badgeX2 = $capsuleX2 - 40;
+                $badgeX1 = $badgeX2 - $badgeW;
+                $badgeY1 = $centerY + 10;
+                $badgeY2 = $badgeY1 + $badgeH;
 
-            // Pill styling
-            $badgeBg = ($rank === 1)
-                ? imagecolorallocate($img, 254, 243, 199) // Amber-100 for 1st
-                : imagecolorallocate($img, 241, 245, 249); // Slate-100 for others
-            $badgeTextColor = ($rank === 1)
-                ? imagecolorallocate($img, 146, 64, 14) // Amber-800
-                : imagecolorallocate($img, 30, 41, 59); // Slate-800
+                // Pill styling
+                $badgeBg = ($rank === 1)
+                    ? imagecolorallocate($img, 254, 243, 199) // Amber-100 for 1st
+                    : imagecolorallocate($img, 241, 245, 249); // Slate-100 for others
+                $badgeTextColor = ($rank === 1)
+                    ? imagecolorallocate($img, 146, 64, 14) // Amber-800
+                    : imagecolorallocate($img, 30, 41, 59); // Slate-800
 
-            self::drawRoundedRectangle($img, $badgeX1, $badgeY1, $badgeX2, $badgeY2, 13, $badgeBg);
-            $ptsX = (int) ($badgeX1 + $badgePadX);
-            $ptsY = (int) ($badgeY1 + 18);
-            imagettftext($img, $ptsFontSize, 0, $ptsX, $ptsY, $badgeTextColor, $soraBold, $ptsText);
+                self::drawRoundedRectangle($img, $badgeX1, $badgeY1, $badgeX2, $badgeY2, 13, $badgeBg);
+                $ptsX = (int) ($badgeX1 + $badgePadX);
+                $ptsY = (int) ($badgeY1 + 18);
+                imagettftext($img, $ptsFontSize, 0, $ptsX, $ptsY, $badgeTextColor, $soraBold, $ptsText);
+            } else {
+                // Subtitle Line when amount is hidden: "FINANCE SUPPORT POINTS"
+                $detailText = $subtitleFallback;
+                $detailFontSize = 11;
+                $detailColor = imagecolorallocate($img, 100, 116, 139); // Slate-500
+                $detailY = $centerY + 24;
+                imagettftext($img, $detailFontSize, 0, $nameX, $detailY, $detailColor, $soraRegular, $detailText);
+
+                // Pure Points Pill Badge (prominently centered vertically on the right)
+                $ptsText = $points.' PTS';
+                $ptsFontSize = 22;
+                $badgeW = 160;
+                $badgeH = 54;
+                $badgeRadius = 27;
+                $badgeX2 = $capsuleX2 - 40;
+                $badgeX1 = $badgeX2 - $badgeW;
+                $badgeY1 = (int) ($centerY - ($badgeH / 2));
+                $badgeY2 = (int) ($centerY + ($badgeH / 2));
+
+                $badgeBg = match ($rank) {
+                    1 => imagecolorallocate($img, 254, 243, 199), // Amber-100
+                    2 => imagecolorallocate($img, 241, 245, 249), // Slate-100
+                    3 => imagecolorallocate($img, 255, 237, 213), // Orange-100
+                    default => imagecolorallocate($img, 248, 250, 252) // Slate-50
+                };
+                $badgeBorder = match ($rank) {
+                    1 => imagecolorallocate($img, 245, 158, 11), // Amber-500
+                    2 => imagecolorallocate($img, 203, 213, 225), // Slate-300
+                    3 => imagecolorallocate($img, 217, 119, 6), // Amber-600
+                    default => imagecolorallocate($img, 226, 232, 240) // Slate-200
+                };
+                $badgeTextColor = match ($rank) {
+                    1 => imagecolorallocate($img, 120, 53, 15), // Amber-950
+                    2 => imagecolorallocate($img, 15, 23, 42), // Slate-900
+                    3 => imagecolorallocate($img, 124, 45, 18), // Amber-950
+                    default => imagecolorallocate($img, 51, 65, 85) // Slate-700
+                };
+
+                // Draw filled rounded rectangle with neat border
+                self::drawRoundedRectangle($img, $badgeX1, $badgeY1, $badgeX2, $badgeY2, $badgeRadius, $badgeBorder);
+                self::drawRoundedRectangle($img, $badgeX1 + 2, $badgeY1 + 2, $badgeX2 - 2, $badgeY2 - 2, $badgeRadius - 2, $badgeBg);
+
+                $bboxPts = @imagettfbbox($ptsFontSize, 0, $soraBold, $ptsText);
+                $ptsW = $bboxPts ? abs($bboxPts[4] - $bboxPts[0]) : 75;
+                $ptsH = $bboxPts ? abs($bboxPts[5] - $bboxPts[1]) : 22;
+                $ptsX = (int) ($badgeX1 + (($badgeW - $ptsW) / 2));
+                $ptsY = (int) ($centerY + ($ptsH / 2) - 2);
+                imagettftext($img, $ptsFontSize, 0, $ptsX, $ptsY, $badgeTextColor, $soraBold, $ptsText);
+            }
 
             $rankIndex++;
         }
@@ -266,7 +330,9 @@ class StandingPosterGenerator
         $footerLineColor = imagecolorallocatealpha($img, 255, 255, 255, 100);
         imageline($img, 100, $footerY - 30, $width - 100, $footerY - 30, $footerLineColor);
 
-        $footerText = 'QUAF 09  •  MARKAZ CULTURAL FESTIVAL 2026  •  OFFICIAL LIVE STANDINGS';
+        $footerText = $showAmount
+            ? 'QUAF 09  •  MARKAZ CULTURAL FESTIVAL 2026  •  OFFICIAL LIVE STANDINGS'
+            : 'QUAF 09  •  MARKAZ CULTURAL FESTIVAL 2026  •  OFFICIAL POINT STANDINGS';
         $footerFontSize = 12;
         $footerTextColor = imagecolorallocate($img, 255, 255, 255);
         self::drawCenteredText($img, $footerFontSize, $footerY - 5, $soraBold, $footerText, $footerTextColor, $width);
@@ -398,5 +464,68 @@ class StandingPosterGenerator
         }
 
         return 0;
+    }
+
+    /**
+     * Compute sorted team standings list from manual amounts (or saved settings / actual collection fallback).
+     *
+     * @param  array<int|string, float|int>|null  $customAmounts
+     */
+    public static function getManualStandings(?array $customAmounts = null): Collection
+    {
+        FestivalSetting::ensureSchema();
+        $allGroups = Group::orderBy('name')->get();
+
+        if ($customAmounts === null) {
+            $saved = FestivalSetting::get('manual_fund_standings');
+            if ($saved) {
+                $decoded = json_decode($saved, true);
+                if (is_array($decoded)) {
+                    $customAmounts = $decoded;
+                }
+            }
+        }
+
+        // Fetch real collected amounts as initial fallback
+        $realAmounts = Group::query()
+            ->withSum(['fundReceipts as total_collected' => function ($q) {
+                $q->where('is_cancelled', false);
+            }], 'amount')
+            ->pluck('total_collected', 'id');
+
+        $collection = $allGroups->map(function ($grp) use ($customAmounts, $realAmounts) {
+            $amt = null;
+            if ($customAmounts !== null && array_key_exists($grp->id, $customAmounts)) {
+                $amt = (float) $customAmounts[$grp->id];
+            } else {
+                $amt = (float) ($realAmounts[$grp->id] ?? 0);
+            }
+
+            $points = self::calculateFinancePoints($amt);
+
+            return (object) [
+                'id' => $grp->id,
+                'name' => $grp->name,
+                'code' => $grp->code,
+                'slug' => $grp->slug,
+                'color_hex' => $grp->color_hex ?? '#be1e2d',
+                'manual_amount' => $amt,
+                'total_collected' => $amt,
+                'points' => $points,
+                'receipts_count' => 0,
+            ];
+        });
+
+        // Sort descending: highest amount first, then highest points, then name
+        return $collection->sort(function ($a, $b) {
+            if ($b->manual_amount != $a->manual_amount) {
+                return $b->manual_amount <=> $a->manual_amount;
+            }
+            if ($b->points != $a->points) {
+                return $b->points <=> $a->points;
+            }
+
+            return strcmp($a->name, $b->name);
+        })->values();
     }
 }

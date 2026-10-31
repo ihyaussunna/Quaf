@@ -1011,4 +1011,7 @@ Route::prefix('fund')->name('fund.')->group(function () {
     // 5. Group Standings Poster Generation & High-Resolution Download
     Route::get('/standings/poster', [FundController::class, 'standingPoster'])->name('standings.poster');
     Route::get('/standings/download', [FundController::class, 'downloadStandingPoster'])->name('standings.download');
+    Route::match(['get', 'post'], '/standings/manual/poster', [FundController::class, 'manualStandingPoster'])->name('standings.manual.poster');
+    Route::match(['get', 'post'], '/standings/manual/download', [FundController::class, 'downloadManualStandingPoster'])->name('standings.manual.download');
+    Route::post('/standings/manual/save', [FundController::class, 'saveManualStandingAmounts'])->middleware(['auth', 'role:fund_collector,fund_manager,admin,super_admin'])->name('standings.manual.save');
 });

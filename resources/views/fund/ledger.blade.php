@@ -186,6 +186,199 @@
         </div>
     </div>
 
+    <!-- Manual Team Amount & Point Standing Poster Generator Section -->
+    <div x-data="manualStandingsManager()" class="bg-white p-6 rounded-2xl border border-indigo-200/90 shadow-2xs space-y-6">
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800">
+                        Manual Point Standings
+                    </span>
+                    <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-sora">
+                        Team Point Standing Poster Generator
+                    </h2>
+                </div>
+                <p class="text-xs text-slate-500 font-anek mt-1">
+                    ടീമുകൾക്ക് മാനുവലായി തുക നൽകി പോയിന്റും സ്റ്റാൻഡിങ്ങും കണക്കാക്കുക. നൽകിയ തുകയ്ക്കനുസരിച്ചുള്ള പോയിന്റും റാങ്കും മാത്രം ഉൾപ്പെടുത്തി പോസ്റ്റർ തയ്യാറാക്കാം (പോസ്റ്ററിൽ തുക പ്രദർശിപ്പിക്കില്ല).
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" @click="openPreview()"
+                   class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span>Preview Poster</span>
+                </button>
+                <button type="button" @click="downloadPoster()"
+                   class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Download Standing Poster</span>
+                </button>
+                <button type="button" @click="saveAmounts()"
+                   :disabled="saving"
+                   class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    <span x-text="saving ? 'Saving...' : 'Save Amounts'">Save Amounts</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Success notification toast -->
+        <div x-show="toastMessage" x-cloak class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between transition">
+            <span x-text="toastMessage"></span>
+            <button type="button" @click="toastMessage = ''" class="text-emerald-600 hover:text-emerald-950">&times;</button>
+        </div>
+
+        <!-- Manual Input Toolbar -->
+        <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span class="text-xs font-bold text-slate-700 font-mono uppercase tracking-wider">
+                    Enter Manual Amount For Each Team (തുക നൽകുക):
+                </span>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="copyRealAmounts()"
+                            class="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200 hover:border-indigo-300 transition shadow-2xs">
+                        യഥാർത്ഥ ലെഡ്ജർ തുകകൾ നൽകുക
+                    </button>
+                    <button type="button" @click="resetAmounts()"
+                            class="text-xs font-semibold text-slate-500 hover:text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200 hover:border-slate-300 transition shadow-2xs">
+                        ക്ലിയർ (0)
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5 Team Amount Input Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
+                <template x-for="grp in groups" :key="grp.id">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold"
+                                  :style="{ backgroundColor: grp.color_hex + '20', color: grp.color_hex }"
+                                  x-text="grp.code"></span>
+                            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200"
+                                  x-text="grp.points + ' PTS'"></span>
+                        </div>
+                        <div class="text-xs font-bold text-slate-900 truncate" x-text="grp.name"></div>
+                        <div class="relative">
+                            <span class="absolute left-2.5 top-1.5 text-xs text-slate-400 font-bold">₹</span>
+                            <input type="number" step="any" min="0" x-model.number="grp.amount" @input="recalc()"
+                                   placeholder="0"
+                                   class="w-full pl-6 pr-2 py-1.5 text-xs rounded-lg border border-slate-300 font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-600">
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Live Team Point Standing Cards (NO AMOUNT DISPLAYED - BEAUTIFUL DESIGN) -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs text-slate-500 pb-1">
+                <span class="font-bold uppercase tracking-wider font-mono">
+                    Official Team Point Standings (Preview)
+                </span>
+                <span class="text-[11px] font-anek text-slate-400">
+                    നൽകിയ തുകയ്ക്കനുസരിച്ചുള്ള പോയിന്റും ഔദ്യോഗിക റാങ്കിംഗും:
+                </span>
+            </div>
+
+            <!-- Dynamic Alpine.js Sorted Cards -->
+            <template x-for="(grp, idx) in sortedGroups" :key="grp.id">
+                <div :class="cardBg(idx + 1)"
+                     class="p-4 sm:p-5 rounded-2xl transition-all hover:shadow-md flex items-center justify-between gap-3 sm:gap-4 relative overflow-hidden">
+                    <!-- Left Vertical Color Accent Bar -->
+                    <div class="absolute top-0 bottom-0 left-0 w-2" :style="{ backgroundColor: grp.color_hex }"></div>
+
+                    <!-- Left: Rank & Group Info -->
+                    <div class="flex items-center gap-3 sm:gap-4 min-w-0 pl-1.5">
+                        <!-- Rank Badge -->
+                        <div :class="rankBadgeClass(idx + 1)"
+                             class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-mono">
+                            <span class="text-xs sm:text-sm leading-none" x-text="rankLabel(idx + 1)"></span>
+                            <span x-show="idx < 3" class="text-[8px] font-black uppercase tracking-tighter opacity-90 leading-none mt-0.5" x-text="medalTag(idx + 1)"></span>
+                        </div>
+
+                        <!-- Group Details -->
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded text-[10px] sm:text-xs font-mono font-black"
+                                      :style="{ backgroundColor: grp.color_hex + '20', color: grp.color_hex }"
+                                      x-text="grp.code"></span>
+                                <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-tight break-words" x-text="grp.name"></h3>
+                            </div>
+                            <div class="text-[10px] sm:text-xs font-mono text-slate-500 mt-0.5">
+                                <span>Finance Support Points</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Large Prominent Point Metric Badge (NO AMOUNT DISPLAYED) -->
+                    <div class="text-right shrink-0 font-mono">
+                        <span :class="pointsBadgeClass(idx + 1)"
+                              class="inline-flex items-center px-4 py-2 rounded-xl text-sm sm:text-base font-black tracking-wider shadow-xs">
+                            <span x-text="grp.points + ' PTS'"></span>
+                        </span>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Server-Side Fallback for non-JS / search engine / tests -->
+            <noscript>
+                <div class="space-y-3">
+                    @foreach($manualStandings as $index => $grp)
+                        @php
+                            $rank = $index + 1;
+                            $points = (int) ($grp->points ?? 0);
+                            $isGold = ($rank === 1);
+                            $isSilver = ($rank === 2);
+                            $isBronze = ($rank === 3);
+                            $cardBg = match($rank) {
+                                1 => 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-white border-2 border-amber-400/90 shadow-md shadow-amber-400/10',
+                                2 => 'bg-gradient-to-r from-slate-200/30 via-slate-100/15 to-white border-2 border-slate-300 shadow-xs',
+                                3 => 'bg-gradient-to-r from-amber-700/10 via-amber-600/5 to-white border-2 border-amber-700/35 shadow-2xs',
+                                default => 'bg-slate-50 border border-slate-200/80 shadow-2xs'
+                            };
+                            $rankBadge = match($rank) {
+                                1 => 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/30',
+                                2 => 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400 text-slate-900 font-black shadow-xs',
+                                3 => 'bg-gradient-to-br from-amber-700 via-amber-600 to-amber-800 text-white font-black shadow-xs',
+                                default => 'bg-slate-200/80 text-slate-700 border border-slate-300 font-bold'
+                            };
+                            $medalTag = match($rank) {
+                                1 => 'GOLD',
+                                2 => 'SILVER',
+                                3 => 'BRONZE',
+                                default => null
+                            };
+                        @endphp
+                        <div class="p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 relative overflow-hidden {{ $cardBg }}">
+                            <div class="absolute top-0 bottom-0 left-0 w-2" style="background-color: {{ $grp->color_hex ?? '#be1e2d' }};"></div>
+                            <div class="flex items-center gap-3 pl-1.5">
+                                <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 font-mono {{ $rankBadge }}">
+                                    <span class="text-xs sm:text-sm">@if($isGold) 1st @elseif($isSilver) 2nd @elseif($isBronze) 3rd @else #{{ $rank }} @endif</span>
+                                    @if($medalTag)<span class="text-[8px] font-black">{{ $medalTag }}</span>@endif
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold" style="background-color: {{ $grp->color_hex ?? '#be1e2d' }}20; color: {{ $grp->color_hex ?? '#be1e2d' }};">
+                                            {{ $grp->code }}
+                                        </span>
+                                        <h3 class="text-sm font-black text-slate-900">{{ $grp->name }}</h3>
+                                    </div>
+                                    <div class="text-[10px] font-mono text-slate-500">Finance Support Points</div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0 font-mono">
+                                <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-black {{ $isGold ? 'bg-amber-200 text-amber-950 border border-amber-300' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
+                                    {{ $points }} PTS
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </noscript>
+        </div>
+    </div>
+
     <!-- Filter & Search Toolbar -->
     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
         <form method="GET" action="{{ route('fund.ledger') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
@@ -395,4 +588,147 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('manualStandingsManager', () => ({
+        saving: false,
+        toastMessage: '',
+        groups: [
+            @foreach($allGroups as $g)
+                @php
+                    $initAmt = (float) ($manualAmounts[$g->id] ?? ($topGroups->firstWhere('id', $g->id)?->total_collected ?? 0));
+                    $realAmt = (float) ($topGroups->firstWhere('id', $g->id)?->total_collected ?? 0);
+                    $initPts = \App\Services\StandingPosterGenerator::calculateFinancePoints($initAmt);
+                @endphp
+                {
+                    id: {{ $g->id }},
+                    name: @json($g->name),
+                    code: @json($g->code),
+                    color_hex: @json($g->color_hex ?? '#be1e2d'),
+                    real_amount: {{ $realAmt }},
+                    amount: {{ $initAmt }},
+                    points: {{ $initPts }}
+                },
+            @endforeach
+        ],
+        calcPoints(amount) {
+            const a = parseFloat(amount) || 0;
+            if (a >= 100000) return 40;
+            if (a >= 90000) return 39;
+            if (a >= 80000) return 37;
+            if (a >= 70000) return 35;
+            if (a >= 60000) return 32;
+            if (a >= 50000) return 28;
+            if (a >= 40000) return 22;
+            if (a >= 30000) return 16;
+            if (a >= 20000) return 10;
+            if (a >= 10000) return 5;
+            if (a >= 5000) return 2;
+            return 0;
+        },
+        recalc() {
+            this.groups.forEach(g => {
+                g.points = this.calcPoints(g.amount);
+            });
+        },
+        get sortedGroups() {
+            return [...this.groups].sort((a, b) => {
+                const amtA = parseFloat(a.amount) || 0;
+                const amtB = parseFloat(b.amount) || 0;
+                if (amtB !== amtA) return amtB - amtA;
+                if (b.points !== a.points) return b.points - a.points;
+                return a.name.localeCompare(b.name);
+            });
+        },
+        cardBg(rank) {
+            if (rank === 1) return 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-white border-2 border-amber-400/90 shadow-md shadow-amber-400/10';
+            if (rank === 2) return 'bg-gradient-to-r from-slate-200/30 via-slate-100/15 to-white border-2 border-slate-300 shadow-xs';
+            if (rank === 3) return 'bg-gradient-to-r from-amber-700/10 via-amber-600/5 to-white border-2 border-amber-700/35 shadow-2xs';
+            return 'bg-slate-50 border border-slate-200/80 shadow-2xs';
+        },
+        rankBadgeClass(rank) {
+            if (rank === 1) return 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/30';
+            if (rank === 2) return 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400 text-slate-900 font-black shadow-xs';
+            if (rank === 3) return 'bg-gradient-to-br from-amber-700 via-amber-600 to-amber-800 text-white font-black shadow-xs';
+            return 'bg-slate-200/80 text-slate-700 border border-slate-300 font-bold';
+        },
+        rankLabel(rank) {
+            if (rank === 1) return '1st';
+            if (rank === 2) return '2nd';
+            if (rank === 3) return '3rd';
+            return '#' + rank;
+        },
+        medalTag(rank) {
+            if (rank === 1) return 'GOLD';
+            if (rank === 2) return 'SILVER';
+            if (rank === 3) return 'BRONZE';
+            return '';
+        },
+        pointsBadgeClass(rank) {
+            if (rank === 1) return 'bg-amber-400 text-slate-950 border border-amber-500 font-black shadow-md shadow-amber-400/20';
+            if (rank === 2) return 'bg-slate-200 text-slate-900 border border-slate-300 font-black shadow-xs';
+            if (rank === 3) return 'bg-amber-600 text-white border border-amber-700 font-black shadow-xs';
+            return 'bg-slate-100 text-slate-700 border border-slate-200 font-bold';
+        },
+        copyRealAmounts() {
+            this.groups.forEach(g => {
+                g.amount = g.real_amount;
+            });
+            this.recalc();
+            this.toastMessage = 'യഥാർത്ഥ ലെഡ്ജർ തുകകൾ ഇൻപുട്ടിലേക്ക് പകർന്നു.';
+            setTimeout(() => this.toastMessage = '', 4000);
+        },
+        resetAmounts() {
+            this.groups.forEach(g => {
+                g.amount = 0;
+            });
+            this.recalc();
+            this.toastMessage = 'എല്ലാ തുകകളും പൂജ്യമാക്കി (0).';
+            setTimeout(() => this.toastMessage = '', 4000);
+        },
+        openPreview() {
+            const params = new URLSearchParams();
+            this.groups.forEach(g => {
+                params.append('amounts[' + g.id + ']', g.amount || 0);
+            });
+            window.open('{{ route('fund.standings.manual.poster') }}?' + params.toString(), '_blank');
+        },
+        downloadPoster() {
+            const params = new URLSearchParams();
+            this.groups.forEach(g => {
+                params.append('amounts[' + g.id + ']', g.amount || 0);
+            });
+            window.location.href = '{{ route('fund.standings.manual.download') }}?' + params.toString();
+        },
+        async saveAmounts() {
+            this.saving = true;
+            this.toastMessage = '';
+            try {
+                const payload = {};
+                this.groups.forEach(g => {
+                    payload[g.id] = g.amount || 0;
+                });
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const response = await fetch('{{ route('fund.standings.manual.save') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: JSON.stringify({ amounts: payload })
+                });
+                const data = await response.json();
+                this.toastMessage = data.message || 'മാനുവൽ ടീം തുകകൾ വിജയകരമായി സേവ് ചെയ്തു!';
+            } catch (e) {
+                this.toastMessage = 'സേവ് ചെയ്യുന്നതിൽ പിഴവുണ്ടായി.';
+            } finally {
+                this.saving = false;
+                setTimeout(() => this.toastMessage = '', 5000);
+            }
+        }
+    }));
+});
+</script>
 @endsection
