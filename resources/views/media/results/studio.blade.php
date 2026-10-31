@@ -822,6 +822,30 @@
                         <input type="range" min="0.5" max="1.8" step="0.02" x-model.number="settings.winners_scale" @input="render()" class="w-full accent-purple-600">
                     </div>
 
+                    <!-- Winners Position Coordinates (X & Y) -->
+                    <div class="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="text-xs font-bold text-slate-800 flex items-center justify-between border-b border-slate-200 pb-1.5">
+                            <span>Winners Block Position (വിന്നേഴ്സ് ലിസ്റ്റിന്റെ സ്ഥാനം)</span>
+                            <span class="text-[10px] text-purple-700 font-mono">X &amp; Y Coordinates</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-1 text-xs">
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between font-bold text-slate-700">
+                                    <span>Position X (Left)</span>
+                                    <span class="font-mono text-purple-700" x-text="settings.block_left + 'px'"></span>
+                                </div>
+                                <input type="range" min="0" max="850" step="5" x-model.number="settings.block_left" @input="render(); recordHistory();" class="w-full accent-purple-600">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between font-bold text-slate-700">
+                                    <span>Position Y (Top)</span>
+                                    <span class="font-mono text-purple-700" x-text="settings.winner_start_y + 'px'"></span>
+                                </div>
+                                <input type="range" min="100" max="950" step="5" x-model.number="settings.winner_start_y" @input="render(); recordHistory();" class="w-full accent-purple-600">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Medal Style Selector -->
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
@@ -1223,6 +1247,74 @@
                         <span class="text-[10px] text-slate-500 font-mono">Realtime Controls</span>
                     </div>
 
+                    <!-- UNIFIED ALIGNMENT TOOLKIT: ZONE, PROGRAM & WINNERS ON SAME LINE -->
+                    <div class="space-y-3 bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-4 rounded-xl border border-purple-200 shadow-2xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black uppercase tracking-wide text-purple-950 flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h14"></path></svg>
+                                <span>Align on Same Line (ഒരുമിച്ച് ഒരേ ലൈനിൽ അലൈൻ ചെയ്യുക)</span>
+                            </span>
+                            <span class="text-[10px] font-mono font-bold text-purple-800 bg-white px-2 py-0.5 rounded border border-purple-200">Zone • Program • Students</span>
+                        </div>
+                        <p class="text-[11px] text-purple-900 leading-snug">
+                            റിസൾട്ടിലെ സോൺ, പ്രോഗ്രാം നെയിം, വിജയികളായ കുട്ടികളുടെ പേരുകൾ എന്നിവ കൃത്യമായി ഒരേ വെർട്ടിക്കൽ ലൈനിലേക്ക് അലൈൻ ചെയ്യാം.
+                        </p>
+
+                        <!-- Quick 1-Click Alignment Actions -->
+                        <div class="grid grid-cols-3 gap-1.5 pt-1">
+                            <button type="button" @click="alignAllElements('left')"
+                                    class="py-1.5 px-2 rounded-lg bg-white hover:bg-purple-600 hover:text-white border border-purple-300 text-purple-900 font-bold text-xs transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer">
+                                <span>⇥ Align Left</span>
+                            </button>
+                            <button type="button" @click="alignAllElements('center')"
+                                    class="py-1.5 px-2 rounded-lg bg-white hover:bg-purple-600 hover:text-white border border-purple-300 text-purple-900 font-bold text-xs transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer">
+                                <span>↔ Align Center</span>
+                            </button>
+                            <button type="button" @click="alignAllElements('right')"
+                                    class="py-1.5 px-2 rounded-lg bg-white hover:bg-purple-600 hover:text-white border border-purple-300 text-purple-900 font-bold text-xs transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer">
+                                <span>⇤ Align Right</span>
+                            </button>
+                        </div>
+
+                        <!-- Common Alignment X Coordinate Slider -->
+                        <div class="pt-2 border-t border-purple-200/80 space-y-1">
+                            <div class="flex items-center justify-between text-xs font-bold text-purple-950">
+                                <span>Common Line X Coordinate (ഒരുമിച്ചുള്ള സ്ഥാനം)</span>
+                                <div class="flex items-center gap-1.5 font-mono text-xs">
+                                    <input type="number" min="0" max="1080" step="5"
+                                           :value="settings.block_left"
+                                           @input="setCommonLineX(parseInt($event.target.value) || 0)"
+                                           class="w-16 px-1.5 py-0.5 rounded border border-purple-300 text-center font-bold text-purple-900 bg-white">
+                                    <span class="text-purple-700">px</span>
+                                </div>
+                            </div>
+                            <input type="range" min="50" max="850" step="5"
+                                   :value="settings.block_left"
+                                   @input="setCommonLineX(parseInt($event.target.value) || 0)"
+                                   class="w-full accent-purple-600 cursor-pointer">
+                        </div>
+
+                        <!-- Guidelines Snapping & Quick Add -->
+                        <div class="pt-2 border-t border-purple-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <button type="button" @click="addGuidelineAtCurrentLine()"
+                                    class="px-2.5 py-1 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span>Add Cyan Guide at this Line</span>
+                            </button>
+                            
+                            <!-- Snap to Guide Dropdown / Pills -->
+                            <div class="flex items-center gap-1" x-show="(guidelines.vertical || []).length > 0">
+                                <span class="text-[10px] font-bold text-purple-800">Snap Guide:</span>
+                                <template x-for="gx in (guidelines.vertical || [])" :key="'snap_' + gx">
+                                    <button type="button" @click="setCommonLineX(gx)"
+                                            class="px-1.5 py-0.5 rounded bg-cyan-100 hover:bg-cyan-200 text-cyan-900 font-mono text-[10px] font-bold border border-cyan-300 cursor-pointer"
+                                            :class="settings.block_left === gx ? 'ring-1 ring-cyan-700' : ''"
+                                            x-text="'X:' + gx"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 1. PROGRAM NAME (മത്സരത്തിന്റെ പേര്) -->
                     <div class="space-y-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <div class="flex items-center justify-between">
@@ -1351,6 +1443,24 @@
                             </div>
                         </div>
 
+                        <!-- Program Position (X & Y Coordinates) -->
+                        <div class="pt-2 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs">
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between font-bold text-slate-700">
+                                    <span>Position X</span>
+                                    <span class="font-mono text-purple-700" x-text="settings.competition_x + 'px'"></span>
+                                </div>
+                                <input type="range" min="0" max="1080" step="5" x-model.number="settings.competition_x" @input="render(); recordHistory();" class="w-full accent-purple-600">
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between font-bold text-slate-700">
+                                    <span>Position Y</span>
+                                    <span class="font-mono text-purple-700" x-text="settings.competition_y + 'px'"></span>
+                                </div>
+                                <input type="range" min="50" max="950" step="5" x-model.number="settings.competition_y" @input="render(); recordHistory();" class="w-full accent-purple-600">
+                            </div>
+                        </div>
+
                         <!-- Rotation -->
                         <div class="pt-2 border-t border-slate-200 space-y-1">
                             <div class="flex items-center justify-between text-xs font-bold text-slate-700">
@@ -1372,6 +1482,32 @@
                                 <input type="checkbox" x-model="settings.show_category" @change="render()" class="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-0">
                                 <span>Show</span>
                             </label>
+                        </div>
+
+                        <!-- Zone Alignment & Coordinates -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-white/70 p-2.5 rounded-lg border border-amber-200">
+                            <div class="space-y-1">
+                                <span class="font-bold text-amber-950 block">Zone Alignment</span>
+                                <div class="grid grid-cols-3 gap-1">
+                                    <button type="button" @click="settings.category_align = 'left'; render(); recordHistory();" class="py-1 px-1 text-[10px] font-bold rounded border text-center transition cursor-pointer" :class="(settings.category_align || 'center') === 'left' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white border-amber-300 text-amber-950'">Left</button>
+                                    <button type="button" @click="settings.category_align = 'center'; render(); recordHistory();" class="py-1 px-1 text-[10px] font-bold rounded border text-center transition cursor-pointer" :class="(settings.category_align || 'center') === 'center' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white border-amber-300 text-amber-950'">Center</button>
+                                    <button type="button" @click="settings.category_align = 'right'; render(); recordHistory();" class="py-1 px-1 text-[10px] font-bold rounded border text-center transition cursor-pointer" :class="settings.category_align === 'right' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white border-amber-300 text-amber-950'">Right</button>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between font-bold text-amber-950">
+                                    <span>Zone X</span>
+                                    <span class="font-mono text-amber-900" x-text="settings.category_x + 'px'"></span>
+                                </div>
+                                <input type="range" min="0" max="1080" step="5" x-model.number="settings.category_x" @input="render(); recordHistory();" class="w-full accent-amber-600">
+                            </div>
+                            <div class="sm:col-span-2 space-y-1 pt-1 border-t border-amber-200/60">
+                                <div class="flex items-center justify-between font-bold text-amber-950">
+                                    <span>Zone Y (ലംബ സ്ഥാനം)</span>
+                                    <span class="font-mono text-amber-900" x-text="settings.category_y + 'px'"></span>
+                                </div>
+                                <input type="range" min="50" max="950" step="5" x-model.number="settings.category_y" @input="render(); recordHistory();" class="w-full accent-amber-600">
+                            </div>
                         </div>
 
                         <!-- Editable Zone Text Input -->
@@ -2422,6 +2558,55 @@ function posterStudio() {
                     this.isApplyingHistory = false;
                 });
             }
+        },
+
+        // Unified Alignment & Guidelines Toolkit
+        alignAllElements(mode) {
+            const targetX = this.settings.block_left || 205;
+            if (mode === 'left') {
+                this.settings.category_align = 'left';
+                this.settings.competition_align = 'left';
+                this.settings.category_x = targetX;
+                this.settings.competition_x = targetX;
+            } else if (mode === 'center') {
+                this.settings.category_align = 'center';
+                this.settings.competition_align = 'center';
+                this.settings.category_x = 540;
+                this.settings.competition_x = 540;
+                this.settings.block_left = 540;
+            } else if (mode === 'right') {
+                const rightX = targetX + (this.settings.competition_max_width || 440);
+                this.settings.category_align = 'right';
+                this.settings.competition_align = 'right';
+                this.settings.category_x = rightX;
+                this.settings.competition_x = rightX;
+            }
+            this.render();
+            this.recordHistory();
+        },
+
+        setCommonLineX(newX) {
+            const currentBlockLeft = this.settings.block_left || 205;
+            const diff = newX - currentBlockLeft;
+            this.settings.block_left = newX;
+            this.settings.competition_x = (this.settings.competition_x || newX) + diff;
+            this.settings.category_x = (this.settings.category_x || newX) + diff;
+            this.render();
+            this.recordHistory();
+        },
+
+        addGuidelineAtCurrentLine() {
+            const currentX = this.settings.block_left || 205;
+            if (!this.guidelines.vertical) {
+                this.guidelines.vertical = [];
+            }
+            if (!this.guidelines.vertical.includes(currentX)) {
+                this.guidelines.vertical.push(currentX);
+                this.guidelines.vertical.sort((a, b) => a - b);
+            }
+            this.guidelines.show = true;
+            this.render();
+            this.recordHistory();
         },
 
         init() {

@@ -26,8 +26,8 @@
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 <span>Declared Results</span>
             </a>
-            <button type="button" @click="selectAllReady()" class="px-4 py-2.5 rounded-xl bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100 font-bold text-xs transition">
-                Select All Ready Results
+            <button type="button" @click="selectAllReady()" class="px-4 py-2.5 rounded-xl bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100 font-bold text-xs transition cursor-pointer">
+                Select All to Announce (അനൗൺസ് ചെയ്യാനുള്ളവ)
             </button>
             <button type="button" @click="clearSelection()" x-show="selectedResultIds.length > 0" class="px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs transition">
                 Clear Selection (<span x-text="selectedResultIds.length"></span>)
@@ -217,6 +217,17 @@
                             <span>പബ്ലിഷ് ചെയ്യുക & പോയിന്റ് നില അപ്‌ഡേറ്റ് ചെയ്യുക (<span x-text="selectedResultIds.length"></span>)</span>
                         </button>
                     </form>
+
+                    <!-- PDF Print / Export Milestone Standings -->
+                    <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-400 font-mono">Standings PDF:</span>
+                        <a :href="'{{ route('admin.print.milestone-standings') }}?count=' + ({{ $publishedCount }} + selectedResultIds.length)"
+                           target="_blank"
+                           class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs transition flex items-center gap-1.5 border border-white/15">
+                            <svg class="w-3.5 h-3.5 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            <span>Print Standings PDF</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -227,20 +238,38 @@
             <!-- Filters Toolbar -->
             <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
                 <div class="flex flex-wrap items-center gap-2">
+                    <!-- Tab 1: To Announce (Default) -->
+                    <button type="button" @click="filterStatus = 'to_announce'"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                            :class="filterStatus === 'to_announce' ? 'bg-[#be1e2d] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'">
+                        <span>അനൗൺസ് ചെയ്യാനുള്ളവ</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px]" :class="filterStatus === 'to_announce' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                              x-text="results.filter(r => r.status !== 'send' && r.status !== 'announced' && r.status !== 'published').length"></span>
+                    </button>
+
+                    <!-- Tab 2: Sent to Announcer -->
+                    <button type="button" @click="filterStatus = 'at_announcer'"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                            :class="filterStatus === 'at_announcer' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'">
+                        <span>അനൗൺസറിലുള്ളവ</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px]" :class="filterStatus === 'at_announcer' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                              x-text="results.filter(r => r.status === 'send' || r.status === 'announced').length"></span>
+                    </button>
+
+                    <!-- Tab 3: Published -->
+                    <button type="button" @click="filterStatus = 'published'"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                            :class="filterStatus === 'published' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'">
+                        <span>പബ്ലിഷ് ചെയ്തവ</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px]" :class="filterStatus === 'published' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'"
+                              x-text="results.filter(r => r.status === 'published').length"></span>
+                    </button>
+
+                    <!-- Tab 4: All -->
                     <button type="button" @click="filterStatus = 'all'"
-                            class="px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"
                             :class="filterStatus === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
                         All (<span x-text="results.length"></span>)
-                    </button>
-                    <button type="button" @click="filterStatus = 'ready'"
-                            class="px-3 py-1.5 rounded-xl text-xs font-bold transition"
-                            :class="filterStatus === 'ready' ? 'bg-amber-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-                        Unpublished Queue (<span x-text="results.filter(r => r.status !== 'published').length"></span>)
-                    </button>
-                    <button type="button" @click="filterStatus = 'published'"
-                            class="px-3 py-1.5 rounded-xl text-xs font-bold transition"
-                            :class="filterStatus === 'published' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-                        Published (<span x-text="results.filter(r => r.status === 'published').length"></span>)
                     </button>
                 </div>
 
@@ -424,13 +453,18 @@ function announcementPlanner() {
             };
         }),
 
-        filterStatus: 'ready',
+        filterStatus: 'to_announce',
         filterTeamId: null,
         selectedResultIds: [],
 
         get filteredResults() {
             return this.results.filter(r => {
-                if (this.filterStatus === 'ready' && r.status === 'published') return false;
+                if (this.filterStatus === 'to_announce') {
+                    if (r.status === 'send' || r.status === 'announced' || r.status === 'published') return false;
+                }
+                if (this.filterStatus === 'at_announcer') {
+                    if (r.status !== 'send' && r.status !== 'announced') return false;
+                }
                 if (this.filterStatus === 'published' && r.status !== 'published') return false;
                 if (this.filterTeamId !== null && r.top_group_id !== this.filterTeamId) return false;
                 return true;
@@ -479,7 +513,9 @@ function announcementPlanner() {
         },
 
         selectAllReady() {
-            this.selectedResultIds = this.results.filter(r => r.status !== 'published').map(r => r.id);
+            this.selectedResultIds = this.results
+                .filter(r => r.status !== 'send' && r.status !== 'announced' && r.status !== 'published')
+                .map(r => r.id);
         },
 
         clearSelection() {

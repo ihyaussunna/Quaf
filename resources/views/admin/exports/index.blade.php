@@ -34,8 +34,23 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-                <!-- 1. Print Results -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pt-1">
+                <!-- 1. Print Team Standings (After X Programs / Results) -->
+                <a href="{{ route('admin.print.milestone-standings') }}" target="_blank" class="p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 hover:border-emerald-400 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold text-emerald-400">TEAM STANDINGS</span>
+                            <svg class="w-4 h-4 text-white/50 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-white mb-1">Team Standings (After X Programs)</h3>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">ഇത്ര പ്രോഗ്രാം കഴിഞ്ഞ ശേഷമുള്ള പോയിന്റ് നില (After X Results). ആവശ്യാനുസരണം ഫലങ്ങളുടെ എണ്ണം നൽകി ഔദ്യോഗിക PDF പ്രിന്റ് ചെയ്യാം.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono font-bold text-emerald-400">
+                        <span>Standings PDF →</span>
+                    </div>
+                </a>
+
+                <!-- 2. Print Results -->
                 <a href="{{ route('admin.print.results') }}" target="_blank" class="p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 hover:border-[#f3bd2e] transition-all flex flex-col justify-between group">
                     <div>
                         <div class="flex items-center justify-between mb-2">

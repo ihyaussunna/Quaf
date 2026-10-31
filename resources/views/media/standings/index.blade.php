@@ -24,13 +24,14 @@
             </p>
         </div>
 
-        <div class="flex flex-col sm:items-end gap-1.5 shrink-0">
-            <a href="{{ route('home') }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs">
+        <div class="flex flex-col sm:flex-row items-center gap-2 shrink-0">
+            <a :href="'{{ route('media.print.milestone-standings') }}?count=' + resCount" target="_blank" class="px-4 py-2.5 rounded-2xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
+                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span>Standings PDF (Print)</span>
+            </a>
+            <a href="{{ route('home') }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
                 <span>View Public Site &rarr;</span>
             </a>
-            <span class="text-[11px] font-mono text-slate-400">
-                ആകെ പബ്ലിഷ് ചെയ്ത ഫലങ്ങൾ: <strong class="text-slate-700">{{ $totalPublishedResults }}</strong>
-            </span>
         </div>
     </div>
 
@@ -50,8 +51,17 @@
     @endif
 
     <!-- Standings Editor Form -->
-    <form method="POST" action="{{ route('media.standings.update') }}" x-data="{
+    <form method="POST" action="{{ route('media.standings.update') }}" enctype="multipart/form-data" x-data="{
         resCount: {{ (int) $resultsCount }},
+        posterPreview: null,
+        removePoster: false,
+        handlePosterChange(e) {
+            const file = e.target.files[0];
+            if (file) {
+                this.posterPreview = URL.createObjectURL(file);
+                this.removePoster = false;
+            }
+        },
         get formattedLabel() {
             let n = parseInt(this.resCount) || 0;
             return 'After ' + String(n).padStart(2, '0') + ' Results';
@@ -176,18 +186,98 @@
                     </div>
                 @endforeach
             </div>
+        </div>
 
-            <!-- Submit Publish Button -->
-            <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-xs text-slate-500 font-ml">
-                    ഈ ബട്ടൺ ക്ലിക്ക് ചെയ്യുമ്പോൾ നൽകിയ പോയിന്റുകളും 'After XX Results' ലേബലും ഉടൻ തന്നെ പബ്ലിക് വെബ്സൈറ്റിൽ തത്സമയം ദൃശ്യമാകും.
+        <!-- 3. Standings Poster Upload Card -->
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 font-sora flex items-center gap-2">
+                        <span>3. ടീം സ്റ്റാൻഡിങ്സ് പോസ്റ്റർ അപ്‌ലോഡ് ചെയ്യുക (Upload Standings Poster)</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-100 text-purple-800">PUBLIC WEBSITE</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 font-ml mt-0.5">
+                        പോയിന്റ് നില അപ്‌ഡേറ്റ് ചെയ്യുമ്പോൾ പുതിയ സ്റ്റാൻഡിങ്സ് പോസ്റ്റർ ഇമേജ് ഇവിടെ അപ്‌ലോഡ് ചെയ്യാം. ഇത് വെബ്സൈറ്റിലെ ഗ്രൂപ്പ്സ് പേജിൽ താഴെ കാണാനും സന്ദർശകർക്ക് ഡൗൺലോഡ് ചെയ്യാനും ലഭ്യമാകും.
+                    </p>
                 </div>
-                
-                <button type="submit" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-sora font-extrabold text-sm uppercase tracking-wider transition shadow-lg hover:shadow-emerald-600/20 flex items-center justify-center gap-2 font-mono shrink-0">
-                    <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                    <span>പബ്ലിക് വെബ്സൈറ്റിലേക്ക് പബ്ലിഷ് ചെയ്യുക</span>
-                </button>
+                @if(!empty($standingsPosterUrl))
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs shrink-0">
+                        Live Poster Active
+                    </span>
+                @endif
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start pt-2">
+                <!-- Upload Area -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider font-mono">
+                        Select Poster File (PNG, JPG, WebP - Max 15MB):
+                    </label>
+                    <div class="border-2 border-dashed border-slate-300 hover:border-[#be1e2d] rounded-2xl p-6 text-center bg-slate-50/50 hover:bg-white transition cursor-pointer relative">
+                        <input type="file" name="standings_poster" accept="image/png,image/jpeg,image/webp"
+                               @change="handlePosterChange($event)"
+                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <div class="space-y-2 pointer-events-none">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-200 text-slate-600 mx-auto flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div class="text-xs font-bold text-slate-800">ക്ലിക്ക് ചെയ്ത് പോസ്റ്റർ തിരഞ്ഞെടുക്കുക</div>
+                            <div class="text-[11px] text-slate-500 font-mono">Drag and drop or browse file</div>
+                        </div>
+                    </div>
+
+                    @if(!empty($standingsPosterUrl))
+                        <div class="pt-2">
+                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-red-600 select-none">
+                                <input type="checkbox" name="remove_poster" value="1" x-model="removePoster" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-0">
+                                <span>നിലവിലെ പോസ്റ്റർ നീക്കം ചെയ്യുക (Remove active poster)</span>
+                            </label>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Preview Area -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider font-mono">
+                        Poster Preview:
+                    </label>
+                    
+                    <!-- New File Preview -->
+                    <template x-if="posterPreview">
+                        <div class="rounded-2xl border-2 border-emerald-400 p-2 bg-emerald-50/40 space-y-2">
+                            <span class="text-[11px] font-mono font-bold text-emerald-800 uppercase block">New Poster to Upload:</span>
+                            <img :src="posterPreview" class="max-h-72 w-auto mx-auto rounded-xl object-contain shadow-md">
+                        </div>
+                    </template>
+
+                    <!-- Active Saved Poster -->
+                    @if(!empty($standingsPosterUrl))
+                        <div x-show="!posterPreview && !removePoster" class="rounded-2xl border border-slate-200 p-3 bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-mono">
+                                <span class="font-bold text-slate-700">Currently Active on Website:</span>
+                                <a href="{{ $standingsPosterUrl }}" target="_blank" class="text-purple-700 font-bold hover:underline">Full Size &rarr;</a>
+                            </div>
+                            <img src="{{ $standingsPosterUrl }}" alt="Active Standings Poster" class="max-h-64 w-auto mx-auto rounded-xl object-contain shadow-xs">
+                        </div>
+                    @endif
+
+                    <div x-show="!posterPreview && (!{{ !empty($standingsPosterUrl) ? 'true' : 'false' }} || removePoster)" class="rounded-2xl border border-slate-200 p-8 text-center text-slate-400 text-xs font-mono">
+                        No poster selected. Standings leaderboard table will be shown without poster view.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Publish Button Card -->
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-xs text-slate-500 font-ml">
+                ഈ ബട്ടൺ ക്ലിക്ക് ചെയ്യുമ്പോൾ നൽകിയ പോയിന്റുകളും പുതിയ സ്റ്റാൻഡിങ്സ് പോസ്റ്ററും തത്സമയം പബ്ലിക് വെബ്സൈറ്റിൽ ലഭ്യമാകും.
+            </div>
+            
+            <button type="submit" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-sora font-extrabold text-sm uppercase tracking-wider transition shadow-lg hover:shadow-emerald-600/20 flex items-center justify-center gap-2 font-mono shrink-0 cursor-pointer">
+                <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                <span>പബ്ലിക് വെബ്സൈറ്റിലേക്ക് പബ്ലിഷ് ചെയ്യുക</span>
+            </button>
         </div>
 
     </form>

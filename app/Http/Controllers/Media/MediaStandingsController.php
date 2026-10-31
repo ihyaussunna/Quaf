@@ -10,6 +10,7 @@ use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class MediaStandingsController extends Controller
@@ -29,6 +30,7 @@ class MediaStandingsController extends Controller
         $resultsCount = (int) FestivalSetting::get('public_standings_results_count', 0);
         $formattedCount = sprintf('%02d', $resultsCount);
         $standingsBadge = "After {$formattedCount} Results";
+        $standingsPosterUrl = FestivalSetting::get('public_standings_poster_url');
 
         $totalPublishedResults = Result::where('status', 'published')
             ->where('is_media_published', true)
@@ -39,6 +41,7 @@ class MediaStandingsController extends Controller
             'resultsCount',
             'formattedCount',
             'standingsBadge',
+            'standingsPosterUrl',
             'totalPublishedResults'
         ));
     }
@@ -54,6 +57,8 @@ class MediaStandingsController extends Controller
             'results_count' => ['required', 'integer', 'min:0', 'max:9999'],
             'points' => ['required', 'array'],
             'points.*' => ['required', 'numeric', 'min:0', 'max:100000'],
+            'standings_poster' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:15360'],
+            'remove_poster' => ['nullable', 'boolean'],
         ]);
 
         $resCount = (int) $validated['results_count'];
@@ -83,6 +88,17 @@ class MediaStandingsController extends Controller
         FestivalSetting::set('public_standings_results_count', (string) $resCount);
         FestivalSetting::set('public_standings_label', $label);
         FestivalSetting::set('public_standings_updated_at', now()->toIso8601String());
+
+        // 4. Handle Standings Poster upload or removal
+        if ($request->hasFile('standings_poster')) {
+            $path = $request->file('standings_poster')->store('media/standings', 'public');
+            $posterUrl = Storage::url($path);
+            FestivalSetting::set('public_standings_poster_url', $posterUrl);
+            FestivalSetting::set('public_standings_poster_updated_at', now()->toIso8601String());
+        } elseif ($request->boolean('remove_poster')) {
+            FestivalSetting::set('public_standings_poster_url', '');
+            FestivalSetting::set('public_standings_poster_updated_at', now()->toIso8601String());
+        }
 
         // 4. Invalidate all public standings caches immediately
         Cache::forget('public_api_standings');

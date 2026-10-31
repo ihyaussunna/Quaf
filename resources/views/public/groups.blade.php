@@ -8,21 +8,33 @@
 <!-- Header Section -->
 <section class="py-10 sm:py-14 bg-white border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div>
-            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL HOUSES & TEAMS</span>
-            <div class="flex flex-wrap items-center gap-3 mt-1">
-                <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 animate-heading">Group Standings</h1>
-                @php
-                    $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
-                    $standingsLabel = 'After ' . sprintf('%02d', $standingsCount) . ' Results';
-                @endphp
-                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
-                    {{ $standingsLabel }}
-                </span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL HOUSES & TEAMS</span>
+                <div class="flex flex-wrap items-center gap-3 mt-1">
+                    <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 animate-heading">Group Standings</h1>
+                    @php
+                        $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
+                        $standingsLabel = 'After ' . sprintf('%02d', $standingsCount) . ' Results';
+                        $standingsPoster = $standingsPosterUrl ?? \App\Models\FestivalSetting::get('public_standings_poster_url');
+                    @endphp
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
+                        {{ $standingsLabel }}
+                    </span>
+                </div>
+                <p class="text-sm text-slate-600 mt-2 max-w-xl">
+                    Official leaderboard and cumulative point standings of competing festival groups in QUAF.
+                </p>
             </div>
-            <p class="text-sm text-slate-600 mt-2 max-w-xl">
-                Official leaderboard and cumulative point standings of competing festival groups in QUAF.
-            </p>
+
+            @if(!empty($standingsPoster))
+                <div class="shrink-0 pt-2 sm:pt-0">
+                    <a href="{{ $standingsPoster }}" download="QUAF_Standings_{{ Str::slug($standingsLabel) }}.jpg" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download Poster</span>
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 </section>
@@ -37,14 +49,9 @@
                 <span class="text-xs font-mono uppercase tracking-widest text-slate-400 font-bold">
                     RANK &amp; TEAM
                 </span>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        {{ $standingsLabel }}
-                    </span>
-                    <span class="text-xs font-mono uppercase tracking-widest text-slate-400 font-bold">
-                        TOTAL POINTS
-                    </span>
-                </div>
+                <span class="text-xs font-mono uppercase tracking-widest text-slate-400 font-bold">
+                    TOTAL POINTS
+                </span>
             </div>
 
             <!-- Rows: Only Rank Number, Team Name, Points -->
@@ -127,6 +134,36 @@
                 @endforeach
             </div>
         </div>
+
+        @if(!empty($standingsPoster))
+            <!-- Official Standings Poster Section (View Below on Page) -->
+            <div class="mt-10 rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-8 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#be1e2d] text-white uppercase">OFFICIAL POSTER</span>
+                            <span class="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{{ $standingsLabel }}</span>
+                        </div>
+                        <h2 class="text-xl font-sora font-extrabold text-slate-900 mt-1">ടീം സ്റ്റാൻഡിങ്സ് ഒഫീഷ്യൽ പോസ്റ്റർ</h2>
+                        <p class="text-xs text-slate-500 font-mono mt-0.5">Official cumulative leaderboard graphic poster</p>
+                    </div>
+
+                    <a href="{{ $standingsPoster }}" download="QUAF_Standings_{{ Str::slug($standingsLabel) }}.jpg" target="_blank" class="px-5 py-2.5 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download Poster (ഡൗൺലോഡ്)</span>
+                    </a>
+                </div>
+
+                <div class="bg-slate-950/5 rounded-2xl p-2 sm:p-4 border border-slate-200/80 flex justify-center">
+                    <a href="{{ $standingsPoster }}" target="_blank" class="block group relative overflow-hidden rounded-xl">
+                        <img src="{{ $standingsPoster }}" alt="Official Group Standings Poster - {{ $standingsLabel }}" class="max-w-full h-auto max-h-[850px] rounded-xl shadow-lg group-hover:scale-[1.01] transition-transform duration-300">
+                        <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="px-4 py-2 rounded-xl bg-slate-900/90 text-white font-mono text-xs font-bold shadow-lg">Click to View Full Size</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        @endif
     </div>
 </section>
 

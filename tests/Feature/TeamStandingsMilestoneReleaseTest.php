@@ -12,6 +12,8 @@ use App\Models\StandingAnnouncement;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -496,5 +498,64 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $groupsResponse->assertOk();
         $groupsResponse->assertDontSee('Initial Standings');
         $groupsResponse->assertSee('After 05 Results');
+    }
+
+    public function test_media_can_upload_standings_poster_and_it_shows_on_groups_page(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->image('standings_poster.jpg', 1080, 1350);
+
+        $response = $this->actingAs($this->mediaUser)->post(route('media.standings.update'), [
+            'results_count' => 15,
+            'points' => [
+                $this->groupA->id => 100,
+                $this->groupB->id => 120,
+            ],
+            'standings_poster' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $posterUrl = FestivalSetting::get('public_standings_poster_url');
+        $this->assertNotEmpty($posterUrl);
+
+        $groupsView = $this->get(route('groups.index'));
+        $groupsView->assertOk();
+        $groupsView->assertSee('Download Poster');
+        $groupsView->assertSee($posterUrl);
+        $groupsView->assertSee('ടീം സ്റ്റാൻഡിങ്സ് ഒഫീഷ്യൽ പോസ്റ്റർ');
+    }
+
+    public function test_student_coins_are_available_immediately_upon_stage_announcement(): void
+    {
+        $category = ProgramCategory::create(['name' => 'Music', 'code' => 'MUS', 'slug' => 'music-test']);
+        $prog = Program::create([
+            'category_id' => $category->id,
+            'name' => 'Qawwali Stage Event',
+            'code' => 'P-999',
+            'type' => 'individual',
+            'eligibility' => 'all',
+            'status' => 'completed',
+        ]);
+
+        $student = $this->createStudent($this->groupA, 'Ameen Winner', 'CH-999');
+        $entry = $this->createEntry($prog, $student, 'CH-999');
+
+        $result = Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry->id,
+            'first_grade' => 'A+',
+            'status' => 'delivered',
+        ]);
+
+        // Announcer marks result as announced
+        $announceResponse = $this->actingAs($this->announcer)->post(route('announcer.announced', $result));
+        $announceResponse->assertRedirect();
+
+        // Student's verification page & coin summary must immediately reflect coins
+        $verifyResponse = $this->get(route('verify.student', $student->qr_token));
+        $verifyResponse->assertOk();
+        $verifyResponse->assertSee('Qawwali Stage Event');
+        $verifyResponse->assertSee('1st Prize');
     }
 }

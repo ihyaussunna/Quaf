@@ -7,6 +7,7 @@ use App\Models\Certificate;
 use App\Models\CoinTransaction;
 use App\Models\Student;
 use App\Services\CoinRewardService;
+use App\Services\PointCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -57,24 +58,25 @@ class VerificationController extends Controller
         $purchaseHistory = collect();
         $coinTransactions = collect();
         $awardedPrograms = collect();
+        $declaredStatuses = PointCalculationService::DECLARED_STATUSES;
 
         if ($student) {
-            // Scanner page is public: only show media-published coins and achievements
-            $coinSummary = $coinRewardService->getStudentCoinSummary($student, true);
-            $studentAchievements = $coinRewardService->getStudentAchievements($student, true);
+            // Live coins and achievements immediately available upon result announcement
+            $coinSummary = $coinRewardService->getStudentCoinSummary($student, false);
+            $studentAchievements = $coinRewardService->getStudentAchievements($student, false);
             $purchaseHistory = CoinTransaction::where('student_id', $student->id)
                 ->where('transaction_type', 'debit')
                 ->latest()
                 ->get();
             $coinTransactions = CoinTransaction::where('student_id', $student->id)
-                ->where(function ($q) {
+                ->where(function ($q) use ($declaredStatuses) {
                     $q->whereNull('result_id')
-                        ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                        ->orWhereHas('result', fn ($rq) => $rq->whereIn('status', $declaredStatuses));
                 })
-                ->where(function ($q) {
+                ->where(function ($q) use ($declaredStatuses) {
                     $q->whereNull('program_id')
                         ->orDoesntHave('program.result')
-                        ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                        ->orWhereHas('program.result', fn ($rq) => $rq->whereIn('status', $declaredStatuses));
                 })
                 ->latest()
                 ->take(15)
@@ -109,6 +111,6 @@ class VerificationController extends Controller
      */
     protected function resolveStudentAwardedPrograms(Student $student): Collection
     {
-        return app(CoinRewardService::class)->resolveStudentAwardedPrograms($student, true);
+        return app(CoinRewardService::class)->resolveStudentAwardedPrograms($student, false);
     }
 }

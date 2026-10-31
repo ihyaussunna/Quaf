@@ -632,7 +632,9 @@ class ResultController extends Controller
             'published_count' => Result::where('status', 'published')->count(),
             'send_count' => Result::where('status', 'send')->count(),
             'announced_count' => Result::where('status', 'announced')->count(),
-            'ready_count' => Result::where('status', '!=', 'published')->count(),
+            'to_announce_count' => Result::whereNotIn('status', ['published', 'send', 'announced'])->count(),
+            'at_announcer_count' => Result::whereIn('status', ['send', 'announced'])->count(),
+            'ready_count' => Result::whereNotIn('status', ['published', 'send', 'announced'])->count(),
             'remaining_count' => Program::whereDoesntHave('result')->count(),
         ];
 

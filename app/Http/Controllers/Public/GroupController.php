@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\Program;
 use App\Models\Result;
@@ -20,8 +21,9 @@ class GroupController extends Controller
         $totalPrograms = Program::count();
         $publishedCount = Result::where('status', 'published')->where('is_media_published', true)->count();
         $isFullResultsPublished = ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
+        $standingsPosterUrl = FestivalSetting::get('public_standings_poster_url');
 
-        return view('public.groups', compact('groups', 'isFullResultsPublished'));
+        return view('public.groups', compact('groups', 'isFullResultsPublished', 'standingsPosterUrl'));
     }
 
     public function show(Group $group): View
