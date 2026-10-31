@@ -18,8 +18,8 @@
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-sora">
                     Stage Announcement Console
                 </h1>
-                <p class="text-xs text-slate-600 mt-1 max-w-2xl font-ml">
-                    അഡ്മിൻ പാനലിൽ നിന്ന് വെരിഫൈ ചെയ്ത് അയച്ച മത്സര ഫലങ്ങൾ ഇവിടെ ലഭിക്കുന്നു. മൈക്രോഫോണിൽ അനൗൺസ് ചെയ്ത ശേഷം "അനൗൺസ് ചെയ്തു" ബട്ടൺ ക്ലിക്ക് ചെയ്യുക. ഫലം ഉടൻ തന്നെ മീഡിയ ടീമിന്റെ ഡെസ്കിലേക്ക് കൈമാറുന്നതാണ്.
+                <p class="text-xs text-slate-600 mt-1 max-w-2xl font-sora">
+                    Official competition results verified and transferred from the Admin Panel. After announcing on the stage microphone, click "Mark as Announced" to transfer results directly to the Media Desk.
                 </p>
             </div>
 
@@ -27,7 +27,7 @@
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ route('announcer.stage') }}" class="px-4 py-2.5 rounded-xl bg-[#005c94] hover:bg-[#004b78] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-sora">
                     <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
-                    <span>സ്റ്റേജ് കോളിംഗ് (Stage Calling Console) &rarr;</span>
+                    <span>Stage Calling Console &rarr;</span>
                 </a>
                 <button type="button" onclick="window.location.reload()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -68,18 +68,18 @@
                                     </span>
                                 </div>
                                 <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                                    ടീം പോയിന്റ് നില പ്രഖ്യാപനം (Team Standings)
+                                    Team Standings Announcement
                                 </h2>
-                                <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
-                                    അഡ്മിൻ പാനലിൽ നിന്ന് തയ്യാറാക്കി അയച്ച നിലവിലെ ഗ്രൂപ്പ് പോയിന്റ് നിലയാണിത്. താഴെ നൽകിയിട്ടുള്ള ക്രമത്തിൽ മൈക്കിൽ അനൗൺസ് ചെയ്ത ശേഷം "അനൗൺസ് ചെയ്തു & മീഡിയയിലേക്ക് കൈമാറുക" ക്ലിക്ക് ചെയ്യുക.
+                                <p class="text-xs text-slate-300 mt-1 max-w-2xl font-sora">
+                                    Current official house points standings prepared by the Admin Directorate. Review and click "Mark as Announced & Transfer to Media".
                                 </p>
                             </div>
 
                             <form method="POST" action="{{ route('announcer.standings.announced', $standAnn->id) }}" class="shrink-0">
                                 @csrf
-                                <button type="submit" class="w-full sm:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2 font-ml uppercase tracking-wider">
+                                <button type="submit" class="w-full sm:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2 uppercase tracking-wider">
                                     <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                    <span>അനൗൺസ് ചെയ്തു & മീഡിയയിലേക്ക് കൈമാറുക</span>
+                                    <span>Mark as Announced & Transfer to Media</span>
                                 </button>
                             </form>
                         </div>
@@ -104,19 +104,6 @@
                                 </div>
                             @endforeach
                         </div>
-
-                        <!-- Mic Speech Script Box -->
-                        @if($standAnn->script_text)
-                            <div class="mt-6 bg-black/40 rounded-2xl p-4 border border-white/10">
-                                <div class="text-[10px] font-mono uppercase tracking-wider text-amber-300 font-bold mb-1 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-                                    <span>മലയാളം അനൗൺസ് സ്ക്രിപ്റ്റ് (Stage Announcement Script)</span>
-                                </div>
-                                <p class="text-sm font-medium text-slate-100 font-ml leading-relaxed">
-                                    "{{ $standAnn->script_text }}"
-                                </p>
-                            </div>
-                        @endif
                     </div>
                 @endforeach
             </div>
@@ -134,7 +121,7 @@
                     @endif
                 </div>
                 <div class="text-3xl font-black text-slate-900 font-sora">{{ $stats['ready_count'] }}</div>
-                <div class="text-[11px] text-amber-800 font-medium mt-1 font-ml">അനൗൺസ് ചെയ്യാൻ കാത്തിരിക്കുന്നവ</div>
+                <div class="text-[11px] text-amber-800 font-medium mt-1">Pending Stage Announcement</div>
             </a>
 
             <!-- Announced -->
@@ -145,7 +132,7 @@
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <div class="text-3xl font-black text-slate-900 font-sora">{{ $stats['announced_count'] }}</div>
-                <div class="text-[11px] text-emerald-800 font-medium mt-1 font-ml">സ്റ്റേജിൽ അനൗൺസ് ചെയ്തവ</div>
+                <div class="text-[11px] text-emerald-800 font-medium mt-1">Already Announced on Stage</div>
             </a>
 
             <!-- Total Results -->
@@ -156,7 +143,7 @@
                     <span class="text-xs font-mono font-bold">{{ $stats['total_count'] }}</span>
                 </div>
                 <div class="text-3xl font-black text-slate-900 font-sora">{{ $stats['total_count'] }}</div>
-                <div class="text-[11px] text-slate-500 font-medium mt-1 font-ml">ആകെ ലഭ്യമായ ഫലങ്ങൾ</div>
+                <div class="text-[11px] text-slate-500 font-medium mt-1">Total Available Results</div>
             </a>
         </div>
 
@@ -208,8 +195,8 @@
                         No results found for this view
                     @endif
                 </h3>
-                <p class="text-xs text-slate-500 font-ml max-w-md mx-auto">
-                    അഡ്മിൻ പാനലിൽ നിന്ന് മൂല്യനിർണ്ണയം കഴിഞ്ഞ ഫലങ്ങൾ അയക്കുമ്പോൾ ഇവിടെ തത്സമയം ദൃശ്യമാകും.
+                <p class="text-xs text-slate-500 max-w-md mx-auto">
+                    Competition results evaluated and transferred from the Admin Panel will appear here in real time.
                 </p>
             </div>
         @else
@@ -226,29 +213,6 @@
                         $w2 = $res->getWinnerBreakdown(2);
                         $w3 = $res->getWinnerBreakdown(3);
                         $otherGraded = $res->getOtherGradeHolders();
-
-                        $w1Desc = "{$w1['name']} (ചെസ്റ്റ് #{$w1['chest']}, {$w1['team']})";
-                        if ($w1['grade']) {
-                            $w1Desc .= " — Grade {$w1['grade']} (ഗ്രേഡ് പോയിന്റ്: +{$w1['grade_points']}, പൊസിഷൻ: +{$w1['position_points']} | ആകെ: {$w1['total_points']} pts)";
-                        } else {
-                            $w1Desc .= " — പൊസിഷൻ: +{$w1['position_points']} pts (ആകെ: {$w1['total_points']} pts)";
-                        }
-
-                        $w2Desc = "{$w2['name']} (ചെസ്റ്റ് #{$w2['chest']}, {$w2['team']})";
-                        if ($w2['grade']) {
-                            $w2Desc .= " — Grade {$w2['grade']} (ഗ്രേഡ് പോയിന്റ്: +{$w2['grade_points']}, പൊസിഷൻ: +{$w2['position_points']} | ആകെ: {$w2['total_points']} pts)";
-                        } else {
-                            $w2Desc .= " — പൊസിഷൻ: +{$w2['position_points']} pts (ആകെ: {$w2['total_points']} pts)";
-                        }
-
-                        $w3Desc = "{$w3['name']} (ചെസ്റ്റ് #{$w3['chest']}, {$w3['team']})";
-                        if ($w3['grade']) {
-                            $w3Desc .= " — Grade {$w3['grade']} (ഗ്രേഡ് പോയിന്റ്: +{$w3['grade_points']}, പൊസിഷൻ: +{$w3['position_points']} | ആകെ: {$w3['total_points']} pts)";
-                        } else {
-                            $w3Desc .= " — പൊസിഷൻ: +{$w3['position_points']} pts (ആകെ: {$w3['total_points']} pts)";
-                        }
-
-                        $scriptText = "ക്വാഫ് ഫെസ്റ്റ് റിസൾട്ട് നമ്പർ {$resNo} ({$zoneName}): {$prog?->name} മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു: ഒന്നാം സ്ഥാനം: {$w1Desc}. രണ്ടാം സ്ഥാനം: {$w2Desc}. മൂന്നാം സ്ഥാനം: {$w3Desc}.";
                     @endphp
 
                     <div class="bg-white rounded-3xl p-6 sm:p-8 border {{ $isDelivered ? 'border-amber-300 ring-4 ring-amber-100/70 shadow-md' : 'border-slate-200 shadow-xs' }} transition">
@@ -281,17 +245,14 @@
                                     <span class="text-[#be1e2d] font-mono">#{{ $resNo }}</span>
                                     <span>{{ $prog?->name }}</span>
                                 </h3>
-                                @if($prog?->malayalam_name)
-                                    <p class="text-sm text-slate-500 font-ml mt-0.5">{{ $prog->malayalam_name }}</p>
-                                @endif
                             </div>
 
                             @if($isDelivered)
                                 <form method="POST" action="{{ route('announcer.announced', $res->id) }}">
                                     @csrf
-                                    <button type="submit" class="w-full sm:w-auto px-6 py-3.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-2xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2 font-ml">
+                                    <button type="submit" class="w-full sm:w-auto px-6 py-3.5 bg-[#be1e2d] hover:bg-[#a01624] text-white rounded-2xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                                        <span>അനൗൺസ് ചെയ്തു (Mark as Announced)</span>
+                                        <span>Mark as Announced</span>
                                     </button>
                                 </form>
                             @else
@@ -300,71 +261,11 @@
                                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                         Announced on Stage
                                     </span>
-                                    <span class="text-[11px] font-semibold text-slate-500 font-ml">
-                                        {{ $res->is_media_published ? 'മീഡിയ പോസ്റ്റർ പബ്ലിഷ് ചെയ്തു' : 'മീഡിയ ഡെസ്കിലേക്ക് കൈമാറി' }}
+                                    <span class="text-[11px] font-semibold text-slate-500">
+                                        {{ $res->is_media_published ? 'Media Poster Published' : 'Transferred to Media Desk' }}
                                     </span>
                                 </div>
                             @endif
-                        </div>
-
-                        <!-- Stage Microphone Speech Script Box -->
-                        <div class="mt-5 p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200">
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5 font-sora">
-                                    <svg class="w-4 h-4 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-                                    <span>മൈക്രോഫോൺ അനൗൺസ്മെന്റ് സ്ക്രിപ്റ്റ് (Stage Announcement Script with Grade Points)</span>
-                                </span>
-                                <button type="button" onclick="navigator.clipboard.writeText('{{ addslashes($scriptText) }}'); alert('അനൗൺസ്മെന്റ് സ്ക്രിപ്റ്റ് കോപ്പി ചെയ്തു.');" 
-                                        class="px-2.5 py-1 rounded-lg bg-amber-200/80 hover:bg-amber-300 text-amber-900 text-[11px] font-bold transition font-ml shadow-2xs">
-                                    സ്ക്രിപ്റ്റ് കോപ്പി ചെയ്യുക
-                                </button>
-                            </div>
-                            <div class="text-sm font-ml text-slate-800 leading-relaxed bg-white/80 p-3.5 rounded-xl border border-amber-200/60">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="px-2 py-0.5 rounded bg-slate-900 text-amber-300 font-mono font-black text-xs">
-                                        Result #{{ $resNo }}
-                                    </span>
-                                    <span>ശ്രദ്ധിക്കുക... ക്വാഫ് ഫെസ്റ്റ് <strong>{{ $prog?->name }}</strong> ({{ $zoneName }} &bull; {{ $prog?->malayalam_name ?: $prog?->code }}) മത്സര ഫലം പ്രഖ്യാപിക്കുന്നു:</span>
-                                </div>
-                                <div class="mt-2.5 space-y-2 font-medium">
-                                    <div class="flex flex-wrap items-baseline gap-1.5">
-                                        <span class="font-bold text-amber-900">• ഒന്നാം സ്ഥാനം:</span>
-                                        <span class="font-bold text-slate-900 font-sora">{{ $w1['name'] }}</span>
-                                        <span class="text-xs font-mono text-slate-600">(ചെസ്റ്റ് #{{ $w1['chest'] }}, {{ $w1['team'] }})</span>
-                                        <span class="text-slate-400">—</span>
-                                        @if($w1['grade'])
-                                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Grade {{ $w1['grade'] }} (+{{ $w1['grade_points'] }} pts)</span>
-                                            <span class="text-xs font-mono text-slate-600">+{{ $w1['position_points'] }} pos = <strong class="text-amber-900 text-sm font-bold">{{ $w1['total_points'] }} pts</strong></span>
-                                        @else
-                                            <span class="text-xs font-mono text-slate-600">+{{ $w1['position_points'] }} pos = <strong class="text-amber-900 text-sm font-bold">{{ $w1['total_points'] }} pts</strong></span>
-                                        @endif
-                                    </div>
-                                    <div class="flex flex-wrap items-baseline gap-1.5">
-                                        <span class="font-bold text-slate-800">• രണ്ടാം സ്ഥാനം:</span>
-                                        <span class="font-bold text-slate-900 font-sora">{{ $w2['name'] }}</span>
-                                        <span class="text-xs font-mono text-slate-600">(ചെസ്റ്റ് #{{ $w2['chest'] }}, {{ $w2['team'] }})</span>
-                                        <span class="text-slate-400">—</span>
-                                        @if($w2['grade'])
-                                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Grade {{ $w2['grade'] }} (+{{ $w2['grade_points'] }} pts)</span>
-                                            <span class="text-xs font-mono text-slate-600">+{{ $w2['position_points'] }} pos = <strong class="text-slate-900 text-sm font-bold">{{ $w2['total_points'] }} pts</strong></span>
-                                        @else
-                                            <span class="text-xs font-mono text-slate-600">+{{ $w2['position_points'] }} pos = <strong class="text-slate-900 text-sm font-bold">{{ $w2['total_points'] }} pts</strong></span>
-                                        @endif
-                                    </div>
-                                    <div class="flex flex-wrap items-baseline gap-1.5">
-                                        <span class="font-bold text-red-900">• മൂന്നാം സ്ഥാനം:</span>
-                                        <span class="font-bold text-slate-900 font-sora">{{ $w3['name'] }}</span>
-                                        <span class="text-xs font-mono text-slate-600">(ചെസ്റ്റ് #{{ $w3['chest'] }}, {{ $w3['team'] }})</span>
-                                        <span class="text-slate-400">—</span>
-                                        @if($w3['grade'])
-                                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Grade {{ $w3['grade'] }} (+{{ $w3['grade_points'] }} pts)</span>
-                                            <span class="text-xs font-mono text-slate-600">+{{ $w3['position_points'] }} pos = <strong class="text-red-900 text-sm font-bold">{{ $w3['total_points'] }} pts</strong></span>
-                                        @else
-                                            <span class="text-xs font-mono text-slate-600">+{{ $w3['position_points'] }} pos = <strong class="text-red-900 text-sm font-bold">{{ $w3['total_points'] }} pts</strong></span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Winners Podium Details with Grade Points -->
@@ -484,7 +385,7 @@
                         <!-- Other Grade Holders (if any) -->
                         @if($otherGraded->isNotEmpty())
                             <div class="mt-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center gap-2">
-                                <span class="text-xs font-bold text-slate-700 font-ml">മറ്റ് ഗ്രേഡ് ജേതാക്കൾ (Other Grade Holders):</span>
+                                <span class="text-xs font-bold text-slate-700">Other Grade Holders:</span>
                                 @foreach($otherGraded as $og)
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-xs font-mono shadow-2xs">
                                         <strong class="text-slate-900">{{ $og->student?->name ?: 'Chest #'.$og->chest_number }}</strong>
@@ -501,7 +402,7 @@
                                 <button type="button" @click="open = !open" 
                                         class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
                                     <svg class="w-4 h-4 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="font-ml">ഗ്രേഡുകൾ തിരുത്തുക / രേഖപ്പെടുത്തുക (Edit / Adjust Grades)</span>
+                                    <span>Edit / Adjust Grades</span>
                                 </button>
                                 <span class="text-[11px] font-mono text-slate-400">Official Grade Points: A+=6, A=5, B=3, C=1 pts</span>
                             </div>
@@ -548,13 +449,13 @@
 
                         <!-- Note regarding Media Sync -->
                         @if($isDelivered)
-                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-ml">
-                                <span>മൈക്കിൽ അനൗൺസ് ചെയ്ത ശേഷം മുകളിലുള്ള ബട്ടൺ ക്ലിക്ക് ചെയ്താൽ ഈ റിസൾട്ട് തത്സമയം മീഡിയ ഡെസ്കിലേക്ക് കൈമാറും.</span>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                                <span>After announcing on the microphone, click the button above to transfer this result directly to the Media Desk.</span>
                                 <span class="font-mono text-slate-400">Step 2 of 3: Stage Announcement</span>
                             </div>
                         @else
-                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-ml">
-                                <span>ഈ ഫലം മീഡിയ ടീം പരിശോധിക്കുകയും സോഷ്യൽ മീഡിയ പോസ്റ്റർ തയ്യാറാക്കുകയും ചെയ്യും.</span>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                                <span>Transferred to Media Desk for official poster publishing and social media dispatch.</span>
                                 <span class="font-mono text-emerald-600 font-semibold">Announced</span>
                             </div>
                         @endif

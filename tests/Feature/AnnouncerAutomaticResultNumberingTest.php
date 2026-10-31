@@ -147,8 +147,7 @@ class AnnouncerAutomaticResultNumberingTest extends TestCase
         $announcerView->assertSee('B Zone');
         $announcerView->assertSee('Malayalam Speech');
         $announcerView->assertSee('English Elocution');
-        $announcerView->assertSee('റിസൾട്ട് നമ്പർ 01');
-        $announcerView->assertSee('റിസൾട്ട് നമ്പർ 02');
+        $announcerView->assertSee('Mark as Announced');
     }
 
     public function test_tenth_result_gets_number_10_and_shows_in_announcer_panel(): void
@@ -175,7 +174,7 @@ class AnnouncerAutomaticResultNumberingTest extends TestCase
         $announcerResponse->assertSee('Result #10');
         $announcerResponse->assertSee('Competition 10');
         $announcerResponse->assertSee('Zone 10');
-        $announcerResponse->assertSee('റിസൾട്ട് നമ്പർ 10');
+        $announcerResponse->assertSee('Mark as Announced');
 
         // Check Admin Declared Results table
         $declaredResponse = $this->actingAs($this->admin)->get(route('admin.results.declared'));

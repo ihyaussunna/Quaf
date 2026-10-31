@@ -89,7 +89,7 @@ class AnnouncerController extends Controller
 
         AuditLogger::log('announcer_announced_standing', $standingAnnouncement, ['status' => 'ready'], ['status' => 'announced']);
 
-        return back()->with('success', "ടീം പോയിന്റ് നില സ്റ്റേജിൽ അനൗൺസ് ചെയ്തു ({$standingAnnouncement->title}). ഫലം മീഡിയ ഡെസ്കിലേക്ക് കൈമാറിയിരിക്കുന്നു.");
+        return back()->with('success', "Team standings ({$standingAnnouncement->title}) announced on stage and transferred to Media Desk.");
     }
 
     public function markAnnounced(Result $result): RedirectResponse
@@ -124,7 +124,7 @@ class AnnouncerController extends Controller
 
         AuditLogger::log('announcer_announced_result', $result, ['status' => $old], ['status' => 'announced']);
 
-        return back()->with('success', "പ്രോഗ്രാം '{$result->program->name}' അനൗൺസ് ചെയ്തു. റിസൾട്ട് മീഡിയ ഡെസ്കിലേക്ക് കൈമാറിയിരിക്കുന്നു.");
+        return back()->with('success', "Program '{$result->program->name}' marked as announced and transferred to Media Desk.");
     }
 
     public function stageCalling(Request $request): View
@@ -176,7 +176,7 @@ class AnnouncerController extends Controller
 
         AuditLogger::log('announcer_call_stage', $call, null, ['status' => 'called']);
 
-        return back()->with('success', "കോഡ് {$call->entry?->code_letter} (ചെസ്റ്റ് #{$call->entry?->chest_number}) സ്റ്റേജിലേക്ക് വിളിച്ചു.");
+        return back()->with('success', "Code {$call->entry?->code_letter} (Chest #{$call->entry?->chest_number}) called to stage.");
     }
 
     public function enterStage(GreenRoomCall $call): RedirectResponse
@@ -194,7 +194,7 @@ class AnnouncerController extends Controller
 
         AuditLogger::log('announcer_enter_stage', $call, null, ['status' => 'on_stage']);
 
-        return back()->with('success', "കോഡ് {$call->entry?->code_letter} (ചെസ്റ്റ് #{$call->entry?->chest_number}) സ്റ്റേജിൽ പ്രവേശിച്ചു.");
+        return back()->with('success', "Code {$call->entry?->code_letter} (Chest #{$call->entry?->chest_number}) entered the stage.");
     }
 
     public function completeStage(GreenRoomCall $call): RedirectResponse
@@ -205,7 +205,7 @@ class AnnouncerController extends Controller
 
         AuditLogger::log('announcer_complete_stage', $call, null, ['status' => 'completed']);
 
-        return back()->with('success', "കോഡ് {$call->entry?->code_letter} (ചെസ്റ്റ് #{$call->entry?->chest_number}) മത്സരം പൂർത്തിയാക്കി.");
+        return back()->with('success', "Code {$call->entry?->code_letter} (Chest #{$call->entry?->chest_number}) marked performance complete.");
     }
 
     /**
@@ -238,6 +238,6 @@ class AnnouncerController extends Controller
             'third_grade' => $thirdGrade,
         ]);
 
-        return back()->with('success', "പ്രോഗ്രാം '{$result->program?->name}' ഫലത്തിന്റെ ഗ്രേഡുകൾ വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു.");
+        return back()->with('success', "Grades for program '{$result->program?->name}' updated successfully.");
     }
 }
