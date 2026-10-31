@@ -108,6 +108,8 @@
                 <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Result Status</label>
                 <select name="status" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
                     <option value="">All Declared ({{ $results->count() }})</option>
+                    <option value="evaluated" {{ request('status') === 'evaluated' ? 'selected' : '' }}>Valuation Completed / Evaluated (മൂല്യനിർണ്ണയം കഴിഞ്ഞവ)</option>
+                    <option value="submitted" {{ request('status') === 'submitted' ? 'selected' : '' }}>Verdict Ready / Submitted</option>
                     <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published Only</option>
                     <option value="announced" {{ request('status') === 'announced' ? 'selected' : '' }}>Announced Only</option>
                     <option value="send" {{ request('status') === 'send' ? 'selected' : '' }}>Sent to Announcer</option>
@@ -252,9 +254,13 @@
                                     @endif
                                 </div>
                                 <div class="font-mono text-[11px] text-slate-500 flex items-center gap-2">
+                                    <a href="{{ route('admin.print.evaluation-sheet', $res->program_id) }}" target="_blank" class="no-print px-2 py-0.5 rounded bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 font-bold transition flex items-center gap-1" title="Print Multi-Judge Valuation Scorecard">
+                                        <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Valuation Sheet ↗</span>
+                                    </a>
                                     <span class="px-2 py-0.5 rounded bg-slate-100">{{ $res->program?->eligibility ?? 'General' }}</span>
                                     <span class="uppercase">{{ $res->program?->type }}</span>
-                                    <span>• {{ $res->published_at ? $res->published_at->format('d/m/Y') : '' }}</span>
+                                    <span>• {{ $res->published_at ? $res->published_at->format('d/m/Y') : ($res->created_at ? $res->created_at->format('d/m/Y') : '') }}</span>
                                 </div>
                             </div>
 

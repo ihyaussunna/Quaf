@@ -18,6 +18,11 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.print.evaluation-sheet', $program->id) }}" target="_blank"
+               class="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
+                <svg class="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Print Valuation Scorecard PDF</span>
+            </a>
             <a href="{{ route('admin.mark-entry.show', $program->id) }}"
                class="px-4 py-2 rounded-xl bg-[#be1e2d] text-white font-bold text-xs uppercase hover:bg-[#a01624] transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <span>Mark Entry / Declare Result &rarr;</span>

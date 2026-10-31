@@ -17,6 +17,11 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.print.results', ['status' => 'evaluated']) }}" target="_blank"
+               class="px-4 py-2 rounded-xl bg-purple-700 text-white font-bold text-xs uppercase hover:bg-purple-800 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
+                <svg class="w-3.5 h-3.5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Print Evaluated Results PDF</span>
+            </a>
             <a href="{{ route('admin.call-list.index') }}"
                class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase hover:bg-slate-50 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -191,10 +196,20 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <a href="{{ route('admin.evaluation-monitor.show', $prog->id) }}"
-                                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#be1e2d] hover:text-white text-slate-700 text-xs font-bold transition-all shadow-2xs font-sora">
-                                    <span>Inspect Details &rarr;</span>
-                                </a>
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <a href="{{ route('admin.evaluation-monitor.show', $prog->id) }}"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#be1e2d] hover:text-white text-slate-700 text-xs font-bold transition-all shadow-2xs font-sora">
+                                        <span>Inspect &rarr;</span>
+                                    </a>
+                                    @if($evaluated > 0 || $prog->result)
+                                        <a href="{{ route('admin.print.evaluation-sheet', $prog->id) }}" target="_blank"
+                                           class="inline-flex items-center gap-1 px-2 py-1.5 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 text-xs font-bold transition-all shadow-2xs font-sora"
+                                           title="Print Multi-Judge Valuation Scorecard">
+                                            <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                            <span>Sheet PDF</span>
+                                        </a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

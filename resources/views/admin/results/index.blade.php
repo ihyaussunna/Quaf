@@ -67,6 +67,12 @@
                 </button>
             </form>
 
+            <!-- Evaluated Results PDF -->
+            <a href="{{ route('admin.print.results', ['status' => 'evaluated']) }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 font-semibold text-xs hover:bg-purple-100 transition-all flex items-center gap-1.5 shadow-2xs" title="Valuation Completed Results PDF (മൂല്യനിർണ്ണയം കഴിഞ്ഞവ)">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Evaluated Results PDF</span>
+            </a>
+
             <!-- Declared Results PDF -->
             <a href="{{ route('admin.print.results') }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold text-xs hover:bg-slate-50 hover:border-[#be1e2d] transition-all flex items-center gap-1.5 shadow-2xs" title="All Declared Results PDF Report">
                 <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -266,6 +272,9 @@
                                         </a>
                                         <a href="{{ route('admin.results.edit', $res) }}" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold text-[11px] hover:bg-slate-200 transition-colors">
                                             Edit
+                                        </a>
+                                        <a href="{{ route('admin.print.evaluation-sheet', $res->program_id) }}" target="_blank" class="px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 font-semibold text-[11px] transition-colors border border-purple-200" title="Print Multi-Judge Valuation Scorecard">
+                                            Scorecard PDF ↗
                                         </a>
                                     </td>
                                 </tr>

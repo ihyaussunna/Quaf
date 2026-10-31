@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\OnlineSubmissionFormController as AdminOnlineSubmissionFormController;
 use App\Http\Controllers\Admin\PanelAccessController as AdminPanelAccessController;
 use App\Http\Controllers\Admin\PointController as AdminPointController;
+use App\Http\Controllers\Admin\PrintReportController;
 use App\Http\Controllers\Admin\PrintReportController as AdminPrintReportController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
@@ -635,6 +636,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('results/{result}/coin-preview', [AdminResultController::class, 'coinPreview'])->name('results.coin-preview');
     Route::post('results/{result}/send-to-announcer', [AdminResultController::class, 'sendToAnnouncer'])->name('results.send-to-announcer');
     Route::post('results/{program}/auto-determine', [AdminResultController::class, 'autoDetermine'])->name('results.auto-determine');
+    Route::get('results/declared-pdf', [AdminPrintReportController::class, 'results'])->name('results.declared-pdf');
+    Route::get('results/evaluated-pdf', function (Request $request) {
+        $request->merge(['status' => 'evaluated']);
+
+        return app(PrintReportController::class)->results($request);
+    })->name('results.evaluated-pdf');
     Route::resource('results', AdminResultController::class);
 
     // Points & Rankings
@@ -686,7 +693,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Selective Customizable Print & PDF Reports
     Route::get('print/results', [AdminPrintReportController::class, 'results'])->name('print.results');
-    Route::get('results/declared-pdf', [AdminPrintReportController::class, 'results'])->name('results.declared-pdf');
+    Route::get('print/evaluation/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('print.evaluation-sheet');
+    Route::get('evaluation/print/{program}', [AdminPrintReportController::class, 'evaluationSheet'])->name('evaluation.print');
     Route::get('print/milestone-standings', [AdminPrintReportController::class, 'milestoneStandings'])->name('print.milestone-standings');
     Route::get('standings/milestone', [AdminPrintReportController::class, 'milestoneStandings'])->name('standings.milestone');
     Route::get('print/students', [AdminPrintReportController::class, 'students'])->name('print.students');

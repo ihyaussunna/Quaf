@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
+use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
@@ -44,7 +45,22 @@ class PrintReportController extends Controller
             'thirdEntry.scoreSheets',
         ]);
 
-        if ($selectedStatus && in_array($selectedStatus, ['published', 'announced', 'send'], true)) {
+        if ($selectedStatus === 'evaluated') {
+            // Valuation completed results: auto-assign podium for any evaluated programs without results
+            $evaluatedWithoutResult = Program::whereDoesntHave('result')
+                ->whereHas('entries', fn ($q) => $q->where('attendance_status', 'present')->whereHas('scoreSheets', fn ($sq) => $sq->where('is_submitted', true)))
+                ->get();
+            foreach ($evaluatedWithoutResult as $prog) {
+                PointCalculationService::autoAssignResultPodium($prog, 'submitted');
+            }
+
+            $query->where(function ($q) {
+                $q->whereNotNull('first_entry_id')
+                    ->orWhereIn('status', ['submitted', 'verified', 'send', 'announced', 'published']);
+            });
+        } elseif ($selectedStatus === 'submitted') {
+            $query->whereIn('status', ['submitted', 'verified']);
+        } elseif ($selectedStatus && in_array($selectedStatus, ['published', 'announced', 'send'], true)) {
             $query->where('status', $selectedStatus);
         } else {
             // Default: All declared results (sent to announcer, announced, or published)
@@ -98,6 +114,83 @@ class PrintReportController extends Controller
             'standings' => $milestoneData['standings'],
             'results' => $milestoneData['results'],
         ]);
+    }
+
+    /**
+     * Display printable multi-judge evaluation sheet & official scorecard for a program.
+     */
+    public function evaluationSheet(Program $program): View
+    {
+        $program->load([
+            'category',
+            'stage',
+            'zone',
+            'scoringCriteria',
+            'judges',
+            'result.firstEntry.student.group',
+            'result.secondEntry.student.group',
+            'result.thirdEntry.student.group',
+        ]);
+
+        $judges = $program->judges()->orderBy('name')->get();
+        if ($judges->isEmpty()) {
+            $judges = Judge::whereHas('scoreSheets', fn ($q) => $q->where('program_id', $program->id))->get();
+        }
+
+        $podium = PointCalculationService::determinePodiumForProgram($program);
+        $posPoints = PointCalculationService::getPositionPointsForProgram($program);
+
+        // Fetch all active entries for this program
+        $entries = $program->entries()
+            ->whereIn('status', ProgramEntry::ACTIVE_STATUSES)
+            ->with(['student.group', 'group', 'scores.judge', 'participants.group'])
+            ->get();
+
+        $entries = $entries->map(function ($entry) use ($podium, $posPoints) {
+            $submitted = $entry->scores->where('is_submitted', true);
+            $avg = $submitted->isNotEmpty() ? (float) $submitted->avg('total_score') : 0.0;
+            $entry->avg_score = round($avg, 2);
+            $gradeInfo = PointCalculationService::getGradeFromScore($entry->avg_score);
+            $entry->computed_grade = $gradeInfo['grade'];
+            $entry->grade_points = $gradeInfo['points'];
+
+            $entry->podium_rank = null;
+            if ($podium['first_all']->contains('id', $entry->id)) {
+                $entry->podium_rank = 1;
+                $entry->position_points = $posPoints[1] ?? 0;
+            } elseif ($podium['second_all']->contains('id', $entry->id)) {
+                $entry->podium_rank = 2;
+                $entry->position_points = $posPoints[2] ?? 0;
+            } elseif ($podium['third_all']->contains('id', $entry->id)) {
+                $entry->podium_rank = 3;
+                $entry->position_points = $posPoints[3] ?? 0;
+            } else {
+                $entry->position_points = 0;
+            }
+
+            $entry->total_team_points = $entry->position_points + $entry->grade_points;
+
+            return $entry;
+        })->sort(function ($a, $b) {
+            $aPres = $a->attendance_status === 'present' ? 1 : 0;
+            $bPres = $b->attendance_status === 'present' ? 1 : 0;
+            if ($aPres !== $bPres) {
+                return $bPres <=> $aPres;
+            }
+            if ($b->avg_score != $a->avg_score) {
+                return $b->avg_score <=> $a->avg_score;
+            }
+
+            return strcmp((string) $a->code_letter, (string) $b->code_letter);
+        })->values();
+
+        return view('admin.print.evaluation_sheet', compact(
+            'program',
+            'judges',
+            'entries',
+            'podium',
+            'posPoints'
+        ));
     }
 
     /**
