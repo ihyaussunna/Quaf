@@ -110,6 +110,84 @@ class PointController extends Controller
         return back()->with('success', 'Point settings updated and all scores recalculated.');
     }
 
+    /**
+     * Update Finance and Grace marks for groups and recalculate standings.
+     */
+    public function updateGroupMarks(Request $request): RedirectResponse
+    {
+        Group::ensureSchema();
+
+        if ($request->has('groups') && is_array($request->input('groups'))) {
+            $validated = $request->validate([
+                'groups' => ['required', 'array'],
+                'groups.*.id' => ['required', 'exists:groups,id'],
+                'groups.*.finance_points' => ['required', 'integer'],
+                'groups.*.finance_remarks' => ['nullable', 'string', 'max:255'],
+                'groups.*.grace_points' => ['required', 'integer'],
+                'groups.*.grace_remarks' => ['nullable', 'string', 'max:255'],
+            ]);
+
+            foreach ($validated['groups'] as $item) {
+                $group = Group::find($item['id']);
+                if ($group) {
+                    $old = [
+                        'finance_points' => $group->finance_points,
+                        'finance_remarks' => $group->finance_remarks,
+                        'grace_points' => $group->grace_points,
+                        'grace_remarks' => $group->grace_remarks,
+                    ];
+                    $group->update([
+                        'finance_points' => (int) $item['finance_points'],
+                        'finance_remarks' => $item['finance_remarks'] ?? null,
+                        'grace_points' => (int) $item['grace_points'],
+                        'grace_remarks' => $item['grace_remarks'] ?? null,
+                    ]);
+                    AuditLogger::log('update_group_marks_batch', $group, $old, $item);
+                }
+            }
+
+            $this->pointService->recalculateAllPoints();
+            Group::checkAndApplyMilestone();
+
+            return back()->with('success', 'എല്ലാ ഗ്രൂപ്പുകളുടെയും ഫിനാൻസ് & ഗ്രേസ് മാർക്കുകൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്യുകയും ആകെ പോയിന്റ് നില പുനർനിർണ്ണയിക്കുകയും ചെയ്തു.');
+        }
+
+        $validated = $request->validate([
+            'group_id' => ['required', 'exists:groups,id'],
+            'finance_points' => ['required', 'integer'],
+            'finance_remarks' => ['nullable', 'string', 'max:255'],
+            'grace_points' => ['required', 'integer'],
+            'grace_remarks' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $group = Group::findOrFail($validated['group_id']);
+        $old = [
+            'finance_points' => $group->finance_points,
+            'finance_remarks' => $group->finance_remarks,
+            'grace_points' => $group->grace_points,
+            'grace_remarks' => $group->grace_remarks,
+        ];
+
+        $group->update([
+            'finance_points' => (int) $validated['finance_points'],
+            'finance_remarks' => $validated['finance_remarks'] ?? null,
+            'grace_points' => (int) $validated['grace_points'],
+            'grace_remarks' => $validated['grace_remarks'] ?? null,
+        ]);
+
+        AuditLogger::log('update_group_marks', $group, $old, [
+            'finance_points' => $group->finance_points,
+            'finance_remarks' => $group->finance_remarks,
+            'grace_points' => $group->grace_points,
+            'grace_remarks' => $group->grace_remarks,
+        ]);
+
+        $this->pointService->recalculateAllPoints();
+        Group::checkAndApplyMilestone();
+
+        return back()->with('success', "{$group->name} ഗ്രൂപ്പിന്റെ ഫിനാൻസ് & ഗ്രേസ് മാർക്കുകൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്യുകയും പോയിന്റ് നില പുനർനിർണ്ണയിക്കുകയും ചെയ്തു.");
+    }
+
     public function recalculate(): RedirectResponse
     {
         $this->pointService->recalculateAllPoints();

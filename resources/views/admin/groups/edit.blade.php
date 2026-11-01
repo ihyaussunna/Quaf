@@ -116,6 +116,33 @@
                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-[#be1e2d] focus:bg-white transition-colors">
         </div>
 
+        <!-- Finance & Grace Marks Adjustments -->
+        <div class="rounded-xl border border-amber-200 bg-amber-50/20 p-5 space-y-4">
+            <div>
+                <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 font-bold block">Points Adjustment</span>
+                <h3 class="text-sm font-sora font-bold text-slate-900 mt-0.5">ഫിനാൻസ് & ഗ്രേസ് മാർക്കുകൾ (Finance & Grace Marks)</h3>
+                <p class="text-xs text-slate-500 font-mono mt-1">മത്സര ഫലങ്ങൾക്ക് പുറമെ ഈ ഗ്രൂപ്പിന് നൽകേണ്ട അധിക മാർക്കുകൾ രേഖപ്പെടുത്തുക.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-mono uppercase text-amber-900 mb-1.5 font-bold">Finance Mark (Points)</label>
+                    <input type="number" name="finance_points" value="{{ old('finance_points', $group->finance_points ?? 0) }}"
+                           class="w-full bg-white border border-amber-300 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-amber-900 focus:outline-none focus:border-amber-500">
+                    <input type="text" name="finance_remarks" value="{{ old('finance_remarks', $group->finance_remarks) }}" placeholder="Finance remarks / reason"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-700 mt-2 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase text-indigo-900 mb-1.5 font-bold">Grace Mark (Points)</label>
+                    <input type="number" name="grace_points" value="{{ old('grace_points', $group->grace_points ?? 0) }}"
+                           class="w-full bg-white border border-indigo-300 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-indigo-900 focus:outline-none focus:border-indigo-500">
+                    <input type="text" name="grace_remarks" value="{{ old('grace_remarks', $group->grace_remarks) }}" placeholder="Grace remarks / reason"
+                           class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-700 mt-2 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="pt-4 flex items-center justify-between border-t border-slate-100">
             <button type="submit" form="delete-form" class="text-xs font-mono text-red-600 hover:text-red-700 hover:underline">

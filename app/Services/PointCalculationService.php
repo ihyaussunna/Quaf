@@ -339,6 +339,50 @@ class PointCalculationService
                 }
             }
 
+            // Append Group Finance & Grace Marks transactions
+            Group::ensureSchema();
+            $specialMarkGroups = Group::where(function ($q) {
+                $q->where('finance_points', '!=', 0)
+                    ->orWhere('grace_points', '!=', 0);
+            })->get();
+
+            $now = now();
+            foreach ($specialMarkGroups as $grp) {
+                if ((int) $grp->finance_points !== 0) {
+                    $pts = (int) $grp->finance_points;
+                    $sign = $pts > 0 ? "+{$pts}" : (string) $pts;
+                    $allTransactions[] = [
+                        'group_id' => $grp->id,
+                        'program_id' => null,
+                        'result_id' => null,
+                        'entry_id' => null,
+                        'student_id' => null,
+                        'source_type' => 'FINANCE',
+                        'points' => $pts,
+                        'description' => "{$grp->name} — Finance Mark ({$sign} pts)".($grp->finance_remarks ? " [{$grp->finance_remarks}]" : ''),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                if ((int) $grp->grace_points !== 0) {
+                    $pts = (int) $grp->grace_points;
+                    $sign = $pts > 0 ? "+{$pts}" : (string) $pts;
+                    $allTransactions[] = [
+                        'group_id' => $grp->id,
+                        'program_id' => null,
+                        'result_id' => null,
+                        'entry_id' => null,
+                        'student_id' => null,
+                        'source_type' => 'GRACE',
+                        'points' => $pts,
+                        'description' => "{$grp->name} — Grace Mark ({$sign} pts)".($grp->grace_remarks ? " [{$grp->grace_remarks}]" : ''),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+
             // Batch insert in chunks of 100 for maximum database efficiency
             if (! empty($allTransactions)) {
                 foreach (array_chunk($allTransactions, 100) as $chunk) {
@@ -1036,9 +1080,14 @@ class PointCalculationService
 
         $teamData = [];
         foreach ($groups as $g) {
+            $financePts = (int) ($g->finance_points ?? 0);
+            $gracePts = (int) ($g->grace_points ?? 0);
             $teamData[$g->id] = [
                 'group' => $g,
-                'points' => 0,
+                'points' => $financePts + $gracePts,
+                'competition_points' => 0,
+                'finance_points' => $financePts,
+                'grace_points' => $gracePts,
                 'first_count' => 0,
                 'second_count' => 0,
                 'third_count' => 0,
@@ -1070,6 +1119,7 @@ class PointCalculationService
                 if ($gid && isset($teamData[$gid])) {
                     $pts = (int) ($tx['points'] ?? 0);
                     $teamData[$gid]['points'] += $pts;
+                    $teamData[$gid]['competition_points'] += $pts;
                     if (($tx['source_type'] ?? '') === 'POSITION') {
                         $teamData[$gid]['position_points'] += $pts;
                     } elseif (($tx['source_type'] ?? '') === 'GRADE') {
@@ -1308,6 +1358,17 @@ class PointCalculationService
                 'status' => $result->status,
                 'teams' => $teamsData,
             ];
+        }
+
+        // Include finance and grace marks in group totals
+        foreach ($groups as $g) {
+            $gid = $g->id;
+            $financePts = (int) ($g->finance_points ?? 0);
+            $gracePts = (int) ($g->grace_points ?? 0);
+            $groupStats[$gid]['competition_points'] = $cumulativeTotals[$gid];
+            $groupStats[$gid]['finance_points'] = $financePts;
+            $groupStats[$gid]['grace_points'] = $gracePts;
+            $groupStats[$gid]['total_points'] = $cumulativeTotals[$gid] + $financePts + $gracePts;
         }
 
         // Rank the final group stats

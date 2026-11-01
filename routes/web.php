@@ -660,6 +660,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Points & Rankings
     Route::get('points', [AdminPointController::class, 'index'])->name('points.index');
     Route::post('points', [AdminPointController::class, 'update'])->name('points.update');
+    Route::post('points/group-marks', [AdminPointController::class, 'updateGroupMarks'])->name('points.group-marks');
     Route::post('points/recalculate', [AdminPointController::class, 'recalculate'])->name('points.recalculate');
     Route::post('points/send-to-announcer', [AdminPointController::class, 'sendStandingsToAnnouncer'])->name('points.send-to-announcer');
     Route::post('points/publish-standings', [AdminPointController::class, 'publishPublicStandings'])->name('points.publish-standings');

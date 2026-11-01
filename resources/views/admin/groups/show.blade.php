@@ -23,7 +23,7 @@
     </div>
 
     <!-- Group Summary & Stat Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Rank</span>
             <span class="text-2xl font-sora font-black text-slate-900 mt-1 block">#{{ $group->rank_cache ?: '—' }}</span>
@@ -33,7 +33,19 @@
             <span class="text-2xl font-sora font-black text-[#be1e2d] mt-1 block">{{ $group->points_cache ?? 0 }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Total Students</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Results Pts</span>
+            <span class="text-2xl font-sora font-black text-slate-800 mt-1 block">{{ $group->competition_points }}</span>
+        </div>
+        <div class="bg-white border border-amber-200 bg-amber-50/20 rounded-2xl p-4 shadow-xs">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 font-bold block">Finance Mark</span>
+            <span class="text-2xl font-sora font-black text-amber-800 mt-1 block">{{ $group->finance_points ?? 0 }}</span>
+        </div>
+        <div class="bg-white border border-indigo-200 bg-indigo-50/20 rounded-2xl p-4 shadow-xs">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-700 font-bold block">Grace Mark</span>
+            <span class="text-2xl font-sora font-black text-indigo-800 mt-1 block">{{ $group->grace_points ?? 0 }}</span>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Students</span>
             <span class="text-2xl font-sora font-black text-slate-900 mt-1 block">{{ $group->students->count() }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
@@ -43,10 +55,6 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">B Zone</span>
             <span class="text-2xl font-sora font-black text-amber-600 mt-1 block">{{ $group->students->where('category', 'B Zone')->count() }}</span>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">C Zone</span>
-            <span class="text-2xl font-sora font-black text-blue-600 mt-1 block">{{ $group->students->where('category', 'C Zone')->count() }}</span>
         </div>
     </div>
 

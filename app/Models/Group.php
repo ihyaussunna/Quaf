@@ -83,6 +83,10 @@ class Group extends Model
         'assistant_managers',
         'points_cache',
         'rank_cache',
+        'finance_points',
+        'finance_remarks',
+        'grace_points',
+        'grace_remarks',
         'public_points_cache',
         'public_rank_cache',
     ];
@@ -93,9 +97,25 @@ class Group extends Model
             'assistant_managers' => 'array',
             'points_cache' => 'integer',
             'rank_cache' => 'integer',
+            'finance_points' => 'integer',
+            'grace_points' => 'integer',
             'public_points_cache' => 'integer',
             'public_rank_cache' => 'integer',
         ];
+    }
+
+    public function getCompetitionPointsAttribute(): int
+    {
+        $total = (int) ($this->points_cache ?? 0);
+        $finance = (int) ($this->finance_points ?? 0);
+        $grace = (int) ($this->grace_points ?? 0);
+
+        return max(0, $total - $finance - $grace);
+    }
+
+    public function getTotalGroupPointsAttribute(): int
+    {
+        return (int) ($this->points_cache ?? 0);
     }
 
     public static function ensureSchema(): void
@@ -110,9 +130,33 @@ class Group extends Model
                 return;
             }
 
+            if (! Schema::hasColumn('groups', 'finance_points')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->integer('finance_points')->default(0)->after('points_cache');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'finance_remarks')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->string('finance_remarks')->nullable()->after('finance_points');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'grace_points')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->integer('grace_points')->default(0)->after('finance_remarks');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'grace_remarks')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->string('grace_remarks')->nullable()->after('grace_points');
+                });
+            }
+
             if (! Schema::hasColumn('groups', 'public_points_cache')) {
                 Schema::table('groups', function (Blueprint $table) {
-                    $table->integer('public_points_cache')->default(0)->after('points_cache');
+                    $table->integer('public_points_cache')->default(0)->after('grace_remarks');
                 });
             }
 

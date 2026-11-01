@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\PointCalculationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -123,12 +124,24 @@ class GroupController extends Controller
             'manager_contact' => ['nullable', 'string', 'max:50'],
             'name_in_results' => ['nullable', 'string', 'max:255'],
             'name_in_certificates' => ['nullable', 'string', 'max:255'],
+            'finance_points' => ['nullable', 'integer'],
+            'finance_remarks' => ['nullable', 'string', 'max:255'],
+            'grace_points' => ['nullable', 'integer'],
+            'grace_remarks' => ['nullable', 'string', 'max:255'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
 
+        $marksChanged = ($request->has('finance_points') && (int) $request->input('finance_points') !== (int) $group->finance_points)
+            || ($request->has('grace_points') && (int) $request->input('grace_points') !== (int) $group->grace_points);
+
         $old = $group->toArray();
         $group->update($validated);
+
+        if ($marksChanged) {
+            app(PointCalculationService::class)->recalculateAllPoints();
+            Group::checkAndApplyMilestone();
+        }
 
         AuditLogger::log('update_group', $group, $old, $group->toArray());
 
