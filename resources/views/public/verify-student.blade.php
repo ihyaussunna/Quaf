@@ -274,7 +274,8 @@
                             $prog = $entry->program;
                             $isGroupProg = $prog ? $prog->isGroup() : false;
                             $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
-                            $isDeclared = $prog && $prog->result && in_array($prog->result->status, $declaredStatuses, true);
+                            $res = $prog?->result ?? ($prog ? \App\Models\Result::where('program_id', $prog->id)->first() : null);
+                            $isDeclared = $res && (($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published));
                             $entryAward = isset($awardedPrograms) ? $awardedPrograms->firstWhere('program_id', $entry->program_id) : null;
                         @endphp
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

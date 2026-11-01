@@ -383,7 +383,8 @@
                     $prog = $entry->program;
                     $isGroupProg = $prog ? $prog->isGroup() : false;
                     $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
-                    $isDeclared = $prog && $prog->result && in_array($prog->result->status, $declaredStatuses, true);
+                    $res = $prog?->result ?? ($prog ? \App\Models\Result::where('program_id', $prog->id)->first() : null);
+                    $isDeclared = $res && in_array($res->status, $declaredStatuses, true);
                     $award = isset($awardedPrograms) ? $awardedPrograms->firstWhere('program_id', $entry->program_id) : null;
                 @endphp
                 <div class="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 hover:border-red-300 transition-all shadow-sm hover:shadow-md">

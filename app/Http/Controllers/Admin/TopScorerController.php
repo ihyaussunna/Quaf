@@ -37,8 +37,8 @@ class TopScorerController extends Controller
             ->where('programs.type', 'individual')
             ->select(
                 'points_transactions.student_id',
-                DB::raw('SUM(CASE WHEN programs.is_stage = 1 OR programs.stage_id IS NOT NULL THEN points_transactions.points ELSE 0 END) as stage_points'),
-                DB::raw('SUM(CASE WHEN (programs.is_stage = 0 OR programs.is_stage IS NULL) AND programs.stage_id IS NULL THEN points_transactions.points ELSE 0 END) as offstage_points'),
+                DB::raw('SUM(CASE WHEN programs.is_stage = 1 THEN points_transactions.points ELSE 0 END) as stage_points'),
+                DB::raw('SUM(CASE WHEN programs.is_stage = 0 OR programs.is_stage IS NULL THEN points_transactions.points ELSE 0 END) as offstage_points'),
                 DB::raw('SUM(points_transactions.points) as total_points')
             )
             ->groupBy('points_transactions.student_id');

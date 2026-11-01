@@ -226,6 +226,19 @@ class CoinRewardService
             }
         }
 
+        // 4. If still empty, check if chest_number directly matches a student identifier
+        if ($all->isEmpty() && ! empty($entry->chest_number)) {
+            $chestClean = trim($entry->chest_number);
+            $matchedStudent = Student::where('student_id', $chestClean)
+                ->orWhere('student_id', 'QF'.$chestClean)
+                ->when(Schema::hasColumn('students', 'chest_number'), fn ($q) => $q->orWhere('chest_number', $chestClean))
+                ->first();
+
+            if ($matchedStudent) {
+                $all->push($matchedStudent);
+            }
+        }
+
         return $all->unique('id')->values();
     }
 
@@ -745,7 +758,9 @@ class CoinRewardService
         self::cleanupDuplicateTransactionsForStudent($student);
 
         // 1. Direct entries (individual and leader entries)
-        $directEntryIds = ProgramEntry::where('student_id', $student->id)->pluck('id')->all();
+        $directEntries = ProgramEntry::where('student_id', $student->id)->get(['id', 'program_id', 'group_id']);
+        $directEntryIds = $directEntries->pluck('id')->all();
+        $programIds = $directEntries->pluck('program_id')->all();
 
         // 2. Group participations from pivot table
         $participationEntryIds = DB::table('program_entry_participants')
@@ -753,20 +768,42 @@ class CoinRewardService
             ->pluck('entry_id')
             ->all();
 
+        if (! empty($participationEntryIds)) {
+            $partProgIds = ProgramEntry::whereIn('id', $participationEntryIds)->pluck('program_id')->all();
+            $programIds = array_merge($programIds, $partProgIds);
+        }
+
+        // 3. Group programs for this student's group if enrolled
+        if ($student->group_id) {
+            $groupProgIds = ProgramEntry::where('group_id', $student->group_id)
+                ->whereHas('program', fn ($q) => $q->where('type', 'group'))
+                ->pluck('program_id')
+                ->all();
+            $programIds = array_merge($programIds, $groupProgIds);
+        }
+
+        $allProgramIds = array_values(array_unique(array_filter($programIds)));
         $allEntryIds = array_values(array_unique(array_merge($directEntryIds, $participationEntryIds)));
 
-        if (empty($allEntryIds)) {
+        if (empty($allProgramIds) && empty($allEntryIds)) {
             return;
         }
 
-        // Find results where any of these entries placed 1st, 2nd, or 3rd
-        $results = Result::whereIn('status', self::DECLARED_STATUSES)
-            ->where(function ($q) use ($allEntryIds) {
-                $q->whereIn('first_entry_id', $allEntryIds)
+        // Find ALL declared results for these programs, or where any of the student's entries are placed
+        $resultsQuery = Result::whereIn('status', self::DECLARED_STATUSES);
+
+        $resultsQuery->where(function ($q) use ($allProgramIds, $allEntryIds) {
+            if (! empty($allProgramIds)) {
+                $q->whereIn('program_id', $allProgramIds);
+            }
+            if (! empty($allEntryIds)) {
+                $q->orWhereIn('first_entry_id', $allEntryIds)
                     ->orWhereIn('second_entry_id', $allEntryIds)
                     ->orWhereIn('third_entry_id', $allEntryIds);
-            })
-            ->get();
+            }
+        });
+
+        $results = $resultsQuery->with(['program', 'firstEntry', 'secondEntry', 'thirdEntry'])->get();
 
         $updated = false;
         foreach ($results as $res) {
@@ -779,9 +816,7 @@ class CoinRewardService
         // Re-run cleanup to guarantee no duplicate programs remain
         self::cleanupDuplicateTransactionsForStudent($student);
 
-        if ($updated) {
-            $this->syncStudentCoinsCache([$student->id]);
-        }
+        $this->syncStudentCoinsCache([$student->id]);
     }
 
     /**
@@ -932,11 +967,17 @@ class CoinRewardService
         if ($onlyMediaPublished) {
             $creditsQuery->where(function ($q) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('result', fn ($rq) => $rq->where(function ($sub) {
+                        $sub->where('status', 'announced')
+                            ->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true));
+                    }));
             })->where(function ($q) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where(function ($sub) {
+                        $sub->where('status', 'announced')
+                            ->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true));
+                    }));
             });
         } else {
             $creditsQuery->where(function ($q) use ($declaredStatuses) {
@@ -954,7 +995,8 @@ class CoinRewardService
         foreach ($credits as $credit) {
             $prog = $credit->program;
             $res = $credit->result ?? $prog?->result;
-            if ($onlyMediaPublished && $res && (! $res->is_media_published || $res->status !== 'published')) {
+            $isPublicDeclared = ! $res || (($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published));
+            if ($onlyMediaPublished && ! $isPublicDeclared) {
                 continue;
             }
             if (! $onlyMediaPublished && $res && ! in_array($res->status, $declaredStatuses, true)) {
@@ -991,14 +1033,24 @@ class CoinRewardService
 
         $allEntries = $student->entries->merge($student->participations)->unique('id');
 
+        // Also include group entries for the student's group if enrolled
+        if ($student->group_id) {
+            $groupEntries = ProgramEntry::where('group_id', $student->group_id)
+                ->whereHas('program', fn ($q) => $q->where('type', 'group'))
+                ->with(['program.result', 'program.category'])
+                ->get();
+            $allEntries = $allEntries->merge($groupEntries)->unique('id');
+        }
+
         foreach ($allEntries as $entry) {
             $prog = $entry->program;
-            if (! $prog || ! $prog->result) {
+            $res = $prog?->result ?? ($prog ? Result::where('program_id', $prog->id)->first() : null);
+            if (! $prog || ! $res) {
                 continue;
             }
 
-            $res = $prog->result;
-            if ($onlyMediaPublished && (! $res->is_media_published || $res->status !== 'published')) {
+            $isPublicDeclared = ($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published);
+            if ($onlyMediaPublished && ! $isPublicDeclared) {
                 continue;
             }
             if (! $onlyMediaPublished && ! in_array($res->status, $declaredStatuses, true)) {
@@ -1008,22 +1060,56 @@ class CoinRewardService
             $pos = null;
             $grade = null;
 
-            if ($res->first_entry_id === $entry->id) {
-                $pos = 1;
-                $grade = $res->first_grade;
-            } elseif ($res->second_entry_id === $entry->id) {
-                $pos = 2;
-                $grade = $res->second_grade;
-            } elseif ($res->third_entry_id === $entry->id) {
-                $pos = 3;
-                $grade = $res->third_grade;
+            // A. Precise check via getPodiumWinnersWithTies() (supports ties and team participants)
+            $podiumWinners = $res->getPodiumWinnersWithTies();
+            foreach ([1, 2, 3] as $p) {
+                foreach ($podiumWinners[$p] as $winnerItem) {
+                    $wEntry = $winnerItem['entry'] ?? null;
+                    $wEntryId = $winnerItem['id'] ?? $wEntry?->id;
+                    $isEntryMatch = ($wEntryId && $wEntryId == $entry->id);
+
+                    $isStudentMatch = false;
+                    if ($wEntry) {
+                        $participants = self::getEligibleParticipantsForEntry($wEntry, false);
+                        $isStudentMatch = $participants->contains('id', $student->id);
+                    }
+
+                    if ($isEntryMatch || $isStudentMatch) {
+                        $pos = $p;
+                        $grade = $winnerItem['grade'] ?? self::resolveGradeForEntry($entry, $res, $p);
+                        break 2;
+                    }
+                }
             }
 
-            if (! $grade && ! empty($entry->computed_grade) && $entry->computed_grade !== '-') {
-                $grade = $entry->computed_grade;
+            // B. Direct column fallback
+            if ($pos === null) {
+                if ($res->first_entry_id === $entry->id) {
+                    $pos = 1;
+                    $grade = $res->first_grade;
+                } elseif ($res->second_entry_id === $entry->id) {
+                    $pos = 2;
+                    $grade = $res->second_grade;
+                } elseif ($res->third_entry_id === $entry->id) {
+                    $pos = 3;
+                    $grade = $res->third_grade;
+                }
             }
 
-            $grade = (! empty($grade) && $grade !== '-') ? trim($grade) : null;
+            // C. Certificate fallback for position
+            if ($pos === null && $student->relationLoaded('certificates')) {
+                $cert = $student->certificates->firstWhere('program_id', $prog->id);
+                if ($cert && in_array((int) $cert->position, [1, 2, 3], true)) {
+                    $pos = (int) $cert->position;
+                }
+            }
+
+            // D. Grade resolution for placed or non-placed participant
+            if (! $grade) {
+                $grade = self::resolveGradeForEntry($entry, $res, $pos);
+            }
+
+            $grade = (! empty($grade) && $grade !== '-' && $grade !== 'NO_GRADE') ? trim($grade) : null;
 
             if ($pos || $grade) {
                 $key = $prog->id;
@@ -1090,11 +1176,11 @@ class CoinRewardService
         if ($onlyMediaPublished) {
             $competitionQuery->where(function ($q) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
             })->where(function ($q) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
             });
         }
 
@@ -1175,11 +1261,11 @@ class CoinRewardService
         if ($onlyMediaPublished) {
             $creditsQuery->where(function ($q) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
             })->where(function ($q) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
             });
         }
 
@@ -1188,7 +1274,8 @@ class CoinRewardService
         foreach ($credits as $credit) {
             $progId = $credit->program_id;
             $res = $credit->result ?? $credit->program?->result;
-            if ($onlyMediaPublished && $res && (! $res->is_media_published || $res->status !== 'published')) {
+            $isPublicDeclared = ! $res || (($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published));
+            if ($onlyMediaPublished && ! $isPublicDeclared) {
                 continue;
             }
 
@@ -1223,8 +1310,8 @@ class CoinRewardService
         $groupEntriesQuery = $student->participations();
 
         if ($onlyMediaPublished) {
-            $entriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
-            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
+            $entriesQuery->whereHas('program.result', fn ($q) => $q->where(fn ($sub) => $sub->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true))));
+            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->where(fn ($sub) => $sub->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true))));
         } else {
             $entriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', self::DECLARED_STATUSES));
             $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', self::DECLARED_STATUSES));

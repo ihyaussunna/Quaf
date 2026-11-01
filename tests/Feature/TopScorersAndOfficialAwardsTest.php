@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Group;
 use App\Models\Program;
 use App\Models\ProgramCategory;
+use App\Models\Stage;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Zone;
@@ -319,5 +320,75 @@ class TopScorersAndOfficialAwardsTest extends TestCase
 
         $resSearch = $this->actingAs($this->adminUser)->get(route('admin.achievements.all-students', ['search' => 'Ahmad']));
         $resSearch->assertRedirect(route('admin.top-scorers.index', ['search' => 'Ahmad']));
+    }
+
+    public function test_offstage_programs_scheduled_in_hall_venue_count_as_offstage_points_and_qualify_for_pen_award(): void
+    {
+        $cat = ProgramCategory::create([
+            'name' => 'Literature',
+            'slug' => 'literature-test',
+            'code' => 'LIT',
+        ]);
+
+        $stage = Stage::firstOrCreate(
+            ['code' => 'STG-05'],
+            [
+                'name' => 'Stage 05 — NF3 Hall',
+                'location' => 'NF3',
+                'capacity' => 150,
+                'status' => 'active',
+            ]
+        );
+
+        // Student with offstage writing points held in NF3 hall
+        $studentRameez = Student::create([
+            'name' => 'Rameez Test',
+            'student_id' => 'QF3125',
+            'group_id' => $this->groupA->id,
+            'zone_id' => $this->zoneB->id,
+            'category' => 'B Zone',
+            'gender' => 'Male',
+            'qr_token' => 'qr_rameez_test',
+            'points_cache' => 47,
+        ]);
+
+        // Offstage Program assigned to a room/hall venue (stage_id = NF3)
+        $offstageInHall = Program::create([
+            'name' => 'Story Writing Arabic',
+            'code' => 'PRG-OFF-NF3',
+            'type' => 'individual',
+            'category_id' => $cat->id,
+            'is_stage' => false,
+            'stage_id' => $stage->id,
+        ]);
+
+        DB::table('points_transactions')->insert([
+            'student_id' => $studentRameez->id,
+            'program_id' => $offstageInHall->id,
+            'group_id' => $this->groupA->id,
+            'points' => 47,
+            'description' => 'Story Writing 1st',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->get(route('admin.top-scorers.index'));
+        $response->assertOk();
+
+        $items = collect($response->viewData('topScorers')->items());
+        $rameezRecord = $items->firstWhere('student_id', 'QF3125');
+
+        $this->assertNotNull($rameezRecord);
+        $this->assertEquals(47, $rameezRecord->calc_offstage_points, 'Offstage programs must count into offstage points even when scheduled in a room venue');
+        $this->assertEquals(0, $rameezRecord->calc_stage_points, 'Offstage programs must never count as stage points');
+        $this->assertEquals(47, $rameezRecord->calc_total_points);
+
+        // Verify Rameez won Pen of the Fest (Offstage Top Scorer)
+        $penWinners = $response->viewData('penWinners');
+        $this->assertTrue($penWinners->contains('student_id', 'QF3125'));
+
+        // Verify Rameez did NOT win Vocal of the Fest (Stage Top Scorer)
+        $vocalWinners = $response->viewData('vocalWinners');
+        $this->assertFalse($vocalWinners->contains('student_id', 'QF3125'));
     }
 }
