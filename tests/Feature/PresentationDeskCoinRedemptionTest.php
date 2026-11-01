@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CoinTransaction;
 use App\Models\Group;
+use App\Models\PresentationCart;
 use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Models\Stage;
@@ -645,5 +646,102 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $cashierFilter = $this->actingAs($admin)->get(route('admin.panel-access.index', ['panel' => 'cashier']));
         $cashierFilter->assertOk();
         $cashierFilter->assertSee('cashier@quaf.fest');
+    }
+
+    public function test_presentation_desk_saves_pending_cart_and_cashier_can_see_and_process_amount_received(): void
+    {
+        $cashierUser = User::create([
+            'name' => 'Main Cashier Officer',
+            'email' => 'cashier.test@quaf.fest',
+            'password' => bcrypt('password123'),
+            'role' => 'cashier',
+            'is_active' => true,
+        ]);
+
+        // 1. Presentation Desk saves a cart for the student (e.g. 2 books, total 150 coins)
+        $cartData = [
+            [
+                'item_name' => 'Sahityotsav Souvenir Book',
+                'coins' => 100,
+                'quantity' => 1,
+                'category' => 'book',
+            ],
+            [
+                'item_name' => 'Executive Pen Set',
+                'coins' => 50,
+                'quantity' => 1,
+                'category' => 'stationery',
+            ],
+        ];
+
+        $saveResponse = $this->actingAs($this->presentationUser)->postJson(route('presentation.save-cart'), [
+            'student_id' => $this->student->id,
+            'cart_data' => json_encode($cartData),
+            'notes' => 'Reserved at Presentation Desk',
+        ]);
+
+        $saveResponse->assertOk()
+            ->assertJson([
+                'success' => true,
+                'total_coins' => 150,
+                'cash_required' => 150.0,
+            ]);
+
+        $this->assertDatabaseHas('presentation_carts', [
+            'student_id' => $this->student->id,
+            'status' => 'pending',
+            'total_coins' => 150,
+        ]);
+
+        // 2. Cashier scans student QR / chest number: /presentation/cashier?student=LM101
+        $cashierScan = $this->actingAs($cashierUser)->get(route('presentation.cashier', ['student' => $this->student->student_id]));
+        $cashierScan->assertOk();
+        $cashierScan->assertSee('Sahityotsav Souvenir Book');
+        $cashierScan->assertSee('Executive Pen Set');
+        $cashierScan->assertSee('100 Coins');
+        $cashierScan->assertSee('50 Coins');
+        $cashierScan->assertSee('Amount Received');
+
+        $pendingCart = PresentationCart::where('student_id', $this->student->id)->where('status', 'pending')->first();
+        $this->assertNotNull($pendingCart);
+
+        // 3. Cashier takes ₹150 and clicks "Amount Received & Complete Order"
+        $receiveResponse = $this->actingAs($cashierUser)->post(route('presentation.cashier.receive-amount'), [
+            'student_id' => $this->student->id,
+            'cart_id' => $pendingCart->id,
+            'cash_amount' => 150,
+            'payment_mode' => 'cash',
+            'notes' => 'Paid in full cash by student',
+        ]);
+
+        $receiveResponse->assertRedirect(route('presentation.cashier', ['student' => $this->student->student_id]));
+        $receiveResponse->assertSessionHas('success');
+
+        // Check that pending cart is now marked as amount_received
+        $pendingCart->refresh();
+        $this->assertEquals('amount_received', $pendingCart->status);
+        $this->assertEquals(150.0, (float) $pendingCart->cash_received);
+
+        // Check that cash transaction was created with source = amount_received
+        $this->assertDatabaseHas('coin_transactions', [
+            'student_id' => $this->student->id,
+            'source' => 'amount_received',
+            'cash_amount' => 150.0,
+            'transaction_type' => 'credit',
+        ]);
+
+        // Check that cart redemption debit transaction was also executed
+        $this->assertDatabaseHas('coin_transactions', [
+            'student_id' => $this->student->id,
+            'reward_rule_id' => 'QUAF09_PRESENTATION_CART_PURCHASE_V1',
+            'transaction_type' => 'debit',
+            'coins' => -150,
+        ]);
+
+        // 4. Cashier table displays "Amount Received" status badge
+        $cashierConsole = $this->actingAs($cashierUser)->get(route('presentation.cashier'));
+        $cashierConsole->assertOk();
+        $cashierConsole->assertSee('Amount Received');
+        $cashierConsole->assertSee('₹ 150.00');
     }
 }

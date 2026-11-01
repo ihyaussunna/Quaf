@@ -678,23 +678,23 @@ class CoinRewardService
 
         if ($hasSourceColumn) {
             $addedQuery->where(function ($q) {
-                $q->where('source', 'cash_deposit')
-                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+                $q->whereIn('source', ['cash_deposit', 'amount_received'])
+                    ->orWhereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
             });
         } else {
-            $addedQuery->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            $addedQuery->whereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
         }
         $addedCoins = (int) $addedQuery->sum('coins');
 
         // 2. Competition earned coins from grades/prizes
         $competitionQuery = CoinTransaction::where('student_id', $student->id)
             ->where('coins', '>', 0)
-            ->where('reward_rule_id', '!=', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            ->whereNotIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
 
         if ($hasSourceColumn) {
             $competitionQuery->where(function ($sub) {
                 $sub->whereNull('source')
-                    ->orWhere('source', '!=', 'cash_deposit');
+                    ->orWhereNotIn('source', ['cash_deposit', 'amount_received']);
             });
         }
 
@@ -1104,6 +1104,9 @@ class CoinRewardService
             $opName = $details['operator_name'] ?? 'Presentation Cashier';
             $notes = $details['notes'] ?? null;
             $paymentMode = $details['payment_mode'] ?? 'cash';
+            $source = $details['source'] ?? 'cash_deposit';
+            $rewardRuleId = $details['reward_rule_id'] ?? ($source === 'amount_received' ? 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1' : 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            $desc = $details['description'] ?? ($source === 'amount_received' ? 'Amount Received (പണം ലഭിച്ചു): ₹'.number_format($cashAmount, 2)." (+{$coins} Coins)" : 'Added Coin (പണം നൽകി ചേർത്തത്): ₹'.number_format($cashAmount, 2)." (+{$coins} Coins)");
 
             $ref = 'COIN-CASH-STU'.$student->id.'-'.now()->format('YmdHis').'-'.strtoupper(Str::random(4));
 
@@ -1115,17 +1118,17 @@ class CoinRewardService
                 'result_id' => null,
                 'prize_position' => 0,
                 'grade' => null,
-                'reward_rule_id' => 'QUAF09_CASHIER_COIN_DEPOSIT_V1',
+                'reward_rule_id' => $rewardRuleId,
                 'coins' => $coins,
                 'cash_amount' => $cashAmount,
                 'payment_mode' => $paymentMode,
-                'source' => 'cash_deposit',
+                'source' => $source,
                 'transaction_type' => 'credit',
                 'transaction_reference' => $ref,
                 'status' => 'completed',
-                'description' => 'Added Coin (പണം നൽകി ചേർത്തത്): ₹'.number_format($cashAmount, 2)." (+{$coins} Coins)",
+                'description' => $desc,
                 'metadata' => [
-                    'source_type' => 'cash_deposit',
+                    'source_type' => $source,
                     'cash_amount' => $cashAmount,
                     'coins_added' => $coins,
                     'balance_before' => $balanceBefore,

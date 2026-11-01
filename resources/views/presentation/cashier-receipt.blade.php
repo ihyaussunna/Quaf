@@ -182,8 +182,8 @@
     <div class="slip-card">
         <div class="header">
             <div class="logo-text">QUAF FESTIVAL 09</div>
-            <div class="sub-title">Presentation Cashier Counter • Cash Deposit Receipt</div>
-            <div class="badge">ADDED COINS RECEIPT</div>
+            <div class="sub-title">Presentation Cashier Counter • {{ $transaction->source === 'amount_received' ? 'Amount Received Receipt' : 'Cash Deposit Receipt' }}</div>
+            <div class="badge">{{ $transaction->source === 'amount_received' ? 'AMOUNT RECEIVED • ORDER COMPLETED' : 'ADDED COINS RECEIPT' }}</div>
         </div>
 
         <div class="meta-grid">
@@ -215,7 +215,7 @@
 
         <!-- Cash & Coins Box -->
         <div class="deposit-box">
-            <div class="deposit-label">Cash Received in Hand (കൈയിൽ പണം)</div>
+            <div class="deposit-label">{{ $transaction->source === 'amount_received' ? 'Amount Received (പണം ലഭിച്ചു)' : 'Cash Received in Hand (കൈയിൽ പണം)' }}</div>
             <div class="deposit-amount">₹ {{ number_format($transaction->cash_amount ?: ($transaction->metadata['cash_amount'] ?? 0), 2) }}</div>
             <div class="coins-added-row">
                 <span class="added-tag">ADDED COINS</span>

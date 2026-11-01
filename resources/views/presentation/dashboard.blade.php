@@ -649,11 +649,21 @@
                                     </p>
                                 </div>
 
-                                <a href="{{ route('presentation.cashier', ['student' => $selectedStudent->student_id]) }}" 
-                                   class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                    <span>Go to Cashier Desk & Add Coins (ക്യാഷ്യറിൽ കോയിൻ ചേർക്കുക &rarr;)</span>
-                                </a>
+                                <div class="space-y-2">
+                                    <button type="button" 
+                                            @click="sendClaimToCashier()" 
+                                            class="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold font-sora text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
+                                        <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                        <span>Send Claim to Cashier (ക്ലെയിം കാഷ്യറിലേക്ക് അയക്കുക)</span>
+                                    </button>
+
+                                    <a href="{{ route('presentation.cashier', ['student' => $selectedStudent->student_id]) }}" 
+                                       target="_blank"
+                                       class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all">
+                                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                        <span>Open Cashier Desk & Receive Amount &rarr;</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -858,12 +868,16 @@ function presentationDesk() {
 
         init() {
             @if($selectedStudent)
-                try {
-                    const saved = sessionStorage.getItem('quaf_pres_cart_{{ $selectedStudent->id }}');
-                    if (saved) {
-                        this.cart = JSON.parse(saved);
-                    }
-                } catch(e) {}
+                @if(isset($pendingCart) && $pendingCart && !empty($pendingCart->cart_items))
+                    this.cart = @json($pendingCart->cart_items);
+                @else
+                    try {
+                        const saved = sessionStorage.getItem('quaf_pres_cart_{{ $selectedStudent->id }}');
+                        if (saved) {
+                            this.cart = JSON.parse(saved);
+                        }
+                    } catch(e) {}
+                @endif
             @endif
         },
 
@@ -872,7 +886,34 @@ function presentationDesk() {
                 try {
                     sessionStorage.setItem('quaf_pres_cart_{{ $selectedStudent->id }}', JSON.stringify(this.cart));
                 } catch(e) {}
+                this.syncCartToServer();
             @endif
+        },
+
+        syncCartToServer() {
+            @if($selectedStudent)
+                fetch('{{ route('presentation.save-cart') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        student_id: {{ $selectedStudent->id }},
+                        cart_data: JSON.stringify(this.cart),
+                        notes: this.notes || ''
+                    })
+                }).catch(() => {});
+            @endif
+        },
+
+        sendClaimToCashier() {
+            if (this.cart.length === 0) {
+                alert('കാർട്ടിൽ ഇനങ്ങൾ ഒന്നും തിരഞ്ഞെടുത്തിട്ടില്ല.');
+                return;
+            }
+            this.syncCartToServer();
+            alert('ക്ലെയിം ഓർഡർ വിജയകരമായി കാഷ്യർ കൗണ്ടറിലേക്ക് അയച്ചു! വിദ്യാർത്ഥിക്ക് ക്യാഷ്യർ ഡെസ്കിൽ ചെന്ന് Fest ID കാർഡ് സ്കാൻ ചെയ്ത് പണം നൽകാം.');
         },
 
         addToCart(name, coins, category, qty = 1) {
@@ -931,7 +972,19 @@ function presentationDesk() {
             if (this.cart.length === 0) return;
             if (confirm('കാർട്ടിലുള്ള എല്ലാ ഇനങ്ങളും ഒഴിവാക്കട്ടെ?')) {
                 this.cart = [];
-                this.saveCart();
+                @if($selectedStudent)
+                    try { sessionStorage.removeItem('quaf_pres_cart_{{ $selectedStudent->id }}'); } catch(e) {}
+                    fetch('{{ route('presentation.clear-cart') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            student_id: {{ $selectedStudent->id }}
+                        })
+                    }).catch(() => {});
+                @endif
             }
         },
 

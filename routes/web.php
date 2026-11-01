@@ -815,6 +815,8 @@ Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:
     Route::get('/search-student', [PresentationController::class, 'searchStudent'])->name('search-student');
     Route::post('/redeem', [PresentationController::class, 'redeem'])->name('redeem');
     Route::post('/redeem-cart', [PresentationController::class, 'redeemCart'])->name('redeem-cart');
+    Route::post('/save-cart', [PresentationController::class, 'saveCart'])->name('save-cart');
+    Route::post('/clear-cart', [PresentationController::class, 'clearPendingCart'])->name('clear-cart');
     Route::post('/students/{student}/toggle-gift', [PresentationController::class, 'toggleGift'])->name('toggle-gift');
     Route::post('/transactions/{transaction}/reverse', [PresentationController::class, 'reverseRedemption'])->name('reverse');
     Route::get('/transactions/{transaction}/receipt', [PresentationController::class, 'receipt'])->name('receipt');
@@ -823,6 +825,7 @@ Route::prefix('presentation')->name('presentation.')->middleware(['auth', 'role:
     // Presentation Cashier Routes
     Route::get('/cashier', [PresentationController::class, 'cashierIndex'])->name('cashier');
     Route::post('/cashier/add-coins', [PresentationController::class, 'addCashierCoins'])->name('cashier.add-coins');
+    Route::post('/cashier/receive-amount', [PresentationController::class, 'receiveCashierAmount'])->name('cashier.receive-amount');
     Route::get('/cashier/receipt/{transaction}', [PresentationController::class, 'cashierReceipt'])->name('cashier.receipt');
 });
 

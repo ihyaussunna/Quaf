@@ -839,9 +839,9 @@
                             <div class="space-y-1">
                                 <div class="flex items-center justify-between font-bold text-slate-700">
                                     <span>Position Y (Top)</span>
-                                    <span class="font-mono text-purple-700" x-text="settings.winner_start_y + 'px'"></span>
+                                    <span class="font-mono text-purple-700" x-text="settings.first_top + 'px'"></span>
                                 </div>
-                                <input type="range" min="100" max="950" step="5" x-model.number="settings.winner_start_y" @input="render(); recordHistory();" class="w-full accent-purple-600">
+                                <input type="range" min="0" max="950" step="5" x-model.number="settings.first_top" @input="render(); recordHistory();" class="w-full accent-purple-600">
                             </div>
                         </div>
                     </div>
@@ -1143,12 +1143,27 @@
                             <div class="flex items-center justify-between text-xs font-bold text-slate-700">
                                 <span>Winner Row Gap (സ്ഥാനങ്ങൾ തമ്മിലുള്ള അകലം)</span>
                                 <div class="flex items-center gap-1 font-mono">
-                                    <button type="button" @click="settings.row_gap = Math.max(60, settings.row_gap - 8); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">-</button>
-                                    <span class="w-12 text-center" x-text="settings.row_gap + 'px'"></span>
-                                    <button type="button" @click="settings.row_gap = Math.min(350, settings.row_gap + 8); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center">+</button>
+                                    <button type="button" @click="settings.row_gap = Math.max(20, (settings.row_gap || 178) - 8); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer">-</button>
+                                    <span class="w-12 text-center" x-text="(settings.row_gap || 178) + 'px'"></span>
+                                    <button type="button" @click="settings.row_gap = Math.min(380, (settings.row_gap || 178) + 8); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer">+</button>
                                 </div>
                             </div>
-                            <input type="range" min="60" max="350" step="2" x-model.number="settings.row_gap" @input="render()" class="w-full accent-[#be1e2d]">
+                            <input type="range" min="20" max="380" step="2" x-model.number="settings.row_gap" @input="render()" class="w-full accent-[#be1e2d]">
+                            <p class="text-[10px] text-slate-500">1st, 2nd, 3rd സ്ഥാനങ്ങൾ തമ്മിലുള്ള കുത്തനെയുള്ള അകലം കൂട്ടാനും കുറയ്ക്കാനും.</p>
+                        </div>
+
+                        <!-- 4. Tie Winner Gap (when multiple winners exist in same rank) -->
+                        <div class="space-y-1.5" x-show="data.winners.first.length > 1 || data.winners.second.length > 1 || data.winners.third.length > 1">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>Tie Winners Gap (ടൈ ആയവർ തമ്മിലുള്ള അകലം)</span>
+                                <div class="flex items-center gap-1 font-mono">
+                                    <button type="button" @click="settings.tie_row_gap = Math.max(20, (settings.tie_row_gap || Math.round((settings.row_gap || 178) * 0.82)) - 6); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer">-</button>
+                                    <span class="w-12 text-center" x-text="(settings.tie_row_gap || Math.round((settings.row_gap || 178) * 0.82)) + 'px'"></span>
+                                    <button type="button" @click="settings.tie_row_gap = Math.min(300, (settings.tie_row_gap || Math.round((settings.row_gap || 178) * 0.82)) + 6); render();" class="w-6 h-6 rounded bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer">+</button>
+                                </div>
+                            </div>
+                            <input type="range" min="20" max="300" step="2" x-model.number="settings.tie_row_gap" @input="render()" class="w-full accent-amber-600">
+                            <p class="text-[10px] text-slate-500">ഒരേ സ്ഥാനത്ത് (1st/2nd/3rd) ഒന്നിൽ കൂടുതൽ പേർ വരുമ്പോൾ അവർ തമ്മിലുള്ള അകലം.</p>
                         </div>
                     </div>
 
@@ -2178,6 +2193,8 @@ function posterStudio() {
             winner_name_line_height: {{ (float) ($currentSettings['winner_name_line_height'] ?? 38) }},
             winner_unit_gap: {{ (float) ($currentSettings['winner_unit_gap'] ?? 2) }},
             row_gap: {{ (float) ($currentSettings['row_gap'] ?? 178) }},
+            tie_row_gap: {{ isset($currentSettings['tie_row_gap']) ? (float) $currentSettings['tie_row_gap'] : 'null' }},
+            winner_autofit: {{ isset($currentSettings['winner_autofit']) ? ($currentSettings['winner_autofit'] ? 'true' : 'false') : 'true' }},
 
             // Medal System
             medal_type: '{{ $currentSettings["medal_type"] ?? "medals" }}', // 'medals', 'numbers', 'badges', 'text', 'none'
@@ -3180,11 +3197,13 @@ function posterStudio() {
                     };
                 } else if (this.selectedId === 'winners') {
                     const scale = this.settings.winners_scale || 1.0;
+                    const wCount = (this.data.winners.first?.length || 1) + (this.data.winners.second?.length || 1) + (this.data.winners.third?.length || 1);
+                    const calcH = Math.max(520, wCount * (this.settings.row_gap || 140));
                     return {
                         x: this.settings.block_left,
                         y: this.settings.first_top,
                         w: Math.round(440 * scale),
-                        h: Math.round(520 * scale),
+                        h: Math.round(calcH * scale),
                         rotation: 0,
                         type: 'core',
                         id: 'winners'
@@ -3258,7 +3277,9 @@ function posterStudio() {
                         const wx = this.settings.block_left;
                         const wy = this.settings.first_top;
                         const scale = this.settings.winners_scale || 1.0;
-                        if (x >= wx - 20 && x <= wx + Math.round(440 * scale) + 20 && y >= wy - 20 && y <= wy + Math.round(540 * scale) + 20) {
+                        const wCount = (this.data.winners.first?.length || 1) + (this.data.winners.second?.length || 1) + (this.data.winners.third?.length || 1);
+                        const calcH = Math.max(540, wCount * (this.settings.row_gap || 140));
+                        if (x >= wx - 20 && x <= wx + Math.round(440 * scale) + 20 && y >= wy - 20 && y <= wy + Math.round(calcH * scale) + 20) {
                             return { type: 'core', id: 'winners' };
                         }
                     }
@@ -3709,13 +3730,13 @@ function posterStudio() {
             const flatWinners = [];
             const addPlace = (arr, rank, label, defaultName) => {
                 if (Array.isArray(arr) && arr.length > 0) {
-                    arr.forEach(w => {
+                    arr.forEach((w, idx) => {
                         const name = (w && w.name && w.name.trim()) ? this.toTitleCase(w.name) : defaultName;
                         const unit = (w && w.unit && w.unit.trim()) ? this.toTitleCase(w.unit) : 'Team / Unit';
-                        flatWinners.push({ rank, rankLabel: label, name, unit });
+                        flatWinners.push({ rank, rankLabel: label, name, unit, isTie: idx > 0, tieIndex: idx });
                     });
                 } else {
-                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'Team / Unit' });
+                    flatWinners.push({ rank, rankLabel: label, name: defaultName, unit: 'Team / Unit', isTie: false, tieIndex: 0 });
                 }
             };
             addPlace(this.data.winners.first, '01', '1st Place', 'Muhammed Yaseen P.');
@@ -3726,12 +3747,24 @@ function posterStudio() {
             if (count === 0) return;
 
             const masterScale = (this.settings.winners_scale || 1.0);
-            const autoScale = count <= 3 ? 1.0 : Math.min(1.0, Math.max(0.48, 3.15 / count));
+            const autoScale = (this.settings.winner_autofit !== false && count > 3)
+                ? Math.min(1.0, Math.max(0.68, 3.6 / count))
+                : 1.0;
             const finalScale = masterScale * autoScale;
 
-            const availHeight = 520;
-            const rowGap = Math.round((count <= 3 ? (this.settings.row_gap || 178) : Math.floor(availHeight / count)) * masterScale);
-            const startY = count <= 3 ? (this.settings.first_top || 145) : Math.max(90, Math.floor(130 - (count - 3) * 10));
+            const baseRowGap = (this.settings.row_gap !== undefined && this.settings.row_gap !== null && !isNaN(this.settings.row_gap))
+                ? Number(this.settings.row_gap)
+                : 178;
+            const rowGap = Math.round(baseRowGap * masterScale);
+
+            const baseTieGap = (this.settings.tie_row_gap !== undefined && this.settings.tie_row_gap !== null && !isNaN(this.settings.tie_row_gap) && this.settings.tie_row_gap !== '')
+                ? Number(this.settings.tie_row_gap)
+                : Math.round(baseRowGap * 0.82);
+            const tieGap = Math.round(baseTieGap * masterScale);
+
+            const startY = (this.settings.first_top !== undefined && this.settings.first_top !== null && !isNaN(this.settings.first_top))
+                ? Number(this.settings.first_top)
+                : 145;
 
             const rankSize = Math.max(14, Math.round((this.settings.medal_size || 26) * finalScale));
             const winFont = this.settings.winner_font || 'Rockwell Std';
@@ -3751,7 +3784,7 @@ function posterStudio() {
             const medGap = Math.max(6, Math.round((this.settings.medal_gap || 16) * finalScale));
 
             let currY = startY;
-            flatWinners.forEach(w => {
+            flatWinners.forEach((w, wIdx) => {
                 ctx.save();
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
@@ -3879,7 +3912,13 @@ function posterStudio() {
 
                 ctx.restore();
                 const extraNameH = Math.max(0, (nameLines.length - 1) * nameLineH);
-                currY += (rowGap + extraNameH);
+
+                // Determine step gap to NEXT winner
+                const nextW = flatWinners[wIdx + 1];
+                const isNextTieWithCurrent = nextW && (nextW.rank === w.rank);
+                const stepGap = isNextTieWithCurrent ? tieGap : rowGap;
+
+                currY += (stepGap + extraNameH);
             });
         },
 

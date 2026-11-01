@@ -245,17 +245,149 @@
                 </div>
             </div>
 
-            <!-- Right: Add Coins Form (7 cols) -->
-            <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-                <div>
-                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>Add Coins for Cash in Hand (പണം സ്വീകരിച്ച് കോയിൻ നൽകുക)</span>
-                    </h3>
-                    <p class="text-xs text-slate-500 font-anek">
-                        വിദ്യാർത്ഥിയുടെ കൈയിൽ നിന്നും പണം നേരിട്ട് സ്വീകരിച്ച് അക്കൗണ്ടിലേക്ക് <strong>Added Coins</strong> ആയി ക്രെഡിറ്റ് ചെയ്യുക.
-                    </p>
-                </div>
+            <!-- Right: Add Coins Form & Pending Presentation Cart (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                @if(isset($pendingCart) && $pendingCart && !empty($pendingCart->cart_items))
+                    <!-- PENDING PRESENTATION DESK CLAIM / CART -->
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50/50 border-2 border-amber-400 rounded-3xl p-6 sm:p-7 shadow-md space-y-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shadow-sm">
+                                    <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-base sm:text-lg font-black text-amber-950 font-sora">
+                                            പ്രസന്റേഷൻ ഡെസ്ക് ക്ലെയിം ഓർഡർ (Claimed Items)
+                                        </h3>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400 text-amber-950 shadow-2xs">
+                                            PENDING PAYMENT
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-amber-800 font-anek mt-0.5">
+                                        പ്രസന്റേഷൻ ഡെസ്കിൽ നിന്നും ഈ വിദ്യാർത്ഥി കാർട്ടിൽ ചേർത്ത ഇനങ്ങൾ. പണം സ്വീകരിച്ച് ഓർഡർ പൂർത്തിയാക്കാം.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <span class="text-xs font-mono font-bold text-amber-900 block">Operator: {{ $pendingCart->operator_name ?? 'Presentation Desk' }}</span>
+                                <span class="text-[10px] font-mono text-amber-700">{{ $pendingCart->updated_at?->diffForHumans() }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div class="overflow-x-auto bg-white rounded-2xl border border-amber-300 shadow-2xs">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-amber-200 text-slate-500 font-mono uppercase text-[10px] bg-amber-50/70">
+                                        <th class="py-2.5 px-3">ഇനം (Item Name)</th>
+                                        <th class="py-2.5 px-3 text-center">വിഭാഗം</th>
+                                        <th class="py-2.5 px-3 text-center">എണ്ണം (Qty)</th>
+                                        <th class="py-2.5 px-3 text-center">റേറ്റ്</th>
+                                        <th class="py-2.5 px-3 text-right">ആകെ കോയിൻ</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach($pendingCart->cart_items as $cItem)
+                                        <tr class="hover:bg-amber-50/30">
+                                            <td class="py-2.5 px-3 font-bold text-slate-900">
+                                                {{ $cItem['item_name'] ?? 'Gift Item' }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center text-slate-500 font-mono text-[10px] uppercase">
+                                                {{ $cItem['item_category'] ?? 'book' }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $cItem['quantity'] ?? 1 }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono text-slate-600">
+                                                {{ $cItem['coins'] ?? 0 }} c
+                                            </td>
+                                            <td class="py-2.5 px-3 text-right font-mono font-black text-amber-950">
+                                                {{ ($cItem['coins'] ?? 0) * ($cItem['quantity'] ?? 1) }} Coins
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        @php
+                            $shortfall = max(0, $pendingCart->total_coins - $studentSummary['balance']);
+                        @endphp
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-white border border-amber-300 shadow-2xs">
+                            <div class="space-y-0.5">
+                                <span class="text-[10px] uppercase font-mono font-bold text-slate-400 block">ആകെ ഓർഡർ കോയിൻ</span>
+                                <span class="text-xl font-black text-slate-900 font-mono">{{ $pendingCart->total_coins }} <span class="text-xs font-normal">Coins</span></span>
+                            </div>
+                            <div class="space-y-0.5">
+                                <span class="text-[10px] uppercase font-mono font-bold text-slate-400 block">കൈവശമുള്ള ബാലൻസ്</span>
+                                <span class="text-xl font-black text-emerald-700 font-mono">{{ $studentSummary['balance'] }} <span class="text-xs font-normal">Coins</span></span>
+                            </div>
+                            <div class="space-y-0.5">
+                                <span class="text-[10px] uppercase font-mono font-bold text-rose-700 block">സ്വീകരിക്കേണ്ട തുക (Cash Due)</span>
+                                <span class="text-2xl font-black text-rose-600 font-mono">₹ {{ number_format($shortfall, 2) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- "Amount Received" Form Action -->
+                        <form method="POST" action="{{ route('presentation.cashier.receive-amount') }}" class="space-y-4 pt-2 border-t border-amber-300" onsubmit="return confirm('₹' + this.cash_amount.value + ' പണം സ്വീകരിച്ച് ഓർഡർ പൂർത്തിയാക്കട്ടെ? (Confirm Amount Received)')">
+                            @csrf
+                            <input type="hidden" name="student_id" value="{{ $selectedStudent->id }}">
+                            <input type="hidden" name="cart_id" value="{{ $pendingCart->id }}">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-amber-950 font-mono">
+                                        സ്വീകരിച്ച തുക / Amount Received (₹) <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold">₹</span>
+                                        <input type="number" 
+                                               name="cash_amount" 
+                                               value="{{ $shortfall }}" 
+                                               min="0" 
+                                               max="20000" 
+                                               step="1"
+                                               required 
+                                               class="w-full pl-8 pr-3 py-2.5 bg-white border-2 border-amber-400 focus:border-emerald-600 rounded-xl text-base font-black font-mono text-slate-900 shadow-inner">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-amber-950 font-mono">Payment Mode</label>
+                                    <select name="payment_mode" class="w-full px-3 py-2.5 bg-white border border-amber-300 rounded-xl text-xs font-bold font-mono">
+                                        <option value="cash">Cash in Hand (കൈയിൽ പണം)</option>
+                                        <option value="upi">UPI / GPay / Scanner</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-amber-950 font-mono">കുറിപ്പ് (Notes)</label>
+                                    <input type="text" name="notes" placeholder="Optional notes" class="w-full px-3 py-2.5 bg-white border border-amber-300 rounded-xl text-xs">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold font-sora text-sm uppercase tracking-wider shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>Amount Received &amp; Complete Order (പണം ലഭിച്ചു - ഓർഡർ പൂർത്തിയാക്കുക)</span>
+                            </button>
+                        </form>
+                    </div>
+                @endif
+
+                <!-- Standard Cash Deposit Box -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+                    <div>
+                        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Add Coins for Cash in Hand (പണം സ്വീകരിച്ച് കോയിൻ നൽകുക)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 font-anek">
+                            വിദ്യാർത്ഥിയുടെ കൈയിൽ നിന്നും പണം നേരിട്ട് സ്വീകരിച്ച് അക്കൗണ്ടിലേക്ക് <strong>Added Coins</strong> ആയി ക്രെഡിറ്റ് ചെയ്യുക.
+                        </p>
+                    </div>
 
                 <!-- Quick Cash Presets -->
                 <div class="space-y-2">
@@ -379,9 +511,9 @@
             <div>
                 <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                    <span>Recent Cash Deposits (പണം സ്വീകരിച്ച് ചേർത്ത കോയിനുകൾ)</span>
+                    <span>Recent Cash Deposits &amp; Amount Received (പണം സ്വീകരിച്ച് ചേർത്ത കോയിനുകളും ഓർഡറുകളും)</span>
                 </h3>
-                <p class="text-xs text-slate-500 font-anek">ക്യാഷ്യർ കൗണ്ടർ വഴി പണം നൽകി ചേർത്ത കോയിനുകളുടെ ഹിസ്റ്ററിയും രസീതും.</p>
+                <p class="text-xs text-slate-500 font-anek">ക്യാഷ്യർ കൗണ്ടർ വഴി പണം നൽകി ചേർത്ത കോയിനുകളുടെയും പ്രസന്റേഷൻ ക്ലെയിം ഓർഡറുകളുടെയും ഹിസ്റ്ററിയും രസീതും.</p>
             </div>
         </div>
 
@@ -393,8 +525,9 @@
                         <th class="py-3 px-4">Date & Time</th>
                         <th class="py-3 px-4">Student</th>
                         <th class="py-3 px-4">Group</th>
-                        <th class="py-3 px-4 text-center">Cash Received</th>
+                        <th class="py-3 px-4 text-center">Amount Received (ലഭിച്ച തുക)</th>
                         <th class="py-3 px-4 text-center">Coins Added</th>
+                        <th class="py-3 px-4 text-center">Status / Type</th>
                         <th class="py-3 px-4 text-center">Operator</th>
                         <th class="py-3 px-4 text-right">Receipt Slip</th>
                     </tr>
@@ -427,6 +560,17 @@
                                     +{{ $tx->coins }} Coins
                                 </span>
                             </td>
+                            <td class="py-3 px-4 text-center">
+                                @if($tx->source === 'amount_received' || ($tx->metadata['action'] ?? '') === 'amount_received')
+                                    <span class="px-2.5 py-1 rounded-full font-mono font-bold text-xs bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        Amount Received
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-full font-mono font-bold text-xs bg-blue-100 text-blue-800 border border-blue-200">
+                                        Cash Deposit
+                                    </span>
+                                @endif
+                            </td>
                             <td class="py-3 px-4 text-center text-slate-500 text-[11px] font-mono">
                                 {{ $tx->metadata['operator_name'] ?? 'Cashier' }}
                             </td>
@@ -439,7 +583,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-8 text-center text-slate-400 font-mono text-xs">
+                            <td colspan="9" class="py-8 text-center text-slate-400 font-mono text-xs">
                                 ഇന്നത്തെ പണം സ്വീകരിച്ച് ചേർത്ത കോയിനുകൾ ഒന്നും രേഖപ്പെടുത്തിയിട്ടില്ല (No cash deposits recorded yet).
                             </td>
                         </tr>

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Presentation;
 
 use App\Http\Controllers\Controller;
 use App\Models\CoinTransaction;
+use App\Models\PresentationCart;
 use App\Models\Student;
 use App\Services\CoinRewardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -71,6 +73,7 @@ class PresentationController extends Controller
         $studentSummary = null;
         $studentAchievements = null;
         $studentTransactions = collect();
+        $pendingCart = null;
 
         $queryStr = trim((string) ($request->query('student') ?? $request->query('query') ?? ''));
         if ($queryStr !== '') {
@@ -82,6 +85,12 @@ class PresentationController extends Controller
                     ->latest()
                     ->take(20)
                     ->get();
+
+                PresentationCart::ensureSchema();
+                $pendingCart = PresentationCart::where('student_id', $selectedStudent->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
             }
         }
 
@@ -117,6 +126,7 @@ class PresentationController extends Controller
             'studentAchievements',
             'studentTransactions',
             'recentTransactions',
+            'pendingCart',
             'queryStr',
             'searchFilter',
             'lastTransaction'
@@ -257,6 +267,13 @@ class PresentationController extends Controller
                 'operator_name' => Auth::user()?->name ?? 'Presentation Desk',
             ]);
 
+            PresentationCart::where('student_id', $student->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'completed',
+                    'transaction_id' => $transaction->id,
+                ]);
+
             return redirect()->route('presentation.dashboard', ['student' => $student->student_id])
                 ->with('success', "വിജയകരമായി പൂർത്തിയാക്കി! {$student->name}-ൽ നിന്ന് ".abs($transaction->coins).' കോയിനുകൾ കുറച്ചു.')
                 ->with('last_transaction_id', $transaction->id);
@@ -269,6 +286,107 @@ class PresentationController extends Controller
                 ->withInput()
                 ->with('error', 'Error processing cart purchase: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Save / Sync pending cart from Presentation Desk to Cashier Desk.
+     */
+    public function saveCart(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|integer|exists:students,id',
+            'cart_data' => 'required|string',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $cartItems = json_decode($validated['cart_data'], true);
+        if (! is_array($cartItems)) {
+            $cartItems = [];
+        }
+
+        $student = Student::findOrFail($validated['student_id']);
+        $summary = $this->coinRewardService->getStudentCoinSummary($student);
+        $balance = (int) ($summary['balance'] ?? 0);
+
+        $totalCoins = 0;
+        $totalItems = 0;
+        $normalizedItems = [];
+
+        foreach ($cartItems as $item) {
+            $name = trim($item['item_name'] ?? '');
+            $coins = (int) ($item['coins'] ?? 0);
+            $qty = max(1, (int) ($item['quantity'] ?? 1));
+            $cat = $item['item_category'] ?? ($item['category'] ?? 'book');
+
+            if ($name === '' || $coins <= 0) {
+                continue;
+            }
+
+            $subtotal = $coins * $qty;
+            $totalCoins += $subtotal;
+            $totalItems += $qty;
+            $normalizedItems[] = [
+                'item_name' => $name,
+                'coins' => $coins,
+                'quantity' => $qty,
+                'item_category' => $cat,
+                'subtotal_coins' => $subtotal,
+            ];
+        }
+
+        PresentationCart::ensureSchema();
+
+        if (empty($normalizedItems)) {
+            PresentationCart::where('student_id', $student->id)
+                ->where('status', 'pending')
+                ->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pending cart cleared',
+                'cart' => null,
+            ]);
+        }
+
+        $cashRequired = (float) max(0, $totalCoins - $balance);
+
+        $pendingCart = PresentationCart::updateOrCreate(
+            ['student_id' => $student->id, 'status' => 'pending'],
+            [
+                'cart_items' => $normalizedItems,
+                'total_coins' => $totalCoins,
+                'total_items_count' => $totalItems,
+                'cash_required' => $cashRequired,
+                'notes' => $validated['notes'] ?? null,
+                'operator_id' => Auth::id(),
+                'operator_name' => Auth::user()?->name ?? 'Presentation Desk',
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart saved and synced to Cashier Desk',
+            'cart_id' => $pendingCart->id,
+            'total_coins' => $totalCoins,
+            'cash_required' => $cashRequired,
+        ]);
+    }
+
+    /**
+     * Clear the pending cart for a student.
+     */
+    public function clearPendingCart(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|integer|exists:students,id',
+        ]);
+
+        PresentationCart::ensureSchema();
+        PresentationCart::where('student_id', $validated['student_id'])
+            ->where('status', 'pending')
+            ->delete();
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -397,6 +515,7 @@ class PresentationController extends Controller
         $selectedStudent = null;
         $studentSummary = null;
         $studentTransactions = collect();
+        $pendingCart = null;
 
         $queryStr = trim((string) ($request->query('student') ?? $request->query('query') ?? ''));
         if ($queryStr !== '') {
@@ -407,6 +526,12 @@ class PresentationController extends Controller
                     ->latest()
                     ->take(20)
                     ->get();
+
+                PresentationCart::ensureSchema();
+                $pendingCart = PresentationCart::where('student_id', $selectedStudent->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
             }
         }
 
@@ -419,21 +544,21 @@ class PresentationController extends Controller
 
         if ($hasSourceColumn) {
             $todayCashDeposits->where(function ($q) {
-                $q->where('source', 'cash_deposit')
-                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+                $q->whereIn('source', ['cash_deposit', 'amount_received'])
+                    ->orWhereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
             });
         } else {
-            $todayCashDeposits->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            $todayCashDeposits->whereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
         }
 
         $allTimeQuery = CoinTransaction::query();
         if ($hasSourceColumn) {
             $allTimeQuery->where(function ($q) {
-                $q->where('source', 'cash_deposit')
-                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+                $q->whereIn('source', ['cash_deposit', 'amount_received'])
+                    ->orWhereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
             });
         } else {
-            $allTimeQuery->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            $allTimeQuery->whereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
         }
 
         $stats = [
@@ -447,11 +572,11 @@ class PresentationController extends Controller
         $recentDepositsQuery = CoinTransaction::query();
         if ($hasSourceColumn) {
             $recentDepositsQuery->where(function ($q) {
-                $q->where('source', 'cash_deposit')
-                    ->orWhere('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+                $q->whereIn('source', ['cash_deposit', 'amount_received'])
+                    ->orWhereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
             });
         } else {
-            $recentDepositsQuery->where('reward_rule_id', 'QUAF09_CASHIER_COIN_DEPOSIT_V1');
+            $recentDepositsQuery->whereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
         }
 
         $recentDeposits = $recentDepositsQuery
@@ -471,6 +596,7 @@ class PresentationController extends Controller
             'studentSummary',
             'studentTransactions',
             'recentDeposits',
+            'pendingCart',
             'queryStr',
             'lastDeposit'
         ));
@@ -511,6 +637,87 @@ class PresentationController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error adding coins: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Cashier confirms "Amount Received" for a presentation cart order, settles payment, and fulfills cart.
+     */
+    public function receiveCashierAmount(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|integer|exists:students,id',
+            'cart_id' => 'required|integer|exists:presentation_carts,id',
+            'cash_amount' => 'required|numeric|min:0',
+            'payment_mode' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $student = Student::with(['group'])->findOrFail($validated['student_id']);
+        $cart = PresentationCart::where('id', $validated['cart_id'])
+            ->where('student_id', $student->id)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $cashAmount = (float) $validated['cash_amount'];
+        $paymentMode = $validated['payment_mode'] ?? 'cash';
+        $notes = $validated['notes'] ?? null;
+
+        try {
+            $depositTransaction = null;
+            $redeemTransaction = null;
+
+            DB::transaction(function () use ($student, $cart, $cashAmount, $paymentMode, $notes, &$depositTransaction, &$redeemTransaction) {
+                // 1. If cash amount received, credit Added Coins with source = 'amount_received'
+                if ($cashAmount > 0) {
+                    $coinsToAdd = (int) round($cashAmount);
+                    $depositTransaction = $this->coinRewardService->addCashierCoins(
+                        $student,
+                        $coinsToAdd,
+                        $cashAmount,
+                        [
+                            'payment_mode' => $paymentMode,
+                            'source' => 'amount_received',
+                            'reward_rule_id' => 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1',
+                            'description' => 'Amount Received (പണം ലഭിച്ചു): ₹'.number_format($cashAmount, 2)." (+{$coinsToAdd} Coins for Order #{$cart->id})",
+                            'notes' => ($notes ? $notes.' • ' : '')."Presentation Order #{$cart->id} payment",
+                            'operator_id' => Auth::id(),
+                            'operator_name' => Auth::user()?->name ?? 'Presentation Cashier',
+                        ]
+                    );
+                }
+
+                // 2. Fulfill the cart redemption
+                $redeemTransaction = $this->coinRewardService->redeemCart($student, $cart->cart_items, [
+                    'notes' => ($notes ? $notes.' • ' : '')."Amount Received at Cashier Desk (₹{$cashAmount})",
+                    'operator_id' => Auth::id(),
+                    'operator_name' => Auth::user()?->name ?? 'Presentation Cashier',
+                ]);
+
+                // 3. Mark the pending presentation cart as completed
+                $cart->update([
+                    'status' => 'amount_received',
+                    'cash_received' => $cashAmount,
+                    'cashier_id' => Auth::id(),
+                    'cashier_name' => Auth::user()?->name ?? 'Presentation Cashier',
+                    'cashier_received_at' => now(),
+                    'transaction_id' => $redeemTransaction->id,
+                ]);
+            });
+
+            $amountMsg = $cashAmount > 0 ? '₹'.number_format($cashAmount, 2).' പണം സ്വീകരിച്ച് ' : '';
+
+            return redirect()->route('presentation.cashier', ['student' => $student->student_id])
+                ->with('success', "Amount Received! {$amountMsg}{$student->name}-ന്റെ ഓർഡർ വിജയകരമായി പൂർത്തിയാക്കി.")
+                ->with('last_deposit_id', $depositTransaction?->id ?? $redeemTransaction?->id);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error processing amount received: '.$e->getMessage());
         }
     }
 
