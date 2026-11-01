@@ -97,7 +97,7 @@
                             @foreach($standAnn->standings_data as $grpItem)
                                 <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between">
                                     <div class="flex items-center justify-between text-xs font-mono mb-2">
-                                        <span class="px-2 py-0.5 rounded font-black {{ $grpItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
+                                        <span class="px-2 py-0.5 rounded font-black {{ $grpItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : ($grpItem['rank'] === 2 ? 'bg-slate-200 text-slate-900' : ($grpItem['rank'] === 3 ? 'bg-amber-700 text-white' : 'bg-white/20 text-white')) }}">
                                             #{{ $grpItem['rank'] }}
                                         </span>
                                         <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $grpItem['code'] }}</span>

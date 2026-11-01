@@ -141,80 +141,96 @@
     </div>
 
 
-    <!-- Team Standings Section: Only Official Announced Milestone Standings -->
-    @if(isset($incomingStandings) && $incomingStandings->isNotEmpty())
-        <!-- Priority: Announced Team Standings from Stage Announcer Desk -->
-        <div class="space-y-4">
-            @foreach($incomingStandings as $standAnn)
-                <div class="bg-gradient-to-r from-red-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border-2 border-red-500 shadow-xl ring-4 ring-red-500/20 font-sora">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/10 pb-5">
-                        <div>
-                            <div class="flex flex-wrap items-center gap-2 mb-2">
-                                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-red-600 text-white animate-pulse flex items-center gap-1.5 shadow-2xs">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-                                    <span>STAGE ANNOUNCED • PENDING WEBSITE PUBLISH</span>
-                                </span>
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400 text-slate-950">
-                                    {{ $standAnn->title }}
-                                </span>
-                                <span class="text-xs font-mono text-slate-300">
-                                    പ്രഖ്യാപിച്ചത്: {{ $standAnn->announced_at ? $standAnn->announced_at->format('h:i A') : 'ഇപ്പോൾ' }}
-                                </span>
-                            </div>
-                            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-                                സ്റ്റേജിൽ അനൗൺസ് ചെയ്ത ടീം പോയിന്റ് നില
-                            </h2>
-                            <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
-                                സ്റ്റേജ് അനൗൺസർ മൈക്കിലൂടെ പ്രഖ്യാപിച്ച ഔദ്യോഗിക ടീം പോയിന്റ് നിലയാണിത്. ഇത് പബ്ലിക് വെബ്സൈറ്റിൽ അപ്‌ഡേറ്റ് ചെയ്യാൻ "Publish to Website" ക്ലിക്ക് ചെയ്യുക.
-                            </p>
+    <!-- Team Standings Section: Only Latest Official Announced Milestone Standing -->
+    @php
+        $latestStandAnn = (isset($incomingStandings) && $incomingStandings->isNotEmpty()) ? $incomingStandings->first() : null;
+    @endphp
+    @if($latestStandAnn)
+        <!-- Priority: Latest Announced Team Standings from Stage Announcer Desk -->
+        <div>
+            <div class="bg-gradient-to-r from-red-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border-2 border-red-500 shadow-xl ring-4 ring-red-500/20 font-sora">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/10 pb-5">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-red-600 text-white animate-pulse flex items-center gap-1.5 shadow-2xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                                <span>STAGE ANNOUNCED • PENDING WEBSITE PUBLISH</span>
+                            </span>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400 text-slate-950">
+                                {{ $latestStandAnn->title }}
+                            </span>
+                            <span class="text-xs font-mono text-slate-300">
+                                പ്രഖ്യാപിച്ചത്: {{ $latestStandAnn->announced_at ? $latestStandAnn->announced_at->format('h:i A') : 'ഇപ്പോൾ' }}
+                            </span>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                            @if(!empty($standingsPosterUrl))
-                                <a href="{{ route('media.standings.download-poster') }}" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
-                                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    <span>Download Poster</span>
-                                </a>
-                            @endif
-
-                            <a href="{{ route('media.print.milestone-standings', ['count' => $standAnn->results_count]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
-                                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                <span>Print Standings PDF</span>
-                            </a>
-
-                            <form method="POST" action="{{ route('media.standings.publish', $standAnn->id) }}" class="inline">
-                                @csrf
-                                <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 font-mono cursor-pointer">
-                                    <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    <span>Publish to Website</span>
-                                </button>
-                            </form>
-                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+                            സ്റ്റേജിൽ അനൗൺസ് ചെയ്ത ടീം പോയിന്റ് നില
+                        </h2>
+                        <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
+                            സ്റ്റേജ് അനൗൺസർ മൈക്കിലൂടെ പ്രഖ്യാപിച്ച ഏറ്റവും പുതിയ ഔദ്യോഗിക ടീം പോയിന്റ് നിലയാണിത്. ഇത് പബ്ലിക് വെബ്സൈറ്റിൽ അപ്‌ഡേറ്റ് ചെയ്യാൻ "Publish to Website" ക്ലിക്ക് ചെയ്യുക.
+                        </p>
                     </div>
 
-                    <!-- Team Standings Ranks Grid -->
-                    <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        @foreach($standAnn->standings_data as $grpItem)
-                            <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
-                                <div class="flex items-center justify-between text-xs font-mono mb-2">
-                                    <span class="px-2 py-0.5 rounded font-black {{ $grpItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
-                                        #{{ $grpItem['rank'] }}
-                                    </span>
-                                    <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $grpItem['code'] }}</span>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white text-sm truncate">{{ $grpItem['name'] }}</div>
-                                    <div class="mt-1 flex items-baseline gap-1">
-                                        <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($grpItem['points']) }}</span>
-                                        <span class="text-[10px] text-slate-400 uppercase font-mono font-bold">pts</span>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                        @if(!empty($standingsPosterUrl))
+                            <a href="{{ route('media.standings.download-poster') }}" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
+                                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>Download Poster</span>
+                            </a>
+                        @endif
+
+                        <a href="{{ route('media.print.milestone-standings', ['count' => $latestStandAnn->results_count]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
+                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            <span>Print Standings PDF</span>
+                        </a>
+
+                        <form method="POST" action="{{ route('media.standings.publish', $latestStandAnn->id) }}" class="inline">
+                            @csrf
+                            <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 font-mono cursor-pointer">
+                                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>Publish to Website</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
-            @endforeach
+
+                <!-- Team Standings Ranks Grid (Gold, Silver, Bronze, Neutral) -->
+                <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    @foreach($latestStandAnn->standings_data as $grpItem)
+                        @php
+                            $gRank = (int) $grpItem['rank'];
+                            $rankBadge = match($gRank) {
+                                1 => 'bg-amber-400 text-slate-950 ring-1 ring-amber-300 shadow-xs',
+                                2 => 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-950 ring-1 ring-slate-300 shadow-xs',
+                                3 => 'bg-gradient-to-br from-[#d97706] to-[#92400e] text-white ring-1 ring-amber-600/30 shadow-xs',
+                                default => 'bg-white/20 text-white',
+                            };
+                            $pointsColor = match($gRank) {
+                                1 => 'text-amber-300',
+                                2 => 'text-slate-200',
+                                3 => 'text-amber-400',
+                                default => 'text-white',
+                            };
+                        @endphp
+                        <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
+                            <div class="flex items-center justify-between text-xs font-mono mb-2">
+                                <span class="px-2 py-0.5 rounded font-black {{ $rankBadge }}">
+                                    #{{ $grpItem['rank'] }}
+                                </span>
+                                <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $grpItem['code'] }}</span>
+                            </div>
+                            <div>
+                                <div class="font-bold text-white text-sm truncate">{{ $grpItem['name'] }}</div>
+                                <div class="mt-1 flex items-baseline gap-1">
+                                    <span class="text-2xl font-black {{ $pointsColor }} font-mono">{{ number_format($grpItem['points']) }}</span>
+                                    <span class="text-[10px] text-slate-400 uppercase font-mono font-bold">pts</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
     @else
         <!-- Current Official Public Standings Banner -->
@@ -263,20 +279,35 @@
                 </div>
             </div>
 
-            <!-- Official Team Standings Grid -->
+            <!-- Official Team Standings Grid (Gold, Silver, Bronze, Neutral) -->
             <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 @foreach($publicGroups as $idx => $pGrp)
+                    @php
+                        $pRank = (int) ($pGrp->public_rank_cache ?? ($idx + 1));
+                        $pBadge = match($pRank) {
+                            1 => 'bg-amber-400 text-slate-950 ring-1 ring-amber-300 shadow-xs',
+                            2 => 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-950 ring-1 ring-slate-300 shadow-xs',
+                            3 => 'bg-gradient-to-br from-[#d97706] to-[#92400e] text-white ring-1 ring-amber-600/30 shadow-xs',
+                            default => 'bg-white/20 text-white',
+                        };
+                        $pPointsColor = match($pRank) {
+                            1 => 'text-amber-300',
+                            2 => 'text-slate-200',
+                            3 => 'text-amber-400',
+                            default => 'text-white',
+                        };
+                    @endphp
                     <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
                         <div class="flex items-center justify-between text-xs font-mono mb-2">
-                            <span class="px-2 py-0.5 rounded font-black {{ ($pGrp->public_rank_cache ?? ($idx + 1)) === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
-                                #{{ $pGrp->public_rank_cache ?? ($idx + 1) }}
+                            <span class="px-2 py-0.5 rounded font-black {{ $pBadge }}">
+                                #{{ $pRank }}
                             </span>
                             <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $pGrp->code }}</span>
                         </div>
                         <div>
                             <div class="font-bold text-white text-sm truncate">{{ $pGrp->name }}</div>
                             <div class="mt-1 flex items-baseline gap-1">
-                                <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($pGrp->public_points_cache) }}</span>
+                                <span class="text-2xl font-black {{ $pPointsColor }} font-mono">{{ number_format($pGrp->public_points_cache) }}</span>
                                 <span class="text-[10px] text-slate-400 uppercase font-mono font-bold">pts</span>
                             </div>
                         </div>

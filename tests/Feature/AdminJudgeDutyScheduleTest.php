@@ -147,18 +147,15 @@ class AdminJudgeDutyScheduleTest extends TestCase
         $response->assertOk();
         // Official QUAF PDF Header must be present
         $response->assertSee('OFFICIAL JUDGE DUTY ALLOCATION');
-        $response->assertSee('QUAF 2026 Markaz Arts Festival');
+        $response->assertSee('Markaz Cultural Festival');
         $response->assertSee('print-pdf-header.svg');
 
         // Page break class for 1 Judge per page on the container div
         $response->assertSee('judge-sheet judge-sheet-break');
 
-        // Verify judge cards and sign off signatures
+        // Verify judge cards
         $response->assertSee('Rafi Ahsani');
         $response->assertSee('Shahabas Master');
-        $response->assertSee('Program Committee Convener');
-        $response->assertSee('Festival General Secretary');
-        $response->assertSee('Judge Acceptance Signature');
 
         $judges = $response->viewData('judges');
         $this->assertCount(2, $judges);
@@ -197,5 +194,19 @@ class AdminJudgeDutyScheduleTest extends TestCase
         $this->assertCount(1, $judges);
         $this->assertSame($this->judge1->id, $judges->first()->id);
         $this->assertSame($this->judge1->id, $response->viewData('singleJudge')->id);
+    }
+
+    public function test_admin_can_view_judges_passwords_pdf(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.judges.passwords.print'));
+
+        $response->assertOk();
+        $response->assertSee('JUDGES OFFICIAL PASSWORDS & SCHEDULE ACCESS ROSTER');
+        $response->assertSee('Rafi Ahsani');
+        $response->assertSee('7482');
+        $response->assertSee('Shahabas Master');
+        $response->assertSee('8591');
+        $response->assertSee('quaf.ihyaussunna.in/judge/login');
+        $response->assertSee('quaf.ihyaussunna.in/custom-judge/login');
     }
 }

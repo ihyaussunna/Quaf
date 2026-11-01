@@ -63,9 +63,9 @@
                         $showWinnerBadge = $isWinner && (!empty($isFullResultsPublished) && $isFullResultsPublished === true);
                     @endphp
 
-                    @if($isWinner)
-                        <!-- Rank 1 Row (Light Theme) -->
-                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-yellow-50/40 to-white border border-amber-300/80 flex items-center justify-between gap-4 shadow-xs transition-all">
+                    @if($rank === 1)
+                        <!-- Rank 1 Row (Gold Theme) -->
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/90 via-yellow-50/40 to-white border border-amber-300/90 flex items-center justify-between gap-4 shadow-xs transition-all ring-1 ring-amber-400/20">
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
                                 @if($showWinnerBadge)
                                     <!-- Trophy Box when Full Results Published -->
@@ -106,8 +106,56 @@
                                 </span>
                             </div>
                         </div>
+                    @elseif($rank === 2)
+                        <!-- Rank 2 Row (Silver Theme) -->
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-slate-100/90 via-slate-50/60 to-white border border-slate-300 flex items-center justify-between gap-4 shadow-2xs transition-all ring-1 ring-slate-300/40">
+                            <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                                <!-- Rank 2 Silver Number Box -->
+                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400 text-slate-900 font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0 border border-slate-300">
+                                    2
+                                </div>
+
+                                <h2 class="font-sora font-black text-slate-900 text-base sm:text-xl lg:text-2xl tracking-tight truncate">
+                                    {{ $group->name }}
+                                </h2>
+                            </div>
+
+                            <!-- Points -->
+                            <div class="flex items-baseline gap-1.5 shrink-0 text-right">
+                                <span class="font-sora font-black text-2xl sm:text-3xl lg:text-4xl text-slate-700 leading-none">
+                                    {{ number_format($group->public_points_cache ?? 0) }}
+                                </span>
+                                <span class="text-xs sm:text-sm font-mono text-slate-400 uppercase tracking-widest font-semibold">
+                                    PTS
+                                </span>
+                            </div>
+                        </div>
+                    @elseif($rank === 3)
+                        <!-- Rank 3 Row (Bronze Theme) -->
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white border border-amber-600/35 flex items-center justify-between gap-4 shadow-2xs transition-all ring-1 ring-amber-600/20">
+                            <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                                <!-- Rank 3 Bronze Number Box -->
+                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#d97706] to-[#92400e] text-white font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0 border border-amber-600/30">
+                                    3
+                                </div>
+
+                                <h2 class="font-sora font-black text-slate-900 text-base sm:text-xl lg:text-2xl tracking-tight truncate">
+                                    {{ $group->name }}
+                                </h2>
+                            </div>
+
+                            <!-- Points -->
+                            <div class="flex items-baseline gap-1.5 shrink-0 text-right">
+                                <span class="font-sora font-black text-2xl sm:text-3xl lg:text-4xl text-amber-800 leading-none">
+                                    {{ number_format($group->public_points_cache ?? 0) }}
+                                </span>
+                                <span class="text-xs sm:text-sm font-mono text-amber-900/60 uppercase tracking-widest font-semibold">
+                                    PTS
+                                </span>
+                            </div>
+                        </div>
                     @else
-                        <!-- Subsequent Rows (Rank 2, 3, 4, 5...) in Light Theme -->
+                        <!-- Subsequent Rows (Rank 4, 5...) in Neutral Theme -->
                         <div class="rounded-2xl p-4 sm:p-5 bg-slate-50/80 border border-slate-200/80 hover:bg-slate-100/70 flex items-center justify-between gap-4 transition-colors">
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
                                 <!-- Rank Number Box -->

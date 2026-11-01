@@ -138,6 +138,11 @@
                    class="px-2.5 py-1 rounded-lg font-bold transition {{ ($mode ?? '') === 'continuous' ? 'bg-[#be1e2d] text-white shadow-xs' : 'text-slate-300 hover:text-white' }}">
                     Continuous Sheet
                 </a>
+                <a href="{{ route('admin.judges.passwords.print') }}"
+                   class="px-2.5 py-1 rounded-lg font-bold text-amber-300 hover:text-white transition flex items-center gap-1">
+                    <span>Passwords PDF</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
             </div>
 
             <!-- Judge Selector -->
@@ -190,12 +195,20 @@
                             <h2 class="text-xl sm:text-2xl font-black text-slate-900 font-sora tracking-tight leading-tight">
                                 {{ $judge->name }}
                             </h2>
-                        </div>
-                        <div class="text-right font-mono text-xs">
-                            @if($judge->access_code)
-                                <div class="text-slate-600">Access PIN: <span class="font-bold text-[#be1e2d] text-base">{{ $judge->access_code }}</span></div>
+                            @if($judge->user?->email)
+                                <div class="text-[11px] font-mono text-slate-500 mt-0.5">
+                                    Login ID: <strong class="text-slate-800">{{ $judge->user->email }}</strong>
+                                </div>
                             @endif
-                            <div class="text-slate-500 text-[11px]">Assigned: <span class="font-bold text-slate-900">{{ $dutyPrograms->count() }} Competitions</span></div>
+                        </div>
+                        <div class="text-right font-mono text-xs space-y-0.5">
+                            @if($judge->access_code)
+                                <div class="text-slate-700">Quick PIN: <span class="font-bold text-[#be1e2d] text-base px-1.5 py-0.2 bg-red-50 rounded border border-red-200">{{ $judge->access_code }}</span></div>
+                            @endif
+                            @if($judge->user?->plain_password)
+                                <div class="text-slate-600 text-[11px]">Password: <strong class="text-slate-900">{{ $judge->user->plain_password }}</strong></div>
+                            @endif
+                            <div class="text-slate-500 text-[10px]">Assigned: <strong class="text-slate-900">{{ $dutyPrograms->count() }} Competitions</strong></div>
                         </div>
                     </div>
 

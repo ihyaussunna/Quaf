@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FestivalSetting;
 use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
@@ -443,5 +444,37 @@ class JudgeController extends Controller
             'mode',
             'includeUnassigned'
         ));
+    }
+
+    /**
+     * Dedicated printable PDF report for Judges credentials, PINs, passwords, and assigned duty schedule.
+     */
+    public function printPasswords(Request $request): View
+    {
+        Judge::ensureCredentials();
+        Judge::ensureCustomJudges();
+
+        $judges = Judge::with([
+            'user',
+            'programs' => function ($pq) {
+                $pq->with(['category', 'stage', 'schedule.stage', 'zone'])
+                    ->withCount('entries');
+            },
+        ])->withCount('programs')
+            ->orderBy('name')
+            ->get();
+
+        // Sort each judge's programs chronologically
+        $judges->each(function ($judge) {
+            $judge->sorted_programs = $judge->programs->sortBy(function ($prog) {
+                $time = $prog->scheduled_time ?? $prog->schedule?->start_time;
+
+                return $time ? $time->timestamp : PHP_INT_MAX;
+            })->values();
+        });
+
+        $customPin = FestivalSetting::get('custom_judge_pin', '9999');
+
+        return view('admin.judges.passwords-print', compact('judges', 'customPin'));
     }
 }

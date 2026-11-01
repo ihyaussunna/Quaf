@@ -618,6 +618,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::post('judges/sync-official', [AdminJudgeController::class, 'syncOfficialJudges'])->name('judges.sync-official');
     Route::get('judges/duty', [AdminJudgeController::class, 'dutySchedules'])->name('judges.duty');
     Route::get('judges/duty/print', [AdminJudgeController::class, 'printDuty'])->name('judges.duty.print');
+    Route::get('judges/passwords/print', [AdminJudgeController::class, 'printPasswords'])->name('judges.passwords.print');
     Route::resource('judges', AdminJudgeController::class);
     Route::post('judges/{judge}/regenerate-pin', [AdminJudgeController::class, 'regeneratePin'])->name('judges.regenerate-pin');
     Route::post('judges/{judge}/update-password', [AdminJudgeController::class, 'updatePassword'])->name('judges.update-password');
