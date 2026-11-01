@@ -454,7 +454,7 @@ class CoinRewardService
                         if (isset($awardedStudentsInProgram[$student->id])) {
                             $prev = $awardedStudentsInProgram[$student->id];
                             if ($coins > $prev['coins']) {
-                                // Delete previous lower transaction
+                                // Delete previous lower transaction by ID
                                 CoinTransaction::where('id', $prev['tx_id'])->delete();
                             } else {
                                 // Already has equal or higher reward for this program; skip duplicate
@@ -462,33 +462,42 @@ class CoinRewardService
                             }
                         }
 
-                        // Remove any stale reversal for this result & student so net matches exact new coins
-                        CoinTransaction::where('result_id', $result->id)
-                            ->where('student_id', $student->id)
-                            ->where('transaction_type', 'reversal')
-                            ->delete();
-
                         $existing = $existingCredits->get($student->id);
 
+                        // If student already has exact matching active credit, avoid any database delete or write locks entirely!
+                        if ($existing && (int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
+                            $awardedStudentsInProgram[$student->id] = [
+                                'tx_id' => $existing->id,
+                                'coins' => $coins,
+                            ];
+                            $affectedStudentIds[] = $student->id;
+
+                            continue;
+                        }
+
+                        // Remove any stale reversal for this result & student so net matches exact new coins (delete by primary key only)
+                        $staleReversalIds = CoinTransaction::where('result_id', $result->id)
+                            ->where('student_id', $student->id)
+                            ->where('transaction_type', 'reversal')
+                            ->pluck('id');
+
+                        if ($staleReversalIds->isNotEmpty()) {
+                            CoinTransaction::whereIn('id', $staleReversalIds)->delete();
+                        }
+
                         if ($existing) {
-                            // Clean up any extra duplicate credit transactions
-                            CoinTransaction::where('student_id', $student->id)
+                            // Clean up any extra duplicate credit transactions (delete by primary key only)
+                            $dupCreditIds = CoinTransaction::where('student_id', $student->id)
                                 ->where('transaction_type', 'credit')
                                 ->where('id', '!=', $existing->id)
                                 ->where(function ($q) use ($result, $program) {
                                     $q->where('result_id', $result->id)
                                         ->orWhere('program_id', $program->id);
                                 })
-                                ->delete();
+                                ->pluck('id');
 
-                            if ((int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
-                                $awardedStudentsInProgram[$student->id] = [
-                                    'tx_id' => $existing->id,
-                                    'coins' => $coins,
-                                ];
-                                $affectedStudentIds[] = $student->id;
-
-                                continue;
+                            if ($dupCreditIds->isNotEmpty()) {
+                                CoinTransaction::whereIn('id', $dupCreditIds)->delete();
                             }
                         }
 
@@ -553,15 +562,19 @@ class CoinRewardService
                             ]
                         );
 
-                        // Ensure no extra duplicate was left for this student and program
-                        CoinTransaction::where('student_id', $student->id)
+                        // Ensure no extra duplicate was left for this student and program (delete by primary key only)
+                        $extraDupIds = CoinTransaction::where('student_id', $student->id)
                             ->where('transaction_type', 'credit')
                             ->where('id', '!=', $tx->id)
                             ->where(function ($q) use ($result, $program) {
                                 $q->where('result_id', $result->id)
                                     ->orWhere('program_id', $program->id);
                             })
-                            ->delete();
+                            ->pluck('id');
+
+                        if ($extraDupIds->isNotEmpty()) {
+                            CoinTransaction::whereIn('id', $extraDupIds)->delete();
+                        }
 
                         $awardedStudentsInProgram[$student->id] = [
                             'tx_id' => $tx->id,
@@ -611,7 +624,7 @@ class CoinRewardService
                 'total_coins' => $totalCoins,
                 'skipped' => false,
             ];
-        });
+        }, 5);
     }
 
     /**
@@ -672,7 +685,7 @@ class CoinRewardService
             }
 
             return $reversedCount;
-        });
+        }, 5);
     }
 
     /**
@@ -754,13 +767,16 @@ class CoinRewardService
     {
         CoinTransaction::ensureSchema();
 
-        // 0. Auto-cleanup any duplicate coin transactions for this student
-        self::cleanupDuplicateTransactionsForStudent($student);
+        $flag = $onlyMediaPublished ? '_coins_ensured_media_published' : '_coins_ensured_all';
+        if (! empty($student->{$flag})) {
+            return;
+        }
+        $student->{$flag} = true;
 
         // 1. Direct entries (individual and leader entries)
         $directEntries = ProgramEntry::where('student_id', $student->id)->get(['id', 'program_id', 'group_id']);
         $directEntryIds = $directEntries->pluck('id')->all();
-        $programIds = $directEntries->pluck('program_id')->all();
+        $directProgIds = $directEntries->pluck('program_id')->all();
 
         // 2. Group participations from pivot table
         $participationEntryIds = DB::table('program_entry_participants')
@@ -770,26 +786,32 @@ class CoinRewardService
 
         if (! empty($participationEntryIds)) {
             $partProgIds = ProgramEntry::whereIn('id', $participationEntryIds)->pluck('program_id')->all();
-            $programIds = array_merge($programIds, $partProgIds);
+            $directProgIds = array_merge($directProgIds, $partProgIds);
         }
 
-        // 3. Group programs for this student's group if enrolled
+        // 3. Group entries for this student's group if enrolled
+        $groupEntryIds = [];
         if ($student->group_id) {
-            $groupProgIds = ProgramEntry::where('group_id', $student->group_id)
+            $groupEntryIds = ProgramEntry::where('group_id', $student->group_id)
                 ->whereHas('program', fn ($q) => $q->where('type', 'group'))
-                ->pluck('program_id')
+                ->pluck('id')
                 ->all();
-            $programIds = array_merge($programIds, $groupProgIds);
         }
 
-        $allProgramIds = array_values(array_unique(array_filter($programIds)));
-        $allEntryIds = array_values(array_unique(array_merge($directEntryIds, $participationEntryIds)));
+        $allRelevantEntryIds = array_values(array_unique(array_filter(array_merge($directEntryIds, $participationEntryIds, $groupEntryIds))));
+        $allDirectProgIds = array_values(array_unique(array_filter($directProgIds)));
 
-        if (empty($allProgramIds) && empty($allEntryIds)) {
+        // 4. Any result where student has an existing transaction in coin_transactions (covers unplaced clawbacks)
+        $existingResultIds = CoinTransaction::where('student_id', $student->id)
+            ->whereNotNull('result_id')
+            ->pluck('result_id')
+            ->all();
+
+        if (empty($allRelevantEntryIds) && empty($allDirectProgIds) && empty($existingResultIds)) {
             return;
         }
 
-        // Find declared results for these programs, or where any of the student's entries are placed
+        // Find declared results where this student's entry or their group's entry is placed on podium, OR where student has existing transaction
         $resultsQuery = Result::query();
         if ($onlyMediaPublished) {
             $resultsQuery->where('status', 'published')->where('is_media_published', true);
@@ -797,14 +819,17 @@ class CoinRewardService
             $resultsQuery->whereIn('status', self::DECLARED_STATUSES);
         }
 
-        $resultsQuery->where(function ($q) use ($allProgramIds, $allEntryIds) {
-            if (! empty($allProgramIds)) {
-                $q->whereIn('program_id', $allProgramIds);
+        $resultsQuery->where(function ($q) use ($allRelevantEntryIds, $allDirectProgIds, $existingResultIds) {
+            if (! empty($allRelevantEntryIds)) {
+                $q->whereIn('first_entry_id', $allRelevantEntryIds)
+                    ->orWhereIn('second_entry_id', $allRelevantEntryIds)
+                    ->orWhereIn('third_entry_id', $allRelevantEntryIds);
             }
-            if (! empty($allEntryIds)) {
-                $q->orWhereIn('first_entry_id', $allEntryIds)
-                    ->orWhereIn('second_entry_id', $allEntryIds)
-                    ->orWhereIn('third_entry_id', $allEntryIds);
+            if (! empty($allDirectProgIds)) {
+                $q->orWhereIn('program_id', $allDirectProgIds);
+            }
+            if (! empty($existingResultIds)) {
+                $q->orWhereIn('id', $existingResultIds);
             }
         });
 
@@ -818,10 +843,10 @@ class CoinRewardService
             }
         }
 
-        // Re-run cleanup to guarantee no duplicate programs remain
-        self::cleanupDuplicateTransactionsForStudent($student);
-
-        $this->syncStudentCoinsCache([$student->id]);
+        if ($updated) {
+            self::cleanupDuplicateTransactionsForStudent($student);
+            $this->syncStudentCoinsCache([$student->id]);
+        }
     }
 
     /**
@@ -848,10 +873,10 @@ class CoinRewardService
                 // Keep the best transaction (highest coins, earliest created)
                 $sorted = $txs->sortByDesc('coins');
                 $keep = $sorted->first();
-                $toDelete = $sorted->slice(1);
+                $toDeleteIds = $sorted->slice(1)->pluck('id');
 
-                foreach ($toDelete as $delTx) {
-                    $delTx->delete();
+                if ($toDeleteIds->isNotEmpty()) {
+                    CoinTransaction::whereIn('id', $toDeleteIds)->delete();
                 }
             }
         }
@@ -1382,7 +1407,7 @@ class CoinRewardService
         CoinTransaction::ensureSchema();
 
         // Ensure all awarded competition results (individual and group) are distributed for this student
-        $this->ensureCoinsDistributedForStudent($student);
+        $this->ensureCoinsDistributedForStudent($student, $onlyMediaPublished);
 
         $achievements = [
             'grade_counts' => [

@@ -11,6 +11,7 @@ use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -99,7 +100,11 @@ class VerificationController extends Controller
 
         if ($student) {
             // Live coins auto-distribution and synchronization immediately upon student verification (strictly media published for public scan)
-            $coinRewardService->ensureCoinsDistributedForStudent($student, true);
+            try {
+                $coinRewardService->ensureCoinsDistributedForStudent($student, true);
+            } catch (\Throwable $e) {
+                Log::warning("Verification coin sync notice for student {$student->id}: ".$e->getMessage());
+            }
             $student->refresh();
 
             // Scanner page is public: only show media-published coins and achievements
