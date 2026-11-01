@@ -10,6 +10,7 @@ use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\ResultTemplate;
+use App\Models\StandingAnnouncement;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\VideoItem;
@@ -785,6 +786,10 @@ class MediaPanelAndAccessControlTest extends TestCase
             'updated_at' => now()->addMinutes(10),
         ]);
 
+        // Announcer announced team standings on stage
+        $standingAnnouncement = StandingAnnouncement::createFromCurrentStandings('Standings after 2 Results', $this->adminUser->id, 2);
+        $standingAnnouncement->update(['status' => 'announced', 'announced_at' => now()]);
+
         // Visit Media Results
         $response = $this->actingAs($this->mediaUser)->get(route('media.results.index', ['tab' => 'all']));
 
@@ -801,10 +806,10 @@ class MediaPanelAndAccessControlTest extends TestCase
         $this->assertTrue($posRes2 !== false && $posRes1 !== false);
         $this->assertLessThan($posRes1, $posRes2, 'Result #02 must appear before Result #01 based on announced order');
 
-        // 3. Check Dedicated Total Announced Competitions Standings Section
-        $response->assertSee('അനൗൺസർക്ക് അയച്ച മുഴുവൻ മത്സരങ്ങളുടെയും ടീം പോയിന്റ് നില');
-        $response->assertSee('After 02 Results');
-        $response->assertSee(route('media.print.milestone-standings', ['count' => 2]));
+        // 3. Check Dedicated Official Announced Standings Section from stage announcer
+        $response->assertSee('സ്റ്റേജിൽ അനൗൺസ് ചെയ്ത ടീം പോയിന്റ് നില');
+        $response->assertSee('Standings after 2 Results');
+        $response->assertSee(route('media.standings.publish', $standingAnnouncement->id));
 
         // 4. Test Media user can access printable milestone standings
         $printResponse = $this->actingAs($this->mediaUser)->get(route('media.print.milestone-standings', ['count' => 2]));

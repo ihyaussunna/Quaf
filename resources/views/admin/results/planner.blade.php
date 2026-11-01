@@ -201,6 +201,18 @@
                         </button>
                     </form>
 
+                    <!-- Action 1.5: Send Team Standings to Stage Announcer -->
+                    <form method="POST" action="{{ route('admin.results.send-standings-announcer') }}">
+                        @csrf
+                        <input type="hidden" name="custom_label" :value="suggestedMilestoneLabel">
+                        <input type="hidden" name="results_count" :value="totalStandingsCount">
+                        <button type="submit"
+                                class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-md font-mono flex items-center justify-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                            <span>ടീം സ്റ്റാൻഡിങ്സ് അനൗൺസർക്ക് അയക്കുക (<span x-text="suggestedMilestoneLabel"></span>)</span>
+                        </button>
+                    </form>
+
                     <!-- Action 2: Batch Publish to Website -->
                     <form method="POST" action="{{ route('admin.results.batch-publish') }}" class="space-y-2">
                         @csrf

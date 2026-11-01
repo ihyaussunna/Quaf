@@ -644,6 +644,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
         return app(PrintReportController::class)->results($request);
     })->name('results.evaluated-pdf');
     Route::get('results/progression-matrix', [AdminResultController::class, 'progressionMatrix'])->name('results.progression-matrix');
+    Route::post('results/send-standings-announcer', [AdminPointController::class, 'sendStandingsToAnnouncer'])->name('results.send-standings-announcer');
     Route::resource('results', AdminResultController::class);
 
     // Points & Rankings

@@ -83,6 +83,26 @@ class AnnouncerController extends Controller
         try {
             StandingAnnouncement::ensureSchema();
             if (Schema::hasTable('standing_announcements')) {
+                // Auto-sync any pending ready announcement count if outdated compared to declared count
+                $declaredCount = Result::whereIn('status', PointCalculationService::DECLARED_STATUSES)->count();
+                if ($declaredCount > 0) {
+                    foreach (StandingAnnouncement::where('status', 'ready')->get() as $pStand) {
+                        if ($pStand->results_count < $declaredCount && preg_match('~after\s+(\d+)\s+Results~i', $pStand->title, $m)) {
+                            $oldCount = (int) $m[1];
+                            if ($oldCount < $declaredCount) {
+                                $newTitle = "Standings after {$declaredCount} Results";
+                                $newIntro = "ശ്രദ്ധിക്കുക, ക്വാഫ് 2026 കലാമേളയുടെ {$declaredCount} മത്സര ഫലങ്ങൾ പൂർത്തിയായപ്പോൾ ടീമുകളുടെ നിലവിലെ പോയിന്റ് നില പ്രഖ്യാപിക്കുന്നു: ";
+                                $updatedScript = preg_replace('~ശ്രദ്ധിക്കുക,.*?:~u', $newIntro, (string) $pStand->script_text) ?: $pStand->script_text;
+                                $pStand->update([
+                                    'results_count' => $declaredCount,
+                                    'title' => $newTitle,
+                                    'script_text' => $updatedScript,
+                                ]);
+                            }
+                        }
+                    }
+                }
+
                 $pendingStandings = StandingAnnouncement::where('status', 'ready')->latest()->get();
                 $announcedStandings = StandingAnnouncement::whereIn('status', ['announced', 'published'])->latest()->take(6)->get();
             }

@@ -113,13 +113,22 @@ class StandingAnnouncement extends Model
     /**
      * Create a new official Standing Announcement snapshot from current live points.
      */
-    public static function createFromCurrentStandings(?string $customLabel = null, ?int $userId = null): self
+    public static function createFromCurrentStandings(?string $customLabel = null, ?int $userId = null, ?int $forceCount = null): self
     {
         // 1. Ensure latest live points are calculated
         app(PointCalculationService::class)->recalculateAllPoints();
 
-        $resultsCount = Result::where('status', 'published')->count();
+        $declaredCount = Result::whereIn('status', PointCalculationService::DECLARED_STATUSES)->count();
+        $resultsCount = $forceCount ?? ($declaredCount > 0 ? $declaredCount : Result::where('status', 'published')->count());
+
+        if ($customLabel && preg_match('~after\s+(\d+)~i', $customLabel, $matches)) {
+            $resultsCount = (int) $matches[1];
+        }
+
         $title = $customLabel ?: ($resultsCount > 0 ? "Standings after {$resultsCount} Results" : 'Initial Standings');
+
+        // Clean up previous unannounced ready announcements so announcer console always shows the latest clean snapshot
+        self::where('status', 'ready')->delete();
 
         $groups = Group::orderByDesc('points_cache')->orderBy('name')->get();
 

@@ -123,7 +123,8 @@ class PointController extends Controller
     public function sendStandingsToAnnouncer(Request $request): RedirectResponse
     {
         $customLabel = $request->input('custom_label', $request->input('label'));
-        $announcement = StandingAnnouncement::createFromCurrentStandings($customLabel, auth()->id());
+        $forceCount = $request->has('results_count') ? (int) $request->input('results_count') : null;
+        $announcement = StandingAnnouncement::createFromCurrentStandings($customLabel, auth()->id(), $forceCount);
 
         AuditLogger::log('admin_send_standings_to_announcer', $announcement, [], $announcement->toArray());
 

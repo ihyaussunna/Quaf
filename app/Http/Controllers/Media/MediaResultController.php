@@ -115,6 +115,8 @@ class MediaResultController extends Controller
             $publishedStandingsHistory = collect();
         }
 
+        $publicGroups = Group::orderByDesc('public_points_cache')->orderBy('name')->get();
+
         return view('media.results.index', compact(
             'results',
             'stats',
@@ -126,7 +128,8 @@ class MediaResultController extends Controller
             'standingsInfo',
             'standingsPosterUrl',
             'incomingStandings',
-            'publishedStandingsHistory'
+            'publishedStandingsHistory',
+            'publicGroups'
         ));
     }
 

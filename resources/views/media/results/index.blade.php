@@ -141,137 +141,150 @@
     </div>
 
 
-    <!-- Dedicated Section: Total Announced Competitions Live Team Standings -->
-    <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border-2 border-indigo-500/40 shadow-xl ring-4 ring-indigo-500/10 font-sora" x-data="{ showFullTable: false }">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/10 pb-5">
-            <div>
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-indigo-600 text-white flex items-center gap-1.5 shadow-2xs">
-                        <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        <span>Announcer Sync Leaderboard</span>
-                    </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400 text-slate-950">
-                        {{ $totalAnnouncedStandings['milestone_label'] }}
-                    </span>
-                    <span class="text-xs font-mono text-slate-300">
-                        ആകെ അനൗൺസ് ചെയ്ത മത്സരങ്ങൾ: <strong class="text-white font-bold">{{ $totalAnnouncedCount }}</strong>
-                    </span>
-                </div>
-                <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-                    അനൗൺസർക്ക് അയച്ച മുഴുവൻ മത്സരങ്ങളുടെയും ടീം പോയിന്റ് നില
-                </h2>
-                <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
-                    അനൗൺസർ ഡെസ്കിലേക്ക് കൈമാറിയ ആകെ {{ $totalAnnouncedCount }} മത്സരങ്ങളുടെ യഥാർത്ഥ പോയിന്റുകൾ അടിസ്ഥാനമാക്കിയുള്ള ലൈവ് ടീം നിലയാണിത്.
-                </p>
-            </div>
+    <!-- Team Standings Section: Only Official Announced Milestone Standings -->
+    @if(isset($incomingStandings) && $incomingStandings->isNotEmpty())
+        <!-- Priority: Announced Team Standings from Stage Announcer Desk -->
+        <div class="space-y-4">
+            @foreach($incomingStandings as $standAnn)
+                <div class="bg-gradient-to-r from-red-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border-2 border-red-500 shadow-xl ring-4 ring-red-500/20 font-sora">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/10 pb-5">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-red-600 text-white animate-pulse flex items-center gap-1.5 shadow-2xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                                    <span>STAGE ANNOUNCED • PENDING WEBSITE PUBLISH</span>
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-400 text-slate-950">
+                                    {{ $standAnn->title }}
+                                </span>
+                                <span class="text-xs font-mono text-slate-300">
+                                    പ്രഖ്യാപിച്ചത്: {{ $standAnn->announced_at ? $standAnn->announced_at->format('h:i A') : 'ഇപ്പോൾ' }}
+                                </span>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+                                സ്റ്റേജിൽ അനൗൺസ് ചെയ്ത ടീം പോയിന്റ് നില
+                            </h2>
+                            <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
+                                സ്റ്റേജ് അനൗൺസർ മൈക്കിലൂടെ പ്രഖ്യാപിച്ച ഔദ്യോഗിക ടീം പോയിന്റ് നിലയാണിത്. ഇത് പബ്ലിക് വെബ്സൈറ്റിൽ അപ്‌ഡേറ്റ് ചെയ്യാൻ "Publish to Website" ക്ലിക്ക് ചെയ്യുക.
+                            </p>
+                        </div>
 
-            <!-- Action Buttons for Announced Standings -->
-            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                @if(!empty($standingsPosterUrl))
-                    <a href="{{ route('media.standings.download-poster') }}" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
-                        <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Download Poster ⬇</span>
-                    </a>
-                @endif
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                            @if(!empty($standingsPosterUrl))
+                                <a href="{{ route('media.standings.download-poster') }}" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
+                                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>Download Poster</span>
+                                </a>
+                            @endif
 
-                <a href="{{ route('media.print.milestone-standings', ['count' => $totalAnnouncedCount]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
-                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                    <span>Print Standings PDF ↗</span>
-                </a>
+                            <a href="{{ route('media.print.milestone-standings', ['count' => $standAnn->results_count]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
+                                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                <span>Print Standings PDF</span>
+                            </a>
 
-                <form method="POST" action="{{ route('media.results.publish-standings') }}" class="inline">
-                    @csrf
-                    <input type="hidden" name="results_count" value="{{ $totalAnnouncedCount }}">
-                    <input type="hidden" name="custom_label" value="{{ $totalAnnouncedStandings['milestone_label'] }}">
-                    <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 font-mono cursor-pointer">
-                        <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Publish {{ $totalAnnouncedStandings['milestone_label'] }}</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Team Standings Live Podium Strip -->
-        <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            @foreach($totalAnnouncedStandings['standings'] as $tItem)
-                <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
-                    <div class="flex items-center justify-between text-xs font-mono mb-2">
-                        <span class="px-2 py-0.5 rounded font-black {{ $tItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : ($tItem['rank'] === 2 ? 'bg-slate-200 text-slate-900' : ($tItem['rank'] === 3 ? 'bg-amber-600 text-white' : 'bg-white/20 text-white')) }}">
-                            #{{ $tItem['rank'] }}
-                        </span>
-                        <span class="text-[10px] text-slate-300 font-bold uppercase">{{ $tItem['code'] }}</span>
+                            <form method="POST" action="{{ route('media.standings.publish', $standAnn->id) }}" class="inline">
+                                @csrf
+                                <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 font-mono cursor-pointer">
+                                    <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Publish to Website</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div>
-                        <div class="font-bold text-white text-sm truncate">{{ $tItem['name'] }}</div>
-                        <div class="mt-1 flex items-baseline gap-1.5">
-                            <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($tItem['points']) }}</span>
-                            <span class="text-[10px] text-slate-300 uppercase font-mono font-bold">pts</span>
-                        </div>
-                        <div class="mt-1.5 text-[10px] font-mono text-slate-400 flex items-center gap-2 border-t border-white/10 pt-1">
-                            <span>1st: <strong class="text-slate-200">{{ $tItem['first_count'] }}</strong></span>
-                            <span>2nd: <strong class="text-slate-200">{{ $tItem['second_count'] }}</strong></span>
-                            <span>3rd: <strong class="text-slate-200">{{ $tItem['third_count'] }}</strong></span>
-                        </div>
+
+                    <!-- Team Standings Ranks Grid -->
+                    <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        @foreach($standAnn->standings_data as $grpItem)
+                            <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
+                                <div class="flex items-center justify-between text-xs font-mono mb-2">
+                                    <span class="px-2 py-0.5 rounded font-black {{ $grpItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
+                                        #{{ $grpItem['rank'] }}
+                                    </span>
+                                    <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $grpItem['code'] }}</span>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white text-sm truncate">{{ $grpItem['name'] }}</div>
+                                    <div class="mt-1 flex items-baseline gap-1">
+                                        <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($grpItem['points']) }}</span>
+                                        <span class="text-[10px] text-slate-400 uppercase font-mono font-bold">pts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             @endforeach
         </div>
+    @else
+        <!-- Current Official Public Standings Banner -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border border-indigo-500/30 shadow-xl font-sora">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/10 pb-5">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-indigo-600/80 text-white flex items-center gap-1.5 shadow-2xs">
+                            <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Official Public Standings</span>
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-400 text-slate-950">
+                            {{ $standingsInfo['public_standings_label'] }}
+                        </span>
+                        @if($standingsInfo['public_standings_updated_at'])
+                            <span class="text-xs font-mono text-slate-400">
+                                അപ്‌ഡേറ്റ് ചെയ്തത്: {{ \Carbon\Carbon::parse($standingsInfo['public_standings_updated_at'])->format('h:i A, d M') }}
+                            </span>
+                        @endif
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+                        ഔദ്യോഗിക പബ്ലിക് ടീം പോയിന്റ് നില
+                    </h2>
+                    <p class="text-xs text-slate-300 mt-1 max-w-2xl font-ml">
+                        പൊതുജനങ്ങൾക്ക് വെബ്സൈറ്റിൽ നിലവിൽ ദൃശ്യമാകുന്ന ഔദ്യോഗിക ടീം പോയിന്റ് നിലയാണിത്. പുതിയ സ്റ്റാൻഡിങ്സ് സ്റ്റേജ് അനൗൺസർ പ്രഖ്യാപിക്കുമ്പോൾ ഇവിടെ ദൃശ്യമാകും.
+                    </p>
+                </div>
 
-        <!-- Toggle Full Breakdown Table -->
-        <div class="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <button type="button" @click="showFullTable = !showFullTable" class="text-xs font-bold text-indigo-300 hover:text-white flex items-center gap-1.5 transition cursor-pointer">
-                <svg class="w-4 h-4 transition-transform" :class="showFullTable ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                <span x-text="showFullTable ? 'Hide Complete Team Score Breakdown' : 'View Complete Team Score Breakdown (Position & Grade Pts)'"></span>
-            </button>
-            <div class="flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-                <span>Active Public Site Milestone:</span>
-                <strong class="text-emerald-400">{{ $standingsInfo['public_standings_label'] }}</strong>
-                <a href="{{ route('media.standings.index') }}" class="ml-2 text-indigo-300 hover:text-white underline">
-                    Edit Standings &rarr;
-                </a>
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                    @if(!empty($standingsPosterUrl))
+                        <a href="{{ route('media.standings.download-poster') }}" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-2xs font-mono">
+                            <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Download Poster</span>
+                        </a>
+                    @endif
+
+                    <a href="{{ route('media.print.milestone-standings', ['count' => $standingsInfo['public_standings_count']]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
+                        <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Print Standings PDF</span>
+                    </a>
+
+                    <a href="{{ route('media.standings.index') }}" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/15 shadow-2xs font-mono">
+                        <span>Manage Standings &rarr;</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Official Team Standings Grid -->
+            <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                @foreach($publicGroups as $idx => $pGrp)
+                    <div class="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/15 transition">
+                        <div class="flex items-center justify-between text-xs font-mono mb-2">
+                            <span class="px-2 py-0.5 rounded font-black {{ ($pGrp->public_rank_cache ?? ($idx + 1)) === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
+                                #{{ $pGrp->public_rank_cache ?? ($idx + 1) }}
+                            </span>
+                            <span class="text-[10px] text-slate-300 uppercase font-bold">{{ $pGrp->code }}</span>
+                        </div>
+                        <div>
+                            <div class="font-bold text-white text-sm truncate">{{ $pGrp->name }}</div>
+                            <div class="mt-1 flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-amber-300 font-mono">{{ number_format($pGrp->public_points_cache) }}</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-mono font-bold">pts</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
-
-        <!-- Detailed Table -->
-        <div x-show="showFullTable" x-cloak class="mt-3 overflow-x-auto rounded-2xl border border-white/15 bg-black/30">
-            <table class="w-full text-left text-xs font-sora">
-                <thead class="bg-white/10 text-slate-300 uppercase font-mono text-[10px] border-b border-white/10">
-                    <tr>
-                        <th class="py-2.5 px-3">Rank</th>
-                        <th class="py-2.5 px-3">Team Name</th>
-                        <th class="py-2.5 px-3 text-center">1st</th>
-                        <th class="py-2.5 px-3 text-center">2nd</th>
-                        <th class="py-2.5 px-3 text-center">3rd</th>
-                        <th class="py-2.5 px-3 text-center">Position Pts</th>
-                        <th class="py-2.5 px-3 text-center">Grade Pts</th>
-                        <th class="py-2.5 px-3 text-right">Total Points</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/10 font-mono">
-                    @foreach($totalAnnouncedStandings['standings'] as $tItem)
-                        <tr class="hover:bg-white/5 transition">
-                            <td class="py-2.5 px-3 font-bold">
-                                <span class="px-2 py-0.5 rounded font-black {{ $tItem['rank'] === 1 ? 'bg-amber-400 text-slate-950' : 'bg-white/20 text-white' }}">
-                                    #{{ $tItem['rank'] }}
-                                </span>
-                            </td>
-                            <td class="py-2.5 px-3 font-sora font-bold text-white">
-                                {{ $tItem['name'] }} <span class="text-slate-400 text-xs">({{ $tItem['code'] }})</span>
-                            </td>
-                            <td class="py-2.5 px-3 text-center text-amber-300 font-bold">{{ $tItem['first_count'] }}</td>
-                            <td class="py-2.5 px-3 text-center text-slate-300 font-bold">{{ $tItem['second_count'] }}</td>
-                            <td class="py-2.5 px-3 text-center text-amber-500 font-bold">{{ $tItem['third_count'] }}</td>
-                            <td class="py-2.5 px-3 text-center text-slate-300">{{ number_format($tItem['position_points']) }}</td>
-                            <td class="py-2.5 px-3 text-center text-emerald-300">{{ number_format($tItem['grade_points']) }}</td>
-                            <td class="py-2.5 px-3 text-right text-base font-black text-amber-300">
-                                {{ number_format($tItem['points']) }} pts
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
+    @endif
 
     <!-- Stat Badges -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
