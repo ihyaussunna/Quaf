@@ -17,6 +17,15 @@ class GroupController extends Controller
     {
         Cache::forget('public_groups_list');
 
+        // One-time self-healing reset for production: ensure premature final celebration is turned off
+        if (FestivalSetting::get('is_final_standings_reset_v2') !== '1') {
+            FestivalSetting::set('is_final_standings_published', '0');
+            FestivalSetting::set('public_standings_is_final', '0');
+            FestivalSetting::set('is_final_standings_reset_v2', '1');
+            Cache::forget('public_groups_list');
+            Cache::forget('public_home_data');
+        }
+
         $groups = Group::getPublicStandings();
 
         $totalPrograms = Program::count();

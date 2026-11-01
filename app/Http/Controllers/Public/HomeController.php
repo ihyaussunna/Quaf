@@ -283,6 +283,15 @@ class HomeController extends Controller
         $totalProgramsCount = $stats['programs'] ?? Program::count();
         $publishedResultsCount = Result::where('status', 'published')->where('is_media_published', true)->count();
         $isDemo = request()->boolean('demo') || request()->is('*demo*') || request()->is('*preview*');
+
+        // One-time self-healing reset for production: ensure premature final celebration is turned off
+        if (FestivalSetting::get('is_final_standings_reset_v2') !== '1') {
+            FestivalSetting::set('is_final_standings_published', '0');
+            FestivalSetting::set('public_standings_is_final', '0');
+            FestivalSetting::set('is_final_standings_reset_v2', '1');
+            Cache::forget('public_home_data');
+        }
+
         $isFinalPublished = $isDemo || (bool) FestivalSetting::get('is_final_standings_published', false) || ($totalProgramsCount > 0 && $publishedResultsCount >= $totalProgramsCount);
         $isFullResultsPublished = $isFinalPublished;
 

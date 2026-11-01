@@ -523,7 +523,7 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $groupsView->assertOk();
         $groupsView->assertSee('Download Poster');
         $groupsView->assertSee($posterUrl);
-        $groupsView->assertSee('ടീം സ്റ്റാൻഡിങ്സ് ഒഫീഷ്യൽ പോസ്റ്റർ');
+        $groupsView->assertSee('Official Standings Poster');
 
         // Test media panel standings page has download poster button
         $mediaStandingsView = $this->actingAs($this->mediaUser)->get(route('media.standings.index'));

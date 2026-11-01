@@ -63,6 +63,7 @@ class FinalStandingsPublishAndCelebrationTest extends TestCase
             'public_rank_cache' => 3,
         ]);
 
+        FestivalSetting::set('is_final_standings_reset_v2', '1');
         FestivalSetting::set('is_final_standings_published', '0');
         FestivalSetting::set('public_standings_results_count', '15');
         FestivalSetting::set('public_standings_label', 'After 15 Results');
@@ -137,7 +138,7 @@ class FinalStandingsPublishAndCelebrationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('FINAL CHAMPIONS');
-        $response->assertSee('CHAMPION');
+        $response->assertSee('WINNER');
     }
 
     public function test_media_team_can_publish_final_via_standings_update_checkbox(): void

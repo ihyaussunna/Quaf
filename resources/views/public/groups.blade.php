@@ -68,7 +68,7 @@
                 <div>
                     <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL TEAMS</span>
                     <div class="flex flex-wrap items-center gap-3 mt-1">
-                        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 animate-heading">Group Standings</h1>
+                        <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 animate-heading">Team Standings</h1>
                         @php
                             $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
                             $standingsLabel = $standingsLabel ?? ('After ' . sprintf('%02d', $standingsCount) . ' Results');
