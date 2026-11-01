@@ -404,38 +404,8 @@
         </div>
 
         @if(!empty($standingsPoster))
-            <!-- Quick Download Banner right under the team cards list -->
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 text-white shadow-xl border border-slate-800">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-400/30">
-                        <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#be1e2d] text-white uppercase tracking-wider">OFFICIAL</span>
-                            <span class="text-xs font-mono font-bold text-amber-300">{{ $standingsLabel }}</span>
-                        </div>
-                        <h3 class="font-sora font-extrabold text-base sm:text-lg text-white mt-0.5">
-                            {{ !empty($isFinalPublished) ? 'Official Final Championship Result Poster' : 'Official Team Standings Graphic Poster' }}
-                        </h3>
-                        <p class="text-xs text-slate-400 font-mono mt-0.5">
-                            {{ !empty($isFinalPublished) ? 'Download high-resolution official championship result poster' : 'Download high-resolution official standings graphic' }}
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 w-full sm:w-auto shrink-0">
-                    <a href="{{ route('groups.download-poster') }}" download class="flex-1 sm:flex-initial px-6 py-3 rounded-2xl bg-gradient-to-r from-[#be1e2d] to-[#991522] hover:from-[#991522] hover:to-[#80101b] text-white font-sora font-extrabold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Download Poster</span>
-                    </a>
-                    <a href="#official-poster" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm">
-                        <span>Preview &darr;</span>
-                    </a>
-                </div>
-            </div>
-
             <!-- Official Standings Poster Section (View Below on Page) -->
-            <div id="official-poster" class="mt-8 rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-8 shadow-sm space-y-4 scroll-mt-20">
+            <div id="official-poster" class="mt-10 rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-8 shadow-sm space-y-4 scroll-mt-20">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                     <div>
                         <div class="flex items-center gap-2">
