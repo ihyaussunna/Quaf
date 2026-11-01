@@ -43,7 +43,10 @@ class FinalStandingsDemoPreviewTest extends TestCase
         $response->assertSee('DEMO PREVIEW', false);
         $response->assertSee('celebration-canvas', false);
         $response->assertSee('Demo Champion Team', false);
-        $response->assertSee('QUAF 2026 OVERALL CHAMPIONS', false);
+        $response->assertSee('OVERALL CHAMPION', false);
+        $response->assertSee('FINAL OFFICIAL RESULT', false);
+        $response->assertSee('Final Team Standings', false);
+        $response->assertSee('WINNER', false);
     }
 
     public function test_groups_query_param_demo_renders_celebration(): void

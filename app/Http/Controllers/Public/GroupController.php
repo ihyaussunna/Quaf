@@ -30,7 +30,7 @@ class GroupController extends Controller
             ? 'FINAL CHAMPIONSHIP STANDINGS (DEMO PREVIEW)'
             : (FestivalSetting::get('public_standings_label') ?: ('After '.sprintf('%02d', (int) FestivalSetting::get('public_standings_results_count', 0)).' Results'));
 
-        return view('public.groups', compact('groups', 'isFullResultsPublished', 'isFinalPublished', 'standingsPosterUrl', 'standingsLabel', 'isDemo'));
+        return view('public.groups', compact('groups', 'isFullResultsPublished', 'isFinalPublished', 'standingsPosterUrl', 'standingsLabel', 'isDemo', 'totalPrograms'));
     }
 
     /**

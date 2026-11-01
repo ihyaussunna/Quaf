@@ -108,26 +108,24 @@ class FinalStandingsPublishAndCelebrationTest extends TestCase
         $response->assertStatus(200);
 
         // Header celebration badge
-        $response->assertSee('FINAL STANDINGS &amp; CHAMPIONS', false);
+        $response->assertSee('FINAL OFFICIAL RESULT', false);
 
         // Canvas confetti fireworks
         $response->assertSee('id="celebration-canvas"', false);
         $response->assertSee('launchConfettiCannon', false);
-        $response->assertSee('Celebrate Again', false);
+        $response->assertSee('CELEBRATE', false);
 
-        // Grand Championship Victory Banner
-        $response->assertSee('QUAF 2026 OVERALL CHAMPIONS');
+        // Grand Championship Victory Podium
+        $response->assertSee('OVERALL CHAMPION');
         $response->assertSee('Lumo Fikric');
         $response->assertSee('500');
-        $response->assertSee('1st Runner-Up:');
+        $response->assertSee('SECOND PLACE');
         $response->assertSee('Pacto Hikmic');
-        $response->assertSee('2nd Runner-Up:');
+        $response->assertSee('THIRD PLACE');
         $response->assertSee('Conco Majdic');
 
         // Leaderboard rows honors
-        $response->assertSee('QUAF CHAMPION');
-        $response->assertSee('1st RUNNER-UP');
-        $response->assertSee('2nd RUNNER-UP');
+        $response->assertSee('WINNER');
     }
 
     public function test_public_home_page_shows_final_champions_badge_when_published(): void
