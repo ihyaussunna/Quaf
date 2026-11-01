@@ -371,8 +371,8 @@
                         $isPart = $selectedStudent->isCompetitionParticipant();
                         $giftTitle = $selectedStudent->gift_name;
                         $giftDesc = $isPart 
-                            ? 'മത്സരങ്ങളിൽ പങ്കെടുത്തവർക്കുള്ള ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ്.' 
-                            : 'മത്സരങ്ങളിൽ പങ്കെടുക്കാത്തവർക്കുള്ള പ്രത്യേക \'ക്വാഫ് ഖലം\' സമ്മാനം (QUAF Qalam Gift).';
+                            ? 'മത്സരങ്ങളിൽ പങ്കെടുത്തവർക്കുള്ള ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ്. ഈ വിദ്യാർത്ഥിക്ക് സമ്മാനം നൽകുക.' 
+                            : 'ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾക്കുള്ള ക്വാഫ് ഖലം.';
                     @endphp
                     <div class="p-4 sm:p-5 rounded-2xl border transition-all {{ $selectedStudent->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
                         <div class="flex items-center justify-between gap-2">
@@ -381,7 +381,7 @@
                                 <span class="text-[10px] font-mono font-bold uppercase tracking-wider">{{ $giftTitle }}</span>
                                 @if(!$isPart)
                                     <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-200 text-amber-900 border border-amber-300">
-                                        Non-Participant Special Gift
+                                        ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾ
                                     </span>
                                 @endif
                             </div>
@@ -396,6 +396,9 @@
                                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                     <span>സമ്മാനം നൽകി (Gift Delivered)</span>
                                 </div>
+                                <div class="text-[11px] text-emerald-800 font-anek mt-0.5">
+                                    {{ $giftDesc }}
+                                </div>
                                 <div class="text-[10px] font-mono text-emerald-700 mt-0.5">
                                     {{ $selectedStudent->recognition_gift_delivered_at?->format('d M, h:i A') }} • {{ $selectedStudent->recognition_gift_delivered_by ?? 'Presentation Desk' }}
                                 </div>
@@ -404,7 +407,7 @@
                                     <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     <span>കൈപ്പറ്റിയിട്ടില്ല (Pending Collection)</span>
                                 </div>
-                                <div class="text-[11px] text-amber-800 font-anek mt-0.5">{{ $giftDesc }} ഈ വിദ്യാർത്ഥിക്ക് സമ്മാനം നൽകുക.</div>
+                                <div class="text-[11px] text-amber-800 font-anek mt-0.5">{{ $giftDesc }}</div>
                             @endif
                         </div>
 

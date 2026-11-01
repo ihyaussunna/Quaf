@@ -97,7 +97,10 @@ class MediaResultController extends Controller
             'public_standings_mode' => FestivalSetting::get('public_standings_mode', 'milestone'),
             'public_standings_milestones' => FestivalSetting::get('public_standings_milestones', '10,15,20,27,35,40'),
             'public_standings_updated_at' => FestivalSetting::get('public_standings_updated_at'),
+            'public_standings_poster_url' => FestivalSetting::get('public_standings_poster_url'),
         ];
+
+        $standingsPosterUrl = FestivalSetting::get('public_standings_poster_url');
 
         $incomingStandings = collect();
         $publishedStandingsHistory = collect();
@@ -121,6 +124,7 @@ class MediaResultController extends Controller
             'totalAnnouncedCount',
             'totalAnnouncedStandings',
             'standingsInfo',
+            'standingsPosterUrl',
             'incomingStandings',
             'publishedStandingsHistory'
         ));

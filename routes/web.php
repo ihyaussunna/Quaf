@@ -137,6 +137,7 @@ Route::get('/schedule/stage-pdf/download', function () {
     return response()->download($filePath, 'QUAF_2026_Stage_Program_Schedule.pdf');
 })->name('schedule.stage-pdf.download');
 Route::get('/groups', [PublicGroupController::class, 'index'])->name('groups.index');
+Route::get('/groups/download-poster', [MediaStandingsController::class, 'downloadPoster'])->name('groups.download-poster');
 Route::get('/groups/{group}', [PublicGroupController::class, 'show'])->name('groups.show');
 
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
@@ -948,6 +949,7 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     // Team Standings (Public Website Leaderboard)
     Route::get('/team-standings', [MediaStandingsController::class, 'index'])->name('standings.index');
     Route::post('/team-standings', [MediaStandingsController::class, 'update'])->name('standings.update');
+    Route::get('/team-standings/download-poster', [MediaStandingsController::class, 'downloadPoster'])->name('standings.download-poster');
 
     // Printable Reports for Media Desk
     Route::get('/print/milestone-standings', [AdminPrintReportController::class, 'milestoneStandings'])->name('print.milestone-standings');

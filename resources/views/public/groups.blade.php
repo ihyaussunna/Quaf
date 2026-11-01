@@ -29,7 +29,7 @@
 
             @if(!empty($standingsPoster))
                 <div class="shrink-0 pt-2 sm:pt-0">
-                    <a href="{{ $standingsPoster }}" download="QUAF_Standings_{{ Str::slug($standingsLabel) }}.jpg" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm">
+                    <a href="{{ route('groups.download-poster') }}" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm">
                         <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span>Download Poster</span>
                     </a>

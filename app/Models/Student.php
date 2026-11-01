@@ -311,7 +311,7 @@ class Student extends Model
     {
         return $this->isCompetitionParticipant()
             ? 'ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ് (QUAF Recognition Gift)'
-            : 'ക്വാഫ് ഖലം സമ്മാനം (QUAF Qalam Gift)';
+            : 'ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾക്കുള്ള ക്വാഫ് ഖലം';
     }
 
     /**

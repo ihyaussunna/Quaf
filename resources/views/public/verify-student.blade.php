@@ -147,7 +147,7 @@
                 $giftTitle = $student->gift_name;
                 $giftDesc = $isPart 
                     ? 'മത്സരങ്ങളിൽ പങ്കെടുത്ത വിദ്യാർത്ഥികൾക്കുള്ള ക്വാഫ് റെക്കഗ്നിഷൻ ഗിഫ്റ്റ്.' 
-                    : 'മത്സരങ്ങളിൽ പങ്കെടുക്കാത്ത വിദ്യാർത്ഥികൾക്കുള്ള പ്രത്യേക \'ക്വാഫ് ഖലം\' സമ്മാനം (QUAF Qalam Gift).';
+                    : 'ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾക്കുള്ള ക്വാഫ് ഖലം.';
             @endphp
             <div class="p-5 sm:p-6 rounded-2xl border transition-all {{ $student->recognition_gift_delivered ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950' }}">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -159,7 +159,7 @@
                             </span>
                             @if(!$isPart)
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-200 text-amber-900 border border-amber-300">
-                                    Non-Participant Gift
+                                    ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾ
                                 </span>
                             @endif
                         </div>
@@ -170,7 +170,7 @@
                                 <span>സമ്മാനം കൈപ്പറ്റി (Gift Delivered)</span>
                             </div>
                             <div class="text-xs font-mono text-emerald-800 mt-0.5">
-                                Delivered on: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • Counter: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
+                                {{ $giftDesc }} • Delivered: {{ $student->recognition_gift_delivered_at?->format('d M Y, h:i A') }} • Counter: {{ $student->recognition_gift_delivered_by ?? 'Presentation Desk' }}
                             </div>
                         @else
                             <div class="text-lg font-black font-sora mt-1 text-amber-900 flex items-center gap-2">

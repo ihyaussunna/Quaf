@@ -342,6 +342,11 @@ class PresentationDeskCoinRedemptionTest extends TestCase
         $verifyResponse = $this->get(route('verify.student', $nonParticipant->qr_token));
         $verifyResponse->assertOk();
         $verifyResponse->assertSee('QUAF Qalam');
+        $verifyResponse->assertSee('ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾക്കുള്ള ക്വാഫ് ഖലം');
+
+        $dashResponse = $this->actingAs($this->presentationUser)->get(route('presentation.dashboard', ['student' => 'LM999']));
+        $dashResponse->assertOk();
+        $dashResponse->assertSee('ഇഹ്‌യാഉസ്സുന്ന അംഗങ്ങൾക്കുള്ള ക്വാഫ് ഖലം');
     }
 
     public function test_scanned_student_verification_page_reveals_secret_code_and_wallet_data(): void

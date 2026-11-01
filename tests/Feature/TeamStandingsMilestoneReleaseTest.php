@@ -524,6 +524,19 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $groupsView->assertSee('Download Poster');
         $groupsView->assertSee($posterUrl);
         $groupsView->assertSee('ടീം സ്റ്റാൻഡിങ്സ് ഒഫീഷ്യൽ പോസ്റ്റർ');
+
+        // Test media panel standings page has download poster button
+        $mediaStandingsView = $this->actingAs($this->mediaUser)->get(route('media.standings.index'));
+        $mediaStandingsView->assertOk();
+        $mediaStandingsView->assertSee(route('media.standings.download-poster'));
+
+        // Test downloading the poster via media download route
+        $downloadResponse = $this->actingAs($this->mediaUser)->get(route('media.standings.download-poster'));
+        $this->assertTrue(in_array($downloadResponse->getStatusCode(), [200, 302]));
+
+        // Test downloading the poster via public download route
+        $publicDownloadResponse = $this->get(route('groups.download-poster'));
+        $this->assertTrue(in_array($publicDownloadResponse->getStatusCode(), [200, 302]));
     }
 
     public function test_student_coins_are_available_immediately_upon_stage_announcement(): void

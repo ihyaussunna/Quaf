@@ -11,7 +11,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaStandingsController extends Controller
 {
@@ -93,9 +95,11 @@ class MediaStandingsController extends Controller
         if ($request->hasFile('standings_poster')) {
             $path = $request->file('standings_poster')->store('media/standings', 'public');
             $posterUrl = Storage::url($path);
+            FestivalSetting::set('public_standings_poster_path', $path);
             FestivalSetting::set('public_standings_poster_url', $posterUrl);
             FestivalSetting::set('public_standings_poster_updated_at', now()->toIso8601String());
         } elseif ($request->boolean('remove_poster')) {
+            FestivalSetting::set('public_standings_poster_path', '');
             FestivalSetting::set('public_standings_poster_url', '');
             FestivalSetting::set('public_standings_poster_updated_at', now()->toIso8601String());
         }
@@ -113,5 +117,34 @@ class MediaStandingsController extends Controller
         ]);
 
         return back()->with('success', "ടീം പോയിന്റ് നില വിജയകരമായി പബ്ലിക് വെബ്സൈറ്റിൽ അപ്‌ഡേറ്റ് ചെയ്തു ({$label}).");
+    }
+
+    /**
+     * Download the currently active Team Standings poster.
+     */
+    public function downloadPoster(): StreamedResponse|RedirectResponse
+    {
+        $path = FestivalSetting::get('public_standings_poster_path');
+        if ($path && Storage::disk('public')->exists($path)) {
+            $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
+            $filename = 'QUAF_Standings_'.Str::slug($label).'.'.pathinfo($path, PATHINFO_EXTENSION);
+
+            return Storage::disk('public')->download($path, $filename);
+        }
+
+        $url = FestivalSetting::get('public_standings_poster_url');
+        if ($url) {
+            $cleanPath = ltrim(str_replace('/storage/', '', parse_url($url, PHP_URL_PATH)), '/');
+            if (Storage::disk('public')->exists($cleanPath)) {
+                $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
+                $filename = 'QUAF_Standings_'.Str::slug($label).'.'.pathinfo($cleanPath, PATHINFO_EXTENSION);
+
+                return Storage::disk('public')->download($cleanPath, $filename);
+            }
+
+            return redirect($url);
+        }
+
+        return back()->with('error', 'സ്റ്റാൻഡിങ്സ് പോസ്റ്റർ ലഭ്യമല്ല.');
     }
 }
