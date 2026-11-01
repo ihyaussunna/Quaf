@@ -7,12 +7,13 @@ use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\Program;
 use App\Models\Result;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class GroupController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         Cache::forget('public_groups_list');
 
@@ -20,12 +21,26 @@ class GroupController extends Controller
 
         $totalPrograms = Program::count();
         $publishedCount = Result::where('status', 'published')->where('is_media_published', true)->count();
-        $isFinalPublished = (bool) FestivalSetting::get('is_final_standings_published', false) || ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
+
+        $isDemo = $request->boolean('demo') || $request->is('*demo*') || $request->is('*preview*');
+        $isFinalPublished = $isDemo || (bool) FestivalSetting::get('is_final_standings_published', false) || ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
         $isFullResultsPublished = $isFinalPublished;
         $standingsPosterUrl = FestivalSetting::get('public_standings_poster_url');
-        $standingsLabel = FestivalSetting::get('public_standings_label');
+        $standingsLabel = $isDemo
+            ? 'FINAL CHAMPIONSHIP STANDINGS (DEMO PREVIEW)'
+            : (FestivalSetting::get('public_standings_label') ?: ('After '.sprintf('%02d', (int) FestivalSetting::get('public_standings_results_count', 0)).' Results'));
 
-        return view('public.groups', compact('groups', 'isFullResultsPublished', 'isFinalPublished', 'standingsPosterUrl', 'standingsLabel'));
+        return view('public.groups', compact('groups', 'isFullResultsPublished', 'isFinalPublished', 'standingsPosterUrl', 'standingsLabel', 'isDemo'));
+    }
+
+    /**
+     * Dedicated demo preview route to inspect the full Final Standings & Victory Celebration.
+     */
+    public function demo(Request $request): View
+    {
+        $request->merge(['demo' => 1]);
+
+        return $this->index($request);
     }
 
     public function show(Group $group): View

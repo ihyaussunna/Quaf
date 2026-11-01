@@ -138,6 +138,10 @@ Route::get('/schedule/stage-pdf/download', function () {
     return response()->download($filePath, 'QUAF_2026_Stage_Program_Schedule.pdf');
 })->name('schedule.stage-pdf.download');
 Route::get('/groups', [PublicGroupController::class, 'index'])->name('groups.index');
+Route::get('/groups/demo', [PublicGroupController::class, 'demo'])->name('groups.demo');
+Route::get('/standings/demo', [PublicGroupController::class, 'demo'])->name('standings.demo');
+Route::get('/final-preview', [PublicGroupController::class, 'demo'])->name('final.preview');
+Route::get('/home/demo', fn () => redirect('/?demo=1'))->name('home.demo');
 Route::get('/groups/download-poster', [MediaStandingsController::class, 'downloadPoster'])->name('groups.download-poster');
 Route::get('/groups/{group}', [PublicGroupController::class, 'show'])->name('groups.show');
 

@@ -187,7 +187,12 @@
                     എല്ലാ മത്സര ഫലങ്ങളും സ്റ്റേജ് അനൗൺസർക്ക് അയച്ചു കഴിഞ്ഞു. ഫെസ്റ്റിവൽ അന്തിമ വിജയികളെയും ഓവറോൾ ചാമ്പ്യൻഷിപ്പും പബ്ലിക് വെബ്സൈറ്റിൽ ഒഫീഷ്യലായി പ്രഖ്യാപിക്കാൻ താഴെയുള്ള ബട്ടൺ ക്ലിക്ക് ചെയ്യുക (വെബ്സൈറ്റിൽ സെലിബ്രേഷൻ ആരംഭിക്കും).
                 </p>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a href="{{ route('groups.demo') }}" target="_blank" class="px-4 py-3 rounded-2xl bg-indigo-900/80 hover:bg-indigo-800 text-amber-300 border border-indigo-400/40 font-mono font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <span>Demo / Preview Celebration</span>
+                </a>
+
                 <form method="POST" action="{{ route('media.standings.publish-final') }}" onsubmit="return confirm('അന്തിമ ഫലം പബ്ലിക് വെബ്സൈറ്റിൽ ഒഫീഷ്യലായി പബ്ലിഷ് ചെയ്യണോ? ഇത് വെബ്സൈറ്റിൽ സെലിബ്രേഷൻ ആരംഭിക്കും.');">
                     @csrf
                     <input type="hidden" name="results_count" value="{{ $totalProgramsCount > 0 ? $totalProgramsCount : $totalAnnouncedCount }}">

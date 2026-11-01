@@ -5,6 +5,37 @@
 
 @section('content')
 
+@if(!empty($isDemo))
+    <!-- Demo Mode Ribbon -->
+    <div class="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-950 text-white px-4 sm:px-6 py-3 shadow-lg border-b border-indigo-500/40 sticky top-16 z-40">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-sora">
+            <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-black text-[10px] uppercase tracking-wider animate-pulse shrink-0">
+                    DEMO PREVIEW
+                </span>
+                <span class="font-bold text-amber-300">
+                    ഫൈനൽ ചാമ്പ്യൻഷിപ്പ് &amp; വിക്ടറി സെലിബ്രേഷൻ ഡെമോ
+                </span>
+                <span class="text-slate-300 text-[11px] hidden md:inline">
+                    (മീഡിയ പാനലിൽ ഫൈനൽ പബ്ലിഷ് ചെയ്യുമ്പോൾ വെബ്സൈറ്റിൽ ഇപ്രകാരമാണ് കാണപ്പെടുക)
+                </span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" onclick="launchConfettiCannon(); if(window.playVictoryFanfare) playVictoryFanfare();" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-bold text-[11px] uppercase tracking-wider transition shadow cursor-pointer flex items-center gap-1.5 active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    <span>Confetti &amp; Fanfare</span>
+                </button>
+                <a href="{{ route('media.standings.index') }}" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600 font-mono font-medium text-[11px] uppercase tracking-wider transition">
+                    &larr; Media Panel
+                </a>
+                <a href="{{ route('groups.index') }}" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono font-medium text-[11px] uppercase tracking-wider transition">
+                    Live View
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
+
 <!-- Header Section -->
 <section class="py-10 sm:py-14 bg-white border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -124,7 +155,7 @@
 
                         <!-- Celebrate Again Button -->
                         <div class="pt-2">
-                            <button type="button" onclick="launchConfettiCannon()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-sora font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-400/30 flex items-center gap-2 mx-auto cursor-pointer">
+                            <button type="button" onclick="launchConfettiCannon(); if(window.playVictoryFanfare) playVictoryFanfare();" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-sora font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-400/30 flex items-center gap-2 mx-auto cursor-pointer active:scale-95">
                                 <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                                 <span>Celebrate Again</span>
                             </button>
@@ -440,6 +471,47 @@ function launchConfettiCannon() {
 
     render();
 }
+
+function playVictoryFanfare() {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        const now = ctx.currentTime;
+        const notes = [
+            { freq: 392.00, start: 0.0, dur: 0.16 }, // G4
+            { freq: 523.25, start: 0.16, dur: 0.16 }, // C5
+            { freq: 659.25, start: 0.32, dur: 0.20 }, // E5
+            { freq: 783.99, start: 0.52, dur: 0.26 }, // G5
+            { freq: 1046.50, start: 0.80, dur: 1.10 }, // C6
+            { freq: 523.25, start: 0.80, dur: 1.10 },  // C5 backing
+            { freq: 659.25, start: 0.80, dur: 1.10 },  // E5 backing
+        ];
+
+        notes.forEach(n => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(n.freq, now + n.start);
+
+            gain.gain.setValueAtTime(0.001, now + n.start);
+            gain.gain.exponentialRampToValueAtTime(0.22, now + n.start + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now + n.start);
+            osc.stop(now + n.start + n.dur + 0.05);
+        });
+    } catch(e) {
+        // Ignored if sound gesture policy blocks before interaction
+    }
+}
+window.playVictoryFanfare = playVictoryFanfare;
 
 document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
