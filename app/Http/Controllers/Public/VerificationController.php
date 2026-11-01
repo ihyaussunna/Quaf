@@ -40,22 +40,22 @@ class VerificationController extends Controller
     public function verifyStudent(string $qrToken, CoinRewardService $coinRewardService): View
     {
         $clean = trim($qrToken);
-        $stripped = ltrim($clean, '#');
-        $numeric = preg_replace('/[^0-9]/', '', $clean);
+        $noSpace = str_replace(' ', '', $clean);
+        $stripped = ltrim($noSpace, '#');
+        $numeric = preg_replace('/[^0-9]/', '', $noSpace);
 
+        // Priority 1: Direct match on Student unique credentials (qr_token, student_id, or chest_number)
         $studentQuery = Student::where('qr_token', $clean)
+            ->orWhere('qr_token', $noSpace)
             ->orWhere('student_id', $clean)
+            ->orWhere('student_id', $noSpace)
             ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($clean)])
-            ->orWhere('student_id', 'QF'.$stripped)
-            ->orWhere('student_id', 'QF-ST-'.$stripped)
-            ->orWhere('student_id', 'QUAF-ST-'.$stripped);
+            ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($noSpace)]);
 
-        if (Schema::hasColumn('students', 'chest_number')) {
-            $studentQuery->orWhere('chest_number', $clean)
-                ->orWhere('chest_number', $stripped);
-            if (! empty($numeric)) {
-                $studentQuery->orWhere('chest_number', $numeric);
-            }
+        if (! empty($stripped)) {
+            $studentQuery->orWhere('student_id', 'QF'.$stripped)
+                ->orWhere('student_id', 'QF-ST-'.$stripped)
+                ->orWhere('student_id', 'QUAF-ST-'.$stripped);
         }
 
         if (! empty($numeric)) {
@@ -64,16 +64,16 @@ class VerificationController extends Controller
                 ->orWhere('student_id', $numeric);
         }
 
-        // Also check if $clean matches chest_number on any program_entry
-        $studentQuery->orWhereHas('entries', function ($eq) use ($clean, $stripped, $numeric) {
-            $eq->where('chest_number', $clean)
-                ->orWhere('chest_number', $stripped);
+        if (Schema::hasColumn('students', 'chest_number')) {
+            $studentQuery->orWhere('chest_number', $clean)
+                ->orWhere('chest_number', $noSpace);
             if (! empty($numeric)) {
-                $eq->orWhere('chest_number', $numeric);
+                $studentQuery->orWhere('chest_number', $numeric)
+                    ->orWhere('chest_number', 'QF'.$numeric);
             }
-        });
+        }
 
-        $student = $studentQuery->with([
+        $relations = [
             'group',
             'zone',
             'entries.program.category',
@@ -85,7 +85,21 @@ class VerificationController extends Controller
             'participations.program.schedule',
             'participations.program.result',
             'certificates.program',
-        ])->first();
+        ];
+
+        $student = $studentQuery->with($relations)->first();
+
+        // Priority 2: Fallback ONLY if NO direct student matched student_id or qr_token
+        if (! $student) {
+            $student = Student::whereHas('entries', function ($eq) use ($clean, $noSpace, $numeric) {
+                $eq->where('chest_number', $clean)
+                    ->orWhere('chest_number', $noSpace);
+                if (! empty($numeric)) {
+                    $eq->orWhere('chest_number', $numeric)
+                        ->orWhere('chest_number', 'QF'.$numeric);
+                }
+            })->with($relations)->first();
+        }
 
         $isValid = (bool) $student;
         $coinSummary = null;

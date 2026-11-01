@@ -245,4 +245,52 @@ class StudentVerificationProfileTest extends TestCase
         $this->assertCount(1, $pubResponse2->viewData('results'));
         $pubResponse2->assertSee('Download Poster');
     }
+
+    public function test_verification_prioritizes_exact_student_id_over_other_students_program_entry_chest_number(): void
+    {
+        // Student A with earlier ID
+        $studentA = Student::create([
+            'student_id' => 'QF1030',
+            'name' => 'RABEEH',
+            'group_id' => $this->group->id,
+            'qr_token' => 'qr-rabeeh-token',
+        ]);
+
+        // Student B with later ID
+        $studentB = Student::create([
+            'student_id' => 'QF1103',
+            'name' => 'CINAN DELAMPADY',
+            'group_id' => $this->group->id,
+            'qr_token' => 'qr-cinan-token',
+        ]);
+
+        $prog = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Group Entry Program',
+            'code' => 'Q9-999',
+            'type' => 'group',
+            'status' => 'completed',
+        ]);
+
+        // Student A has a program entry with chest_number = '1103'
+        ProgramEntry::create([
+            'program_id' => $prog->id,
+            'student_id' => $studentA->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '1103',
+            'status' => 'verified',
+        ]);
+
+        // Searching/visiting with 'QF1103' MUST return Student B (CINAN), not Student A (RABEEH)
+        $resQF = $this->get(route('verify.student', 'QF1103'));
+        $resQF->assertOk();
+        $resQF->assertSee('CINAN DELAMPADY');
+        $resQF->assertDontSee('RABEEH');
+
+        // Searching/visiting with numeric '1103' MUST also return Student B (CINAN)
+        $resNum = $this->get(route('verify.student', '1103'));
+        $resNum->assertOk();
+        $resNum->assertSee('CINAN DELAMPADY');
+        $resNum->assertDontSee('RABEEH');
+    }
 }

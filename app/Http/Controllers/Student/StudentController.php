@@ -42,12 +42,33 @@ class StudentController extends Controller
         ]);
 
         $identifier = trim($validated['identifier']);
+        $noSpace = str_replace(' ', '', $identifier);
+        $numeric = preg_replace('/[^0-9]/', '', $noSpace);
 
-        // Search by student_id, or by chest_number in program_entries
+        // Priority 1: Search by student_id or qr_token
         $student = Student::with('user')
             ->where('student_id', $identifier)
-            ->orWhereHas('entries', fn ($q) => $q->where('chest_number', $identifier))
+            ->orWhere('student_id', $noSpace)
+            ->orWhere('qr_token', $identifier)
+            ->orWhere('qr_token', $noSpace)
+            ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($identifier)])
+            ->orWhereRaw('UPPER(student_id) = ?', [strtoupper($noSpace)])
+            ->when(! empty($numeric), fn ($q) => $q->orWhere('student_id', 'QF'.$numeric)->orWhere('student_id', $numeric))
             ->first();
+
+        // Priority 2: Fallback only if no student found by student_id
+        if (! $student) {
+            $student = Student::with('user')
+                ->whereHas('entries', function ($q) use ($identifier, $noSpace, $numeric) {
+                    $q->where('chest_number', $identifier)
+                        ->orWhere('chest_number', $noSpace);
+                    if (! empty($numeric)) {
+                        $q->orWhere('chest_number', 'QF'.$numeric)
+                            ->orWhere('chest_number', $numeric);
+                    }
+                })
+                ->first();
+        }
 
         if (! $student) {
             return back()->withErrors([
