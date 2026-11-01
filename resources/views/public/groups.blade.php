@@ -36,12 +36,18 @@
     </div>
 @endif
 
+@php
+    $standingsPoster = $standingsPosterUrl ?? \App\Models\FestivalSetting::get('public_standings_poster_url');
+    $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
+    $standingsLabel = $standingsLabel ?? (!empty($isFinalPublished) ? 'Final Result • Official Champions' : ('After ' . sprintf('%02d', $standingsCount) . ' Results'));
+@endphp
+
 <!-- Header Section (White Theme) -->
 <section class="py-10 sm:py-14 bg-white border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         @if(!empty($isFinalPublished))
             <!-- Final Championship Header matching Model in White Theme -->
-            <div class="text-center max-w-3xl mx-auto space-y-3">
+            <div class="text-center max-w-3xl mx-auto space-y-4">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-yellow-500/20 to-amber-500/15 border border-amber-400/60 shadow-xs text-amber-700 font-mono text-xs font-black uppercase tracking-widest"
                      style="animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.1s;">
                     <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
@@ -54,12 +60,23 @@
                     Final Team Standings
                 </h1>
 
-                <div>
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300/80 font-mono font-bold text-xs shadow-2xs"
-                         style="animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.5s;">
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-1"
+                     style="animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.5s;">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300/80 font-mono font-bold text-xs shadow-2xs">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>All {{ $totalPrograms > 0 ? $totalPrograms : 143 }} Results Declared</span>
                     </div>
+
+                    @if(!empty($standingsPoster))
+                        <a href="{{ route('groups.download-poster') }}" download class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#be1e2d] to-[#991522] hover:from-[#991522] hover:to-[#80101b] text-white font-sora font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg active:scale-95">
+                            <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Download Final Result Poster</span>
+                        </a>
+                        <a href="#official-poster" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-200 font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-2xs">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>View Poster</span>
+                        </a>
+                    @endif
                 </div>
             </div>
         @else
@@ -69,11 +86,6 @@
                     <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">FESTIVAL TEAMS</span>
                     <div class="flex flex-wrap items-center gap-3 mt-1">
                         <h1 class="text-3xl sm:text-5xl font-sora font-black text-slate-900 animate-heading">Team Standings</h1>
-                        @php
-                            $standingsCount = (int) \App\Models\FestivalSetting::get('public_standings_results_count', 0);
-                            $standingsLabel = $standingsLabel ?? ('After ' . sprintf('%02d', $standingsCount) . ' Results');
-                            $standingsPoster = $standingsPosterUrl ?? \App\Models\FestivalSetting::get('public_standings_poster_url');
-                        @endphp
                         <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
                             {{ $standingsLabel }}
                         </span>
@@ -85,7 +97,7 @@
 
                 @if(!empty($standingsPoster))
                     <div class="shrink-0 pt-2 sm:pt-0">
-                        <a href="{{ route('groups.download-poster') }}" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm">
+                        <a href="{{ route('groups.download-poster') }}" download class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm">
                             <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             <span>Download Poster</span>
                         </a>
@@ -392,22 +404,62 @@
         </div>
 
         @if(!empty($standingsPoster))
+            <!-- Quick Download Banner right under the team cards list -->
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 text-white shadow-xl border border-slate-800">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-400/30">
+                        <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#be1e2d] text-white uppercase tracking-wider">OFFICIAL</span>
+                            <span class="text-xs font-mono font-bold text-amber-300">{{ $standingsLabel }}</span>
+                        </div>
+                        <h3 class="font-sora font-extrabold text-base sm:text-lg text-white mt-0.5">
+                            {{ !empty($isFinalPublished) ? 'Official Final Championship Result Poster' : 'Official Team Standings Graphic Poster' }}
+                        </h3>
+                        <p class="text-xs text-slate-400 font-mono mt-0.5">
+                            {{ !empty($isFinalPublished) ? 'Download high-resolution official championship result poster' : 'Download high-resolution official standings graphic' }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto shrink-0">
+                    <a href="{{ route('groups.download-poster') }}" download class="flex-1 sm:flex-initial px-6 py-3 rounded-2xl bg-gradient-to-r from-[#be1e2d] to-[#991522] hover:from-[#991522] hover:to-[#80101b] text-white font-sora font-extrabold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Download Poster</span>
+                    </a>
+                    <a href="#official-poster" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                        <span>Preview &darr;</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- Official Standings Poster Section (View Below on Page) -->
-            <div class="mt-10 rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-8 shadow-sm space-y-4">
+            <div id="official-poster" class="mt-8 rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-8 shadow-sm space-y-4 scroll-mt-20">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#be1e2d] text-white uppercase">OFFICIAL POSTER</span>
                             <span class="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{{ $standingsLabel }}</span>
                         </div>
-                        <h2 class="text-xl font-sora font-extrabold text-slate-900 mt-1">Official Standings Poster</h2>
-                        <p class="text-xs text-slate-500 font-mono mt-0.5">Official cumulative leaderboard graphic poster</p>
+                        <h2 class="text-xl font-sora font-extrabold text-slate-900 mt-1">
+                            {{ !empty($isFinalPublished) ? 'Official Final Championship Result Poster' : 'Official Standings Poster' }}
+                        </h2>
+                        <p class="text-xs text-slate-500 font-mono mt-0.5">
+                            {{ !empty($isFinalPublished) ? 'Official high-resolution final results graphic poster' : 'Official cumulative leaderboard graphic poster' }}
+                        </p>
                     </div>
 
-                    <a href="{{ route('groups.download-poster') }}" class="px-5 py-2.5 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shrink-0">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Download Poster</span>
-                    </a>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{{ route('groups.download-poster') }}" download class="px-5 py-2.5 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Download Poster</span>
+                        </a>
+                        <a href="{{ $standingsPoster }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            <span>Open Full Size</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="bg-slate-950/5 rounded-2xl p-2 sm:p-4 border border-slate-200/80 flex justify-center">

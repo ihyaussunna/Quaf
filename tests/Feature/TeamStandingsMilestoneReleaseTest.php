@@ -595,6 +595,21 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         // Test downloading the poster via public download route
         $publicDownloadResponse = $this->get(route('groups.download-poster'));
         $this->assertTrue(in_array($publicDownloadResponse->getStatusCode(), [200, 302]));
+
+        // 7. Verify that in FINAL CHAMPIONSHIP STATUS, the poster and download options are fully visible
+        FestivalSetting::set('is_final_standings_published', '1');
+        FestivalSetting::set('public_standings_is_final', '1');
+
+        $finalGroupsView = $this->get(route('groups.index'));
+        $finalGroupsView->assertOk();
+        $finalGroupsView->assertSee('Download Final Result Poster');
+        $finalGroupsView->assertSee('Official Final Championship Result Poster');
+        $finalGroupsView->assertSee('Download Poster');
+        $finalGroupsView->assertSee($posterUrl);
+
+        // Test downloading the poster in final status
+        $finalDownloadResponse = $this->get(route('groups.download-poster'));
+        $this->assertTrue(in_array($finalDownloadResponse->getStatusCode(), [200, 302]));
     }
 
     public function test_student_coins_are_available_immediately_upon_stage_announcement(): void

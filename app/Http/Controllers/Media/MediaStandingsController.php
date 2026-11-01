@@ -237,32 +237,55 @@ class MediaStandingsController extends Controller
      */
     public function downloadPoster(): Response
     {
-        $path = FestivalSetting::get('public_standings_poster_path');
-        if ($path && Storage::disk('public')->exists($path)) {
-            $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
-            $ext = pathinfo($path, PATHINFO_EXTENSION) ?: 'jpg';
-            $filename = 'QUAF_Standings_'.Str::slug($label).'.'.$ext;
-            $fullPath = Storage::disk('public')->path($path);
+        $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
+        $filenameBase = 'QUAF_Standings_'.Str::slug($label);
 
-            return response()->download($fullPath, $filename, [
-                'Content-Type' => Storage::disk('public')->mimeType($path) ?: 'image/jpeg',
-                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-                'Cache-Control' => 'no-cache, must-revalidate',
-                'Pragma' => 'public',
-            ]);
+        $path = ltrim((string) FestivalSetting::get('public_standings_poster_path'), '/');
+        if ($path !== '') {
+            $fullPath = null;
+            if (Storage::disk('public')->exists($path)) {
+                $fullPath = Storage::disk('public')->path($path);
+            } elseif (file_exists(public_path('storage/'.$path))) {
+                $fullPath = public_path('storage/'.$path);
+            } elseif (file_exists(public_path($path))) {
+                $fullPath = public_path($path);
+            }
+
+            if ($fullPath && is_file($fullPath)) {
+                $ext = pathinfo($fullPath, PATHINFO_EXTENSION) ?: 'jpg';
+                $filename = $filenameBase.'.'.$ext;
+
+                return response()->download($fullPath, $filename, [
+                    'Content-Type' => (function_exists('mime_content_type') ? @mime_content_type($fullPath) : null) ?: 'image/jpeg',
+                    'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                    'Cache-Control' => 'no-cache, must-revalidate',
+                    'Pragma' => 'public',
+                ]);
+            }
         }
 
         $url = FestivalSetting::get('public_standings_poster_url');
         if ($url) {
-            $cleanPath = ltrim(str_replace('/storage/', '', parse_url($url, PHP_URL_PATH)), '/');
-            if (Storage::disk('public')->exists($cleanPath)) {
-                $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
-                $ext = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: 'jpg';
-                $filename = 'QUAF_Standings_'.Str::slug($label).'.'.$ext;
+            $parsedPath = parse_url($url, PHP_URL_PATH) ?? '';
+            $cleanPath = ltrim(preg_replace('~^/?storage/~', '', $parsedPath), '/');
+
+            $fullPath = null;
+            if ($cleanPath !== '' && Storage::disk('public')->exists($cleanPath)) {
                 $fullPath = Storage::disk('public')->path($cleanPath);
+            } elseif ($cleanPath !== '' && file_exists(public_path('storage/'.$cleanPath))) {
+                $fullPath = public_path('storage/'.$cleanPath);
+            } elseif ($cleanPath !== '' && file_exists(public_path($cleanPath))) {
+                $fullPath = public_path($cleanPath);
+            } elseif ($parsedPath !== '' && file_exists(public_path(ltrim($parsedPath, '/')))) {
+                $fullPath = public_path(ltrim($parsedPath, '/'));
+            }
+
+            if ($fullPath && is_file($fullPath)) {
+                $ext = pathinfo($fullPath, PATHINFO_EXTENSION) ?: 'jpg';
+                $filename = $filenameBase.'.'.$ext;
 
                 return response()->download($fullPath, $filename, [
-                    'Content-Type' => Storage::disk('public')->mimeType($cleanPath) ?: 'image/jpeg',
+                    'Content-Type' => (function_exists('mime_content_type') ? @mime_content_type($fullPath) : null) ?: 'image/jpeg',
                     'Content-Disposition' => 'attachment; filename="'.$filename.'"',
                     'Cache-Control' => 'no-cache, must-revalidate',
                     'Pragma' => 'public',
@@ -272,6 +295,6 @@ class MediaStandingsController extends Controller
             return redirect($url);
         }
 
-        return back()->with('error', 'സ്റ്റാൻഡിങ്സ് പോസ്റ്റർ ലഭ്യമല്ല.');
+        return redirect()->route('groups.index')->with('error', 'സ്റ്റാൻഡിങ്സ് പോസ്റ്റർ ലഭ്യമല്ല.');
     }
 }
