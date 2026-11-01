@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class MediaStandingsController extends Controller
 {
@@ -233,16 +233,23 @@ class MediaStandingsController extends Controller
     }
 
     /**
-     * Download the currently active Team Standings poster.
+     * Download the currently active Team Standings poster in full original high quality without compression.
      */
-    public function downloadPoster(): StreamedResponse|RedirectResponse
+    public function downloadPoster(): Response
     {
         $path = FestivalSetting::get('public_standings_poster_path');
         if ($path && Storage::disk('public')->exists($path)) {
             $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
-            $filename = 'QUAF_Standings_'.Str::slug($label).'.'.pathinfo($path, PATHINFO_EXTENSION);
+            $ext = pathinfo($path, PATHINFO_EXTENSION) ?: 'jpg';
+            $filename = 'QUAF_Standings_'.Str::slug($label).'.'.$ext;
+            $fullPath = Storage::disk('public')->path($path);
 
-            return Storage::disk('public')->download($path, $filename);
+            return response()->download($fullPath, $filename, [
+                'Content-Type' => Storage::disk('public')->mimeType($path) ?: 'image/jpeg',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                'Cache-Control' => 'no-cache, must-revalidate',
+                'Pragma' => 'public',
+            ]);
         }
 
         $url = FestivalSetting::get('public_standings_poster_url');
@@ -250,9 +257,16 @@ class MediaStandingsController extends Controller
             $cleanPath = ltrim(str_replace('/storage/', '', parse_url($url, PHP_URL_PATH)), '/');
             if (Storage::disk('public')->exists($cleanPath)) {
                 $label = FestivalSetting::get('public_standings_label', 'Official_Standings');
-                $filename = 'QUAF_Standings_'.Str::slug($label).'.'.pathinfo($cleanPath, PATHINFO_EXTENSION);
+                $ext = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: 'jpg';
+                $filename = 'QUAF_Standings_'.Str::slug($label).'.'.$ext;
+                $fullPath = Storage::disk('public')->path($cleanPath);
 
-                return Storage::disk('public')->download($cleanPath, $filename);
+                return response()->download($fullPath, $filename, [
+                    'Content-Type' => Storage::disk('public')->mimeType($cleanPath) ?: 'image/jpeg',
+                    'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                    'Cache-Control' => 'no-cache, must-revalidate',
+                    'Pragma' => 'public',
+                ]);
             }
 
             return redirect($url);

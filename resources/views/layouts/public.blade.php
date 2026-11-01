@@ -402,14 +402,16 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <!-- Desktop Navigation Links (Light font weight) -->
-                <nav class="flex items-center gap-6 xl:gap-8 text-xs font-light uppercase tracking-wider">
+                <nav class="flex items-center gap-5 xl:gap-7 text-xs font-light uppercase tracking-wider">
                     <a href="{{ route('home.view') }}" class="transition-colors hover:text-white {{ request()->routeIs('home.view') || request()->routeIs('home') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Home</a>
                     <a href="{{ route('results.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('results.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Results</a>
+                    <a href="{{ route('groups.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('groups.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Standings</a>
                     <a href="{{ route('schedule.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('schedule.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Schedule</a>
                     <a href="{{ route('gallery.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('gallery.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Gallery</a>
                     <a href="{{ route('news.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('news.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">News</a>
                     <a href="{{ route('media.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('media.*') || request()->routeIs('videos.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Media</a>
                     <a href="{{ route('brochure.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('brochure.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Brochure</a>
+                    <a href="{{ route('supplement.index') }}" class="transition-colors hover:text-white {{ request()->routeIs('supplement.*') ? 'text-[#f3bd2e] font-normal border-b-2 border-[#f3bd2e] pb-1' : 'text-slate-300 font-light' }}">Supplement</a>
                 </nav>
 
                 <!-- Right Action CTAs: Student Portal Button -->
@@ -619,6 +621,11 @@
                    class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('results.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Festival Results
                 </a>
+                <a href="{{ route('groups.index') }}" 
+                   @click="mobileOpen = false" 
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('groups.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
+                    Team Standings
+                </a>
                 <a href="{{ route('schedule.index') }}" 
                    @click="mobileOpen = false" 
                    class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('schedule.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
@@ -643,6 +650,11 @@
                    @click="mobileOpen = false" 
                    class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('brochure.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
                     Official Brochure
+                </a>
+                <a href="{{ route('supplement.index') }}" 
+                   @click="mobileOpen = false" 
+                   class="block py-2.5 px-4 rounded-2xl text-base font-semibold tracking-wide transition-all transform active:scale-95 {{ request()->routeIs('supplement.*') ? 'bg-white/20 text-[#f3bd2e] shadow-xs font-bold border border-white/25 backdrop-blur-md' : 'text-white/90 hover:text-white hover:bg-white/15 border border-transparent hover:border-white/15' }}">
+                    Official Supplement
                 </a>
             </nav>
 

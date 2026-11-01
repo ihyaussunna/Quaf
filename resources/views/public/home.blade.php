@@ -632,11 +632,12 @@
                                         </div>
                                     </div>
                                 @elseif($rank === 3)
-                                    <!-- Rank 3 Row (Bronze Theme) -->
-                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white border border-amber-600/35 flex items-center justify-between gap-3 shadow-2xs transition-all ring-1 ring-amber-600/20">
+                                    <!-- Rank 3 Row (Bronze Theme - Clean stroke, rich visibility) -->
+                                    <div class="rounded-2xl p-3 sm:p-3.5 bg-gradient-to-r from-amber-50/60 via-orange-50/25 to-white border border-amber-300/80 flex items-center justify-between gap-3 shadow-xs transition-all">
                                         <div class="flex items-center gap-3 min-w-0">
                                             <!-- Rank 3 Bronze Number Box -->
-                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#d97706] to-[#92400e] text-white font-sora font-black text-sm flex items-center justify-center shadow-xs shrink-0 border border-amber-600/30">
+                                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-white font-sora font-black text-sm flex items-center justify-center shadow-xs shrink-0"
+                                                 style="background: linear-gradient(135deg, #c26928 0%, #92400e 100%);">
                                                 3
                                             </div>
 
@@ -654,10 +655,10 @@
 
                                         <!-- Points -->
                                         <div class="flex items-baseline gap-1 shrink-0 text-right">
-                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-800 leading-none">
+                                            <span class="font-sora font-black text-xl sm:text-2xl text-amber-700 leading-none">
                                                 {{ number_format($group->public_points_cache ?? 0) }}
                                             </span>
-                                            <span class="text-[10px] font-mono text-amber-900/60 uppercase tracking-widest font-semibold">
+                                            <span class="text-[10px] font-mono text-amber-800/60 uppercase tracking-widest font-semibold">
                                                 PTS
                                             </span>
                                         </div>

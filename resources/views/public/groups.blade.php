@@ -84,10 +84,10 @@
                             </svg>
                         </div>
 
-                        <!-- Malayalam & English Title -->
+                        <!-- Title -->
                         <div>
-                            <div class="text-xs sm:text-sm font-ml font-bold text-amber-200">
-                                ഫെസ്റ്റിവൽ അന്തിമ വിജയികൾ &bull; ഔദ്യോഗിക ഓവറോൾ ചാമ്പ്യൻഷിപ്പ്
+                            <div class="text-xs sm:text-sm font-mono tracking-widest uppercase font-bold text-amber-300">
+                                Official Festival Championship
                             </div>
                             <h2 class="text-3xl sm:text-5xl lg:text-6xl font-sora font-black tracking-tight text-white mt-1">
                                 {{ $championGroup->name ?? 'CHAMPION' }}
@@ -126,7 +126,7 @@
                         <div class="pt-2">
                             <button type="button" onclick="launchConfettiCannon()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-sora font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-400/30 flex items-center gap-2 mx-auto cursor-pointer">
                                 <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                                <span>Celebrate Again (വീണ്ടും ആഘോഷിക്കുക)</span>
+                                <span>Celebrate Again</span>
                             </button>
                         </div>
 
@@ -231,11 +231,12 @@
                             </div>
                         </div>
                     @elseif($rank === 3)
-                        <!-- Rank 3 Row (Bronze Theme) -->
-                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white border border-amber-600/35 flex items-center justify-between gap-4 shadow-2xs transition-all ring-1 ring-amber-600/20">
+                        <!-- Rank 3 Row (Bronze Theme - Clean stroke, rich visibility) -->
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/60 via-orange-50/25 to-white border border-amber-300/80 flex items-center justify-between gap-4 shadow-xs transition-all">
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
                                 <!-- Rank 3 Bronze Number Box -->
-                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#d97706] to-[#92400e] text-white font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0 border border-amber-600/30">
+                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl text-white font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0"
+                                     style="background: linear-gradient(135deg, #c26928 0%, #92400e 100%);">
                                     3
                                 </div>
 
@@ -253,10 +254,10 @@
 
                             <!-- Points -->
                             <div class="flex items-baseline gap-1.5 shrink-0 text-right">
-                                <span class="font-sora font-black text-2xl sm:text-3xl lg:text-4xl text-amber-800 leading-none">
+                                <span class="font-sora font-black text-2xl sm:text-3xl lg:text-4xl text-amber-700 leading-none">
                                     {{ number_format($group->public_points_cache ?? 0) }}
                                 </span>
-                                <span class="text-xs sm:text-sm font-mono text-amber-900/60 uppercase tracking-widest font-semibold">
+                                <span class="text-xs sm:text-sm font-mono text-amber-800/60 uppercase tracking-widest font-semibold">
                                     PTS
                                 </span>
                             </div>
@@ -299,13 +300,13 @@
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#be1e2d] text-white uppercase">OFFICIAL POSTER</span>
                             <span class="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{{ $standingsLabel }}</span>
                         </div>
-                        <h2 class="text-xl font-sora font-extrabold text-slate-900 mt-1">ടീം സ്റ്റാൻഡിങ്സ് ഒഫീഷ്യൽ പോസ്റ്റർ</h2>
+                        <h2 class="text-xl font-sora font-extrabold text-slate-900 mt-1">Official Standings Poster</h2>
                         <p class="text-xs text-slate-500 font-mono mt-0.5">Official cumulative leaderboard graphic poster</p>
                     </div>
 
-                    <a href="{{ $standingsPoster }}" download="QUAF_Standings_{{ Str::slug($standingsLabel) }}.jpg" target="_blank" class="px-5 py-2.5 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shrink-0">
+                    <a href="{{ route('groups.download-poster') }}" class="px-5 py-2.5 rounded-2xl bg-[#be1e2d] hover:bg-[#a01824] text-white font-sora font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shrink-0">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Download Poster (ഡൗൺലോഡ്)</span>
+                        <span>Download Poster</span>
                     </a>
                 </div>
 

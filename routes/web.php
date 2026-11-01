@@ -59,6 +59,7 @@ use App\Http\Controllers\Public\QfDirectoryController;
 use App\Http\Controllers\Public\ResultController;
 use App\Http\Controllers\Public\ScheduleController;
 use App\Http\Controllers\Public\SitemapController;
+use App\Http\Controllers\Public\SupplementController;
 use App\Http\Controllers\Public\VerificationController;
 use App\Http\Controllers\Public\VideoController;
 use App\Http\Controllers\Student\StudentController;
@@ -148,6 +149,7 @@ Route::get('/gallery/{item}/download', [GalleryController::class, 'download'])->
 Route::get('/media', [VideoController::class, 'mediaHub'])->name('media.index');
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/brochure', [BrochureController::class, 'index'])->name('brochure.index');
+Route::get('/supplement', [SupplementController::class, 'index'])->name('supplement.index');
 Route::get('/dp', [DpMakerController::class, 'index'])->name('dp.index');
 Route::get('/dp-maker', fn () => redirect()->route('dp.index'))->name('dp.maker');
 Route::get('/be-quaf', fn () => redirect()->route('dp.index'))->name('dp.be-quaf');

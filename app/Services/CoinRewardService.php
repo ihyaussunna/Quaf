@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CoinTransaction;
+use App\Models\FestivalSetting;
 use App\Models\Program;
 use App\Models\ProgramEntry;
 use App\Models\Result;
@@ -229,6 +230,30 @@ class CoinRewardService
     }
 
     /**
+     * Determine if a program is specifically excluded from coin rewards.
+     * E.g., Q9-236 Insight (coins should not be distributed to registered participants).
+     */
+    public static function isProgramExcludedFromCoins(?Program $program): bool
+    {
+        if (! $program) {
+            return true;
+        }
+
+        $code = strtoupper(trim((string) $program->code));
+        $name = strtolower(trim((string) $program->name));
+
+        if ($code === 'Q9-236' || $name === 'insight') {
+            return true;
+        }
+
+        if (FestivalSetting::get("program_coins_disabled_{$program->id}", false) === '1') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Generate preview of coin distribution for a group or individual program result prior to publishing.
      *
      * @return array<string, mixed>
@@ -239,6 +264,21 @@ class CoinRewardService
 
         $program = $result->program ?? Program::find($result->program_id);
         $isGroup = $program ? $program->isGroup() : false;
+
+        if (self::isProgramExcludedFromCoins($program)) {
+            return [
+                'program_id' => $program?->id,
+                'program_name' => $program?->name ?? 'Unknown Program',
+                'program_code' => $program?->code ?? '',
+                'is_group' => $isGroup,
+                'reward_rule_id' => self::REWARD_RULE_ID,
+                'placements' => [],
+                'total_eligible_participants' => 0,
+                'total_coins_to_credit' => 0,
+                'can_publish' => true,
+                'flags' => ["ഈ പ്രോഗ്രാമിന് ({$program?->code} {$program?->name}) വിദ്യാർത്ഥികൾക്ക് കോയിൻ നൽകേണ്ടതില്ല എന്ന് ഒഴിവാക്കിയിരിക്കുന്നു."],
+            ];
+        }
 
         $placements = [];
         $totalParticipants = 0;
@@ -341,7 +381,7 @@ class CoinRewardService
         CoinTransaction::ensureSchema();
 
         $program = $result->program ?? Program::find($result->program_id);
-        if (! $program) {
+        if (! $program || self::isProgramExcludedFromCoins($program)) {
             return [
                 'credited_count' => 0,
                 'total_coins' => 0,

@@ -19,9 +19,20 @@
     @keydown.escape.window="closeResult()"
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-16">
     <!-- Header -->
-    <div class="mb-5 sm:mb-8 text-center sm:text-left">
-        <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">OFFICIAL CONCLAVE VERDICTS</span>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2 animate-heading">Festival Results</h1>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 sm:mb-8 text-center sm:text-left">
+        <div>
+            <span class="text-xs font-mono font-bold tracking-widest text-[#be1e2d] uppercase animate-subheading">OFFICIAL CONCLAVE VERDICTS</span>
+            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-sora font-black text-slate-900 mt-1 sm:mt-2 animate-heading">Festival Results</h1>
+        </div>
+
+        <!-- Direct Team Standings Button -->
+        <div class="flex items-center justify-center sm:justify-end gap-2 shrink-0">
+            <a href="{{ route('groups.index') }}" 
+               class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-sora font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg active:scale-95 shrink-0">
+                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span>Team Standings &rarr;</span>
+            </a>
+        </div>
     </div>
 
     <!-- Quick Zone Chips (App-Style One-Tap Mobile Scroller) -->

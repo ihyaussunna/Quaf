@@ -1,0 +1,559 @@
+@extends('layouts.public', [
+    'title' => 'QUAF Official Festival Supplement — Digital Book Experience',
+    'metaDescription' => 'QUAF 2026 Official Festival Supplement Digital Book Experience. Official Supplement for QUAF Markaz Cultural Festival.',
+])
+
+@push('styles')
+    <style>
+        /* Clean Supplement Display — Strictly No Shadows Underneath */
+        .page {
+            box-shadow: none !important;
+            background: #ffffff;
+        }
+        .page.--left {
+            border-right: 1px solid rgba(0, 0, 0, 0.08);
+            background: linear-gradient(to right, #ffffff 0%, #fbfbfb 93%, #f0f0f0 100%);
+        }
+        .page.--right {
+            border-left: 1px solid rgba(0, 0, 0, 0.08);
+            background: linear-gradient(to left, #ffffff 0%, #fbfbfb 93%, #f0f0f0 100%);
+        }
+        #flipbook,
+        #flipbook .stf__parent,
+        #flipbook .stf__wrapper,
+        #flipbook .stf__item,
+        #flipbook .page,
+        .stf__shadow {
+            box-shadow: none !important;
+            filter: none !important;
+        }
+        #book-stage:fullscreen {
+            background-color: #020617;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+    </style>
+@endpush
+
+@section('content')
+<div class="w-full bg-[#020617] text-white relative flex flex-col justify-between py-4 sm:py-6 overflow-hidden min-h-[calc(100vh-140px)] select-none"
+     x-data="supplementFlipViewer({
+         totalPages: {{ count($supplement['pages']) }}
+     })"
+     x-init="initViewer()"
+     @mousemove="handleActivity()"
+     @touchstart.passive="handleActivity()"
+     @keydown.window.left="prevPage()"
+     @keydown.window.right="nextPage()">
+
+    <!-- Subtle Minimal Header Bar inside Supplement canvas -->
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-8 py-2 flex items-center justify-between z-20 transition-opacity duration-300 pointer-events-none shrink-0"
+         :class="controlsVisible ? 'opacity-90' : 'opacity-0'">
+        <div class="flex items-center gap-2.5">
+            <span class="w-2 h-2 rounded-full bg-[#f3bd2e] animate-pulse"></span>
+            <div>
+                <h1 class="text-xs sm:text-sm font-bold tracking-wider text-[#f3bd2e] uppercase font-sora">Official Festival Supplement</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{{ route('brochure.index') }}" class="pointer-events-auto text-xs text-slate-300 hover:text-white underline decoration-slate-500 font-mono hidden sm:inline">
+                &larr; View Main Brochure
+            </a>
+            <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] sm:text-[11px] font-mono tracking-wider backdrop-blur-md border border-white/10">
+                {{ count($supplement['pages']) }} Pages
+            </span>
+        </div>
+    </div>
+
+    <!-- Center Stage: Digital Flipbook Magazine Viewer with Double-Tap Zoom & Pan -->
+    <div class="flex-1 flex items-center justify-center relative px-2 sm:px-10 py-2 overflow-hidden w-full min-h-[500px] sm:min-h-[620px]" 
+         id="book-stage">
+        
+        <!-- Loading Spinner -->
+        <div x-show="loading" class="flex flex-col items-center justify-center gap-3 z-20 text-center py-20">
+            <div class="w-10 h-10 border-4 border-[#f3bd2e] border-t-transparent rounded-full animate-spin"></div>
+            <p class="font-sora font-semibold text-xs text-slate-300">Loading Festival Supplement...</p>
+        </div>
+
+        <!-- Floating Left Navigation Arrow -->
+        <button @click="prevPage()"
+                type="button"
+                x-show="!loading && hasPrev && zoomLevel === 1.0"
+                class="flex absolute left-2 sm:left-4 lg:left-8 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl active:scale-95 focus:outline-none cursor-pointer"
+                :class="controlsVisible ? 'opacity-90' : 'opacity-20 hover:opacity-100'"
+                aria-label="Previous Page">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+
+        <!-- Book Viewport Container -->
+        <div id="book-wrapper" 
+             class="relative z-10 max-w-full flex items-center justify-center transition-transform duration-150 origin-center"
+             :style="`transform: translate3d(${panX}px, ${panY}px, 0) scale(${zoomLevel})`"
+             @touchstart="handleTouchStart($event)"
+             @touchmove="handleTouchMove($event)"
+             @touchend="handleTouchEnd($event)"
+             @dblclick="toggleZoom()">
+            
+            <div id="flipbook" class="shadow-none rounded-sm">
+                @foreach ($supplement['pages'] as $index => $pageUrl)
+                    <div class="page bg-white overflow-hidden flex items-center justify-center"
+                         data-density="{{ ($index === 0 || $index === count($supplement['pages']) - 1) ? 'hard' : 'soft' }}">
+                        <img src="{{ $pageUrl }}" 
+                             alt="Page {{ $index + 1 }}" 
+                             class="w-full h-full object-contain pointer-events-none select-none"
+                             loading="{{ $index < 4 ? 'eager' : 'lazy' }}"
+                             draggable="false">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Floating Right Navigation Arrow -->
+        <button @click="nextPage()"
+                type="button"
+                x-show="!loading && hasNext && zoomLevel === 1.0"
+                class="flex absolute right-2 sm:right-4 lg:right-8 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 items-center justify-center z-30 transition-all shadow-xl active:scale-95 focus:outline-none cursor-pointer"
+                :class="controlsVisible ? 'opacity-90' : 'opacity-20 hover:opacity-100'"
+                aria-label="Next Page">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+
+    <!-- Floating Bottom Glass Controls Toolbar -->
+    <div class="w-full px-2 sm:px-4 py-2 sm:py-3.5 flex flex-col items-center gap-1.5 sm:gap-2 z-30 transition-opacity duration-300 pointer-events-none shrink-0"
+         :class="controlsVisible ? 'opacity-100' : 'opacity-0'">
+        
+        <div class="bg-slate-900/95 backdrop-blur-md pointer-events-auto rounded-2xl px-3 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-center gap-2 sm:gap-4 shadow-2xl border border-white/10 text-xs font-mono max-w-[95vw]">
+            
+            <!-- Previous Button -->
+            <button @click="prevPage()"
+                    :disabled="!hasPrev"
+                    class="flex items-center gap-1 text-slate-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-2 py-1.5 rounded-lg active:bg-white/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                <span class="hidden sm:inline">Prev</span>
+            </button>
+
+            <!-- Page Counter Display -->
+            <div class="px-2.5 sm:px-3.5 py-1 rounded-xl bg-white/10 text-white font-bold tracking-wider text-[11px] sm:text-xs shrink-0">
+                <span x-text="pageIndicator">1 / {{ count($supplement['pages']) }}</span>
+            </div>
+
+            <!-- Next Button -->
+            <button @click="nextPage()"
+                    :disabled="!hasNext"
+                    class="flex items-center gap-1 text-slate-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors font-semibold cursor-pointer px-2 py-1.5 rounded-lg active:bg-white/10">
+                <span class="hidden sm:inline">Next</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+
+            <!-- Download PDF Button -->
+            <a href="{{ $supplement['pdf_url'] }}" 
+               download="QUAF_9.0_Official_Supplement.pdf"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#be1e2d] hover:bg-[#991522] text-white font-bold text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer shrink-0"
+               title="Download Supplement PDF">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="font-sora text-[11px] font-semibold">PDF</span>
+            </a>
+
+            <span class="w-px h-4 bg-white/20 hidden sm:inline-block"></span>
+
+            <!-- Paper Turn Sound Toggle -->
+            <button @click="soundEnabled = !soundEnabled"
+                    class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer hidden sm:flex items-center"
+                    :title="soundEnabled ? 'Mute Page Turn Sound' : 'Enable Page Turn Sound'">
+                <template x-if="soundEnabled">
+                    <svg class="w-4 h-4 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                </template>
+                <template x-if="!soundEnabled">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z m12-4l4 4m0-4l-4 4"></path></svg>
+                </template>
+            </button>
+
+            <!-- Zoom Controls -->
+            <div class="hidden sm:flex items-center gap-1.5">
+                <button @click="zoomOut()" 
+                        class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" 
+                        title="Zoom Out (−)">
+                    −
+                </button>
+                <button @click="toggleZoom()" 
+                        class="text-[11px] text-slate-300 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 cursor-pointer text-center" 
+                        title="Toggle Zoom">
+                    <span x-text="Math.round(zoomLevel * 100) + '%'">100%</span>
+                </button>
+                <button @click="zoomIn()" 
+                        class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold cursor-pointer" 
+                        title="Zoom In (+)">
+                    +
+                </button>
+            </div>
+
+            <span class="w-px h-4 bg-white/20 hidden sm:inline-block"></span>
+
+            <!-- Fullscreen Button -->
+            <button @click="toggleFullscreen()" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hidden sm:flex items-center justify-center cursor-pointer" title="Toggle Fullscreen">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('vendor/page-flip/page-flip.browser.js') }}"></script>
+<script>
+    function supplementFlipViewer(config) {
+        return {
+            pageFlip: null,
+            loading: true,
+            isFlipping: false,
+            currentPage: 0,
+            totalPages: config.totalPages || 12,
+            pageIndicator: '1 / ' + (config.totalPages || 12),
+            zoomLevel: 1.0,
+            panX: 0,
+            panY: 0,
+            isPanning: false,
+            panStartX: 0,
+            panStartY: 0,
+            isPinching: false,
+            pinchStartDist: 0,
+            initialPinchZoom: 1.0,
+            lastTapTime: 0,
+            lastTapX: 0,
+            lastTapY: 0,
+            touchStartX: 0,
+            touchStartY: 0,
+            controlsVisible: true,
+            soundEnabled: true,
+            idleTimer: null,
+            isMobile: window.innerWidth < 768,
+
+            get hasPrev() {
+                const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
+                return cur > 0;
+            },
+            get hasNext() {
+                const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
+                return cur < this.totalPages - 1;
+            },
+
+            handleActivity() {
+                this.controlsVisible = true;
+                clearTimeout(this.idleTimer);
+                this.idleTimer = setTimeout(() => {
+                    this.controlsVisible = false;
+                }, 4000);
+            },
+
+            playFlipSound() {
+                if (!this.soundEnabled) return;
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    if (!this.audioCtx) {
+                        this.audioCtx = new AudioContext();
+                    }
+                    const ctx = this.audioCtx;
+                    if (ctx.state === 'suspended') {
+                        ctx.resume();
+                    }
+
+                    const now = ctx.currentTime;
+                    const duration = 0.22;
+                    const sampleRate = ctx.sampleRate;
+                    const bufferSize = Math.floor(sampleRate * duration);
+                    const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+                    const data = buffer.getChannelData(0);
+
+                    // Natural paper fiber friction synthesis
+                    let b0 = 0, b1 = 0, b2 = 0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        const white = (Math.random() * 2 - 1);
+                        b0 = 0.99886 * b0 + white * 0.0555179;
+                        b1 = 0.99332 * b1 + white * 0.0750759;
+                        b2 = 0.96900 * b2 + white * 0.1538520;
+                        const pink = (b0 + b1 + b2 + white * 0.5362) * 0.11;
+
+                        const progress = i / bufferSize;
+                        const envelope = Math.sin(progress * Math.PI) * Math.pow(1 - progress, 0.45);
+                        data[i] = pink * envelope;
+                    }
+
+                    const source = ctx.createBufferSource();
+                    source.buffer = buffer;
+
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(1100, now);
+                    filter.frequency.exponentialRampToValueAtTime(2600, now + 0.07);
+                    filter.frequency.exponentialRampToValueAtTime(950, now + duration);
+                    filter.Q.setValueAtTime(1.4, now);
+
+                    const shelf = ctx.createBiquadFilter();
+                    shelf.type = 'highshelf';
+                    shelf.frequency.setValueAtTime(3600, now);
+                    shelf.gain.setValueAtTime(-5, now);
+
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.linearRampToValueAtTime(0.32, now + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                    source.connect(filter);
+                    filter.connect(shelf);
+                    shelf.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    source.start(now);
+                } catch (e) {}
+            },
+
+            initViewer() {
+                this.handleActivity();
+                const container = document.getElementById('flipbook');
+                const isSmall = window.innerWidth < 768;
+
+                const availableWidth = Math.min(window.innerWidth - (isSmall ? 16 : 80), 1200);
+                const maxSinglePageWidth = Math.floor(availableWidth / 2);
+                const maxSinglePageHeight = Math.max(160, Math.floor(window.innerHeight - (isSmall ? 210 : 190)));
+                const pageDim = Math.min(maxSinglePageWidth, maxSinglePageHeight);
+
+                try {
+                    const PageFlipClass = window.St?.PageFlip || window.PageFlip;
+                    const pageNodes = document.querySelectorAll('.page');
+
+                    this.pageFlip = new PageFlipClass(container, {
+                        width: pageDim,
+                        height: pageDim,
+                        size: 'fixed',
+                        minWidth: 140,
+                        maxWidth: 900,
+                        minHeight: 140,
+                        maxHeight: 900,
+                        drawShadow: false,
+                        maxShadowOpacity: 0,
+                        showCover: true,
+                        usePortrait: false,
+                        startPage: 0,
+                        flippingTime: 500,
+                        useMouseEvents: true,
+                        swipeDistance: 99999,
+                        clickEventForward: false,
+                        disableFlipByClick: true,
+                        showPageCorners: false
+                    });
+
+                    this.pageFlip.loadFromHTML(pageNodes);
+
+                    this.pageFlip.on('flip', (e) => {
+                        this.currentPage = e.data;
+                        this.isFlipping = false;
+                        this.playFlipSound();
+                        this.updatePageIndicator();
+                    });
+
+                    this.loading = false;
+                    this.updatePageIndicator();
+
+                } catch (err) {
+                    console.error('PageFlip initialization error:', err);
+                    this.loading = false;
+                }
+            },
+
+            handleTouchStart(e) {
+                this.handleActivity();
+
+                if (e.touches.length >= 2) {
+                    this.isPinching = true;
+                    this.pinchStartDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    this.initialPinchZoom = this.zoomLevel;
+                    e.stopPropagation();
+                    return;
+                }
+
+                const now = Date.now();
+                const touch = e.touches[0];
+                const timeDelta = now - this.lastTapTime;
+                const distDelta = Math.hypot(touch.clientX - this.lastTapX, touch.clientY - this.lastTapY);
+
+                if (timeDelta < 320 && distDelta < 40) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleZoom();
+                    this.lastTapTime = 0;
+                    return;
+                }
+
+                this.lastTapTime = now;
+                this.lastTapX = touch.clientX;
+                this.lastTapY = touch.clientY;
+                this.touchStartX = touch.clientX;
+                this.touchStartY = touch.clientY;
+
+                if (this.zoomLevel > 1.0) {
+                    this.isPanning = true;
+                    this.panStartX = touch.clientX - this.panX;
+                    this.panStartY = touch.clientY - this.panY;
+                    e.stopPropagation();
+                }
+            },
+
+            handleTouchMove(e) {
+                if (e.touches.length >= 2 && this.isPinching) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    if (this.pinchStartDist > 0) {
+                        const scaleMultiplier = currentDist / this.pinchStartDist;
+                        let newZoom = +(this.initialPinchZoom * scaleMultiplier).toFixed(2);
+                        newZoom = Math.max(1.0, Math.min(2.5, newZoom));
+                        this.zoomLevel = newZoom;
+                        if (this.zoomLevel === 1.0) {
+                            this.panX = 0;
+                            this.panY = 0;
+                        }
+                    }
+                    return;
+                }
+
+                if (this.zoomLevel > 1.0 && this.isPanning && e.touches.length === 1) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const touch = e.touches[0];
+                    const newPanX = touch.clientX - this.panStartX;
+                    const newPanY = touch.clientY - this.panStartY;
+                    const maxPanX = (window.innerWidth * (this.zoomLevel - 1)) / 1.5;
+                    const maxPanY = (window.innerHeight * (this.zoomLevel - 1)) / 1.5;
+                    this.panX = Math.max(-maxPanX, Math.min(maxPanX, newPanX));
+                    this.panY = Math.max(-maxPanY, Math.min(maxPanY, newPanY));
+                }
+            },
+
+            handleTouchEnd(e) {
+                if (e.touches.length < 2) {
+                    this.isPinching = false;
+                }
+                if (e.touches.length === 0) {
+                    if (!this.isPanning && this.zoomLevel === 1.0 && this.touchStartX && e.changedTouches && e.changedTouches.length > 0) {
+                        const touch = e.changedTouches[0];
+                        const deltaX = touch.clientX - this.touchStartX;
+                        const deltaY = touch.clientY - this.touchStartY;
+                        if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
+                            if (deltaX < 0) {
+                                this.nextPage();
+                            } else {
+                                this.prevPage();
+                            }
+                        }
+                    }
+                    this.isPanning = false;
+                    this.touchStartX = 0;
+                    this.touchStartY = 0;
+                }
+            },
+
+            toggleZoom() {
+                if (this.zoomLevel > 1.0) {
+                    this.zoomLevel = 1.0;
+                    this.panX = 0;
+                    this.panY = 0;
+                } else {
+                    this.zoomLevel = 1.8;
+                }
+            },
+
+            updatePageIndicator() {
+                const cur = this.pageFlip ? this.pageFlip.getCurrentPageIndex() : this.currentPage;
+                this.currentPage = cur;
+                if (cur === 0) {
+                    this.pageIndicator = `Cover (1 / ${this.totalPages})`;
+                } else if (cur >= this.totalPages - 1) {
+                    this.pageIndicator = `Back Cover (${this.totalPages} / ${this.totalPages})`;
+                } else {
+                    const left = cur + 1;
+                    const right = Math.min(cur + 2, this.totalPages);
+                    this.pageIndicator = this.isMobile 
+                        ? `${left}–${right} / ${this.totalPages}` 
+                        : `Pages ${left}–${right} of ${this.totalPages}`;
+                }
+            },
+
+            prevPage() {
+                if (this.isFlipping) return;
+                if (this.pageFlip && this.hasPrev) {
+                    if (this.zoomLevel > 1.0) {
+                        this.zoomLevel = 1.0;
+                        this.panX = 0;
+                        this.panY = 0;
+                    }
+                    this.isFlipping = true;
+                    try {
+                        this.pageFlip.flipPrev();
+                    } catch (e) {
+                        this.pageFlip.turnToPrevPage();
+                    }
+                    setTimeout(() => { this.isFlipping = false; }, 550);
+                }
+            },
+
+            nextPage() {
+                if (this.isFlipping) return;
+                if (this.pageFlip && this.hasNext) {
+                    if (this.zoomLevel > 1.0) {
+                        this.zoomLevel = 1.0;
+                        this.panX = 0;
+                        this.panY = 0;
+                    }
+                    this.isFlipping = true;
+                    try {
+                        this.pageFlip.flipNext();
+                    } catch (e) {
+                        this.pageFlip.turnToNextPage();
+                    }
+                    setTimeout(() => { this.isFlipping = false; }, 550);
+                }
+            },
+
+            zoomIn() {
+                if (this.zoomLevel < 2.5) {
+                    this.zoomLevel = +(this.zoomLevel + 0.2).toFixed(1);
+                }
+            },
+
+            zoomOut() {
+                if (this.zoomLevel > 1.0) {
+                    this.zoomLevel = +(this.zoomLevel - 0.2).toFixed(1);
+                    if (this.zoomLevel <= 1.0) {
+                        this.zoomLevel = 1.0;
+                        this.panX = 0;
+                        this.panY = 0;
+                    }
+                }
+            },
+
+            toggleFullscreen() {
+                const el = document.getElementById('book-stage') || document.documentElement;
+                if (!document.fullscreenElement) {
+                    el.requestFullscreen?.().catch(() => {
+                        document.documentElement.requestFullscreen?.().catch(err => console.log(err));
+                    });
+                } else {
+                    document.exitFullscreen?.().catch(err => console.log(err));
+                }
+            }
+        };
+    }
+    window.supplementFlipViewer = supplementFlipViewer;
+</script>
+@endsection

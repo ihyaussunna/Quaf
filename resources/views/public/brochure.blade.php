@@ -60,7 +60,10 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('supplement.index') }}" class="pointer-events-auto text-xs text-slate-300 hover:text-white underline decoration-slate-500 font-mono hidden sm:inline">
+                &rarr; View Festival Supplement
+            </a>
             <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-[10px] sm:text-[11px] font-mono tracking-wider backdrop-blur-md border border-white/10">
                 {{ count($brochure['pages']) }} Pages
             </span>
