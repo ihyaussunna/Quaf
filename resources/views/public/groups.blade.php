@@ -60,23 +60,12 @@
                     Final Team Standings
                 </h1>
 
-                <div class="flex flex-wrap items-center justify-center gap-3 pt-1"
-                     style="animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.5s;">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300/80 font-mono font-bold text-xs shadow-2xs">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300/80 font-mono font-bold text-xs shadow-2xs"
+                         style="animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.5s;">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>All {{ $totalPrograms > 0 ? $totalPrograms : 143 }} Results Declared</span>
                     </div>
-
-                    @if(!empty($standingsPoster))
-                        <a href="{{ route('groups.download-poster') }}" download class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#be1e2d] to-[#991522] hover:from-[#991522] hover:to-[#80101b] text-white font-sora font-black text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg active:scale-95">
-                            <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Download Final Result Poster</span>
-                        </a>
-                        <a href="#official-poster" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-200 font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-2xs">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <span>View Poster</span>
-                        </a>
-                    @endif
                 </div>
             </div>
         @else

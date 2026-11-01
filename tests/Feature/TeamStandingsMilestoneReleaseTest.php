@@ -602,7 +602,6 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
 
         $finalGroupsView = $this->get(route('groups.index'));
         $finalGroupsView->assertOk();
-        $finalGroupsView->assertSee('Download Final Result Poster');
         $finalGroupsView->assertSee('Official Final Championship Result Poster');
         $finalGroupsView->assertSee('Download Poster');
         $finalGroupsView->assertSee($posterUrl);
