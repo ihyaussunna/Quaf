@@ -578,7 +578,9 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('admin.results.planner');
         $response->assertViewHas('publishedCount');
+        $response->assertViewHas('sentToAnnouncerCount');
         $response->assertViewHas('stats');
+        $response->assertSee('അനൗൺസർക്ക് അയച്ചവ');
         $response->assertSee('Print Standings PDF');
     }
 }

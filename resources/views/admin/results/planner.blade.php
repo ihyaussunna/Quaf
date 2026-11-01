@@ -44,14 +44,14 @@
             <div class="text-[10px] text-slate-400 mt-1 font-mono">100% Festival Slate</div>
         </div>
 
-        <!-- 2. Published Results -->
-        <div class="bg-emerald-50/60 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-2xs">
-            <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center justify-between">
-                <span>പ്രസിദ്ധീകരിച്ച ഫലങ്ങൾ</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <!-- 2. Sent to Announcer (Stage Announced & Standing Base) -->
+        <div class="bg-purple-50/70 p-4 sm:p-5 rounded-2xl border border-purple-200/80 shadow-2xs">
+            <div class="text-[11px] font-bold text-purple-900 uppercase tracking-wider flex items-center justify-between">
+                <span>അനൗൺസർക്ക് അയച്ചവ</span>
+                <span class="w-2 h-2 rounded-full bg-purple-600"></span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-emerald-950 font-mono mt-1">{{ $stats['published_count'] }}</div>
-            <div class="text-[10px] text-emerald-700 mt-1 font-mono">പോസ്റ്ററുകൾ പബ്ലിഷായവ</div>
+            <div class="text-2xl sm:text-3xl font-black text-purple-950 font-mono mt-1">{{ $sentToAnnouncerCount }}</div>
+            <div class="text-[10px] text-purple-700 mt-1 font-mono">സ്റ്റാൻഡിങ്സ് അടിസ്ഥാനം (Published: {{ $stats['published_count'] }})</div>
         </div>
 
         <!-- 3. Ready Awaiting Announcement / Stage Queue -->
@@ -130,9 +130,14 @@
                         <div class="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">Live Standings Simulator</div>
                         <h3 class="text-sm font-black text-white mt-0.5">അടുത്ത അനൗൺസ്‌മെന്റിലെ പ്രൊജക്ഷൻ</h3>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/10 text-slate-300">
-                        <span x-text="selectedResultIds.length"></span> Selected
-                    </span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/30 text-purple-200 border border-purple-500/40" title="അനൗൺസർക്ക് അയച്ച ഫലങ്ങൾ">
+                            അനൗൺസർക്ക്: {{ $sentToAnnouncerCount }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/10 text-slate-300">
+                            <span x-text="selectedResultIds.length"></span> Selected
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Simulation Status Banner -->
@@ -221,7 +226,7 @@
                     <!-- PDF Print / Export Milestone Standings -->
                     <div class="pt-3 border-t border-white/10 flex items-center justify-between">
                         <span class="text-[11px] text-slate-400 font-mono">Standings PDF:</span>
-                        <a :href="'{{ route('admin.print.milestone-standings') }}?count=' + ({{ $stats['published_count'] }} + selectedResultIds.length)"
+                        <a :href="'{{ route('admin.print.milestone-standings') }}?count=' + totalStandingsCount"
                            target="_blank"
                            class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs transition flex items-center gap-1.5 border border-white/15">
                             <svg class="w-3.5 h-3.5 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
@@ -410,6 +415,7 @@ function toTitleCase(str) {
 function announcementPlanner() {
     const rawGroups = @json($groups);
     const rawResults = @json($resultsData);
+    const sentToAnnouncerCount = {{ $sentToAnnouncerCount }};
     const publishedCount = {{ $stats['published_count'] }};
 
     return {
@@ -507,9 +513,19 @@ function announcementPlanner() {
             return `ഈ ഫലങ്ങൾ പ്രഖ്യാപിച്ചാൽ '${leader.name}' ${leader.projected_points} പോയിന്റോടെ ഒന്നാം സ്ഥാനത്തെത്തും (+${lead} pts ലീഡ്)!`;
         },
 
+        get selectedNewCount() {
+            return this.selectedResultIds.filter(id => {
+                const r = this.results.find(res => res.id == id);
+                return r && r.status !== 'send' && r.status !== 'announced' && r.status !== 'published';
+            }).length;
+        },
+
+        get totalStandingsCount() {
+            return sentToAnnouncerCount + this.selectedNewCount;
+        },
+
         get suggestedMilestoneLabel() {
-            const count = publishedCount + this.selectedResultIds.length;
-            return `Standings after ${count} Results`;
+            return `Standings after ${this.totalStandingsCount} Results`;
         },
 
         selectAllReady() {

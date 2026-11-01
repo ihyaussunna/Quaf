@@ -627,11 +627,14 @@ class ResultController extends Controller
             ];
         }
 
+        $sentToAnnouncerCount = Result::whereIn('status', PointCalculationService::DECLARED_STATUSES)->count();
+
         $stats = [
             'total_programs' => Program::count(),
             'published_count' => Result::where('status', 'published')->count(),
             'send_count' => Result::where('status', 'send')->count(),
             'announced_count' => Result::where('status', 'announced')->count(),
+            'sent_to_announcer_count' => $sentToAnnouncerCount,
             'to_announce_count' => Result::whereNotIn('status', ['published', 'send', 'announced'])->count(),
             'at_announcer_count' => Result::whereIn('status', ['send', 'announced'])->count(),
             'ready_count' => Result::whereNotIn('status', ['published', 'send', 'announced'])->count(),
@@ -651,6 +654,7 @@ class ResultController extends Controller
             'resultsData',
             'groupStrategyStats',
             'stats',
+            'sentToAnnouncerCount',
             'publishedCount',
             'publicStandingsInfo'
         ));
@@ -730,7 +734,11 @@ class ResultController extends Controller
 
         if ($request->boolean('update_standings')) {
             $customLabel = $request->input('standings_label');
-            Group::publishStandings($customLabel);
+            $forceCount = null;
+            if ($customLabel && preg_match('~after\s+(\d+)~i', $customLabel, $m)) {
+                $forceCount = (int) $m[1];
+            }
+            Group::publishStandings($customLabel, $forceCount);
         }
 
         return back()->with('success', "{$count} ഫലങ്ങൾ വിജയകരമായി പബ്ലിഷ് ചെയ്യുകയും പോയിന്റ് നില അപ്‌ഡേറ്റ് ചെയ്യുകയും ചെയ്തു.");
