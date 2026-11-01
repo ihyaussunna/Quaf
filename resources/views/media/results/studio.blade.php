@@ -2229,6 +2229,24 @@ function posterStudio() {
                 };
                 $cleanWinnerNameColor = $formatHex($currentSettings['winner_name_color'] ?? '', '#D02627');
                 $cleanWinnerUnitColor = $formatHex($currentSettings['winner_unit_color'] ?? '', '#000000');
+
+                $formatWinnerList = function ($list, $fallbackName, $fallbackUnit) {
+                    if (!empty($list)) {
+                        return array_map(function ($w) {
+                            return [
+                                'name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''),
+                                'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? ''),
+                            ];
+                        }, array_values($list));
+                    }
+                    return [['name' => $fallbackName, 'unit' => $fallbackUnit]];
+                };
+
+                $formattedStudioWinners = [
+                    'first' => $formatWinnerList($winners['first'] ?? [], 'Muhammed Yaseen P.', 'Red Fox Team'),
+                    'second' => $formatWinnerList($winners['second'] ?? [], 'Ahmad Rayyan K.', 'Green Warriors'),
+                    'third' => $formatWinnerList($winners['third'] ?? [], 'Bilal Muhammed', 'Blue Riders'),
+                ];
             @endphp
             winner_name_size: {{ (float) ($currentSettings['winner_name_size'] ?? 34) }},
             winner_name_weight: '{{ $currentSettings["winner_name_weight"] ?? "400" }}',
@@ -2246,9 +2264,9 @@ function posterStudio() {
             category: '{{ \App\Services\PointCalculationService::toTitleCase($result->program->zone?->name ?? $result->program->eligibility ?? "All Zones") }}',
             competition: '{{ \App\Services\PointCalculationService::toTitleCase($result->program->name) }}',
             winners: {
-                first: @json(!empty($winners['first']) ? array_map(fn($w) => ['name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''), 'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? '')], array_values($winners['first'])) : [['name' => 'Muhammed Yaseen P.', 'unit' => 'Red Fox Team']]),
-                second: @json(!empty($winners['second']) ? array_map(fn($w) => ['name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''), 'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? '')], array_values($winners['second'])) : [['name' => 'Ahmad Rayyan K.', 'unit' => 'Green Warriors']]),
-                third: @json(!empty($winners['third']) ? array_map(fn($w) => ['name' => \App\Services\PointCalculationService::toTitleCase($w['name'] ?? ''), 'unit' => \App\Services\PointCalculationService::toTitleCase($w['unit'] ?? '')], array_values($winners['third'])) : [['name' => 'Bilal Muhammed', 'unit' => 'Blue Riders']])
+                first: @json($formattedStudioWinners['first']),
+                second: @json($formattedStudioWinners['second']),
+                third: @json($formattedStudioWinners['third'])
             }
         },
 
