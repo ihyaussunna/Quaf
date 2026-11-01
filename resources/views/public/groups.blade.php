@@ -188,8 +188,9 @@
                     @endphp
 
                     @if($rank === 1)
-                        <!-- Rank 1 Row (Gold Theme) -->
-                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/90 via-yellow-50/40 to-white border border-amber-300/90 flex items-center justify-between gap-4 shadow-xs transition-all ring-1 ring-amber-400/20">
+                        <!-- Rank 1 Row (Gold Theme - Clean stroke like Rank 3) -->
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/90 via-yellow-50/40 to-white border border-amber-300/80 flex items-center justify-between gap-4 shadow-xs transition-all"
+                             style="border: 1px solid rgba(251, 191, 36, 0.8);">
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
                                 @if($showWinnerBadge)
                                     <!-- Trophy Box when Full Results Published -->
@@ -231,11 +232,12 @@
                             </div>
                         </div>
                     @elseif($rank === 2)
-                        <!-- Rank 2 Row (Silver Theme) -->
-                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-slate-100/90 via-slate-50/60 to-white border border-slate-300 flex items-center justify-between gap-4 shadow-2xs transition-all ring-1 ring-slate-300/40">
+                        <!-- Rank 2 Row (Silver Theme - Clean stroke like Rank 3, no black stroke) -->
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-slate-100/90 via-slate-50/60 to-white border border-amber-300/80 flex items-center justify-between gap-4 shadow-xs transition-all"
+                             style="border: 1px solid rgba(251, 191, 36, 0.8);">
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
                                 <!-- Rank 2 Silver Number Box -->
-                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400 text-slate-900 font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0 border border-slate-300">
+                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400 text-slate-900 font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0">
                                     2
                                 </div>
 
@@ -263,7 +265,8 @@
                         </div>
                     @elseif($rank === 3)
                         <!-- Rank 3 Row (Bronze Theme - Clean stroke, rich visibility) -->
-                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/60 via-orange-50/25 to-white border border-amber-300/80 flex items-center justify-between gap-4 shadow-xs transition-all">
+                        <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-50/60 via-orange-50/25 to-white border border-amber-300/80 flex items-center justify-between gap-4 shadow-xs transition-all"
+                             style="border: 1px solid rgba(251, 191, 36, 0.8);">
                             <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
                                 <!-- Rank 3 Bronze Number Box -->
                                 <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl text-white font-sora font-black text-base sm:text-lg flex items-center justify-center shadow-xs shrink-0"
