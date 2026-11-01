@@ -396,6 +396,7 @@ class CoinRewardService
             $totalCoins = 0;
             $affectedStudentIds = [];
             $isGroup = $program->isGroup();
+            $awardedStudentsInProgram = [];
 
             foreach ([1, 2, 3] as $pos) {
                 $posLabel = match ($pos) {
@@ -421,20 +422,16 @@ class CoinRewardService
                     }
 
                     foreach ($participants as $student) {
-                        $existing = CoinTransaction::where('result_id', $result->id)
-                            ->where('entry_id', $entry->id)
-                            ->where('student_id', $student->id)
-                            ->where('transaction_type', 'credit')
-                            ->first();
-
-                        if ($existing && (int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
-                            // Clean up any stale reversal transactions from prior edits
-                            CoinTransaction::where('result_id', $result->id)
-                                ->where('student_id', $student->id)
-                                ->where('transaction_type', 'reversal')
-                                ->delete();
-
-                            continue;
+                        // Strict Deduplication: If student was already awarded in this program, keep the higher reward and skip lower/duplicate
+                        if (isset($awardedStudentsInProgram[$student->id])) {
+                            $prev = $awardedStudentsInProgram[$student->id];
+                            if ($coins > $prev['coins']) {
+                                // Delete previous lower transaction
+                                CoinTransaction::where('id', $prev['tx_id'])->delete();
+                            } else {
+                                // Already has equal or higher reward for this program; skip duplicate
+                                continue;
+                            }
                         }
 
                         // Remove any stale reversal for this result & student so net matches exact new coins
@@ -443,17 +440,49 @@ class CoinRewardService
                             ->where('transaction_type', 'reversal')
                             ->delete();
 
-                        $ref = "COIN-RES{$result->id}-ENT{$entry->id}-STU{$student->id}-P{$pos}-CR";
+                        // Check if an existing credit transaction exists for this student in this program or result
+                        $existing = CoinTransaction::where('student_id', $student->id)
+                            ->where('transaction_type', 'credit')
+                            ->where(function ($q) use ($result, $program) {
+                                $q->where('result_id', $result->id)
+                                    ->orWhere('program_id', $program->id);
+                            })
+                            ->orderByDesc('coins')
+                            ->first();
+
+                        if ($existing) {
+                            // Clean up any extra duplicate credit transactions
+                            CoinTransaction::where('student_id', $student->id)
+                                ->where('transaction_type', 'credit')
+                                ->where('id', '!=', $existing->id)
+                                ->where(function ($q) use ($result, $program) {
+                                    $q->where('result_id', $result->id)
+                                        ->orWhere('program_id', $program->id);
+                                })
+                                ->delete();
+
+                            if ((int) $existing->coins === $coins && (int) $existing->prize_position === $pos && $existing->grade === ($grade ?: 'NO_GRADE')) {
+                                $awardedStudentsInProgram[$student->id] = [
+                                    'tx_id' => $existing->id,
+                                    'coins' => $coins,
+                                ];
+
+                                continue;
+                            }
+                        }
+
+                        $ref = "COIN-RES{$result->id}-STU{$student->id}-P{$pos}-CR";
                         $progType = $isGroup ? 'Group' : 'Individual';
 
-                        CoinTransaction::updateOrCreate(
+                        $tx = CoinTransaction::updateOrCreate(
+                            [
+                                'id' => $existing?->id,
+                            ],
                             [
                                 'result_id' => $result->id,
                                 'entry_id' => $entry->id,
                                 'student_id' => $student->id,
                                 'transaction_type' => 'credit',
-                            ],
-                            [
                                 'group_id' => $entry->group_id ?: $student->group_id,
                                 'program_id' => $program->id,
                                 'prize_position' => $pos,
@@ -475,6 +504,21 @@ class CoinRewardService
                                 ],
                             ]
                         );
+
+                        // Ensure no extra duplicate was left for this student and program
+                        CoinTransaction::where('student_id', $student->id)
+                            ->where('transaction_type', 'credit')
+                            ->where('id', '!=', $tx->id)
+                            ->where(function ($q) use ($result, $program) {
+                                $q->where('result_id', $result->id)
+                                    ->orWhere('program_id', $program->id);
+                            })
+                            ->delete();
+
+                        $awardedStudentsInProgram[$student->id] = [
+                            'tx_id' => $tx->id,
+                            'coins' => $coins,
+                        ];
 
                         $affectedStudentIds[] = $student->id;
                         $creditedCount++;
@@ -635,6 +679,9 @@ class CoinRewardService
     {
         CoinTransaction::ensureSchema();
 
+        // 0. Auto-cleanup any duplicate coin transactions for this student
+        self::cleanupDuplicateTransactionsForStudent($student);
+
         // 1. Direct entries (individual and leader entries)
         $directEntryIds = ProgramEntry::where('student_id', $student->id)->pluck('id')->all();
 
@@ -667,9 +714,158 @@ class CoinRewardService
             }
         }
 
+        // Re-run cleanup to guarantee no duplicate programs remain
+        self::cleanupDuplicateTransactionsForStudent($student);
+
         if ($updated) {
             $this->syncStudentCoinsCache([$student->id]);
         }
+    }
+
+    /**
+     * Clean up any duplicate credit transactions for a student so that a student
+     * has at most ONE credit transaction per program/result.
+     * Re-calculates and synchronizes the student's coins_cache immediately.
+     */
+    public static function cleanupDuplicateTransactionsForStudent(Student $student): bool
+    {
+        CoinTransaction::ensureSchema();
+
+        $duplicates = CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'credit')
+            ->where('coins', '>', 0)
+            ->get()
+            ->groupBy(function ($tx) {
+                return $tx->program_id ? 'prog_'.$tx->program_id : ($tx->result_id ? 'res_'.$tx->result_id : 'tx_'.$tx->id);
+            });
+
+        $hasDuplicates = false;
+        foreach ($duplicates as $groupKey => $txs) {
+            if ($txs->count() > 1 && ! str_starts_with($groupKey, 'tx_')) {
+                $hasDuplicates = true;
+                // Keep the best transaction (highest coins, earliest created)
+                $sorted = $txs->sortByDesc('coins');
+                $keep = $sorted->first();
+                $toDelete = $sorted->slice(1);
+
+                foreach ($toDelete as $delTx) {
+                    $delTx->delete();
+                }
+            }
+        }
+
+        if ($hasDuplicates) {
+            $credits = (int) CoinTransaction::where('student_id', $student->id)
+                ->where('transaction_type', 'credit')
+                ->where('status', 'completed')
+                ->sum('coins');
+
+            $debits = (int) CoinTransaction::where('student_id', $student->id)
+                ->where('transaction_type', 'debit')
+                ->where('status', 'completed')
+                ->sum('coins');
+
+            $netBalance = max(0, $credits - $debits);
+            $student->update(['coins_cache' => $netBalance]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Scan and clean up duplicate credit transactions for all students festival-wide.
+     *
+     * @return array{duplicates_removed: int, students_rebalanced: int}
+     */
+    public static function cleanupAllDuplicateTransactions(): array
+    {
+        CoinTransaction::ensureSchema();
+
+        $duplicates = DB::table('coin_transactions')
+            ->select('student_id', 'program_id', DB::raw('COUNT(*) as total_count'))
+            ->where('transaction_type', 'credit')
+            ->whereNotNull('program_id')
+            ->where('coins', '>', 0)
+            ->groupBy('student_id', 'program_id')
+            ->having('total_count', '>', 1)
+            ->get();
+
+        $affectedStudentIds = [];
+        $duplicatesRemoved = 0;
+
+        foreach ($duplicates as $dup) {
+            $txs = CoinTransaction::where('student_id', $dup->student_id)
+                ->where('program_id', $dup->program_id)
+                ->where('transaction_type', 'credit')
+                ->orderByDesc('coins')
+                ->orderBy('id')
+                ->get();
+
+            $keep = $txs->first();
+            $toDelete = $txs->slice(1);
+
+            foreach ($toDelete as $delTx) {
+                $delTx->delete();
+                $duplicatesRemoved++;
+            }
+
+            $affectedStudentIds[] = $dup->student_id;
+        }
+
+        // Also check by (student_id, result_id)
+        $resultDuplicates = DB::table('coin_transactions')
+            ->select('student_id', 'result_id', DB::raw('COUNT(*) as total_count'))
+            ->where('transaction_type', 'credit')
+            ->whereNotNull('result_id')
+            ->where('coins', '>', 0)
+            ->groupBy('student_id', 'result_id')
+            ->having('total_count', '>', 1)
+            ->get();
+
+        foreach ($resultDuplicates as $dup) {
+            $txs = CoinTransaction::where('student_id', $dup->student_id)
+                ->where('result_id', $dup->result_id)
+                ->where('transaction_type', 'credit')
+                ->orderByDesc('coins')
+                ->orderBy('id')
+                ->get();
+
+            $keep = $txs->first();
+            $toDelete = $txs->slice(1);
+
+            foreach ($toDelete as $delTx) {
+                $delTx->delete();
+                $duplicatesRemoved++;
+            }
+
+            $affectedStudentIds[] = $dup->student_id;
+        }
+
+        $affectedStudentIds = array_values(array_unique($affectedStudentIds));
+        foreach ($affectedStudentIds as $sId) {
+            $student = Student::find($sId);
+            if ($student) {
+                $credits = (int) CoinTransaction::where('student_id', $sId)
+                    ->where('transaction_type', 'credit')
+                    ->where('status', 'completed')
+                    ->sum('coins');
+
+                $debits = (int) CoinTransaction::where('student_id', $sId)
+                    ->where('transaction_type', 'debit')
+                    ->where('status', 'completed')
+                    ->sum('coins');
+
+                $netBalance = max(0, $credits - $debits);
+                $student->update(['coins_cache' => $netBalance]);
+            }
+        }
+
+        return [
+            'duplicates_removed' => $duplicatesRemoved,
+            'students_rebalanced' => count($affectedStudentIds),
+        ];
     }
 
     /**
@@ -959,13 +1155,17 @@ class CoinRewardService
                 continue;
             }
 
+            // Deduplication: prevent duplicate listing of the same program
+            if ($progId) {
+                if (isset($processedPrograms[$progId])) {
+                    continue;
+                }
+                $processedPrograms[$progId] = true;
+            }
+
             $pos = (int) $credit->prize_position;
             $grade = self::normalizeGrade($credit->grade);
             $progName = $credit->program?->name ?? ($credit->metadata['program_name'] ?? 'Competition');
-
-            if ($progId) {
-                $processedPrograms[$progId] = true;
-            }
 
             if (isset($achievements['prizes'][$pos])) {
                 $achievements['prizes'][$pos]['count']++;
