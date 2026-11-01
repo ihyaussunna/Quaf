@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\FestivalSetting;
 use App\Models\Group;
 use App\Models\PointSetting;
 use App\Models\PointsTransaction;
@@ -278,7 +279,6 @@ class PointCalculationService
             app(self::class)->recalculateAllPoints();
             if (class_exists(CoinRewardService::class)) {
                 $coinService = app(CoinRewardService::class);
-                $coinService->reverseCoinDistributionForResult($result, 'Podium or marks updated');
                 $coinService->distributeCoinsForResult($result);
             }
             Group::checkAndApplyMilestone();
@@ -580,10 +580,24 @@ class PointCalculationService
             $rank++;
         }
 
+        // 3b. Update public points cache if in live mode or if standings were already released
+        $isLiveMode = FestivalSetting::get('public_standings_mode', 'milestone') === 'live';
+        $hasPublicStandings = (int) FestivalSetting::get('public_standings_results_count', '0') > 0;
+
+        if ($isLiveMode || $hasPublicStandings) {
+            foreach ($rankedGroups as $idx => $g) {
+                $g->update([
+                    'public_points_cache' => (int) $g->points_cache,
+                    'public_rank_cache' => $idx + 1,
+                ]);
+            }
+        }
+
         // 4. Invalidate related caches
         Cache::forget('admin_dashboard_stats');
         Cache::forget('admin_leaderboard');
         Cache::forget('public_leaderboard');
+        Cache::forget('public_api_standings');
         Cache::forget('public_results_summary');
         Cache::forget('chart_performance_data_cached');
         Cache::forget('public_home_data');

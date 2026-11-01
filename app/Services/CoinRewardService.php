@@ -398,6 +398,19 @@ class CoinRewardService
             $isGroup = $program->isGroup();
             $awardedStudentsInProgram = [];
 
+            // 1. Gather all existing positive credit transactions for this result or program
+            $existingCredits = CoinTransaction::where('transaction_type', 'credit')
+                ->where('coins', '>', 0)
+                ->where(function ($q) use ($result, $program) {
+                    $q->where('result_id', $result->id)
+                        ->orWhere('program_id', $program->id);
+                })
+                ->get()
+                ->keyBy('student_id');
+
+            $allNewWinnerStudentIds = [];
+
+            // 2. Iterate through new podium winners
             foreach ([1, 2, 3] as $pos) {
                 $posLabel = match ($pos) {
                     1 => '1st Prize',
@@ -422,6 +435,8 @@ class CoinRewardService
                     }
 
                     foreach ($participants as $student) {
+                        $allNewWinnerStudentIds[] = $student->id;
+
                         // Strict Deduplication: If student was already awarded in this program, keep the higher reward and skip lower/duplicate
                         if (isset($awardedStudentsInProgram[$student->id])) {
                             $prev = $awardedStudentsInProgram[$student->id];
@@ -440,15 +455,7 @@ class CoinRewardService
                             ->where('transaction_type', 'reversal')
                             ->delete();
 
-                        // Check if an existing credit transaction exists for this student in this program or result
-                        $existing = CoinTransaction::where('student_id', $student->id)
-                            ->where('transaction_type', 'credit')
-                            ->where(function ($q) use ($result, $program) {
-                                $q->where('result_id', $result->id)
-                                    ->orWhere('program_id', $program->id);
-                            })
-                            ->orderByDesc('coins')
-                            ->first();
+                        $existing = $existingCredits->get($student->id);
 
                         if ($existing) {
                             // Clean up any extra duplicate credit transactions
@@ -466,6 +473,7 @@ class CoinRewardService
                                     'tx_id' => $existing->id,
                                     'coins' => $coins,
                                 ];
+                                $affectedStudentIds[] = $student->id;
 
                                 continue;
                             }
@@ -473,6 +481,42 @@ class CoinRewardService
 
                         $ref = "COIN-RES{$result->id}-STU{$student->id}-P{$pos}-CR";
                         $progType = $isGroup ? 'Group' : 'Individual';
+
+                        $metadata = [
+                            'program_name' => $program->name,
+                            'program_type' => $program->type,
+                            'group_name' => $entry->group?->name,
+                            'student_number' => $student->student_id,
+                            'student_name' => $student->name,
+                            'prize_position' => $pos,
+                            'grade' => $grade ?: 'NO_GRADE',
+                            'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
+                        ];
+
+                        $description = "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)";
+
+                        if ($existing) {
+                            $oldCoins = (int) $existing->coins;
+                            $oldPos = (int) $existing->prize_position;
+
+                            if ($coins > $oldCoins) {
+                                $diff = $coins - $oldCoins;
+                                $description .= " (Judgment updated: promoted from Pos {$oldPos} to Pos {$pos}; +{$diff} coins added; now +{$coins} coins)";
+                                $metadata['judgment_updated'] = true;
+                                $metadata['action'] = 'promoted';
+                                $metadata['previous_position'] = $oldPos;
+                                $metadata['previous_coins'] = $oldCoins;
+                                $metadata['coins_added'] = $diff;
+                            } elseif ($coins < $oldCoins) {
+                                $clawback = $oldCoins - $coins;
+                                $description .= " (Judgment updated: demoted from Pos {$oldPos} to Pos {$pos}; {$clawback} coins clawed back; now +{$coins} coins)";
+                                $metadata['judgment_updated'] = true;
+                                $metadata['action'] = 'demoted';
+                                $metadata['previous_position'] = $oldPos;
+                                $metadata['previous_coins'] = $oldCoins;
+                                $metadata['clawback_amount'] = $clawback;
+                            }
+                        }
 
                         $tx = CoinTransaction::updateOrCreate(
                             [
@@ -491,17 +535,8 @@ class CoinRewardService
                                 'coins' => $coins,
                                 'transaction_reference' => $existing?->transaction_reference ?? $ref,
                                 'status' => 'completed',
-                                'description' => "QUAF 09 {$progType} Reward: {$program->name} - {$posLabel} - Grade ".($grade ?: 'No Grade')." (+{$coins} coins)",
-                                'metadata' => [
-                                    'program_name' => $program->name,
-                                    'program_type' => $program->type,
-                                    'group_name' => $entry->group?->name,
-                                    'student_number' => $student->student_id,
-                                    'student_name' => $student->name,
-                                    'prize_position' => $pos,
-                                    'grade' => $grade ?: 'NO_GRADE',
-                                    'participant_role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
-                                ],
+                                'description' => $description,
+                                'metadata' => $metadata,
                             ]
                         );
 
@@ -527,8 +562,35 @@ class CoinRewardService
                 }
             }
 
+            // 3. Handle previously awarded participants who are NO LONGER placed in the updated result (Unplaced / Removed)
+            $allNewWinnerStudentIds = array_unique($allNewWinnerStudentIds);
+            foreach ($existingCredits as $staleStudentId => $staleCredit) {
+                if (! in_array($staleStudentId, $allNewWinnerStudentIds, true)) {
+                    $staleCoins = (int) $staleCredit->coins;
+                    $stalePos = (int) $staleCredit->prize_position;
+
+                    $staleCredit->update([
+                        'coins' => 0,
+                        'transaction_type' => 'reversal',
+                        'status' => 'reversed',
+                        'description' => "QUAF 09 Reversal: {$program->name} - Position {$stalePos} (Unplaced after judgment update; {$staleCoins} coins clawed back)",
+                        'metadata' => [
+                            'action' => 'unplaced_clawback',
+                            'previous_position' => $stalePos,
+                            'previous_coins' => $staleCoins,
+                            'clawback_amount' => $staleCoins,
+                            'reason' => 'Podium changed after score correction',
+                            'unplaced_at' => now()->toIso8601String(),
+                        ],
+                    ]);
+
+                    $affectedStudentIds[] = $staleStudentId;
+                }
+            }
+
+            // 4. Synchronize wallet balances immediately for ALL affected students
             if (! empty($affectedStudentIds)) {
-                $this->syncStudentCoinsCache($affectedStudentIds);
+                $this->syncStudentCoinsCache(array_unique($affectedStudentIds));
             }
 
             return [
@@ -755,18 +817,7 @@ class CoinRewardService
         }
 
         if ($hasDuplicates) {
-            $credits = (int) CoinTransaction::where('student_id', $student->id)
-                ->where('transaction_type', 'credit')
-                ->where('status', 'completed')
-                ->sum('coins');
-
-            $debits = (int) CoinTransaction::where('student_id', $student->id)
-                ->where('transaction_type', 'debit')
-                ->where('status', 'completed')
-                ->sum('coins');
-
-            $netBalance = max(0, $credits - $debits);
-            $student->update(['coins_cache' => $netBalance]);
+            app(self::class)->syncStudentCoinsCache([$student->id]);
 
             return true;
         }
@@ -844,22 +895,8 @@ class CoinRewardService
         }
 
         $affectedStudentIds = array_values(array_unique($affectedStudentIds));
-        foreach ($affectedStudentIds as $sId) {
-            $student = Student::find($sId);
-            if ($student) {
-                $credits = (int) CoinTransaction::where('student_id', $sId)
-                    ->where('transaction_type', 'credit')
-                    ->where('status', 'completed')
-                    ->sum('coins');
-
-                $debits = (int) CoinTransaction::where('student_id', $sId)
-                    ->where('transaction_type', 'debit')
-                    ->where('status', 'completed')
-                    ->sum('coins');
-
-                $netBalance = max(0, $credits - $debits);
-                $student->update(['coins_cache' => $netBalance]);
-            }
+        if (! empty($affectedStudentIds)) {
+            app(self::class)->syncStudentCoinsCache($affectedStudentIds);
         }
 
         return [

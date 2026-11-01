@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Group;
 use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
@@ -10,6 +11,7 @@ use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\ScoreSheet;
 use App\Services\AuditLogger;
+use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -183,6 +185,10 @@ class MarkEntryController extends Controller
 
         // High-speed incremental points calculation for the published program & leaderboard
         app(PointCalculationService::class)->recalculateForProgram($program);
+        if (class_exists(CoinRewardService::class)) {
+            app(CoinRewardService::class)->distributeCoinsForResult($result);
+        }
+        Group::checkAndApplyMilestone();
 
         AuditLogger::log('publish_result', $result, null, $result->toArray());
 

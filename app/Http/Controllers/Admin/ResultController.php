@@ -224,11 +224,11 @@ class ResultController extends Controller
         }
 
         $result->update($validated);
+        $result->refresh();
 
         AuditLogger::log('update_result', $result, $old, $result->toArray());
 
         if (in_array($result->status, PointCalculationService::DECLARED_STATUSES)) {
-            $this->coinService->reverseCoinDistributionForResult($result, 'Podium, grade, or status updated');
             if ($result->status === 'published') {
                 $this->issueCertificates($result);
             }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\CallListController as AdminCallListController;
 use App\Http\Controllers\Admin\CertificateController as AdminCertificateController;
 use App\Http\Controllers\Admin\CodeLetterController as AdminCodeLetterController;
+use App\Http\Controllers\Admin\CoinAuditController as AdminCoinAuditController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExportController as AdminExportController;
 use App\Http\Controllers\Admin\FormController as AdminFormController;
@@ -720,6 +721,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('achievements/stage-score', [AdminTopScorerController::class, 'stageScore'])->name('achievements.stage-score');
     Route::get('achievements/all-students', [AdminTopScorerController::class, 'allStudentScore'])->name('achievements.all-students');
     Route::get('top-scorers', [AdminTopScorerController::class, 'index'])->name('top-scorers.index');
+
+    // Coin Ledger & Audit Hub
+    Route::get('coins', [AdminCoinAuditController::class, 'index'])->name('coins.index');
+    Route::post('coins/sync-all', [AdminCoinAuditController::class, 'syncAll'])->name('coins.sync-all');
+    Route::get('coins/student/{student}', [AdminCoinAuditController::class, 'studentBreakdown'])->name('coins.student');
 
     // Website Builder (Dynamic Landing Page Settings)
     Route::get('website-builder', [AdminWebsiteBuilderController::class, 'index'])->name('website-builder.index');
