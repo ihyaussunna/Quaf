@@ -208,7 +208,7 @@ class TopScorerController extends Controller
             ['path' => route('admin.top-scorers.index'), 'query' => $request->query()]
         );
 
-        $allTeams = Group::orderBy('display_order')->get();
+        $allTeams = Group::orderBy('name')->get();
         $allCategories = Zone::orderBy('display_order')->get();
 
         return view('admin.top-scorers.index', compact(

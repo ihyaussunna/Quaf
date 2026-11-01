@@ -42,7 +42,6 @@ class TopScorersAndOfficialAwardsTest extends TestCase
                 'name' => 'Lumo Fikric',
                 'slug' => 'lumo-fikric',
                 'color_hex' => '#be1e2d',
-                'display_order' => 1,
             ]
         );
 
@@ -52,7 +51,6 @@ class TopScorersAndOfficialAwardsTest extends TestCase
                 'name' => 'Pacto Hikmic',
                 'slug' => 'pacto-hikmic',
                 'color_hex' => '#10b981',
-                'display_order' => 2,
             ]
         );
 

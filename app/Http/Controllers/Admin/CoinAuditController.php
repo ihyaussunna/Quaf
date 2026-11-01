@@ -155,7 +155,7 @@ class CoinAuditController extends Controller
         }
 
         $allPrograms = Program::orderBy('name')->get();
-        $allGroups = Group::orderBy('display_order')->get();
+        $allGroups = Group::orderBy('name')->get();
 
         return view('admin.coins.index', compact(
             'transactions',
