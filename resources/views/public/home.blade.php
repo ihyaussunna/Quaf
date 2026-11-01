@@ -536,14 +536,9 @@
                             <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
                                 RANK &amp; TEAM
                             </span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                    {{ $standingsBadge }}
-                                </span>
-                                <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
-                                    TOTAL POINTS
-                                </span>
-                            </div>
+                            <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+                                TOTAL POINTS
+                            </span>
                         </div>
 
                         <!-- Rows: Only Rank Number, Team Name, Points -->
