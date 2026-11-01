@@ -157,6 +157,24 @@ class PresentationController extends Controller
 
         $summary = $this->coinRewardService->getStudentCoinSummary($student);
         $achievements = $this->coinRewardService->getStudentAchievements($student);
+        $awardedPrograms = $this->coinRewardService->resolveStudentAwardedPrograms($student, false);
+        $student->loadMissing(['entries.program.category', 'participations.program.category']);
+        $allPrograms = $student->entries->merge($student->participations)->unique('id')->map(function ($e) use ($awardedPrograms) {
+            $prog = $e->program;
+            $award = $awardedPrograms->firstWhere('program_id', $e->program_id);
+
+            return [
+                'id' => $prog?->id,
+                'code' => $prog?->code,
+                'name' => $prog?->name,
+                'type' => $prog?->type ?? 'individual',
+                'category' => $prog?->category?->name,
+                'prize' => $award['position_title'] ?? null,
+                'grade' => $award['grade'] ?? null,
+                'has_award' => (bool) $award,
+            ];
+        })->values();
+
         $recent = CoinTransaction::where('student_id', $student->id)
             ->latest()
             ->take(15)
@@ -197,6 +215,8 @@ class PresentationController extends Controller
                 'grade_counts' => $achievements['grade_counts'],
                 'prizes' => $achievements['prizes'],
                 'recent_transactions' => $recent,
+                'programs' => $allPrograms,
+                'awarded_programs' => $awardedPrograms,
             ],
         ]);
     }

@@ -96,6 +96,12 @@ class StudentController extends Controller
             'entries.program.stage',
             'entries.program.schedule',
             'entries.program.zone',
+            'entries.program.result',
+            'participations.program.category',
+            'participations.program.stage',
+            'participations.program.schedule',
+            'participations.program.zone',
+            'participations.program.result',
             'certificates.program',
         ]);
 
@@ -103,13 +109,16 @@ class StudentController extends Controller
         $remainingSlots = $student->getRemainingIndividualSlots();
         $maxSlots = Student::MAX_INDIVIDUAL_PROGRAMS;
 
+        // Collect all participating programs (individual entries + group team participations)
+        $allEntries = $student->entries->merge($student->participations)->unique('id');
+
         // Find Next Program prominently
-        $nextEntry = $student->entries
+        $nextEntry = $allEntries
             ->filter(fn ($e) => $e->program?->scheduled_time && $e->program->scheduled_time->isFuture())
             ->sortBy('program.scheduled_time')
             ->first();
 
-        $myPrograms = $student->entries;
+        $myPrograms = $allEntries;
 
         $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
 

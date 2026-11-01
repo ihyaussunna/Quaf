@@ -17,6 +17,11 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.evaluation-monitor.print-pending', request()->query()) }}" target="_blank"
+               class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
+                <svg class="w-3.5 h-3.5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Print Pending List PDF (കഴിയാത്തവ)</span>
+            </a>
             <a href="{{ route('admin.print.results', ['status' => 'evaluated']) }}" target="_blank"
                class="px-4 py-2 rounded-xl bg-purple-700 text-white font-bold text-xs uppercase hover:bg-purple-800 transition-colors shadow-2xs flex items-center gap-1.5 font-sora">
                 <svg class="w-3.5 h-3.5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -36,40 +41,51 @@
 
     <!-- Program Evaluation Stat Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+        <a href="{{ route('admin.evaluation-monitor.index') }}" class="p-4 rounded-2xl bg-white border {{ empty($status) ? 'border-slate-400 ring-2 ring-slate-300' : 'border-slate-200' }} shadow-2xs hover:border-slate-400 transition-all block">
             <span class="text-slate-500 font-mono block text-[11px] uppercase font-bold">Total Programs</span>
             <span class="text-2xl font-black text-slate-900 mt-1 block font-mono">{{ number_format($stats['total_programs']) }}</span>
             <span class="text-[10px] text-slate-400 font-mono">Festival Competitions</span>
-        </div>
-        <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 text-purple-900 shadow-2xs">
+        </a>
+        <a href="{{ route('admin.evaluation-monitor.index', array_merge(request()->query(), ['status' => 'evaluated'])) }}" class="p-4 rounded-2xl bg-purple-50/70 border {{ $status === 'evaluated' ? 'border-purple-500 ring-2 ring-purple-300' : 'border-purple-200' }} text-purple-900 shadow-2xs hover:border-purple-400 transition-all block">
             <span class="font-mono block text-purple-700 text-[11px] uppercase font-bold">Evaluated Programs</span>
             <span class="text-2xl font-black mt-1 block font-mono text-purple-900">{{ number_format($stats['evaluated_programs']) }}</span>
             <span class="text-[10px] text-purple-600 font-mono font-medium">Jury Done (മൂല്യനിർണ്ണയം കഴിഞ്ഞവ)</span>
-        </div>
-        <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 shadow-2xs">
+        </a>
+        <a href="{{ route('admin.evaluation-monitor.index', array_merge(request()->query(), ['status' => 'pending_evaluation'])) }}" class="p-4 rounded-2xl bg-amber-50/70 border {{ in_array($status, ['pending_evaluation', 'incomplete', 'pending'], true) ? 'border-amber-500 ring-2 ring-amber-300' : 'border-amber-200' }} text-amber-900 shadow-2xs hover:border-amber-400 transition-all block">
             <span class="font-mono block text-amber-700 text-[11px] uppercase font-bold">Pending Programs</span>
             <span class="text-2xl font-black mt-1 block font-mono text-amber-900">{{ number_format($stats['pending_programs']) }}</span>
-            <span class="text-[10px] text-amber-600 font-mono font-medium">Pending (കഴിയാത്തവ)</span>
-        </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 shadow-2xs">
+            <span class="text-[10px] text-amber-600 font-mono font-medium">Pending (കഴിയാത്തവ) &rarr;</span>
+        </a>
+        <a href="{{ route('admin.evaluation-monitor.index', array_merge(request()->query(), ['status' => 'completed'])) }}" class="p-4 rounded-2xl bg-emerald-50/70 border {{ $status === 'completed' ? 'border-emerald-500 ring-2 ring-emerald-300' : 'border-emerald-200' }} text-emerald-900 shadow-2xs hover:border-emerald-400 transition-all block">
             <span class="font-mono block text-emerald-700 text-[11px] uppercase font-bold">Completed / Declared</span>
             <span class="text-2xl font-black mt-1 block font-mono text-emerald-900">{{ number_format($stats['completed_programs']) }}</span>
             <span class="text-[10px] text-emerald-600 font-mono font-medium">Published (പൂർത്തിയായവ)</span>
-        </div>
-        <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 shadow-2xs">
+        </a>
+        <a href="{{ route('admin.evaluation-monitor.index', array_merge(request()->query(), ['status' => 'in_progress'])) }}" class="p-4 rounded-2xl bg-blue-50/70 border {{ $status === 'in_progress' ? 'border-blue-500 ring-2 ring-blue-300' : 'border-blue-200' }} text-blue-900 shadow-2xs hover:border-blue-400 transition-all block">
             <span class="font-mono block text-blue-700 text-[11px] uppercase font-bold">In Progress / Stage</span>
             <span class="text-2xl font-black mt-1 block font-mono text-blue-900">{{ number_format($stats['in_progress_programs']) }}</span>
             <span class="text-[10px] text-blue-600 font-mono font-medium">Active (വേദിയിൽ നടക്കുന്നവ)</span>
-        </div>
+        </a>
     </div>
 
     <!-- Filters -->
     <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
-        <form method="GET" action="{{ route('admin.evaluation-monitor.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <form method="GET" action="{{ route('admin.evaluation-monitor.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
             <div class="md:col-span-2">
                 <label class="block text-xs font-bold text-slate-700 mb-1">Search Program</label>
                 <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Program name or code..."
                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="">All Statuses</option>
+                    <option value="pending_evaluation" {{ in_array($status ?? '', ['pending_evaluation', 'incomplete', 'pending'], true) ? 'selected' : '' }}>Pending Evaluation (മൂല്യനിർണ്ണയം കഴിയാത്തവ)</option>
+                    <option value="evaluated" {{ ($status ?? '') == 'evaluated' ? 'selected' : '' }}>Evaluated / Ready (മൂല്യനിർണ്ണയം കഴിഞ്ഞവ)</option>
+                    <option value="completed" {{ ($status ?? '') == 'completed' ? 'selected' : '' }}>Completed (പൂർത്തിയായവ)</option>
+                    <option value="in_progress" {{ ($status ?? '') == 'in_progress' ? 'selected' : '' }}>In Progress (വേദിയിൽ നടക്കുന്നവ)</option>
+                    <option value="upcoming" {{ ($status ?? '') == 'upcoming' ? 'selected' : '' }}>Upcoming / Not Started</option>
+                </select>
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Zone</label>

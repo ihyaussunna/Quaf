@@ -373,17 +373,31 @@
     <!-- Enrolled Programs Grid (Standard Card Design) -->
     <div class="space-y-4">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-sora font-bold text-slate-900">My Enrolled Programs</h2>
+            <h2 class="text-xl font-sora font-bold text-slate-900">My Enrolled Programs &amp; Results</h2>
             <span class="text-xs font-mono text-slate-500 font-semibold px-3 py-1 bg-slate-100 rounded-full border border-slate-200">Total: {{ $myPrograms->count() }} Events</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @forelse($myPrograms as $entry)
+                @php
+                    $prog = $entry->program;
+                    $isGroupProg = $prog ? $prog->isGroup() : false;
+                    $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
+                    $isDeclared = $prog && $prog->result && in_array($prog->result->status, $declaredStatuses, true);
+                    $award = isset($awardedPrograms) ? $awardedPrograms->firstWhere('program_id', $entry->program_id) : null;
+                @endphp
                 <div class="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 hover:border-red-300 transition-all shadow-sm hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
-                            {{ $entry->program->zone?->name ?? $entry->program->eligibility ?? 'All Zones' }} • {{ ucfirst($entry->program->type) }}
-                        </span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                                {{ $prog->zone?->name ?? $prog->eligibility ?? 'All Zones' }} • {{ ucfirst($prog->type ?? 'Individual') }}
+                            </span>
+                            @if($isGroupProg)
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                    ഗ്രൂപ്പ് ഇനം (Team)
+                                </span>
+                            @endif
+                        </div>
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase font-bold
                             {{ $entry->status === 'verified' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600' }}">
                             {{ $entry->status }}
@@ -391,17 +405,79 @@
                     </div>
 
                     <div>
-                        <h3 class="text-xl font-sora font-bold text-slate-900">{{ $entry->program->name }}</h3>
+                        <div class="flex items-center gap-2 text-xs font-mono text-[#be1e2d] mb-1 font-semibold">
+                            <span class="font-bold">{{ $prog->code }}</span>
+                            @if($entry->chest_number)
+                                <span>•</span>
+                                <span>Chest #{{ $entry->chest_number }}</span>
+                            @endif
+                        </div>
+                        <h3 class="text-xl font-sora font-bold text-slate-900">{{ $prog->name }}</h3>
                     </div>
 
-                    <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs font-mono">
+                    <!-- Program Result Verdict / Status Strip -->
+                    @if($isDeclared)
+                        <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-mono font-bold text-amber-900 uppercase block">മത്സര ഫലം (Verdict)</span>
+                                @if($award && ($award['position'] || $award['grade']))
+                                    <div class="font-sora font-bold text-xs text-slate-900 truncate">
+                                        {{ $award['position_title'] ?? '' }}
+                                        @if(!empty($award['grade']))
+                                            ({{ 'Grade ' . $award['grade'] }})
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="font-sora font-medium text-xs text-slate-700 truncate">
+                                        ഫലം പ്രഖ്യാപിച്ചു (പങ്കെടുത്തു)
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
+                                @if($award && $award['position'] === 1)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-amber-400 text-slate-950 shadow-xs border border-amber-300">
+                                        <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>1st Prize</span>
+                                    </span>
+                                @elseif($award && $award['position'] === 2)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-blue-500 text-white shadow-xs">
+                                        <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>2nd Prize</span>
+                                    </span>
+                                @elseif($award && $award['position'] === 3)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-amber-700 text-white shadow-xs">
+                                        <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <span>3rd Prize</span>
+                                    </span>
+                                @endif
+
+                                @if($award && !empty($award['grade']) && $award['grade'] !== '-')
+                                    <span class="px-2 py-0.5 rounded-lg text-xs font-mono font-black {{ in_array($award['grade'], ['A+', 'A']) ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-800 border border-slate-200' }}">
+                                        Grade {{ $award['grade'] }}
+                                    </span>
+                                @elseif(! $award)
+                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                        Declared
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+                            <span>ഫലം (Result):</span>
+                            <span class="font-bold text-slate-600">ഫലം വരാനുണ്ട് (Pending)</span>
+                        </div>
+                    @endif
+
+                    <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs font-mono">
                         <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold">Stage Venue</span>
-                            <span class="text-slate-900 font-bold">{{ $entry->program->stage->name ?? 'TBA' }}</span>
+                            <span class="text-slate-900 font-bold">{{ $prog->stage->name ?? 'TBA' }}</span>
                         </div>
                         <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold">Schedule Slot</span>
-                            <span class="text-[#be1e2d] font-bold">{{ $entry->program->scheduled_time?->format('M d, h:i A') ?? 'TBA' }}</span>
+                            <span class="text-[#be1e2d] font-bold">{{ $prog->scheduled_time?->format('M d, h:i A') ?? 'TBA' }}</span>
                         </div>
                     </div>
                 </div>

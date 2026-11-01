@@ -48,6 +48,11 @@ class VerificationController extends Controller
                 'entries.program.category',
                 'entries.program.stage',
                 'entries.program.schedule',
+                'entries.program.result',
+                'participations.program.category',
+                'participations.program.stage',
+                'participations.program.schedule',
+                'participations.program.result',
                 'certificates.program',
             ])
             ->first();
@@ -58,12 +63,14 @@ class VerificationController extends Controller
         $purchaseHistory = collect();
         $coinTransactions = collect();
         $awardedPrograms = collect();
+        $allPrograms = collect();
         $declaredStatuses = PointCalculationService::DECLARED_STATUSES;
 
         if ($student) {
             // Live coins and achievements immediately available upon result announcement
             $coinSummary = $coinRewardService->getStudentCoinSummary($student, false);
             $studentAchievements = $coinRewardService->getStudentAchievements($student, false);
+            $allPrograms = $student->entries->merge($student->participations)->unique('id');
             $purchaseHistory = CoinTransaction::where('student_id', $student->id)
                 ->where('transaction_type', 'debit')
                 ->latest()
@@ -92,7 +99,8 @@ class VerificationController extends Controller
             'studentAchievements',
             'purchaseHistory',
             'coinTransactions',
-            'awardedPrograms'
+            'awardedPrograms',
+            'allPrograms'
         ));
     }
 

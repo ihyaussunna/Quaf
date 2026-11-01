@@ -590,6 +590,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     // Evaluation Monitor Dashboard
     Route::get('evaluation-monitor', [AdminCallListController::class, 'evaluationMonitor'])->name('evaluation-monitor.index');
     Route::get('evaluation_monitor', [AdminCallListController::class, 'evaluationMonitor'])->name('evaluation_monitor.index');
+    Route::get('evaluation-monitor/print-pending', [AdminCallListController::class, 'printPendingEvaluations'])->name('evaluation-monitor.print-pending');
+    Route::get('evaluation_monitor/print-pending', [AdminCallListController::class, 'printPendingEvaluations'])->name('evaluation_monitor.print-pending');
     Route::get('evaluation-monitor/{program}', [AdminCallListController::class, 'evaluationDetails'])->name('evaluation-monitor.show');
     Route::get('evaluation_monitor/{program}', [AdminCallListController::class, 'evaluationDetails'])->name('evaluation_monitor.show');
 

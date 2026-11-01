@@ -253,24 +253,53 @@
 
             <!-- Registered Programs & Stage Status -->
             <div class="space-y-4 pt-4 border-t border-slate-200">
-                <h3 class="font-sora font-bold text-lg text-slate-900">Allocated Program Registrations</h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-sora font-bold text-lg text-slate-900">Allocated Program Registrations &amp; Results</h3>
+                        <p class="text-xs text-slate-500 font-mono">മത്സരിച്ച മത്സരങ്ങളും അവയുടെ ഫലങ്ങളും (Enrolled Events &amp; Results)</p>
+                    </div>
+                    @php
+                        $programList = (isset($allPrograms) && $allPrograms->isNotEmpty())
+                            ? $allPrograms
+                            : $student->entries->merge($student->participations)->unique('id');
+                    @endphp
+                    <span class="text-xs font-mono font-bold text-slate-400 uppercase">
+                        {{ $programList->count() }} {{ \Illuminate\Support\Str::plural('Event', $programList->count()) }}
+                    </span>
+                </div>
+
                 <div class="space-y-3">
-                    @forelse($student->entries as $entry)
+                    @forelse($programList as $entry)
+                        @php
+                            $prog = $entry->program;
+                            $isGroupProg = $prog ? $prog->isGroup() : false;
+                            $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
+                            $isDeclared = $prog && $prog->result && in_array($prog->result->status, $declaredStatuses, true);
+                            $entryAward = isset($awardedPrograms) ? $awardedPrograms->firstWhere('program_id', $entry->program_id) : null;
+                        @endphp
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <div class="flex items-center gap-2 text-xs font-mono text-[#be1e2d] mb-1 font-semibold">
-                                    <span class="font-bold">{{ $entry->program?->code }}</span>
-                                    <span>•</span>
-                                    <span>Chest #{{ $entry->chest_number }}</span>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 text-xs font-mono text-[#be1e2d] mb-1 font-semibold flex-wrap">
+                                    <span class="font-bold">{{ $prog?->code }}</span>
+                                    @if($entry->chest_number)
+                                        <span>•</span>
+                                        <span>Chest #{{ $entry->chest_number }}</span>
+                                    @endif
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                                        {{ $prog?->zone?->name ?? $prog?->eligibility ?? 'All Zones' }} • {{ ucfirst($prog?->type ?? 'Individual') }}
+                                    </span>
+                                    @if($isGroupProg)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                            ഗ്രൂപ്പ് ഇനം
+                                        </span>
+                                    @endif
                                 </div>
-                                <h4 class="font-sora font-bold text-slate-900 text-base">{{ $entry->program?->name }}</h4>
-                                <span class="text-xs text-slate-500 font-mono">{{ $entry->program?->stage?->name ?? 'Stage Schedule Pending' }}</span>
+                                <h4 class="font-sora font-bold text-slate-900 text-base">{{ $prog?->name }}</h4>
+                                <span class="text-xs text-slate-500 font-mono">{{ $prog?->stage?->name ?? 'Stage Schedule Pending' }}</span>
                             </div>
-                            @php
-                                $entryAward = isset($awardedPrograms) ? $awardedPrograms->firstWhere('program_id', $entry->program_id) : null;
-                            @endphp
-                            @if($entryAward && ($entryAward['position'] || $entryAward['grade']))
-                                <div class="shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
+
+                            <div class="shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
+                                @if($entryAward && ($entryAward['position'] || $entryAward['grade']))
                                     @if($entryAward['position'] === 1)
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-amber-400 text-slate-950 shadow-xs border border-amber-300">
                                             <svg class="w-3.5 h-3.5 text-current" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -293,8 +322,16 @@
                                             Grade {{ $entryAward['grade'] }}
                                         </span>
                                     @endif
-                                </div>
-                            @endif
+                                @elseif($isDeclared)
+                                    <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                        ഫലം പ്രഖ്യാപിച്ചു (പങ്കെടുത്തു)
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                        ഫലം വരാനുണ്ട് (Pending)
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     @empty
                         <p class="text-slate-500 font-mono text-xs">No programs currently registered for this candidate.</p>

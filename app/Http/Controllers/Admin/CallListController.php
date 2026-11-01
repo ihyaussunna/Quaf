@@ -413,7 +413,23 @@ class CallListController extends Controller
             $query->where('stage_id', $stageId);
         }
 
-        if ($status === 'completed') {
+        if ($status === 'pending_evaluation' || $status === 'incomplete' || $status === 'pending') {
+            $query->whereDoesntHave('result', fn ($rq) => $rq->where('status', 'published'))
+                ->where(function ($q) {
+                    $q->whereDoesntHave('entries', function ($eq) {
+                        $eq->where('status', 'verified')->where('attendance_status', 'present');
+                    })->orWhereRaw('(SELECT COUNT(*) FROM program_entries pe WHERE pe.program_id = programs.id AND pe.status = ? AND pe.attendance_status = ? AND EXISTS (SELECT 1 FROM score_sheets ss WHERE ss.entry_id = pe.id AND ss.is_submitted = 1)) < (SELECT COUNT(*) FROM program_entries pe2 WHERE pe2.program_id = programs.id AND pe2.status = ? AND pe2.attendance_status = ?)', ['verified', 'present', 'verified', 'present']);
+                });
+        } elseif ($status === 'evaluated' || $status === 'ready') {
+            $query->where(function ($q) {
+                $q->whereHas('result', fn ($rq) => $rq->where('status', 'published'))
+                    ->orWhere(function ($sub) {
+                        $sub->whereHas('entries', function ($eq) {
+                            $eq->where('status', 'verified')->where('attendance_status', 'present');
+                        })->whereRaw('(SELECT COUNT(*) FROM program_entries pe WHERE pe.program_id = programs.id AND pe.status = ? AND pe.attendance_status = ? AND EXISTS (SELECT 1 FROM score_sheets ss WHERE ss.entry_id = pe.id AND ss.is_submitted = 1)) >= (SELECT COUNT(*) FROM program_entries pe2 WHERE pe2.program_id = programs.id AND pe2.status = ? AND pe2.attendance_status = ?)', ['verified', 'present', 'verified', 'present']);
+                    });
+            });
+        } elseif ($status === 'completed') {
             $query->where('status', 'completed');
         } elseif ($status === 'in_progress') {
             $query->where('status', 'in_progress');
@@ -462,6 +478,60 @@ class CallListController extends Controller
             'zone',
             'stageId',
             'status'
+        ));
+    }
+
+    /**
+     * Printable report of all competitions where evaluation is incomplete / pending.
+     */
+    public function printPendingEvaluations(Request $request): View
+    {
+        Program::ensureSchema();
+
+        $search = $request->query('search');
+        $zone = $request->query('zone');
+        $stageId = $request->query('stage_id');
+
+        $query = Program::with(['category', 'stage', 'schedule', 'result', 'judges'])
+            ->withCount([
+                'entries as total_entries_count' => fn ($q) => $q->where('status', 'verified'),
+                'entries as present_entries_count' => fn ($q) => $q->where('status', 'verified')->where('attendance_status', 'present'),
+                'entries as absent_entries_count' => fn ($q) => $q->where('status', 'verified')->where('attendance_status', 'absent'),
+                'entries as evaluated_entries_count' => fn ($q) => $q->where('status', 'verified')->whereHas('scoreSheets', fn ($sq) => $sq->where('is_submitted', true)),
+            ])
+            ->whereDoesntHave('result', fn ($rq) => $rq->where('status', 'published'))
+            ->where(function ($q) {
+                $q->whereDoesntHave('entries', function ($eq) {
+                    $eq->where('status', 'verified')->where('attendance_status', 'present');
+                })->orWhereRaw('(SELECT COUNT(*) FROM program_entries pe WHERE pe.program_id = programs.id AND pe.status = ? AND pe.attendance_status = ? AND EXISTS (SELECT 1 FROM score_sheets ss WHERE ss.entry_id = pe.id AND ss.is_submitted = 1)) < (SELECT COUNT(*) FROM program_entries pe2 WHERE pe2.program_id = programs.id AND pe2.status = ? AND pe2.attendance_status = ?)', ['verified', 'present', 'verified', 'present']);
+            });
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($zone) {
+            $query->where('eligibility', $zone);
+        }
+
+        if ($stageId) {
+            $query->where('stage_id', $stageId);
+        }
+
+        $programs = $query->orderBy('code')->orderBy('name')->get();
+        $stages = Stage::orderBy('name')->get();
+        $zones = Program::ZONES;
+
+        return view('admin.evaluation-monitor.print-pending', compact(
+            'programs',
+            'search',
+            'zone',
+            'stageId',
+            'stages',
+            'zones'
         ));
     }
 

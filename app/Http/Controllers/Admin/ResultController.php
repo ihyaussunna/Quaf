@@ -596,6 +596,52 @@ class ResultController extends Controller
             ->latest('updated_at')
             ->get();
 
+        // Only include programs where evaluation is complete (valuation completed)
+        $results = $results->filter(function ($res) {
+            // Previously declared/sent results are already evaluated
+            if (in_array($res->status, ['send', 'delivered', 'announced', 'published'], true)) {
+                return true;
+            }
+
+            $prog = $res->program;
+            if (! $prog || ! $res->first_entry_id) {
+                return false;
+            }
+
+            $verifiedEntries = $prog->entries->where('status', 'verified');
+            if ($verifiedEntries->isEmpty()) {
+                return false;
+            }
+
+            $presentEntries = $verifiedEntries->where('attendance_status', 'present');
+            $presentCount = $presentEntries->count();
+
+            if ($presentCount > 0) {
+                $evaluatedCount = $presentEntries->filter(function ($e) {
+                    return $e->scoreSheets->where('is_submitted', true)->isNotEmpty()
+                        || $e->scores->where('is_submitted', true)->isNotEmpty();
+                })->count();
+
+                // if ($prog->code === 'ESS01') {
+                //    dump(['code' => $prog->code, 'presentCount' => $presentCount, 'evaluatedCount' => $evaluatedCount, 'entries' => $presentEntries->pluck('id')]);
+                // }
+
+                return $evaluatedCount >= $presentCount;
+            }
+
+            // If attendance was not explicitly marked as present (e.g. offstage/direct submission)
+            $nonAbsentEntries = $verifiedEntries->where('attendance_status', '!=', 'absent');
+            if ($nonAbsentEntries->isEmpty()) {
+                return false;
+            }
+
+            $evaluatedAny = $nonAbsentEntries->filter(function ($e) {
+                return $e->scoreSheets->where('is_submitted', true)->isNotEmpty() || $e->scores->isNotEmpty();
+            })->count();
+
+            return $evaluatedAny > 0 && $evaluatedAny >= $nonAbsentEntries->count();
+        })->values();
+
         // Attach points breakdown to each result
         $resultsData = $results->map(function ($res) {
             $breakdown = $this->getResultPointsBreakdown($res);
@@ -637,9 +683,9 @@ class ResultController extends Controller
             'send_count' => Result::where('status', 'send')->count(),
             'announced_count' => Result::where('status', 'announced')->count(),
             'sent_to_announcer_count' => $sentToAnnouncerCount,
-            'to_announce_count' => Result::whereNotIn('status', ['published', 'send', 'announced'])->count(),
-            'at_announcer_count' => Result::whereIn('status', ['send', 'announced'])->count(),
-            'ready_count' => Result::whereNotIn('status', ['published', 'send', 'announced'])->count(),
+            'to_announce_count' => $resultsData->whereNotIn('status', ['published', 'send', 'announced'])->count(),
+            'at_announcer_count' => $resultsData->whereIn('status', ['send', 'announced'])->count(),
+            'ready_count' => $resultsData->whereNotIn('status', ['published', 'send', 'announced'])->count(),
             'remaining_count' => Program::whereDoesntHave('result')->count(),
         ];
 
