@@ -58,7 +58,7 @@
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300/80 font-mono font-bold text-xs shadow-2xs"
                          style="animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.5s;">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>All {{ $totalPrograms > 0 ? $totalPrograms : 143 }} Results Declared &bull; National Champions Crowned</span>
+                        <span>All {{ $totalPrograms > 0 ? $totalPrograms : 143 }} Results Declared</span>
                     </div>
                 </div>
             </div>
