@@ -619,15 +619,28 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
             'status' => 'delivered',
         ]);
 
-        // Announcer marks result as announced
+        // Announcer marks result as announced (poster not yet published by media desk)
         $announceResponse = $this->actingAs($this->announcer)->post(route('announcer.announced', $result));
         $announceResponse->assertRedirect();
 
-        // Student's verification page & coin summary must immediately reflect coins
+        // Student's verification page must NOT reveal result or coins until public result poster is released
         $verifyResponse = $this->get(route('verify.student', $student->qr_token));
         $verifyResponse->assertOk();
-        $verifyResponse->assertSee('Qawwali Stage Event');
-        $verifyResponse->assertSee('1st Prize');
+        $verifyResponse->assertDontSee('Competition Results');
+        $verifyResponse->assertDontSee('1st Prize');
+        $verifyResponse->assertSee('ഫലം വരാനുണ്ട് (Pending)');
+
+        // Now Media Desk publishes official poster
+        $result->fresh()->update([
+            'status' => 'published',
+            'is_media_published' => true,
+            'media_published_at' => now(),
+        ]);
+
+        $publishedVerify = $this->get(route('verify.student', $student->qr_token));
+        $publishedVerify->assertOk();
+        $publishedVerify->assertSee('Qawwali Stage Event');
+        $publishedVerify->assertSee('1st Prize');
     }
 
     public function test_admin_results_planner_renders_successfully(): void

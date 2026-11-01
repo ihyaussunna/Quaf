@@ -145,7 +145,18 @@ class EvaluationMonitorPendingAndStrategyPlannerFilterTest extends TestCase
         $response->assertSee('Grade A+');
         $response->assertSee('Grade A');
 
-        // B. Public QR Scan Verification
+        // B. Public QR Scan Verification before media poster is released
+        $preScanResponse = $this->get(route('verify.student', $student->qr_token));
+        $preScanResponse->assertOk();
+        $preScanResponse->assertDontSee('Competition Results');
+        $preScanResponse->assertDontSee('1st Prize');
+        $preScanResponse->assertSee('ഫലം വരാനുണ്ട് (Pending)');
+
+        // Now Media Desk releases official posters
+        $resInd->update(['status' => 'published', 'is_media_published' => true, 'media_published_at' => now()]);
+        $resGrp->update(['status' => 'published', 'is_media_published' => true, 'media_published_at' => now()]);
+
+        // C. Public QR Scan Verification after media poster is released
         $scanResponse = $this->get(route('verify.student', $student->qr_token));
         $scanResponse->assertOk();
         $scanResponse->assertSee('Elocution Arabic');

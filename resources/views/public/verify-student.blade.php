@@ -41,7 +41,7 @@
                     <h2 class="text-xl sm:text-2xl md:text-3xl font-sora font-black text-slate-900 break-words leading-tight w-full">{{ $student->name }}</h2>
                     <div class="text-xs font-mono text-slate-500 space-y-0.5 mt-1.5">
                         <p>Class / Category: <strong class="text-slate-700">{{ $student->class_level ?? $student->category }}</strong></p>
-                        <p>Festival Contribution: <strong class="text-[#be1e2d] font-bold">{{ $student->points_cache }} Points</strong></p>
+                        <p>Festival Contribution: <strong class="text-[#be1e2d] font-bold">{{ $publicPoints ?? $student->public_points ?? 0 }} Points</strong></p>
                     </div>
                 </div>
             </div>
@@ -275,7 +275,7 @@
                             $isGroupProg = $prog ? $prog->isGroup() : false;
                             $declaredStatuses = ['send', 'delivered', 'announced', 'published'];
                             $res = $prog?->result ?? ($prog ? \App\Models\Result::where('program_id', $prog->id)->first() : null);
-                            $isDeclared = $res && (($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published));
+                            $isDeclared = $res && $res->status === 'published' && (bool) $res->is_media_published;
                             $entryAward = isset($awardedPrograms) ? $awardedPrograms->firstWhere('program_id', $entry->program_id) : null;
                         @endphp
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

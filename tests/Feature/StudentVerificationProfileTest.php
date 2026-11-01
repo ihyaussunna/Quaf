@@ -9,6 +9,7 @@ use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Student;
 use App\Models\Zone;
+use App\Services\PointCalculationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -199,17 +200,19 @@ class StudentVerificationProfileTest extends TestCase
             'program_id' => $prog->id,
             'first_entry_id' => $entry->id,
             'first_grade' => 'A+',
-            'status' => 'published',
+            'status' => 'announced', // Stage mic announced, but poster pending
             'is_media_published' => false, // Not yet published by Media Desk!
             'published_at' => now(),
         ]);
 
-        // When scanned, the result must be completely hidden
+        // When scanned, the result, coins, and points must be completely hidden
         $response = $this->get(route('verify.student', $this->student->qr_token));
         $response->assertOk();
         $response->assertDontSee('Competition Results');
         $response->assertDontSee('1st Prize');
         $response->assertDontSee('Grade A+');
+        $response->assertSee('ഫലം വരാനുണ്ട് (Pending)');
+        $response->assertSee('Festival Contribution: <strong class="text-[#be1e2d] font-bold">0 Points</strong>', false);
 
         // Also public results page must not show it in published results
         $pubResponse = $this->get(route('results.index'));
@@ -219,16 +222,22 @@ class StudentVerificationProfileTest extends TestCase
 
         // Now Media Desk publishes the poster & result
         $result->update([
+            'status' => 'published',
             'is_media_published' => true,
             'media_published_at' => now(),
         ]);
 
-        // Now when scanned, it reveals the achievements
+        // Recalculate points so points transactions exist
+        app(PointCalculationService::class)->recalculateAllPoints();
+
+        // Now when scanned, it reveals the achievements, coins, and points
         $response2 = $this->get(route('verify.student', $this->student->qr_token));
         $response2->assertOk();
         $response2->assertSee('Competition Results');
         $response2->assertSee('1st Prize');
         $response2->assertSee('Grade A+');
+        $response2->assertDontSee('ഫലം വരാനുണ്ട് (Pending)');
+        $response2->assertDontSee('Festival Contribution: <strong class="text-[#be1e2d] font-bold">0 Points</strong>', false);
 
         // And public results page now displays it in published results
         $pubResponse2 = $this->get(route('results.index'));

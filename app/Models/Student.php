@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Student extends Model
 {
@@ -260,6 +261,26 @@ class Student extends Model
         $token = $this->qr_token ?: $this->student_id ?: (string) $this->id;
 
         return str_pad((string) (abs(crc32($token)) % 9000 + 1000), 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Get festival contribution points strictly from published media posters.
+     */
+    public function getPublicPointsAttribute(): int
+    {
+        return (int) DB::table('points_transactions')
+            ->where('student_id', $this->id)
+            ->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereExists(function ($rq) {
+                        $rq->select(DB::raw(1))
+                            ->from('results')
+                            ->whereColumn('results.id', 'points_transactions.result_id')
+                            ->where('results.status', 'published')
+                            ->where('results.is_media_published', true);
+                    });
+            })
+            ->sum('points');
     }
 
     /**

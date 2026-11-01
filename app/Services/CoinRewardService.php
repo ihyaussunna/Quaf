@@ -750,7 +750,7 @@ class CoinRewardService
      * Ensure coins are accurately distributed for all awarded programs of a student.
      * Checks both individual entries and group program participations.
      */
-    public function ensureCoinsDistributedForStudent(Student $student): void
+    public function ensureCoinsDistributedForStudent(Student $student, bool $onlyMediaPublished = false): void
     {
         CoinTransaction::ensureSchema();
 
@@ -789,8 +789,13 @@ class CoinRewardService
             return;
         }
 
-        // Find ALL declared results for these programs, or where any of the student's entries are placed
-        $resultsQuery = Result::whereIn('status', self::DECLARED_STATUSES);
+        // Find declared results for these programs, or where any of the student's entries are placed
+        $resultsQuery = Result::query();
+        if ($onlyMediaPublished) {
+            $resultsQuery->where('status', 'published')->where('is_media_published', true);
+        } else {
+            $resultsQuery->whereIn('status', self::DECLARED_STATUSES);
+        }
 
         $resultsQuery->where(function ($q) use ($allProgramIds, $allEntryIds) {
             if (! empty($allProgramIds)) {
@@ -967,17 +972,11 @@ class CoinRewardService
         if ($onlyMediaPublished) {
             $creditsQuery->where(function ($q) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where(function ($sub) {
-                        $sub->where('status', 'announced')
-                            ->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true));
-                    }));
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             })->where(function ($q) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where(function ($sub) {
-                        $sub->where('status', 'announced')
-                            ->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true));
-                    }));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             });
         } else {
             $creditsQuery->where(function ($q) use ($declaredStatuses) {
@@ -995,7 +994,7 @@ class CoinRewardService
         foreach ($credits as $credit) {
             $prog = $credit->program;
             $res = $credit->result ?? $prog?->result;
-            $isPublicDeclared = ! $res || (($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published));
+            $isPublicDeclared = ! $res || ($res->status === 'published' && (bool) $res->is_media_published);
             if ($onlyMediaPublished && ! $isPublicDeclared) {
                 continue;
             }
@@ -1049,7 +1048,7 @@ class CoinRewardService
                 continue;
             }
 
-            $isPublicDeclared = ($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published);
+            $isPublicDeclared = $res->status === 'published' && (bool) $res->is_media_published;
             if ($onlyMediaPublished && ! $isPublicDeclared) {
                 continue;
             }
@@ -1143,7 +1142,7 @@ class CoinRewardService
         CoinTransaction::ensureSchema();
 
         // Ensure all awarded competition results (individual and group) are distributed for this student
-        $this->ensureCoinsDistributedForStudent($student);
+        $this->ensureCoinsDistributedForStudent($student, $onlyMediaPublished);
 
         $hasSourceColumn = Schema::hasColumn('coin_transactions', 'source');
 
@@ -1176,11 +1175,11 @@ class CoinRewardService
         if ($onlyMediaPublished) {
             $competitionQuery->where(function ($q) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             })->where(function ($q) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             });
         }
 
@@ -1261,11 +1260,11 @@ class CoinRewardService
         if ($onlyMediaPublished) {
             $creditsQuery->where(function ($q) {
                 $q->whereNull('result_id')
-                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             })->where(function ($q) {
                 $q->whereNull('program_id')
                     ->orDoesntHave('program.result')
-                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
+                    ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
             });
         }
 
@@ -1274,7 +1273,7 @@ class CoinRewardService
         foreach ($credits as $credit) {
             $progId = $credit->program_id;
             $res = $credit->result ?? $credit->program?->result;
-            $isPublicDeclared = ! $res || (($res->status === 'announced') || ($res->status === 'published' && (bool) $res->is_media_published));
+            $isPublicDeclared = ! $res || ($res->status === 'published' && (bool) $res->is_media_published);
             if ($onlyMediaPublished && ! $isPublicDeclared) {
                 continue;
             }
@@ -1310,8 +1309,8 @@ class CoinRewardService
         $groupEntriesQuery = $student->participations();
 
         if ($onlyMediaPublished) {
-            $entriesQuery->whereHas('program.result', fn ($q) => $q->where(fn ($sub) => $sub->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true))));
-            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->where(fn ($sub) => $sub->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true))));
+            $entriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
+            $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->where('status', 'published')->where('is_media_published', true));
         } else {
             $entriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', self::DECLARED_STATUSES));
             $groupEntriesQuery->whereHas('program.result', fn ($q) => $q->whereIn('status', self::DECLARED_STATUSES));

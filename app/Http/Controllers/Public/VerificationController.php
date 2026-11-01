@@ -93,11 +93,12 @@ class VerificationController extends Controller
         $coinTransactions = collect();
         $awardedPrograms = collect();
         $allPrograms = collect();
+        $publicPoints = 0;
         $declaredStatuses = PointCalculationService::DECLARED_STATUSES;
 
         if ($student) {
-            // Live coins auto-distribution and synchronization immediately upon student verification
-            $coinRewardService->ensureCoinsDistributedForStudent($student);
+            // Live coins auto-distribution and synchronization immediately upon student verification (strictly media published for public scan)
+            $coinRewardService->ensureCoinsDistributedForStudent($student, true);
             $student->refresh();
 
             // Scanner page is public: only show media-published coins and achievements
@@ -121,17 +122,18 @@ class VerificationController extends Controller
             $coinTransactions = CoinTransaction::where('student_id', $student->id)
                 ->where(function ($q) {
                     $q->whereNull('result_id')
-                        ->orWhereHas('result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
+                        ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
                 })
                 ->where(function ($q) {
                     $q->whereNull('program_id')
                         ->orDoesntHave('program.result')
-                        ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'announced')->orWhere(fn ($sq) => $sq->where('status', 'published')->where('is_media_published', true)));
+                        ->orWhereHas('program.result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
                 })
                 ->latest()
                 ->take(15)
                 ->get();
             $awardedPrograms = $this->resolveStudentAwardedPrograms($student);
+            $publicPoints = $student->public_points;
         }
 
         return view('public.verify-student', compact(
@@ -143,7 +145,8 @@ class VerificationController extends Controller
             'purchaseHistory',
             'coinTransactions',
             'awardedPrograms',
-            'allPrograms'
+            'allPrograms',
+            'publicPoints'
         ));
     }
 
