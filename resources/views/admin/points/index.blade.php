@@ -357,22 +357,22 @@
         </form>
     </div>
 
-    <!-- Group Finance & Grace Marks Adjustment Engine -->
-    <div class="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm font-sora">
-        <div class="bg-gradient-to-r from-amber-900 via-slate-900 to-slate-900 text-white p-6">
+    <!-- Group Grace, Cultural Walk, Finance & Special Marks Adjustment Engine -->
+    <div id="special-marks" class="scroll-mt-6 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm font-sora">
+        <div class="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white p-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                            Special Group Marks
+                            Standing Adjustment Engine
                         </span>
-                        <span class="text-xs font-mono text-slate-300">Finance & Grace Marks Engine</span>
+                        <span class="text-xs font-mono text-purple-200">Grace • Cultural Walk • Finance • Other Marks</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black tracking-tight mt-1">
-                        ഗ്രൂപ്പ് ഫിനാൻസ് & ഗ്രേസ് മാർക്കുകൾ (Finance & Grace Marks)
+                        ഗ്രൂപ്പ് സ്റ്റാൻഡിംഗ് മാർക്കുകൾ (Grace, Cultural Walk & Finance Marks)
                     </h2>
                     <p class="text-xs text-slate-300 mt-1 max-w-2xl font-mono">
-                        മത്സര ഫലങ്ങൾക്ക് പുറമെ ഓരോ ഗ്രൂപ്പുകൾക്കും ഫിനാൻസ് കളക്ഷൻ, അച്ചടക്കം, ക്യാമ്പ് മെറിറ്റ് എന്നിവയ്ക്കുള്ള മാർക്കുകൾ ചേർക്കാം. ഇവിടെ നൽകുന്ന മാർക്കുകൾ ഗ്രൂപ്പിന്റെ ആകെ പോയിന്റിലേക്ക് നേരിട്ട് കൂട്ടിച്ചേർക്കപ്പെടുകയും ലീഡർബോർഡിൽ തത്സമയം പ്രതിഫലിക്കുകയും ചെയ്യും.
+                        മത്സര ഫലങ്ങൾക്ക് പുറമെ ഓരോ ഗ്രൂപ്പുകൾക്കും ഗ്രേസ് മാർക്ക്, കൾച്ചറൽ വാക്ക് (Cultural Walk), ഫിനാൻസ് കളക്ഷൻ, അച്ചടക്കം / ക്യാമ്പ് മെറിറ്റ് എന്നിവയ്ക്കുള്ള മാർക്കുകൾ ചേർക്കാം. ഇവിടെ നൽകുന്ന മാർക്കുകൾ ഗ്രൂപ്പ് സ്റ്റാൻഡിംഗിലേക്ക് നേരിട്ട് കൂട്ടിച്ചേർക്കപ്പെടുകയും ലീഡർബോർഡിൽ തത്സമയം പ്രതിഫലിക്കുകയും ചെയ്യും.
                     </p>
                 </div>
             </div>
@@ -384,25 +384,29 @@
                 <table class="w-full text-left text-xs font-mono border-collapse">
                     <thead class="bg-slate-50 text-slate-600 uppercase border-b border-slate-200">
                         <tr>
-                            <th class="px-4 py-3 font-semibold">Group / Team</th>
-                            <th class="px-4 py-3 text-center font-semibold bg-slate-100/60">മത്സര പോയിന്റ്<br><span class="text-[10px] text-slate-400 font-normal">Competition</span></th>
-                            <th class="px-4 py-3 font-semibold bg-amber-50/50 text-amber-900">ഫിനാൻസ് മാർക്ക് (Finance Pts)</th>
-                            <th class="px-4 py-3 font-semibold bg-indigo-50/50 text-indigo-900">ഗ്രേസ് മാർക്ക് (Grace Pts)</th>
-                            <th class="px-4 py-3 text-right font-semibold bg-emerald-50/50 text-emerald-900">ആകെ സ്കോർ<br><span class="text-[10px] text-emerald-600 font-normal">Total Points</span></th>
+                            <th class="px-3 py-3 font-semibold">Group / Team</th>
+                            <th class="px-3 py-3 text-center font-semibold bg-slate-100/60">മത്സര പോയിന്റ്<br><span class="text-[10px] text-slate-400 font-normal">Competition</span></th>
+                            <th class="px-3 py-3 font-semibold bg-purple-50/50 text-purple-900">കൾച്ചറൽ വാക്ക്<br><span class="text-[10px] text-purple-600 font-normal">Cultural Walk</span></th>
+                            <th class="px-3 py-3 font-semibold bg-indigo-50/50 text-indigo-900">ഗ്രേസ് മാർക്ക്<br><span class="text-[10px] text-indigo-600 font-normal">Grace Pts</span></th>
+                            <th class="px-3 py-3 font-semibold bg-amber-50/50 text-amber-900">ഫിനാൻസ് മാർക്ക്<br><span class="text-[10px] text-amber-600 font-normal">Finance Pts</span></th>
+                            <th class="px-3 py-3 font-semibold bg-teal-50/50 text-teal-900">മറ്റ് മാർക്കുകൾ<br><span class="text-[10px] text-teal-600 font-normal">Other / Extra</span></th>
+                            <th class="px-3 py-3 text-right font-semibold bg-emerald-50/50 text-emerald-900">ആകെ സ്കോർ<br><span class="text-[10px] text-emerald-600 font-normal">Total Points</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700 bg-white">
                         @foreach($groups as $grp)
                             @php
                                 $compPts = $grp->competition_points;
-                                $finPts = (int) ($grp->finance_points ?? 0);
+                                $walkPts = (int) ($grp->cultural_walk_points ?? 0);
                                 $gracePts = (int) ($grp->grace_points ?? 0);
+                                $finPts = (int) ($grp->finance_points ?? 0);
+                                $otherPts = (int) ($grp->other_points ?? 0);
                                 $totalPts = (int) $grp->points_cache;
                             @endphp
                             <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="px-4 py-4 whitespace-nowrap">
+                                <td class="px-3 py-3.5 whitespace-nowrap">
                                     <input type="hidden" name="groups[{{ $loop->index }}][id]" value="{{ $grp->id }}">
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2.5">
                                         <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-xs shrink-0" style="background-color: {{ $grp->color_hex }}"></span>
                                         <div>
                                             <span class="font-sora font-bold text-slate-900 text-sm block">{{ $grp->name }}</span>
@@ -410,33 +414,59 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-center bg-slate-50/50 whitespace-nowrap">
+                                <td class="px-3 py-3.5 text-center bg-slate-50/50 whitespace-nowrap">
                                     <span class="font-sora font-black text-base text-slate-800">{{ number_format($compPts) }}</span>
                                     <span class="text-[10px] text-slate-400 block">pts</span>
                                 </td>
-                                <td class="px-4 py-4 bg-amber-50/30">
-                                    <div class="space-y-1.5 min-w-[160px]">
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" name="groups[{{ $loop->index }}][finance_points]" value="{{ $finPts }}"
-                                                   class="w-24 bg-white border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-amber-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-right">
-                                            <span class="text-[11px] text-amber-700 font-mono">pts</span>
+                                <!-- Cultural Walk -->
+                                <td class="px-3 py-3.5 bg-purple-50/30">
+                                    <div class="space-y-1 min-w-[130px]">
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="number" name="groups[{{ $loop->index }}][cultural_walk_points]" value="{{ $walkPts }}"
+                                                   class="w-20 bg-white border border-purple-300 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-purple-900 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-right">
+                                            <span class="text-[11px] text-purple-700 font-mono">pts</span>
                                         </div>
-                                        <input type="text" name="groups[{{ $loop->index }}][finance_remarks]" value="{{ $grp->finance_remarks ?? '' }}" placeholder="Finance remarks / reason"
-                                               class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1 text-[11px] font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-amber-500">
+                                        <input type="text" name="groups[{{ $loop->index }}][cultural_walk_remarks]" value="{{ $grp->cultural_walk_remarks ?? '' }}" placeholder="Walk remarks"
+                                               class="w-full bg-white border border-slate-200 rounded-md px-2 py-0.5 text-[10px] font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-purple-500">
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 bg-indigo-50/30">
-                                    <div class="space-y-1.5 min-w-[160px]">
-                                        <div class="flex items-center gap-2">
+                                <!-- Grace Points -->
+                                <td class="px-3 py-3.5 bg-indigo-50/30">
+                                    <div class="space-y-1 min-w-[130px]">
+                                        <div class="flex items-center gap-1.5">
                                             <input type="number" name="groups[{{ $loop->index }}][grace_points]" value="{{ $gracePts }}"
-                                                   class="w-24 bg-white border border-indigo-300 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-indigo-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-right">
+                                                   class="w-20 bg-white border border-indigo-300 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-indigo-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-right">
                                             <span class="text-[11px] text-indigo-700 font-mono">pts</span>
                                         </div>
-                                        <input type="text" name="groups[{{ $loop->index }}][grace_remarks]" value="{{ $grp->grace_remarks ?? '' }}" placeholder="Grace remarks / reason"
-                                               class="w-full bg-white border border-slate-200 rounded-md px-2.5 py-1 text-[11px] font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-indigo-500">
+                                        <input type="text" name="groups[{{ $loop->index }}][grace_remarks]" value="{{ $grp->grace_remarks ?? '' }}" placeholder="Grace remarks"
+                                               class="w-full bg-white border border-slate-200 rounded-md px-2 py-0.5 text-[10px] font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-indigo-500">
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-right bg-emerald-50/30 whitespace-nowrap">
+                                <!-- Finance Points -->
+                                <td class="px-3 py-3.5 bg-amber-50/30">
+                                    <div class="space-y-1 min-w-[130px]">
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="number" name="groups[{{ $loop->index }}][finance_points]" value="{{ $finPts }}"
+                                                   class="w-20 bg-white border border-amber-300 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-amber-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-right">
+                                            <span class="text-[11px] text-amber-700 font-mono">pts</span>
+                                        </div>
+                                        <input type="text" name="groups[{{ $loop->index }}][finance_remarks]" value="{{ $grp->finance_remarks ?? '' }}" placeholder="Finance remarks"
+                                               class="w-full bg-white border border-slate-200 rounded-md px-2 py-0.5 text-[10px] font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-amber-500">
+                                    </div>
+                                </td>
+                                <!-- Other Points -->
+                                <td class="px-3 py-3.5 bg-teal-50/30">
+                                    <div class="space-y-1 min-w-[130px]">
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="number" name="groups[{{ $loop->index }}][other_points]" value="{{ $otherPts }}"
+                                                   class="w-20 bg-white border border-teal-300 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-teal-900 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 text-right">
+                                            <span class="text-[11px] text-teal-700 font-mono">pts</span>
+                                        </div>
+                                        <input type="text" name="groups[{{ $loop->index }}][other_remarks]" value="{{ $grp->other_remarks ?? '' }}" placeholder="Discipline / Extra remarks"
+                                               class="w-full bg-white border border-slate-200 rounded-md px-2 py-0.5 text-[10px] font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-teal-500">
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3.5 text-right bg-emerald-50/30 whitespace-nowrap">
                                     <span class="font-sora font-black text-xl text-emerald-800">{{ number_format($totalPts) }}</span>
                                     <span class="text-[10px] text-emerald-600 block">Total pts</span>
                                 </td>
@@ -448,11 +478,11 @@
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 mt-4 border-t border-slate-200">
                 <span class="text-xs text-slate-500 font-mono">
-                    മാർക്കുകൾ സേവ് ചെയ്യുമ്പോൾ ഗ്രൂപ്പ് ലീഡർബോർഡും ടോട്ടൽ സ്കോറുകളും തത്സമയം റീ-കാൽക്കുലേറ്റ് ചെയ്യപ്പെടും.
+                    മാർക്കുകൾ സേവ് ചെയ്യുമ്പോൾ ഗ്രൂപ്പ് സ്റ്റാൻഡിംഗും ടോട്ടൽ സ്കോറുകളും തത്സമയം റീ-കാൽക്കുലേറ്റ് ചെയ്യപ്പെടും.
                 </span>
                 <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider shadow-sm transition-colors flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span>Save All Finance & Grace Marks</span>
+                    <span>Save All Grace, Cultural Walk & Finance Marks</span>
                 </button>
             </div>
         </form>
@@ -468,24 +498,26 @@
             <table class="w-full text-left text-xs font-mono">
                 <thead class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200">
                     <tr>
-                        <th class="px-6 py-4 font-semibold">Rank</th>
-                        <th class="px-6 py-4 font-semibold">Group</th>
-                        <th class="px-4 py-4 text-center font-semibold">Competition Pts</th>
-                        <th class="px-4 py-4 text-center font-semibold text-amber-700">Finance</th>
-                        <th class="px-4 py-4 text-center font-semibold text-indigo-700">Grace</th>
-                        <th class="px-6 py-4 text-center font-semibold bg-emerald-50/80 text-emerald-900 border-x border-emerald-100">Public Standings</th>
-                        <th class="px-6 py-4 text-right font-semibold">Live Total Points</th>
+                        <th class="px-4 py-4 font-semibold">Rank</th>
+                        <th class="px-4 py-4 font-semibold">Group</th>
+                        <th class="px-3 py-4 text-center font-semibold">Competition</th>
+                        <th class="px-3 py-4 text-center font-semibold text-purple-700">Cultural Walk</th>
+                        <th class="px-3 py-4 text-center font-semibold text-indigo-700">Grace</th>
+                        <th class="px-3 py-4 text-center font-semibold text-amber-700">Finance</th>
+                        <th class="px-3 py-4 text-center font-semibold text-teal-700">Other</th>
+                        <th class="px-5 py-4 text-center font-semibold bg-emerald-50/80 text-emerald-900 border-x border-emerald-100">Public Standings</th>
+                        <th class="px-5 py-4 text-right font-semibold">Live Total Points</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @foreach($groups as $grp)
                         <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <span class="w-7 h-7 rounded-lg font-bold flex items-center justify-center bg-slate-100 border border-slate-200 text-slate-800 shadow-sm">
                                     #{{ $grp->rank_cache ?: $loop->iteration }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 <div class="flex items-center gap-3">
                                     <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-xs shrink-0" style="background-color: {{ $grp->color_hex }}"></span>
                                     <div>
@@ -494,16 +526,22 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 text-center font-bold text-slate-800">
+                            <td class="px-3 py-4 text-center font-bold text-slate-800">
                                 {{ number_format($grp->competition_points) }}
                             </td>
-                            <td class="px-4 py-4 text-center font-bold text-amber-800">
-                                {{ $grp->finance_points > 0 ? '+'.$grp->finance_points : $grp->finance_points }}
+                            <td class="px-3 py-4 text-center font-bold text-purple-800">
+                                {{ $grp->cultural_walk_points > 0 ? '+'.$grp->cultural_walk_points : $grp->cultural_walk_points }}
                             </td>
-                            <td class="px-4 py-4 text-center font-bold text-indigo-800">
+                            <td class="px-3 py-4 text-center font-bold text-indigo-800">
                                 {{ $grp->grace_points > 0 ? '+'.$grp->grace_points : $grp->grace_points }}
                             </td>
-                            <td class="px-6 py-4 text-center bg-emerald-50/40 border-x border-emerald-100">
+                            <td class="px-3 py-4 text-center font-bold text-amber-800">
+                                {{ $grp->finance_points > 0 ? '+'.$grp->finance_points : $grp->finance_points }}
+                            </td>
+                            <td class="px-3 py-4 text-center font-bold text-teal-800">
+                                {{ $grp->other_points > 0 ? '+'.$grp->other_points : $grp->other_points }}
+                            </td>
+                            <td class="px-5 py-4 text-center bg-emerald-50/40 border-x border-emerald-100">
                                 <span class="inline-flex items-center gap-1 font-sora font-black text-xl text-emerald-800">
                                     {{ number_format($grp->public_points_cache ?? 0) }}
                                     <span class="text-[10px] font-mono text-emerald-600 font-normal">pts</span>
@@ -512,7 +550,7 @@
                                     Public Rank: <strong class="text-slate-800">#{{ $grp->public_rank_cache ?? '—' }}</strong>
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-5 py-4 text-right">
                                 <span class="font-sora font-black text-2xl" style="color: {{ $grp->color_hex }}">
                                     {{ number_format($grp->points_cache) }}
                                 </span>
@@ -547,8 +585,10 @@
                     <option value="">All Sources</option>
                     <option value="POSITION" {{ $sourceType === 'POSITION' ? 'selected' : '' }}>Position Points</option>
                     <option value="GRADE" {{ $sourceType === 'GRADE' ? 'selected' : '' }}>Grade Points</option>
-                    <option value="FINANCE" {{ $sourceType === 'FINANCE' ? 'selected' : '' }}>Finance Marks</option>
+                    <option value="CULTURAL_WALK" {{ $sourceType === 'CULTURAL_WALK' ? 'selected' : '' }}>Cultural Walk</option>
                     <option value="GRACE" {{ $sourceType === 'GRACE' ? 'selected' : '' }}>Grace Marks</option>
+                    <option value="FINANCE" {{ $sourceType === 'FINANCE' ? 'selected' : '' }}>Finance Marks</option>
+                    <option value="OTHER" {{ $sourceType === 'OTHER' ? 'selected' : '' }}>Other Marks</option>
                 </select>
 
                 @if($selectedGroupId || $sourceType)
@@ -583,10 +623,14 @@
                                 </span>
                             </td>
                             <td class="px-6 py-3 font-medium text-slate-900 max-w-[200px] truncate" title="{{ $tx->program?->name }}">
-                                @if($tx->source_type === 'FINANCE')
+                                @if($tx->source_type === 'CULTURAL_WALK')
+                                    <span class="text-purple-800 font-bold">Cultural Walk Performance</span>
+                                @elseif($tx->source_type === 'FINANCE')
                                     <span class="text-amber-800 font-bold">Finance Contribution</span>
                                 @elseif($tx->source_type === 'GRACE')
                                     <span class="text-indigo-800 font-bold">Grace Mark Allocation</span>
+                                @elseif($tx->source_type === 'OTHER')
+                                    <span class="text-teal-800 font-bold">Other / Extra Standing Mark</span>
                                 @else
                                     {{ $tx->program?->name ?? '—' }}
                                 @endif
@@ -596,10 +640,14 @@
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">POSITION</span>
                                 @elseif($tx->source_type === 'GRADE')
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">GRADE</span>
+                                @elseif($tx->source_type === 'CULTURAL_WALK')
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-300">WALK</span>
                                 @elseif($tx->source_type === 'FINANCE')
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">FINANCE</span>
                                 @elseif($tx->source_type === 'GRACE')
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-300">GRACE</span>
+                                @elseif($tx->source_type === 'OTHER')
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-300">OTHER</span>
                                 @else
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">{{ $tx->source_type }}</span>
                                 @endif
@@ -608,7 +656,7 @@
                                 @if($tx->student)
                                     <span class="font-medium text-slate-900">{{ $tx->student->name }}</span>
                                     <span class="text-[10px] text-slate-400">({{ $tx->student->student_id }})</span>
-                                @elseif(in_array($tx->source_type, ['FINANCE', 'GRACE']))
+                                @elseif(in_array($tx->source_type, ['FINANCE', 'GRACE', 'CULTURAL_WALK', 'OTHER']))
                                     <span class="text-slate-500 font-medium">Group Level</span>
                                 @else
                                     <span class="text-slate-400 italic">Group Entry</span>

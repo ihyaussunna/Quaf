@@ -249,4 +249,60 @@ class GroupFinanceAndGraceMarksTest extends TestCase
         $this->assertSame('Conduct award', $this->groupA->grace_remarks);
         $this->assertSame(23, $this->groupA->points_cache);
     }
+
+    public function test_admin_can_update_cultural_walk_and_other_marks_and_they_aggregate_into_standings(): void
+    {
+        $response = $this->actingAs($this->adminUser)->post(route('admin.points.group-marks'), [
+            'group_id' => $this->groupA->id,
+            'finance_points' => 10,
+            'finance_remarks' => 'Fund',
+            'grace_points' => 5,
+            'grace_remarks' => 'Grace',
+            'cultural_walk_points' => 20,
+            'cultural_walk_remarks' => 'Best Procession Performance',
+            'other_points' => 7,
+            'other_remarks' => 'Campus Cleanliness Trophy',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->groupA->refresh();
+        $this->assertSame(20, $this->groupA->cultural_walk_points);
+        $this->assertSame('Best Procession Performance', $this->groupA->cultural_walk_remarks);
+        $this->assertSame(7, $this->groupA->other_points);
+        $this->assertSame('Campus Cleanliness Trophy', $this->groupA->other_remarks);
+        $this->assertSame(42, $this->groupA->points_cache); // 10 + 5 + 20 + 7
+
+        // Verify transactions created for CULTURAL_WALK and OTHER
+        $this->assertDatabaseHas('points_transactions', [
+            'group_id' => $this->groupA->id,
+            'source_type' => 'CULTURAL_WALK',
+            'points' => 20,
+        ]);
+        $this->assertDatabaseHas('points_transactions', [
+            'group_id' => $this->groupA->id,
+            'source_type' => 'OTHER',
+            'points' => 7,
+        ]);
+    }
+
+    public function test_admin_points_dashboard_shows_special_marks_form_and_cultural_walk(): void
+    {
+        $this->groupA->update([
+            'cultural_walk_points' => 25,
+            'cultural_walk_remarks' => 'Walk Winner',
+            'finance_points' => 10,
+            'grace_points' => 5,
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->get(route('admin.points.index'));
+        $response->assertOk();
+        $response->assertSee('ഗ്രൂപ്പ് സ്റ്റാൻഡിംഗ് മാർക്കുകൾ');
+        $response->assertSee('Cultural Walk');
+        $response->assertSee('Grace Pts');
+        $response->assertSee('Finance Pts');
+        $response->assertSee('cultural_walk_points');
+        $response->assertSee('25');
+    }
 }

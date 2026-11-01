@@ -296,6 +296,15 @@
                 <span>Groups</span>
             </a>
 
+            <!-- 2b. Standings & Special Marks (Grace, Cultural Walk, Finance) -->
+            <a href="{{ route('admin.points.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.points.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 {{ request()->routeIs('admin.points.*') ? 'text-white' : 'text-amber-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Standings & Marks</span>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold {{ request()->routeIs('admin.points.*') ? 'bg-black/30 text-white' : 'bg-amber-400/20 text-amber-300 border border-amber-400/30' }}">Grace & Walk</span>
+            </a>
+
             <!-- 3. Zone -->
             <a href="{{ route('admin.zones.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.zones.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
@@ -398,6 +407,10 @@
                     <a href="{{ route('admin.judge-marks.index') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.judge-marks.index') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Judge Marks Audit</a>
                     <a href="{{ route('admin.mark-entry.handler') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.mark-entry.handler') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Marks Handler</a>
                     <a href="{{ route('admin.mark-entry.check') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.mark-entry.check') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Mark Check</a>
+                    <a href="{{ route('admin.points.index') }}#special-marks" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.points.*') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }} flex items-center justify-between">
+                        <span>Group Special Marks</span>
+                        <span class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-amber-500/20 text-amber-300">Grace/Walk</span>
+                    </a>
                 </div>
             </div>
 

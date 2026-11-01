@@ -128,12 +128,18 @@ class GroupController extends Controller
             'finance_remarks' => ['nullable', 'string', 'max:255'],
             'grace_points' => ['nullable', 'integer'],
             'grace_remarks' => ['nullable', 'string', 'max:255'],
+            'cultural_walk_points' => ['nullable', 'integer'],
+            'cultural_walk_remarks' => ['nullable', 'string', 'max:255'],
+            'other_points' => ['nullable', 'integer'],
+            'other_remarks' => ['nullable', 'string', 'max:255'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
 
         $marksChanged = ($request->has('finance_points') && (int) $request->input('finance_points') !== (int) $group->finance_points)
-            || ($request->has('grace_points') && (int) $request->input('grace_points') !== (int) $group->grace_points);
+            || ($request->has('grace_points') && (int) $request->input('grace_points') !== (int) $group->grace_points)
+            || ($request->has('cultural_walk_points') && (int) $request->input('cultural_walk_points') !== (int) $group->cultural_walk_points)
+            || ($request->has('other_points') && (int) $request->input('other_points') !== (int) $group->other_points);
 
         $old = $group->toArray();
         $group->update($validated);

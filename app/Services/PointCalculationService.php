@@ -339,11 +339,13 @@ class PointCalculationService
                 }
             }
 
-            // Append Group Finance & Grace Marks transactions
+            // Append Group Finance, Grace Marks, Cultural Walk, and Other Standing Adjustments
             Group::ensureSchema();
             $specialMarkGroups = Group::where(function ($q) {
                 $q->where('finance_points', '!=', 0)
-                    ->orWhere('grace_points', '!=', 0);
+                    ->orWhere('grace_points', '!=', 0)
+                    ->orWhere('cultural_walk_points', '!=', 0)
+                    ->orWhere('other_points', '!=', 0);
             })->get();
 
             $now = now();
@@ -377,6 +379,40 @@ class PointCalculationService
                         'source_type' => 'GRACE',
                         'points' => $pts,
                         'description' => "{$grp->name} — Grace Mark ({$sign} pts)".($grp->grace_remarks ? " [{$grp->grace_remarks}]" : ''),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                if ((int) $grp->cultural_walk_points !== 0) {
+                    $pts = (int) $grp->cultural_walk_points;
+                    $sign = $pts > 0 ? "+{$pts}" : (string) $pts;
+                    $allTransactions[] = [
+                        'group_id' => $grp->id,
+                        'program_id' => null,
+                        'result_id' => null,
+                        'entry_id' => null,
+                        'student_id' => null,
+                        'source_type' => 'CULTURAL_WALK',
+                        'points' => $pts,
+                        'description' => "{$grp->name} — Cultural Walk ({$sign} pts)".($grp->cultural_walk_remarks ? " [{$grp->cultural_walk_remarks}]" : ''),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                if ((int) $grp->other_points !== 0) {
+                    $pts = (int) $grp->other_points;
+                    $sign = $pts > 0 ? "+{$pts}" : (string) $pts;
+                    $allTransactions[] = [
+                        'group_id' => $grp->id,
+                        'program_id' => null,
+                        'result_id' => null,
+                        'entry_id' => null,
+                        'student_id' => null,
+                        'source_type' => 'OTHER',
+                        'points' => $pts,
+                        'description' => "{$grp->name} — Other Mark ({$sign} pts)".($grp->other_remarks ? " [{$grp->other_remarks}]" : ''),
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];

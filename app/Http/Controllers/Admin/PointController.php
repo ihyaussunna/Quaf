@@ -125,6 +125,10 @@ class PointController extends Controller
                 'groups.*.finance_remarks' => ['nullable', 'string', 'max:255'],
                 'groups.*.grace_points' => ['required', 'integer'],
                 'groups.*.grace_remarks' => ['nullable', 'string', 'max:255'],
+                'groups.*.cultural_walk_points' => ['nullable', 'integer'],
+                'groups.*.cultural_walk_remarks' => ['nullable', 'string', 'max:255'],
+                'groups.*.other_points' => ['nullable', 'integer'],
+                'groups.*.other_remarks' => ['nullable', 'string', 'max:255'],
             ]);
 
             foreach ($validated['groups'] as $item) {
@@ -135,12 +139,20 @@ class PointController extends Controller
                         'finance_remarks' => $group->finance_remarks,
                         'grace_points' => $group->grace_points,
                         'grace_remarks' => $group->grace_remarks,
+                        'cultural_walk_points' => $group->cultural_walk_points,
+                        'cultural_walk_remarks' => $group->cultural_walk_remarks,
+                        'other_points' => $group->other_points,
+                        'other_remarks' => $group->other_remarks,
                     ];
                     $group->update([
                         'finance_points' => (int) $item['finance_points'],
                         'finance_remarks' => $item['finance_remarks'] ?? null,
                         'grace_points' => (int) $item['grace_points'],
                         'grace_remarks' => $item['grace_remarks'] ?? null,
+                        'cultural_walk_points' => (int) ($item['cultural_walk_points'] ?? 0),
+                        'cultural_walk_remarks' => $item['cultural_walk_remarks'] ?? null,
+                        'other_points' => (int) ($item['other_points'] ?? 0),
+                        'other_remarks' => $item['other_remarks'] ?? null,
                     ]);
                     AuditLogger::log('update_group_marks_batch', $group, $old, $item);
                 }
@@ -149,7 +161,7 @@ class PointController extends Controller
             $this->pointService->recalculateAllPoints();
             Group::checkAndApplyMilestone();
 
-            return back()->with('success', 'എല്ലാ ഗ്രൂപ്പുകളുടെയും ഫിനാൻസ് & ഗ്രേസ് മാർക്കുകൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്യുകയും ആകെ പോയിന്റ് നില പുനർനിർണ്ണയിക്കുകയും ചെയ്തു.');
+            return back()->with('success', 'എല്ലാ ഗ്രൂപ്പുകളുടെയും ഗ്രേസ്, കൾച്ചറൽ വാക്ക്, ഫിനാൻസ് & അഡീഷണൽ മാർക്കുകൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്യുകയും ആകെ പോയിന്റ് നില പുനർനിർണ്ണയിക്കുകയും ചെയ്തു.');
         }
 
         $validated = $request->validate([
@@ -158,6 +170,10 @@ class PointController extends Controller
             'finance_remarks' => ['nullable', 'string', 'max:255'],
             'grace_points' => ['required', 'integer'],
             'grace_remarks' => ['nullable', 'string', 'max:255'],
+            'cultural_walk_points' => ['nullable', 'integer'],
+            'cultural_walk_remarks' => ['nullable', 'string', 'max:255'],
+            'other_points' => ['nullable', 'integer'],
+            'other_remarks' => ['nullable', 'string', 'max:255'],
         ]);
 
         $group = Group::findOrFail($validated['group_id']);
@@ -166,6 +182,10 @@ class PointController extends Controller
             'finance_remarks' => $group->finance_remarks,
             'grace_points' => $group->grace_points,
             'grace_remarks' => $group->grace_remarks,
+            'cultural_walk_points' => $group->cultural_walk_points,
+            'cultural_walk_remarks' => $group->cultural_walk_remarks,
+            'other_points' => $group->other_points,
+            'other_remarks' => $group->other_remarks,
         ];
 
         $group->update([
@@ -173,6 +193,10 @@ class PointController extends Controller
             'finance_remarks' => $validated['finance_remarks'] ?? null,
             'grace_points' => (int) $validated['grace_points'],
             'grace_remarks' => $validated['grace_remarks'] ?? null,
+            'cultural_walk_points' => (int) ($validated['cultural_walk_points'] ?? 0),
+            'cultural_walk_remarks' => $validated['cultural_walk_remarks'] ?? null,
+            'other_points' => (int) ($validated['other_points'] ?? 0),
+            'other_remarks' => $validated['other_remarks'] ?? null,
         ]);
 
         AuditLogger::log('update_group_marks', $group, $old, [
@@ -180,12 +204,16 @@ class PointController extends Controller
             'finance_remarks' => $group->finance_remarks,
             'grace_points' => $group->grace_points,
             'grace_remarks' => $group->grace_remarks,
+            'cultural_walk_points' => $group->cultural_walk_points,
+            'cultural_walk_remarks' => $group->cultural_walk_remarks,
+            'other_points' => $group->other_points,
+            'other_remarks' => $group->other_remarks,
         ]);
 
         $this->pointService->recalculateAllPoints();
         Group::checkAndApplyMilestone();
 
-        return back()->with('success', "{$group->name} ഗ്രൂപ്പിന്റെ ഫിനാൻസ് & ഗ്രേസ് മാർക്കുകൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്യുകയും പോയിന്റ് നില പുനർനിർണ്ണയിക്കുകയും ചെയ്തു.");
+        return back()->with('success', "{$group->name} ഗ്രൂപ്പിന്റെ ഗ്രേസ്, കൾച്ചറൽ വാക്ക്, ഫിനാൻസ് & അഡീഷണൽ മാർക്കുകൾ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്യുകയും പോയിന്റ് നില പുനർനിർണ്ണയിക്കുകയും ചെയ്തു.");
     }
 
     public function recalculate(): RedirectResponse

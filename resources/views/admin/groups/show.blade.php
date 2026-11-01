@@ -36,13 +36,21 @@
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Results Pts</span>
             <span class="text-2xl font-sora font-black text-slate-800 mt-1 block">{{ $group->competition_points }}</span>
         </div>
-        <div class="bg-white border border-amber-200 bg-amber-50/20 rounded-2xl p-4 shadow-xs">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 font-bold block">Finance Mark</span>
-            <span class="text-2xl font-sora font-black text-amber-800 mt-1 block">{{ $group->finance_points ?? 0 }}</span>
+        <div class="bg-white border border-purple-200 bg-purple-50/20 rounded-2xl p-4 shadow-xs">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-purple-700 font-bold block">Cultural Walk</span>
+            <span class="text-2xl font-sora font-black text-purple-800 mt-1 block">{{ $group->cultural_walk_points ?? 0 }}</span>
         </div>
         <div class="bg-white border border-indigo-200 bg-indigo-50/20 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-700 font-bold block">Grace Mark</span>
             <span class="text-2xl font-sora font-black text-indigo-800 mt-1 block">{{ $group->grace_points ?? 0 }}</span>
+        </div>
+        <div class="bg-white border border-amber-200 bg-amber-50/20 rounded-2xl p-4 shadow-xs">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 font-bold block">Finance Mark</span>
+            <span class="text-2xl font-sora font-black text-amber-800 mt-1 block">{{ $group->finance_points ?? 0 }}</span>
+        </div>
+        <div class="bg-white border border-teal-200 bg-teal-50/20 rounded-2xl p-4 shadow-xs">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-bold block">Other Mark</span>
+            <span class="text-2xl font-sora font-black text-teal-800 mt-1 block">{{ $group->other_points ?? 0 }}</span>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Students</span>

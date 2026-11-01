@@ -87,6 +87,10 @@ class Group extends Model
         'finance_remarks',
         'grace_points',
         'grace_remarks',
+        'cultural_walk_points',
+        'cultural_walk_remarks',
+        'other_points',
+        'other_remarks',
         'public_points_cache',
         'public_rank_cache',
     ];
@@ -99,6 +103,8 @@ class Group extends Model
             'rank_cache' => 'integer',
             'finance_points' => 'integer',
             'grace_points' => 'integer',
+            'cultural_walk_points' => 'integer',
+            'other_points' => 'integer',
             'public_points_cache' => 'integer',
             'public_rank_cache' => 'integer',
         ];
@@ -109,8 +115,10 @@ class Group extends Model
         $total = (int) ($this->points_cache ?? 0);
         $finance = (int) ($this->finance_points ?? 0);
         $grace = (int) ($this->grace_points ?? 0);
+        $cultural = (int) ($this->cultural_walk_points ?? 0);
+        $other = (int) ($this->other_points ?? 0);
 
-        return max(0, $total - $finance - $grace);
+        return max(0, $total - $finance - $grace - $cultural - $other);
     }
 
     public function getTotalGroupPointsAttribute(): int
@@ -151,6 +159,30 @@ class Group extends Model
             if (! Schema::hasColumn('groups', 'grace_remarks')) {
                 Schema::table('groups', function (Blueprint $table) {
                     $table->string('grace_remarks')->nullable()->after('grace_points');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'cultural_walk_points')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->integer('cultural_walk_points')->default(0)->after('grace_remarks');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'cultural_walk_remarks')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->string('cultural_walk_remarks')->nullable()->after('cultural_walk_points');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'other_points')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->integer('other_points')->default(0)->after('cultural_walk_remarks');
+                });
+            }
+
+            if (! Schema::hasColumn('groups', 'other_remarks')) {
+                Schema::table('groups', function (Blueprint $table) {
+                    $table->string('other_remarks')->nullable()->after('other_points');
                 });
             }
 

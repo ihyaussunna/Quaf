@@ -8,7 +8,11 @@
             <h1 class="text-2xl font-bold text-slate-900 font-sora">Groups</h1>
             <p class="text-xs text-slate-500 mt-0.5">Manage official festival competition groups and leaders</p>
         </div>
-        <div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.points.index') }}#special-marks" class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors border border-amber-400/30">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>Grace, Cultural Walk & Finance Marks</span>
+            </a>
             <button @click="newTeamOpen = true" class="px-4 py-2 rounded-lg bg-[#be1e2d] hover:bg-[#a01624] text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors">
                 <span>+</span> <span>New Group</span>
             </button>
