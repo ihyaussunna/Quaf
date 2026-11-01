@@ -221,7 +221,7 @@
                     <!-- PDF Print / Export Milestone Standings -->
                     <div class="pt-3 border-t border-white/10 flex items-center justify-between">
                         <span class="text-[11px] text-slate-400 font-mono">Standings PDF:</span>
-                        <a :href="'{{ route('admin.print.milestone-standings') }}?count=' + ({{ $publishedCount }} + selectedResultIds.length)"
+                        <a :href="'{{ route('admin.print.milestone-standings') }}?count=' + ({{ $stats['published_count'] }} + selectedResultIds.length)"
                            target="_blank"
                            class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs transition flex items-center gap-1.5 border border-white/15">
                             <svg class="w-3.5 h-3.5 text-[#f3bd2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>

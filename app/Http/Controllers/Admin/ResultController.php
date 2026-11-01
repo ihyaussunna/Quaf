@@ -644,11 +644,14 @@ class ResultController extends Controller
             'updated_at' => FestivalSetting::get('public_standings_updated_at'),
         ];
 
+        $publishedCount = $stats['published_count'];
+
         return view('admin.results.planner', compact(
             'groups',
             'resultsData',
             'groupStrategyStats',
             'stats',
+            'publishedCount',
             'publicStandingsInfo'
         ));
     }

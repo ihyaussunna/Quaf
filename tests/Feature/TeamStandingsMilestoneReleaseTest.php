@@ -558,4 +558,14 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
         $verifyResponse->assertSee('Qawwali Stage Event');
         $verifyResponse->assertSee('1st Prize');
     }
+
+    public function test_admin_results_planner_renders_successfully(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.results.planner'));
+        $response->assertOk();
+        $response->assertViewIs('admin.results.planner');
+        $response->assertViewHas('publishedCount');
+        $response->assertViewHas('stats');
+        $response->assertSee('Print Standings PDF');
+    }
 }
