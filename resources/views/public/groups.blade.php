@@ -21,7 +21,7 @@
                 </span>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-                <button type="button" onclick="launchCelebrationSequence();" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-bold text-[11px] uppercase tracking-wider transition shadow cursor-pointer flex items-center gap-1.5 active:scale-95">
+                <button type="button" onclick="launchCelebrationSequence(true);" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-bold text-[11px] uppercase tracking-wider transition shadow cursor-pointer flex items-center gap-1.5 active:scale-95">
                     <svg class="w-3.5 h-3.5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                     <span>Replay Celebration</span>
                 </button>
@@ -99,12 +99,39 @@
 <!-- Leaderboard & Podium Section (White Theme) -->
 <section class="py-10 sm:py-16 bg-slate-50 min-h-[60vh] relative">
     @if(!empty($isFinalPublished))
+        <!-- Background Audio for Final Championship Celebration -->
+        <audio id="championship-anthem" preload="auto" loop playsinline>
+            <source src="{{ asset('audio/championship-bgm.m4a') }}" type="audio/mp4">
+            <source src="{{ asset('audio/championship-bgm.mp4') }}" type="audio/mp4">
+            <source src="{{ asset('audio/championship-bgm.aac') }}" type="audio/aac">
+        </audio>
+
         <!-- Celebration Canvas for Confetti Fireworks -->
         <canvas id="celebration-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
 
-        <!-- Floating Action Button for Celebration matching user screenshot model -->
-        <div class="fixed bottom-6 right-6 z-40">
-            <button type="button" onclick="launchCelebrationSequence();" class="px-5 py-3 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-sora font-black text-xs uppercase tracking-wider transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 flex items-center gap-2 border-2 border-white cursor-pointer">
+        <!-- Floating Controls: Audio Mute/Play Toggle & Celebration Fireworks -->
+        <div class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5">
+            <!-- Audio Toggle Button -->
+            <button type="button" id="championship-sound-toggle" onclick="toggleChampionshipAudio();"
+                    class="h-11 px-3.5 rounded-full bg-white/95 hover:bg-white text-slate-800 border border-slate-200/90 shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2 backdrop-blur-md group"
+                    title="Toggle Championship Music">
+                <span id="sound-wave-bars" class="flex items-end gap-0.5 h-4 px-0.5">
+                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-2.5"></span>
+                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.4s_ease-in-out_infinite] h-4"></span>
+                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.7s_ease-in-out_infinite] h-3"></span>
+                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.5s_ease-in-out_infinite] h-4.5"></span>
+                </span>
+                <span id="sound-icon-muted" class="hidden text-slate-500 group-hover:text-slate-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>
+                </span>
+                <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 hidden sm:inline">MUSIC</span>
+            </button>
+
+            <!-- Replay / Celebrate Button -->
+            <button type="button" onclick="launchCelebrationSequence(true);" class="h-11 px-5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-sora font-black text-xs uppercase tracking-wider transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 flex items-center gap-2 border-2 border-white cursor-pointer">
                 <svg class="w-4 h-4 text-slate-950 animate-bounce" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 <span>CELEBRATE</span>
             </button>
@@ -550,46 +577,84 @@ function launchConfettiCannon() {
     render();
 }
 
-function playVictoryFanfare() {
-    try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        if (ctx.state === 'suspended') {
-            ctx.resume();
-        }
-        const now = ctx.currentTime;
-        const notes = [
-            { freq: 392.00, start: 0.0, dur: 0.16 }, // G4
-            { freq: 523.25, start: 0.16, dur: 0.16 }, // C5
-            { freq: 659.25, start: 0.32, dur: 0.20 }, // E5
-            { freq: 783.99, start: 0.52, dur: 0.26 }, // G5
-            { freq: 1046.50, start: 0.80, dur: 1.10 }, // C6
-            { freq: 523.25, start: 0.80, dur: 1.10 },  // C5
-            { freq: 659.25, start: 0.80, dur: 1.10 },  // E5
-        ];
+// Background Championship Audio Management
+let championshipAudio = null;
+let isAudioMuted = false;
 
-        notes.forEach(n => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(n.freq, now + n.start);
+function initChampionshipAudio() {
+    championshipAudio = document.getElementById('championship-anthem');
+    if (!championshipAudio) return;
 
-            gain.gain.setValueAtTime(0.001, now + n.start);
-            gain.gain.exponentialRampToValueAtTime(0.22, now + n.start + 0.04);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+    championshipAudio.volume = 0.85;
 
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            osc.start(now + n.start);
-            osc.stop(now + n.start + n.dur + 0.05);
+    // Attempt playback when page arrives
+    const promise = championshipAudio.play();
+    if (promise !== undefined) {
+        promise.then(() => {
+            updateAudioUI(true);
+        }).catch(() => {
+            // Browser autoplay restrictions blocked playback before user interaction
+            updateAudioUI(false);
+            const startOnInteraction = () => {
+                if (!isAudioMuted && championshipAudio && championshipAudio.paused) {
+                    championshipAudio.play().then(() => {
+                        updateAudioUI(true);
+                    }).catch(() => {});
+                }
+                ['click', 'touchstart', 'keydown'].forEach(evt => {
+                    document.removeEventListener(evt, startOnInteraction);
+                });
+            };
+            ['click', 'touchstart', 'keydown'].forEach(evt => {
+                document.addEventListener(evt, startOnInteraction, { once: true, passive: true });
+            });
         });
-    } catch(e) {
-        // Ignored if sound gesture policy blocks before interaction
     }
 }
-window.playVictoryFanfare = playVictoryFanfare;
+
+function updateAudioUI(isPlaying) {
+    const waveEl = document.getElementById('sound-wave-bars');
+    const muteIcon = document.getElementById('sound-icon-muted');
+    const btn = document.getElementById('championship-sound-toggle');
+    if (!waveEl || !muteIcon) return;
+
+    if (isPlaying) {
+        waveEl.classList.remove('hidden');
+        waveEl.classList.add('flex');
+        muteIcon.classList.add('hidden');
+        if (btn) {
+            btn.setAttribute('title', 'Mute Championship Music');
+            btn.classList.add('ring-2', 'ring-amber-400/80');
+        }
+    } else {
+        waveEl.classList.add('hidden');
+        waveEl.classList.remove('flex');
+        muteIcon.classList.remove('hidden');
+        if (btn) {
+            btn.setAttribute('title', 'Play Championship Music');
+            btn.classList.remove('ring-2', 'ring-amber-400/80');
+        }
+    }
+}
+
+function toggleChampionshipAudio() {
+    if (!championshipAudio) {
+        championshipAudio = document.getElementById('championship-anthem');
+    }
+    if (!championshipAudio) return;
+
+    if (championshipAudio.paused) {
+        isAudioMuted = false;
+        championshipAudio.play().then(() => {
+            updateAudioUI(true);
+        }).catch(e => console.error(e));
+    } else {
+        isAudioMuted = true;
+        championshipAudio.pause();
+        updateAudioUI(false);
+    }
+}
+window.toggleChampionshipAudio = toggleChampionshipAudio;
 
 function animatePointsCounters() {
     const targets = document.querySelectorAll('.count-up-target');
@@ -619,11 +684,21 @@ function animatePointsCounters() {
     });
 }
 
-function launchCelebrationSequence() {
+function launchCelebrationSequence(restartAudio = false) {
     launchConfettiCannon();
-    if (window.playVictoryFanfare) {
-        playVictoryFanfare();
+
+    if (championshipAudio) {
+        if (restartAudio) {
+            championshipAudio.currentTime = 0;
+            isAudioMuted = false;
+            championshipAudio.play().then(() => updateAudioUI(true)).catch(() => {});
+        } else if (championshipAudio.paused && !isAudioMuted) {
+            championshipAudio.play().then(() => updateAudioUI(true)).catch(() => {});
+        }
+    } else {
+        initChampionshipAudio();
     }
+
     setTimeout(() => {
         animatePointsCounters();
     }, 400);
@@ -631,9 +706,12 @@ function launchCelebrationSequence() {
 window.launchCelebrationSequence = launchCelebrationSequence;
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Start championship background music
+    initChampionshipAudio();
+
     // Stage-timed confetti burst matching the Champion podium card reveal
     setTimeout(() => {
-        launchCelebrationSequence();
+        launchCelebrationSequence(false);
     }, 1100);
 });
 </script>
