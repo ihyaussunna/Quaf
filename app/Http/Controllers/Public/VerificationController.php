@@ -89,6 +89,7 @@ class VerificationController extends Controller
         $isValid = (bool) $student;
         $coinSummary = null;
         $studentAchievements = null;
+        $clawbackSummary = null;
         $purchaseHistory = collect();
         $coinTransactions = collect();
         $awardedPrograms = collect();
@@ -104,6 +105,7 @@ class VerificationController extends Controller
             // Scanner page is public: only show media-published coins and achievements
             $coinSummary = $coinRewardService->getStudentCoinSummary($student, true);
             $studentAchievements = $coinRewardService->getStudentAchievements($student, true);
+            $clawbackSummary = $coinRewardService->getStudentClawbackSummary($student, true);
 
             $allPrograms = $student->entries->merge($student->participations);
             if ($student->group_id) {
@@ -142,6 +144,7 @@ class VerificationController extends Controller
             'qrToken',
             'coinSummary',
             'studentAchievements',
+            'clawbackSummary',
             'purchaseHistory',
             'coinTransactions',
             'awardedPrograms',

@@ -1190,14 +1190,181 @@ class CoinRewardService
             ->where('transaction_type', 'debit')
             ->sum('coins'));
 
-        $balance = max(0, $earned - $spent);
+        $rawBalance = $earned - $spent;
+        $balance = max(0, $rawBalance);
+        $excessSpent = max(0, $spent - $earned);
+        $clawbackSummary = $this->getStudentClawbackSummary($student, $onlyMediaPublished);
 
         return [
             'balance' => $balance,
+            'raw_balance' => $rawBalance,
+            'excess_spent' => $excessSpent,
+            'has_excess_spent' => $excessSpent > 0,
             'total_earned' => $earned,
             'competition_earned' => $competitionEarned,
             'added_coins' => $addedCoins,
             'total_spent' => $spent,
+            'has_purchase_with_clawback' => $clawbackSummary['has_purchase_with_clawback'] || ($excessSpent > 0),
+            'total_clawback_coins' => $clawbackSummary['total_clawback_coins'],
+            'clawback_adjustments' => $clawbackSummary['adjustments'],
+            'clawback_summary' => $clawbackSummary,
+        ];
+    }
+
+    /**
+     * Get comprehensive summary of result updates, coin clawbacks, and purchases made prior to adjustments.
+     *
+     * @return array{
+     *     has_clawback: bool,
+     *     has_purchase_with_clawback: bool,
+     *     total_clawback_coins: int,
+     *     total_spent: int,
+     *     adjustments: array<int, array{
+     *         program_id: int|null,
+     *         program_name: string,
+     *         action: string,
+     *         previous_position: int|null,
+     *         new_position: int|null,
+     *         previous_coins: int,
+     *         current_coins: int,
+     *         clawback_amount: int,
+     *         reason: string,
+     *         description: string,
+     *         date: string|null
+     *     }>
+     * }
+     */
+    public function getStudentClawbackSummary(Student $student, bool $onlyMediaPublished = false): array
+    {
+        CoinTransaction::ensureSchema();
+
+        $adjustments = [];
+
+        // 1. Reversals (unplaced participants whose entire credit was revoked)
+        $reversalsQuery = CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'reversal')
+            ->with(['program', 'result']);
+
+        if ($onlyMediaPublished) {
+            $reversalsQuery->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            });
+        }
+
+        $reversals = $reversalsQuery->latest()->get();
+
+        foreach ($reversals as $rev) {
+            $meta = $rev->metadata ?? [];
+            $prevPos = $meta['previous_position'] ?? $rev->prize_position;
+            $prevCoins = (int) ($meta['previous_coins'] ?? ($meta['clawback_amount'] ?? 0));
+            $clawback = (int) ($meta['clawback_amount'] ?? $prevCoins);
+
+            if ($clawback <= 0 && $prevCoins <= 0) {
+                continue;
+            }
+
+            $progName = $rev->program?->name ?? ($meta['program_name'] ?? 'Competition');
+            $posLabel = match ((int) $prevPos) {
+                1 => '1st Prize',
+                2 => '2nd Prize',
+                3 => '3rd Prize',
+                default => ($prevPos ? "Position {$prevPos}" : 'Prize'),
+            };
+
+            $adjustments[] = [
+                'program_id' => $rev->program_id,
+                'program_name' => $progName,
+                'action' => 'unplaced',
+                'previous_position' => $prevPos ? (int) $prevPos : null,
+                'new_position' => null,
+                'previous_coins' => $prevCoins,
+                'current_coins' => 0,
+                'clawback_amount' => $clawback ?: $prevCoins,
+                'reason' => 'ഫലം തിരുത്തിയതിലൂടെ സ്ഥാനമില്ലാതായി (Unplaced after judgment update)',
+                'description' => "ആദ്യം ലഭിച്ച {$posLabel} തിരുത്തിയപ്പോൾ സ്ഥാനം ഇല്ലാതാവുകയും {$clawback} കോയിനുകൾ പിൻവലിക്കുകയും ചെയ്തു",
+                'date' => $rev->updated_at?->format('d M, h:i A'),
+            ];
+        }
+
+        // 2. Demotions (participants demoted from higher to lower position e.g. 1st -> 2nd, 2nd -> 3rd)
+        $demotionsQuery = CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'credit')
+            ->with(['program', 'result']);
+
+        if ($onlyMediaPublished) {
+            $demotionsQuery->where(function ($q) {
+                $q->whereNull('result_id')
+                    ->orWhereHas('result', fn ($rq) => $rq->where('status', 'published')->where('is_media_published', true));
+            });
+        }
+
+        $demotions = $demotionsQuery->latest()->get();
+
+        foreach ($demotions as $dem) {
+            $meta = $dem->metadata ?? [];
+            $isDemoted = ($meta['action'] ?? null) === 'demoted'
+                || ! empty($meta['clawback_amount'])
+                || str_contains($dem->description ?? '', 'clawed back')
+                || str_contains($dem->description ?? '', 'demoted');
+
+            if ($isDemoted) {
+                $oldPos = (int) ($meta['previous_position'] ?? 0);
+                $newPos = (int) ($dem->prize_position ?? 0);
+                $oldCoins = (int) ($meta['previous_coins'] ?? 0);
+                $currentCoins = (int) $dem->coins;
+                $clawback = (int) ($meta['clawback_amount'] ?? max(0, $oldCoins - $currentCoins));
+
+                if ($clawback <= 0) {
+                    continue;
+                }
+
+                $progName = $dem->program?->name ?? ($meta['program_name'] ?? 'Competition');
+                $oldPosLabel = match ($oldPos) {
+                    1 => '1st Prize',
+                    2 => '2nd Prize',
+                    3 => '3rd Prize',
+                    default => ($oldPos ? "Position {$oldPos}" : 'Previous Prize'),
+                };
+                $newPosLabel = match ($newPos) {
+                    1 => '1st Prize',
+                    2 => '2nd Prize',
+                    3 => '3rd Prize',
+                    default => ($newPos ? "Position {$newPos}" : 'New Prize'),
+                };
+
+                $adjustments[] = [
+                    'program_id' => $dem->program_id,
+                    'program_name' => $progName,
+                    'action' => 'demoted',
+                    'previous_position' => $oldPos ?: null,
+                    'new_position' => $newPos ?: null,
+                    'previous_coins' => $oldCoins,
+                    'current_coins' => $currentCoins,
+                    'clawback_amount' => $clawback,
+                    'reason' => 'ഫലം തിരുത്തിയതിലൂടെ സ്ഥാനം താഴ്ന്നു (Demoted after judgment update)',
+                    'description' => "ആദ്യം ലഭിച്ച {$oldPosLabel}-ൽ നിന്ന് {$newPosLabel}-ലേക്ക് മാറിയപ്പോൾ {$clawback} കോയിനുകൾ പിൻവലിച്ചു",
+                    'date' => $dem->updated_at?->format('d M, h:i A'),
+                ];
+            }
+        }
+
+        $totalClawback = array_sum(array_column($adjustments, 'clawback_amount'));
+
+        $spent = (int) abs(CoinTransaction::where('student_id', $student->id)
+            ->where('transaction_type', 'debit')
+            ->sum('coins'));
+
+        // Has purchases and has clawbacks
+        $hasClawback = ! empty($adjustments);
+        $hasPurchaseWithClawback = ($spent > 0 && $hasClawback);
+
+        return [
+            'has_clawback' => $hasClawback,
+            'has_purchase_with_clawback' => $hasPurchaseWithClawback,
+            'total_clawback_coins' => $totalClawback,
+            'total_spent' => $spent,
+            'adjustments' => $adjustments,
         ];
     }
 

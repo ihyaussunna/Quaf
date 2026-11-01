@@ -155,6 +155,7 @@ class StudentController extends Controller
         $student->refresh();
         $coinSummary = $coinService->getStudentCoinSummary($student, false);
         $studentAchievements = $coinService->getStudentAchievements($student, false);
+        $clawbackSummary = $coinService->getStudentClawbackSummary($student, false);
         $awardedPrograms = $coinService->resolveStudentAwardedPrograms($student);
 
         $coinTransactions = CoinTransaction::where('student_id', $student->id)
@@ -183,6 +184,7 @@ class StudentController extends Controller
             'remainingSlots',
             'maxSlots',
             'coinSummary',
+            'clawbackSummary',
             'coinTransactions',
             'studentAchievements',
             'awardedPrograms',

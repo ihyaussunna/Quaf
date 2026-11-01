@@ -54,6 +54,59 @@
                 </span>
             </div>
 
+            <!-- RESULT ADJUSTMENT & CLAWBACK NOTICE BANNER -->
+            @if(!empty($clawbackSummary['has_purchase_with_clawback']) || ($coinSummary['excess_spent'] ?? 0) > 0 || !empty($clawbackSummary['adjustments']))
+                <div class="p-4 sm:p-5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 space-y-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs sm:text-sm font-black font-sora text-rose-950 flex items-center gap-2 flex-wrap">
+                                <span>ഫലം തിരുത്തൽ / കോയിൻ ക്രമീകരണം (Result Correction Alert)</span>
+                                @if(!empty($clawbackSummary['has_purchase_with_clawback']))
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-rose-200 text-rose-900 border border-rose-300">
+                                        ആദ്യ ഫലപ്രകാരം സാധനങ്ങൾ കൈപ്പറ്റിയിട്ടുണ്ട്
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-rose-800 font-medium mt-1 leading-relaxed">
+                                @if(!empty($clawbackSummary['has_purchase_with_clawback']))
+                                    ആദ്യ ഫലപ്രഖ്യാപനപ്രകാരമുള്ള കോയിൻ ഉപയോഗിച്ച് പ്രസന്റേഷൻ ഡെസ്കിൽ നിന്ന് താങ്കൾ സാധനങ്ങൾ കൈപ്പറ്റിയ ശേഷം ചില മത്സരങ്ങളുടെ ഫലത്തിൽ ഔദ്യോഗികമായി മാറ്റം വരികയും (Judgment Corrected) കോയിനുകൾ പിൻവലിക്കുകയും ചെയ്തിട്ടുണ്ട്.
+                                @else
+                                    മത്സരഫലം പുനഃപരിശോധിച്ചതിലൂടെ ഫലത്തിൽ മാറ്റം വരികയും അർഹമായ കോയിനുകൾ ക്രമീകരിക്കുകയും ചെയ്തിട്ടുണ്ട്.
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+
+                    @if(($coinSummary['excess_spent'] ?? 0) > 0)
+                        <div class="p-3 rounded-xl bg-white border border-rose-200 flex items-center justify-between text-xs font-mono font-bold shadow-2xs">
+                            <div>
+                                <span class="text-rose-700 block">ആദ്യ ഫലപ്രകാരം അധികമായി കൈപ്പറ്റിയത് (Over-redeemed / Excess Spent):</span>
+                                <span class="text-[10px] text-slate-500 font-normal">ആദ്യ റിസൾട്ട് അനുസരിച്ച് സാധനങ്ങൾ നൽകിയതിലൂടെ ഉണ്ടായ കുറവ്</span>
+                            </div>
+                            <span class="text-rose-700 font-black text-sm shrink-0">-{{ number_format($coinSummary['excess_spent']) }} Coins</span>
+                        </div>
+                    @endif
+
+                    @if(!empty($clawbackSummary['adjustments']))
+                        <div class="pt-2 border-t border-rose-200/80 space-y-1.5">
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-800 block">തിരുത്തിയ മത്സരങ്ങളുടെ വിവരങ്ങൾ (Adjusted Competitions):</span>
+                            @foreach($clawbackSummary['adjustments'] as $adj)
+                                <div class="p-2.5 rounded-xl bg-white/80 border border-rose-200/80 text-xs flex items-center justify-between gap-2 shadow-2xs">
+                                    <div class="min-w-0">
+                                        <strong class="text-slate-900 block truncate">{{ $adj['program_name'] }}</strong>
+                                        <span class="text-rose-800 text-[11px] font-anek">{{ $adj['description'] }}</span>
+                                    </div>
+                                    <span class="font-mono font-black text-rose-700 shrink-0 text-xs">-{{ $adj['clawback_amount'] }} Coins</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <!-- Available Balance -->
                 <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 shadow-md border border-amber-300 col-span-2 sm:col-span-1">

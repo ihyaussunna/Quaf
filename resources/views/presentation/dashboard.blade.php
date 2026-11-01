@@ -175,6 +175,59 @@
 
                 <!-- Big Golden Coin Balance Display -->
                 <div class="px-6 space-y-4">
+                    <!-- RESULT ADJUSTMENT & CLAWBACK NOTICE BANNER -->
+                    @if(!empty($clawbackSummary['has_purchase_with_clawback']) || ($studentSummary['excess_spent'] ?? 0) > 0 || !empty($clawbackSummary['adjustments']))
+                        <div class="p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 shadow-sm space-y-2.5">
+                            <div class="flex items-start gap-2.5">
+                                <div class="w-7 h-7 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-black uppercase font-mono tracking-wider text-rose-950 flex items-center gap-1.5 flex-wrap">
+                                        <span>ഫലം തിരുത്തൽ / കോയിൻ ക്രമീകരണം (Result Correction Alert)</span>
+                                        @if(!empty($clawbackSummary['has_purchase_with_clawback']))
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-rose-200 text-rose-900 border border-rose-300">
+                                                ആദ്യ ഫലപ്രകാരം പർച്ചേസ് നടത്തിയിട്ടുണ്ട്
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-xs text-rose-800 font-medium mt-1 leading-relaxed">
+                                        @if(!empty($clawbackSummary['has_purchase_with_clawback']))
+                                            ഈ വിദ്യാർത്ഥി ആദ്യ ഫലപ്രഖ്യാപനപ്രകാരമുള്ള കോയിൻ ഉപയോഗിച്ച് സാധനങ്ങൾ കൈപ്പറ്റിയ ശേഷം ചില മത്സരങ്ങളുടെ ഫലത്തിൽ മാറ്റം വരികയും (Judgment Corrected) കോയിനുകൾ പിൻവലിക്കുകയും ചെയ്തിട്ടുണ്ട്.
+                                        @else
+                                            മത്സരഫലം പുനഃപരിശോധിച്ചതിലൂടെ ഫലത്തിൽ മാറ്റം വരികയും കോയിനുകൾ ക്രമീകരിക്കുകയും ചെയ്തിട്ടുണ്ട്.
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if(($studentSummary['excess_spent'] ?? 0) > 0)
+                                <div class="p-3 rounded-xl bg-white border border-rose-200 flex items-center justify-between text-xs font-mono font-bold shadow-2xs">
+                                    <div>
+                                        <span class="text-rose-700 block">അധികമായി കൈപ്പറ്റിയത് (Over-redeemed / Excess Spent):</span>
+                                        <span class="text-[10px] text-slate-500 font-normal">ആദ്യ ഫലമനുസരിച്ച് സാധനങ്ങൾ നൽകിയതിലൂടെ ഉണ്ടായ കുറവ്</span>
+                                    </div>
+                                    <span class="text-rose-700 font-black text-base shrink-0">-{{ number_format($studentSummary['excess_spent']) }} Coins</span>
+                                </div>
+                            @endif
+
+                            @if(!empty($clawbackSummary['adjustments']))
+                                <div class="pt-2 border-t border-rose-200/80 space-y-1.5">
+                                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-800 block">തിരുത്തിയ മത്സരങ്ങളുടെ വിവരങ്ങൾ (Adjusted Competitions):</span>
+                                    @foreach($clawbackSummary['adjustments'] as $adj)
+                                        <div class="p-2.5 rounded-xl bg-white/90 border border-rose-200 text-[11px] flex items-center justify-between gap-2 shadow-2xs">
+                                            <div class="min-w-0">
+                                                <strong class="text-slate-900 block truncate">{{ $adj['program_name'] }}</strong>
+                                                <span class="text-rose-800 text-[10px] font-anek">{{ $adj['description'] }}</span>
+                                            </div>
+                                            <span class="font-mono font-black text-rose-700 shrink-0 text-xs">-{{ $adj['clawback_amount'] }} Coins</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     <div class="p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/20 relative overflow-hidden border border-amber-300">
                         <div class="absolute -right-4 -bottom-4 opacity-20 pointer-events-none text-7xl">
                             <svg class="w-28 h-28" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.03 6.9C12.68 8.17 11.94 7.66 11.07 7.66H8.28V6.42h7.44v1.24h-2.02c.3.36.52.78.65 1.24H15.72v1.24h-1.25c-.16 1.74-1.62 3.1-3.4 3.1h-.45l4.17 4.34h-1.72L8.9 13.24V12h2.17c1.09 0 2-.81 2.15-1.86H8.28V8.9h4.75z"/></svg>
@@ -196,6 +249,13 @@
                                 <span class="text-rose-950 font-black">-{{ $studentSummary['total_spent'] }}</span>
                             </div>
                         </div>
+
+                        @if(($studentSummary['excess_spent'] ?? 0) > 0)
+                            <div class="mt-3 pt-2.5 border-t border-slate-950/15 flex items-center justify-between text-xs font-mono font-bold text-rose-950 bg-rose-200/50 -mx-5 -mb-5 px-5 py-2.5 rounded-b-2xl">
+                                <span>അധികമായി കൈപ്പറ്റിയത് (Over-redeemed):</span>
+                                <span class="font-black text-sm text-rose-700">-{{ number_format($studentSummary['excess_spent']) }} Coins</span>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Breakdown: Competition Earned vs Added Coins -->

@@ -343,4 +343,146 @@ class ResultJudgmentUpdateCoinClawbackAndAuditTest extends TestCase
         $jsonResponse->assertJsonPath('student.name', 'Rashid Scholar');
         $jsonResponse->assertJsonPath('student.coins_cache', 250);
     }
+
+    public function test_student_who_purchased_items_on_initial_result_shows_clawback_and_over_redeemed_in_presentation_and_portals(): void
+    {
+        $studentUser = User::factory()->create([
+            'role' => 'student',
+            'name' => 'Faris Winner',
+            'email' => 'faris@student.quaf.org',
+        ]);
+
+        $student = Student::create([
+            'name' => 'Faris Winner',
+            'user_id' => $studentUser->id,
+            'student_id' => 'QF777',
+            'chest_number' => '777',
+            'group_id' => $this->groupA->id,
+            'category' => 'A Zone',
+            'qr_token' => 'qr_faris_777',
+            'coins_cache' => 0,
+        ]);
+
+        $program = Program::create([
+            'name' => 'Classical Verses',
+            'code' => 'PRG-CLS-01',
+            'type' => 'individual',
+            'category_id' => $this->category->id,
+            'is_stage' => true,
+        ]);
+
+        $entry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $student->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => '777',
+            'attendance_status' => 'present',
+        ]);
+
+        // 1. Initial Result: 1st Prize A+ (300 coins), published with poster
+        $result = Result::create([
+            'program_id' => $program->id,
+            'first_entry_id' => $entry->id,
+            'first_grade' => 'A+',
+            'status' => 'published',
+            'is_media_published' => true,
+            'media_published_at' => now(),
+            'published_at' => now(),
+            'result_number' => 10,
+        ]);
+
+        app(CoinRewardService::class)->distributeCoinsForResult($result);
+
+        $student->refresh();
+        $this->assertEquals(300, $student->coins_cache);
+
+        // 2. Student goes to Presentation Desk and redeems a premium book for 300 coins
+        $presentationOperator = User::factory()->create([
+            'role' => 'presentation_team',
+            'name' => 'Desk Officer',
+            'email' => 'officer@quaf.test',
+        ]);
+
+        $redeemRes = $this->actingAs($presentationOperator)->post(route('presentation.redeem'), [
+            'student_id' => $student->id,
+            'item_name' => 'Grand Encyclopedia',
+            'coins' => 300,
+            'quantity' => 1,
+            'item_category' => 'book',
+        ]);
+        $redeemRes->assertRedirect();
+
+        $student->refresh();
+        $this->assertEquals(0, $student->coins_cache);
+
+        // 3. Score update! Student is demoted to 2nd Prize with A+ (270 coins) -> 30 coins clawed back!
+        // Now student earned 270, but has already spent 300 coins. Excess spent = 30 coins!
+        $secondEntry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => null,
+            'group_id' => $this->groupB->id,
+            'chest_number' => '888',
+            'attendance_status' => 'present',
+        ]);
+
+        $this->actingAs($this->adminUser)->put(route('admin.results.update', $result), [
+            'first_entry_id' => $secondEntry->id,
+            'first_grade' => 'A+',
+            'second_entry_id' => $entry->id, // Faris is now 2nd!
+            'second_grade' => 'A+',
+            'status' => 'published',
+        ]);
+
+        $student->refresh();
+
+        // 4. Check Presentation Team Dashboard
+        $deskRes = $this->actingAs($presentationOperator)->get(route('presentation.dashboard', ['student' => $student->student_id]));
+        $deskRes->assertOk();
+        $deskRes->assertSee('ഫലം തിരുത്തൽ / കോയിൻ ക്രമീകരണം');
+        $deskRes->assertSee('ആദ്യ ഫലപ്രകാരം പർച്ചേസ് നടത്തിയിട്ടുണ്ട്');
+        $deskRes->assertSee('അധികമായി കൈപ്പറ്റിയത് (Over-redeemed / Excess Spent):');
+        $deskRes->assertSee('-30 Coins');
+
+        // 5. Check Student Dashboard Portal
+        $portalRes = $this->actingAs($studentUser)->get(route('student.dashboard'));
+        $portalRes->assertOk();
+        $portalRes->assertSee('ഫലം തിരുത്തൽ / കോയിൻ ക്രമീകരണം');
+        $portalRes->assertSee('ആദ്യ ഫലപ്രകാരം സാധനങ്ങൾ കൈപ്പറ്റിയിട്ടുണ്ട്');
+        $portalRes->assertSee('ആദ്യ ഫലപ്രകാരം അധികമായി കൈപ്പറ്റിയത് (Over-redeemed / Excess Spent):');
+        $portalRes->assertSee('-30 Coins');
+
+        // 6. Check Public QR Scan Verification Card
+        $scanRes = $this->get(route('verify.student', $student->qr_token));
+        $scanRes->assertOk();
+        $scanRes->assertSee('ഫലം തിരുത്തൽ / കോയിൻ ക്രമീകരണം');
+        $scanRes->assertSee('ആദ്യ ഫലപ്രകാരം സാധനങ്ങൾ കൈപ്പറ്റിയിട്ടുണ്ട്');
+        $scanRes->assertSee('ആദ്യ ഫലപ്രകാരം അധികമായി കൈപ്പറ്റിയത് (Over-redeemed / Excess Spent):');
+        $scanRes->assertSee('-30 Coins');
+
+        // 7. Phase 4: Student is completely unplaced!
+        $thirdEntry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => null,
+            'group_id' => $this->groupC->id,
+            'chest_number' => '999',
+            'attendance_status' => 'present',
+        ]);
+
+        $this->actingAs($this->adminUser)->put(route('admin.results.update', $result), [
+            'first_entry_id' => $secondEntry->id,
+            'first_grade' => 'A+',
+            'second_entry_id' => $thirdEntry->id,
+            'second_grade' => 'A',
+            'third_entry_id' => null, // Faris is now completely UNPLACED!
+            'status' => 'published',
+        ]);
+
+        // Faris earned 0 coins, but spent 300 coins. Excess spent = 300 coins!
+        $deskRes2 = $this->actingAs($presentationOperator)->get(route('presentation.dashboard', ['student' => $student->student_id]));
+        $deskRes2->assertOk();
+        $deskRes2->assertSee('ഫലം തിരുത്തൽ / കോയിൻ ക്രമീകരണം');
+        $deskRes2->assertSee('ആദ്യ ഫലപ്രകാരം പർച്ചേസ് നടത്തിയിട്ടുണ്ട്');
+        $deskRes2->assertSee('-300 Coins');
+        $deskRes2->assertSee('സ്ഥാനം ഇല്ലാതാവുകയും');
+    }
 }

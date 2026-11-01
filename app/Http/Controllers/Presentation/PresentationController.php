@@ -72,6 +72,7 @@ class PresentationController extends Controller
         $selectedStudent = null;
         $studentSummary = null;
         $studentAchievements = null;
+        $clawbackSummary = null;
         $studentTransactions = collect();
         $pendingCart = null;
 
@@ -81,6 +82,7 @@ class PresentationController extends Controller
             if ($selectedStudent) {
                 $studentSummary = $this->coinRewardService->getStudentCoinSummary($selectedStudent);
                 $studentAchievements = $this->coinRewardService->getStudentAchievements($selectedStudent);
+                $clawbackSummary = $this->coinRewardService->getStudentClawbackSummary($selectedStudent);
                 $studentTransactions = CoinTransaction::where('student_id', $selectedStudent->id)
                     ->latest()
                     ->take(20)
@@ -124,6 +126,7 @@ class PresentationController extends Controller
             'selectedStudent',
             'studentSummary',
             'studentAchievements',
+            'clawbackSummary',
             'studentTransactions',
             'recentTransactions',
             'pendingCart',
@@ -157,6 +160,7 @@ class PresentationController extends Controller
 
         $summary = $this->coinRewardService->getStudentCoinSummary($student);
         $achievements = $this->coinRewardService->getStudentAchievements($student);
+        $clawbackSummary = $this->coinRewardService->getStudentClawbackSummary($student);
         $awardedPrograms = $this->coinRewardService->resolveStudentAwardedPrograms($student, false);
         $student->loadMissing(['entries.program.category', 'participations.program.category']);
         $allPrograms = $student->entries->merge($student->participations)->unique('id')->map(function ($e) use ($awardedPrograms) {
@@ -206,6 +210,12 @@ class PresentationController extends Controller
                 'competition_earned' => $summary['competition_earned'],
                 'added_coins' => $summary['added_coins'],
                 'total_spent' => $summary['total_spent'],
+                'excess_spent' => $summary['excess_spent'],
+                'has_excess_spent' => $summary['has_excess_spent'],
+                'has_purchase_with_clawback' => $summary['has_purchase_with_clawback'],
+                'total_clawback_coins' => $summary['total_clawback_coins'],
+                'clawback_adjustments' => $summary['clawback_adjustments'],
+                'clawback_summary' => $clawbackSummary,
                 'is_participant' => $student->isCompetitionParticipant(),
                 'gift_name' => $student->gift_name,
                 'gift_malayalam_title' => $student->gift_malayalam_title,
