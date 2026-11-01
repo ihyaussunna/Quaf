@@ -205,7 +205,7 @@
                         <h3 class="text-sm font-bold text-slate-900 tracking-tight font-sora">Score Board</h3>
                         <span class="text-[10px] font-sora text-slate-400">Live Status</span>
                     </div>
-                    <a href="{{ route('admin.achievements.team-score') }}" class="text-xs font-bold text-[#be1e2d] hover:underline font-sora">View All →</a>
+                    <a href="{{ route('admin.top-scorers.index') }}" class="text-xs font-bold text-[#be1e2d] hover:underline font-sora">Top Scorers →</a>
                 </div>
 
                 <div class="space-y-2.5">

@@ -422,22 +422,11 @@
                 </div>
             </div>
 
-            <!-- 10. Achievements (Dropdown) -->
-            <div x-data="{ open: {{ request()->routeIs('admin.achievements.*') || request()->routeIs('admin.top-scorers.*') ? 'true' : 'false' }} }" class="space-y-0.5">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all hover:text-white hover:bg-slate-800/60 {{ request()->routeIs('admin.achievements.*') || request()->routeIs('admin.top-scorers.*') ? 'text-white font-semibold' : '' }}">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                        <span>Achievements</span>
-                    </div>
-                    <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div x-show="open" class="pl-9 pr-2 py-1 space-y-1 text-[11px]" style="display: none;">
-                    <a href="{{ route('admin.achievements.team-score') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.achievements.team-score') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Group Score</a>
-                    <a href="{{ route('admin.achievements.zone-score') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.achievements.zone-score') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Zone Score</a>
-                    <a href="{{ route('admin.achievements.stage-score') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.achievements.stage-score') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">Stage Score</a>
-                    <a href="{{ route('admin.achievements.all-students') }}" class="block px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.achievements.all-students') ? 'bg-[#be1e2d]/20 text-[#be1e2d] font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/40' }}">All Student Score</a>
-                </div>
-            </div>
+            <!-- 10. Top Scorers & Festival Awards -->
+            <a href="{{ route('admin.top-scorers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.top-scorers.*') || request()->routeIs('admin.achievements.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
+                <svg class="w-4 h-4 {{ request()->routeIs('admin.top-scorers.*') || request()->routeIs('admin.achievements.*') ? 'text-white' : 'text-amber-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span>Top Scorers</span>
+            </a>
 
             <!-- 11. Venues & Stages -->
             <a href="{{ route('admin.stages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.stages.*') ? 'bg-[#be1e2d] text-white font-bold shadow-md shadow-[#be1e2d]/20' : 'hover:text-white hover:bg-slate-800/60' }}">
