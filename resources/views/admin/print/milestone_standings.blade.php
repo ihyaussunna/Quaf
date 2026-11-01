@@ -138,21 +138,23 @@
     <!-- Official Printable Document -->
     <div class="print-container max-w-5xl mx-auto bg-white border border-slate-300 rounded-3xl p-8 sm:p-10 shadow-xl space-y-6">
         
+        <!-- Official QUAF Header Banner (From Program Mark PDF) -->
+        <div class="w-full flex justify-center mb-3">
+            <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-22 sm:max-h-26 object-contain block mx-auto">
+        </div>
+
         <!-- Document Letterhead & Festival Header -->
-        <div class="border-b-2 border-slate-900 pb-5 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <img src="{{ asset('images/quaf-logo-favicon.svg') }}" alt="QUAF" class="h-14 w-auto object-contain shrink-0">
-                <div>
-                    <span class="text-xs font-mono font-black tracking-widest text-[#be1e2d] uppercase block">
-                        QUAF SEASON 09 &bull; INTER-HOUSE FESTIVAL 2026
-                    </span>
-                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sora">
-                        OFFICIAL TEAM STANDINGS
-                    </h1>
-                    <span class="text-xs text-slate-600 font-mono">
-                        Office of the Controller of Examinations &amp; Festival Directorate
-                    </span>
-                </div>
+        <div class="border-b-2 border-slate-900 pb-4 flex items-center justify-between gap-4">
+            <div>
+                <span class="text-xs font-mono font-black tracking-widest text-[#be1e2d] uppercase block">
+                    QUAF SEASON 09 &bull; INTER-HOUSE FESTIVAL 2026
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sora">
+                    OFFICIAL TEAM STANDINGS
+                </h1>
+                <span class="text-xs text-slate-600 font-mono">
+                    Office of the Controller of Examinations &amp; Festival Directorate
+                </span>
             </div>
 
             <div class="text-right shrink-0">
@@ -384,6 +386,15 @@
                     <span class="text-[10px] text-slate-500 block uppercase">Central Festival Directorate</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Official Print Footer (From Program Mark Sheet/PDF) -->
+        <div class="avoid-break mt-8 pt-3 border-t border-slate-200 text-[10px] text-slate-500 flex justify-between items-center gap-4">
+            <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 10px; max-height: 11px;">
+                <span class="font-normal text-slate-600 whitespace-nowrap leading-none font-sans">Markaz Cultural Festival</span>
+            </div>
+            <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
         </div>
 
     </div>

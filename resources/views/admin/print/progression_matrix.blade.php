@@ -110,22 +110,24 @@
     <!-- Printable Paper Sheet -->
     <div class="print-container max-w-7xl mx-auto bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm text-slate-900">
         
+        <!-- Official QUAF Header Banner (From Program Mark PDF) -->
+        <div class="w-full flex justify-center mb-3">
+            <img src="{{ asset('images/offstage-pdf-header.png') }}" alt="Ādabīc Inheritance - QUAF" class="w-full max-h-20 sm:max-h-24 object-contain block mx-auto">
+        </div>
+
         <!-- Sheet Header -->
         <div class="border-b-2 border-slate-900 pb-4 mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <img src="{{ asset('images/quaf-logo-dark.svg') }}" alt="QUAF Logo" class="h-10 w-auto" onerror="this.style.display='none'">
-                <div>
-                    <div class="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
-                        QUAF 2026 • MARKAZ CULTURAL FESTIVAL
-                    </div>
-                    <h2 class="text-xl font-black text-slate-950 font-sora uppercase tracking-tight">
-                        Official Points Progression Matrix Sheet
-                    </h2>
-                    <div class="text-[11px] font-mono text-slate-600 mt-0.5">
-                        <span>Total Announced Competitions: <strong>{{ $totalResults }}</strong></span>
-                        @if($selectedZone) &bull; <span>Zone: <strong>{{ $selectedZone }}</strong></span> @endif
-                        &bull; <span>Status: <strong>Declared & Verified</strong></span>
-                    </div>
+            <div>
+                <div class="text-[10px] font-mono font-bold tracking-widest text-[#be1e2d] uppercase">
+                    QUAF 2026 • MARKAZ CULTURAL FESTIVAL
+                </div>
+                <h2 class="text-xl font-black text-slate-950 font-sora uppercase tracking-tight">
+                    Official Points Progression Matrix Sheet
+                </h2>
+                <div class="text-[11px] font-mono text-slate-600 mt-0.5">
+                    <span>Total Announced Competitions: <strong>{{ $totalResults }}</strong></span>
+                    @if($selectedZone) &bull; <span>Zone: <strong>{{ $selectedZone }}</strong></span> @endif
+                    &bull; <span>Status: <strong>Declared & Verified</strong></span>
                 </div>
             </div>
 
@@ -286,6 +288,15 @@
                 <div class="border-t border-slate-400 pt-1 font-bold text-slate-800">Festival General Convener</div>
                 <div class="text-[10px] text-slate-500">QUAF 2026 Directorate</div>
             </div>
+        </div>
+
+        <!-- Official Print Footer (From Program Mark Sheet/PDF) -->
+        <div class="avoid-break mt-8 pt-3 border-t border-slate-200 text-[10px] text-slate-500 flex justify-between items-center gap-4">
+            <div class="inline-flex items-center gap-1.5 whitespace-nowrap leading-none shrink-0">
+                <img src="{{ asset('images/quaf-black-title.svg') }}" alt="QUAF" class="w-auto object-contain inline-block align-middle" style="height: 10px; max-height: 11px;">
+                <span class="font-normal text-slate-600 whitespace-nowrap leading-none font-sans">Markaz Cultural Festival</span>
+            </div>
+            <span class="text-[10px] text-slate-400 whitespace-nowrap shrink-0 leading-none">Printed: {{ now()->format('d M Y, h:i A') }}</span>
         </div>
 
     </div>
