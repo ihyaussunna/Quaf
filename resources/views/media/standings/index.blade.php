@@ -48,11 +48,84 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-sm font-semibold shadow-2xs font-ml">
+            {{ session('error') }}
+        </div>
+    @endif
+
     @if($errors->any())
         <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs font-semibold space-y-1">
             @foreach($errors->all() as $err)
                 <div>• {{ $err }}</div>
             @endforeach
+        </div>
+    @endif
+
+    @if($isFinalPublished)
+        <!-- Final Championship Standings Active Banner -->
+        <div class="p-6 rounded-3xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 shadow-lg border-2 border-amber-300 flex flex-col md:flex-row md:items-center justify-between gap-5 font-sora">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-black uppercase bg-slate-950 text-amber-300 tracking-wider shadow-xs">
+                        FINAL CHAMPIONSHIP PUBLISHED
+                    </span>
+                    <span class="text-xs font-mono font-bold text-slate-900 bg-white/40 px-2.5 py-0.5 rounded-full">
+                        Celebration Active on Public Website
+                    </span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+                    അന്തിമ ചാമ്പ്യൻഷിപ്പ് ഫലം പബ്ലിക് വെബ്സൈറ്റിൽ പബ്ലിഷ് ചെയ്തിരിക്കുന്നു!
+                </h2>
+                <p class="text-xs font-semibold text-slate-900 font-ml max-w-2xl">
+                    പബ്ലിക് വെബ്സൈറ്റിൽ ഒന്നാം സ്ഥാനത്തെത്തിയ ടീമിന് ഒഫീഷ്യൽ ഗ്രാൻഡ് ട്രോഫിയും ചാമ്പ്യൻഷിപ്പ് ബാനറും സെലിബ്രേഷൻ കോൺഫെറ്റിയും തത്സമയം പ്രവർത്തിക്കുന്നുണ്ട്.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a href="{{ route('groups.index') }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-900 text-amber-300 font-mono font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-1.5">
+                    <span>View Live Celebration &rarr;</span>
+                </a>
+
+                <form method="POST" action="{{ route('media.standings.revert-final') }}" onsubmit="return confirm('അന്തിമ ഫല സ്റ്റാറ്റസ് പിൻവലിച്ച് റെഗുലർ സ്റ്റാൻഡിങ്സിലേക്ക് തിരികെ മാറ്റണോ?');">
+                    @csrf
+                    <button type="submit" class="px-4 py-2.5 rounded-2xl bg-white/90 hover:bg-white text-red-700 font-mono font-bold text-xs uppercase tracking-wider transition shadow-md border border-red-200 flex items-center gap-1 cursor-pointer">
+                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                        <span>Revert Final Status</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    @else
+        <!-- Final Championship Standings Callout Card -->
+        <div class="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md border border-indigo-500/30 flex flex-col md:flex-row md:items-center justify-between gap-5 font-sora">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase bg-amber-400 text-slate-950 tracking-wider">
+                        FINAL CHAMPIONSHIP MODE
+                    </span>
+                    <span class="text-xs font-mono text-slate-300">
+                        {{ $totalPublishedResults }} / {{ $totalPrograms }} Published
+                    </span>
+                </div>
+                <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">
+                    ഫൈനൽ റിസൾട്ട് ടീം സ്റ്റാൻഡിങ്സ് &amp; ഒഫീഷ്യൽ സെലിബ്രേഷൻ
+                </h2>
+                <p class="text-xs text-slate-300 font-ml max-w-2xl">
+                    എല്ലാ മത്സര ഫലങ്ങളും സ്റ്റേജ് അനൗൺസർ പ്രഖ്യാപിച്ചു കഴിഞ്ഞാൽ ഫെസ്റ്റിവലിന്റെ അന്തിമ ചാമ്പ്യന്മാരെ ഔദ്യോഗികമായി പ്രഖ്യാപിക്കാം. ഇത് പബ്ലിക് വെബ്സൈറ്റിൽ വലിയ വിക്ടറി സെലിബ്രേഷനും കോൺഫെറ്റിയും ആരംഭിക്കും.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <form method="POST" action="{{ route('media.standings.publish-final') }}" onsubmit="return confirm('ഫൈനൽ ചാമ്പ്യൻഷിപ്പ് ഫലം പബ്ലിക് വെബ്സൈറ്റിൽ ഔദ്യോഗികമായി പ്രഖ്യാപിക്കണോ? ഇത് വെബ്സൈറ്റിൽ സെലിബ്രേഷൻ ആരംഭിക്കും.');">
+                    @csrf
+                    <input type="hidden" name="results_count" value="{{ $totalPrograms > 0 ? $totalPrograms : $resultsCount }}">
+                    <button type="submit" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 cursor-pointer">
+                        <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A5.25 5.25 0 0012 3.75a5.25 5.25 0 00-2.25 10.5m4.5 0h-4.5" /></svg>
+                        <span>Publish Final Standings &amp; Celebrate</span>
+                    </button>
+                </form>
+            </div>
         </div>
     @endif
 
@@ -277,6 +350,34 @@
                         No poster selected. Standings leaderboard table will be shown without poster view.
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 4. Final Championship Standings Option Card -->
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-xs space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 font-sora flex items-center gap-2">
+                        <span>4. അന്തിമ ചാമ്പ്യൻഷിപ്പ് ഫലം (Final Championship Standings)</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 uppercase">CELEBRATION TRIGGER</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 font-ml mt-0.5">
+                        ഇത് ഫെസ്റ്റിവലിന്റെ അന്തിമ ഫലമായി പബ്ലിഷ് ചെയ്യണമെങ്കിൽ താഴെയുള്ള ബോക്സ് ടിക്ക് ചെയ്യുക. വെബ്സൈറ്റിൽ ഒന്നാം സ്ഥാനത്തെത്തിയ ടീമിന് ഒഫീഷ്യൽ ട്രോഫിയും സെലിബ്രേഷനും കാണിക്കും.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-start gap-3">
+                <input type="checkbox" id="is_final_checkbox" name="is_final" value="1" {{ $isFinalPublished ? 'checked' : '' }}
+                       class="mt-1 w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
+                <label for="is_final_checkbox" class="cursor-pointer select-none">
+                    <span class="block text-sm font-bold text-slate-900 font-sora">
+                        ഇത് അന്തിമ ഫലമായി (Final Result • Official Champions) പബ്ലിഷ് ചെയ്യുക
+                    </span>
+                    <span class="block text-xs text-slate-600 font-ml mt-0.5">
+                        ഈ ഓപ്ഷൻ ഓൺ ചെയ്താൽ പബ്ലിക് വെബ്സൈറ്റിൽ ഓവറോൾ വിന്നർ ബാനറും, ഒന്നാം സ്ഥാനക്കാർക്ക് ട്രോഫിയും, സെലിബ്രേഷൻ കോൺഫെറ്റി വെടിക്കെട്ടും തത്സമയം ദൃശ്യമാകും.
+                    </span>
+                </label>
             </div>
         </div>
 

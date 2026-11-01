@@ -140,6 +140,65 @@
         </div>
     </div>
 
+    @if(!empty($isFinalPublished))
+        <!-- Final Championship Standings Active Banner -->
+        <div class="mb-6 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 shadow-lg border-2 border-amber-300 flex flex-col md:flex-row md:items-center justify-between gap-4 font-sora">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-black uppercase bg-slate-950 text-amber-300 tracking-wider shadow-xs">
+                        FINAL CHAMPIONSHIP PUBLISHED
+                    </span>
+                    <span class="text-xs font-mono font-bold text-slate-900 bg-white/40 px-2.5 py-0.5 rounded-full">
+                        Celebration Active on Public Website
+                    </span>
+                </div>
+                <h3 class="text-lg sm:text-xl font-black text-slate-950 tracking-tight">
+                    അന്തിമ ചാമ്പ്യൻഷിപ്പ് ഫലം പബ്ലിക് വെബ്സൈറ്റിൽ ഒഫീഷ്യലായി പ്രഖ്യാപിച്ചു!
+                </h3>
+                <p class="text-xs font-semibold text-slate-900 font-ml">
+                    സ്റ്റാൻഡിങ്സ് പേജിൽ സെലിബ്രേഷൻ, കോൺഫെറ്റി വെടിക്കെട്ട്, ഗ്രാൻഡ് ട്രോഫി ബാനർ എന്നിവ നിലവിൽ തത്സമയം കാണിക്കുന്നുണ്ട്.
+                </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ route('groups.index') }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-900 text-amber-300 font-mono font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-1.5">
+                    <span>View Public Celebration &rarr;</span>
+                </a>
+                <a href="{{ route('media.standings.index') }}" class="px-4 py-2.5 rounded-2xl bg-white text-slate-900 hover:bg-slate-50 font-mono font-bold text-xs uppercase tracking-wider transition shadow-md border border-slate-200">
+                    <span>Manage Standings</span>
+                </a>
+            </div>
+        </div>
+    @elseif(!empty($allResultsSentToAnnouncer))
+        <!-- All Results Sent Callout Banner -->
+        <div class="mb-6 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-lg border-2 border-indigo-500/40 flex flex-col md:flex-row md:items-center justify-between gap-4 font-sora">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase bg-amber-400 text-slate-950 tracking-wider">
+                        ALL RESULTS SENT TO ANNOUNCER
+                    </span>
+                    <span class="text-xs font-mono text-slate-300">
+                        {{ $totalAnnouncedCount }} / {{ $totalProgramsCount ?? 0 }} Declared
+                    </span>
+                </div>
+                <h3 class="text-lg sm:text-xl font-black text-white tracking-tight">
+                    അന്തിമ ചാമ്പ്യൻഷിപ്പ് ഫലം പബ്ലിക് വെബ്സൈറ്റിൽ പ്രഖ്യാപിക്കാം
+                </h3>
+                <p class="text-xs text-slate-300 font-ml">
+                    എല്ലാ മത്സര ഫലങ്ങളും സ്റ്റേജ് അനൗൺസർക്ക് അയച്ചു കഴിഞ്ഞു. ഫെസ്റ്റിവൽ അന്തിമ വിജയികളെയും ഓവറോൾ ചാമ്പ്യൻഷിപ്പും പബ്ലിക് വെബ്സൈറ്റിൽ ഒഫീഷ്യലായി പ്രഖ്യാപിക്കാൻ താഴെയുള്ള ബട്ടൺ ക്ലിക്ക് ചെയ്യുക (വെബ്സൈറ്റിൽ സെലിബ്രേഷൻ ആരംഭിക്കും).
+                </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <form method="POST" action="{{ route('media.standings.publish-final') }}" onsubmit="return confirm('അന്തിമ ഫലം പബ്ലിക് വെബ്സൈറ്റിൽ ഒഫീഷ്യലായി പബ്ലിഷ് ചെയ്യണോ? ഇത് വെബ്സൈറ്റിൽ സെലിബ്രേഷൻ ആരംഭിക്കും.');">
+                    @csrf
+                    <input type="hidden" name="results_count" value="{{ $totalProgramsCount > 0 ? $totalProgramsCount : $totalAnnouncedCount }}">
+                    <button type="submit" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 cursor-pointer">
+                        <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A5.25 5.25 0 0012 3.75a5.25 5.25 0 00-2.25 10.5m4.5 0h-4.5" /></svg>
+                        <span>Publish Final Standings &amp; Celebrate</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
 
     <!-- Team Standings Section: Only Latest Official Announced Milestone Standing -->
     @php

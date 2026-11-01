@@ -116,6 +116,9 @@ class MediaResultController extends Controller
         }
 
         $publicGroups = Group::orderByDesc('public_points_cache')->orderBy('name')->get();
+        $totalProgramsCount = Program::count();
+        $isFinalPublished = (bool) FestivalSetting::get('is_final_standings_published', false);
+        $allResultsSentToAnnouncer = ($totalProgramsCount > 0 && $totalAnnouncedCount >= $totalProgramsCount);
 
         return view('media.results.index', compact(
             'results',
@@ -129,7 +132,10 @@ class MediaResultController extends Controller
             'standingsPosterUrl',
             'incomingStandings',
             'publishedStandingsHistory',
-            'publicGroups'
+            'publicGroups',
+            'totalProgramsCount',
+            'isFinalPublished',
+            'allResultsSentToAnnouncer'
         ));
     }
 

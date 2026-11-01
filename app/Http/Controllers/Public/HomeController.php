@@ -282,7 +282,8 @@ class HomeController extends Controller
 
         $totalProgramsCount = $stats['programs'] ?? Program::count();
         $publishedResultsCount = Result::where('status', 'published')->where('is_media_published', true)->count();
-        $isFullResultsPublished = ($totalProgramsCount > 0 && $publishedResultsCount >= $totalProgramsCount);
+        $isFinalPublished = (bool) FestivalSetting::get('is_final_standings_published', false) || ($totalProgramsCount > 0 && $publishedResultsCount >= $totalProgramsCount);
+        $isFullResultsPublished = $isFinalPublished;
 
         return view('public.home', compact(
             'liveFestMode',
@@ -298,7 +299,8 @@ class HomeController extends Controller
             'categories',
             'zones',
             'stats',
-            'isFullResultsPublished'
+            'isFullResultsPublished',
+            'isFinalPublished'
         ));
     }
 }

@@ -956,6 +956,8 @@ Route::prefix('media-portal')->name('media.')->middleware(['auth', 'role:media_t
     // Team Standings (Public Website Leaderboard)
     Route::get('/team-standings', [MediaStandingsController::class, 'index'])->name('standings.index');
     Route::post('/team-standings', [MediaStandingsController::class, 'update'])->name('standings.update');
+    Route::post('/team-standings/publish-final', [MediaStandingsController::class, 'publishFinal'])->name('standings.publish-final');
+    Route::post('/team-standings/revert-final', [MediaStandingsController::class, 'revertFinal'])->name('standings.revert-final');
     Route::get('/team-standings/download-poster', [MediaStandingsController::class, 'downloadPoster'])->name('standings.download-poster');
 
     // Printable Reports for Media Desk

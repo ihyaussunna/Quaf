@@ -20,10 +20,12 @@ class GroupController extends Controller
 
         $totalPrograms = Program::count();
         $publishedCount = Result::where('status', 'published')->where('is_media_published', true)->count();
-        $isFullResultsPublished = ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
+        $isFinalPublished = (bool) FestivalSetting::get('is_final_standings_published', false) || ($totalPrograms > 0 && $publishedCount >= $totalPrograms);
+        $isFullResultsPublished = $isFinalPublished;
         $standingsPosterUrl = FestivalSetting::get('public_standings_poster_url');
+        $standingsLabel = FestivalSetting::get('public_standings_label');
 
-        return view('public.groups', compact('groups', 'isFullResultsPublished', 'standingsPosterUrl'));
+        return view('public.groups', compact('groups', 'isFullResultsPublished', 'isFinalPublished', 'standingsPosterUrl', 'standingsLabel'));
     }
 
     public function show(Group $group): View
