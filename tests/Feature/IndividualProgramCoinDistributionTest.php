@@ -104,8 +104,8 @@ class IndividualProgramCoinDistributionTest extends TestCase
 
         $preview = $coinService->previewGroupCoinDistribution($result);
         $this->assertEquals(2, $preview['total_eligible_participants']);
-        // 1st with A+ = 200, 2nd with A = 160 => 360 total coins
-        $this->assertEquals(360, $preview['total_coins_to_credit']);
+        // Individual rates: 1st with A+ = 300, 2nd with A = 250 => 550 total coins
+        $this->assertEquals(550, $preview['total_coins_to_credit']);
 
         // Save & publish result
         $result->save();
@@ -113,24 +113,24 @@ class IndividualProgramCoinDistributionTest extends TestCase
 
         $this->assertFalse($dist['skipped']);
         $this->assertEquals(2, $dist['credited_count']);
-        $this->assertEquals(360, $dist['total_coins']);
+        $this->assertEquals(550, $dist['total_coins']);
 
         $student1->refresh();
         $student2->refresh();
 
-        $this->assertEquals(200, (int) $student1->coins_cache);
-        $this->assertEquals(160, (int) $student2->coins_cache);
+        $this->assertEquals(300, (int) $student1->coins_cache);
+        $this->assertEquals(250, (int) $student2->coins_cache);
 
         // Verify transaction descriptions and types
         $tx1 = CoinTransaction::where('student_id', $student1->id)->first();
         $this->assertNotNull($tx1);
-        $this->assertEquals(200, $tx1->coins);
+        $this->assertEquals(300, $tx1->coins);
         $this->assertStringContainsString('Individual Reward', $tx1->description);
         $this->assertEquals('credit', $tx1->transaction_type);
 
         $tx2 = CoinTransaction::where('student_id', $student2->id)->first();
         $this->assertNotNull($tx2);
-        $this->assertEquals(160, $tx2->coins);
+        $this->assertEquals(250, $tx2->coins);
         $this->assertStringContainsString('Individual Reward', $tx2->description);
     }
 }

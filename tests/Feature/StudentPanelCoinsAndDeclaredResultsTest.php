@@ -114,9 +114,9 @@ class StudentPanelCoinsAndDeclaredResultsTest extends TestCase
         $freshResult = $result->fresh();
         $this->assertEquals('send', $freshResult->status);
 
-        // Student coins must immediately be credited (1st with A+ = 200 coins)
+        // Student coins must immediately be credited (1st with A+ = 300 coins for individual)
         $student->refresh();
-        $this->assertEquals(200, (int) $student->coins_cache);
+        $this->assertEquals(300, (int) $student->coins_cache);
 
         // Student logs into their dashboard
         $dashRes = $this->actingAs($user)->get(route('student.dashboard'));
@@ -124,7 +124,7 @@ class StudentPanelCoinsAndDeclaredResultsTest extends TestCase
 
         // Must see Wallet Balance and Competition Results
         $dashRes->assertSee('QUAF Coin Wallet');
-        $dashRes->assertSee('200');
+        $dashRes->assertSee('300');
         $dashRes->assertSee('Official Competition Results');
         $dashRes->assertSee('Elocution Arabic');
         $dashRes->assertSee('1st Prize');
@@ -152,7 +152,7 @@ class StudentPanelCoinsAndDeclaredResultsTest extends TestCase
             'status' => 'verified',
         ]);
 
-        // 2nd prize with A grade = 160 coins, marked as announced
+        // 2nd prize with A grade in individual program = 250 coins, marked as announced
         $result = Result::create([
             'program_id' => $program->id,
             'first_entry_id' => null,
@@ -169,10 +169,10 @@ class StudentPanelCoinsAndDeclaredResultsTest extends TestCase
         app(PointCalculationService::class)->recalculateAllPoints();
 
         $student->refresh();
-        $this->assertEquals(160, (int) $student->coins_cache);
+        $this->assertEquals(250, (int) $student->coins_cache);
 
         $summary = app(CoinRewardService::class)->getStudentCoinSummary($student, false);
-        $this->assertEquals(160, $summary['balance']);
-        $this->assertEquals(160, $summary['competition_earned']);
+        $this->assertEquals(250, $summary['balance']);
+        $this->assertEquals(250, $summary['competition_earned']);
     }
 }

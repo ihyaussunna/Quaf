@@ -366,7 +366,7 @@ class GroupProgramCoinDistributionTest extends TestCase
 
         $this->assertFalse($res['skipped']);
         $this->assertEquals(1, $res['credited_count']);
-        $this->assertEquals(200, $res['total_coins']);
+        $this->assertEquals(300, $res['total_coins']);
         $this->assertEquals(1, CoinTransaction::count());
     }
 

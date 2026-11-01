@@ -25,7 +25,35 @@ class CoinRewardService
     public const DECLARED_STATUSES = ['send', 'delivered', 'announced', 'published'];
 
     /**
-     * Official QUAF Season 09 Group Program Reward Chart:
+     * Official QUAF Season 09 Graded Individual Program Reward Chart:
+     * Coins per winner.
+     */
+    public const INDIVIDUAL_REWARD_CHART = [
+        1 => [
+            'A+' => 300,
+            'A' => 280,
+            'B' => 270,
+            'C' => 260,
+            'NO_GRADE' => 200,
+        ],
+        2 => [
+            'A+' => 270,
+            'A' => 250,
+            'B' => 240,
+            'C' => 230,
+            'NO_GRADE' => 170,
+        ],
+        3 => [
+            'A+' => 240,
+            'A' => 220,
+            'B' => 210,
+            'C' => 200,
+            'NO_GRADE' => 140,
+        ],
+    ];
+
+    /**
+     * Official QUAF Season 09 Graded Group Program Reward Chart:
      * Coins per individual eligible participant.
      */
     public const GROUP_REWARD_CHART = [
@@ -53,22 +81,32 @@ class CoinRewardService
     ];
 
     /**
-     * Calculate individual coins reward for a participant based on position and grade.
+     * Calculate individual coins reward for a participant based on position, grade, and program type.
      */
-    public static function calculateGroupRewardPerParticipant(int $position, ?string $grade): int
+    public static function calculateReward(int $position, ?string $grade, bool $isGroup = false): int
     {
-        if (! isset(self::GROUP_REWARD_CHART[$position])) {
+        $chart = $isGroup ? self::GROUP_REWARD_CHART : self::INDIVIDUAL_REWARD_CHART;
+
+        if (! isset($chart[$position])) {
             return 0;
         }
 
-        $chart = self::GROUP_REWARD_CHART[$position];
+        $posChart = $chart[$position];
         $normalizedGrade = self::normalizeGrade($grade);
 
-        if ($normalizedGrade !== null && isset($chart[$normalizedGrade])) {
-            return $chart[$normalizedGrade];
+        if ($normalizedGrade !== null && isset($posChart[$normalizedGrade])) {
+            return $posChart[$normalizedGrade];
         }
 
-        return $chart['NO_GRADE'];
+        return $posChart['NO_GRADE'] ?? 0;
+    }
+
+    /**
+     * Calculate individual coins reward for a participant based on position and grade (Group programs).
+     */
+    public static function calculateGroupRewardPerParticipant(int $position, ?string $grade): int
+    {
+        return self::calculateReward($position, $grade, true);
     }
 
     /**
@@ -139,7 +177,7 @@ class CoinRewardService
 
     /**
      * Retrieve official eligible participating students for a program entry.
-     * Enforces Green Room attendance rules and group verification.
+     * Includes all students registered for the entry (both entry student and pivot participants).
      *
      * @return Collection<int, Student>
      */
@@ -149,19 +187,49 @@ class CoinRewardService
             return collect();
         }
 
+        $all = collect();
+
+        // 1. Primary registered student (individual participant or team captain/leader)
+        if ($entry->student) {
+            $all->push($entry->student);
+        } elseif ($entry->student_id) {
+            $stu = Student::find($entry->student_id);
+            if ($stu) {
+                $all->push($stu);
+            }
+        }
+
+        // 2. All registered team participants from pivot table
         $participants = $entry->relationLoaded('participants')
             ? $entry->participants
             : $entry->participants()->get();
 
-        if ($participants->isEmpty() && $entry->student) {
-            $participants = collect([$entry->student]);
+        foreach ($participants as $p) {
+            $all->push($p);
         }
 
-        return $participants->unique('id')->values();
+        // 3. If still empty and it's a group program, check sibling entries for the same group in this program
+        if ($all->isEmpty() && $entry->group_id && $entry->program_id) {
+            $siblingEntries = ProgramEntry::where('program_id', $entry->program_id)
+                ->where('group_id', $entry->group_id)
+                ->with(['participants', 'student'])
+                ->get();
+
+            foreach ($siblingEntries as $sibling) {
+                if ($sibling->student) {
+                    $all->push($sibling->student);
+                }
+                foreach ($sibling->participants as $sp) {
+                    $all->push($sp);
+                }
+            }
+        }
+
+        return $all->unique('id')->values();
     }
 
     /**
-     * Generate preview of coin distribution for a group program result prior to publishing.
+     * Generate preview of coin distribution for a group or individual program result prior to publishing.
      *
      * @return array<string, mixed>
      */
@@ -196,9 +264,9 @@ class CoinRewardService
 
                 $group = $entry->group;
                 $grade = $wData['grade'] ?? self::resolveGradeForEntry($entry, $result, $pos);
-                $coinsPerParticipant = self::calculateGroupRewardPerParticipant($pos, $grade);
+                $coinsPerParticipant = self::calculateReward($pos, $grade, $isGroup);
                 $participants = self::getEligibleParticipantsForEntry($entry, false);
-                $isAbsent = $entry->attendance_status === 'absent';
+                $isAbsent = false;
 
                 $participantItems = [];
                 foreach ($participants as $student) {
@@ -207,11 +275,11 @@ class CoinRewardService
                         'student_number' => $student->student_id ?? 'STU-'.$student->id,
                         'name' => $student->name,
                         'role' => $student->pivot?->role ?? ($isGroup ? 'participant' : 'individual'),
-                        'coins' => $isAbsent ? 0 : $coinsPerParticipant,
+                        'coins' => $coinsPerParticipant,
                     ];
                 }
 
-                $count = $isAbsent ? 0 : $participants->count();
+                $count = $participants->count();
                 $subtotal = $count * $coinsPerParticipant;
                 $posLabel = $baseLabel.(! empty($wData['is_tied']) ? ' (Shared)' : '');
 
@@ -305,7 +373,7 @@ class CoinRewardService
                     }
 
                     $grade = $wData['grade'] ?? self::resolveGradeForEntry($entry, $result, $pos);
-                    $coins = self::calculateGroupRewardPerParticipant($pos, $grade);
+                    $coins = self::calculateReward($pos, $grade, $isGroup);
                     $participants = self::getEligibleParticipantsForEntry($entry, true);
 
                     if ($participants->isEmpty() || $coins <= 0) {
@@ -520,6 +588,51 @@ class CoinRewardService
     }
 
     /**
+     * Ensure coins are accurately distributed for all awarded programs of a student.
+     * Checks both individual entries and group program participations.
+     */
+    public function ensureCoinsDistributedForStudent(Student $student): void
+    {
+        CoinTransaction::ensureSchema();
+
+        // 1. Direct entries (individual and leader entries)
+        $directEntryIds = ProgramEntry::where('student_id', $student->id)->pluck('id')->all();
+
+        // 2. Group participations from pivot table
+        $participationEntryIds = DB::table('program_entry_participants')
+            ->where('student_id', $student->id)
+            ->pluck('entry_id')
+            ->all();
+
+        $allEntryIds = array_values(array_unique(array_merge($directEntryIds, $participationEntryIds)));
+
+        if (empty($allEntryIds)) {
+            return;
+        }
+
+        // Find results where any of these entries placed 1st, 2nd, or 3rd
+        $results = Result::whereIn('status', self::DECLARED_STATUSES)
+            ->where(function ($q) use ($allEntryIds) {
+                $q->whereIn('first_entry_id', $allEntryIds)
+                    ->orWhereIn('second_entry_id', $allEntryIds)
+                    ->orWhereIn('third_entry_id', $allEntryIds);
+            })
+            ->get();
+
+        $updated = false;
+        foreach ($results as $res) {
+            $dist = $this->distributeCoinsForResult($res);
+            if ($dist['credited_count'] > 0) {
+                $updated = true;
+            }
+        }
+
+        if ($updated) {
+            $this->syncStudentCoinsCache([$student->id]);
+        }
+    }
+
+    /**
      * Resolve all competition programs where the student achieved 1st/2nd/3rd prize or a grade.
      *
      * @return Collection<int, array{
@@ -670,6 +783,9 @@ class CoinRewardService
     {
         CoinTransaction::ensureSchema();
 
+        // Ensure all awarded competition results (individual and group) are distributed for this student
+        $this->ensureCoinsDistributedForStudent($student);
+
         $hasSourceColumn = Schema::hasColumn('coin_transactions', 'source');
 
         // 1. Added coins purchased via Cashier cash deposit
@@ -739,6 +855,9 @@ class CoinRewardService
     public function getStudentAchievements(Student $student, bool $onlyMediaPublished = false): array
     {
         CoinTransaction::ensureSchema();
+
+        // Ensure all awarded competition results (individual and group) are distributed for this student
+        $this->ensureCoinsDistributedForStudent($student);
 
         $achievements = [
             'grade_counts' => [

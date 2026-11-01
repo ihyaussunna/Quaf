@@ -144,8 +144,10 @@ class ResultController extends Controller
 
         AuditLogger::log('create_result', $result, null, $result->toArray());
 
-        if ($result->status === 'published') {
-            $this->issueCertificates($result);
+        if (in_array($result->status, PointCalculationService::DECLARED_STATUSES, true) || $result->status === 'verified') {
+            if ($result->status === 'published') {
+                $this->issueCertificates($result);
+            }
             $this->pointService->recalculateAllPoints();
             $this->coinService->distributeCoinsForResult($result);
             Group::checkAndApplyMilestone();
