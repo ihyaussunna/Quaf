@@ -11,6 +11,7 @@ use App\Models\Result;
 use App\Models\StandingAnnouncement;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\PointCalculationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -256,6 +257,63 @@ class TeamStandingsMilestoneReleaseTest extends TestCase
 
         $mediaResponse->assertRedirect();
         $this->assertEquals('Media Flash Standings', FestivalSetting::get('public_standings_label'));
+    }
+
+    public function test_subsequent_results_do_not_leak_to_public_standings_until_media_publishes_again(): void
+    {
+        // 1. Suppose media published standings after milestone 10
+        $this->groupA->update([
+            'points_cache' => 50,
+            'public_points_cache' => 50,
+            'public_rank_cache' => 1,
+        ]);
+        $this->groupB->update([
+            'points_cache' => 30,
+            'public_points_cache' => 30,
+            'public_rank_cache' => 2,
+        ]);
+        FestivalSetting::set('public_standings_results_count', '10');
+        FestivalSetting::set('public_standings_label', 'After 10 Results');
+
+        // 2. Now a new result is declared in admin, giving Group A points
+        $category = ProgramCategory::create(['name' => 'Stage Arts', 'code' => 'STG', 'slug' => 'stg-arts']);
+        $studentA = $this->createStudent($this->groupA, 'Zayd Participant', 'CH-11');
+        $prog = Program::create([
+            'category_id' => $category->id,
+            'name' => 'New Program 11',
+            'code' => 'P-11',
+            'type' => 'individual',
+            'eligibility' => 'all',
+            'status' => 'completed',
+        ]);
+        $entry = $this->createEntry($prog, $studentA, 'CH-11');
+        Result::create([
+            'program_id' => $prog->id,
+            'first_entry_id' => $entry->id,
+            'first_grade' => 'A',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        // Recalculate live points
+        app(PointCalculationService::class)->recalculateAllPoints();
+
+        $this->groupA->refresh();
+        $this->groupB->refresh();
+
+        // Live points updated from declared results
+        $this->assertSame(10, $this->groupA->points_cache);
+
+        // BUT public points MUST REMAIN exactly 50 (from the previous media release) until media publishes again!
+        $this->assertSame(50, $this->groupA->public_points_cache);
+        $this->assertSame(30, $this->groupB->public_points_cache);
+        $this->assertSame('After 10 Results', FestivalSetting::get('public_standings_label'));
+
+        // Public page must still show 50, NOT the new live points
+        $response = $this->get(route('groups.index'));
+        $response->assertOk();
+        $response->assertSee('50');
+        $response->assertDontSee($this->groupA->points_cache.' PTS');
     }
 
     public function test_admin_can_update_milestones_and_mode(): void

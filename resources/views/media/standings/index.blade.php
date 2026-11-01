@@ -225,10 +225,20 @@
                         2. ടീമുകളുടെ പോയിന്റുകൾ നൽകുക (Enter Team Points)
                     </h2>
                     <p class="text-xs text-slate-500 font-ml mt-0.5">
-                        ഓരോ ടീമിനും ലഭിച്ച ഔദ്യോഗിക പോയിന്റ് ടൈപ്പ് ചെയ്യുക. സേവ് ചെയ്യുമ്പോൾ പോയിന്റ് കൂടുതൽ ഉള്ള ടീം സ്വമേധയാ ഒന്നാമതായി അറേഞ്ച് ചെയ്യപ്പെടും.
+                        ഓരോ ടീമിനും ലഭിച്ച ഔദ്യോഗിക പോയിന്റ് ടൈപ്പ് ചെയ്യുക. മീഡിയ പാനലിൽ നിന്ന് ഇവിടെ സേവ് ചെയ്യുമ്പോൾ മാത്രമേ പബ്ലിക് വെബ്സൈറ്റിൽ പോയിന്റ് നില മാറുകയുള്ളൂ.
                     </p>
                 </div>
-                <span class="text-xs font-mono text-slate-400">5 Official Groups</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="
+                        @foreach($groups as $g)
+                            if ($refs.input_{{ $g->id }}) { $refs.input_{{ $g->id }}.value = {{ (int) $g->points_cache }}; }
+                        @endforeach
+                    " class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                        <span>Fill All Live Scores</span>
+                    </button>
+                    <span class="text-xs font-mono text-slate-400">5 Official Groups</span>
+                </div>
             </div>
 
             <div class="mt-6 space-y-3.5">
@@ -250,16 +260,24 @@
                                         {{ $grp->code }}
                                     </span>
                                 </div>
+                                <div class="flex items-center gap-2 text-[11px] font-mono mt-0.5">
+                                    <span class="text-slate-500">Currently Public: <strong class="text-slate-800">{{ number_format($grp->public_points_cache ?? 0) }} pts</strong></span>
+                                    <span class="text-slate-300">•</span>
+                                    <span class="text-emerald-700">Live Calculated: <strong class="text-emerald-900">{{ number_format($grp->points_cache ?? 0) }} pts</strong></span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Points Input -->
                         <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                            <label class="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold hidden sm:inline">
-                                Points:
-                            </label>
+                            <button type="button" @click="$refs.input_{{ $grp->id }}.value = {{ (int) $grp->points_cache }}"
+                                    class="text-[10px] font-mono font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                                    title="Copy current live calculated score">
+                                Use Live ({{ $grp->points_cache }})
+                            </button>
                             <div class="relative w-36 sm:w-40">
                                 <input type="number" min="0" max="100000" name="points[{{ $grp->id }}]"
+                                       x-ref="input_{{ $grp->id }}"
                                        value="{{ old('points.'.$grp->id, $grp->public_points_cache ?? 0) }}"
                                        class="w-full pl-3 pr-10 py-2.5 rounded-xl bg-white border-2 border-slate-300 focus:border-[#be1e2d] text-slate-900 font-mono font-black text-lg text-right focus:outline-none transition">
                                 <span class="absolute right-3 top-3 text-[11px] font-mono font-bold text-slate-400">

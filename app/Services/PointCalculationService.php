@@ -624,11 +624,10 @@ class PointCalculationService
             $rank++;
         }
 
-        // 3b. Update public points cache if in live mode or if standings were already released
+        // 3b. Update public points cache ONLY if explicitly configured in continuous live mode (Media desk strictly controls public standings in milestone/manual mode)
         $isLiveMode = FestivalSetting::get('public_standings_mode', 'milestone') === 'live';
-        $hasPublicStandings = (int) FestivalSetting::get('public_standings_results_count', '0') > 0;
 
-        if ($isLiveMode || $hasPublicStandings) {
+        if ($isLiveMode) {
             foreach ($rankedGroups as $idx => $g) {
                 $g->update([
                     'public_points_cache' => (int) $g->points_cache,
