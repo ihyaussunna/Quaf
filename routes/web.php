@@ -726,6 +726,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     // Coin Ledger & Audit Hub
     Route::get('coins', [AdminCoinAuditController::class, 'index'])->name('coins.index');
+    Route::get('coins/remaining', [AdminCoinAuditController::class, 'remainingBalances'])->name('coins.remaining');
     Route::get('coins/print', [AdminCoinAuditController::class, 'print'])->name('coins.print');
     Route::post('coins/sync-all', [AdminCoinAuditController::class, 'syncAll'])->name('coins.sync-all');
     Route::get('coins/student/{student}', [AdminCoinAuditController::class, 'studentBreakdown'])->name('coins.student');

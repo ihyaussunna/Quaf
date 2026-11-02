@@ -10,6 +10,10 @@
             <p class="text-xs text-slate-500 mt-1 font-mono">മത്സര ഫലങ്ങൾ, ജഡ്ജ്മെന്റ് അപ്ഡേറ്റ് ക്ലോബാക്കുകൾ, കാഷ്യർ റിഡംപ്ഷൻ എന്നിവയുടെ സമഗ്ര ഓഡിറ്റ് ലോഗ്</p>
         </div>
         <div class="flex items-center gap-2.5 print:hidden">
+            <a href="{{ route('admin.coins.remaining') }}" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer" title="View all students with remaining coins and their QF numbers">
+                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span>ബാക്കി കോയിൻ ഉള്ളവർ (Remaining)</span>
+            </a>
             <a href="{{ route('admin.coins.print', request()->query()) }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Print entire audit ledger with all details without page limits">
                 <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 <span>Print Audit (All Details)</span>
@@ -95,6 +99,10 @@
                     {{ number_format($totalActiveBalance) }}
                 </div>
                 <div class="text-[11px] font-mono text-amber-800 mt-1">{{ $studentsWithCoinsCount }} വിദ്യാർത്ഥികളുടെ വാലറ്റിൽ ലഭ്യമാണ്</div>
+                <a href="{{ route('admin.coins.remaining') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#be1e2d] hover:text-red-700 mt-2.5 group">
+                    <span>വിശദമായ ലിസ്റ്റ് കാണുക (View List)</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform font-mono">&rarr;</span>
+                </a>
             </div>
         </div>
 

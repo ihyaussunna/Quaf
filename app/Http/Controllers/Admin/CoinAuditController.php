@@ -161,6 +161,150 @@ class CoinAuditController extends Controller
     }
 
     /**
+     * Display list of students who have remaining coin balance in their active wallet.
+     * Includes QF number, student name, group, zone, earned, redeemed, and remaining balance.
+     */
+    public function remainingBalances(Request $request)
+    {
+        CoinTransaction::ensureSchema();
+
+        $search = trim((string) ($request->query('search') ?? ''));
+        $selectedGroup = $request->query('group_id') ?? $request->query('group', 'all');
+        $selectedZone = $request->query('zone', 'all');
+        $minCoins = $request->query('min_coins');
+        $sort = $request->query('sort', 'coins_desc');
+        $perPage = $request->query('per_page', 50);
+
+        $query = Student::with(['group', 'zone'])
+            ->where('coins_cache', '>', 0)
+            ->withSum(['coinTransactions as total_earned' => function ($q) {
+                $q->where('transaction_type', 'credit')->where('coins', '>', 0);
+            }], 'coins')
+            ->withSum(['coinTransactions as total_redeemed' => function ($q) {
+                $q->where('transaction_type', 'debit');
+            }], 'coins');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $clean = strtoupper(trim($search));
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('student_id', 'like', "%{$search}%")
+                    ->orWhere('chest_number', 'like', "%{$search}%")
+                    ->orWhere('contact', 'like', "%{$search}%");
+                if (str_starts_with($clean, 'QF')) {
+                    $numOnly = substr($clean, 2);
+                    $q->orWhere('chest_number', $numOnly)->orWhere('student_id', $numOnly);
+                }
+            });
+        }
+
+        if ($selectedGroup && $selectedGroup !== 'all') {
+            $query->where('group_id', $selectedGroup);
+        }
+
+        if ($selectedZone && $selectedZone !== 'all') {
+            $query->where(function ($q) use ($selectedZone) {
+                $q->where('category', $selectedZone)
+                    ->orWhereHas('zone', fn ($zq) => $zq->where('name', $selectedZone)->orWhere('code', $selectedZone));
+            });
+        }
+
+        if ($minCoins !== null && $minCoins !== '') {
+            $query->where('coins_cache', '>=', (int) $minCoins);
+        }
+
+        // CSV Export
+        if ($request->query('export') === 'csv') {
+            $filename = 'quaf_students_remaining_coins_'.now()->format('Ymd_His').'.csv';
+            $headers = [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+
+            return response()->stream(function () use ($query) {
+                $file = fopen('php://output', 'w');
+                fwrite($file, "\xEF\xBB\xBF"); // UTF-8 BOM
+                fputcsv($file, [
+                    'Sl No',
+                    'QF Number / Chest No',
+                    'Student Name',
+                    'Team / Group',
+                    'Zone / Category',
+                    'Contact',
+                    'Total Earned Coins',
+                    'Total Redeemed Coins',
+                    'Remaining Coin Balance',
+                ]);
+
+                $students = (clone $query)->orderByDesc('coins_cache')->get();
+                foreach ($students as $idx => $s) {
+                    $earned = (int) ($s->total_earned ?? 0);
+                    $redeemed = abs((int) ($s->total_redeemed ?? 0));
+                    $chest = $s->chest_number ?: $s->student_id;
+                    fputcsv($file, [
+                        $idx + 1,
+                        $chest,
+                        $s->name,
+                        $s->group?->name ?? '—',
+                        $s->zone?->name ?? ($s->category ?? '—'),
+                        $s->contact ?? '—',
+                        $earned,
+                        $redeemed,
+                        $s->coins_cache,
+                    ]);
+                }
+                fclose($file);
+            }, 200, $headers);
+        }
+
+        // Sorting
+        match ($sort) {
+            'coins_asc' => $query->orderBy('coins_cache', 'asc'),
+            'qf' => $query->orderBy('student_id', 'asc'),
+            'name' => $query->orderBy('name', 'asc'),
+            default => $query->orderByDesc('coins_cache'),
+        };
+
+        // Summary stats matching current filtered view
+        $summaryQuery = clone $query;
+        $totalStudentsWithBalance = (clone $summaryQuery)->count();
+        $totalRemainingCoins = (int) (clone $summaryQuery)->sum('coins_cache');
+        $averageRemaining = $totalStudentsWithBalance > 0 ? (int) round($totalRemainingCoins / $totalStudentsWithBalance) : 0;
+        $topStudent = (clone $summaryQuery)->orderByDesc('coins_cache')->first();
+
+        // Filtered stats
+        $filteredCount = $totalStudentsWithBalance;
+        $filteredTotalCoins = $totalRemainingCoins;
+
+        if ($perPage === 'all') {
+            $students = $query->paginate(10000)->withQueryString();
+        } else {
+            $students = $query->paginate(max(10, min(500, (int) $perPage)))->withQueryString();
+        }
+
+        $allGroups = Group::orderBy('name')->get();
+        $zones = Program::ZONES;
+
+        return view('admin.coins.remaining', compact(
+            'students',
+            'totalStudentsWithBalance',
+            'totalRemainingCoins',
+            'averageRemaining',
+            'topStudent',
+            'filteredCount',
+            'filteredTotalCoins',
+            'allGroups',
+            'zones',
+            'search',
+            'selectedGroup',
+            'selectedZone',
+            'minCoins',
+            'sort',
+            'perPage'
+        ));
+    }
+
+    /**
      * Overall Festival Coin Metrics.
      */
     protected function getCoinMetrics(): array
