@@ -114,21 +114,19 @@
         <div class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5">
             <!-- Audio Toggle Button -->
             <button type="button" id="championship-sound-toggle" onclick="toggleChampionshipAudio();"
-                    class="h-11 px-3.5 rounded-full bg-white/95 hover:bg-white text-slate-800 border border-slate-200/90 shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2 backdrop-blur-md group"
-                    title="Toggle Championship Music">
-                <span id="sound-wave-bars" class="flex items-end gap-0.5 h-4 px-0.5">
-                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-2.5"></span>
-                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.4s_ease-in-out_infinite] h-4"></span>
-                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.7s_ease-in-out_infinite] h-3"></span>
-                    <span class="w-1 bg-amber-500 rounded-full animate-[pulse_0.5s_ease-in-out_infinite] h-4.5"></span>
+                    class="w-11 h-11 rounded-full bg-white/95 hover:bg-white text-slate-800 border border-slate-200/90 shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-center backdrop-blur-md group"
+                    title="Toggle Championship Music" aria-label="Toggle Championship Music">
+                <span id="sound-icon-playing" class="hidden text-amber-500 group-hover:text-amber-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
                 </span>
-                <span id="sound-icon-muted" class="hidden text-slate-500 group-hover:text-slate-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span id="sound-icon-muted" class="text-slate-500 group-hover:text-slate-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                     </svg>
                 </span>
-                <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 hidden sm:inline">MUSIC</span>
             </button>
 
             <!-- Replay / Celebrate Button -->
@@ -624,22 +622,20 @@ function initChampionshipAudio() {
 }
 
 function updateAudioUI(isPlaying) {
-    const waveEl = document.getElementById('sound-wave-bars');
+    const playIcon = document.getElementById('sound-icon-playing');
     const muteIcon = document.getElementById('sound-icon-muted');
     const btn = document.getElementById('championship-sound-toggle');
-    if (!waveEl || !muteIcon) return;
+    if (!muteIcon) return;
 
     if (isPlaying) {
-        waveEl.classList.remove('hidden');
-        waveEl.classList.add('flex');
+        if (playIcon) playIcon.classList.remove('hidden');
         muteIcon.classList.add('hidden');
         if (btn) {
             btn.setAttribute('title', 'Mute Championship Music');
             btn.classList.add('ring-2', 'ring-amber-400/80');
         }
     } else {
-        waveEl.classList.add('hidden');
-        waveEl.classList.remove('flex');
+        if (playIcon) playIcon.classList.add('hidden');
         muteIcon.classList.remove('hidden');
         if (btn) {
             btn.setAttribute('title', 'Play Championship Music');
