@@ -1057,15 +1057,6 @@ class CoinRewardService
 
         $allEntries = $student->entries->merge($student->participations)->unique('id');
 
-        // Also include group entries for the student's group if enrolled
-        if ($student->group_id) {
-            $groupEntries = ProgramEntry::where('group_id', $student->group_id)
-                ->whereHas('program', fn ($q) => $q->where('type', 'group'))
-                ->with(['program.result', 'program.category'])
-                ->get();
-            $allEntries = $allEntries->merge($groupEntries)->unique('id');
-        }
-
         foreach ($allEntries as $entry) {
             $prog = $entry->program;
             $res = $prog?->result ?? ($prog ? Result::where('program_id', $prog->id)->first() : null);
@@ -1098,7 +1089,12 @@ class CoinRewardService
                         $isStudentMatch = $participants->contains('id', $student->id);
                     }
 
-                    if ($isEntryMatch || $isStudentMatch) {
+                    $isGroup = $prog->isGroup();
+                    $matched = $isGroup
+                        ? ($isStudentMatch || ($entry->student_id && $entry->student_id == $student->id))
+                        : ($isEntryMatch || $isStudentMatch || ($entry->student_id && $entry->student_id == $student->id));
+
+                    if ($matched) {
                         $pos = $p;
                         $grade = $winnerItem['grade'] ?? self::resolveGradeForEntry($entry, $res, $p);
                         break 2;
@@ -1108,15 +1104,20 @@ class CoinRewardService
 
             // B. Direct column fallback
             if ($pos === null) {
-                if ($res->first_entry_id === $entry->id) {
-                    $pos = 1;
-                    $grade = $res->first_grade;
-                } elseif ($res->second_entry_id === $entry->id) {
-                    $pos = 2;
-                    $grade = $res->second_grade;
-                } elseif ($res->third_entry_id === $entry->id) {
-                    $pos = 3;
-                    $grade = $res->third_grade;
+                $isGroup = $prog->isGroup();
+                $isDirectParticipant = ! $isGroup || ($entry->student_id && $entry->student_id == $student->id) || $student->participations->contains('id', $entry->id);
+
+                if ($isDirectParticipant) {
+                    if ($res->first_entry_id === $entry->id) {
+                        $pos = 1;
+                        $grade = $res->first_grade;
+                    } elseif ($res->second_entry_id === $entry->id) {
+                        $pos = 2;
+                        $grade = $res->second_grade;
+                    } elseif ($res->third_entry_id === $entry->id) {
+                        $pos = 3;
+                        $grade = $res->third_grade;
+                    }
                 }
             }
 

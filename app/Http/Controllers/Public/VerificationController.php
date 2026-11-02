@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\CoinTransaction;
-use App\Models\ProgramEntry;
 use App\Models\Student;
 use App\Services\CoinRewardService;
 use App\Services\PointCalculationService;
@@ -126,15 +125,7 @@ class VerificationController extends Controller
             $studentAchievements = $coinRewardService->getStudentAchievements($student, true);
             $clawbackSummary = $coinRewardService->getStudentClawbackSummary($student, true);
 
-            $allPrograms = $student->entries->merge($student->participations);
-            if ($student->group_id) {
-                $grpEntries = ProgramEntry::where('group_id', $student->group_id)
-                    ->whereHas('program', fn ($q) => $q->where('type', 'group'))
-                    ->with(['program.category', 'program.stage', 'program.schedule', 'program.result'])
-                    ->get();
-                $allPrograms = $allPrograms->merge($grpEntries);
-            }
-            $allPrograms = $allPrograms->unique('id');
+            $allPrograms = $student->entries->merge($student->participations)->unique('id');
 
             $purchaseHistory = CoinTransaction::where('student_id', $student->id)
                 ->where('transaction_type', 'debit')

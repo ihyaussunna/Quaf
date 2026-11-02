@@ -8,9 +8,11 @@ use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
 use App\Models\Result;
 use App\Models\Student;
+use App\Models\User;
 use App\Models\Zone;
 use App\Services\PointCalculationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class StudentVerificationProfileTest extends TestCase
@@ -292,5 +294,100 @@ class StudentVerificationProfileTest extends TestCase
         $resNum->assertOk();
         $resNum->assertSee('CINAN DELAMPADY');
         $resNum->assertDontSee('RABEEH');
+    }
+
+    public function test_unparticipated_group_programs_do_not_appear_on_student_card_or_dashboard(): void
+    {
+        $student1 = Student::create([
+            'student_id' => 'QF7001',
+            'name' => 'STUDENT ONE',
+            'group_id' => $this->group->id,
+            'qr_token' => 'qr-student-one-token',
+        ]);
+
+        $student2 = Student::create([
+            'student_id' => 'QF7002',
+            'name' => 'STUDENT TWO',
+            'group_id' => $this->group->id,
+            'qr_token' => 'qr-student-two-token',
+        ]);
+
+        // 1. Individual program for Student 2
+        $indProg2 = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Solo Recitation',
+            'code' => 'Q9-301',
+            'type' => 'individual',
+            'status' => 'completed',
+        ]);
+        ProgramEntry::create([
+            'program_id' => $indProg2->id,
+            'student_id' => $student2->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '7002',
+            'status' => 'verified',
+        ]);
+
+        // 2. Group program where ONLY Student 1 is a participant
+        $grpProg1 = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Team Daff Muttu',
+            'code' => 'Q9-302',
+            'type' => 'group',
+            'status' => 'completed',
+        ]);
+        $grpEntry1 = ProgramEntry::create([
+            'program_id' => $grpProg1->id,
+            'student_id' => $student1->id,
+            'group_id' => $this->group->id,
+            'chest_number' => '7001',
+            'status' => 'verified',
+        ]);
+        DB::table('program_entry_participants')->insert([
+            'entry_id' => $grpEntry1->id,
+            'student_id' => $student1->id,
+            'role' => 'participant',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 3. Group program of the same group where NEITHER student participated
+        $grpProgOther = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Team Skit Drama',
+            'code' => 'Q9-303',
+            'type' => 'group',
+            'status' => 'completed',
+        ]);
+        $grpEntryOther = ProgramEntry::create([
+            'program_id' => $grpProgOther->id,
+            'student_id' => null,
+            'group_id' => $this->group->id,
+            'chest_number' => 'GRP-99',
+            'status' => 'verified',
+        ]);
+
+        // Verify Student 2's card
+        $resCard2 = $this->get(route('verify.student', $student2->qr_token));
+        $resCard2->assertOk();
+        $resCard2->assertSee('Solo Recitation');
+        $resCard2->assertDontSee('Team Daff Muttu');
+        $resCard2->assertDontSee('Team Skit Drama');
+
+        // Verify Student 1's card
+        $resCard1 = $this->get(route('verify.student', $student1->qr_token));
+        $resCard1->assertOk();
+        $resCard1->assertSee('Team Daff Muttu');
+        $resCard1->assertDontSee('Solo Recitation');
+        $resCard1->assertDontSee('Team Skit Drama');
+
+        // Verify Student 2's dashboard
+        $user2 = User::factory()->create(['role' => 'student']);
+        $student2->update(['user_id' => $user2->id]);
+        $resDash2 = $this->actingAs($user2)->get(route('student.dashboard'));
+        $resDash2->assertOk();
+        $resDash2->assertSee('Solo Recitation');
+        $resDash2->assertDontSee('Team Daff Muttu');
+        $resDash2->assertDontSee('Team Skit Drama');
     }
 }

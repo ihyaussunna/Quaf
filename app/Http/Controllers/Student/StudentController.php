@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\CoinTransaction;
-use App\Models\ProgramEntry;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\CoinRewardService;
@@ -132,16 +131,8 @@ class StudentController extends Controller
         $remainingSlots = $student->getRemainingIndividualSlots();
         $maxSlots = Student::MAX_INDIVIDUAL_PROGRAMS;
 
-        // Collect all participating programs (individual entries + group team participations + group events)
-        $allEntries = $student->entries->merge($student->participations);
-        if ($student->group_id) {
-            $grpEntries = ProgramEntry::where('group_id', $student->group_id)
-                ->whereHas('program', fn ($q) => $q->where('type', 'group'))
-                ->with(['program.category', 'program.stage', 'program.schedule', 'program.zone', 'program.result'])
-                ->get();
-            $allEntries = $allEntries->merge($grpEntries);
-        }
-        $allEntries = $allEntries->unique('id');
+        // Collect all participating programs (individual entries + group participations)
+        $allEntries = $student->entries->merge($student->participations)->unique('id');
 
         // Find Next Program prominently
         $nextEntry = $allEntries
