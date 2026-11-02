@@ -392,4 +392,107 @@ class ResultJudgmentScoreUpdateSyncTest extends TestCase
         // student2 now 1st (Grade A+: 95 score) -> 300 coins!
         $this->assertEquals(300, $student2->coins_cache);
     }
+
+    public function test_poster_winners_sync_and_stale_poster_cleared_when_marks_are_updated(): void
+    {
+        $program = Program::create([
+            'category_id' => $this->category->id,
+            'name' => 'Poster Design Event',
+            'code' => 'Q9-555',
+            'type' => 'individual',
+            'eligibility' => 'Mix Zone',
+            'points_weight' => 1.0,
+            'status' => 'published',
+        ]);
+
+        $oldStudent = Student::create([
+            'name' => 'Old Champion',
+            'student_id' => 'QF701',
+            'group_id' => $this->groupA->id,
+            'category' => 'Mix Zone',
+            'gender' => 'Male',
+            'qr_token' => 'qr_701',
+            'coins_cache' => 0,
+        ]);
+        $oldEntry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $oldStudent->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => 'QF701',
+            'attendance_status' => 'present',
+            'status' => 'verified',
+        ]);
+
+        $newStudent = Student::create([
+            'name' => 'New Champion',
+            'student_id' => 'QF702',
+            'group_id' => $this->groupB->id,
+            'category' => 'Mix Zone',
+            'gender' => 'Male',
+            'qr_token' => 'qr_702',
+            'coins_cache' => 0,
+        ]);
+        $newEntry = ProgramEntry::create([
+            'program_id' => $program->id,
+            'student_id' => $newStudent->id,
+            'group_id' => $this->groupB->id,
+            'chest_number' => 'QF702',
+            'attendance_status' => 'present',
+            'status' => 'verified',
+        ]);
+
+        // Result saved previously with old winner and custom_poster_settings
+        $result = Result::create([
+            'program_id' => $program->id,
+            'first_entry_id' => $oldEntry->id,
+            'first_grade' => 'A',
+            'status' => 'published',
+            'published_at' => now(),
+            'result_number' => 140,
+            'poster_image' => 'storage/media/posters/result_old_test.png',
+            'custom_poster_settings' => [
+                'custom_winners' => [
+                    'first' => [
+                        ['id' => $oldEntry->id, 'name' => 'Old Champion', 'unit' => 'Unio Hilmic'],
+                    ],
+                    'second' => [],
+                    'third' => [],
+                ],
+            ],
+        ]);
+
+        // New marks awarded: newEntry gets 95, oldEntry gets 40
+        ScoreSheet::create([
+            'program_id' => $program->id,
+            'entry_id' => $newEntry->id,
+            'judge_id' => $this->judge->id,
+            'total_score' => 95,
+            'is_submitted' => true,
+        ]);
+        ScoreSheet::create([
+            'program_id' => $program->id,
+            'entry_id' => $oldEntry->id,
+            'judge_id' => $this->judge->id,
+            'total_score' => 40,
+            'is_submitted' => true,
+        ]);
+
+        // Trigger sync
+        $synced = $result->syncWithLatestJudgeScores();
+        $this->assertTrue($synced);
+
+        $result->refresh();
+        // Stale poster_image should be wiped clean
+        $this->assertNull($result->poster_image);
+
+        // Poster winners must return the new champion, not the old champion
+        $posterWinners = $result->getPosterWinners();
+        $this->assertEquals('New Champion', $posterWinners['first'][0]['name']);
+        $this->assertEquals($newEntry->id, $posterWinners['first'][0]['id']);
+
+        // Visiting media studio should show the new champion
+        $studioResponse = $this->actingAs($this->adminUser)->get(route('media.results.studio', $result->id));
+        $studioResponse->assertOk();
+        $studioResponse->assertSee('New Champion');
+    }
 }

@@ -154,9 +154,13 @@ class MediaResultController extends Controller
     /**
      * Open the Live Result Poster Designer & Settings Studio.
      */
-    public function studio(Result $result): View
+    public function studio(Request $request, Result $result): View
     {
         Result::ensureSchema();
+
+        // 0. Auto-sync result with current judge scores
+        $result->syncWithLatestJudgeScores();
+        $result->refresh();
 
         $result->load([
             'program.category',
@@ -217,14 +221,33 @@ class MediaResultController extends Controller
         );
 
         // Extract 1st, 2nd, and 3rd place winners (including ties or saved custom winners)
+        $officialWinners = $result->getPosterWinners(true);
+
         $hasCustomWinners = false;
-        if (! empty($customSettings['custom_winners']) && is_array($customSettings['custom_winners'])) {
-            foreach ($customSettings['custom_winners'] as $cwList) {
-                if (is_array($cwList)) {
-                    foreach ($cwList as $cw) {
-                        if (! empty($cw['name']) || ! empty($cw['unit'])) {
-                            $hasCustomWinners = true;
-                            break 2;
+        if (! $request->boolean('sync_winners') && ! empty($customSettings['custom_winners']) && is_array($customSettings['custom_winners'])) {
+            $customFirstId = $customSettings['custom_winners']['first'][0]['id'] ?? null;
+            $customFirstName = $customSettings['custom_winners']['first'][0]['name'] ?? null;
+            $officialFirst = $officialWinners['first'][0] ?? null;
+
+            $isMismatch = false;
+            if ($customFirstId && ! empty($officialFirst['id']) && (int) $customFirstId !== (int) $officialFirst['id']) {
+                $isMismatch = true;
+            } elseif ($customFirstName && ! empty($officialFirst['name'])) {
+                $cleanOfficial = strtolower(preg_replace('/[^a-z0-9]/i', '', $officialFirst['name']));
+                $cleanCustom = strtolower(preg_replace('/[^a-z0-9]/i', '', $customFirstName));
+                if ($cleanOfficial !== '' && $cleanCustom !== '' && ! str_contains($cleanOfficial, substr($cleanCustom, 0, 4)) && ! str_contains($cleanCustom, substr($cleanOfficial, 0, 4))) {
+                    $isMismatch = true;
+                }
+            }
+
+            if (! $isMismatch) {
+                foreach ($customSettings['custom_winners'] as $cwList) {
+                    if (is_array($cwList)) {
+                        foreach ($cwList as $cw) {
+                            if (! empty($cw['name']) || ! empty($cw['unit'])) {
+                                $hasCustomWinners = true;
+                                break 2;
+                            }
                         }
                     }
                 }
@@ -233,7 +256,7 @@ class MediaResultController extends Controller
 
         $winners = $hasCustomWinners
             ? $customSettings['custom_winners']
-            : $result->getPosterWinners();
+            : $officialWinners;
 
         // Compute sequence result number (e.g. 37, 61) rather than program code
         $resultNo = Result::where(function ($q) use ($result) {
@@ -304,6 +327,7 @@ class MediaResultController extends Controller
             'activeTemplate',
             'currentSettings',
             'winners',
+            'officialWinners',
             'resultNo',
             'themeColor'
         ));
@@ -810,6 +834,9 @@ class MediaResultController extends Controller
     public function downloadPoster(Result $result): Response|StreamedResponse
     {
         abort_unless($result->status === 'published' && (bool) $result->is_media_published, 404);
+
+        $result->syncWithLatestJudgeScores();
+        $result->refresh();
 
         $result->loadMissing([
             'program.category',

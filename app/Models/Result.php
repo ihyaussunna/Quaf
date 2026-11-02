@@ -231,10 +231,32 @@ class Result extends Model
     /**
      * Get 1st, 2nd, and 3rd place winners (including ties) for poster generation.
      */
-    public function getPosterWinners(): array
+    public function getPosterWinners(bool $forceFresh = false): array
     {
-        if (! empty($this->custom_poster_settings['custom_winners']) && is_array($this->custom_poster_settings['custom_winners'])) {
-            return $this->custom_poster_settings['custom_winners'];
+        if (! $forceFresh && ! empty($this->custom_poster_settings['custom_winners']) && is_array($this->custom_poster_settings['custom_winners'])) {
+            $customWinners = $this->custom_poster_settings['custom_winners'];
+
+            // Validate that custom_winners is not completely mismatched with current official podium
+            $isMismatch = false;
+            $customFirstId = $customWinners['first'][0]['id'] ?? null;
+            $customFirstName = $customWinners['first'][0]['name'] ?? null;
+
+            $currentFirstEntry = $this->relationLoaded('firstEntry') ? $this->firstEntry : ($this->first_entry_id ? ProgramEntry::with('student', 'group')->find($this->first_entry_id) : null);
+            $currentFirstName = $currentFirstEntry?->student?->name ?? $currentFirstEntry?->group?->name;
+
+            if ($this->first_entry_id && $customFirstId && (int) $customFirstId !== (int) $this->first_entry_id) {
+                $isMismatch = true;
+            } elseif ($currentFirstName && $customFirstName) {
+                $cleanCurrent = strtolower(preg_replace('/[^a-z0-9]/i', '', $currentFirstName));
+                $cleanCustom = strtolower(preg_replace('/[^a-z0-9]/i', '', $customFirstName));
+                if ($cleanCurrent !== '' && $cleanCustom !== '' && ! str_contains($cleanCurrent, substr($cleanCustom, 0, 4)) && ! str_contains($cleanCustom, substr($cleanExpected = substr($cleanCurrent, 0, 4), 0, 4))) {
+                    $isMismatch = true;
+                }
+            }
+
+            if (! $isMismatch) {
+                return $customWinners;
+            }
         }
 
         $podium = $this->getPodiumWinnersWithTies();
@@ -670,13 +692,31 @@ class Result extends Model
             || (int) $this->second_entry_id !== (int) $newSecondId
             || (int) $this->third_entry_id !== (int) $newThirdId;
 
-        if ($hasChanged || $forceCoins) {
+        // Also detect if custom_poster_settings has stale custom_winners that don't match the new podium
+        $customSettings = is_array($this->custom_poster_settings) ? $this->custom_poster_settings : [];
+        $hasStalePosterWinners = false;
+        if (! empty($customSettings['custom_winners'])) {
+            $customFirstId = $customSettings['custom_winners']['first'][0]['id'] ?? null;
+            if ($customFirstId && (int) $customFirstId !== (int) $newFirstId) {
+                $hasStalePosterWinners = true;
+            }
+        }
+
+        if ($hasChanged || $forceCoins || $hasStalePosterWinners) {
             if (! empty(static::$syncingResults[$this->id])) {
                 return false;
             }
             static::$syncingResults[$this->id] = true;
 
             try {
+                // Clear stale poster custom winners and shared entries so poster reflects true judge marks
+                if (isset($customSettings['custom_winners'])) {
+                    unset($customSettings['custom_winners']);
+                }
+                if (isset($customSettings['shared_entry_ids'])) {
+                    unset($customSettings['shared_entry_ids']);
+                }
+
                 $this->update([
                     'first_entry_id' => $newFirstId,
                     'first_grade' => $podium['first']->computed_grade ?: $this->first_grade,
@@ -684,6 +724,8 @@ class Result extends Model
                     'second_grade' => $podium['second']?->computed_grade ?: $this->second_grade,
                     'third_entry_id' => $newThirdId,
                     'third_grade' => $podium['third']?->computed_grade ?: $this->third_grade,
+                    'custom_poster_settings' => $customSettings,
+                    'poster_image' => null, // Reset static poster image so dynamic generator and studio use latest marks
                 ]);
 
                 $this->setRelation('firstEntry', $podium['first']);

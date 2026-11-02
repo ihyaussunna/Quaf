@@ -364,9 +364,7 @@ class ResultPosterGenerator
         }
 
         // 4. Multiple Winners with dynamic auto-scaling
-        $winnersData = ! empty($result->custom_poster_settings['custom_winners'])
-            ? $result->custom_poster_settings['custom_winners']
-            : $result->getPosterWinners();
+        $winnersData = $result->getPosterWinners();
 
         $flatWinners = [];
         foreach (['first', 'second', 'third'] as $rankKey) {

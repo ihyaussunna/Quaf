@@ -167,6 +167,14 @@
                         <span>Upload Poster</span>
                     </button>
 
+                    <!-- Sync Official Marks Button -->
+                    <button type="button" @click="syncOfficialWinners()"
+                            class="px-3.5 py-2 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                            title="മാർക്കുകളിലെ ഏറ്റവും പുതിയ മാറ്റങ്ങൾക്കനുസരിച്ച് വിന്നേഴ്സിനെ റീലോഡ് ചെയ്യുക">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Sync Winners</span>
+                    </button>
+
                     <!-- Save & Publish -->
                     <button type="button" @click="saveAndPublish()" :disabled="publishing"
                             class="px-5 py-2 rounded-xl bg-[#be1e2d] hover:bg-[#a01624] text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#be1e2d]/20 disabled:opacity-50 cursor-pointer">
@@ -1169,9 +1177,17 @@
 
                     <!-- Editable Winner Names and Groups -->
                     <div class="space-y-3 pt-3 border-t border-slate-100">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-800">വിജയികളുടെ പേരുകൾ (Edit Winner Names)</span>
-                            <span class="text-[10px] text-slate-500">പേരും ഗ്രൂപ്പും ഇവിടെ എഡിറ്റ് ചെയ്യാം</span>
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-xs font-bold text-slate-800">വിജയികളുടെ പേരുകൾ (Edit Winner Names)</span>
+                                <span class="block text-[10px] text-slate-500">പേരും ഗ്രൂപ്പും ഇവിടെ എഡിറ്റ് ചെയ്യാം</span>
+                            </div>
+                            <button type="button" @click="syncOfficialWinners()" 
+                                    class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs transition cursor-pointer shrink-0"
+                                    title="Reload winners directly from current marks">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Sync from Marks</span>
+                            </button>
                         </div>
 
                         <!-- 1st Place Winners -->
@@ -2264,6 +2280,12 @@ function posterStudio() {
                     'second' => $formatWinnerList($winners['second'] ?? [], 'Ahmad Rayyan K.', 'Green Warriors'),
                     'third' => $formatWinnerList($winners['third'] ?? [], 'Bilal Muhammed', 'Blue Riders'),
                 ];
+
+                $formattedOfficialWinners = [
+                    'first' => $formatWinnerList($officialWinners['first'] ?? [], 'Muhammed Yaseen P.', 'Red Fox Team'),
+                    'second' => $formatWinnerList($officialWinners['second'] ?? [], 'Ahmad Rayyan K.', 'Green Warriors'),
+                    'third' => $formatWinnerList($officialWinners['third'] ?? [], 'Bilal Muhammed', 'Blue Riders'),
+                ];
             @endphp
             winner_name_size: {{ (float) ($currentSettings['winner_name_size'] ?? 34) }},
             winner_name_weight: '{{ $currentSettings["winner_name_weight"] ?? "400" }}',
@@ -2273,6 +2295,20 @@ function posterStudio() {
             winner_unit_weight: '{{ $currentSettings["winner_unit_weight"] ?? "300" }}',
             winner_unit_color: '{{ $cleanWinnerUnitColor }}',
             winner_font: '{{ $currentSettings["winner_font"] ?? "Rockwell Std" }}',
+        },
+
+        officialWinners: @json($formattedOfficialWinners),
+
+        syncOfficialWinners() {
+            this.data.winners = JSON.parse(JSON.stringify(this.officialWinners));
+            this.$nextTick(() => { 
+                this.render(); 
+                if (typeof this.pushHistory === 'function') {
+                    this.pushHistory();
+                } else if (typeof this.recordHistory === 'function') {
+                    this.recordHistory();
+                }
+            });
         },
 
         // Content Data
@@ -2698,6 +2734,15 @@ function posterStudio() {
                 ];
             }
             this.syncLayerStack();
+
+            // Self-heal: If canvas winners differ from current official judge marks, sync immediately
+            if (this.officialWinners && this.officialWinners.first && this.officialWinners.first[0] && this.officialWinners.first[0].name) {
+                const offName = this.officialWinners.first[0].name.trim();
+                const curName = (this.data.winners.first && this.data.winners.first[0] && this.data.winners.first[0].name) ? this.data.winners.first[0].name.trim() : '';
+                if (offName !== 'Muhammed Yaseen P.' && curName !== '' && offName.toLowerCase().slice(0, 4) !== curName.toLowerCase().slice(0, 4)) {
+                    this.data.winners = JSON.parse(JSON.stringify(this.officialWinners));
+                }
+            }
 
             this.loadTemplateImage(this.settings.template_image);
             this.loadMedalImages();
