@@ -171,6 +171,7 @@ class CoinAuditController extends Controller
         $search = trim((string) ($request->query('search') ?? ''));
         $selectedGroup = $request->query('group_id') ?? $request->query('group', 'all');
         $selectedZone = $request->query('zone', 'all');
+        $selectedClass = $request->query('class_level') ?? $request->query('class', 'all');
         $minCoins = $request->query('min_coins');
         $sort = $request->query('sort', 'coins_desc');
         $perPage = $request->query('per_page', 50);
@@ -190,6 +191,7 @@ class CoinAuditController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('student_id', 'like', "%{$search}%")
                     ->orWhere('chest_number', 'like', "%{$search}%")
+                    ->orWhere('class_level', 'like', "%{$search}%")
                     ->orWhere('contact', 'like', "%{$search}%");
                 if (str_starts_with($clean, 'QF')) {
                     $numOnly = substr($clean, 2);
@@ -207,6 +209,10 @@ class CoinAuditController extends Controller
                 $q->where('category', $selectedZone)
                     ->orWhereHas('zone', fn ($zq) => $zq->where('name', $selectedZone)->orWhere('code', $selectedZone));
             });
+        }
+
+        if ($selectedClass && $selectedClass !== 'all') {
+            $query->where('class_level', $selectedClass);
         }
 
         if ($minCoins !== null && $minCoins !== '') {
@@ -228,6 +234,7 @@ class CoinAuditController extends Controller
                     'Sl No',
                     'QF Number / Chest No',
                     'Student Name',
+                    'Class / Standard',
                     'Team / Group',
                     'Zone / Category',
                     'Contact',
@@ -245,6 +252,7 @@ class CoinAuditController extends Controller
                         $idx + 1,
                         $chest,
                         $s->name,
+                        $s->class_level ?? '—',
                         $s->group?->name ?? '—',
                         $s->zone?->name ?? ($s->category ?? '—'),
                         $s->contact ?? '—',
@@ -284,6 +292,11 @@ class CoinAuditController extends Controller
 
         $allGroups = Group::orderBy('name')->get();
         $zones = Program::ZONES;
+        $allClasses = Student::whereNotNull('class_level')
+            ->where('class_level', '!=', '')
+            ->distinct()
+            ->orderBy('class_level')
+            ->pluck('class_level');
 
         return view('admin.coins.remaining', compact(
             'students',
@@ -295,6 +308,8 @@ class CoinAuditController extends Controller
             'filteredTotalCoins',
             'allGroups',
             'zones',
+            'allClasses',
+            'selectedClass',
             'search',
             'selectedGroup',
             'selectedZone',

@@ -327,6 +327,7 @@
                                 'entry' => $entry,
                                 'name' => $entry->student?->name ?: ($entry->group?->name ?? '—'),
                                 'chest' => $entry->chest_number ?: ($entry->student?->student_id ?? '—'),
+                                'class' => $entry->student?->class_level ?? null,
                                 'code_letter' => $entry->code_letter ? strtoupper(trim($entry->code_letter)) : null,
                                 'team' => $entry->group?->name ?: ($entry->student?->group?->name ?? '—'),
                                 'team_color' => $entry->group?->color_hex ?? ($entry->student?->group?->color_hex ?? '#be1e2d'),
@@ -336,6 +337,9 @@
                         }
                     } else {
                         foreach ($list as &$w) {
+                            if (empty($w['class']) && !empty($w['entry'])) {
+                                $w['class'] = $w['entry']->student?->class_level ?? null;
+                            }
                             if (empty($w['code_letter'])) {
                                 $w['code_letter'] = !empty($w['entry']?->code_letter)
                                     ? strtoupper(trim($w['entry']->code_letter))
@@ -443,6 +447,11 @@
                                                 </div>
                                                 <div class="text-[11px] text-slate-600 font-mono truncate mt-0.5 flex items-center gap-1.5 flex-wrap">
                                                     <span class="font-bold text-slate-800">#{{ $w['chest'] }}</span>
+                                                    @if(!empty($w['class']))
+                                                        <span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-800 border border-slate-200 font-bold text-[10px]">
+                                                            Class {{ $w['class'] }}
+                                                        </span>
+                                                    @endif
                                                     <span>• {{ $w['team'] }}</span>
                                                     @if(!empty($w['grade']) && $w['grade'] !== '-')
                                                         <span class="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[10px]">
@@ -474,6 +483,7 @@
                                 <th class="py-2.5 px-2 w-16 text-center bg-slate-800 text-amber-300 font-black">Code</th>
                                 <th class="py-2.5 px-3 w-24">QF Number</th>
                                 <th class="py-2.5 px-3 min-w-[170px]">Student / Contestant Name</th>
+                                <th class="py-2.5 px-2 w-16 text-center">Class</th>
                                 <th class="py-2.5 px-3 min-w-[120px]">Group / Team</th>
                                 <th class="py-2.5 px-2 w-16 text-center">Grade</th>
                             </tr>
@@ -512,7 +522,7 @@
                                         <td class="py-2 px-2.5 font-mono text-[11px] text-slate-600">
                                             {{ $prog?->is_stage ? ($prog->stage?->name ?? 'Stage') : 'Off-Stage' }}
                                         </td>
-                                        <td colspan="6" class="py-2 px-3 text-center text-slate-400 font-mono italic">
+                                        <td colspan="7" class="py-2 px-3 text-center text-slate-400 font-mono italic">
                                             No podium winners declared
                                         </td>
                                     </tr>
@@ -590,6 +600,17 @@
                                                 </div>
                                                 @if(!empty($w['is_tied']))
                                                     <span class="text-[9px] font-mono uppercase text-amber-700 font-bold">Shared / Tied</span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Class -->
+                                            <td class="py-2 px-2 text-center align-middle font-mono font-bold text-slate-800 text-[11px]">
+                                                @if(!empty($w['class']))
+                                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
+                                                        {{ $w['class'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-slate-300 font-normal">—</span>
                                                 @endif
                                             </td>
 

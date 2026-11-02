@@ -117,15 +117,15 @@
 
     <!-- Filter Control Bar (Screen Only) -->
     <div class="no-print bg-white border border-slate-300 rounded-2xl p-4 shadow-sm space-y-3">
-        <form method="GET" action="{{ route('admin.coins.remaining') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
+        <form method="GET" action="{{ route('admin.coins.remaining') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3">
             
             <!-- Search -->
             <div class="md:col-span-2">
-                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Search QF # or Name</label>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Search QF #, Name or Class</label>
                 <input type="text" 
                        name="search" 
                        value="{{ $search }}" 
-                       placeholder="e.g. Chest No, QF No, Name..." 
+                       placeholder="e.g. Chest No, QF No, Class, Name..." 
                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
             </div>
 
@@ -149,6 +149,19 @@
                     <option value="all">All Zones</option>
                     @foreach($zones as $val => $label)
                         <option value="{{ $val }}" {{ $selectedZone == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Class Filter -->
+            <div>
+                <label class="block text-[11px] font-mono uppercase font-bold text-slate-500 mb-1">Class / Standard</label>
+                <select name="class" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#be1e2d]">
+                    <option value="all">All Classes (എല്ലാ ക്ലാസും)</option>
+                    @foreach($allClasses as $cls)
+                        <option value="{{ $cls }}" {{ (string) $selectedClass === (string) $cls ? 'selected' : '' }}>
+                            Class {{ $cls }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -235,13 +248,14 @@
                         <tr class="bg-slate-900 text-white font-mono uppercase text-[11px] border-b border-slate-800">
                             <th class="py-3 px-3 w-12 text-center">#</th>
                             <th class="py-3 px-3 w-28 bg-slate-800 text-amber-300 font-black">QF Number</th>
-                            <th class="py-3 px-4 min-w-[200px]">Contestant Name</th>
-                            <th class="py-3 px-3 min-w-[140px]">Group / Team</th>
-                            <th class="py-3 px-3 w-28">Zone</th>
-                            <th class="py-3 px-3 text-right w-24">Earned</th>
-                            <th class="py-3 px-3 text-right w-24">Redeemed</th>
-                            <th class="py-3 px-3 text-right w-32 bg-amber-500/10 text-[#be1e2d] font-black">Balance Coins</th>
-                            <th class="no-print py-3 px-3 text-center w-36">Actions</th>
+                            <th class="py-3 px-4 min-w-[190px]">Contestant Name</th>
+                            <th class="py-3 px-3 w-20 text-center">Class</th>
+                            <th class="py-3 px-3 min-w-[130px]">Group / Team</th>
+                            <th class="py-3 px-3 w-24">Zone</th>
+                            <th class="py-3 px-3 text-right w-20">Earned</th>
+                            <th class="py-3 px-3 text-right w-20">Redeemed</th>
+                            <th class="py-3 px-3 text-right w-28 bg-amber-500/10 text-[#be1e2d] font-black">Balance Coins</th>
+                            <th class="no-print py-3 px-3 text-center w-32">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 font-sora">
@@ -274,6 +288,17 @@
                                     </a>
                                     @if(!empty($s->contact))
                                         <div class="text-[10px] font-mono text-slate-400 font-normal">Ph: {{ $s->contact }}</div>
+                                    @endif
+                                </td>
+
+                                <!-- Class -->
+                                <td class="py-2.5 px-3 text-center font-mono">
+                                    @if(!empty($s->class_level))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-black text-xs bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
+                                            {{ $s->class_level }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400 text-xs">—</span>
                                     @endif
                                 </td>
 
@@ -333,7 +358,7 @@
                     </tbody>
                     <tfoot class="bg-slate-100 font-mono font-bold text-slate-800 border-t-2 border-slate-900 text-xs">
                         <tr>
-                            <td colspan="5" class="py-3 px-4 text-right uppercase tracking-wider">Total Active Coin Balance:</td>
+                            <td colspan="6" class="py-3 px-4 text-right uppercase tracking-wider">Total Active Coin Balance:</td>
                             <td class="py-3 px-3 text-right font-black text-emerald-700">
                                 +{{ number_format($students->sum('total_earned')) }}
                             </td>

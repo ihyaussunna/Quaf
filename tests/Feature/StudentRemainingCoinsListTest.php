@@ -49,6 +49,7 @@ class StudentRemainingCoinsListTest extends TestCase
             'name' => 'Abu Hamid. K',
             'student_id' => 'QF4012',
             'chest_number' => '4012',
+            'class_level' => 'UH4',
             'group_id' => $this->groupA->id,
             'category' => 'Mix Zone',
             'gender' => 'Male',
@@ -60,6 +61,7 @@ class StudentRemainingCoinsListTest extends TestCase
             'name' => 'Ahammed Farhan Kp',
             'student_id' => 'QF5012',
             'chest_number' => '5012',
+            'class_level' => 'NF3',
             'group_id' => $this->groupB->id,
             'category' => 'Mix Zone',
             'gender' => 'Male',
@@ -71,6 +73,7 @@ class StudentRemainingCoinsListTest extends TestCase
             'name' => 'Alif Kollam',
             'student_id' => 'QF1229',
             'chest_number' => '1229',
+            'class_level' => 'ID4',
             'group_id' => $this->groupA->id,
             'category' => 'Mix Zone',
             'gender' => 'Male',
@@ -111,13 +114,26 @@ class StudentRemainingCoinsListTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('QF4012');
         $response->assertSee('Abu Hamid. K');
+        $response->assertSee('UH4');
         $response->assertSee('180');
         $response->assertSee('QF5012');
         $response->assertSee('Ahammed Farhan Kp');
+        $response->assertSee('NF3');
         $response->assertSee('95');
 
         // Zero balance student must not be listed
         $response->assertDontSee('QF1229');
+    }
+
+    public function test_filter_by_class_works(): void
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->get(route('admin.coins.remaining', ['class' => 'UH4']));
+
+        $response->assertStatus(200);
+        $response->assertSee('QF4012');
+        $response->assertSee('Abu Hamid. K');
+        $response->assertDontSee('Ahammed Farhan Kp');
     }
 
     public function test_search_by_qf_number_filters_correctly(): void
@@ -153,9 +169,11 @@ class StudentRemainingCoinsListTest extends TestCase
 
         $content = $response->streamedContent();
         $this->assertStringContainsString('QF Number / Chest No', $content);
+        $this->assertStringContainsString('Class / Standard', $content);
         $this->assertStringContainsString('Remaining Coin Balance', $content);
         $this->assertStringContainsString('QF4012', $content);
         $this->assertStringContainsString('Abu Hamid. K', $content);
+        $this->assertStringContainsString('UH4', $content);
         $this->assertStringContainsString('180', $content);
         $this->assertStringNotContainsString('QF1229', $content);
     }
