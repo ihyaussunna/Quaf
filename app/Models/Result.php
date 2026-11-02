@@ -37,6 +37,13 @@ class Result extends Model
         'media_published_at',
     ];
 
+    /**
+     * In-memory recursion prevention flag for syncing results.
+     *
+     * @var array<int, bool>
+     */
+    protected static array $syncingResults = [];
+
     protected function casts(): array
     {
         return [
@@ -483,6 +490,46 @@ class Result extends Model
             }
         }
 
+        if ($this->exists && $podium && ! empty($podium['first'])) {
+            $newFirstId = $podium['first']->id;
+            $newSecondId = $podium['second']?->id;
+            $newThirdId = $podium['third']?->id;
+
+            $hasMismatch = (int) $this->first_entry_id !== (int) $newFirstId
+                || (int) $this->second_entry_id !== (int) $newSecondId
+                || (int) $this->third_entry_id !== (int) $newThirdId;
+
+            if ($hasMismatch && empty(static::$syncingResults[$this->id])) {
+                static::$syncingResults[$this->id] = true;
+                $this->update([
+                    'first_entry_id' => $newFirstId,
+                    'first_grade' => $podium['first']->computed_grade ?: $this->first_grade,
+                    'second_entry_id' => $newSecondId,
+                    'second_grade' => $podium['second']?->computed_grade ?: $this->second_grade,
+                    'third_entry_id' => $newThirdId,
+                    'third_grade' => $podium['third']?->computed_grade ?: $this->third_grade,
+                ]);
+
+                $this->setRelation('firstEntry', $podium['first']);
+                if ($podium['second']) {
+                    $this->setRelation('secondEntry', $podium['second']);
+                }
+                if ($podium['third']) {
+                    $this->setRelation('thirdEntry', $podium['third']);
+                }
+
+                if (in_array($this->status, PointCalculationService::DECLARED_STATUSES, true)) {
+                    if (class_exists(CoinRewardService::class)) {
+                        app(CoinRewardService::class)->distributeCoinsForResult($this);
+                    }
+                    if ($program) {
+                        app(PointCalculationService::class)->recalculateForProgram($program);
+                    }
+                }
+                unset(static::$syncingResults[$this->id]);
+            }
+        }
+
         $result = [
             1 => [],
             2 => [],
@@ -493,36 +540,34 @@ class Result extends Model
 
         foreach ([1 => 'first', 2 => 'second', 3 => 'third'] as $pos => $key) {
             $entriesForPos = collect();
-
-            // A. Primary direct relationship
-            $primaryEntry = match ($pos) {
-                1 => $this->firstEntry,
-                2 => $this->secondEntry,
-                3 => $this->thirdEntry,
-                default => null,
-            };
-            if (! $primaryEntry) {
-                $pId = match ($pos) {
-                    1 => $this->first_entry_id,
-                    2 => $this->second_entry_id,
-                    3 => $this->third_entry_id,
-                    default => null,
-                };
-                if ($pId) {
-                    $primaryEntry = ProgramEntry::with(['group', 'student.group', 'scores', 'scoreSheets'])->find($pId);
-                }
-            }
-            if ($primaryEntry) {
-                $entriesForPos->push($primaryEntry);
-            }
-
-            // B. Add all tied entries from judge podium calculation
             $podiumKey = "{$key}_all";
+
+            // A. If judge podium calculation exists and has winners for this position, use judge podium
             if ($podium && ! empty($podium[$podiumKey]) && $podium[$podiumKey]->isNotEmpty()) {
                 foreach ($podium[$podiumKey] as $tiedEntry) {
-                    if (! $entriesForPos->contains('id', $tiedEntry->id)) {
-                        $entriesForPos->push($tiedEntry);
+                    $entriesForPos->push($tiedEntry);
+                }
+            } else {
+                // Otherwise fallback to primary direct relationship from result record (for manually declared verdicts)
+                $primaryEntry = match ($pos) {
+                    1 => $this->firstEntry,
+                    2 => $this->secondEntry,
+                    3 => $this->thirdEntry,
+                    default => null,
+                };
+                if (! $primaryEntry) {
+                    $pId = match ($pos) {
+                        1 => $this->first_entry_id,
+                        2 => $this->second_entry_id,
+                        3 => $this->third_entry_id,
+                        default => null,
+                    };
+                    if ($pId) {
+                        $primaryEntry = ProgramEntry::with(['group', 'student.group', 'scores', 'scoreSheets'])->find($pId);
                     }
+                }
+                if ($primaryEntry) {
+                    $entriesForPos->push($primaryEntry);
                 }
             }
 
@@ -595,6 +640,74 @@ class Result extends Model
         }
 
         return $result;
+    }
+
+    /**
+     * Auto-sync stored winner IDs with latest judge score calculation.
+     * Re-distributes coins and recalculates points when changes occur.
+     */
+    public function syncWithLatestJudgeScores(bool $forceCoins = false): bool
+    {
+        if (! $this->program_id) {
+            return false;
+        }
+
+        $program = $this->relationLoaded('program') ? $this->program : Program::find($this->program_id);
+        if (! $program) {
+            return false;
+        }
+
+        $podium = PointCalculationService::determinePodiumForProgram($program);
+        if (empty($podium['first'])) {
+            return false;
+        }
+
+        $newFirstId = $podium['first']->id;
+        $newSecondId = $podium['second']?->id;
+        $newThirdId = $podium['third']?->id;
+
+        $hasChanged = (int) $this->first_entry_id !== (int) $newFirstId
+            || (int) $this->second_entry_id !== (int) $newSecondId
+            || (int) $this->third_entry_id !== (int) $newThirdId;
+
+        if ($hasChanged || $forceCoins) {
+            if (! empty(static::$syncingResults[$this->id])) {
+                return false;
+            }
+            static::$syncingResults[$this->id] = true;
+
+            try {
+                $this->update([
+                    'first_entry_id' => $newFirstId,
+                    'first_grade' => $podium['first']->computed_grade ?: $this->first_grade,
+                    'second_entry_id' => $newSecondId,
+                    'second_grade' => $podium['second']?->computed_grade ?: $this->second_grade,
+                    'third_entry_id' => $newThirdId,
+                    'third_grade' => $podium['third']?->computed_grade ?: $this->third_grade,
+                ]);
+
+                $this->setRelation('firstEntry', $podium['first']);
+                if ($podium['second']) {
+                    $this->setRelation('secondEntry', $podium['second']);
+                }
+                if ($podium['third']) {
+                    $this->setRelation('thirdEntry', $podium['third']);
+                }
+
+                if (in_array($this->status, PointCalculationService::DECLARED_STATUSES, true)) {
+                    if (class_exists(CoinRewardService::class)) {
+                        app(CoinRewardService::class)->distributeCoinsForResult($this);
+                    }
+                    app(PointCalculationService::class)->recalculateForProgram($program);
+                }
+
+                return true;
+            } finally {
+                unset(static::$syncingResults[$this->id]);
+            }
+        }
+
+        return false;
     }
 
     /**

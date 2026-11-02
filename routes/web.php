@@ -688,6 +688,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('mark_entry/check/print', [AdminMarkEntryController::class, 'checkPrint'])->name('mark_entry.check.print');
     Route::get('mark-entry/check', [AdminMarkEntryController::class, 'markCheck'])->name('mark-entry.check');
     Route::get('mark_entry/check', [AdminMarkEntryController::class, 'markCheck'])->name('mark_entry.check');
+    Route::post('mark-entry/{program}/sync-result', [AdminMarkEntryController::class, 'syncResultFromMarks'])->name('mark-entry.sync-result');
     Route::get('mark-entry', [AdminMarkEntryController::class, 'index'])->name('mark-entry.index');
     Route::get('mark_entry', [AdminMarkEntryController::class, 'index'])->name('mark_entry.index');
     Route::get('mark-entry/{program}', [AdminMarkEntryController::class, 'show'])->name('mark-entry.show');

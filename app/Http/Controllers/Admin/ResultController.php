@@ -70,11 +70,16 @@ class ResultController extends Controller
         return view('admin.results.index', compact('results', 'pendingPrograms', 'status', 'search', 'teams', 'counts'));
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
         $programId = $request->query('program_id');
-        $program = Program::with(['entries.student.group', 'entries.participants', 'entries.scoreSheets', 'scoringCriteria'])
+        $program = Program::with(['entries.student.group', 'entries.participants', 'entries.scoreSheets', 'scoringCriteria', 'result'])
             ->findOrFail($programId);
+
+        if ($program->result) {
+            return redirect()->route('admin.results.edit', $program->result->id)
+                ->with('info', "Result for '{$program->name}' has already been recorded. You can update it here.");
+        }
 
         $podium = PointCalculationService::determinePodiumForProgram($program);
 

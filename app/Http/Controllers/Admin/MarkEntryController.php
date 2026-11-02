@@ -524,6 +524,9 @@ class MarkEntryController extends Controller
         if ($selectedProgramId) {
             $selectedProgram = Program::with(['category', 'stage', 'result'])->find($selectedProgramId);
             if ($selectedProgram) {
+                if ($selectedProgram->result) {
+                    $selectedProgram->result->syncWithLatestJudgeScores();
+                }
                 $rankedEntries = $this->computeRankedEntries($selectedProgram);
             }
         }
@@ -646,5 +649,23 @@ class MarkEntryController extends Controller
         }
 
         return $entries;
+    }
+
+    /**
+     * Re-sync result, adjust coins, and update points directly from current marks.
+     */
+    public function syncResultFromMarks(Program $program): RedirectResponse
+    {
+        $result = $program->result;
+        if (! $result) {
+            $result = PointCalculationService::autoAssignResultPodium($program, 'published');
+
+            return back()->with('success', "Result for '{$program->name}' declared from current marks, points updated, and coins distributed.");
+        }
+
+        $result->syncWithLatestJudgeScores(true);
+        PointCalculationService::autoAssignResultPodium($program, $result->status);
+
+        return back()->with('success', "Result for '{$program->name}' successfully updated from latest marks! Previous coins reversed and new coins awarded.");
     }
 }

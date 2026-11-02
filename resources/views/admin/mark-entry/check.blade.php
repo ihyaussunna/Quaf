@@ -18,9 +18,22 @@
                 <a href="{{ route('admin.mark-entry.view-marks', ['zone' => $selectedZone, 'program' => $selectedProgram->id]) }}" class="px-3.5 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-200 transition">
                     View Marks
                 </a>
-                <a href="{{ route('admin.results.create', ['program_id' => $selectedProgram->id]) }}" class="px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs">
-                    Declare Result
-                </a>
+                @if($selectedProgram->result)
+                    <form method="POST" action="{{ route('admin.mark-entry.sync-result', $selectedProgram->id) }}" class="inline">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition shadow-xs cursor-pointer flex items-center gap-1.5" title="Re-sync podium winners and adjust coins from current marks">
+                            <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>Update / Sync Result</span>
+                        </button>
+                    </form>
+                    <a href="{{ route('admin.results.edit', $selectedProgram->result->id) }}" class="px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs">
+                        Edit Result
+                    </a>
+                @else
+                    <a href="{{ route('admin.results.create', ['program_id' => $selectedProgram->id]) }}" class="px-4 py-2 bg-brand-orange text-white rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-xs">
+                        Declare Result
+                    </a>
+                @endif
             </div>
         @elseif($selectedZone)
             <div class="flex items-center gap-2">
