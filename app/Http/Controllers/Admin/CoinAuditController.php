@@ -28,82 +28,19 @@ class CoinAuditController extends Controller
         $selectedProgram = $request->query('program', 'all');
         $selectedGroup = $request->query('group', 'all');
         $selectedStudentId = $request->query('student_id');
+        $perPage = $request->query('per_page', 25);
 
         // 1. Overall Festival Coin Metrics
-        $totalEarned = (int) CoinTransaction::where('transaction_type', 'credit')
-            ->where('coins', '>', 0)
-            ->sum('coins');
-
-        $totalRedeemed = (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins'));
-
-        $totalActiveBalance = (int) Student::sum('coins_cache');
-
-        $studentsWithCoinsCount = Student::where('coins_cache', '>', 0)->count();
-
-        // Calculate total coins clawed back due to judgment updates/corrections
-        $clawbackTxs = CoinTransaction::where(function ($q) {
-            $q->where('transaction_type', 'reversal')
-                ->orWhere('metadata->judgment_updated', true);
-        })->get();
-
-        $totalClawedBack = (int) $clawbackTxs->sum(function ($tx) {
-            if ($tx->transaction_type === 'reversal') {
-                return (int) ($tx->metadata['clawback_amount'] ?? $tx->metadata['previous_coins'] ?? abs($tx->coins));
-            }
-
-            return (int) ($tx->metadata['clawback_amount'] ?? 0);
-        });
+        $metrics = $this->getCoinMetrics();
 
         // 2. Query Coin Transactions Ledger
-        $query = CoinTransaction::with(['student.group', 'program', 'group', 'result'])
-            ->orderByDesc('id');
+        $query = $this->buildTransactionsQuery($request);
 
-        if ($selectedType && $selectedType !== 'all') {
-            if ($selectedType === 'credit') {
-                $query->where('transaction_type', 'credit')->where('coins', '>', 0);
-            } elseif ($selectedType === 'clawback') {
-                $query->where(function ($q) {
-                    $q->where('transaction_type', 'reversal')
-                        ->orWhere('metadata->judgment_updated', true);
-                });
-            } elseif ($selectedType === 'debit') {
-                $query->where('transaction_type', 'debit');
-            } elseif ($selectedType === 'reversal') {
-                $query->where('transaction_type', 'reversal');
-            }
+        if ($perPage === 'all') {
+            $transactions = $query->paginate(10000)->withQueryString();
+        } else {
+            $transactions = $query->paginate(max(10, min(500, (int) $perPage)))->withQueryString();
         }
-
-        if ($selectedProgram && $selectedProgram !== 'all') {
-            $query->where('program_id', $selectedProgram);
-        }
-
-        if ($selectedGroup && $selectedGroup !== 'all') {
-            $query->where(function ($q) use ($selectedGroup) {
-                $q->where('group_id', $selectedGroup)
-                    ->orWhereHas('student', fn ($sq) => $sq->where('group_id', $selectedGroup));
-            });
-        }
-
-        if ($selectedStudentId) {
-            $query->where('student_id', $selectedStudentId);
-        }
-
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                    ->orWhere('transaction_reference', 'like', "%{$search}%")
-                    ->orWhereHas('student', function ($sq) use ($search) {
-                        $sq->where('name', 'like', "%{$search}%")
-                            ->orWhere('student_id', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('program', function ($pq) use ($search) {
-                        $pq->where('name', 'like', "%{$search}%")
-                            ->orWhere('code', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        $transactions = $query->paginate(25)->withQueryString();
 
         // 3. Highlighted Student Breakdown (if filtered for a specific student)
         $highlightedStudent = null;
@@ -157,23 +94,169 @@ class CoinAuditController extends Controller
         $allPrograms = Program::orderBy('name')->get();
         $allGroups = Group::orderBy('name')->get();
 
-        return view('admin.coins.index', compact(
-            'transactions',
-            'totalEarned',
-            'totalClawedBack',
-            'totalRedeemed',
-            'totalActiveBalance',
-            'studentsWithCoinsCount',
-            'highlightedStudent',
-            'studentProgramBreakdown',
-            'allPrograms',
-            'allGroups',
-            'search',
-            'selectedType',
-            'selectedProgram',
-            'selectedGroup',
-            'selectedStudentId'
-        ));
+        return view('admin.coins.index', array_merge($metrics, [
+            'transactions' => $transactions,
+            'highlightedStudent' => $highlightedStudent,
+            'studentProgramBreakdown' => $studentProgramBreakdown,
+            'allPrograms' => $allPrograms,
+            'allGroups' => $allGroups,
+            'search' => $search,
+            'selectedType' => $selectedType,
+            'selectedProgram' => $selectedProgram,
+            'selectedGroup' => $selectedGroup,
+            'selectedStudentId' => $selectedStudentId,
+            'perPage' => $perPage,
+        ]));
+    }
+
+    /**
+     * Dedicated printable report showing all coin transaction audit details together.
+     */
+    public function print(Request $request): View
+    {
+        CoinTransaction::ensureSchema();
+
+        $metrics = $this->getCoinMetrics();
+        $query = $this->buildTransactionsQuery($request);
+        $transactions = $query->get();
+
+        $search = trim((string) ($request->query('search') ?? ''));
+        $selectedType = $request->query('type', 'all');
+
+        $selectedProgramModel = $request->query('program') && $request->query('program') !== 'all'
+            ? Program::find($request->query('program'))
+            : null;
+
+        $selectedGroupModel = $request->query('group') && $request->query('group') !== 'all'
+            ? Group::find($request->query('group'))
+            : null;
+
+        $selectedStudent = $request->query('student_id')
+            ? Student::with('group')->find($request->query('student_id'))
+            : null;
+
+        $totalFilteredCredit = (int) $transactions->where('transaction_type', 'credit')->where('coins', '>', 0)->sum('coins');
+        $totalFilteredDebit = (int) abs($transactions->where('transaction_type', 'debit')->sum('coins'));
+        $totalFilteredClawback = (int) $transactions->sum(function ($tx) {
+            if ($tx->transaction_type === 'reversal') {
+                return (int) ($tx->metadata['clawback_amount'] ?? $tx->metadata['previous_coins'] ?? abs($tx->coins));
+            }
+
+            return (int) ($tx->metadata['clawback_amount'] ?? 0);
+        });
+        $netFilteredCoins = (int) $transactions->sum('coins');
+
+        return view('admin.coins.print', array_merge($metrics, [
+            'transactions' => $transactions,
+            'search' => $search,
+            'selectedType' => $selectedType,
+            'selectedProgramModel' => $selectedProgramModel,
+            'selectedGroupModel' => $selectedGroupModel,
+            'selectedStudent' => $selectedStudent,
+            'totalFilteredCredit' => $totalFilteredCredit,
+            'totalFilteredDebit' => $totalFilteredDebit,
+            'totalFilteredClawback' => $totalFilteredClawback,
+            'netFilteredCoins' => $netFilteredCoins,
+        ]));
+    }
+
+    /**
+     * Overall Festival Coin Metrics.
+     */
+    protected function getCoinMetrics(): array
+    {
+        $totalEarned = (int) CoinTransaction::where('transaction_type', 'credit')
+            ->where('coins', '>', 0)
+            ->sum('coins');
+
+        $totalRedeemed = (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins'));
+
+        $totalActiveBalance = (int) Student::sum('coins_cache');
+
+        $studentsWithCoinsCount = Student::where('coins_cache', '>', 0)->count();
+
+        $clawbackTxs = CoinTransaction::where(function ($q) {
+            $q->where('transaction_type', 'reversal')
+                ->orWhere('metadata->judgment_updated', true);
+        })->get();
+
+        $totalClawedBack = (int) $clawbackTxs->sum(function ($tx) {
+            if ($tx->transaction_type === 'reversal') {
+                return (int) ($tx->metadata['clawback_amount'] ?? $tx->metadata['previous_coins'] ?? abs($tx->coins));
+            }
+
+            return (int) ($tx->metadata['clawback_amount'] ?? 0);
+        });
+
+        return [
+            'totalEarned' => $totalEarned,
+            'totalRedeemed' => $totalRedeemed,
+            'totalActiveBalance' => $totalActiveBalance,
+            'studentsWithCoinsCount' => $studentsWithCoinsCount,
+            'totalClawedBack' => $totalClawedBack,
+        ];
+    }
+
+    /**
+     * Build filtered transactions query based on request parameters.
+     */
+    protected function buildTransactionsQuery(Request $request)
+    {
+        $search = trim((string) ($request->query('search') ?? ''));
+        $selectedType = $request->query('type', 'all');
+        $selectedProgram = $request->query('program', 'all');
+        $selectedGroup = $request->query('group', 'all');
+        $selectedStudentId = $request->query('student_id');
+
+        $query = CoinTransaction::with(['student.group', 'program', 'group', 'result'])
+            ->orderByDesc('id');
+
+        if ($selectedType && $selectedType !== 'all') {
+            if ($selectedType === 'credit') {
+                $query->where('transaction_type', 'credit')->where('coins', '>', 0);
+            } elseif ($selectedType === 'clawback') {
+                $query->where(function ($q) {
+                    $q->where('transaction_type', 'reversal')
+                        ->orWhere('metadata->judgment_updated', true);
+                });
+            } elseif ($selectedType === 'debit') {
+                $query->where('transaction_type', 'debit');
+            } elseif ($selectedType === 'reversal') {
+                $query->where('transaction_type', 'reversal');
+            }
+        }
+
+        if ($selectedProgram && $selectedProgram !== 'all') {
+            $query->where('program_id', $selectedProgram);
+        }
+
+        if ($selectedGroup && $selectedGroup !== 'all') {
+            $query->where(function ($q) use ($selectedGroup) {
+                $q->where('group_id', $selectedGroup)
+                    ->orWhereHas('student', fn ($sq) => $sq->where('group_id', $selectedGroup));
+            });
+        }
+
+        if ($selectedStudentId) {
+            $query->where('student_id', $selectedStudentId);
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhere('transaction_reference', 'like', "%{$search}%")
+                    ->orWhereHas('student', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                            ->orWhere('student_id', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('program', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query;
     }
 
     /**

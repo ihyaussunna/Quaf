@@ -10,10 +10,10 @@
             <p class="text-xs text-slate-500 mt-1 font-mono">മത്സര ഫലങ്ങൾ, ജഡ്ജ്മെന്റ് അപ്ഡേറ്റ് ക്ലോബാക്കുകൾ, കാഷ്യർ റിഡംപ്ഷൻ എന്നിവയുടെ സമഗ്ര ഓഡിറ്റ് ലോഗ്</p>
         </div>
         <div class="flex items-center gap-2.5 print:hidden">
-            <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                <span>Print Audit</span>
-            </button>
+            <a href="{{ route('admin.coins.print', request()->query()) }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Print entire audit ledger with all details without page limits">
+                <svg class="w-4 h-4 text-[#be1e2d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span>Print Audit (All Details)</span>
+            </a>
             <form method="POST" action="{{ route('admin.coins.sync-all') }}" onsubmit="return confirm('Recalculate and synchronize all student coin balances from the ledger?')">
                 @csrf
                 <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
@@ -410,16 +410,26 @@
             </table>
         </div>
 
-        @if($transactions->hasPages())
-            <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono print:hidden">
-                <div>
+        <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-mono print:hidden">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <span>
                     Showing <span class="font-bold text-slate-700">{{ $transactions->firstItem() ?? 0 }}</span> to <span class="font-bold text-slate-700">{{ $transactions->lastItem() ?? 0 }}</span> of <span class="font-bold text-slate-700">{{ $transactions->total() }}</span> transactions
+                </span>
+                <span class="text-slate-300">•</span>
+                <div class="flex items-center gap-1 text-[11px]">
+                    <span class="text-slate-400">Per page:</span>
+                    <a href="{{ request()->fullUrlWithQuery(['per_page' => 25]) }}" class="px-2 py-0.5 rounded {{ ($perPage ?? 25) == 25 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:text-slate-900' }}">25</a>
+                    <a href="{{ request()->fullUrlWithQuery(['per_page' => 50]) }}" class="px-2 py-0.5 rounded {{ ($perPage ?? '') == 50 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:text-slate-900' }}">50</a>
+                    <a href="{{ request()->fullUrlWithQuery(['per_page' => 100]) }}" class="px-2 py-0.5 rounded {{ ($perPage ?? '') == 100 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:text-slate-900' }}">100</a>
+                    <a href="{{ request()->fullUrlWithQuery(['per_page' => 'all']) }}" class="px-2 py-0.5 rounded {{ ($perPage ?? '') === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:text-slate-900 font-bold' }}" title="Show all transactions on one page">All (എല്ലാം)</a>
                 </div>
+            </div>
+            @if($transactions->hasPages())
                 <div>
                     {{ $transactions->links() }}
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
 </div>
