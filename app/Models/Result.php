@@ -471,6 +471,7 @@ class Result extends Model
             'rank' => sprintf('%02d', $pos),
             'name' => $name,
             'chest' => $chest,
+            'code_letter' => $entry?->code_letter ? strtoupper(trim($entry->code_letter)) : null,
             'team' => $team,
             'team_color' => $teamColor,
             'grade' => $grade,

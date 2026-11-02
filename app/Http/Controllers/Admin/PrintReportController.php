@@ -25,10 +25,17 @@ class PrintReportController extends Controller
         $selectedZone = $request->query('zone');
         $selectedProgramId = $request->query('program');
         $selectedStatus = $request->query('status');
+        $selectedIsStage = $request->query('is_stage');
+        $selectedStageId = $request->query('stage_id') ?: $request->query('stage');
+        $selectedView = $request->query('view', 'cards');
 
         $groups = Group::orderByDesc('points_cache')->get();
         $categories = ProgramCategory::orderBy('name')->get();
-        $allPrograms = Program::orderBy('name')->get();
+        $stages = Stage::orderBy('name')->get();
+        $allPrograms = Program::when($selectedIsStage !== null && $selectedIsStage !== '', function ($q) use ($selectedIsStage) {
+            $isStageBool = in_array((string) $selectedIsStage, ['1', 'true', 'stage'], true);
+            $q->where('is_stage', $isStageBool);
+        })->orderBy('name')->get();
 
         $query = Result::with([
             'program.category',
@@ -73,6 +80,15 @@ class PrintReportController extends Controller
             });
         }
 
+        if ($selectedIsStage !== null && $selectedIsStage !== '') {
+            $isStageBool = in_array((string) $selectedIsStage, ['1', 'true', 'stage'], true);
+            $query->whereHas('program', fn ($q) => $q->where('is_stage', $isStageBool));
+        }
+
+        if ($selectedStageId && $selectedStageId !== 'all') {
+            $query->whereHas('program', fn ($q) => $q->where('stage_id', $selectedStageId));
+        }
+
         if ($selectedProgramId) {
             $query->where('program_id', $selectedProgramId);
         }
@@ -84,11 +100,15 @@ class PrintReportController extends Controller
             'results',
             'groups',
             'categories',
+            'stages',
             'zones',
             'allPrograms',
             'selectedZone',
             'selectedProgramId',
-            'selectedStatus'
+            'selectedStatus',
+            'selectedIsStage',
+            'selectedStageId',
+            'selectedView'
         ));
     }
 

@@ -7,7 +7,9 @@ use App\Models\Judge;
 use App\Models\Program;
 use App\Models\ProgramCategory;
 use App\Models\ProgramEntry;
+use App\Models\Result;
 use App\Models\ScoreSheet;
+use App\Models\Stage;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -271,5 +273,141 @@ class ValuationResultsPdfPrintTest extends TestCase
         $resIndex = $this->actingAs($this->admin)->get(route('admin.results.index'));
         $resIndex->assertOk();
         $resIndex->assertSee('Evaluated Results PDF');
+    }
+
+    public function test_stage_programs_results_can_be_filtered_and_printed_with_code_letter_and_qf_number(): void
+    {
+        $stage = Stage::firstOrCreate(
+            ['name' => 'Stage 01 — Grand Amphitheatre'],
+            ['code' => 'S01', 'venue' => 'Main Ground']
+        );
+
+        // 1. Stage program with Code Letters
+        $stageProgram = Program::create([
+            'name' => 'Arabic Mappila Song',
+            'code' => 'Q9-STAGE-1',
+            'category_id' => $this->category->id,
+            'type' => 'individual',
+            'status' => 'completed',
+            'is_stage' => true,
+            'stage_id' => $stage->id,
+            'eligibility' => 'Mix Zone',
+        ]);
+
+        $student1 = Student::create([
+            'student_id' => 'QF4099',
+            'name' => 'ZAYAN K',
+            'group_id' => $this->groupA->id,
+            'category' => 'Mix Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $student2 = Student::create([
+            'student_id' => 'QF5088',
+            'name' => 'HASHIM T',
+            'group_id' => $this->groupB->id,
+            'category' => 'Mix Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry1 = ProgramEntry::create([
+            'program_id' => $stageProgram->id,
+            'student_id' => $student1->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => 'QF4099',
+            'code_letter' => 'C',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        $entry2 = ProgramEntry::create([
+            'program_id' => $stageProgram->id,
+            'student_id' => $student2->id,
+            'group_id' => $this->groupB->id,
+            'chest_number' => 'QF5088',
+            'code_letter' => 'A',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        Result::create([
+            'program_id' => $stageProgram->id,
+            'result_number' => 88,
+            'status' => 'published',
+            'is_media_published' => true,
+            'first_entry_id' => $entry1->id,
+            'first_grade' => 'A',
+            'second_entry_id' => $entry2->id,
+            'second_grade' => 'A',
+        ]);
+
+        // 2. Off-stage program
+        $offstageProgram = Program::create([
+            'name' => 'Pencil Drawing Master',
+            'code' => 'Q9-OFF-1',
+            'category_id' => $this->category->id,
+            'type' => 'individual',
+            'status' => 'completed',
+            'is_stage' => false,
+            'eligibility' => 'A Zone',
+        ]);
+
+        $student3 = Student::create([
+            'student_id' => 'QF1001',
+            'name' => 'ANAS MALAPPURAM',
+            'group_id' => $this->groupA->id,
+            'category' => 'A Zone',
+            'qr_token' => Str::random(32),
+        ]);
+
+        $entry3 = ProgramEntry::create([
+            'program_id' => $offstageProgram->id,
+            'student_id' => $student3->id,
+            'group_id' => $this->groupA->id,
+            'chest_number' => 'QF1001',
+            'status' => 'verified',
+            'attendance_status' => 'present',
+        ]);
+
+        Result::create([
+            'program_id' => $offstageProgram->id,
+            'result_number' => 89,
+            'status' => 'published',
+            'is_media_published' => true,
+            'first_entry_id' => $entry3->id,
+            'first_grade' => 'B',
+        ]);
+
+        // Filter is_stage = 1 (Stage programs only)
+        $stageRes = $this->actingAs($this->admin)->get(route('admin.print.results', ['is_stage' => '1']));
+        $stageRes->assertOk();
+        $stageRes->assertSee('Arabic Mappila Song');
+        $stageRes->assertSee('Mix Zone');
+        $stageRes->assertSee('ZAYAN K');
+        $stageRes->assertSee('QF4099');
+        $stageRes->assertSee('Code C');
+        $stageRes->assertSee('HASHIM T');
+        $stageRes->assertSee('QF5088');
+        $stageRes->assertSee('Code A');
+        $stageRes->assertSee('SCOPE: STAGE PROGRAMS ONLY');
+        $stageRes->assertDontSee('Pencil Drawing Master');
+
+        // Filter is_stage = 1 with Table View
+        $tableRes = $this->actingAs($this->admin)->get(route('admin.print.results', ['is_stage' => '1', 'view' => 'table']));
+        $tableRes->assertOk();
+        $tableRes->assertSee('Arabic Mappila Song');
+        $tableRes->assertSee('Winners Table');
+        $tableRes->assertSee('ZAYAN K');
+        $tableRes->assertSee('QF4099');
+        $tableRes->assertSee('HASHIM T');
+        $tableRes->assertSee('QF5088');
+        $tableRes->assertDontSee('Pencil Drawing Master');
+
+        // Filter is_stage = 0 (Off-stage only)
+        $offRes = $this->actingAs($this->admin)->get(route('admin.print.results', ['is_stage' => '0']));
+        $offRes->assertOk();
+        $offRes->assertSee('Pencil Drawing Master');
+        $offRes->assertSee('ANAS MALAPPURAM');
+        $offRes->assertDontSee('Arabic Mappila Song');
     }
 }
