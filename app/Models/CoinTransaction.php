@@ -175,4 +175,57 @@ class CoinTransaction extends Model
     {
         return $this->belongsTo(Result::class);
     }
+
+    /**
+     * Determine if this transaction represents a cashier cash deposit / amount received.
+     */
+    public function isCashDeposit(): bool
+    {
+        return in_array($this->source, ['cash_deposit', 'amount_received'])
+            || in_array($this->reward_rule_id, ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1'])
+            || str_starts_with((string) $this->transaction_reference, 'COIN-CASH-')
+            || (float) $this->cash_amount > 0
+            || (isset($this->metadata['source_type']) && in_array($this->metadata['source_type'], ['cash_deposit', 'amount_received']))
+            || (isset($this->metadata['cash_amount']) && (float) $this->metadata['cash_amount'] > 0);
+    }
+
+    /**
+     * Scope query to only cashier cash deposits and amounts received.
+     */
+    public function scopeWhereCashDeposit($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereIn('source', ['cash_deposit', 'amount_received'])
+                ->orWhereIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1'])
+                ->orWhere('transaction_reference', 'like', 'COIN-CASH-%')
+                ->orWhere('cash_amount', '>', 0)
+                ->orWhere('metadata->source_type', 'cash_deposit')
+                ->orWhere('metadata->source_type', 'amount_received');
+        });
+    }
+
+    /**
+     * Scope query to competition merit awards only (excluding cash additions).
+     */
+    public function scopeWhereCompetitionAward($query)
+    {
+        return $query->where('transaction_type', 'credit')
+            ->where('coins', '>', 0)
+            ->where(function ($q) {
+                $q->whereNull('source')
+                    ->orWhereNotIn('source', ['cash_deposit', 'amount_received']);
+            })
+            ->where(function ($q) {
+                $q->whereNull('reward_rule_id')
+                    ->orWhereNotIn('reward_rule_id', ['QUAF09_CASHIER_COIN_DEPOSIT_V1', 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1']);
+            })
+            ->where(function ($q) {
+                $q->whereNull('transaction_reference')
+                    ->orWhere('transaction_reference', 'not like', 'COIN-CASH-%');
+            })
+            ->where(function ($q) {
+                $q->whereNull('cash_amount')
+                    ->orWhere('cash_amount', '<=', 0);
+            });
+    }
 }

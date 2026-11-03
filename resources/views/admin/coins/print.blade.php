@@ -111,7 +111,9 @@
                 <span class="font-bold text-slate-700 uppercase">Filter Scope:</span>
                 <span class="px-2 py-0.5 rounded bg-white border border-slate-200 font-semibold text-slate-800">
                     Event: {{ match($selectedType) {
-                        'credit' => 'Competition Awards (+Coins)',
+                        'cash' => 'Cash Received / Added Coins (പണം നൽകി ചേർത്തവ)',
+                        'competition' => 'Competition Awards (മത്സര അവാർഡുകൾ)',
+                        'credit' => 'All Credits (എല്ലാ വരവുകളും)',
                         'clawback' => 'Judgment Clawbacks & Updates',
                         'debit' => 'Cashier Gift Redemptions (-Coins)',
                         'reversal' => 'Reversals & Unplaced',
@@ -144,12 +146,17 @@
             </div>
         </div>
 
-        <!-- 4 Metric Cards (Summary of Entire Festival) -->
-        <div class="grid grid-cols-4 gap-3 mb-5 text-xs font-mono">
+        <!-- 5 Metric Cards (Summary of Entire Festival) -->
+        <div class="grid grid-cols-5 gap-3 mb-5 text-xs font-mono">
             <div class="p-3 rounded-xl border border-slate-200 bg-white">
-                <div class="text-[10px] text-slate-500 font-bold uppercase">Total Awarded</div>
-                <div class="text-lg font-black text-emerald-600 mt-0.5">+{{ number_format($totalEarned) }}</div>
-                <div class="text-[9px] text-slate-400">മത്സരങ്ങളിൽ നൽകിയ ആകെ</div>
+                <div class="text-[10px] text-slate-500 font-bold uppercase">Competition Awards</div>
+                <div class="text-lg font-black text-emerald-600 mt-0.5">+{{ number_format($totalCompetitionAwarded) }}</div>
+                <div class="text-[9px] text-slate-400">മത്സരങ്ങളിൽ നൽകിയവ</div>
+            </div>
+            <div class="p-3 rounded-xl border border-emerald-300 bg-emerald-50/50">
+                <div class="text-[10px] text-emerald-900 font-bold uppercase">Cash Received (പണം)</div>
+                <div class="text-lg font-black text-emerald-700 mt-0.5">₹{{ number_format($totalCashAmount, 2) }}</div>
+                <div class="text-[9px] text-emerald-700 font-semibold">+{{ number_format($totalCoinsFromCash) }} Coins ({{ $cashDepositsCount }} തവണ)</div>
             </div>
             <div class="p-3 rounded-xl border border-slate-200 bg-white">
                 <div class="text-[10px] text-slate-500 font-bold uppercase">Clawed Back</div>
@@ -222,6 +229,10 @@
 
                             <!-- Competition / Channel -->
                             <td class="py-2 px-3">
+                                @php
+                                    $isCash = $tx->isCashDeposit();
+                                    $cashAmt = (float) ($tx->cash_amount ?: ($tx->metadata['cash_amount'] ?? 0));
+                                @endphp
                                 @if($tx->program)
                                     <div>
                                         <div class="font-bold text-slate-900 leading-tight">{{ $tx->program->name }}</div>
@@ -231,6 +242,8 @@
                                             <span>{{ $tx->program->isGroup() ? 'Group' : 'Individual' }}</span>
                                         </div>
                                     </div>
+                                @elseif($isCash)
+                                    <span class="text-emerald-800 font-mono font-bold text-[10px]">Cashier Desk (പണം നൽകിയത്)</span>
                                 @else
                                     <span class="text-slate-600 font-mono font-medium">Store Redemption / Cashier</span>
                                 @endif
@@ -247,6 +260,15 @@
                                         @else
                                             <span class="font-mono font-bold text-amber-700 text-[10px]">
                                                 Judgment Promoted (Upgraded)
+                                            </span>
+                                        @endif
+                                    @elseif($isCash)
+                                        <span class="font-mono font-bold text-emerald-800 text-[10px]">
+                                            Cash Received (പണം സ്വീകരിച്ചത്)
+                                        </span>
+                                        @if($cashAmt > 0)
+                                            <span class="font-mono font-black text-emerald-700 text-[10px]">
+                                                ₹{{ number_format($cashAmt, 2) }}
                                             </span>
                                         @endif
                                     @elseif($isCredit)
@@ -271,6 +293,8 @@
                                             @if($tx->grade && $tx->grade !== 'NO_GRADE')
                                                 <span class="font-bold text-slate-700 ml-1">[{{ $tx->grade }}]</span>
                                             @endif
+                                        @elseif($isCash)
+                                            <span class="text-emerald-700 font-semibold text-[9px]">Cash Deposit Counter</span>
                                         @elseif($isDebit)
                                             <span class="text-slate-500">Presentation Counter</span>
                                         @endif
@@ -284,7 +308,11 @@
                                     <div class="font-mono font-bold text-xs text-emerald-700">
                                         +{{ number_format($tx->coins) }}
                                     </div>
-                                    @if($isJudgmentUpdated && !empty($tx->metadata['clawback_amount']))
+                                    @if($isCash && $cashAmt > 0)
+                                        <div class="text-[9px] font-mono text-emerald-700 font-bold">
+                                            (₹{{ number_format($cashAmt) }} Cash)
+                                        </div>
+                                    @elseif($isJudgmentUpdated && !empty($tx->metadata['clawback_amount']))
                                         <div class="text-[9px] font-mono text-rose-600 font-bold">
                                             -{{ $tx->metadata['clawback_amount'] }} clawback
                                         </div>

@@ -135,4 +135,43 @@ class CoinAuditPrintAllDetailsTest extends TestCase
         $response->assertSee('Transaction sample row 1');
         $response->assertSee('Transaction sample row 30');
     }
+
+    public function test_cash_received_metrics_and_filter_work_accurately(): void
+    {
+        CoinTransaction::create([
+            'student_id' => $this->student->id,
+            'group_id' => $this->group->id,
+            'program_id' => null,
+            'transaction_type' => 'credit',
+            'coins' => 110,
+            'cash_amount' => 110.00,
+            'payment_mode' => 'cash',
+            'source' => 'amount_received',
+            'reward_rule_id' => 'QUAF09_CASHIER_AMOUNT_RECEIVED_V1',
+            'transaction_reference' => 'COIN-CASH-TEST-999',
+            'status' => 'completed',
+            'prize_position' => 0,
+            'description' => 'Amount Received (പണം): ₹110.00 (+110 Coins for Order #589)',
+        ]);
+
+        // 1. Index shows Cash Received metric card
+        $indexResponse = $this->actingAs($this->adminUser)->get(route('admin.coins.index'));
+        $indexResponse->assertOk();
+        $indexResponse->assertSee('Cash Received (പണം)');
+        $indexResponse->assertSee('110.00');
+
+        // 2. Filter by type=cash returns the transaction and proper label
+        $filterResponse = $this->actingAs($this->adminUser)->get(route('admin.coins.index', ['type' => 'cash']));
+        $filterResponse->assertOk();
+        $filterResponse->assertSee('COIN-CASH-TEST-999');
+        $filterResponse->assertSee('Cash Received (പണം സ്വീകരിച്ചത്)');
+        $filterResponse->assertSee('Cashier Desk (പണം നൽകി ചേർത്തത്)');
+
+        // 3. Print view with type=cash shows proper scope and table
+        $printResponse = $this->actingAs($this->adminUser)->get(route('admin.coins.print', ['type' => 'cash']));
+        $printResponse->assertOk();
+        $printResponse->assertSee('Cash Received / Added Coins (പണം നൽകി ചേർത്തവ)');
+        $printResponse->assertSee('COIN-CASH-TEST-999');
+        $printResponse->assertSee('110.00');
+    }
 }

@@ -145,6 +145,10 @@ class CoinAuditController extends Controller
             return (int) ($tx->metadata['clawback_amount'] ?? 0);
         });
         $netFilteredCoins = (int) $transactions->sum('coins');
+        $totalFilteredCashAmount = (float) $transactions->sum(function ($tx) {
+            return (float) ($tx->cash_amount ?: ($tx->metadata['cash_amount'] ?? 0));
+        });
+        $totalFilteredCashCoins = (int) $transactions->filter(fn ($tx) => $tx->isCashDeposit())->sum('coins');
 
         return view('admin.coins.print', array_merge($metrics, [
             'transactions' => $transactions,
@@ -157,6 +161,8 @@ class CoinAuditController extends Controller
             'totalFilteredDebit' => $totalFilteredDebit,
             'totalFilteredClawback' => $totalFilteredClawback,
             'netFilteredCoins' => $netFilteredCoins,
+            'totalFilteredCashAmount' => $totalFilteredCashAmount,
+            'totalFilteredCashCoins' => $totalFilteredCashCoins,
         ]));
     }
 
@@ -181,6 +187,12 @@ class CoinAuditController extends Controller
             ->withSum(['coinTransactions as total_earned' => function ($q) {
                 $q->where('transaction_type', 'credit')->where('coins', '>', 0);
             }], 'coins')
+            ->withSum(['coinTransactions as total_cash_coins' => function ($q) {
+                $q->whereCashDeposit();
+            }], 'coins')
+            ->withSum(['coinTransactions as total_cash_amount' => function ($q) {
+                $q->whereCashDeposit();
+            }], 'cash_amount')
             ->withSum(['coinTransactions as total_redeemed' => function ($q) {
                 $q->where('transaction_type', 'debit');
             }], 'coins');
@@ -238,6 +250,8 @@ class CoinAuditController extends Controller
                     'Team / Group',
                     'Zone / Category',
                     'Contact',
+                    'Cash Added Coins',
+                    'Cash Paid (₹)',
                     'Total Earned Coins',
                     'Total Redeemed Coins',
                     'Remaining Coin Balance',
@@ -246,6 +260,8 @@ class CoinAuditController extends Controller
                 $students = (clone $query)->orderByDesc('coins_cache')->get();
                 foreach ($students as $idx => $s) {
                     $earned = (int) ($s->total_earned ?? 0);
+                    $cashCoins = (int) ($s->total_cash_coins ?? 0);
+                    $cashAmt = (float) ($s->total_cash_amount ?? 0);
                     $redeemed = abs((int) ($s->total_redeemed ?? 0));
                     $chest = $s->chest_number ?: $s->student_id;
                     fputcsv($file, [
@@ -256,6 +272,8 @@ class CoinAuditController extends Controller
                         $s->group?->name ?? '—',
                         $s->zone?->name ?? ($s->category ?? '—'),
                         $s->contact ?? '—',
+                        $cashCoins,
+                        $cashAmt > 0 ? number_format($cashAmt, 2, '.', '') : '0.00',
                         $earned,
                         $redeemed,
                         $s->coins_cache,
@@ -324,9 +342,18 @@ class CoinAuditController extends Controller
      */
     protected function getCoinMetrics(): array
     {
-        $totalEarned = (int) CoinTransaction::where('transaction_type', 'credit')
-            ->where('coins', '>', 0)
-            ->sum('coins');
+        $allCredits = CoinTransaction::where('transaction_type', 'credit')->where('coins', '>', 0);
+
+        $totalEarned = (int) (clone $allCredits)->sum('coins');
+        $totalCompetitionAwarded = (int) (clone $allCredits)->whereCompetitionAward()->sum('coins');
+
+        $cashQuery = CoinTransaction::query()->whereCashDeposit();
+        $totalCashAmount = (float) CoinTransaction::sum('cash_amount');
+        if ($totalCashAmount == 0.0) {
+            $totalCashAmount = (float) (clone $cashQuery)->get()->sum(fn ($tx) => (float) ($tx->cash_amount ?: ($tx->metadata['cash_amount'] ?? 0)));
+        }
+        $totalCoinsFromCash = (int) (clone $cashQuery)->where('transaction_type', 'credit')->sum('coins');
+        $cashDepositsCount = (clone $cashQuery)->count();
 
         $totalRedeemed = (int) abs(CoinTransaction::where('transaction_type', 'debit')->sum('coins'));
 
@@ -349,6 +376,10 @@ class CoinAuditController extends Controller
 
         return [
             'totalEarned' => $totalEarned,
+            'totalCompetitionAwarded' => $totalCompetitionAwarded,
+            'totalCashAmount' => $totalCashAmount,
+            'totalCoinsFromCash' => $totalCoinsFromCash,
+            'cashDepositsCount' => $cashDepositsCount,
             'totalRedeemed' => $totalRedeemed,
             'totalActiveBalance' => $totalActiveBalance,
             'studentsWithCoinsCount' => $studentsWithCoinsCount,
@@ -371,7 +402,11 @@ class CoinAuditController extends Controller
             ->orderByDesc('id');
 
         if ($selectedType && $selectedType !== 'all') {
-            if ($selectedType === 'credit') {
+            if ($selectedType === 'cash') {
+                $query->whereCashDeposit();
+            } elseif ($selectedType === 'competition') {
+                $query->whereCompetitionAward();
+            } elseif ($selectedType === 'credit') {
                 $query->where('transaction_type', 'credit')->where('coins', '>', 0);
             } elseif ($selectedType === 'clawback') {
                 $query->where(function ($q) {

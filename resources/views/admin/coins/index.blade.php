@@ -10,6 +10,10 @@
             <p class="text-xs text-slate-500 mt-1 font-mono">മത്സര ഫലങ്ങൾ, ജഡ്ജ്മെന്റ് അപ്ഡേറ്റ് ക്ലോബാക്കുകൾ, കാഷ്യർ റിഡംപ്ഷൻ എന്നിവയുടെ സമഗ്ര ഓഡിറ്റ് ലോഗ്</p>
         </div>
         <div class="flex items-center gap-2.5 print:hidden">
+            <a href="{{ route('admin.coins.index', ['type' => 'cash']) }}" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer" title="View all cash deposits and amount received transactions">
+                <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>ക്യാഷ് ട്രാൻസാക്ഷനുകൾ (Cash: ₹{{ number_format($totalCashAmount, 2) }})</span>
+            </a>
             <a href="{{ route('admin.coins.remaining') }}" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer" title="View all students with remaining coins and their QF numbers">
                 <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 <span>ബാക്കി കോയിൻ ഉള്ളവർ (Remaining)</span>
@@ -35,29 +39,55 @@
         </div>
     @endif
 
-    <!-- 4 Key Coin Metrics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 print:grid-cols-4">
+    <!-- 5 Key Coin Metrics Cards (Separating Competition Awards and Cash Received) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 print:grid-cols-5">
         
-        <!-- Total Coins Awarded -->
+        <!-- Competition Merit Awards -->
         <div class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div class="flex items-center justify-between text-xs font-mono text-slate-500">
-                <span class="font-bold">Total Awarded</span>
+                <span class="font-bold">Competition Awards</span>
                 <span class="p-1 rounded-lg bg-emerald-50 text-emerald-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </span>
             </div>
             <div class="mt-2">
                 <div class="text-2xl font-black font-sora text-slate-900 leading-none">
-                    +{{ number_format($totalEarned) }}
+                    +{{ number_format($totalCompetitionAwarded) }}
                 </div>
                 <div class="text-[11px] font-mono text-slate-400 mt-1">മത്സരങ്ങളിൽ നൽകിയ ആകെ കോയിൻ</div>
+                <a href="{{ route('admin.coins.index', ['type' => 'competition']) }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 hover:text-slate-900 mt-2 print:hidden group">
+                    <span>മത്സരങ്ങൾ കാണുക</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform font-mono">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Cash Received / Added Coins -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 border border-emerald-300 shadow-2xs flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between text-xs font-mono text-emerald-900">
+                <span class="font-bold">Cash Received (പണം)</span>
+                <span class="p-1 rounded-lg bg-emerald-100 text-emerald-800 font-black text-xs">
+                    ₹
+                </span>
+            </div>
+            <div class="mt-2">
+                <div class="text-2xl font-black font-sora text-emerald-700 leading-none">
+                    ₹{{ number_format($totalCashAmount, 2) }}
+                </div>
+                <div class="text-[11px] font-mono text-emerald-800 mt-1 font-semibold">
+                    +{{ number_format($totalCoinsFromCash) }} കോയിനുകൾ ({{ $cashDepositsCount }} തവണ)
+                </div>
+                <a href="{{ route('admin.coins.index', ['type' => 'cash']) }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 hover:text-emerald-950 mt-2 print:hidden group">
+                    <span>പണം നൽകിയവ കാണുക</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform font-mono">&rarr;</span>
+                </a>
             </div>
         </div>
 
         <!-- Total Clawed Back / Reversals from Judgment Updates -->
         <div class="p-4 rounded-2xl bg-gradient-to-br from-rose-50/50 to-white border border-rose-200/80 shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div class="flex items-center justify-between text-xs font-mono text-rose-700">
-                <span class="font-bold">Clawed Back / Returned</span>
+                <span class="font-bold">Clawed Back</span>
                 <span class="p-1 rounded-lg bg-rose-100 text-rose-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                 </span>
@@ -67,6 +97,10 @@
                     -{{ number_format($totalClawedBack) }}
                 </div>
                 <div class="text-[11px] font-mono text-rose-500 mt-1">ജഡ്ജ്മെന്റ് തിരുത്തലിൽ തിരിച്ചുപിടിച്ചവ</div>
+                <a href="{{ route('admin.coins.index', ['type' => 'clawback']) }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 hover:text-rose-900 mt-2 print:hidden group">
+                    <span>ക്ലോബാക്കുകൾ കാണുക</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform font-mono">&rarr;</span>
+                </a>
             </div>
         </div>
 
@@ -83,6 +117,10 @@
                     -{{ number_format($totalRedeemed) }}
                 </div>
                 <div class="text-[11px] font-mono text-slate-400 mt-1">ഗിഫ്റ്റുകൾക്കായി ചെലവഴിച്ചവ</div>
+                <a href="{{ route('admin.coins.index', ['type' => 'debit']) }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 mt-2 print:hidden group">
+                    <span>റിഡംപ്ഷനുകൾ കാണുക</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform font-mono">&rarr;</span>
+                </a>
             </div>
         </div>
 
@@ -99,7 +137,7 @@
                     {{ number_format($totalActiveBalance) }}
                 </div>
                 <div class="text-[11px] font-mono text-amber-800 mt-1">{{ $studentsWithCoinsCount }} വിദ്യാർത്ഥികളുടെ വാലറ്റിൽ ലഭ്യമാണ്</div>
-                <a href="{{ route('admin.coins.remaining') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#be1e2d] hover:text-red-700 mt-2.5 group">
+                <a href="{{ route('admin.coins.remaining') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#be1e2d] hover:text-red-700 mt-2 group">
                     <span>വിശദമായ ലിസ്റ്റ് കാണുക (View List)</span>
                     <span class="group-hover:translate-x-0.5 transition-transform font-mono">&rarr;</span>
                 </a>
@@ -212,7 +250,9 @@
             <div class="sm:col-span-3">
                 <select name="type" onchange="this.form.submit()" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#be1e2d] focus:bg-white text-slate-900 font-medium transition-all">
                     <option value="all" {{ $selectedType === 'all' ? 'selected' : '' }}>All Events (എല്ലാ ഇവന്റുകളും)</option>
-                    <option value="credit" {{ $selectedType === 'credit' ? 'selected' : '' }}>Competition Awards (+Coins)</option>
+                    <option value="cash" {{ $selectedType === 'cash' ? 'selected' : '' }}>Cash Received / Added Coins (പണം നൽകി ചേർത്തവ)</option>
+                    <option value="competition" {{ $selectedType === 'competition' ? 'selected' : '' }}>Competition Awards (മത്സര അവാർഡുകൾ)</option>
+                    <option value="credit" {{ $selectedType === 'credit' ? 'selected' : '' }}>All Credits (എല്ലാ വരവുകളും)</option>
                     <option value="clawback" {{ $selectedType === 'clawback' ? 'selected' : '' }}>Judgment Clawbacks & Updates</option>
                     <option value="debit" {{ $selectedType === 'debit' ? 'selected' : '' }}>Cashier Gift Redemptions (-Coins)</option>
                     <option value="reversal" {{ $selectedType === 'reversal' ? 'selected' : '' }}>Reversals & Unplaced</option>
@@ -304,6 +344,10 @@
 
                             <!-- Competition / Program -->
                             <td class="py-3 px-4">
+                                @php
+                                    $isCash = $tx->isCashDeposit();
+                                    $cashAmt = (float) ($tx->cash_amount ?: ($tx->metadata['cash_amount'] ?? 0));
+                                @endphp
                                 @if($tx->program)
                                     <div class="min-w-0">
                                         <div class="font-bold font-sora text-slate-900 truncate max-w-xs">{{ $tx->program->name }}</div>
@@ -314,6 +358,15 @@
                                                 {{ $tx->program->isGroup() ? 'Group' : 'Individual' }}
                                             </span>
                                         </div>
+                                    </div>
+                                @elseif($isCash)
+                                    <div class="min-w-0">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-900 border border-emerald-200">
+                                            Cashier Desk (പണം നൽകി ചേർത്തത്)
+                                        </span>
+                                        @if(!empty($tx->metadata['operator_name']))
+                                            <div class="text-[10px] font-mono text-slate-400 mt-0.5">By: {{ $tx->metadata['operator_name'] }}</div>
+                                        @endif
                                     </div>
                                 @else
                                     <span class="text-slate-400 font-mono">Store Redemption / Cashier</span>
@@ -331,6 +384,15 @@
                                         @else
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-200">
                                                 Judgment Promoted (Upgraded)
+                                            </span>
+                                        @endif
+                                    @elseif($isCash)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                            Cash Received (പണം സ്വീകരിച്ചത്)
+                                        </span>
+                                        @if($cashAmt > 0)
+                                            <span class="px-2 py-0.2 rounded text-[10px] font-mono font-black text-emerald-800 bg-white border border-emerald-200">
+                                                ₹{{ number_format($cashAmt, 2) }}
                                             </span>
                                         @endif
                                     @elseif($isCredit)
@@ -355,6 +417,8 @@
                                             @if($tx->grade && $tx->grade !== 'NO_GRADE')
                                                 <span class="px-1 py-0.2 rounded bg-slate-100 text-slate-700 font-bold ml-1">[{{ $tx->grade }}]</span>
                                             @endif
+                                        @elseif($isCash)
+                                            <span class="text-emerald-700 font-semibold">Cash Deposit Counter</span>
                                         @elseif($isDebit)
                                             <span class="text-slate-500">Presentation Counter</span>
                                         @endif
@@ -368,7 +432,11 @@
                                     <div class="font-sora font-black text-sm text-emerald-600 leading-none">
                                         +{{ number_format($tx->coins) }}
                                     </div>
-                                    @if($isJudgmentUpdated && !empty($tx->metadata['clawback_amount']))
+                                    @if($isCash && $cashAmt > 0)
+                                        <div class="text-[10px] font-mono text-emerald-800 font-bold mt-0.5">
+                                            (₹{{ number_format($cashAmt) }} Cash)
+                                        </div>
+                                    @elseif($isJudgmentUpdated && !empty($tx->metadata['clawback_amount']))
                                         <div class="text-[10px] font-mono text-rose-500 font-bold mt-0.5">
                                             -{{ $tx->metadata['clawback_amount'] }} clawed back
                                         </div>
